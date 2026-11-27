@@ -16,6 +16,7 @@ const { AI_INDEX_QUERY_PATH: QUERY_PATH, API_HEADERS, CONTEXT_ENGINE_READ } = te
 const RUN_ID = randomUUID().slice(0, 8);
 const SPACE_AWARE_INDEX = `ai-index-idx-scout-query-spaced-${RUN_ID}`;
 const PLAIN_INDEX = `ai-index-idx-scout-query-plain-${RUN_ID}`;
+const USER_INDEX = `ai-index-idx-scout-query-user-${RUN_ID}`;
 const OTHER_SPACE_ID = `ce-query-other-${RUN_ID}`;
 
 /** The documented caller: `contextEngine:read` plus ES `read` on the backing indices. */
@@ -43,6 +44,12 @@ const spacedDocs = [
 const plainDocs = [
   { id: 'plain_a', title: 'Plain A' },
   { id: 'plain_b', title: 'Plain B' },
+];
+
+const userDocs = [
+  { id: 'shared', title: 'No user' },
+  { id: 'alice_only', title: 'Alice', user_id: 'alice' },
+  { id: 'bob_only', title: 'Bob', user_id: 'bob' },
 ];
 
 const idsOf = (body: EsqlResponse): string[] => columnValues(body, 'id').map(String);
@@ -86,6 +93,16 @@ apiTest.describe('context engine AI index query API', { tag: tags.stateful.class
       index: PLAIN_INDEX,
       mappings: { properties: { id: { type: 'keyword' }, title: { type: 'text' } } },
     });
+    await esClient.indices.create({
+      index: USER_INDEX,
+      mappings: {
+        properties: {
+          id: { type: 'keyword' },
+          title: { type: 'text' },
+          user_id: { type: 'keyword' },
+        },
+      },
+    });
     await esClient.bulk({
       refresh: 'wait_for',
       operations: [
@@ -94,12 +111,16 @@ apiTest.describe('context engine AI index query API', { tag: tags.stateful.class
           doc,
         ]),
         ...plainDocs.flatMap((doc) => [{ index: { _index: PLAIN_INDEX, _id: doc.id } }, doc]),
+        ...userDocs.flatMap((doc) => [{ index: { _index: USER_INDEX, _id: doc.id } }, doc]),
       ],
     });
   });
 
   apiTest.afterAll(async ({ kbnClient, esClient }) => {
-    await esClient.indices.delete({ index: [SPACE_AWARE_INDEX, PLAIN_INDEX] }, { ignore: [404] });
+    await esClient.indices.delete(
+      { index: [SPACE_AWARE_INDEX, PLAIN_INDEX, USER_INDEX] },
+      { ignore: [404] }
+    );
     await kbnClient.spaces.delete(OTHER_SPACE_ID);
   });
 
@@ -130,6 +151,32 @@ apiTest.describe('context engine AI index query API', { tag: tags.stateful.class
         expect(idsOf(response.body)).toStrictEqual(['global', 'other_only', 'public']);
       }
     );
+  });
+
+  apiTest('scopes reads to the user_id in the body', async ({ apiClient }) => {
+    const esql = `FROM ${USER_INDEX} | KEEP id | SORT id`;
+
+    await apiTest.step('a user sees shared docs and their own', async () => {
+      const response = await apiClient.post(QUERY_PATH, {
+        headers: { ...queryCredentials.apiKeyHeader, ...API_HEADERS },
+        responseType: 'json',
+        body: { query: esql, user_id: 'alice' },
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(idsOf(response.body)).toStrictEqual(['alice_only', 'shared']);
+    });
+
+    await apiTest.step('without user_id every doc is visible', async () => {
+      const response = await apiClient.post(QUERY_PATH, {
+        headers: { ...queryCredentials.apiKeyHeader, ...API_HEADERS },
+        responseType: 'json',
+        body: { query: esql },
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(idsOf(response.body)).toStrictEqual(['alice_only', 'bob_only', 'shared']);
+    });
   });
 
   apiTest('keeps indices without the privileges mapping fully visible', async ({ apiClient }) => {

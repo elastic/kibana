@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { buildEventEnrichmentRequestOptionsMock } from '../../../../../../common/search_strategy/security_solution/cti/index.mock';
+import {
+  buildEventEnrichmentRequestOptionsMock,
+  buildTransformSourceExclusionMock,
+} from '../../../../../../common/search_strategy/security_solution/cti/index.mock';
 import { buildEventEnrichmentQuery } from './query';
 
 describe('buildEventEnrichmentQuery', () => {
@@ -34,6 +37,20 @@ describe('buildEventEnrichmentQuery', () => {
     expect(query.query?.bool?.filter).toEqual(
       expect.arrayContaining([{ term: { 'event.type': 'indicator' } }])
     );
+  });
+
+  it('excludes raw indicator copies stored by integration transforms', () => {
+    const options = buildEventEnrichmentRequestOptionsMock();
+    const query = buildEventEnrichmentQuery(options);
+    expect(query.query?.bool?.must_not).toEqual([buildTransformSourceExclusionMock()]);
+  });
+
+  it('does not require a transform label, so unlabeled indicators still match', () => {
+    const options = buildEventEnrichmentRequestOptionsMock();
+    const query = buildEventEnrichmentQuery(options);
+    const requiredClauses = JSON.stringify([query.query?.bool?.filter, query.query?.bool?.should]);
+    expect(requiredClauses).not.toContain('labels.is_ioc_transform_source');
+    expect(requiredClauses).not.toContain('labels.is_transform_source');
   });
 
   it('includes the specified timerange', () => {

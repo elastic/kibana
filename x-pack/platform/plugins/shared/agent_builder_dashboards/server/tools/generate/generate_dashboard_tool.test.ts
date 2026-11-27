@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
@@ -118,7 +119,32 @@ describe('generateDashboardTool handler', () => {
       removed: [],
       failures: [],
       panelAuthoringNotes: [],
+      panelHeightHints: [],
     });
+  });
+
+  it('asks the layout step to size a custom content panel by the height its content declared', async () => {
+    mockRetrieveLatestVersion.mockReturnValue(undefined);
+    const card = {
+      type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+      id: 'card',
+      config: { template: '<p>card</p>' },
+      grid: { x: 0, y: 0, w: 48, h: 10 },
+    };
+    mockExecuteDashboardUpsert.mockResolvedValue({
+      dashboardData: { ...generatedDashboard, panels: [card] },
+      created: ['card'],
+      updated: [],
+      removed: [],
+      failures: [],
+      panelAuthoringNotes: [],
+      panelHeightHints: [{ panelId: 'card', heightPx: 352 }],
+    });
+
+    await callHandler();
+
+    const [request] = mockArrangeLayout.mock.calls[0];
+    expect(request.panels).toEqual([expect.objectContaining({ id: 'p1', heightRows: 13 })]);
   });
 
   it.each([
@@ -168,6 +194,7 @@ describe('generateDashboardTool handler', () => {
       removed: [],
       failures: [],
       panelAuthoringNotes: [],
+      panelHeightHints: [],
     });
 
     const { results } = await callHandler();
@@ -187,6 +214,27 @@ describe('generateDashboardTool handler', () => {
           ],
         },
       },
+    });
+  });
+
+  it('returns the stored options in the summary', async () => {
+    mockRetrieveLatestVersion.mockReturnValue(undefined);
+    const options = { hide_panel_borders: true, use_margins: true };
+    mockExecuteDashboardUpsert.mockResolvedValue({
+      dashboardData: { ...generatedDashboard, options },
+      created: [],
+      updated: [],
+      removed: [],
+      failures: [],
+      panelAuthoringNotes: [],
+      panelHeightHints: [],
+    });
+
+    const { results } = await callHandler();
+
+    expect(results[0]).toMatchObject({
+      type: ToolResultType.dashboard,
+      data: { dashboard: { options } },
     });
   });
 
@@ -226,6 +274,7 @@ describe('generateDashboardTool handler', () => {
         removed: [],
         failures,
         panelAuthoringNotes: [],
+        panelHeightHints: [],
       } as unknown as Awaited<ReturnType<typeof executeDashboardUpsert>>);
 
     it('does not create a new dashboard when every requested panel failed', async () => {
@@ -354,6 +403,7 @@ describe('generateDashboardTool handler', () => {
         removed: [],
         failures: [],
         panelAuthoringNotes: [],
+        panelHeightHints: [],
       });
     };
 
@@ -366,6 +416,7 @@ describe('generateDashboardTool handler', () => {
         removed: [],
         failures: [],
         panelAuthoringNotes: [],
+        panelHeightHints: [],
       });
       mockArrangeLayout.mockResolvedValue({
         plan: '',

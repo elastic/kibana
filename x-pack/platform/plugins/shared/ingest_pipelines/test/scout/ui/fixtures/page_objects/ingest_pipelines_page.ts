@@ -9,6 +9,8 @@ import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { AppMenu, type Locator, type ScoutPage } from '@kbn/scout';
 import path from 'path';
 
+const APP_LOAD_TIMEOUT_MS = 60_000;
+
 interface PipelineForm {
   name: string;
   description: string;
@@ -24,7 +26,12 @@ export class IngestPipelinesPage {
   public readonly deleteManagedAssetsCallout: Locator;
   public readonly emptyListPrompt: Locator;
   public readonly configurePipelineHeader: Locator;
-  private readonly createPipelineDropdown: Locator;
+  public readonly createPipelineDropdown: Locator;
+  public readonly editPipelineButton: Locator;
+  public readonly detailsPanelFooter: Locator;
+  public readonly missingCustomPipelineCallout: Locator;
+  public readonly createCustomPipelineButton: Locator;
+  public readonly createFormNameField: Locator;
   private readonly addProcessorButton: Locator;
   private readonly createNewPipelineButton: Locator;
   private readonly createPipelineFromCsvButton: Locator;
@@ -71,6 +78,11 @@ export class IngestPipelinesPage {
     this.configurePipelineHeader = this.page.getByTestId('configurePipelineHeader');
     this.addProcessorButton = this.page.getByTestId('addProcessorButton');
     this.createPipelineDropdown = this.page.testSubj.locator('createPipelineDropdown');
+    this.editPipelineButton = this.page.testSubj.locator('editPipelineButton');
+    this.detailsPanelFooter = this.page.testSubj.locator('detailsPanelFooter');
+    this.missingCustomPipelineCallout = this.page.testSubj.locator('missingCustomPipeline');
+    this.createCustomPipelineButton = this.page.testSubj.locator('createCustomPipeline');
+    this.createFormNameField = this.page.testSubj.locator('nameField');
     this.createNewPipelineButton = this.page.testSubj.locator('createNewPipeline');
     this.createPipelineFromCsvButton = this.page.testSubj.locator('createPipelineFromCsv');
     this.nameFieldInput = this.page.testSubj.locator('nameField').locator('input');
@@ -108,7 +120,29 @@ export class IngestPipelinesPage {
 
   async goto() {
     await this.page.gotoApp('management/ingest/ingest_pipelines');
-    await this.appTitle.waitFor({ timeout: 60_000 });
+    await this.appTitle.waitFor({ timeout: APP_LOAD_TIMEOUT_MS });
+  }
+
+  async gotoSubPath(subPath: string) {
+    await this.page.gotoApp(`management/ingest/ingest_pipelines/${subPath}`);
+    await this.appTitle.waitFor({ timeout: APP_LOAD_TIMEOUT_MS });
+  }
+
+  async openPipelineFlyoutFromUrl(pipelineName: string) {
+    await this.page.goto(`${this.page.url()}?pipeline=${encodeURIComponent(pipelineName)}`);
+    await this.detailsFlyout.waitFor();
+  }
+
+  pipelineTableRow(pipelineName: string) {
+    return this.pipelineTableRows.filter({ hasText: pipelineName });
+  }
+
+  pipelineRowSelectionCheckbox(pipelineName: string) {
+    return this.pipelineTableRow(pipelineName).getByRole('checkbox');
+  }
+
+  pipelineRowEditAction(pipelineName: string) {
+    return this.pipelineTableRow(pipelineName).getByRole('button', { name: 'Edit this pipeline' });
   }
 
   async sectionHeadingText() {

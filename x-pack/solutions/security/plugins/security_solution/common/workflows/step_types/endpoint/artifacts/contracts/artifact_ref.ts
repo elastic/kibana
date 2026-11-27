@@ -23,7 +23,7 @@ import {
 } from '../../../../../endpoint/service/artifacts/utils';
 import { FAMILY_BY_LIST_ID, familySchema, osSchema } from './enums';
 
-export const SUMMARY_NAME_MAX_CHARS = 128;
+export const SUMMARY_NAME_MAX_CHARS = 256;
 export const SUMMARY_DESCRIPTION_MAX_CHARS = 256;
 export const SUMMARY_TAGS_MAX = 5;
 export const SUMMARY_TAG_MAX_CHARS = 64;
@@ -103,6 +103,7 @@ export type ProposedRef = z.infer<typeof proposedRefSchema>;
 
 export const artifactSummarySchema = lazySchema(() =>
   artifactRefSchema.extend({
+    disabled: z.boolean(),
     name: z.string().max(SUMMARY_NAME_MAX_CHARS),
     name_truncated: truncatedFlagSchema.optional(),
     os_types: z

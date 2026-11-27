@@ -79,6 +79,11 @@ export interface CreateConnectorFlyoutProps {
   initialConnector?: Partial<Omit<ActionConnector, 'secrets'>> & { actionTypeId: string };
   icon?: IconType;
   size?: 's' | 'm' | 'l';
+  /**
+   * Skips the "Created '<name>'" success toast, for hosts that confirm the create with their own
+   * toast from `onConnectorCreated`. Errors are still toasted.
+   */
+  hideSuccessToast?: boolean;
 }
 
 const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
@@ -91,6 +96,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   initialConnector,
   icon,
   size,
+  hideSuccessToast,
 }) => {
   const services = useKibana().services;
   const connectorContext = useContext(ConnectorContext);
@@ -126,6 +132,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     actionTypeRegistry,
     actionTypeId: actionType?.id,
     initialConnector,
+    hideSuccessToast,
   });
 
   useEffect(() => {

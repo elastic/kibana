@@ -13,6 +13,7 @@ import {
   createAttachmentPermanentDeleteBlockedError,
   lastExecutionTerminal,
   parseExecutionId,
+  TimelineTriggerType,
 } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { isAttachmentReferencedInRounds } from '../../attachments/attachment_guards';
@@ -57,7 +58,39 @@ const eventsForKnownRound = (
 ): ConversationEvent[] =>
   hasResumeExecution(round.id, storedForRound)
     ? storedForRound
-    : roundToEvents(round, conversation);
+    : keepStoredAgentMessages(storedForRound, roundToEvents(round, conversation));
+
+/** A round records no agent author, so its regenerated events take the stored agent message as is. */
+export const keepStoredAgentMessages = <E extends ConversationEvent>(
+  stored: ReadonlyArray<ConversationEvent>,
+  events: E[]
+): E[] => {
+  const agentMessages = new Map(
+    stored
+      .filter((event) => event.type === TimelineEventType.agentMessage)
+      .map((event) => [event.id, event])
+  );
+  if (agentMessages.size === 0) {
+    return events;
+  }
+  return events.map((event) => {
+    const storedMessage = agentMessages.get(event.id);
+    if (storedMessage) {
+      return storedMessage as E;
+    }
+    if (
+      event.type === TimelineEventType.executionStarted &&
+      event.trigger_event_id &&
+      agentMessages.has(event.trigger_event_id)
+    ) {
+      return {
+        ...event,
+        data: { ...event.data, trigger_type: TimelineTriggerType.agentMessage },
+      } as E;
+    }
+    return event;
+  });
+};
 
 /**
  * Whether a stored block absent from the caller's `rounds` was removed on purpose. It was when

@@ -39,12 +39,6 @@ export interface EntitiesOverviewProps {
    * Callback to navigate to the entities details panel. When omitted, the header link is hidden.
    */
   onShowEntitiesDetails?: () => void;
-  /**
-   * When true, host/user names render as preview links and the alert/misconfig/vuln chips
-   * become clickable. The legacy expandable flyout sets this; Flyout v2 and Discover leave
-   * it off so everything renders as plain text.
-   */
-  enableEntityLinks?: boolean;
 }
 
 const HEADER_TITLE = (
@@ -76,7 +70,6 @@ export const EntitiesOverview: FC<EntitiesOverviewProps> = memo(
     scopeId = '',
     renderCellActions = noopCellActionRenderer,
     onShowEntitiesDetails,
-    enableEntityLinks = false,
   }) => {
     const { user, host, hasAnyEntity } = useEntitiesOverview({ hit });
 
@@ -110,7 +103,6 @@ export const EntitiesOverview: FC<EntitiesOverviewProps> = memo(
                   entityRecord={user.entityRecord}
                   scopeId={scopeId}
                   renderCellActions={renderCellActions}
-                  enableEntityLinks={enableEntityLinks}
                 />
               </EuiFlexItem>
             )}
@@ -122,7 +114,6 @@ export const EntitiesOverview: FC<EntitiesOverviewProps> = memo(
                   entityRecord={host.entityRecord}
                   scopeId={scopeId}
                   renderCellActions={renderCellActions}
-                  enableEntityLinks={enableEntityLinks}
                 />
               </EuiFlexItem>
             )}

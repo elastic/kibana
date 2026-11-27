@@ -8,11 +8,12 @@
  */
 
 import { Readable } from 'node:stream';
-import { core } from '@elastic/opentelemetry-node/sdk';
-import type { tracing } from '@elastic/opentelemetry-node/sdk';
 import { ProtobufTraceSerializer } from '@opentelemetry/otlp-transformer';
 import { ElasticsearchOtlpExporter } from './elasticsearch_otlp_exporter';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { ExportResultCode } from '@opentelemetry/core';
+import type { ExportResult } from '@opentelemetry/core';
+import type { ReadableSpan } from '@opentelemetry/sdk-trace';
 
 jest.mock('@opentelemetry/otlp-transformer', () => ({
   ProtobufTraceSerializer: {
@@ -33,7 +34,7 @@ const emptyStream = (): Readable => Readable.from([]);
 const streamFrom = (buf: Buffer): Readable => Readable.from([buf]);
 
 describe('ElasticsearchOtlpExporter', () => {
-  const spans = [] as tracing.ReadableSpan[];
+  const spans = [] as ReadableSpan[];
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -53,7 +54,7 @@ describe('ElasticsearchOtlpExporter', () => {
 
     exporter.export(spans, (result) => {
       try {
-        expect(result.code).toBe(core.ExportResultCode.SUCCESS);
+        expect(result.code).toBe(ExportResultCode.SUCCESS);
         expect(request).toHaveBeenCalledWith(
           {
             method: 'POST',
@@ -85,7 +86,7 @@ describe('ElasticsearchOtlpExporter', () => {
 
     exporter.export(spans, (result) => {
       try {
-        expect(result.code).toBe(core.ExportResultCode.FAILED);
+        expect(result.code).toBe(ExportResultCode.FAILED);
         expect(result.error).toEqual(new Error('Serialization failed'));
         expect(request).not.toHaveBeenCalled();
         done();
@@ -109,7 +110,7 @@ describe('ElasticsearchOtlpExporter', () => {
 
     exporter.export(spans, (result) => {
       try {
-        expect(result.code).toBe(core.ExportResultCode.FAILED);
+        expect(result.code).toBe(ExportResultCode.FAILED);
         expect(result.error).toBe(transportError);
         done();
       } catch (err) {
@@ -138,7 +139,7 @@ describe('ElasticsearchOtlpExporter', () => {
 
     exporter.export(spans, (result) => {
       try {
-        expect(result.code).toBe(core.ExportResultCode.FAILED);
+        expect(result.code).toBe(ExportResultCode.FAILED);
         expect(result.error?.message).toBe(errorMessage);
         expect(mockedDeserializeResponse).toHaveBeenCalledWith(protobufBytes);
         done();
@@ -164,7 +165,7 @@ describe('ElasticsearchOtlpExporter', () => {
 
     exporter.export(spans, (result) => {
       try {
-        expect(result.code).toBe(core.ExportResultCode.SUCCESS);
+        expect(result.code).toBe(ExportResultCode.SUCCESS);
         done();
       } catch (err) {
         done(err);
@@ -185,7 +186,7 @@ describe('ElasticsearchOtlpExporter', () => {
 
     exporter.export(spans, (result) => {
       try {
-        expect(result.code).toBe(core.ExportResultCode.SUCCESS);
+        expect(result.code).toBe(ExportResultCode.SUCCESS);
         expect(mockedDeserializeResponse).not.toHaveBeenCalled();
         done();
       } catch (err) {
@@ -204,13 +205,13 @@ describe('ElasticsearchOtlpExporter', () => {
     } as unknown as ElasticsearchClient;
 
     const exporter = new ElasticsearchOtlpExporter(client);
-    const results: core.ExportResult[] = [];
+    const results: ExportResult[] = [];
     exporter.export(spans, (result) => results.push(result));
 
     await exporter.shutdown();
 
     expect(results).toHaveLength(1);
-    expect(results[0].code).toBe(core.ExportResultCode.SUCCESS);
+    expect(results[0].code).toBe(ExportResultCode.SUCCESS);
   });
 
   it('export after shutdown returns FAILED immediately', (done) => {
@@ -222,7 +223,7 @@ describe('ElasticsearchOtlpExporter', () => {
     exporter.shutdown().then(() => {
       exporter.export(spans, (result) => {
         try {
-          expect(result.code).toBe(core.ExportResultCode.FAILED);
+          expect(result.code).toBe(ExportResultCode.FAILED);
           expect(result.error?.message).toBe('Exporter has been shut down');
           expect(client.transport.request).not.toHaveBeenCalled();
           done();
@@ -249,7 +250,7 @@ describe('ElasticsearchOtlpExporter', () => {
     } as unknown as ElasticsearchClient;
 
     const exporter = new ElasticsearchOtlpExporter(client);
-    const results: core.ExportResult[] = [];
+    const results: ExportResult[] = [];
     exporter.export(spans, (result) => results.push(result));
 
     const flushPromise = exporter.forceFlush();
@@ -259,7 +260,7 @@ describe('ElasticsearchOtlpExporter', () => {
     await flushPromise;
 
     expect(results).toHaveLength(1);
-    expect(results[0].code).toBe(core.ExportResultCode.SUCCESS);
+    expect(results[0].code).toBe(ExportResultCode.SUCCESS);
   });
 
   it('forceFlush resolves immediately when no exports are pending', async () => {

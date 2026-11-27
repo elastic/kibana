@@ -6,7 +6,7 @@
  */
 
 import http from 'http';
-import getPort from 'get-port';
+import getPort, { portNumbers } from 'get-port';
 
 interface McpTool {
   name: string;
@@ -58,7 +58,7 @@ export class McpServerSimulator {
    * Start the MCP server simulator
    */
   async start(): Promise<string> {
-    this.port = await getPort({ port: getPort.makeRange(9200, 9299) });
+    this.port = await getPort({ port: portNumbers(9200, 9299) });
 
     return new Promise((resolve, reject) => {
       this.server = http.createServer(async (req, res) => {

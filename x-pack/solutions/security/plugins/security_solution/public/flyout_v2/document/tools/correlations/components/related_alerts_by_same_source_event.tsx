@@ -29,10 +29,6 @@ export interface RelatedAlertsBySameSourceEventProps {
    * Callback to open the alert preview
    */
   onShowAlert: (id: string, indexName: string, title?: string) => void;
-  /**
-   * Whether to render rule links as PreviewLink (legacy expandable flyout) instead of OpenFlyoutLink (new flyout system)
-   */
-  useLegacyExpandableFlyout: boolean;
 }
 
 /**
@@ -43,7 +39,6 @@ export const RelatedAlertsBySameSourceEvent: React.FC<RelatedAlertsBySameSourceE
   scopeId,
   eventId,
   onShowAlert,
-  useLegacyExpandableFlyout,
 }) => {
   const { loading, data, dataCount } = useFetchRelatedAlertsBySameSourceEvent({
     originalEventId,
@@ -53,12 +48,10 @@ export const RelatedAlertsBySameSourceEvent: React.FC<RelatedAlertsBySameSourceE
   const columns = useMemo(
     () =>
       getColumns({
-        scopeId,
         dataTestSubj: CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TEST_ID,
         onShowAlert,
-        useLegacyExpandableFlyout,
       }),
-    [scopeId, onShowAlert, useLegacyExpandableFlyout]
+    [onShowAlert]
   );
 
   return (

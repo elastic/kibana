@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
+import { render } from '@testing-library/react';
 
 import { TestProviders } from '../../../../../common/mock';
-import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
 import { CellActionsRenderer } from '../../../../../common/components/cell_actions/cell_actions_renderer';
 
 import { ExitCodeDraggable } from './exit_code_draggable';
@@ -37,10 +37,8 @@ describe('ExitCodeDraggable', () => {
   beforeEach(() => {
     (CellActionsRenderer as unknown as jest.Mock).mockImplementation(MockedCellActionsRenderer);
   });
-  const mount = useMountAppended();
-
   test('it renders the expected text and exit codes, when text, processExitCode, and an endgameExitCode are provided', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <ExitCodeDraggable
           scopeId="some_scope"
@@ -52,11 +50,11 @@ describe('ExitCodeDraggable', () => {
         />
       </TestProviders>
     );
-    expect(wrapper.text()).toEqual('with exit code-10');
+    expect(container.textContent).toEqual('with exit code-10');
   });
 
   test('it returns an empty string when text is provided, but processExitCode and endgameExitCode are undefined', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <ExitCodeDraggable
           scopeId="some_scope"
@@ -68,11 +66,11 @@ describe('ExitCodeDraggable', () => {
         />
       </TestProviders>
     );
-    expect(wrapper.text()).toEqual('');
+    expect(container).toBeEmptyDOMElement();
   });
 
   test('it returns an empty string when text is provided, but processExitCode and endgameExitCode are null', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <ExitCodeDraggable
           scopeId="some_scope"
@@ -84,11 +82,11 @@ describe('ExitCodeDraggable', () => {
         />
       </TestProviders>
     );
-    expect(wrapper.text()).toEqual('');
+    expect(container).toBeEmptyDOMElement();
   });
 
   test('it returns an empty string when text is provided, but endgameExitCode is an empty string', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <ExitCodeDraggable
           scopeId="some_scope"
@@ -100,11 +98,11 @@ describe('ExitCodeDraggable', () => {
         />
       </TestProviders>
     );
-    expect(wrapper.text()).toEqual('');
+    expect(container).toBeEmptyDOMElement();
   });
 
   test('it renders just the endgameExitCode code when text is undefined', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <ExitCodeDraggable
           scopeId="some_scope"
@@ -116,11 +114,11 @@ describe('ExitCodeDraggable', () => {
         />
       </TestProviders>
     );
-    expect(wrapper.text()).toEqual('1');
+    expect(container.textContent).toEqual('1');
   });
 
   test('it renders just the processExitCode code when text is undefined', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <ExitCodeDraggable
           scopeId="some_scope"
@@ -132,11 +130,11 @@ describe('ExitCodeDraggable', () => {
         />
       </TestProviders>
     );
-    expect(wrapper.text()).toEqual('-1');
+    expect(container.textContent).toEqual('-1');
   });
 
   test('it renders just the endgameExitCode code when text is null', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <ExitCodeDraggable
           scopeId="some_scope"
@@ -148,11 +146,11 @@ describe('ExitCodeDraggable', () => {
         />
       </TestProviders>
     );
-    expect(wrapper.text()).toEqual('1');
+    expect(container.textContent).toEqual('1');
   });
 
   test('it renders just the processExitCode code when text is null', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <ExitCodeDraggable
           scopeId="some_scope"
@@ -164,11 +162,11 @@ describe('ExitCodeDraggable', () => {
         />
       </TestProviders>
     );
-    expect(wrapper.text()).toEqual('-1');
+    expect(container.textContent).toEqual('-1');
   });
 
   test('it renders just the endgameExitCode code when text is an empty string', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <ExitCodeDraggable
           scopeId="some_scope"
@@ -180,11 +178,11 @@ describe('ExitCodeDraggable', () => {
         />
       </TestProviders>
     );
-    expect(wrapper.text()).toEqual('1');
+    expect(container.textContent).toEqual('1');
   });
 
   test('it renders just the processExitCode code when text is an empty string', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <ExitCodeDraggable
           scopeId="some_scope"
@@ -196,11 +194,11 @@ describe('ExitCodeDraggable', () => {
         />
       </TestProviders>
     );
-    expect(wrapper.text()).toEqual('-1');
+    expect(container.textContent).toEqual('-1');
   });
 
   test('should passing correct scopeId to cell actions', () => {
-    mount(
+    render(
       <TestProviders>
         <ExitCodeDraggable
           scopeId="some_scope"

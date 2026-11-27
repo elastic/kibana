@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { loggerMock } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { SignificantEventsWorkflowStatus } from '@kbn/significant-events-schema';
 import { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
@@ -20,6 +21,7 @@ describe('getKiIdentificationStatusToolHandler', () => {
         }),
       } as never,
       telemetry: { trackOnboardingScheduled: jest.fn() } as never,
+      logger: loggerMock.create(),
       getSourcesClient: jest.fn().mockResolvedValue({
         get: jest.fn().mockResolvedValue({ source: { id: 'logs.nginx', slug: 'logs-nginx' } }),
       }),

@@ -194,6 +194,9 @@ export class EndpointAppContextService {
   private fleetServicesFactory: EndpointFleetServicesFactoryInterface | null = null;
   private savedObjectsFactoryService: SavedObjectsClientFactory | null = null;
   private readonly ccsCache = new SimpleMemCache({ ttl: CCS_CACHE_TTL_SECONDS });
+  // Endpoint auth is per user. Same request = same user (normally)
+  // Add optional cache support for duration of request (via WeakMap).
+  private readonly authzCache = new WeakMap<KibanaRequest, Promise<EndpointAuthz>>();
 
   public security: SecurityServiceStart | undefined;
 
@@ -244,10 +247,12 @@ export class EndpointAppContextService {
     }
   }
 
+  /**
+   * Keeps the start dependencies: core stops this plugin while Task Manager can still run its rules,
+   * and closes Elasticsearch and saved objects only after all plugins stop, so those rules keep working.
+   */
   public stop() {
     setYaraLogger(undefined);
-    this.startDependencies = null;
-    this.savedObjectsFactoryService = null;
   }
 
   private registerListsExtensions() {
@@ -522,7 +527,46 @@ export class EndpointAppContextService {
     return this.security?.authc.getCurrentUser(request)?.username ?? 'unknown';
   }
 
-  public async getEndpointAuthz(request: KibanaRequest): Promise<EndpointAuthz> {
+  /**
+   * Resolves the Endpoint authz for the user on the given request. With caching.
+   */
+  public getEndpointAuthz(
+    request: KibanaRequest,
+    options: { cache: true }
+  ): Promise<Readonly<EndpointAuthz>>;
+
+  /**
+   * Resolves the Endpoint authz for the user on the given request. Uncached.
+   */
+  public getEndpointAuthz(
+    request: KibanaRequest,
+    options?: { cache?: false }
+  ): Promise<EndpointAuthz>;
+
+  public async getEndpointAuthz(
+    request: KibanaRequest,
+    { cache = false }: { cache?: boolean } = {}
+  ): Promise<EndpointAuthz> {
+    if (!cache) {
+      return this.resolveEndpointAuthz(request);
+    }
+
+    let promise = this.authzCache.get(request);
+
+    if (!promise) {
+      promise = this.resolveEndpointAuthz(request)
+        .then((authz) => Object.freeze(authz))
+        .catch((error) => {
+          this.authzCache.delete(request);
+          throw error;
+        });
+      this.authzCache.set(request, promise);
+    }
+
+    return promise;
+  }
+
+  private async resolveEndpointAuthz(request: KibanaRequest): Promise<EndpointAuthz> {
     if (!this.startDependencies?.productFeaturesService) {
       throw new EndpointAppContentServicesNotStartedError();
     }

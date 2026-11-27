@@ -35,7 +35,9 @@ export type StatusChange =
   /** The status an operator chose, through the update route or a chat tool. */
   | { kind: 'operator'; status: SignificantEventManualStatus }
   /** The rule backing the event no longer exists. */
-  | { kind: 'rule_deleted' };
+  | { kind: 'rule_deleted' }
+  /** A `recovering` series had no new version for longer than the cleanup timeout. */
+  | { kind: 'recovery_timeout' };
 
 /** Named constructors for a `StatusChange`, so callers never spell out the union. */
 export const StatusChange = {
@@ -46,6 +48,8 @@ export const StatusChange = {
   }),
   /** The rule backing the event no longer exists. */
   ruleDeleted: (): StatusChange => ({ kind: 'rule_deleted' }),
+  /** A `recovering` series had no new version for longer than the cleanup timeout. */
+  recoveryTimedOut: (): StatusChange => ({ kind: 'recovery_timeout' }),
   /** What discovery's stored verdicts say about the event's members after a write is merged. */
   assessed: (outcome: StatusOutcome): StatusChange => ({ kind: 'assessment', outcome }),
 };
@@ -135,6 +139,12 @@ export const decideLifecycle = ({
       return isLive(status)
         ? { write: true, status: ALERT_EPISODE_STATUS.INACTIVE }
         : { write: false, reason: 'already_in_state' };
+
+    // Only a recovering series times out: an active one is still breaching, and a closed one is closed.
+    case 'recovery_timeout':
+      return status === ALERT_EPISODE_STATUS.RECOVERING
+        ? { write: true, status: ALERT_EPISODE_STATUS.INACTIVE }
+        : { write: false, reason: 'already_in_state' };
   }
 };
 
@@ -154,6 +164,7 @@ export const requestedStatus = (change: StatusChange): SignificantEventStatus =>
     case 'operator':
       return change.status;
     case 'rule_deleted':
+    case 'recovery_timeout':
       return ALERT_EPISODE_STATUS.INACTIVE;
     case 'assessment':
       return ALERT_EPISODE_STATUS.ACTIVE;

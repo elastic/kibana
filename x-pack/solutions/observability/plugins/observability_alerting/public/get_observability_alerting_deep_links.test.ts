@@ -6,6 +6,7 @@
  */
 
 import type { AppDeepLinkLocations, Capabilities } from '@kbn/core/public';
+import { OBSERVABILITY_ALERTING_IMPORTS_PATH } from '@kbn/deeplinks-observability';
 import {
   OBSERVABILITY_ALERTING_ACTION_POLICIES_DEEP_LINK_ID,
   OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID,
@@ -192,6 +193,25 @@ describe('getObservabilityAlertingDeepLinks', () => {
           OBSERVABILITY_ALERTING_RULES_V2_DEEP_LINK_ID
         )?.keywords
       ).not.toContain('classic');
+    });
+  });
+
+  it('registers no deep link for the Import alerts page, so search and navigation cannot reach it', () => {
+    // A user who can open the page: Universal Alerts and connector read access.
+    const everyCapabilitySet = capabilities({
+      actions: { show: true },
+      alerting_v2_rules: { read: true, all: true },
+      alerting_v2_alerts: { read: true, all: true },
+      alerting_v2_action_policies: { read: true, all: true },
+      alerting_v2_execution_history: { read: true, all: true },
+    });
+
+    [undefined, everyCapabilitySet].forEach((caps) => {
+      expect(
+        getObservabilityAlertingDeepLinks(caps).filter(
+          ({ path }) => path === OBSERVABILITY_ALERTING_IMPORTS_PATH
+        )
+      ).toEqual([]);
     });
   });
 });

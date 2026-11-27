@@ -107,6 +107,28 @@ describe('CloudConnectorService', () => {
       },
     };
 
+    it('creates the saved object under the given id when one is passed', async () => {
+      jest
+        .spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled')
+        .mockResolvedValue(true);
+      mockSoClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 10000,
+      });
+      mockSoClient.create.mockResolvedValue({ ...mockSavedObject, id: 'given-id' });
+
+      const result = await service.create(mockSoClient, mockCreateRequest, { id: 'given-id' });
+
+      expect(mockSoClient.create).toHaveBeenCalledWith(
+        CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+        expect.objectContaining({ name: 'test-connector' }),
+        { id: 'given-id' }
+      );
+      expect(result.id).toBe('given-id');
+    });
+
     it('should create a cloud connector successfully with space awareness enabled', async () => {
       jest
         .spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled')

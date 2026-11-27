@@ -16,15 +16,20 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { DEFAULT_GRID_RESOLUTION } from '@kbn/geo-precision';
+import type { GRID_RESOLUTION } from '@kbn/geo-precision';
 import type { OnSourceChangeArgs } from '../source';
 import { ForceRefreshCheckbox } from '../../../components/force_refresh_checkbox';
+import { hasGeoPrecisionParam } from './esql_utils';
 import { ESQLEditor } from './esql_editor';
+import { GeoPrecisionResolutionEditor } from './geo_precision_resolution_editor';
 import { NarrowByMapBounds, NarrowByTime } from './narrow_by_field';
 import type { getFields } from './esql_utils';
 import type { NormalizedESQLSourceDescriptor } from './esql_source';
+import type { ESQLSourceDescriptor } from '../../../../common/descriptor_types';
 
 interface Props {
-  onChange(...args: OnSourceChangeArgs[]): void;
+  onChange(...args: OnSourceChangeArgs<ESQLSourceDescriptor>[]): void;
   sourceDescriptor: NormalizedESQLSourceDescriptor;
   getDataViewFields: () => Promise<ReturnType<typeof getFields>>;
 }
@@ -79,8 +84,7 @@ export function UpdateSourceEditor(props: Props) {
             onESQLChange={(change) => {
               setDateFields(change.dateFields);
               setGeoFields(change.geoFields);
-              const changes: OnSourceChangeArgs[] = [
-                { propName: 'dataViewId', value: change.adhocDataViewId },
+              const changes: OnSourceChangeArgs<ESQLSourceDescriptor>[] = [
                 { propName: 'esql', value: change.esql },
               ];
               function ensureField(key: 'dateField' | 'geoField', fields: string[]) {
@@ -116,7 +120,7 @@ export function UpdateSourceEditor(props: Props) {
               props.onChange({ propName: 'geoField', value: fieldName });
             }}
             onNarrowByFieldChange={(narrowByField: boolean) => {
-              const changes: OnSourceChangeArgs[] = [
+              const changes: OnSourceChangeArgs<ESQLSourceDescriptor>[] = [
                 { propName: 'narrowByMapBounds', value: narrowByField },
               ];
               // auto select first geo field when enabling narrowByMapBounds and geoField is not set
@@ -149,7 +153,7 @@ export function UpdateSourceEditor(props: Props) {
               props.onChange({ propName: 'dateField', value: fieldName });
             }}
             onNarrowByFieldChange={(narrowByField: boolean) => {
-              const changes: OnSourceChangeArgs[] = [
+              const changes: OnSourceChangeArgs<ESQLSourceDescriptor>[] = [
                 { propName: 'narrowByGlobalTime', value: narrowByField },
               ];
               // auto select first date field when enabling narrowByGlobalTime and dateField is not set
@@ -159,6 +163,15 @@ export function UpdateSourceEditor(props: Props) {
               props.onChange(...changes);
             }}
           />
+
+          {hasGeoPrecisionParam(props.sourceDescriptor.esql) && (
+            <GeoPrecisionResolutionEditor
+              resolution={props.sourceDescriptor.resolution ?? DEFAULT_GRID_RESOLUTION}
+              onChange={(resolution: GRID_RESOLUTION) => {
+                props.onChange({ propName: 'resolution', value: resolution });
+              }}
+            />
+          )}
 
           <ForceRefreshCheckbox
             applyForceRefresh={props.sourceDescriptor.applyForceRefresh}

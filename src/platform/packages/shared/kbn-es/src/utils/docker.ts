@@ -195,6 +195,11 @@ export interface ServerlessOptions extends EsClusterExecOptions, BaseOptions {
    * (UIAM accepts PT1M to PT5M, default PT5M). Shorten it to exercise token renewal in tests.
    */
   uiamEphemeralTokenExpiration?: string;
+  /**
+   * ISO-8601 lifetime of session access tokens issued by UIAM. The minimum is PT1M,
+   * and the default is PT1H. Shorten this lifetime to exercise token renewal in tests.
+   */
+  uiamAccessTokenExpiration?: string;
   /** Configuration for a linked project in Cross Project Search (CPS) mode */
   linkedProject?: { projectId: string; port: number };
 }
@@ -1042,6 +1047,7 @@ async function startServerlessContainers(
       ? getUiamContainers({
           includeOAuth: options.uiamOAuth,
           ephemeralTokenExpiration: options.uiamEphemeralTokenExpiration,
+          accessTokenExpiration: options.uiamAccessTokenExpiration,
         }).map(({ image }) => setupDockerImage({ log, image }))
       : []),
   ]);
@@ -1078,6 +1084,7 @@ async function startServerlessContainers(
     for (const container of getUiamContainers({
       includeOAuth: options.uiamOAuth,
       ephemeralTokenExpiration: options.uiamEphemeralTokenExpiration,
+      accessTokenExpiration: options.uiamAccessTokenExpiration,
     })) {
       nodeNames.push(await runUiamContainer(log, container));
     }

@@ -45,7 +45,6 @@ import {
 } from '../../../common/constants';
 import { useChartLayers } from '../../chart/hooks/use_chart_layers';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
-import { useFetchExemplars } from './hooks/use_fetch_exemplars';
 
 const EMPTY_APPLICABLE_DIMENSIONS: Dimension[] = [];
 
@@ -107,11 +106,6 @@ export type MetricsGridProps = Pick<
    *
    */
   isTabSelected: boolean;
-  /**
-   * `ChartsGrid` hides an inactive grid with CSS rather than unmounting it, so per-chart
-   * fetches that should pause while hidden (exemplars) need this flag explicitly.
-   */
-  isComponentVisible: boolean;
   /** Min/max fetched for the visible histogram charts. Empty until the heatmaps flag is on. */
   histogramBounds?: HistogramBoundsByMetricKey;
   histogramBoundsLoading?: boolean;
@@ -140,7 +134,6 @@ export const MetricsGrid = ({
   getUserMessages,
   getDescription,
   isTabSelected,
-  isComponentVisible,
   histogramBounds = EMPTY_HISTOGRAM_BOUNDS,
   histogramBoundsLoading = false,
 }: MetricsGridProps) => {
@@ -292,7 +285,6 @@ export const MetricsGrid = ({
                   profileId={profileId}
                   gridSettings={gridSettings}
                   onMetricExplored={onMetricExplored}
-                  isComponentVisible={isComponentVisible}
                   histogramBounds={histogramBounds}
                   histogramBoundsLoading={histogramBoundsLoading}
                 />
@@ -338,7 +330,6 @@ interface ChartItemProps
   profileId: string;
   gridSettings: MetricsGridSettings;
   onMetricExplored?: (metricUniqueKey: string) => void;
-  isComponentVisible: boolean;
   histogramBounds: HistogramBoundsByMetricKey;
   histogramBoundsLoading: boolean;
 }
@@ -371,7 +362,6 @@ const ChartItem = React.memo(
     profileId,
     gridSettings,
     onMetricExplored,
-    isComponentVisible,
     histogramBounds,
     histogramBoundsLoading,
   }: ChartItemProps) => {
@@ -401,18 +391,6 @@ const ChartItem = React.memo(
       dimensions,
       metricItem.dimensionFields
     );
-
-    const exemplars = useFetchExemplars({
-      fetchParams,
-      services,
-      metricItem,
-      whereStatements,
-      originalSource: userSource,
-      profileId,
-      isComponentVisible,
-    });
-    // TODO(kibana#289722): feed `exemplars` into useChartLayers as a points layer.
-    void exemplars;
 
     const { shouldRenderHistogram, boundsError, distributionQuery, heatmapConfig } =
       useHistogramHeatmap({

@@ -51,15 +51,15 @@ describe('DisabledFieldMarkdownRenderer', () => {
     expect(label).not.toHaveStyleRule('max-width', '10rem');
   });
 
-  it('shows the field name in the tooltip when the value fits', async () => {
+  it('shows the field name in the tooltip when the value fits', () => {
     render(<DisabledFieldMarkdownRenderer icon="storage" name={name} operator=":" value="srv-1" />);
 
     fireEvent.mouseOver(screen.getByTestId('disabledActionsBadge'));
 
-    expect(await screen.findByText(name)).toBeInTheDocument();
+    expect(screen.getByText(name)).toBeInTheDocument();
   });
 
-  it('shows the field name and full value in the tooltip when the value is clipped', async () => {
+  it('shows the field name and full value in the tooltip when the value is clipped', () => {
     jest.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(100);
     jest.spyOn(HTMLElement.prototype, 'scrollWidth', 'get').mockReturnValue(250);
 
@@ -67,10 +67,10 @@ describe('DisabledFieldMarkdownRenderer', () => {
 
     fireEvent.mouseOver(screen.getByTestId('disabledActionsBadge'));
 
-    expect(await screen.findByText(`${name}: ${value}`)).toBeInTheDocument();
+    expect(screen.getByText(`${name}: ${value}`)).toBeInTheDocument();
   });
 
-  it('shows only the field name in the tooltip when wrapFieldValues is true', async () => {
+  it('shows only the field name in the tooltip when wrapFieldValues is true', () => {
     jest.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(100);
     jest.spyOn(HTMLElement.prototype, 'scrollWidth', 'get').mockReturnValue(250);
 
@@ -86,7 +86,7 @@ describe('DisabledFieldMarkdownRenderer', () => {
 
     fireEvent.mouseOver(screen.getByTestId('disabledActionsBadge'));
 
-    expect(await screen.findByText(name)).toBeInTheDocument();
+    expect(screen.getByText(name)).toBeInTheDocument();
     expect(screen.queryByText(`${name}: ${value}`)).not.toBeInTheDocument();
   });
 });

@@ -14,6 +14,7 @@
 /** @typedef {import("@typescript-eslint/typescript-estree").TSESTree.ImportDeclaration} ImportDeclaration */
 /** @typedef {import("@typescript-eslint/typescript-estree").TSESTree.VariableDeclarator} VariableDeclarator */
 /** @typedef {import("@typescript-eslint/typescript-estree").TSESTree.Property} Property */
+/** @typedef {import("@typescript-eslint/typescript-estree").TSESTree.CallExpression} CallExpression */
 
 const tsEstree = require('@typescript-eslint/typescript-estree');
 const changedLines = require('./require_lazy_zod_schema_changed_lines');
@@ -621,6 +622,149 @@ const hasBinding = (node, name, sourceCode) => {
 };
 
 /**
+ * Returns the expression a function returns when it has a single return path.
+ * @param {Node | undefined} fn
+ * @returns {Expression | undefined}
+ */
+const getReturnedExpression = (fn) => {
+  if (
+    !fn ||
+    (fn.type !== esTypes.ArrowFunctionExpression &&
+      fn.type !== esTypes.FunctionExpression &&
+      fn.type !== esTypes.FunctionDeclaration)
+  ) {
+    return undefined;
+  }
+  if (fn.body.type !== esTypes.BlockStatement) {
+    return unwrapExpression(fn.body);
+  }
+  const returns = collectReturnStatements(fn.body);
+  const [only] = returns;
+  return returns.length === 1 && fn.body.body[fn.body.body.length - 1] === only
+    ? unwrapExpression(only.argument || undefined)
+    : undefined;
+};
+
+/**
+ * True when node is `z.lazy(fn)` using a tracked zod namespace binding.
+ * @param {Expression | undefined} node
+ * @param {FileState} state
+ * @param {import('eslint').SourceCode} sourceCode
+ * @returns {boolean}
+ */
+const isZodLazyCall = (node, state, sourceCode) =>
+  node?.type === esTypes.CallExpression &&
+  node.arguments.length === 1 &&
+  node.callee.type === esTypes.MemberExpression &&
+  !node.callee.computed &&
+  node.callee.property.type === esTypes.Identifier &&
+  node.callee.property.name === 'lazy' &&
+  node.callee.object.type === esTypes.Identifier &&
+  resolvesToImportedName(node.callee.object, sourceCode, state.zodNamespaces);
+
+/**
+ * Finds the variable definition an identifier resolves to.
+ * @param {Identifier} identifier
+ * @param {import('eslint').SourceCode} sourceCode
+ */
+const findDefinition = (identifier, sourceCode) => {
+  let scope = sourceCode.getScope(identifier);
+  while (scope) {
+    const variable = scope.set.get(identifier.name);
+    if (variable) {
+      return variable.defs.length === 1 ? variable.defs[0] : undefined;
+    }
+    scope = scope.upper;
+  }
+  return undefined;
+};
+
+/**
+ * True when the identifier is bound to a `lazySchema(...)` call in this file.
+ * @param {Expression} node
+ * @param {FileState} state
+ * @param {import('eslint').SourceCode} sourceCode
+ * @returns {boolean}
+ */
+const isLazySchemaBinding = (node, state, sourceCode) => {
+  if (node.type !== esTypes.Identifier) {
+    return false;
+  }
+  const definition = findDefinition(node, sourceCode);
+  return Boolean(
+    definition?.type === 'Variable' &&
+      definition.node.id.type === esTypes.Identifier &&
+      definition.node.init &&
+      isLazySchemaCall(definition.node.init, state, sourceCode)
+  );
+};
+
+/**
+ * Returns X when `returned` is `X.clone()`.
+ * @param {Expression} returned
+ * @returns {Expression | undefined}
+ */
+const getClonedObject = (returned) => {
+  if (returned.type !== esTypes.CallExpression || returned.arguments.length !== 0) {
+    return undefined;
+  }
+  const callee = unwrapExpression(returned.callee);
+  return callee?.type === esTypes.MemberExpression &&
+    !callee.computed &&
+    callee.property.type === esTypes.Identifier &&
+    callee.property.name === 'clone'
+    ? unwrapExpression(callee.object)
+    : undefined;
+};
+
+/**
+ * True when `returned` is `X.clone()` with X a same-file lazySchema binding.
+ * @param {Expression} returned
+ * @param {FileState} state
+ * @param {import('eslint').SourceCode} sourceCode
+ * @returns {boolean}
+ */
+const isCloneOfLazySchemaBinding = (returned, state, sourceCode) => {
+  const target = getClonedObject(returned);
+  return Boolean(target && isLazySchemaBinding(target, state, sourceCode));
+};
+
+/**
+ * Index of the parameter P when the helper returns `z.lazy(() => P.clone())`.
+ * @param {Identifier} callee
+ * @param {FileState} state
+ * @param {import('eslint').SourceCode} sourceCode
+ * @returns {number}
+ */
+const getCloneHelperParamIndex = (callee, state, sourceCode) => {
+  const definition = findDefinition(callee, sourceCode);
+  /** @type {Node | undefined} */
+  let fn;
+  if (definition?.type === 'FunctionName') {
+    fn = definition.node;
+  } else if (definition?.type === 'Variable' && definition.node.init) {
+    fn = unwrapExpression(definition.node.init);
+  }
+  const lazyCall = getReturnedExpression(fn);
+  if (!fn || !('params' in fn) || !isZodLazyCall(lazyCall, state, sourceCode)) {
+    return -1;
+  }
+  const returned = getReturnedExpression(/** @type {CallExpression} */ (lazyCall).arguments[0]);
+  const target = returned && getClonedObject(returned);
+  if (target?.type !== esTypes.Identifier) {
+    return -1;
+  }
+  // Skip locals in the lazy callback that shadow the helper parameter.
+  const targetDefinition = findDefinition(target, sourceCode);
+  if (targetDefinition?.type !== 'Parameter' || targetDefinition.node !== fn) {
+    return -1;
+  }
+  return fn.params.findIndex(
+    (param) => param.type === esTypes.Identifier && param.name === target.name
+  );
+};
+
+/**
  * @param {Expression} node
  * @returns {boolean}
  */
@@ -647,11 +791,13 @@ module.exports = {
     schema: [],
     messages: {
       eagerZodSchema:
-        'Wrap this module-level Zod schema in `lazySchema(() => ...)` to defer its creation until first use.',
+        'Wrap this module-level Zod schema in `lazySchema(() => ...)` to defer its creation until first use. For schemas used on every request, `z.lazy(() => ...)` is also accepted. With Zod 4 it keeps the built schema in memory.',
       eagerDerivedZodSchema:
-        'Wrap this module-level Zod schema derivation in `lazySchema(() => ...)` to defer it until first use.',
+        'Wrap this module-level Zod schema derivation in `lazySchema(() => ...)` to defer it until first use. For schemas used on every request, `z.lazy(() => ...)` is also accepted. With Zod 4 it keeps the built schema in memory.',
       schemaFactoryUsedAsSchema:
         'This function is used as a Zod schema. Use `lazySchema(() => ...)` to keep a schema value.',
+      doubleLazyWrap:
+        'With Zod 4, the outer `z.lazy` already defers and caches the schema. Build the schema directly inside `z.lazy(() => ...)` instead of wrapping a `lazySchema` proxy.',
     },
   },
 
@@ -790,6 +936,42 @@ module.exports = {
         }
 
         recordSchemaBinding(declarator, state, sourceCode);
+      },
+      CallExpression(node) {
+        const call = /** @type {Expression} */ (node);
+        let doubleWrapped = false;
+        if (isZodLazyCall(call, state, sourceCode)) {
+          const returned = getReturnedExpression(call.arguments[0]);
+          doubleWrapped = Boolean(
+            returned &&
+              (isLazySchemaCall(returned, state, sourceCode) ||
+                isCloneOfLazySchemaBinding(returned, state, sourceCode))
+          );
+        } else if (isLazySchemaCall(call, state, sourceCode)) {
+          doubleWrapped = isZodLazyCall(
+            getReturnedExpression(call.arguments[0]),
+            state,
+            sourceCode
+          );
+        } else if (
+          call.type === esTypes.CallExpression &&
+          call.callee.type === esTypes.Identifier
+        ) {
+          const index = getCloneHelperParamIndex(call.callee, state, sourceCode);
+          const argument = index >= 0 ? call.arguments[index] : undefined;
+          doubleWrapped = Boolean(
+            argument &&
+              argument.type !== esTypes.SpreadElement &&
+              isLazySchemaBinding(argument, state, sourceCode)
+          );
+        }
+        if (
+          doubleWrapped &&
+          changedLines.touchesChangedLine(fileChangedLines, call) &&
+          !changedLines.isUnchangedInAddedFile(context.filename, sourceCode.getText(call))
+        ) {
+          context.report({ node: call, messageId: 'doubleLazyWrap' });
+        }
       },
       Property(node) {
         const property = /** @type {Property} */ (node);

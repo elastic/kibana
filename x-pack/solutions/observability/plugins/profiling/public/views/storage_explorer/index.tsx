@@ -14,7 +14,7 @@ import {
   EuiTabs,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { usePerformanceContext } from '@kbn/ebt-tools';
+import { usePerformanceContext } from '@kbn/ebt-tools/react';
 import { ProfilingSchema } from '@kbn/profiling-utils';
 import React, { useState, useEffect } from 'react';
 import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';

@@ -11,7 +11,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { ToolingLog } from '@kbn/tooling-log';
-import type { SetupBuilds } from './breakages';
+import type { BuildOutcome, SetupBuilds } from './breakages';
 import {
   checkFlakyTest,
   classifyTest,
@@ -101,24 +101,48 @@ describe('flakiestQualifyingBranch', () => {
       flakiestQualifyingBranch([branch('main', 100, 10), branch('9.5', 20, 2)], thresholds)?.branch
     ).toBe('main');
   });
+
+  it('judges a pipeline judged on its own apart from the same branch of the others', () => {
+    // 4 of 514 judged together would be 0.8%; FIPS alone is 29%
+    const byBranch = [
+      branch('main', 500, 0),
+      { ...branch('main', 14, 4), pipeline: 'kibana-fips' },
+    ];
+    expect(flakiestQualifyingBranch(byBranch, { ...thresholds, minFailRate: 0.03 })).toEqual({
+      branch: 'main',
+      pipeline: 'kibana-fips',
+      builds: 14,
+      failedBuilds: 4,
+      buildFailRate: 4 / 14,
+    });
+  });
 });
 
 /** Builds run an hour apart, build 0 on Oct 1, 2026. */
 const FIRST_BUILD_AT = Date.UTC(2026, 9, 1);
 const HOUR_MS = 60 * 60 * 1000;
 
-/** Builds of one setup numbered from `first` on, oldest first: `x` failed, `.` passed. */
+const OUTCOMES: Readonly<Record<string, BuildOutcome>> = {
+  x: 'failed',
+  r: 'recovered',
+  '.': 'passed',
+};
+
+/**
+ * Builds of one setup numbered from `first` on, oldest first: `x` failed every attempt, `r` failed
+ * then passed on a retry, `.` passed.
+ */
 const setupBuilds = (pattern: string, first = 1, branch = 'main'): SetupBuilds => ({
   branch,
   setup: 'kibana-on-merge a.config.ts stateful-classic local',
-  builds: [...pattern].map((outcome, index) => {
+  builds: [...pattern].map((mark, index) => {
     const ranAt = new Date(FIRST_BUILD_AT + (first + index) * HOUR_MS);
     return {
       buildId: `build-${first + index}`,
       buildNumber: first + index,
-      failed: outcome === 'x',
+      outcome: OUTCOMES[mark],
       ranAt,
-      failedAt: outcome === 'x' ? ranAt : undefined,
+      failedAt: mark !== '.' ? ranAt : undefined,
     };
   }),
 });
@@ -158,8 +182,17 @@ describe('checkFlakyTest', () => {
       outcome: 'dropped',
       cause: 'broken',
       reason:
-        'broken right now, 20 failed builds in a row on main (#81 to #100) in ' +
+        'broken right now, 20 builds in a row failing every attempt on main (#81 to #100) in ' +
         'kibana-on-merge a.config.ts stateful-classic local',
+    });
+  });
+
+  it('keeps a test that failed then passed on a retry in every build', () => {
+    // a retry passed in each of those builds: the test is at its flakiest, not broken
+    const setups = [setupBuilds('r'.repeat(89), 500, '9.5')];
+
+    expect(checkFlakyTest(setups, [branchCounts('9.5', 89, 89)], strict, after(589))).toEqual({
+      outcome: 'none',
     });
   });
 
@@ -171,8 +204,8 @@ describe('checkFlakyTest', () => {
       outcome: 'dropped',
       cause: 'breakages',
       reason:
-        'below the thresholds without its breakage, 12 failed builds in a row on main ' +
-        '(#91 to #102) in kibana-on-merge a.config.ts stateful-classic local',
+        'below the thresholds without its breakage, 12 builds in a row failing every attempt ' +
+        'on main (#91 to #102) in kibana-on-merge a.config.ts stateful-classic local',
     });
   });
 
@@ -185,8 +218,8 @@ describe('checkFlakyTest', () => {
       outcome: 'dropped',
       cause: 'breakages',
       reason:
-        'below the thresholds without its 2 breakages, the longest 8 failed builds in a row on ' +
-        'main (#146 to #153) in kibana-on-merge a.config.ts stateful-classic local',
+        'below the thresholds without its 2 breakages, the longest 8 builds in a row failing ' +
+        'every attempt on main (#146 to #153) in kibana-on-merge a.config.ts stateful-classic local',
     });
   });
 
@@ -244,6 +277,36 @@ describe('checkFlakyTest', () => {
       const bothCounts = [...counts, branchCounts('9.6', 100, 10)];
       expect(checkFlakyTest(setups, bothCounts, strict, after(1100, 24))).toEqual({
         outcome: 'none',
+      });
+    });
+
+    it('is judged in a pipeline judged on its own by that pipeline’s builds only', () => {
+      // stopped failing in the pipelines judged together, still failing in FIPS on the same branch
+      const fips = {
+        ...setupBuilds('.........x'.repeat(10), 1000),
+        pipeline: 'kibana-fips',
+        setup: 'kibana-fips a.config.ts stateful-classic local',
+      };
+      const fipsCounts = [...counts, { ...branchCounts('main', 100, 10), pipeline: 'kibana-fips' }];
+      expect(
+        checkFlakyTest([setupBuilds(pattern), fips], fipsCounts, strict, after(1100, 24))
+      ).toEqual({ outcome: 'none' });
+
+      // stopped failing in FIPS too, 20 builds ago: dropped, the least fixed pipeline named
+      const fixedInFips = {
+        ...fips,
+        builds: setupBuilds(`${'.........x'.repeat(10)}${'.'.repeat(20)}`, 1000).builds,
+      };
+      const fixedCounts = [
+        ...counts,
+        { ...branchCounts('main', 120, 10), pipeline: 'kibana-fips' },
+      ];
+      expect(
+        checkFlakyTest([setupBuilds(pattern), fixedInFips], fixedCounts, strict, after(1100, 24))
+      ).toMatchObject({
+        outcome: 'dropped',
+        cause: 'fixed',
+        reason: expect.stringContaining('builds on main in kibana-fips since'),
       });
     });
 
@@ -854,8 +917,8 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
       expect.objectContaining({ testId: 'never-passed' }),
     ]);
     expect(info).toHaveBeenCalledWith(
-      'Dropped a.test.ts › breaks from the report: broken right now, 20 failed builds in a row on main ' +
-        '(#81 to #100) in kibana-on-merge a.config.ts stateful-classic local'
+      'Dropped a.test.ts › breaks from the report: broken right now, 20 builds in a row failing ' +
+        'every attempt on main (#81 to #100) in kibana-on-merge a.config.ts stateful-classic local'
     );
   });
 
@@ -918,7 +981,7 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
     );
     expect(info).toHaveBeenCalledWith(
       expect.stringMatching(
-        /^Checked 2 flaky tests for breakages \(failed builds in a row, too many to be chance\) and fixes in .+: dropped 0 from the report \(0 broken right now, 0 flaky only because of their breakages, 0 fixed: no failures in enough builds since their last one\); kept 1 that are flaky even without their breakages, with those builds taken off their counts; 1 unchanged$/
+        /^Checked 2 flaky tests for breakages \(builds in a row failing every attempt, too many to be chance\) and fixes in .+: dropped 0 from the report \(0 broken right now, 0 flaky only because of their breakages, 0 fixed: no failures in enough builds since their last one\); kept 1 that are flaky even without their breakages, with those builds taken off their counts; 1 unchanged$/
       )
     );
   });

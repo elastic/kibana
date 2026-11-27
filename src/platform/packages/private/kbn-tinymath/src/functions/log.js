@@ -11,11 +11,11 @@ const changeOfBase = (a, b) => Math.log(a) / Math.log(b);
 
 /**
  * Calculates the logarithm of a number. For arrays, the function will be applied index-wise to each element.
- * @param {(number|number[])} a a number or an array of numbers, `a` must be greater than 0
- * @param {{number}} b (optional) base for the logarithm. If not provided a value, the default base is e, and the natural log is calculated.
- * @return {(number|number[])} The logarithm of `a`. Returns an array with the the logarithms of each element if `a` is an array.
- * @throws `'Base out of range'` if `b` <= 0
- * - 'Must be greater than 0' if `a` > 0
+ * @param {(number|number[])} a a number or an array of numbers, `a` can't be negative
+ * @param {number} b (optional) base for the logarithm. If you don't provide a base, the function uses e and calculates the natural logarithm.
+ * @return {(number|number[])} The logarithm of `a`. Returns an array with the logarithms of each element if `a` is an array.
+ * @throws `'Base out of range'` if `b` is less than or equal to 0
+ * @throws `'Must be greater than 0'` if `a` < 0
  * @example
  * log(1) // returns 0
  * log(64, 8) // returns 2

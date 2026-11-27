@@ -19,6 +19,7 @@ import {
 
 type PenaltyInput = Pick<
   AlertOutcomeRcaAccuracyOutput,
+  | 'ground_truth_verdict'
   | 'score'
   | 'root_cause_match'
   | 'mechanism_match'
@@ -35,14 +36,23 @@ const isHallucination = ({
 
 /**
  * Ports Deductive's `apply_penalty`: a 3 needs all three matches or drops to 2, and a named
- * materially wrong claim costs one point, with a floor of 0.
+ * materially wrong claim costs one point, with a floor of 0. A refuted cause with no verified
+ * one leaves nothing to make progress toward, so at most the symptoms earn credit.
  */
 export const applyPenalty = (result: PenaltyInput): number => {
-  const { score, root_cause_match, mechanism_match, evidence_match } = result;
+  const { ground_truth_verdict, score, root_cause_match, mechanism_match, evidence_match } = result;
   const allMatch = root_cause_match && mechanism_match && evidence_match;
-  const consistent = score >= 3 && !allMatch ? 2 : score;
+  const consistent =
+    ground_truth_verdict === 'contradicted'
+      ? Math.min(score, 1)
+      : score >= 3 && !allMatch
+      ? 2
+      : score;
   return isHallucination(result) ? Math.max(0, consistent - 1) : consistent;
 };
+
+/** The grade an investigation needs for `alert_outcome_rca_accuracy` to pass. */
+const PASS_GRADE = 3;
 
 const toScores = ({
   effective,
@@ -63,8 +73,8 @@ const toScores = ({
   },
   {
     name: 'alert_outcome_rca_accuracy',
-    score: effective >= 3 ? 1 : 0,
-    label: `score=${effective}/3`,
+    score: effective >= PASS_GRADE ? 1 : 0,
+    label: `score=${effective}/3 pass=${PASS_GRADE}/3`,
     explanation: capExplanation(reasoning),
   },
   {
@@ -77,11 +87,11 @@ const toScores = ({
 
 const definition: RegisteredEvaluatorDefinition<AlertOutcomeReferenceData> = {
   name: 'nightshift_alert_outcome_rca_accuracy',
-  version: '1.0.0',
+  version: '1.1.0',
   kind: 'llm',
   direction: 'maximize',
   description:
-    "Reference-based: how well an investigation's first-round conclusion matches the cause confirmed when its alert recovered.",
+    "Reference-based: how well an investigation's first-round conclusion matches the cause confirmed when its alert recovered, or whether it asserted a cause the recovery refuted.",
   evidenceSchema: roundEvidenceSchema,
   referenceDataSchema: alertOutcomeReferenceDataSchema,
   async evaluate({ round, referenceData, inferenceClient }) {
@@ -107,8 +117,11 @@ const definition: RegisteredEvaluatorDefinition<AlertOutcomeReferenceData> = {
       outputSchema: alertOutcomeRcaAccuracyOutputSchema,
     });
 
-    if (!output.ground_truth_has_verified_cause) {
-      return { scores: [], notApplicable: { reason: 'recovery states no verified cause' } };
+    if (output.ground_truth_verdict === 'unresolved') {
+      return {
+        scores: [],
+        notApplicable: { reason: "recovery neither verifies a cause nor refutes the report's" },
+      };
     }
 
     return {

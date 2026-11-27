@@ -40,8 +40,10 @@ export function useStopSiemMigration<T extends MigrationType>(
     ({ migrationId, vendor }: StopArgs) => {
       if (migrationType === 'rule') {
         return siemMigrations.rules.stopRuleMigration({ migrationId, vendor });
-      } else {
+      } else if (migrationType === 'dashboard') {
         return siemMigrations.dashboards.stopDashboardMigration({ migrationId, vendor });
+      } else {
+        return siemMigrations.workflows.stopWorkflowMigration({ migrationId });
       }
     },
     [siemMigrations, migrationType]

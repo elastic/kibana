@@ -33,10 +33,10 @@ dependsOn:
   - '@kbn/core-logging-server-mocks'
   - '@kbn/core-elasticsearch-server-mocks'
   - '@kbn/core-http-server'
-  - '@kbn/safer-lodash-set'
   - '@kbn/core-threads-server-internal'
   - '@kbn/core-feature-flags-server'
   - '@kbn/core-status-common'
+  - '@kbn/repo-info'
 tags:
   - shared-server
   - package

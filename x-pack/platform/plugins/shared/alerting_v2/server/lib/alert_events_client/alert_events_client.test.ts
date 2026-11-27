@@ -114,6 +114,16 @@ describe('getGroupHash', () => {
       sha256('default:pagerduty:mon-1')
     );
   });
+
+  it('uses one series per source and space when no identity input is given', () => {
+    expect(getGroupHash({ source: 'pagerduty' }, spaceId)).toBe(sha256('default:pagerduty'));
+    expect(getGroupHash({ source: 'pagerduty' }, 'other')).not.toBe(
+      getGroupHash({ source: 'pagerduty' }, spaceId)
+    );
+    expect(getGroupHash({ source: 'datadog' }, spaceId)).not.toBe(
+      getGroupHash({ source: 'pagerduty' }, spaceId)
+    );
+  });
 });
 
 const createClient = (
@@ -431,6 +441,155 @@ describe('AlertEventsClient.createAlertEvent status changes', () => {
           code: ALERTING_LOG_CODES.EVENTS_ALERT_STATUS_CHANGED_PUBLISH_FAILED,
         }),
       })
+    );
+  });
+});
+
+describe('AlertEventsClient.createSignalEvent', () => {
+  it('stores a signal with no identity input as breached, with no alert, rule or lifecycle', async () => {
+    const { client, storageService, queryService, publisher, resourceManager } = createClient([]);
+
+    const result = await client.createSignalEvent({ source: 'datadog' });
+
+    expect(result).toEqual({ group_hash: sha256('default:datadog') });
+    expect(resourceManager.ensureResourceReady).toHaveBeenCalledWith(ALERT_EVENTS_RESOURCE_KEY);
+
+    const [{ docs }] = storageService.bulkIndexDocs.mock.calls[0];
+    expect(docs).toHaveLength(1);
+    expect(docs[0]).toEqual(
+      expect.objectContaining({
+        type: 'signal',
+        status: 'breached',
+        source: 'datadog',
+        group_hash: sha256('default:datadog'),
+        space_id: 'default',
+        data: {},
+      })
+    );
+    expect(docs[0]).not.toHaveProperty('alert');
+    expect(docs[0]).not.toHaveProperty('rule');
+    expect(queryService.executeQuery).not.toHaveBeenCalled();
+    expect(publisher.publishAlertStatusChanges).not.toHaveBeenCalled();
+  });
+
+  it('keeps the data payload, event timestamp and severity', async () => {
+    const { client, storageService } = createClient([]);
+
+    await client.createSignalEvent({
+      source: 'datadog',
+      data: { message: 'disk almost full' },
+      timestamp: '2026-11-06T10:00:00.000Z',
+      severity: 'high',
+    });
+
+    const [{ docs }] = storageService.bulkIndexDocs.mock.calls[0];
+    expect(docs[0]).toEqual(
+      expect.objectContaining({
+        '@timestamp': '2026-11-06T10:00:00.000Z',
+        scheduled_timestamp: '2026-11-06T10:00:00.000Z',
+        data: { message: 'disk almost full' },
+        severity: 'high',
+      })
+    );
+  });
+
+  it('leaves @timestamp unset and sets an ISO scheduled_timestamp when the caller sends none', async () => {
+    const { client, storageService } = createClient([]);
+
+    await client.createSignalEvent({ source: 'datadog' });
+
+    const [{ docs }] = storageService.bulkIndexDocs.mock.calls[0];
+    expect(docs[0]).not.toHaveProperty('@timestamp');
+    expect(docs[0].scheduled_timestamp).toEqual(
+      expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/)
+    );
+  });
+
+  it.each(['breached', 'recovered', 'no_data'] as const)(
+    'stores the status %s that the caller sends',
+    async (status) => {
+      const { client, storageService } = createClient([]);
+
+      await client.createSignalEvent({ source: 'datadog', status });
+
+      const [{ docs }] = storageService.bulkIndexDocs.mock.calls[0];
+      expect(docs[0]).toEqual(expect.objectContaining({ type: 'signal', status }));
+    }
+  );
+
+  it('keeps one series whatever the status, so a recovery reaches the same series', async () => {
+    const { client } = createClient([]);
+
+    const breached = await client.createSignalEvent({ source: 'datadog', fingerprint: 'fp-1' });
+    const recovered = await client.createSignalEvent({
+      source: 'datadog',
+      fingerprint: 'fp-1',
+      status: 'recovered',
+    });
+
+    expect(recovered.group_hash).toBe(breached.group_hash);
+  });
+
+  it('accepts a source under the reserved elastic prefix from an internal caller', async () => {
+    const { client, storageService } = createClient([]);
+
+    const result = await client.createSignalEvent({ source: 'elastic.nightshift_detection' });
+
+    expect(result).toEqual({ group_hash: sha256('default:elastic.nightshift_detection') });
+    const [{ docs }] = storageService.bulkIndexDocs.mock.calls[0];
+    expect(docs[0]).toEqual(expect.objectContaining({ source: 'elastic.nightshift_detection' }));
+  });
+
+  it('rejects invalid input without writing', async () => {
+    const { client, storageService } = createClient([]);
+
+    const emptySource = { source: '' };
+    const withLifecycleStatus = { source: 'datadog', alert_status: 'inactive' };
+    const withRuleId = { source: 'datadog', rule_id: 'rule-1' };
+
+    await expect(client.createSignalEvent(emptySource)).rejects.toThrow('Invalid signal event');
+    await expect(client.createSignalEvent(withLifecycleStatus)).rejects.toThrow(
+      'Invalid signal event'
+    );
+    await expect(client.createSignalEvent(withRuleId)).rejects.toThrow('Invalid signal event');
+    expect(storageService.bulkIndexDocs).not.toHaveBeenCalled();
+  });
+
+  it('narrows the series with a fingerprint or fingerprint_fields', async () => {
+    const { client } = createClient([]);
+
+    const withFingerprint = await client.createSignalEvent({
+      source: 'datadog',
+      fingerprint: 'fp-1',
+    });
+    expect(withFingerprint.group_hash).toBe(sha256('default:datadog:fp-1'));
+
+    const withFields = await client.createSignalEvent({
+      source: 'datadog',
+      fingerprint_fields: ['host'],
+      data: { host: 'web-01' },
+    });
+    expect(withFields.group_hash).toBe(
+      sha256('default:datadog:' + JSON.stringify([['host', 'web-01']]))
+    );
+  });
+
+  it('throws when the signal cannot be stored', async () => {
+    const { client, storageService } = createClient([]);
+    storageService.bulkIndexDocs.mockImplementationOnce(async ({ docs }) => ({
+      attempted: docs.length,
+      docs: [],
+      errors: docs.map((document) => ({
+        code: 'mapper_parsing_exception',
+        message: 'boom',
+        details: { statusCode: 400 },
+        index: '.rule-events',
+        document,
+      })),
+    }));
+
+    await expect(client.createSignalEvent({ source: 'datadog' })).rejects.toThrow(
+      'Failed to persist signal event: boom'
     );
   });
 });

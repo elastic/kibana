@@ -33,6 +33,9 @@ const COMMON_HEADERS = {
   'Content-Type': 'application/json',
 };
 
+const WORKFLOW_HEADERS = { ...COMMON_HEADERS, 'elastic-api-version': '2023-10-31' };
+const WORKFLOWS_API_PATH = '/api/workflows/workflow';
+
 /** A saved entity seeded before the test, so the agent has something to discover and edit. */
 export interface SeededEntity {
   id: string;
@@ -189,6 +192,28 @@ export const evaluate = evalsBase.extend<{
   existingActionPolicy: [
     async ({ kbnClient, log }, use) => {
       const name = `Eval existing policy ${uuidv4().slice(0, 8)}`;
+      // The policy destination must be a saved workflow, otherwise `manage_action_policy`
+      // rejects every edit during validation.
+      const { data: workflow } = await kbnClient.request<{ id: string }>({
+        method: 'POST',
+        path: WORKFLOWS_API_PATH,
+        headers: WORKFLOW_HEADERS,
+        body: {
+          yaml: [
+            "version: '1'",
+            `name: ${name} workflow`,
+            'enabled: true',
+            'triggers:',
+            '  - type: manual',
+            'steps:',
+            '  - name: log_alert',
+            '    type: console',
+            '    with:',
+            '      message: "Alert received"',
+          ].join('\n'),
+        },
+      });
+      log.info(`Created eval workflow ${workflow.id}`);
       const { data } = await kbnClient.request<{ id: string }>({
         method: 'POST',
         path: ALERTING_V2_ACTION_POLICY_API_PATH,
@@ -196,7 +221,7 @@ export const evaluate = evalsBase.extend<{
         body: {
           name,
           description: 'Seeded by the alerting-v2 evals',
-          destinations: [{ type: 'workflow', id: 'eval-workflow-id' }],
+          destinations: [{ type: 'workflow', id: workflow.id }],
         },
       });
       log.info(`Created eval action policy ${data.id} (${name})`);
@@ -210,6 +235,13 @@ export const evaluate = evalsBase.extend<{
           ignoreErrors: [404],
         });
         log.info(`Deleted eval action policy ${data.id}`);
+        await kbnClient.request({
+          method: 'DELETE',
+          path: `${WORKFLOWS_API_PATH}/${encodeURIComponent(workflow.id)}?force=true`,
+          headers: WORKFLOW_HEADERS,
+          ignoreErrors: [404],
+        });
+        log.info(`Deleted eval workflow ${workflow.id}`);
       }
     },
     { scope: 'test' },

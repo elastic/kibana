@@ -40,7 +40,6 @@ import { type AddFieldFilterHandler } from '@kbn/unified-field-list';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { type DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import type { inputsModel } from '../../../../common/store';
@@ -55,7 +54,7 @@ import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import {
   EntitySourceValue,
   toEntitySourceArray,
-} from '../../../../flyout/entity_details/shared/components/entity_source_value';
+} from '../../../../flyout_v2/entity/shared/components/entity_source_value';
 
 import type { CriticalityLevelWithUnassigned } from '../../../../../common/entity_analytics/asset_criticality/types';
 import { AssetCriticalityBadge } from '../../asset_criticality';
@@ -191,7 +190,6 @@ export const EntitiesDataTable = ({
     setUrlQuery,
   } = state;
 
-  const { closeFlyout } = useExpandableFlyoutApi();
   const { openEntityFlyout } = useFlyoutApi();
   const {
     timelinePrivileges: { read: canUseTimeline },
@@ -204,10 +202,7 @@ export const EntitiesDataTable = ({
 
   const openTableFlyout = useCallback(
     (doc?: DataTableRecord | undefined) => {
-      if (!doc) {
-        closeFlyout();
-        return;
-      }
+      if (!doc) return;
 
       const { entityType, entityName, entityId } = getEntityFields(doc);
       if (!entityType || !entityName || !entityId) return;
@@ -221,7 +216,7 @@ export const EntitiesDataTable = ({
         scopeId: tableId,
       });
     },
-    [openEntityFlyout, closeFlyout, tableId]
+    [openEntityFlyout, tableId]
   );
 
   const {

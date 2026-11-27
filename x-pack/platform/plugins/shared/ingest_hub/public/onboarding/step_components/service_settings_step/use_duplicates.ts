@@ -21,7 +21,8 @@ interface UseDuplicatesParams {
     name: string,
     varsByDataStream: Record<string, ServiceDataStreamVars>,
     enabledDataStreams: string[],
-    namespace?: string
+    namespace?: string,
+    createDatasetTemplates?: boolean
   ) => void;
   integrationName: string;
   globalNamespace: string;
@@ -106,10 +107,18 @@ export function useDuplicates({
       name: string,
       varsByDataStream: Record<string, ServiceDataStreamVars>,
       enabledDataStreams: string[],
-      namespace: string
+      namespace: string,
+      createDatasetTemplates?: boolean
     ) => {
       if (!sourceInstanceId) return;
-      addDuplicate(sourceInstanceId, name, varsByDataStream, enabledDataStreams, namespace);
+      addDuplicate(
+        sourceInstanceId,
+        name,
+        varsByDataStream,
+        enabledDataStreams,
+        namespace,
+        createDatasetTemplates
+      );
       setSourceInstanceId(null);
     },
     [sourceInstanceId, addDuplicate]

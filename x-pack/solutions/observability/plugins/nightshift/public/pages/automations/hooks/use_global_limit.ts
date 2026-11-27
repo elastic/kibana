@@ -6,7 +6,7 @@
  */
 
 import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
-import { useRunQuotas } from '../../../data/run_quotas/use_significant_events_run_quotas';
+import { useInvestigationQuotas } from '../../../data/run_quotas/use_investigation_quotas';
 import { useKibana } from '../../../hooks/use_kibana';
 import {
   getAutomationBlockingLimit,
@@ -24,14 +24,14 @@ interface GlobalLimit {
 }
 
 export const useGlobalLimit = (): GlobalLimit => {
-  const { data: quotas, refetch } = useRunQuotas();
+  const { data: quotas, refetch } = useInvestigationQuotas();
   const { application } = useKibana().services;
   const blockingLimit = getAutomationBlockingLimit(quotas);
 
   return {
     isReached: blockingLimit !== undefined,
     blockingLimit,
-    limit: quotas?.limits[blockingLimit ?? 'investigation'],
+    limit: quotas?.limits[blockingLimit ?? 'automatic_investigation'] ?? undefined,
     settingsHref: quotas?.canManage
       ? application.getUrlForApp(NIGHTSHIFT_APP_ID, { path: '/settings/investigations' })
       : undefined,

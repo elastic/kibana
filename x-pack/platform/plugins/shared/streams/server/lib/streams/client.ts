@@ -34,12 +34,14 @@ import {
   DefinitionNotFoundError,
   isDefinitionNotFoundError,
 } from './errors/definition_not_found_error';
+import { RemovedStreamTypeError } from './errors/removed_stream_type_error';
 import { SecurityError } from './errors/security_error';
 import { StatusError } from './errors/status_error';
 import { StreamsStatusConflictError } from './errors/streams_status_conflict_error';
 import { createRootStreamDefinition } from './root_stream_definition';
 import { State } from './state_management/state';
 import type { StreamsStorageClient } from './storage/streams_storage_client';
+import { RemovedStreamTypeNotFoundError } from './storage/removed_stream_types';
 import { checkAccess, checkAccessBulk } from './stream_crud';
 import { upsertDataStream } from './data_streams/manage_data_streams';
 import { shouldIncludeFromStreamsList } from './data_streams/should_include_from_streams_list';
@@ -483,13 +485,11 @@ export class StreamsClient {
     name,
     where: condition,
     status,
-    draft,
   }: {
     parent: string;
     name: string;
     where: Condition;
     status: RoutingStatus;
-    draft?: boolean;
   }): Promise<ForkStreamResponse> {
     const parentDefinition = Streams.WiredStream.Definition.parse(await this.getStream(parent));
 
@@ -515,7 +515,6 @@ export class StreamsClient {
                   destination: name,
                   where: condition,
                   status,
-                  ...(draft ? { draft: true } : {}),
                 }),
               },
             },
@@ -528,7 +527,6 @@ export class StreamsClient {
             name,
             description: '',
             updated_at: now,
-            query_streams: [],
             ingest: {
               lifecycle: { inherit: {} },
               processing: { steps: [], updated_at: now },
@@ -536,42 +534,9 @@ export class StreamsClient {
               wired: {
                 fields: {},
                 routing: [],
-                ...(draft ? { draft: true } : {}),
               },
               failure_store: { inherit: {} },
             },
-          },
-        },
-      ],
-      { ...this.dependencies, streamsClient: this }
-    );
-
-    return { acknowledged: true, result: 'created' };
-  }
-
-  async createQueryStream({
-    name,
-    query,
-    field_descriptions,
-    description = '',
-  }: {
-    name: string;
-    query: Streams.QueryStream.UpsertRequest['stream']['query'];
-    field_descriptions?: Record<string, string>;
-    description?: string;
-  }): Promise<UpsertStreamResponse> {
-    await State.attemptChanges(
-      [
-        {
-          type: 'upsert',
-          definition: {
-            type: 'query',
-            name,
-            description,
-            updated_at: new Date().toISOString(),
-            query_streams: [],
-            query,
-            ...(field_descriptions && { field_descriptions }),
           },
         },
       ],
@@ -658,7 +623,9 @@ export class StreamsClient {
         throw error;
       } catch (e) {
         if (isNotFoundError(e)) {
-          throw new DefinitionNotFoundError(`Cannot find stream ${name}`);
+          throw error instanceof RemovedStreamTypeNotFoundError
+            ? new RemovedStreamTypeError(`Cannot find stream ${name}`)
+            : new DefinitionNotFoundError(`Cannot find stream ${name}`);
         }
         throw e;
       }
@@ -1032,17 +999,12 @@ export class StreamsClient {
     }
 
     const privileges = await checkAccessBulk({
-      names: streams
-        .filter((stream) => !Streams.QueryStream.Definition.is(stream))
-        .map((stream) => stream.name),
+      names: streams.map((stream) => stream.name),
       esClient,
       isSecurityEnabled: this.dependencies.isSecurityEnabled,
     });
 
-    return streams.filter((stream) => {
-      if (Streams.QueryStream.Definition.is(stream)) return true;
-      return privileges[stream.name]?.read === true;
-    });
+    return streams.filter((stream) => privileges[stream.name]?.read === true);
   }
 
   /**

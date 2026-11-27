@@ -10,10 +10,14 @@ import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { StepContext } from '@kbn/workflows';
 import { ExecutionError } from '@kbn/workflows/server';
-import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
+import {
+  CONTEXT_ENGINE_ENABLED_SETTING_ID,
+  CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID,
+} from '@kbn/management-settings-ids';
 import { isIndexPattern, validateAiIndexId } from '../../common/ai_index_dest';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
 import type { KiWriter } from '../ai_indices/ki_revision';
+import { samePermissions, type KiPermissions } from '../dreaming/permissions';
 import {
   AiIndexAlreadyExistsError,
   AiIndexManagedError,
@@ -21,6 +25,8 @@ import {
 } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
 import type { ImprovementsServiceApi } from '../improvements/service';
+import type { SessionEventsService } from '../session_events/types';
+import type { SessionMemoryService } from '../session_memory/types';
 import type { KiVerificationSummary } from '../ki_verification';
 import { WORKFLOW_VERIFIER_ID_PREFIX } from '../ki_verification';
 import type { ContextEngineAnalyticsService, KiWriteAction } from '../telemetry';
@@ -35,6 +41,26 @@ export interface KiStepDependencies {
   checkWritePrivilege: (request: KibanaRequest, spaceId: string) => Promise<boolean>;
   analyticsService: ContextEngineAnalyticsService;
   logger: Logger;
+}
+
+/** Dependencies of the KI steps that behave differently while dreaming is unavailable. */
+export interface DreamingKiStepDependencies extends KiStepDependencies {
+  /** Whether Context Engine, and its global memory setting, are on in this space. */
+  isDreamingAvailable: (spaceId: string) => Promise<boolean>;
+}
+
+/** Dependencies injected into the dreaming step definition factories. */
+export interface DreamingStepDependencies {
+  getAiIndexService: () => AiIndexService;
+  isContextEngineEnabled: (spaceId: string) => Promise<boolean>;
+  /** Whether the global Context Engine memory setting is on. */
+  isMemoryEnabled: () => Promise<boolean>;
+  /** Whether the request has the Context Engine read API privilege in this space. */
+  checkReadPrivilege: (request: KibanaRequest, spaceId: string) => Promise<boolean>;
+  /** The session memory store, which the steps read as the internal user once they check privileges. */
+  getSessionMemoryService: () => Promise<SessionMemoryService>;
+  /** The session events store, which the steps read as the internal user once they check privileges. */
+  getSessionEventsService: () => Promise<SessionEventsService>;
 }
 
 /** Dependencies injected into the feedback analysis step definition factories. */
@@ -209,6 +235,19 @@ export const assertContextEngineEnabled = async (
   }
 };
 
+/** Fails the step when Context Engine, or its global memory setting, is off. */
+export const assertDreamingAvailable = async (
+  isDreamingAvailable: (spaceId: string) => Promise<boolean>,
+  spaceId: string
+): Promise<void> => {
+  if (!(await isDreamingAvailable(spaceId))) {
+    throw new ExecutionError({
+      type: 'FeatureDisabledError',
+      message: `Context Engine dreaming is disabled. Enable the '${CONTEXT_ENGINE_ENABLED_SETTING_ID}' and '${CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID}' advanced settings to use this step.`,
+    });
+  }
+};
+
 /** Fails the step when the feedback loop advanced setting is off. */
 export const assertFeedbackLoopEnabled = async (
   isFeedbackLoopEnabled: () => Promise<boolean>
@@ -294,6 +333,20 @@ export const resolveOrCreateAiIndex = async (
   }
 
   return { dest, managed: false };
+};
+
+/** Fails the step when a dreaming batch's memories don't all have the same permissions. */
+export const assertSameMemoryPermissions = (
+  memories: ReadonlyArray<{ permissions?: KiPermissions }>
+): void => {
+  const [first] = memories;
+  if (memories.some(({ permissions }) => !samePermissions(permissions, first?.permissions))) {
+    throw new ExecutionError({
+      type: 'ValidationError',
+      message:
+        "The memories don't all have the same permissions: each dreaming batch must hold one audience's memories",
+    });
+  }
 };
 
 /** Fails the step when the dest is an index pattern, which cannot be a write target. */

@@ -6,8 +6,16 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { SiemMigrationVendor } from '../../../../../common/siem_migrations/model/common.gen';
+import type {
+  AggregationsFilterAggregate,
+  AggregationsStringTermsAggregate,
+  QueryDslQueryContainer,
+} from '@elastic/elasticsearch/lib/api/types';
+import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
+import type {
+  MigrationTranslationStats,
+  SiemMigrationVendor,
+} from '../../../../../common/siem_migrations/model/common.gen';
 import type { WorkflowMigrationWorkflow } from '../../../../../common/siem_migrations/model/workflow_migration.gen';
 import { SiemMigrationsDataItemClient } from '../../common/data/siem_migrations_data_item_client';
 import type { SiemMigrationFilters } from '../../../../../common/siem_migrations/types';
@@ -20,6 +28,44 @@ export class WorkflowMigrationsDataWorkflowsClient extends SiemMigrationsDataIte
 
   protected getSortOptions(sort: SiemMigrationSort = {}): estypes.Sort {
     return getSortingOptions(sort);
+  }
+
+  /** Aggregates translation outcomes for one workflow migration. */
+  public async getTranslationStats(migrationId: string): Promise<MigrationTranslationStats> {
+    const index = await this.getIndexName();
+    const query = this.getFilterQuery(migrationId);
+    const aggregations = {
+      success: {
+        filter: { term: { status: SiemMigrationStatus.COMPLETED } },
+        aggs: {
+          result: { terms: { field: 'translation_result' } },
+          installable: { filter: dsl.isInstallable() },
+        },
+      },
+      failed: { filter: { term: { status: SiemMigrationStatus.FAILED } } },
+    };
+    const result = await this.esClient
+      .search({ index, query, aggregations, _source: false, track_total_hits: true })
+      .catch((error) => {
+        this.logger.error(`Error getting workflow migrations stats: ${error.message}`);
+        throw error;
+      });
+
+    const aggs = result.aggregations ?? {};
+    const successAgg = aggs.success as AggregationsFilterAggregate;
+    const translationResultsAgg = successAgg?.result as AggregationsStringTermsAggregate;
+    return {
+      id: migrationId,
+      items: {
+        total: this.getTotalHits(result),
+        success: {
+          total: successAgg?.doc_count ?? 0,
+          result: this.translationResultAggCount(translationResultsAgg),
+          installable: (successAgg?.installable as AggregationsFilterAggregate)?.doc_count ?? 0,
+        },
+        failed: (aggs.failed as AggregationsFilterAggregate)?.doc_count ?? 0,
+      },
+    };
   }
 
   /** Returns `tines` when the migration has at least one stored story. */
@@ -40,6 +86,9 @@ export class WorkflowMigrationsDataWorkflowsClient extends SiemMigrationsDataIte
 
     if (filters.installed != null) {
       filter.push(filters.installed ? dsl.isInstalled() : dsl.isNotInstalled());
+    }
+    if (filters.installable != null) {
+      filter.push(filters.installable ? dsl.isInstallable() : dsl.isNotInstallable());
     }
 
     return { bool: { filter } };

@@ -49,7 +49,11 @@ import { SavedQueryManagementList } from '../saved_query_management';
 import type { QueryBarMenuProps } from '../query_string_input/query_bar_menu';
 import { QueryBarMenu } from '../query_string_input/query_bar_menu';
 import type { DataViewPickerProps } from '../dataview_picker';
-import type { QueryBarTopRowProps, ShowDatePicker } from '../query_string_input/query_bar_top_row';
+import type {
+  LegacyDatePickerProps,
+  QueryBarTopRowProps,
+  ShowDatePicker,
+} from '../query_string_input/query_bar_top_row';
 import { QueryBarTopRow } from '../query_string_input/query_bar_top_row';
 import { FilterBar, FilterItems } from '../filter_bar';
 import { searchBarStyles } from './search_bar.styles';
@@ -94,6 +98,15 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
    * Defaults to true.
    */
   showTimeWindowButtons?: boolean;
+  /**
+   * Options for the legacy `EuiSuperDatePicker`. They apply whenever the legacy picker is rendered
+   * (`enableDateRangePicker` is `false`, or the new picker feature flag is off) and are ignored by the
+   * new `DateRangePicker`. `minDate` disables the earlier days in the calendar and marks a range whose
+   * start is before it as invalid, so it cannot be applied. Quick ranges, recently used ranges and the
+   * time window buttons are applied directly and are not checked against it. `commonlyUsedRanges`
+   * replaces the quick ranges of the `timepicker:quickRanges` advanced setting.
+   */
+  legacyDatePickerProps?: LegacyDatePickerProps;
   filters?: Filter[];
   additionalQueryBarMenuItems?: AdditionalQueryBarMenuItems;
   filtersForSuggestions?: Filter[];
@@ -191,6 +204,7 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
 
   hasDirtyState?: boolean;
   useBackgroundSearchButton?: boolean;
+  cachedResultsLoadedAt?: QueryBarTopRowProps['cachedResultsLoadedAt'];
   /**
    * Enable data source browser suggestion in ES|QL editor.
    */
@@ -874,8 +888,10 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           esqlQueryStats={this.props.esqlQueryStats}
           onOpenQueryInNewTab={this.props.onOpenQueryInNewTab}
           useBackgroundSearchButton={this.props.useBackgroundSearchButton}
+          cachedResultsLoadedAt={this.props.cachedResultsLoadedAt}
           enableDateRangePicker={this.props.enableDateRangePicker}
           showTimeWindowButtons={this.props.showTimeWindowButtons}
+          legacyDatePickerProps={this.props.legacyDatePickerProps}
           enableResourceBrowser={this.props.enableResourceBrowser}
           enableCreateView={this.props.enableCreateView}
         />

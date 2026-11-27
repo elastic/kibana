@@ -10,7 +10,8 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { FlyoutTemplate } from './flyout_template';
-import { FlyoutTemplateManagedProvider, useFlyoutClose } from './context';
+import { useFlyoutClose } from './context';
+import { FlyoutTemplateManagedProvider } from './frame';
 import type { FlyoutTemplateManaged } from './context';
 import type { FlyoutTemplateProps } from './types';
 

@@ -75,6 +75,7 @@ export type {
 export { RELAY_APP_CONNECTION_STATUS } from './slack_app/types';
 export type {
   RelayAppConnectionStatus,
+  SlackAppAvailableChannelsResponse,
   SlackAppBindChannelResponse,
   SlackAppBindingsResponse,
   SlackAppConfirmResponse,
@@ -85,6 +86,7 @@ export type {
   SlackAppWorkspace,
   SlackChannelBinding,
   SlackChannelBindingStatus,
+  SlackAvailableChannel,
 } from './slack_app/types';
 
 export type {

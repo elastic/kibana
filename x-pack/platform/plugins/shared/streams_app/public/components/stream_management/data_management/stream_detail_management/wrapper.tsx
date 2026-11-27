@@ -20,7 +20,6 @@ import {
   LOGS_ROOT_STREAM_NAME,
   ROOT_STREAM_NAMES,
   type RootStreamName,
-  isDraftGetResponse,
   isRoot,
 } from '@kbn/streams-schema';
 import type { ReactElement, ReactNode } from 'react';
@@ -30,6 +29,10 @@ import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamDetail } from '../../../../hooks/use_stream_detail';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
 import {
+  useNavigateToStreamsHome,
+  useStreamsHomeLink,
+} from '../../../../hooks/use_streams_home_link';
+import {
   STREAMS_HISTOGRAM_NUM_DATA_POINTS,
   useStreamDocCountsFetch,
 } from '../../../../hooks/use_streams_doc_counts_fetch';
@@ -37,7 +40,6 @@ import { useTimeRange } from '../../../../hooks/use_time_range';
 import { calculateDataQuality } from '../../../../util/calculate_data_quality';
 import {
   ClassicStreamBadge,
-  DraftStreamBadge,
   LifecycleBadge,
   TimeSeriesBadge,
   WiredStreamBadge,
@@ -71,11 +73,10 @@ export function Wrapper({
   topContent?: ReactNode;
 }) {
   const router = useStreamsAppRouter();
+  const streamsHomeLink = useStreamsHomeLink();
+  const navigateToStreamsHome = useNavigateToStreamsHome();
   const { definition } = useStreamDetail();
   const {
-    core: {
-      application: { navigateToApp },
-    },
     dependencies: {
       start: {
         streams: { streamsRepositoryClient },
@@ -114,8 +115,6 @@ export function Wrapper({
     });
   }, [definition, tab, services.telemetryClient]);
 
-  const isDraft = isDraftGetResponse(definition);
-
   const { getStreamDocCounts } = useStreamDocCountsFetch({
     groupTotalCountByTimestamp: false,
     getCanReadFailureStore: () =>
@@ -127,21 +126,11 @@ export function Wrapper({
     fetchIngestionDocCounts: false,
   });
 
-  // Draft streams have no backing data stream so doc_counts endpoints return 404.
-  const docCountsFetch = isDraft ? undefined : getStreamDocCounts(streamId);
+  const docCountsFetch = getStreamDocCounts(streamId);
 
-  const countResult = useAsync(
-    () => docCountsFetch?.docCount ?? Promise.resolve([]),
-    [docCountsFetch]
-  );
-  const failedDocsResult = useAsync(
-    () => docCountsFetch?.failedDocCount ?? Promise.resolve([]),
-    [docCountsFetch]
-  );
-  const degradedDocsResult = useAsync(
-    () => docCountsFetch?.degradedDocCount ?? Promise.resolve([]),
-    [docCountsFetch]
-  );
+  const countResult = useAsync(() => docCountsFetch.docCount, [docCountsFetch]);
+  const failedDocsResult = useAsync(() => docCountsFetch.failedDocCount, [docCountsFetch]);
+  const degradedDocsResult = useAsync(() => docCountsFetch.degradedDocCount, [docCountsFetch]);
 
   const docCount = countResult?.value?.find((stat) => stat.stream === streamId)?.count ?? 0;
   const degradedDocCount =
@@ -184,22 +173,20 @@ export function Wrapper({
       ),
     });
   }
-  if (!isDraft) {
-    streamBadges.push({
-      label: i18n.translate('xpack.streams.streamDetailView.qualityTab', {
-        defaultMessage: 'Data quality',
-      }),
-      node: (
-        <DatasetQualityIndicator
-          quality={quality}
-          isLoading={isQualityLoading}
-          verbose={true}
-          showTooltip={true}
-        />
-      ),
-    });
-  }
-  if (Streams.ingest.all.GetResponse.is(definition) && !isDraft) {
+  streamBadges.push({
+    label: i18n.translate('xpack.streams.streamDetailView.qualityTab', {
+      defaultMessage: 'Data quality',
+    }),
+    node: (
+      <DatasetQualityIndicator
+        quality={quality}
+        isLoading={isQualityLoading}
+        verbose={true}
+        showTooltip={true}
+      />
+    ),
+  });
+  if (Streams.ingest.all.GetResponse.is(definition)) {
     streamBadges.push({
       label: i18n.translate('xpack.streams.badges.lifecycle.title', {
         defaultMessage: 'Data Retention',
@@ -236,14 +223,6 @@ export function Wrapper({
       }),
       node: <WiredStreamBadge />,
     });
-    if (isDraft) {
-      streamBadges.push({
-        label: i18n.translate('xpack.streams.entityDetailViewWithoutParams.draftBadgeLabel', {
-          defaultMessage: 'Draft',
-        }),
-        node: <DraftStreamBadge />,
-      });
-    }
   }
 
   const appHeaderBadges: AppHeaderBadge[] = streamBadges.map(({ label, node }) => ({
@@ -263,7 +242,7 @@ export function Wrapper({
     Streams.ingest.all.GetResponse.is(definition)
       ? {
           stream: definition.stream,
-          hasDataStream: definition.data_stream_exists || isDraft,
+          hasDataStream: definition.data_stream_exists,
           indexMode: definition.index_mode ?? 'standard',
         }
       : {}
@@ -277,8 +256,8 @@ export function Wrapper({
       params: { path: { name: definition.stream.name } },
       signal: abortController.signal,
     });
-    navigateToApp('/streams');
-  }, [definition, abortController.signal, navigateToApp, streamsRepositoryClient]);
+    navigateToStreamsHome();
+  }, [definition, abortController.signal, navigateToStreamsHome, streamsRepositoryClient]);
 
   const backToStreamsLabel = i18n.translate('xpack.streams.streamDetailView.backToStreamsLabel', {
     defaultMessage: 'Streams',
@@ -347,7 +326,7 @@ export function Wrapper({
     <>
       <StreamsAppHeader
         title={streamId}
-        back={{ href: router.link('/'), label: backToStreamsLabel }}
+        back={{ href: streamsHomeLink, label: backToStreamsLabel }}
         badges={appHeaderBadges}
         tabs={appHeaderTabs}
         menu={appHeaderMenu}

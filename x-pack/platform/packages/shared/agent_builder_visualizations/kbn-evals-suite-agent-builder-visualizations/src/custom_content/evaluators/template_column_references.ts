@@ -5,42 +5,136 @@
  * 2.0.
  */
 
-import { Liquid } from 'liquidjs';
+import { Liquid, TokenKind, type Template } from 'liquidjs';
 import { CUSTOM_CONTENT_LIQUID_OPTIONS } from '@kbn/custom-content-common';
 
 const liquid = new Liquid(CUSTOM_CONTENT_LIQUID_OPTIONS);
 
-const ROW_LOOP = /\{%-?\s*for\s+(\w+)\s+in\s+rows\b/g;
+type Segments = ReadonlyArray<unknown>;
 
-const isIndexedRow = (segment: unknown): boolean =>
-  typeof segment === 'number' || segment === 'first' || segment === 'last';
+interface Loop {
+  variable: string;
+  query?: number;
+}
 
-/** The column a variable path reads, if its first part is a row: `host` in `r.host.value`. */
-const readColumn = (rowVariables: Set<string>, [root, ...path]: unknown[]): unknown => {
+interface LoopTag {
+  variable: string;
+  collection: { kind: TokenKind; input: string; begin: number; end: number };
+  templates: Template[];
+  elseTemplates?: Template[];
+}
+
+interface QueryReference {
+  query: number;
+  column?: string;
+}
+
+const isLoopTag = (template: Template): template is Template & LoopTag =>
+  'name' in template.token && (template.token.name === 'for' || template.token.name === 'tablerow');
+
+/** A row is picked by a position, `first`, `last`, or a variable. */
+const isRowPick = (segment: unknown): boolean =>
+  typeof segment === 'number' || segment === 'first' || segment === 'last' || isVariable(segment);
+
+const isVariable = (segment: unknown): boolean => typeof segment === 'object' && segment !== null;
+
+const isQueryPosition = (segment: unknown): segment is number => Number.isInteger(segment);
+
+const asColumn = (segment: unknown): string | undefined => {
+  if (typeof segment === 'number') {
+    return String(segment);
+  }
+  return typeof segment === 'string' && segment !== '' ? segment : undefined;
+};
+
+/** The query and column a variable path reads, if it starts from a query, its `max` or one of its rows. */
+const readReference = (
+  loops: Loop[],
+  [root, first, second, third, fourth]: Segments
+): QueryReference | undefined => {
   if (root === 'rows') {
-    return isIndexedRow(path[0]) ? path[1] : undefined;
+    return { query: 0, column: isRowPick(first) ? asColumn(second) : undefined };
   }
-  return rowVariables.has(String(root)) ? path[0] : undefined;
+  if (root === 'max') {
+    return { query: 0, column: asColumn(first) };
+  }
+  if (root === 'queries') {
+    if (!isQueryPosition(first)) {
+      return undefined;
+    }
+    if (second === 'rows') {
+      return { query: first, column: isRowPick(third) ? asColumn(fourth) : undefined };
+    }
+    return { query: first, column: second === 'max' ? asColumn(third) : undefined };
+  }
+  const loop = [...loops].reverse().find(({ variable }) => variable === root);
+  return loop?.query === undefined ? undefined : { query: loop.query, column: asColumn(first) };
 };
 
-/**
- * The columns a template reads: the name that follows a row, such as `host` in
- * `row["host"].value`, `r.host.pct`, `max["host"]` or `rows[0]["host"]`. The row is the variable of a
- * `{% for … in rows %}` loop, whatever it is called, so quoting and dot access do not matter, and
- * neither a property of a cell (`value`, `pct`) nor of anything else (`forloop.index`, an `assign`ed
- * cell) is taken for a column. A template that does not parse reads none.
- */
-export const readColumnReferences = (template: string): string[] => {
+const readSegments = (expression: string): Segments | undefined => {
+  const { variables } = liquid.parseAndAnalyzeSync(`{{ ${expression} }}`);
+  return Object.values(variables)[0]?.[0]?.segments;
+};
+
+/** The query whose rows a loop goes through: `rows` is the first, `queries[n].rows` the n-th. */
+const readLoopQuery = ({
+  collection: { kind, input, begin, end },
+}: LoopTag): number | undefined => {
+  if (kind !== TokenKind.PropertyAccess) {
+    return undefined;
+  }
+  const segments = readSegments(input.slice(begin, end)) ?? [];
+  const [root, first, second] = segments;
+  if (root === 'rows') {
+    return segments.length === 1 ? 0 : undefined;
+  }
+  const isQueryRows = isQueryPosition(first) && second === 'rows' && segments.length === 3;
+  return root === 'queries' && isQueryRows ? first : undefined;
+};
+
+/** The loops of these templates that are not inside another loop, however deep in other tags. */
+const findOutermostLoops = (templates: Template[]): Array<Template & LoopTag> =>
+  templates.flatMap((template) => {
+    if (isLoopTag(template)) {
+      return [template, ...findOutermostLoops(template.elseTemplates ?? [])];
+    }
+    const children = template.children?.(false, true);
+    let step = children?.next();
+    while (step && !step.done) {
+      step = children?.next();
+    }
+    return step?.done ? findOutermostLoops(step.value) : [];
+  });
+
+/** The columns a template reads from each query it uses, keyed by query position (`rows` and `max` are query 0). */
+export const readColumnReferencesByQuery = (template: string): Map<number, string[]> => {
+  const byQuery = new Map<number, string[]>();
+  const read = (scope: Template[], loops: Loop[]) => {
+    for (const usages of Object.values(liquid.analyzeSync(scope).globals)) {
+      for (const { segments } of usages) {
+        const reference = readReference(loops, segments);
+        if (reference) {
+          const columns = byQuery.get(reference.query) ?? [];
+          if (reference.column && !columns.includes(reference.column)) {
+            columns.push(reference.column);
+          }
+          byQuery.set(reference.query, columns);
+        }
+      }
+    }
+    for (const loop of findOutermostLoops(scope)) {
+      read(loop.templates, [...loops, { variable: loop.variable, query: readLoopQuery(loop) }]);
+    }
+  };
+
   try {
-    const rowVariables = new Set(['max']);
-    [...template.matchAll(ROW_LOOP)].forEach(([, name]) => rowVariables.add(name));
-
-    const { variables } = liquid.analyzeSync(liquid.parse(template));
-    const columns = Object.values(variables)
-      .flatMap((usages) => usages.map(({ segments }) => readColumn(rowVariables, segments)))
-      .filter((column): column is string => typeof column === 'string');
-    return [...new Set(columns)];
+    read(liquid.parse(template), []);
+    return byQuery;
   } catch {
-    return [];
+    return new Map();
   }
 };
+
+/** The columns a template reads from the first query, the one it reads as `rows`. */
+export const readColumnReferences = (template: string): string[] =>
+  readColumnReferencesByQuery(template).get(0) ?? [];

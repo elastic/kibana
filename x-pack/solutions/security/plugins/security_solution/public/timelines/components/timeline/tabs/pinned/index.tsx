@@ -11,7 +11,7 @@ import type { ConnectedProps } from 'react-redux-v7';
 import { connect } from 'react-redux-v7';
 import deepEqual from 'fast-deep-equal';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import type { RunTimeMappings } from '@kbn/securitysolution-timeline-search-strategy';
 import type { TimelineItem } from '@kbn/securitysolution-timeline-common';
 import { PageScope } from '../../../../../data_view_manager/constants';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';

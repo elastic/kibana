@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type { api, tracing } from '@elastic/opentelemetry-node/sdk';
 import { trace } from '@opentelemetry/api';
 import { v7 as uuidv7, validate as uuidValidate, version as uuidVersion } from 'uuid';
 import { isInferenceSpan } from '@kbn/inference-tracing';
+import type { Context, Span as ApiSpan } from '@opentelemetry/api';
+import type { ReadableSpan, Span, SpanProcessor } from '@opentelemetry/sdk-trace';
 
 const OPIK_TRACE_ID = 'opik.trace_id';
 const OPIK_SPAN_ID = 'opik.span_id';
@@ -43,7 +44,7 @@ const opikSpanRegistry = new Map<string, OpikSpanInfo>();
  * Returns true if the headers contained valid Opik trace context, false otherwise.
  */
 export const attachOpikDistributedTrace = (
-  span: api.Span,
+  span: ApiSpan,
   headers: OpikDistributedTraceHeaders
 ): boolean => {
   const { opik_trace_id: traceId, opik_parent_span_id: parentSpanId } = headers;
@@ -78,10 +79,10 @@ export const attachOpikDistributedTrace = (
  * Opik trace in the Opik UI.
  *
  * Uses a shared registry keyed by OTel span ID to track opik span assignments,
- * avoiding any cast of api.Span to ReadableSpan to read parent attributes.
+ * avoiding any cast of ApiSpan to ReadableSpan to read parent attributes.
  */
-export class OpikDistributedTracingSpanProcessor implements tracing.SpanProcessor {
-  onStart(span: tracing.Span, parentContext: api.Context): void {
+export class OpikDistributedTracingSpanProcessor implements SpanProcessor {
+  onStart(span: Span, parentContext: Context): void {
     if (!isInferenceSpan(span, parentContext)) return;
 
     const parentOtelSpanId = trace.getSpan(parentContext)?.spanContext().spanId;
@@ -100,7 +101,7 @@ export class OpikDistributedTracingSpanProcessor implements tracing.SpanProcesso
     span.setAttribute(OPIK_PARENT_SPAN_ID, parentOpikInfo.spanId);
   }
 
-  onEnd(span: tracing.ReadableSpan): void {
+  onEnd(span: ReadableSpan): void {
     opikSpanRegistry.delete(span.spanContext().spanId);
   }
 

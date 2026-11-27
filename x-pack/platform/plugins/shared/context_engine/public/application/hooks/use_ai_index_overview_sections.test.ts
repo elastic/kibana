@@ -12,7 +12,6 @@ import { useAiIndexOverviewSections } from './use_ai_index_overview_sections';
 const baseIndex: GetAiIndexResponse = {
   id: 'my-ai-index',
   managed: false,
-  memory_enabled: false,
   dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
   automations: [],
   sources: [],
@@ -36,8 +35,6 @@ describe('useAiIndexOverviewSections', () => {
       hideEditControls: false,
       showOnboardingPanel: true,
       showAutomationsPanel: false,
-      showSignalsSection: false,
-      showSignalsPanel: false,
     });
   });
 
@@ -51,7 +48,6 @@ describe('useAiIndexOverviewSections', () => {
 
     expect(result.current.showAutomationsPanel).toBe(true);
     expect(result.current.showOnboardingPanel).toBe(true);
-    expect(result.current.showSignalsPanel).toBe(false);
   });
 
   it('keeps automations and onboarding visible when only automations are configured', () => {
@@ -68,7 +64,6 @@ describe('useAiIndexOverviewSections', () => {
 
     expect(result.current.showAutomationsPanel).toBe(true);
     expect(result.current.showOnboardingPanel).toBe(true);
-    expect(result.current.showSignalsPanel).toBe(false);
   });
 
   it('hides onboarding when knowledge indicators exist', () => {
@@ -96,16 +91,7 @@ describe('useAiIndexOverviewSections', () => {
       hideEditControls: true,
       showOnboardingPanel: false,
       showAutomationsPanel: true,
-      showSignalsSection: false,
-      showSignalsPanel: false,
     });
-  });
-
-  it('signals section is always hidden', () => {
-    const { result } = renderHook(() => useAiIndexOverviewSections(baseParams));
-
-    expect(result.current.showSignalsSection).toBe(false);
-    expect(result.current.showSignalsPanel).toBe(false);
   });
 
   it('shows real panels and hides onboarding while loading to avoid locked-state flash', () => {
@@ -115,8 +101,6 @@ describe('useAiIndexOverviewSections', () => {
 
     expect(result.current.showAutomationsPanel).toBe(true);
     expect(result.current.showOnboardingPanel).toBe(false);
-    expect(result.current.showSignalsPanel).toBe(false);
-    expect(result.current.showSignalsSection).toBe(false);
     expect(result.current.hideEditControls).toBe(true);
   });
 });

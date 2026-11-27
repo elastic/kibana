@@ -72,7 +72,7 @@ function ConfidenceBadge({ confidence }: { confidence: number }) {
       title={confidenceLabel}
       content={i18n.translate('xpack.nightshift.entityFlyout.confidenceTooltip', {
         defaultMessage:
-          'How confident Nightshift is that this is a real, distinct entity in your system — based on observation frequency, data consistency, and cross-source corroboration.',
+          'How confident nightshift is that this is a real, distinct entity in your system — based on observation frequency, data consistency, and cross-source corroboration.',
       })}
     >
       <EuiBadge color="hollow" tabIndex={0}>
@@ -165,7 +165,7 @@ export function EntityFlyout({
           id: feature.uuid,
           type: KI_FEATURE_ATTACHMENT_TYPE,
           origin: encodeFeatureAttachmentOrigin(feature.source_id, feature.id),
-          description: formatChatAttachmentDescription('Entity', title),
+          description: formatChatAttachmentDescription('entity', title),
           data: feature,
         },
       ],

@@ -40,7 +40,7 @@ export const useScheduleNowAction = (forceDisable: boolean, transformNodes: numb
         isTransformListRowWithStats(item) &&
         !isScheduleNowActionDisabled([item], canScheduleNowTransform, transformNodes),
       description: scheduleNowActionNameText,
-      icon: 'play',
+      icon: 'chevronDoubleRight',
       type: 'icon',
       onClick: (item: TransformListRow) => scheduleNowTransforms([{ id: item.id }]),
       'data-test-subj': 'transformActionScheduleNow',

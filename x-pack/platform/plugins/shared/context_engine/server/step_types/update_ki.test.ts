@@ -139,6 +139,72 @@ describe('getUpdateKiStepDefinition', () => {
     );
   });
 
+  it('does not clear user_id from rendered input', async () => {
+    const esClient = {
+      search: jest
+        .fn()
+        .mockResolvedValue(
+          searchHit('ai-index-idx-my-ai-index', { ...storedKi, user_id: 'alice' })
+        ),
+      update: jest.fn().mockResolvedValue({ result: 'updated' }),
+    };
+    const context = createMockStepContext({
+      input: {
+        ai_index_id: 'my-ai-index',
+        ki_id: 'ki-1',
+        ki: { description: 'Updated', user_id: null },
+      },
+      esClient,
+    });
+    const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
+
+    const { handler } = getUpdateKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: enabled,
+      checkWritePrivilege: allowed,
+      ...mockKiStepTelemetry(),
+    });
+    await handler(context);
+
+    expect(esClient.update.mock.calls[0][0].doc).toEqual({
+      description: 'Updated',
+      updated_at: expect.any(String),
+      governance: { provenance: { updated_by: mockKiWriter } },
+    });
+  });
+
+  it('rejects a user_id change from rendered input', async () => {
+    const esClient = {
+      search: jest
+        .fn()
+        .mockResolvedValue(
+          searchHit('ai-index-idx-my-ai-index', { ...storedKi, user_id: 'alice' })
+        ),
+      update: jest.fn(),
+    };
+    const context = createMockStepContext({
+      input: {
+        ai_index_id: 'my-ai-index',
+        ki_id: 'ki-1',
+        ki: { description: 'Updated', user_id: 'bob' },
+      },
+      esClient,
+    });
+    const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
+
+    const { handler } = getUpdateKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: enabled,
+      checkWritePrivilege: allowed,
+      ...mockKiStepTelemetry(),
+    });
+    const thrown = await handler(context).catch((e) => e);
+
+    expect(thrown).toBeInstanceOf(ExecutionError);
+    expect(thrown.type).toBe('ValidationError');
+    expect(esClient.update).not.toHaveBeenCalled();
+  });
+
   it('waits for the refresh when refresh is true', async () => {
     const esClient = {
       search: jest.fn().mockResolvedValue(searchHit('ai-index-idx-my-ai-index')),

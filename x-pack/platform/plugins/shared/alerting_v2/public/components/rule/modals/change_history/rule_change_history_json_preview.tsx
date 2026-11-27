@@ -66,7 +66,6 @@ const RuleChangeHistoryJsonPreview = ({
   change,
   compareSpec,
   diffTelemetry,
-  isLoadingCompareContext,
 }: Parameters<ChangeHistoryPreviewRenderFn>[0]): JSX.Element => {
   const { euiTheme } = useEuiTheme();
   const targetSnapshot = compareSpec?.target.snapshot ?? change.snapshot;
@@ -88,12 +87,12 @@ const RuleChangeHistoryJsonPreview = ({
   );
 
   useEffect(() => {
-    if (!hasCompare || isLoadingCompareContext || !hasChanges) {
+    if (!hasCompare || !hasChanges) {
       return;
     }
 
     diffTelemetry?.reportDiffViewed();
-  }, [diffTelemetry, hasChanges, hasCompare, isLoadingCompareContext]);
+  }, [diffTelemetry, hasChanges, hasCompare]);
 
   const { diffContainerStyle, diffWrapperStyle, diffContentStyle, diffPartStyles } =
     getStyles(euiTheme);

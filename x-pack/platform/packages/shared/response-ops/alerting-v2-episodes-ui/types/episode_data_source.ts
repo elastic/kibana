@@ -6,9 +6,12 @@
  */
 
 import type { IconType } from '@elastic/eui';
+import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { TimeRange } from '@kbn/es-query';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import type { SnoozeCondition, SnoozeConditionOperator } from '@kbn/response-ops-alerts-apis/types';
 import type {
   AlertEpisode,
   EpisodesFilterState,
@@ -17,9 +20,16 @@ import type {
 import type { HistogramBucketCount, TimeBucket } from '../utils/histogram_utils';
 import type { EpisodeAction } from '../actions/types';
 import type { EpisodeActionsDeps } from '../actions/create_episode_actions';
+import type { CanWriteEpisode } from '../utils/episode_write_privilege';
 
 export interface EpisodeDataSourceServices {
   http: HttpStart;
+}
+
+export interface EpisodeWriteAccessServices {
+  application: ApplicationStart;
+  http: HttpStart;
+  notifications: NotificationsStart;
 }
 
 export interface EpisodeSearchField {
@@ -28,6 +38,7 @@ export interface EpisodeSearchField {
   esTypes: string[];
   searchable: boolean;
   aggregatable: boolean;
+  subType?: { nested?: { path: string } };
 }
 
 interface EpisodeDataSourceBaseParams {
@@ -65,6 +76,11 @@ export interface ResolveSourceRulesParams extends EpisodeDataSourceBaseParams {
   ids: string[];
 }
 
+export interface FetchSourceSearchFieldsParams extends EpisodeDataSourceBaseParams {
+  /** Narrows the fields to specific rule types. Defaults to every type the source covers. */
+  ruleTypeIds?: string[];
+}
+
 export interface EpisodeSourceKpis {
   alerts_count: number;
   firing_rules: number;
@@ -91,6 +107,13 @@ export interface SourceActionResult {
   failed: number;
   unchanged?: number;
   errors?: string[];
+}
+
+/** An expiry (`null` for indefinite) plus the conditions that lift the snooze early. */
+export interface EpisodeSnoozePayload {
+  snoozedUntil: string | null;
+  conditions?: SnoozeCondition[];
+  conditionOperator?: SnoozeConditionOperator;
 }
 
 /**
@@ -124,9 +147,21 @@ export interface EpisodeDataSource {
   fetchHistogram?: (params: FetchSourceHistogramParams) => Promise<EpisodeSourceHistogram>;
   fetchTagOptions?: (params: FetchSourceTagOptionsParams) => Promise<string[]>;
   resolveRules?: (params: ResolveSourceRulesParams) => Promise<RuleResponse[]>;
-  fetchSearchFields?: (params: EpisodeDataSourceBaseParams) => Promise<EpisodeSearchField[]>;
+  fetchSearchFields?: (params: FetchSourceSearchFieldsParams) => Promise<EpisodeSearchField[]>;
   actionExtensions?: Array<EpisodeActionExtension<any>>;
+  /**
+   * Whether the source's backend can evaluate snooze conditions, which gates the
+   * condition based tab of the snooze modal. Defaults to `false` when omitted.
+   */
+  supportsConditionalSnooze?: boolean;
+  /** Rule types backing the given rows, read from the source's own action context. */
+  getRuleTypeIds?: (episodes: AlertEpisode[]) => string[];
   createActions?: (deps: EpisodeActionsDeps) => EpisodeAction[];
+  /**
+   * Resolves which of this source's alerts the user may modify. Called as a React hook, so it can
+   * fetch authorization that is not exposed as a UI capability.
+   */
+  useWriteAccess: (services: EpisodeWriteAccessServices) => CanWriteEpisode;
   severityExtensions?: SeverityExtension[];
   getRuleDetailsHref?: (ruleId: string) => string | null;
 }

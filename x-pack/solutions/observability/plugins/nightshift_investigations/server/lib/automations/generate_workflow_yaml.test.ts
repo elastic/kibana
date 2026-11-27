@@ -687,7 +687,6 @@ describe('generateWorkflowYaml', () => {
             schedulePreset: 'daily',
             time: '09:00',
             timezone: 'Europe/Berlin',
-            scopeQuery: 'service.name:checkout',
           },
         ],
       },
@@ -695,7 +694,7 @@ describe('generateWorkflowYaml', () => {
       runtime: { timeoutSeconds: 120 },
     });
 
-    it('emits a calendar trigger, fresh manual subject, instructions, scope and timeout', () => {
+    it('emits a calendar trigger, fresh manual subject, instructions and timeout', () => {
       const yaml = parse(
         generateWorkflowYaml({ automationId: 'auto-123', automation: scheduledAutomation() })
       );
@@ -725,7 +724,6 @@ describe('generateWorkflowYaml', () => {
           summary: 'Test automation',
           trigger_type: 'automatic',
           message: 'Instructions:\nAssess checkout health in the last hour.',
-          scope_query: 'service.name:checkout',
           timeout_seconds: 120,
         },
       });
@@ -772,7 +770,6 @@ describe('generateWorkflowYaml', () => {
         "${{ execution.triggeredBy == 'alerting.v1.alertStatusChanged' }}"
       );
       expect(yaml.steps[1].steps[0].with.subject_type).toBe('alert');
-      expect(yaml.steps[1].steps[0].with.scope_query).toBeUndefined();
     });
 
     it('isolates all three trigger sources and only sends Slack payload to the Slack step', () => {

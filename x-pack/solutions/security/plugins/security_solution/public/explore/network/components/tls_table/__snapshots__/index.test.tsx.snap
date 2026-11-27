@@ -283,6 +283,7 @@ exports[`Tls Table Component Rendering it renders the default Domains table 1`] 
                         SHA1 fingerprint
                       </span>
                       <span
+                        aria-hidden="true"
                         class="euiTableSortIcon"
                         data-euiicon-type="sortDown"
                       />
@@ -535,6 +536,7 @@ exports[`Tls Table Component Rendering it renders the default Domains table 1`] 
                 Rows per page: 10
               </span>
               <span
+                aria-hidden="true"
                 color="inherit"
                 data-euiicon-type="chevronSingleDown"
               />

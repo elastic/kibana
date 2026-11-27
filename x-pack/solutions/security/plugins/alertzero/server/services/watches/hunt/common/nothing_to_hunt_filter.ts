@@ -1,0 +1,59 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { estypes } from '@elastic/elasticsearch';
+import { INDICATOR_ELIGIBLE_FILTER } from '@kbn/alertzero-common';
+
+/**
+ * Enrich scores relevance 0 for commentary, 0.5 for indicators only, 0.75 for described
+ * techniques and 1 for a concrete detection behavior. 0.5 is also the neutral baseline other
+ * writers stamp (the KEV adapter, the enrich failure fallback), so the cut is strict `lt`.
+ */
+export const MIN_HUNT_RELEVANCE = 0.5;
+
+/**
+ * `extracted.core.context_mode` when enrich retried on excerpts after a model context overflow.
+ * Mirrors the enrichment contract in security_solution, which this plugin cannot import.
+ */
+const DEGRADED_CONTEXT_MODE = 'degraded_context';
+
+/**
+ * Reports a scheduled sweep holds back as unlikely to give the hunt anything to search: scored
+ * below the baseline by enrich and carrying no indicator record, no technique, and no behavior
+ * mapped to a technique.
+ *
+ * This is a heuristic. The hunt does not read `extracted.behaviors`. Behavior Hunt extracts its
+ * own techniques from the stored body, so enrich's verdict predicts what it will find and does not
+ * decide it. On the 21 reports this matched in local test data when it was added, 17 earlier hunts
+ * had searched nothing and 4 had run one T1190 query that found no hits.
+ *
+ * A report with no `extracted.relevance` does not match (a range on a missing field matches
+ * nothing), so it stays selectable.
+ *
+ * `ttps.techniques` is read for completeness: today only seeded documents carry it, since enrich
+ * writes `extracted.behaviors[].technique_id` instead. The behavior test is `prefix`, not
+ * `exists`, because enrich stores an empty string for a behavior it could not map.
+ *
+ * A report enrich read only in part does not match either. Its score and its empty extraction
+ * describe the excerpts, while Behavior Hunt reads the stored body itself.
+ */
+export const NOTHING_TO_HUNT_FILTER: estypes.QueryDslQueryContainer = {
+  bool: {
+    filter: [{ range: { 'extracted.relevance': { lt: MIN_HUNT_RELEVANCE } } }],
+    must_not: [
+      INDICATOR_ELIGIBLE_FILTER,
+      { exists: { field: 'extracted.ttps.techniques' } },
+      {
+        nested: {
+          path: 'extracted.behaviors',
+          query: { prefix: { 'extracted.behaviors.technique_id': 'T' } },
+        },
+      },
+      { term: { 'extracted.core.context_mode': DEGRADED_CONTEXT_MODE } },
+    ],
+  },
+};

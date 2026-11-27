@@ -47,25 +47,25 @@ export const getGeoPointsLayer = (
     style: {
       type: 'VECTOR',
       properties: {
-        fillColor: {
+        fill_color: {
           type: 'STATIC',
           options: {
             color: pointColor,
           },
         },
-        lineColor: {
+        line_color: {
           type: 'STATIC',
           options: {
             color: '#fff',
           },
         },
-        lineWidth: {
+        line_width: {
           type: 'STATIC',
           options: {
             size: 2,
           },
         },
-        iconSize: {
+        icon_size: {
           type: 'STATIC',
           options: {
             size: 6,

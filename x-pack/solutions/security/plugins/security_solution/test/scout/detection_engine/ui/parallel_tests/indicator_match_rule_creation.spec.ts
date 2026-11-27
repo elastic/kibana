@@ -130,7 +130,7 @@ spaceTest.describe(
             ruleDetailsPage.detailValue(aboutSection, 'False positive examples')
           ).toHaveText(FALSE_POSITIVES.join(''));
           await expect(ruleDetailsPage.detailValue(aboutSection, 'Tags')).toHaveText(TAGS.join(''));
-          await ruleDetailsPage.investigationNotesToggle.click();
+          await ruleDetailsPage.openInvestigationNotes();
           await expect(ruleDetailsPage.investigationNotes).toHaveText('test markdown');
 
           await expect(ruleDetailsPage.detailValue(definitionSection, 'Index patterns')).toHaveText(

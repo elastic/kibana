@@ -5,57 +5,41 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { render as rtlRender, screen } from '@testing-library/react';
 
 import { TestProviders } from '../../../../../../common/mock';
-import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 import type { ThreatMatchRowProps } from './threat_match_row';
 import { ThreatMatchRowView } from './threat_match_row';
 
 jest.mock('../../../../../../common/lib/kibana');
 
 describe('ThreatMatchRowView', () => {
-  const mount = useMountAppended();
-
   it('renders an indicator match row', () => {
-    const wrapper = shallow(
-      <ThreatMatchRowView
-        scopeId="some_scope"
-        contextId="contextId"
-        eventId="eventId"
-        feedName="feedName"
-        indicatorReference="http://example.com"
-        indicatorType="domain"
-        sourceField="host.name"
-        sourceValue="http://elastic.co"
-      />
+    rtlRender(
+      <TestProviders>
+        <ThreatMatchRowView
+          scopeId="some_scope"
+          contextId="contextId"
+          eventId="eventId"
+          feedName="feedName"
+          indicatorReference="http://example.com"
+          indicatorType="domain"
+          sourceField="host.name"
+          sourceValue="http://elastic.co"
+        />
+      </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="threat-match-row"]').exists()).toEqual(true);
-  });
-
-  it('matches the registered snapshot', () => {
-    const wrapper = shallow(
-      <ThreatMatchRowView
-        scopeId="some_scope"
-        contextId="contextId"
-        eventId="eventId"
-        feedName="feedName"
-        indicatorReference="http://example.com"
-        indicatorType="domain"
-        sourceField="host.name"
-        sourceValue="http://elastic.co"
-      />
-    );
-
-    expect(wrapper).toMatchSnapshot();
+    expect(screen.getByTestId('threat-match-row')).toBeInTheDocument();
+    expect(screen.getByTestId('threat-match-details')).toBeInTheDocument();
+    expect(screen.getByTestId('threat-match-indicator-details')).toBeInTheDocument();
   });
 
   describe('field rendering', () => {
     let baseProps: ThreatMatchRowProps;
     const render = (props: ThreatMatchRowProps) =>
-      mount(
+      rtlRender(
         <TestProviders>
           <ThreatMatchRowView {...props} />
         </TestProviders>
@@ -75,93 +59,58 @@ describe('ThreatMatchRowView', () => {
     });
 
     it('renders the match field', () => {
-      const wrapper = render(baseProps);
-      const matchField = wrapper.find('[data-test-subj="threat-match-details-source-field"]');
-      expect(matchField.props()).toEqual(
-        expect.objectContaining({
-          value: 'host.name',
-        })
-      );
+      render(baseProps);
+      expect(
+        screen.getByTestId('render-content-threat.enrichments.matched.field')
+      ).toHaveTextContent('host.name');
     });
 
     it('renders the match value', () => {
-      const wrapper = render(baseProps);
-      const matchValue = wrapper.find('[data-test-subj="threat-match-details-source-value"]');
-      expect(matchValue.props()).toEqual(
-        expect.objectContaining({
-          field: 'host.name',
-          value: 'http://elastic.co',
-        })
-      );
+      render(baseProps);
+      expect(screen.getByTestId('render-content-host.name')).toHaveTextContent('http://elastic.co');
     });
 
     it('renders the indicator type, if present', () => {
-      const wrapper = render(baseProps);
-      const indicatorType = wrapper.find(
-        '[data-test-subj="threat-match-indicator-details-indicator-type"]'
-      );
-      expect(indicatorType.props()).toEqual(
-        expect.objectContaining({
-          value: 'domain',
-        })
-      );
+      render(baseProps);
+      expect(
+        screen.getByTestId('render-content-threat.enrichments.matched.type')
+      ).toHaveTextContent('domain');
     });
 
     it('does not render the indicator type, if absent', () => {
-      const wrapper = render({
+      render({
         ...baseProps,
         indicatorType: undefined,
       });
-      const indicatorType = wrapper.find(
-        '[data-test-subj="threat-match-indicator-details-indicator-type"]'
-      );
-      expect(indicatorType.exists()).toBeFalsy();
+      expect(
+        screen.queryByTestId('render-content-threat.enrichments.matched.type')
+      ).not.toBeInTheDocument();
     });
 
     it('renders the feed name, if present', () => {
-      const wrapper = render(baseProps);
-      const feedName = wrapper.find(
-        '[data-test-subj="threat-match-indicator-details-indicator-feedName"]'
-      );
-      expect(feedName.props()).toEqual(
-        expect.objectContaining({
-          value: 'feedName',
-        })
-      );
+      render(baseProps);
+      expect(screen.getByTestId('render-content-feed.name')).toHaveTextContent('feedName');
     });
 
     it('does not render the indicator provider, if absent', () => {
-      const wrapper = render({
+      render({
         ...baseProps,
         feedName: undefined,
       });
-      const indicatorProvider = wrapper.find(
-        '[data-test-subj="threat-match-indicator-details-indicator-feedName"]'
-      );
-      expect(indicatorProvider.exists()).toBeFalsy();
+      expect(screen.queryByTestId('render-content-feed.name')).not.toBeInTheDocument();
     });
 
     it('renders the indicator reference, if present', () => {
-      const wrapper = render(baseProps);
-      const indicatorReference = wrapper.find(
-        '[data-test-subj="threat-match-indicator-details-indicator-reference"]'
-      );
-      expect(indicatorReference.props()).toEqual(
-        expect.objectContaining({
-          value: 'http://example.com',
-        })
-      );
+      render(baseProps);
+      expect(screen.getByRole('link')).toHaveAttribute('href', 'http://example.com');
     });
 
     it('does not render the indicator reference, if absent', () => {
-      const wrapper = render({
+      render({
         ...baseProps,
         indicatorReference: undefined,
       });
-      const indicatorReference = wrapper.find(
-        '[data-test-subj="threat-match-indicator-details-indicator-reference"]'
-      );
-      expect(indicatorReference.exists()).toBeFalsy();
+      expect(screen.queryByRole('link')).not.toBeInTheDocument();
     });
   });
 });

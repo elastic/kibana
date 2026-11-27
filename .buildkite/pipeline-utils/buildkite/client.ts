@@ -177,7 +177,9 @@ export interface BuildkiteTriggerBuildParams {
 }
 
 export interface BuildkiteWaitStep {
-  wait: string;
+  wait: string | null;
+  key?: string;
+  depends_on?: string | string[];
   if?: string;
   allow_dependency_failure?: boolean;
   continue_on_failure?: boolean;
@@ -267,6 +269,19 @@ export class BuildkiteClient {
     params.append('state[]', 'passed');
     params.append('state[]', 'failed');
     params.append('state[]', 'canceled');
+    const response = await this.http.get(
+      `v2/organizations/elastic/pipelines/${encodeURIComponent(
+        pipelineSlug
+      )}/builds?${params.toString()}`
+    );
+    return response.data as Build[];
+  };
+
+  getInProgressBuilds = async (pipelineSlug: string): Promise<Build[]> => {
+    const params = new URLSearchParams({ per_page: '100', exclude_jobs: 'true' });
+    params.append('state[]', 'scheduled');
+    params.append('state[]', 'running');
+    params.append('state[]', 'failing');
     const response = await this.http.get(
       `v2/organizations/elastic/pipelines/${encodeURIComponent(
         pipelineSlug

@@ -96,7 +96,7 @@
   "sources": {
     "v0": {
       "apiVersion": "generated",
-      "fetchedAt": "2026-10-07T20:20:25.121Z",
+      "fetchedAt": "2026-11-25T18:10:52.937Z",
       "format": "openapi",
       "url": "https://docs.sublime.security/openapi/sublime-platform-api.json"
     }

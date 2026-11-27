@@ -1,5 +1,5 @@
 {
-  "sha1": "33521363aef85efd9b8e591e9aca6fe713019957",
+  "sha1": "c1cf115398764eb35388a0cf7e35ab6c277c85f1",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -129,6 +129,230 @@
       }
     },
     {
+      "id": "598e94d29310d7c-ef37dbd0b003daa",
+      "title": "ES|QL rule creation creates an ES|QL rule that is listed in the rules table",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/esql_rule_creation.spec.ts",
+        "line": 43,
+        "column": 7
+      }
+    },
+    {
+      "id": "598e94d29310d7c-4629adee64c800c",
+      "title": "ES|QL rule creation creates an ES|QL rule with a rule name override picked from the query columns",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/esql_rule_creation.spec.ts",
+        "line": 79,
+        "column": 24
+      }
+    },
+    {
+      "id": "598e94d29310d7c-a889cac0f14d2fa",
+      "title": "ES|QL rule creation saves a custom ES|QL column as an investigation field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/esql_rule_creation.spec.ts",
+        "line": 105,
+        "column": 34
+      }
+    },
+    {
+      "id": "598e94d29310d7c-3241f28a8e99c3a",
+      "title": "ES|QL rule creation saves alert suppression by a custom ES|QL column and a regular column for a time period",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/esql_rule_creation.spec.ts",
+        "line": 122,
+        "column": 11
+      }
+    },
+    {
+      "id": "598e94d29310d7c-21b01b3f33820b8",
+      "title": "ES|QL rule creation saves how alert suppression handles events with missing fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/esql_rule_creation.spec.ts",
+        "line": 160,
+        "column": 80
+      }
+    },
+    {
+      "id": "e545a621d0e560b-e1b026a3654115d",
+      "title": "ES|QL rule editing: alert suppression shows the saved suppression options and allows editing them",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/esql_rule_edit_suppression.spec.ts",
+        "line": 34,
+        "column": 34
+      }
+    },
+    {
+      "id": "e545a621d0e560b-1cf939e8e8ee932",
+      "title": "ES|QL rule editing: alert suppression enables suppression on a rule that has none",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/esql_rule_edit_suppression.spec.ts",
+        "line": 70,
+        "column": 30
+      }
+    },
+    {
+      "id": "2f24743c19e632b-fbabce4190fd2ae",
+      "title": "ES|QL rule editing edits the query of an ES|QL rule and shows it on the details page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/esql_rule_edit.spec.ts",
+        "line": 37,
+        "column": 52
+      }
+    },
+    {
+      "id": "2f24743c19e632b-fc661ced4f6d1df",
+      "title": "ES|QL rule editing moves the rule to another data source and shows the new query on the details page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/esql_rule_edit.spec.ts",
+        "line": 49,
+        "column": 43
+      }
+    },
+    {
+      "id": "2f24743c19e632b-1a7ae823c65fa97",
+      "title": "ES|QL rule editing edits the query and overrides the rule name with a column of the new query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/esql_rule_edit.spec.ts",
+        "line": 60,
+        "column": 33
+      }
+    },
+    {
+      "id": "2f24743c19e632b-7d7f6fbf0e792bf",
+      "title": "ES|QL rule editing adds a rule name override to an existing ES|QL rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/esql_rule_edit.spec.ts",
+        "line": 77,
+        "column": 15
+      }
+    },
+    {
+      "id": "2f24743c19e632b-1c3341f8b3340a5",
+      "title": "ES|QL rule editing saves the rule after confirming the warning when the data source does not exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/esql_rule_edit.spec.ts",
+        "line": 96,
+        "column": 59
+      }
+    },
+    {
+      "id": "b4db34d190ee026-e8e991b89e366d1",
+      "title": "ES|QL rule creation: query validation shows an error when the query uses an unknown operator",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/esql_rule_query_validation.spec.ts",
+        "line": 32,
+        "column": 92
+      }
+    },
+    {
+      "id": "b4db34d190ee026-6d757a0fd17be43",
+      "title": "ES|QL rule creation: query validation asks for confirmation when the query has a non-blocking validation error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/esql_rule_query_validation.spec.ts",
+        "line": 37,
+        "column": 7
+      }
+    },
+    {
       "id": "3792ebcf0d84334-3c3c03f720c5bea",
       "title": "Indicator match alert: investigate in timeline shows the indicator match enrichment of the alert in the timeline",
       "expectedStatus": "passed",
@@ -252,7 +476,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/indicator_match_rule_duplication.spec.ts",
-        "line": 50,
+        "line": 53,
         "column": 7
       }
     },

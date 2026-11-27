@@ -314,7 +314,6 @@ class SavedObjectFinderUiClass extends React.Component<
                     }
                   : undefined
               }
-              title={fullName}
               data-test-subj={`savedObjectTitle${(item.title || '').split(' ').join('-')}`}
             >
               {item.name}

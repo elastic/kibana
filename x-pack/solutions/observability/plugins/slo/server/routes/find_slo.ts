@@ -6,7 +6,7 @@
  */
 
 import path from 'path';
-import { findSLOParamsSchema } from '@kbn/slo-schema';
+import { findSLOParamsSchema, findSLOResponseSchema } from '@kbn/slo-schema';
 import { FindSLO } from '../services';
 import { DefaultSummarySearchClient } from '../services/summary_search_client/summary_search_client';
 import { createSloServerRoute } from './utils/create_slo_server_route';
@@ -28,6 +28,9 @@ export const findSLORoute = createSloServerRoute({
     },
   },
   params: findSLOParamsSchema,
+  responses: {
+    200: { description: 'Successful request', body: () => findSLOResponseSchema },
+  },
   handler: async ({ request, logger, params, plugins, getScopedClients }) => {
     await assertPlatinumLicense(plugins);
     const { scopedClusterClient, repository, spaceId, settingsRepository } = await getScopedClients(

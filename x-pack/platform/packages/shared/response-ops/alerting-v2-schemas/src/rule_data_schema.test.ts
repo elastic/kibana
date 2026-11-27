@@ -19,6 +19,7 @@ import {
   isStateTransitionAllowed,
   isRoutingTagsAllowedForKind,
   ROUTING_TAGS_SIGNAL_RULE_MESSAGE,
+  isReasonAllowedForKind,
   updateRuleDataSchema,
   IMMUTABLE_RULE_FIELDS,
   getBreachEsqlQuery,
@@ -41,6 +42,7 @@ import {
   MAX_ESQL_QUERY_LENGTH,
   MAX_FIELD_NAME_LENGTH,
   MAX_PER_PAGE,
+  MAX_REASON_TEMPLATE_LENGTH,
 } from './constants';
 
 const validRuleFields = {
@@ -68,6 +70,135 @@ const composedQuery = {
 
 // Parses as a string but not as ES|QL, so it reaches the parser and fails there.
 const UNPARSEABLE_ESQL = 'WHERE (';
+
+const reasonSchemaCases = [
+  { api: 'create', schema: createRuleDataSchema, payload: validCreateData },
+  { api: 'PUT', schema: putRuleDataSchema, payload: validCreateData },
+  { api: 'PATCH', schema: updateRuleDataSchema, payload: {} },
+  {
+    api: 'response',
+    schema: ruleResponseSchema,
+    payload: {
+      ...validCreateData,
+      id: 'rule-1',
+      version: 1,
+      enabled: true,
+      created_by: null,
+      created_at: '2026-01-01T00:00:00.000Z',
+      updated_by: null,
+      updated_at: '2026-01-01T00:00:00.000Z',
+    },
+  },
+];
+
+describe.each(reasonSchemaCases)('$api reason template', ({ schema, payload }) => {
+  it('accepts omission without adding a value', () => {
+    expect(schema.parse(payload)).not.toHaveProperty('reason');
+  });
+
+  it('preserves the original unresolved template and surrounding whitespace', () => {
+    const reason = { template: '  CPU on {{data.host.name}} was {{data.cpu_pct}}%.\n' };
+
+    expect(schema.parse({ ...payload, reason })).toMatchObject({ reason });
+  });
+
+  it('accepts the maximum length', () => {
+    const reason = { template: 'a'.repeat(MAX_REASON_TEMPLATE_LENGTH) };
+
+    expect(schema.parse({ ...payload, reason })).toMatchObject({ reason });
+  });
+
+  it.each([
+    { template: '' },
+    { template: ' ' },
+    { template: '\t\n' },
+    { template: 'a'.repeat(MAX_REASON_TEMPLATE_LENGTH + 1) },
+    { template: 42 },
+    {},
+    { template: 'CPU', unknown_key: true },
+    'CPU on {{data.host.name}}',
+    42,
+  ])('rejects an invalid reason: %p', (reason) => {
+    expect(schema.safeParse({ ...payload, reason }).success).toBe(false);
+  });
+});
+
+describe('reason template clearing and inheritance', () => {
+  it.each(reasonSchemaCases.filter(({ api }) => api !== 'PATCH'))(
+    'rejects null in $api',
+    ({ schema, payload }) => {
+      expect(schema.safeParse({ ...payload, reason: null }).success).toBe(false);
+    }
+  );
+
+  it('accepts PATCH null as a clearing instruction', () => {
+    expect(updateRuleDataSchema.parse({ reason: null })).toEqual({ reason: null });
+  });
+
+  it.each([
+    { api: 'create', schema: createRuleDataSchema },
+    { api: 'PUT', schema: putRuleDataSchema },
+  ])('rejects a reason on a signal rule in $api', ({ schema }) => {
+    const result = schema.safeParse({
+      ...validSignalCreateData,
+      reason: { template: 'Match on {{data.host.name}}' },
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it.each([
+    { api: 'create', schema: createRuleDataSchema },
+    { api: 'PUT', schema: putRuleDataSchema },
+  ])('accepts a signal rule without a reason in $api', ({ schema }) => {
+    expect(schema.parse(validSignalCreateData)).not.toHaveProperty('reason');
+  });
+
+  it('rejects a reason on a signal rule in bulk create', () => {
+    const result = bulkCreateRulesRequestSchema.safeParse({
+      items: [{ ...validSignalCreateData, reason: { template: 'Match on {{data.host.name}}' } }],
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('accepts a signal rule without a reason in bulk create', () => {
+    expect(
+      bulkCreateRulesRequestSchema.parse({ items: [validSignalCreateData] }).items[0]
+    ).not.toHaveProperty('reason');
+  });
+
+  it('inherits the reason contract in bulk-create items', () => {
+    const reason = { template: 'CPU on {{data.host.name}} was {{data.cpu_pct}}%.' };
+
+    expect(
+      bulkCreateRulesRequestSchema.parse({ items: [{ ...validCreateData, reason }] }).items[0]
+    ).toMatchObject({ reason });
+    expect(
+      bulkCreateRulesRequestSchema.safeParse({ items: [{ ...validCreateData, reason: null }] })
+        .success
+    ).toBe(false);
+  });
+});
+
+describe('isReasonAllowedForKind', () => {
+  it('accepts an alert reason template', () => {
+    expect(
+      isReasonAllowedForKind({ kind: 'alert', reason: { template: 'CPU on {{data.host.name}}' } })
+    ).toBe(true);
+  });
+
+  it('treats omitted and null reasons as absent on a signal rule', () => {
+    expect(isReasonAllowedForKind({ kind: 'signal' })).toBe(true);
+    expect(isReasonAllowedForKind({ kind: 'signal', reason: null })).toBe(true);
+  });
+
+  it('rejects a configured reason on a signal rule', () => {
+    expect(
+      isReasonAllowedForKind({ kind: 'signal', reason: { template: 'CPU on {{data.host.name}}' } })
+    ).toBe(false);
+  });
+});
 
 describe('createRuleDataSchema', () => {
   describe('valid payloads', () => {
@@ -1349,10 +1480,21 @@ describe('putRuleDataSchema', () => {
     const result = putRuleDataSchema.safeParse({ ...validCreateData, enabled: 'true' });
     expect(result.success).toBe(false);
   });
+});
 
-  it('does not add enabled to createRuleDataSchema', () => {
-    const result = createRuleDataSchema.safeParse({ ...validCreateData, enabled: true });
-    expect(result.success).toBe(false);
+describe('createRuleDataSchema enabled', () => {
+  it('leaves enabled undefined when omitted', () => {
+    expect(createRuleDataSchema.parse(validCreateData).enabled).toBeUndefined();
+  });
+
+  it.each([true, false])('accepts enabled: %s', (enabled) => {
+    expect(createRuleDataSchema.parse({ ...validCreateData, enabled }).enabled).toBe(enabled);
+  });
+
+  it('rejects a non-boolean enabled', () => {
+    expect(createRuleDataSchema.safeParse({ ...validCreateData, enabled: 'true' }).success).toBe(
+      false
+    );
   });
 });
 
@@ -1903,10 +2045,12 @@ describe('rule field immutability classification', () => {
     expect(mutable).toMatchInlineSnapshot(`
       Array [
         "artifacts",
+        "enabled",
         "grouping",
         "metadata",
         "no_data",
         "query",
+        "reason",
         "recovery",
         "schedule",
         "state_transition",
@@ -2113,10 +2257,10 @@ describe('bulkGetRulesResponseSchema', () => {
 describe('bulkCreateRulesRequestSchema', () => {
   const validItem = validCreateData;
 
-  it('accepts a single item and defaults enabled to true', () => {
+  it('accepts a single item and leaves enabled undefined', () => {
     const result = bulkCreateRulesRequestSchema.parse({ items: [validItem] });
     expect(result.items).toHaveLength(1);
-    expect(result.items[0].enabled).toBe(true);
+    expect(result.items[0].enabled).toBeUndefined();
     expect(result.items[0].id).toBeUndefined();
   });
 

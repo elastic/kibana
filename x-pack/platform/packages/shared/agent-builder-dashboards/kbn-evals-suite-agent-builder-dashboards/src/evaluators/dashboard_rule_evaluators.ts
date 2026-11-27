@@ -133,6 +133,12 @@ export const dashboardTitlesEvaluator = createRuleEvaluator(
   TITLE_RULES
 );
 
+/** The panel-level title rules only, for scoring a subset of the panels. */
+export const dashboardPanelTitlesEvaluator = createRuleEvaluator(
+  DASHBOARD_TITLES_EVALUATOR_NAME,
+  TITLE_RULES.filter((rule) => getRuleTarget(rule) !== 'dashboard')
+);
+
 /**
  * Gradient area fills, xy legends outside at the bottom with a visibility set,
  * pie legends left to Lens, and metrics that color the value, not the background.

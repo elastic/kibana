@@ -22,8 +22,8 @@ import type { EuiListGroupProps } from '@elastic/eui';
 export function SectionTitle({ children }: { children?: ReactNode }) {
   return (
     <>
-      <EuiText size={'s'} grow={false}>
-        <h5>{children}</h5>
+      <EuiText size={'xs'} grow={false}>
+        <strong>{children}</strong>
       </EuiText>
       <EuiSpacer size={'xs'} />
     </>

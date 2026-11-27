@@ -14,6 +14,7 @@ export const mockInferenceEndpoints = [
     metadata: {
       heuristics: { properties: ['multilingual', 'multimodal'], status: 'ga' },
       display: { name: 'Anthropic Claude Sonnet 3.7', model_creator: 'Anthropic' },
+      capabilities: { reasoning: { supported_effort_levels: ['low', 'medium', 'high'] } },
     },
   },
   {

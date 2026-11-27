@@ -13,8 +13,7 @@ import type { Page } from 'playwright';
 
 interface DashboardJourneyConfig {
   journey: Journey<{}>;
-  dashboardName: string;
-  dashboardLinkSubj: string;
+  dashboardTitle: string;
   setup?: (kibanaServer: KibanaServer) => Promise<void>;
   visualizationCount?: number;
   loadCompleteAwaiter?: (page: Page, kibanaPage: KibanaPage) => Promise<void>;
@@ -44,8 +43,8 @@ export function setupDashboardJourney(config: DashboardJourneyConfig): Journey<{
       await page.goto(kbnUrl.get(`/app/dashboards`));
       await kibanaPage.waitForListViewTable();
     })
-    .step(`Go to ${config.dashboardName}`, async ({ page, kibanaPage }) => {
-      await page.click(subj(config.dashboardLinkSubj));
+    .step(`Go to ${config.dashboardTitle}`, async ({ page, kibanaPage }) => {
+      await kibanaPage.listViewItemLink(config.dashboardTitle).click();
       await waitForDashboardLoad(page, kibanaPage);
     })
     .step('Return to listing page', async ({ page, kibanaPage }) => {
@@ -53,7 +52,7 @@ export function setupDashboardJourney(config: DashboardJourneyConfig): Journey<{
       await kibanaPage.waitForListViewTable();
     })
     .step(`Return to dashboard`, async ({ page, kibanaPage }) => {
-      await page.click(subj(config.dashboardLinkSubj));
+      await kibanaPage.listViewItemLink(config.dashboardTitle).click();
       await waitForDashboardLoad(page, kibanaPage);
     })
     .step('Refresh dashboard', async ({ page, kibanaPage }) => {

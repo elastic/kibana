@@ -25,6 +25,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
 import { CrossIcon } from './cross_icon';
@@ -244,8 +245,14 @@ function KeywordFilterRow({
             iconType={CrossIcon}
             iconOnClick={() => onToggleKeyword(keyword)}
             onClick={() => onToggleKeyword(keyword)}
-            onClickAriaLabel={`${keyword} filter`}
-            iconOnClickAriaLabel={`Remove the ${keyword} filter`}
+            onClickAriaLabel={i18n.translate(
+              'xpack.nightshift.knowledge.memory.keywordTreemap.keywordFilterAriaLabel',
+              { defaultMessage: '{keyword} filter', values: { keyword } }
+            )}
+            iconOnClickAriaLabel={i18n.translate(
+              'xpack.nightshift.knowledge.memory.keywordTreemap.removeKeywordFilterAriaLabel',
+              { defaultMessage: 'Remove the {keyword} filter', values: { keyword } }
+            )}
             data-test-subj={`nightshiftMemoryKeywordChip-${keyword}`}
           >
             {keyword}

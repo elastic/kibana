@@ -554,10 +554,6 @@
       },
       "TargetLag": {
         "discriminator": {
-          "mapping": {
-            "DOWNSTREAM": "DownstreamLag",
-            "USER_DEFINED": "UserDefinedLag"
-          },
           "propertyName": "type"
         },
         "properties": {

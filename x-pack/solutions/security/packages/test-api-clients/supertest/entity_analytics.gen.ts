@@ -49,10 +49,6 @@ import type { DeleteAssetCriticalityRecordRequestQueryInput } from '@kbn/securit
 import type { DeleteMonitoringEngineRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/engine/delete.gen';
 import type { DeletePrivMonUserRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/users/delete.gen';
 import type { DeleteWatchlistEntitySourceRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/data_source/delete.gen';
-import type {
-  DeprecatedTriggerRiskScoreCalculationRequestBodyInput,
-  TriggerRiskScoreCalculationRequestBodyInput,
-} from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/entity_calculation_route.gen';
 import type { EntityDetailsHighlightsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_details/highlights.gen';
 import type { FindAssetCriticalityRecordsRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/list_asset_criticality.gen';
 import type {
@@ -71,7 +67,6 @@ import type {
   ListWatchlistEntitySourcesRequestParamsInput,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/data_source/list.gen';
 import type { PreviewRiskScoreRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/preview_route.gen';
-import type { ScheduleRiskEngineNowRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/engine_schedule_now_route.gen';
 import type { SearchPrivilegesIndicesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/search_indices.gen';
 import type { SyncWatchlistRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/sync/sync.gen';
 import type {
@@ -152,7 +147,7 @@ If asset criticality records already exist for the specified entities, those rec
       .send(props.body as object);
   },
   /**
-   * Cleaning up the the Risk Engine by removing the indices, mapping and transforms
+   * Stops risk scoring for the space. Removes the risk score data stream, the lookup index and its template, the risk engine configuration, and the risk score maintainer task, and clears risk fields stored on entity documents.
    */
   cleanUpRiskEngine(kibanaSpace: string = 'default') {
     return supertest
@@ -352,20 +347,6 @@ Removes a privileged user from monitoring by their document ID.
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   /**
-   * Calculates and persists Risk Scores for an entity, returning the calculated risk score.
-   */
-  deprecatedTriggerRiskScoreCalculation(
-    props: DeprecatedTriggerRiskScoreCalculationProps,
-    kibanaSpace: string = 'default'
-  ) {
-    return supertest
-      .post(getRouteUrlForSpace('/api/risk_scores/calculation/entity', kibanaSpace))
-      .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-      .send(props.body as object);
-  },
-  /**
    * **Deprecated in 9.4.0.** Disables the Privilege Monitoring Engine, stopping all monitoring activity without removing data.
    */
   disableMonitoringEngine(kibanaSpace: string = 'default') {
@@ -373,20 +354,6 @@ Removes a privileged user from monitoring by their document ID.
       .post(getRouteUrlForSpace('/api/entity_analytics/monitoring/engine/disable', kibanaSpace))
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-  },
-  disableRiskEngine(kibanaSpace: string = 'default') {
-    return supertest
-      .post(getRouteUrlForSpace('/internal/risk_score/engine/disable', kibanaSpace))
-      .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-  },
-  enableRiskEngine(kibanaSpace: string = 'default') {
-    return supertest
-      .post(getRouteUrlForSpace('/internal/risk_score/engine/enable', kibanaSpace))
-      .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   entityDetailsHighlights(props: EntityDetailsHighlightsProps, kibanaSpace: string = 'default') {
@@ -508,16 +475,6 @@ Get an entity source configuration by ID.
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   /**
-   * Returns the status of both the legacy transform-based risk engine, as well as the new risk engine
-   */
-  getRiskEngineStatus(kibanaSpace: string = 'default') {
-    return supertest
-      .get(getRouteUrlForSpace('/internal/risk_score/engine/status', kibanaSpace))
-      .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-  },
-  /**
    * Returns time-ordered historical risk score entries from the risk score time-series index for a given entity.
    */
   getRiskScoreHistory(props: GetRiskScoreHistoryProps, kibanaSpace: string = 'default') {
@@ -566,16 +523,6 @@ Get an entity source configuration by ID.
       .post(getRouteUrlForSpace('/api/entity_analytics/monitoring/engine/init', kibanaSpace))
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-  },
-  /**
-   * Initializes the Risk Engine by creating the necessary indices and mappings, removing old transforms, and starting the new risk engine
-   */
-  initRiskEngine(kibanaSpace: string = 'default') {
-    return supertest
-      .post(getRouteUrlForSpace('/internal/risk_score/engine/init', kibanaSpace))
-      .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   /**
@@ -748,17 +695,6 @@ Check if the current user has all required permissions for Privilege Monitoring.
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   /**
-   * Schedule the risk scoring engine to run as soon as possible. You can use this to recalculate entity risk scores after updating their asset criticality.
-   */
-  scheduleRiskEngineNow(props: ScheduleRiskEngineNowProps, kibanaSpace: string = 'default') {
-    return supertest
-      .post(getRouteUrlForSpace('/api/risk_score/engine/schedule_now', kibanaSpace))
-      .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-      .send(props.body as object);
-  },
-  /**
       * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
 
 Search Indices for Privileges Monitoring import.
@@ -783,20 +719,6 @@ Search Indices for Privileges Monitoring import.
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-  },
-  /**
-   * Calculates and persists Risk Scores for an entity, returning the calculated risk score.
-   */
-  triggerRiskScoreCalculation(
-    props: TriggerRiskScoreCalculationProps,
-    kibanaSpace: string = 'default'
-  ) {
-    return supertest
-      .post(getRouteUrlForSpace('/internal/risk_score/calculation/entity', kibanaSpace))
-      .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-      .send(props.body as object);
   },
   /**
       * Unassigns the provided entities from the specified watchlist.
@@ -1014,9 +936,6 @@ export interface DeletePrivMonUserProps {
 export interface DeleteWatchlistEntitySourceProps {
   params: DeleteWatchlistEntitySourceRequestParamsInput;
 }
-export interface DeprecatedTriggerRiskScoreCalculationProps {
-  body: DeprecatedTriggerRiskScoreCalculationRequestBodyInput;
-}
 export interface EntityDetailsHighlightsProps {
   body: EntityDetailsHighlightsRequestBodyInput;
 }
@@ -1059,17 +978,11 @@ export interface ListWatchlistEntitySourcesProps {
 export interface PreviewRiskScoreProps {
   body: PreviewRiskScoreRequestBodyInput;
 }
-export interface ScheduleRiskEngineNowProps {
-  body: ScheduleRiskEngineNowRequestBodyInput;
-}
 export interface SearchPrivilegesIndicesProps {
   query: SearchPrivilegesIndicesRequestQueryInput;
 }
 export interface SyncWatchlistProps {
   params: SyncWatchlistRequestParamsInput;
-}
-export interface TriggerRiskScoreCalculationProps {
-  body: TriggerRiskScoreCalculationRequestBodyInput;
 }
 export interface UnassignWatchlistEntitiesProps {
   params: UnassignWatchlistEntitiesRequestParamsInput;

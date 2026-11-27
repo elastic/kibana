@@ -36,7 +36,7 @@ jest.mock('@kbn/task-manager-plugin/server/queries/task_claiming', () => {
           createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => ({
             run: async () => {
               mockRuns.push({ attempts: taskInstance.attempts, state: taskInstance.state });
-              return mockRun();
+              return mockRun(taskInstance);
             },
           }),
         },
@@ -64,9 +64,10 @@ const waitFor = async (assertion: () => void, timeoutMs = 60_000) => {
 
 /**
  * `isNewAttempt` reads Task Manager's attempt count and task state, so it relies on Task Manager
- * restarting the count after a `{ runAt }` result and keeping state when a run throws.
+ * restarting the count after a `{ runAt }` result and keeping state when a run throws. A capacity
+ * hand-back returns the claimed `runAt`, so it relies on Task Manager storing a past `runAt` as is.
  */
-describe('Task Manager behavior that report attempt counting relies on', () => {
+describe('Task Manager behavior that report render retries rely on', () => {
   let esServer: TestElasticsearchUtils;
   let root: ReturnType<typeof createRootWithCorePlugins>;
   let taskManager: TaskManagerStartContract;
@@ -108,5 +109,21 @@ describe('Task Manager behavior that report attempt counting relies on', () => {
     expect(
       mockRuns.map(({ attempts, state }) => isNewAttempt(state as RenderRetryState, attempts))
     ).toEqual([true, false, true]);
+  });
+
+  it('keeps a past runAt returned by a hand-back, so the task keeps its queue place', async () => {
+    mockRun.mockClear();
+    mockRun
+      .mockImplementationOnce(({ runAt }: ConcreteTaskInstance) => ({
+        runAt,
+        state: { queued: true },
+      }))
+      .mockImplementationOnce(() => ({ state: {} }));
+    const runAt = new Date(Date.now() - 5 * 60_000);
+
+    await taskManager.schedule({ taskType: mockTaskType, params: {}, state: {}, runAt });
+    await waitFor(() => expect(mockRun).toHaveBeenCalledTimes(2));
+
+    expect(mockRun.mock.calls.map(([task]) => task.runAt)).toEqual([runAt, runAt]);
   });
 });

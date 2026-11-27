@@ -9,6 +9,7 @@ import React, { useState } from 'react';
 import { EuiButton, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import {
   createTriggerFormValues,
+  getScheduledRunsPerDay,
   isSlackTrigger,
   type TriggerFormValues,
 } from '../automation_form_values';
@@ -58,6 +59,11 @@ export const AutomationTriggerSection = ({
   return (
     <>
       <SectionHeader title={triggerLabels.triggers} />
+      {trigger && isSlackTrigger(trigger) && (
+        <EuiText size="xs" color="subdued" data-test-subj="automationSlackTriggerMentionHelp">
+          {triggerLabels.slackMentionHelp}
+        </EuiText>
+      )}
       <EuiSpacer size="s" />
       <EuiPanel hasBorder hasShadow={false} paddingSize={trigger && !readOnly ? 's' : 'm'}>
         {!trigger && (
@@ -127,6 +133,7 @@ export const AutomationTriggerSection = ({
             savedLimit={savedLimit}
             onRaiseLimit={onRaiseLimit}
             readOnly={readOnly}
+            scheduledRunsPerDay={getScheduledRunsPerDay(trigger)}
           />
         )}
         {trigger && (

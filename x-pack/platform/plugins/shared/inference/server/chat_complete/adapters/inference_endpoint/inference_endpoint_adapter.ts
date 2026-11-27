@@ -223,6 +223,7 @@ const createEndpointRequest = ({
     reasoning,
     hasNativeTools: hasTools,
     model: endpointModelId ?? modelName,
+    isEis: provider === InferenceEndpointProvider.Elastic,
   });
 
   return {

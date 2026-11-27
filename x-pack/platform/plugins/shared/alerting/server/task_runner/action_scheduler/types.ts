@@ -26,6 +26,7 @@ import type {
 import type { NormalizedRuleType } from '../../rule_type_registry';
 import type { CombinedSummarizedAlerts } from '../../types';
 import type { RuleRunMetricsStore } from '../../lib/rule_run_metrics_store';
+import type { RuleResultService } from '../../monitoring/rule_result_service';
 import type {
   ActionOpts,
   AlertingEventLogger,
@@ -62,6 +63,7 @@ export interface ActionSchedulerOptions<
   taskRunnerContext: TaskRunnerContext;
   taskInstance: RuleTaskInstance;
   ruleRunMetricsStore: RuleRunMetricsStore;
+  ruleResultService: RuleResultService;
   apiKeyId?: string;
   /**
    * Resolved credential to enqueue for scheduled connector actions. This is the

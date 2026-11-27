@@ -48,7 +48,7 @@ export const SettingsSection = ({
     data-test-subj={dataTestSubject}
   >
     <EuiPanel hasShadow={false} color="subdued" paddingSize="m" css={headerPanelStyles}>
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
         <EuiFlexItem grow={false}>
           <EuiText size="s">
             <h3>{title}</h3>

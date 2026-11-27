@@ -39,6 +39,7 @@ import {
 import { hasSameEsql } from '@kbn/streams-schema';
 import React, { useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
+import { useIsMobile } from '../../../../hooks/use_is_mobile';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useSourcesApi } from '../../../../data/sources/use_sources_api';
 import { getFormattedError } from '../../../../common/errors';
@@ -82,6 +83,7 @@ export function SourceFlyout({
     notifications: { toasts },
   } = useKibana().services;
   const { createSource, updateSource } = useSourcesApi();
+  const isMobile = useIsMobile();
   const titleId = useGeneratedHtmlId();
   // Only the query the user ran is previewed, so typing does not search on every keystroke.
   // `runId` changes on every run, so running an unchanged query still refetches it.
@@ -171,7 +173,7 @@ export function SourceFlyout({
   return (
     <>
       <EuiFlyout
-        size="l"
+        size={isMobile ? 'fill' : 'l'}
         onClose={onClose}
         aria-labelledby={titleId}
         data-test-subj="significantEventsAppSourceFlyout"
@@ -184,10 +186,18 @@ export function SourceFlyout({
           </EuiTitle>
         </EuiFlyoutHeader>
         {/* A flex child of the flyout, so both panels fill the height between header and footer. */}
-        <EuiResizableContainer css={{ flexGrow: 1, minHeight: 0 }}>
+        <EuiResizableContainer
+          direction={isMobile ? 'vertical' : 'horizontal'}
+          css={{ flexGrow: 1, minHeight: 0 }}
+        >
           {(EuiResizablePanel, EuiResizableButton) => (
             <>
-              <EuiResizablePanel initialSize={40} minSize="350px" paddingSize="l" tabIndex={0}>
+              <EuiResizablePanel
+                initialSize={isMobile ? 60 : 40}
+                minSize={isMobile ? '20%' : '350px'}
+                paddingSize="l"
+                tabIndex={0}
+              >
                 <EuiText size="s" color="subdued">
                   <p>{FORM_DESCRIPTION}</p>
                 </EuiText>
@@ -373,7 +383,12 @@ export function SourceFlyout({
                 </EuiForm>
               </EuiResizablePanel>
               <EuiResizableButton indicator="border" />
-              <EuiResizablePanel initialSize={60} minSize="300px" paddingSize="l" tabIndex={0}>
+              <EuiResizablePanel
+                initialSize={isMobile ? 40 : 60}
+                minSize={isMobile ? '20%' : '300px'}
+                paddingSize="l"
+                tabIndex={0}
+              >
                 <SourcePreview esql={preview.esql} runId={preview.runId} />
               </EuiResizablePanel>
             </>
@@ -486,7 +501,7 @@ const ENABLED_LABEL = i18n.translate('xpack.nightshift.sources.flyout.enabledLab
 
 const ENABLED_HELP_TEXT = i18n.translate('xpack.nightshift.sources.flyout.enabledHelpText', {
   defaultMessage:
-    'Onboarding starts as soon as the source is created, so Nightshift can learn its knowledge indicators and watch it for significant events.',
+    'Onboarding starts as soon as the source is created, so nightshift can learn its knowledge indicators and watch it for significant events.',
 });
 
 const DISABLED_HELP_TEXT = i18n.translate('xpack.nightshift.sources.flyout.disabledHelpText', {

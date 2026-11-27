@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { assertSchemasValid } from './assert_schemas_valid';
+import type { InvalidSchemaFailure } from './assert_schemas_valid';
+import { assertSchemasValid, InvalidSchemaError } from './assert_schemas_valid';
+import { describeOperation } from './schema_walk';
 import { loadOperations } from './load_operations';
 import { normalizeOperations } from './normalize_operations';
 import type { ContractOperation, OpenApiDocument } from './types';
@@ -24,6 +26,37 @@ export const loadContractOperations = (
   const operations = normalizeOperations(loadOperations(document, source));
   assertSchemasValid(operations);
   return operations;
+};
+
+/**
+ * Like {@link loadContractOperations}, but sets apart the operations whose schemas have defects
+ * instead of failing (`broken`), and lists the defects, so one broken operation doesn't take the
+ * spec down.
+ */
+export const loadValidContractOperations = (
+  document: OpenApiDocument,
+  source?: string
+): {
+  operations: ContractOperation[];
+  broken: ContractOperation[];
+  invalid: InvalidSchemaFailure[];
+} => {
+  const operations = normalizeOperations(loadOperations(document, source));
+  try {
+    assertSchemasValid(operations);
+    return { operations, broken: [], invalid: [] };
+  } catch (error) {
+    if (!(error instanceof InvalidSchemaError)) {
+      throw error;
+    }
+    const described = new Set(error.failures.map(({ operation }) => operation));
+    const isBroken = (operation: ContractOperation) => described.has(describeOperation(operation));
+    return {
+      operations: operations.filter((operation) => !isBroken(operation)),
+      broken: operations.filter(isBroken),
+      invalid: [...error.failures],
+    };
+  }
 };
 
 export { InvalidSchemaError } from './assert_schemas_valid';

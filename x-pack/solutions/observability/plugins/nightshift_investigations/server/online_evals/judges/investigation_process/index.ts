@@ -29,7 +29,7 @@ export const investigationProcessJudge: RegisteredEvaluatorDefinition = {
   kind: 'llm',
   direction: 'maximize',
   description:
-    'Reference-free: how a Nightshift investigation was carried out, from alert semantics and decision tree use to causal validation, hypothesis coverage, evidence grounding and when it stopped.',
+    'Reference-free: how a nightshift investigation was carried out, from alert semantics and decision tree use to causal validation, hypothesis coverage, evidence grounding and when it stopped.',
   evidenceSchema: roundEvidenceSchema,
   async evaluate({ round, inferenceClient }) {
     if (!inferenceClient) {

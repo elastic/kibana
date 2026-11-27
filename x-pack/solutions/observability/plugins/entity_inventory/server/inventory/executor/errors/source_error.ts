@@ -5,15 +5,8 @@
  * 2.0.
  */
 
+import type { SourceError } from '../../../../common';
 import { asNumber, asText } from '../utils';
-
-/** A failed query against one source, safe to return to the caller. */
-export interface SourceError {
-  indexPattern: string;
-  /** The HTTP status Elasticsearch answered with, null when there was no response. */
-  status: number | null;
-  reason: string;
-}
 
 interface ErrorLike {
   message?: unknown;
@@ -24,8 +17,11 @@ interface ErrorLike {
   };
 }
 
+/** The status and reason of a `failed` source error. */
+export type ErrorDetail = Pick<SourceError, 'status' | 'reason'>;
+
 /** Flattens any thrown value to a status and reason, never a stack or the raw body. */
-export const toSourceError = (indexPattern: string, error: unknown): SourceError => {
+export const toErrorDetail = (error: unknown): ErrorDetail => {
   const { message, statusCode, meta }: ErrorLike =
     typeof error === 'object' && error !== null ? error : {};
   const type = asText(meta?.body?.error?.type);
@@ -35,7 +31,6 @@ export const toSourceError = (indexPattern: string, error: unknown): SourceError
   const reason = bodyReason ? (type ? `${type}: ${bodyReason}` : bodyReason) : fallback;
 
   return {
-    indexPattern,
     status: asNumber(meta?.statusCode) ?? asNumber(statusCode),
     reason,
   };

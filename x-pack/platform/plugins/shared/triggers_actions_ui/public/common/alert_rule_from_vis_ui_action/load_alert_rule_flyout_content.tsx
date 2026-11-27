@@ -135,8 +135,8 @@ const getDataTableFromEmbeddable = (embeddable: LensApi) =>
     | undefined;
 
 const getDataFromEmbeddable = (embeddable: LensApi): AlertRuleFromVisUIActionData => {
-  const queryValue = embeddable.query$.getValue();
-  const query = queryValue && 'esql' in queryValue ? queryValue.esql : null;
+  const [esqlQuery] = embeddable.esql$.getValue();
+  const query = esqlQuery?.esql ?? null;
   const datatable = getDataTableFromEmbeddable(embeddable);
   const thresholdValues = datatable
     ? datatable.columns

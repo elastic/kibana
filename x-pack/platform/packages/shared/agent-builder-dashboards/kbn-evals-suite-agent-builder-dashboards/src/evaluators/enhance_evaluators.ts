@@ -16,6 +16,7 @@ import {
   findAskUserQuestionPrompt,
   findModeOptionIndex,
   hasWrittenDashboard,
+  type AskUserQuestionPrompt,
 } from '../extract_dashboard';
 import {
   SCORED_RULES,
@@ -36,6 +37,31 @@ export const ENHANCE_MODE_QUESTION_EVALUATOR_NAME = 'Enhance Mode Question';
 export const ENHANCE_MODE_COMPLIANCE_EVALUATOR_NAME = 'Enhance Mode Compliance';
 export const ENHANCE_DEFECT_RESOLUTION_EVALUATOR_NAME = 'Enhance Defect Resolution';
 export const ENHANCE_NO_REGRESSION_EVALUATOR_NAME = 'Enhance No Regression';
+
+/**
+ * Ways the opening turn fails to ask the mode question properly: no question,
+ * more than one, options missing a mode, or a dashboard write before asking.
+ */
+export const findModeQuestionFailures = (
+  output: DashboardAgentTaskOutput
+): { prompt?: AskUserQuestionPrompt; failures: string[] } => {
+  const prompt = findAskUserQuestionPrompt(output.openingPrompts ?? []);
+  if (!prompt) {
+    return { failures: ['did not ask which mode to apply'] };
+  }
+  const options = prompt.questions[0]?.options ?? [];
+  const offersBothModes = (['appearance', 'content'] as const).every(
+    (mode) => findModeOptionIndex(options, mode) !== -1
+  );
+  const wroteBeforeAsking = (output.openingToolIds ?? []).includes(GENERATE_DASHBOARD_TOOL_ID);
+  const failures = [
+    prompt.questions.length !== 1 && `asked ${prompt.questions.length} questions, expected 1`,
+    !offersBothModes &&
+      `options [${options.map(({ label }) => label).join(', ')}] do not offer both modes`,
+    wroteBeforeAsking && 'changed the dashboard before asking',
+  ].filter((failure): failure is string => typeof failure === 'string');
+  return { prompt, failures };
+};
 
 /**
  * A bare "enhance" request must end the opening turn with one question that
@@ -71,17 +97,7 @@ export const enhanceModeQuestionEvaluator: DashboardAgentEvaluator = {
         explanation: 'A bare enhance request should ask which mode to apply.',
       };
     }
-    const options = prompt.questions[0]?.options ?? [];
-    const offersBothModes = (['appearance', 'content'] as const).every(
-      (mode) => findModeOptionIndex(options, mode) !== -1
-    );
-    const wroteBeforeAsking = (output.openingToolIds ?? []).includes(GENERATE_DASHBOARD_TOOL_ID);
-    const failures = [
-      prompt.questions.length !== 1 && `asked ${prompt.questions.length} questions, expected 1`,
-      !offersBothModes &&
-        `options [${options.map(({ label }) => label).join(', ')}] do not offer both modes`,
-      wroteBeforeAsking && 'changed the dashboard before asking',
-    ].filter((failure): failure is string => typeof failure === 'string');
+    const { failures } = findModeQuestionFailures(output);
 
     return {
       score: failures.length === 0 ? 1 : 0,

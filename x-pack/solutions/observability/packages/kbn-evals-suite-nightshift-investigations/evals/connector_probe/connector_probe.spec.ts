@@ -5,95 +5,10 @@
  * 2.0.
  */
 
-import { expect } from '@playwright/test';
-import { selectEvaluators, tags } from '@kbn/evals';
-import {
-  NIGHTSHIFT_ASSISTANT_AGENT_ID,
-  NIGHTSHIFT_INVESTIGATION_AGENT_ID,
-} from '@kbn/nightshift-investigations-plugin/common';
-import { evaluate } from '../../src/evaluate';
-import { saveConnectorSetOnInvestigator } from '../investigation/connector_sets';
 import { readConnectorProbeDataset } from './datasets';
-import { createConnectorProbeEvaluators } from './evaluators';
-import { runConnectorProbe } from './task';
-import type { ConnectorProbeTaskOutput } from './types';
+import { registerConnectorProbeEvaluation } from './register_evaluation';
 
-/**
- * Asks the Nightshift assistant each probe question in one `converse` call, so a case takes a few
- * model turns rather than a full investigation, and scores its connector use, its wall-clock time
- * and its behaviour against the example's reference answer.
- */
-const suiteTags = [...tags.stateful.classic, ...tags.serverless.observability.complete];
-
-evaluate.describe('Nightshift assistant: connector probes', { tag: suiteTags }, () => {
-  evaluate(
-    'answers telemetry probes through the Elasticsearch connector',
-    async ({ executorClient, connector, fetch, evaluators, concurrency, repetitions, log }) => {
-      const dataset = readConnectorProbeDataset();
-      // Batches of `concurrency` probes run back to back; allow five minutes per batch plus slack.
-      evaluate.setTimeout(
-        Math.ceil((dataset.examples.length * repetitions) / concurrency) * 5 * 60_000 + 5 * 60_000
-      );
-      // The agents are installed in the background at Kibana start.
-      await expect
-        .poll(
-          async () =>
-            Promise.all(
-              [NIGHTSHIFT_ASSISTANT_AGENT_ID, NIGHTSHIFT_INVESTIGATION_AGENT_ID].map((agentId) =>
-                fetch(`/api/agent_builder/agents/${agentId}`, { version: '2023-10-31' })
-              )
-            ).then(
-              () => true,
-              () => false
-            ),
-          { timeout: 60_000 }
-        )
-        .toBe(true);
-      // The assistant uses the connectors saved on the investigator.
-      await saveConnectorSetOnInvestigator(fetch);
-
-      const [experiment] = await executorClient.runExperiment(
-        {
-          name: 'Nightshift assistant connector probes',
-          datasets: [dataset],
-          concurrency,
-          metadata: { concurrency, agent_id: NIGHTSHIFT_ASSISTANT_AGENT_ID },
-          task: (example) => runConnectorProbe(fetch, example, connector),
-        },
-        selectEvaluators(createConnectorProbeEvaluators(evaluators))
-      );
-
-      const runs = Object.values(experiment.runs);
-      expect(runs).toHaveLength(dataset.examples.length * repetitions);
-
-      for (const [runId, run] of Object.entries(experiment.runs)) {
-        const output = run.output as ConnectorProbeTaskOutput;
-        const scores = experiment.evaluationRuns
-          .filter(({ experimentRunId }) => experimentRunId === runId)
-          .map(({ name, result }) => [name, result?.score ?? null]);
-        log.info(
-          JSON.stringify({
-            case_id: output.case_id,
-            duration_s: Math.round(output.duration_ms / 100) / 10,
-            tool_calls: output.tool_call_trajectory.length,
-            conversation_id: output.conversation_id,
-            trace_id: output.traceId,
-            execution_error: output.execution_error,
-            scores: Object.fromEntries(scores),
-          })
-        );
-      }
-
-      // Scores grade the answers; a failed converse call means the run itself is broken.
-      expect(
-        runs
-          .map(({ output }) => output as ConnectorProbeTaskOutput)
-          .filter(({ execution_error: executionError }) => executionError)
-          .map(({ case_id: caseId, execution_error: executionError }) => ({
-            caseId,
-            executionError,
-          }))
-      ).toEqual([]);
-    }
-  );
+registerConnectorProbeEvaluation({
+  name: 'connector probes',
+  loadDataset: async () => readConnectorProbeDataset(),
 });

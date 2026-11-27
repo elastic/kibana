@@ -27,7 +27,7 @@ import { reportConsistentFailureIssues } from './consistent_failure_issues';
 import { ExistingFailedTestIssues } from './existing_failed_test_issues';
 import { generateScoutTestFailureArtifacts } from './generate_scout_test_failure_artifacts';
 import type { TestFailure } from './get_failures';
-import { GithubApi } from './github_api';
+import { DEFAULT_GITHUB_REPO, GithubApi } from './github_api';
 import { processJUnitReports } from './process_junit_reports';
 import type { ProcessReportsParams } from './process_reports_types';
 import { processScoutReports } from './process_scout_reports';
@@ -37,6 +37,8 @@ const DISABLE_MISSING_TEST_REPORT_ERRORS =
   process.env.DISABLE_MISSING_TEST_REPORT_ERRORS === 'true';
 /** `owner/name`, as GitHub spells a repository. */
 const REPO_PATTERN = /^[\w.-]+\/[\w.-]+$/;
+/** The clone URL of `elastic/kibana`, over HTTPS or SSH, as `BUILDKITE_REPO` gives it. */
+const KIBANA_REPO_URL = /[/:]elastic\/kibana(\.git)?$/;
 
 /**
  * Checks the job's failures for tests that fail every attempt build after build, by the Scout
@@ -47,14 +49,22 @@ async function checkConsistentFailures({
   log,
   failures,
   repo,
+  replacePerTestIssues,
+  jobRetries,
   dryRun,
 }: {
   log: ToolingLog;
   failures: TestFailure[];
   repo: string;
+  replacePerTestIssues: boolean;
+  jobRetries: number;
   dryRun: boolean;
 }) {
-  const { BUILDKITE_PIPELINE_SLUG: pipeline, BUILDKITE_BRANCH: branch } = process.env;
+  const {
+    BUILDKITE_PIPELINE_SLUG: pipeline,
+    BUILDKITE_BRANCH: branch,
+    BUILDKITE_REPO: buildRepo = '',
+  } = process.env;
   if (!pipeline || !branch) {
     log.warning('Not in a Buildkite job, skipping the consistent failure check');
     return;
@@ -79,6 +89,9 @@ async function checkConsistentFailures({
       github: new GithubApi({ log, token: process.env.GITHUB_TOKEN, dryRun, repo }),
       repo,
       build: { pipeline, branch },
+      replacePerTestIssues,
+      jobRetries,
+      kibanaCommits: KIBANA_REPO_URL.test(buildRepo),
       dryRun,
     });
   } finally {
@@ -86,9 +99,10 @@ async function checkConsistentFailures({
   }
 }
 
-// Whether a failure no issue tracks yet gets a per-test issue (the legacy behaviour, default).
-// 'false' leaves new issues to the daily flaky suite reporter and `--report-failing-suites`.
-// Tracked issues are updated either way. Set in the pipeline env, flip back to fall back.
+// Whether failures get per-test issues (the legacy behaviour, default): a new one for a test no
+// issue tracks yet, a comment on an existing one. 'false' leaves issues to the daily flaky suite
+// reporter and `--report-failing-suites`, which replace the per-test issues with suite issues;
+// suite issues are updated either way. Set in the pipeline env, flip back to fall back.
 const PER_TEST_ISSUES = process.env.REPORT_FAILED_TESTS_PER_TEST_ISSUES !== 'false';
 
 export function runFailedTestsReporterCli() {
@@ -111,6 +125,10 @@ export function runFailedTestsReporterCli() {
         (typeof failingSuitesRepo !== 'string' || !REPO_PATTERN.test(failingSuitesRepo))
       ) {
         throw createFlagError('--failing-suites-repo must be of the form owner/name');
+      }
+      const jobRetries = Number(flags['failing-suites-job-retries']);
+      if (reportFailingSuites && !(Number.isInteger(jobRetries) && jobRetries >= 0)) {
+        throw createFlagError('--failing-suites-job-retries must be a non-negative integer');
       }
 
       let branch: string = '';
@@ -160,7 +178,7 @@ export function runFailedTestsReporterCli() {
           log.info('found', reportPaths.length, 'reports', reportPaths);
           if (!PER_TEST_ISSUES) {
             log.info(
-              'REPORT_FAILED_TESTS_PER_TEST_ISSUES=false: no per-test issues will be opened, only existing ones updated'
+              'REPORT_FAILED_TESTS_PER_TEST_ISSUES=false: per-test issues will be neither opened nor updated, only suite issues'
             );
           }
 
@@ -188,6 +206,8 @@ export function runFailedTestsReporterCli() {
             prependTitle,
             updateGithub,
             perTestIssues: PER_TEST_ISSUES,
+            // the suite issues come from the repository the per-test issues are in
+            suiteIssueComments: !(reportFailingSuites && failingSuitesRepo === DEFAULT_GITHUB_REPO),
             indexInEs,
             reportUpdate,
             bkMeta,
@@ -212,6 +232,8 @@ export function runFailedTestsReporterCli() {
                 log,
                 failures: [...junitFailures, ...scoutFailures],
                 repo: failingSuitesRepo,
+                replacePerTestIssues: !PER_TEST_ISSUES,
+                jobRetries,
                 dryRun: !updateGithub,
               });
             } catch (error) {
@@ -238,7 +260,7 @@ export function runFailedTestsReporterCli() {
       description: `a cli that opens issues or updates existing issues based on junit reports`,
       flags: {
         boolean: ['github-update', 'report-update', 'report-failing-suites'],
-        string: ['build-url', 'failing-suites-repo'],
+        string: ['build-url', 'failing-suites-repo', 'failing-suites-job-retries'],
         default: {
           'github-update': true,
           'report-update': true,
@@ -246,6 +268,7 @@ export function runFailedTestsReporterCli() {
           'build-url': process.env.BUILD_URL,
           'report-failing-suites': process.env.REPORT_FAILING_SUITES === 'true',
           'failing-suites-repo': process.env.FAILING_SUITES_REPO || 'elastic/kibana',
+          'failing-suites-job-retries': process.env.FAILING_SUITES_JOB_RETRIES || '1',
         },
         help: `
         --no-github-update       Execute the CLI without writing to Github
@@ -260,6 +283,9 @@ export function runFailedTestsReporterCli() {
                                  by the Scout test events
         --failing-suites-repo    owner/name of the repository those issues go to, defaults to
                                  process.env.FAILING_SUITES_REPO, then elastic/kibana
+        --failing-suites-job-retries  Times this pipeline's jobs retry a test failure, which a build
+                                 waits for before it counts, defaults to
+                                 process.env.FAILING_SUITES_JOB_RETRIES, then 1
       `,
       },
     }

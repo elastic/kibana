@@ -8,6 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
+import type { PublicAppInfo } from '@kbn/core/public';
 import { SecurityPageName } from '../../../../app/types';
 import { createMockStore } from '../../../mock/create_store';
 import { mockGlobalState } from '../../../mock/global_state';
@@ -58,6 +59,12 @@ const alertsNavLink: NavigationLink = {
   title: 'alerts',
   description: 'alerts description',
 };
+
+const alertZeroApp = (homeVisibleIn: string[]) =>
+  ({
+    visibleIn: [],
+    deepLinks: [{ id: 'home', visibleIn: homeVisibleIn }],
+  } as unknown as PublicAppInfo);
 
 const mockSolutionSideNav = jest.fn((_: SolutionSideNavProps) => <></>);
 jest.mock('@kbn/security-solution-side-nav', () => ({
@@ -122,6 +129,7 @@ describe('SecuritySideNav', () => {
     useKibana().services.chrome.hasHeaderBanner$ = jest.fn(() =>
       new BehaviorSubject(false).asObservable()
     );
+    useKibana().services.application.applications$ = new BehaviorSubject(new Map());
     useKibana().services.serverless = undefined;
   });
 
@@ -151,6 +159,35 @@ describe('SecuritySideNav', () => {
         tracker: track,
       })
     );
+  });
+
+  it("should render the AlertZero external link when AlertZero's deep links are in the Classic nav", () => {
+    useKibana().services.application.applications$ = new BehaviorSubject(
+      new Map([['alertzero', alertZeroApp(['classicSideNav'])]])
+    );
+    mockUseNavLinks.mockReturnValue([alertsNavLink]);
+    renderNav();
+    expect(mockSolutionSideNav).toHaveBeenCalledWith(
+      expect.objectContaining({
+        items: expect.arrayContaining([
+          expect.objectContaining({
+            id: SecurityPageName.externalLinkAlertZero,
+            label: 'AlertZero',
+            position: 'top',
+          }),
+        ]),
+      })
+    );
+  });
+
+  it("should not render the AlertZero external link when AlertZero's deep links are not in the Classic nav", () => {
+    useKibana().services.application.applications$ = new BehaviorSubject(
+      new Map([['alertzero', alertZeroApp([])]])
+    );
+    mockUseNavLinks.mockReturnValue([alertsNavLink]);
+    renderNav();
+    const [{ items }] = mockSolutionSideNav.mock.calls[mockSolutionSideNav.mock.calls.length - 1];
+    expect(items.map(({ id }) => id)).not.toContain(SecurityPageName.externalLinkAlertZero);
   });
 
   it('should render the loader if items are still empty', () => {
@@ -398,9 +435,15 @@ describe('SecuritySideNav', () => {
     (useKibana().services.settings.client.get$ as jest.Mock).mockImplementation(() =>
       new BehaviorSubject(AIChatExperience.Agent).asObservable()
     );
+    useKibana().services.application.applications$ = new BehaviorSubject(
+      new Map([['alertzero', alertZeroApp(['classicSideNav'])]])
+    );
     mockUseNavLinks.mockReturnValue([alertsNavLink]);
     renderNav();
 
+    expect(useKibana().services.application.getUrlForApp as jest.Mock).toHaveBeenCalledWith(
+      'alertzero'
+    );
     expect(useKibana().services.application.getUrlForApp as jest.Mock).toHaveBeenCalledWith(
       'agent_builder',
       {
@@ -417,6 +460,10 @@ describe('SecuritySideNav', () => {
     expect(mockSolutionSideNav).toHaveBeenCalledWith(
       expect.objectContaining({
         items: expect.arrayContaining([
+          expect.objectContaining({
+            id: SecurityPageName.externalLinkAlertZero,
+            href: '/test-basepath/s/my-space/app/alertzero',
+          }),
           expect.objectContaining({
             id: SecurityPageName.externalLinkAgentBuilder,
             href: '/test-basepath/s/my-space/app/agent_builder/agents',

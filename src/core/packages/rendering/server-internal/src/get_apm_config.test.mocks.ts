@@ -9,8 +9,10 @@
 
 export const getConfigurationMock = jest.fn();
 export const shouldInstrumentClientMock = jest.fn(() => true);
+export const getBrowserTracingConfigurationMock = jest.fn();
 jest.doMock('@kbn/apm-config-loader', () => ({
   getConfiguration: getConfigurationMock,
+  getBrowserTracingConfiguration: getBrowserTracingConfigurationMock,
   shouldInstrumentClient: shouldInstrumentClientMock,
 }));
 

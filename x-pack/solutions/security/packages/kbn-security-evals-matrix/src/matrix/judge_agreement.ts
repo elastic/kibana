@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ESTIMATED_COST_EVALUATOR_NAME } from '@kbn/evals';
 import { wilsonInterval, type ConfidenceInterval } from './trajectory_agreement';
 import { classifyFamily } from './judge_provenance';
 
@@ -54,7 +55,14 @@ export interface JudgeAgreementRow {
 }
 
 /** Cost and latency instruments are recorded as evaluators but are not verdicts. */
-const NON_VERDICT_EVALUATORS = new Set(['Input Tokens', 'Output Tokens', 'Latency', 'Tool Calls']);
+const NON_VERDICT_EVALUATORS = new Set([
+  'Input Tokens',
+  'Output Tokens',
+  'Cached Tokens',
+  ESTIMATED_COST_EVALUATOR_NAME,
+  'Latency',
+  'Tool Calls',
+]);
 
 /** Scores are 0..1; a verdict is the pass/fail side of the midpoint. */
 const passed = (score: number): boolean => score > 0.5;

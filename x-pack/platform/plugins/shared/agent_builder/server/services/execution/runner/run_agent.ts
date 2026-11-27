@@ -27,6 +27,7 @@ import {
   createSubAgentExecutor,
 } from './utils';
 import { createPluginsService } from './utils/plugins';
+import { createConnectorSkillsService } from './utils/connector_skills_service';
 import type { RunnerManager } from './runner';
 
 export const createAgentHandlerContext = async <TParams = Record<string, unknown>>({
@@ -56,6 +57,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     stateManager,
     skillServiceStart,
     pluginsServiceStart,
+    actions,
     toolManager,
     analyticsService,
     trackingService,
@@ -100,7 +102,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     spaceId,
     runAs: runAs?.serviceAccountId,
     deployment,
-    defaultConnectorId: manager.deps.defaultConnectorId,
+    defaultModel: manager.deps.defaultModel,
     logger,
     modelProvider,
     esClient: elasticsearch.client.asScoped(
@@ -143,6 +145,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     conversationEvents: conversationEventsService,
     conversationTemplates,
     plugins: createPluginsService({ pluginsServiceStart, request }),
+    connectorSkills: createConnectorSkillsService({ actions, request, logger }),
     toolManager,
     events: createAgentEventEmitter({ eventHandler: onEvent, context: manager.context }),
     hooks: manager.deps.hooks,

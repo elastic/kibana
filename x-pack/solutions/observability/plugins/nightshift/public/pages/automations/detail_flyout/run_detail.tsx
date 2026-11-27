@@ -24,7 +24,7 @@ import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import { getNightshiftInvestigationPath } from '../../../common/url_params';
 import { useKibana } from '../../../hooks/use_kibana';
 import { SectionHeader } from '../flyouts/form/section_header';
-import { RunStatusIndicator, type Run } from './run_history';
+import { getRunSourceLabel, RunStatusIndicator, type Run } from './run_history';
 
 const getSkipReasonDescription = ({ skipReason, dailyLimit }: Run) => {
   if (skipReason === 'investigation_limit') {
@@ -66,6 +66,12 @@ const labels = {
   source: i18n.translate('xpack.nightshift.automations.detail.source', {
     defaultMessage: 'Source',
   }),
+  runAs: i18n.translate('xpack.nightshift.automations.detail.runAs', {
+    defaultMessage: 'Run as',
+  }),
+  runAsServiceAccount: i18n.translate('xpack.nightshift.automations.detail.runAsServiceAccount', {
+    defaultMessage: 'Nightshift automations service account',
+  }),
   message: i18n.translate('xpack.nightshift.automations.detail.message', {
     defaultMessage: 'Message',
   }),
@@ -80,6 +86,9 @@ const labels = {
     defaultMessage: 'Automation',
   }),
 };
+
+const getRunAsItems = ({ runsAsServiceAccount }: Run) =>
+  runsAsServiceAccount ? [{ title: labels.runAs, description: labels.runAsServiceAccount }] : [];
 
 const formatDate = (value: string) =>
   new Date(value).toLocaleString(undefined, {
@@ -156,7 +165,8 @@ export const RunDetail = ({
                   title: labels.triggered,
                   description: formatStarted(run.startedAt),
                 },
-                { title: labels.source, description: run.triggeredBy ?? '—' },
+                { title: labels.source, description: getRunSourceLabel(run) },
+                ...getRunAsItems(run),
                 { title: labels.message, description: run.message ?? '—' },
                 {
                   title: labels.reason,
@@ -176,7 +186,8 @@ export const RunDetail = ({
               columnWidths={DETAIL_COLUMN_WIDTHS}
               descriptionProps={DETAIL_VALUE_PROPS}
               listItems={[
-                { title: labels.source, description: run.triggeredBy ?? '—' },
+                { title: labels.source, description: getRunSourceLabel(run) },
+                ...getRunAsItems(run),
                 { title: labels.message, description: run.message ?? '—' },
                 ...(run.error ? [{ title: labels.reason, description: run.error }] : []),
                 {

@@ -6,7 +6,7 @@
  */
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
-import { PerformanceContextProvider } from '@kbn/ebt-tools';
+import { PerformanceContextProvider } from '@kbn/ebt-tools/react';
 import React, { useMemo } from 'react';
 import { DATASET_QUALITY_ALL_SIGNALS_ID } from '../../../common/constants';
 import type { DatasetQualityController } from '../../controller/dataset_quality';

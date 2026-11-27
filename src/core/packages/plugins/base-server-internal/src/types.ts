@@ -38,6 +38,10 @@ export interface InternalPluginInfo {
    */
   readonly version: string;
   /**
+   * Plugins whose browser bundles must be registered before this plugin
+   */
+  readonly requiredPlugins: readonly string[];
+  /**
    * Bundles that must be loaded for this plugin
    */
   readonly requiredBundles: readonly string[];

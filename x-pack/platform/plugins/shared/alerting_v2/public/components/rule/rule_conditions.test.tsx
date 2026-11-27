@@ -12,7 +12,7 @@ import type { RuleApiResponse } from '../../services/rules_api';
 import { getQueryOverflowHeight } from '../../utils/rule_display';
 import { RuleConditions } from './rule_conditions';
 
-jest.mock('@kbn/alerting-plugin/common', () => ({
+jest.mock('../../utils/format_duration', () => ({
   formatDuration: (v: string) => v,
 }));
 

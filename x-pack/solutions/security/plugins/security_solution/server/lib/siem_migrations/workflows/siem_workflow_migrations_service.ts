@@ -10,6 +10,8 @@ import type { IClusterClient, LoggerFactory, Logger } from '@kbn/core/server';
 import type { Subject } from 'rxjs';
 import type { WorkflowMigrationsDataClient } from './data/workflow_migrations_data_client';
 import { WorkflowMigrationsDataService } from './data/workflow_migrations_data_service';
+import type { WorkflowMigrationsTaskClient } from './task/workflow_migrations_task_client';
+import { WorkflowMigrationsTaskService } from './task/workflow_migrations_task_service';
 import type { SiemMigrationsCreateClientParams } from '../common/types';
 
 export interface SiemWorkflowMigrationsSetupParams {
@@ -20,16 +22,19 @@ export interface SiemWorkflowMigrationsSetupParams {
 
 export interface SiemWorkflowMigrationsClient {
   data: WorkflowMigrationsDataClient;
+  task: WorkflowMigrationsTaskClient;
 }
 
 export class SiemWorkflowMigrationsService {
   private dataService: WorkflowMigrationsDataService;
   private esClusterClient?: IClusterClient;
+  private taskService: WorkflowMigrationsTaskService;
   private logger: Logger;
 
   constructor(logger: LoggerFactory, kibanaVersion: string, _elserInferenceId?: string) {
     this.logger = logger.get('siemWorkflowMigrations');
     this.dataService = new WorkflowMigrationsDataService(this.logger, kibanaVersion);
+    this.taskService = new WorkflowMigrationsTaskService(this.logger);
   }
 
   setup({ esClusterClient, ...params }: SiemWorkflowMigrationsSetupParams) {
@@ -58,10 +63,18 @@ export class SiemWorkflowMigrationsService {
       dependencies,
     });
 
-    return { data: dataClient };
+    const taskClient = this.taskService.createClient({
+      request,
+      currentUser,
+      dataClient,
+      dependencies,
+    });
+
+    return { data: dataClient, task: taskClient };
   }
 
   stop(): void {
+    this.taskService.stopAll();
     this.logger.debug('Workflow migrations service stopped');
   }
 }

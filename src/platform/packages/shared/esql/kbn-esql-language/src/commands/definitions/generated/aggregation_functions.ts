@@ -90,6 +90,39 @@ const absentDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'counter_double',
+          optional: false,
+          description: 'Expression that outputs values to be checked for absence.',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'counter_integer',
+          optional: false,
+          description: 'Expression that outputs values to be checked for absence.',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'counter_long',
+          optional: false,
+          description: 'Expression that outputs values to be checked for absence.',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'date',
           optional: false,
           description: 'Expression that outputs values to be checked for absence.',
@@ -474,6 +507,42 @@ const countDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'cartesian_shape',
+          optional: true,
+          description:
+            'Expression that outputs values to be counted. If omitted, equivalent to `COUNT(*)` (the number of rows).',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'counter_double',
+          optional: true,
+          description:
+            'Expression that outputs values to be counted. If omitted, equivalent to `COUNT(*)` (the number of rows).',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'counter_integer',
+          optional: true,
+          description:
+            'Expression that outputs values to be counted. If omitted, equivalent to `COUNT(*)` (the number of rows).',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'counter_long',
           optional: true,
           description:
             'Expression that outputs values to be counted. If omitted, equivalent to `COUNT(*)` (the number of rows).',
@@ -6235,6 +6304,39 @@ const presentDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'cartesian_shape',
+          optional: false,
+          description: 'Expression that outputs values to be checked for presence.',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'counter_double',
+          optional: false,
+          description: 'Expression that outputs values to be checked for presence.',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'counter_integer',
+          optional: false,
+          description: 'Expression that outputs values to be checked for presence.',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'counter_long',
           optional: false,
           description: 'Expression that outputs values to be checked for presence.',
         },

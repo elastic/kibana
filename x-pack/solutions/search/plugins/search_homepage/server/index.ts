@@ -5,13 +5,9 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext } from '@kbn/core/server';
-
 export { config } from './config';
 
-export async function plugin(initializerContext: PluginInitializerContext) {
+export async function plugin() {
   const { SearchHomepagePlugin } = await import('./plugin');
-  return new SearchHomepagePlugin(initializerContext);
+  return new SearchHomepagePlugin();
 }
-
-export type { SearchHomepagePluginSetup, SearchHomepagePluginStart } from './types';

@@ -9,7 +9,7 @@ import type { Client } from '@elastic/elasticsearch';
 import { createTestEsCluster } from '@kbn/test';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import type { TimeRange } from '../../../entities_grid/common';
+import type { TimeRange } from '../../../queries/time_range';
 import { getSeriesWindow, readSeriesDots } from '../tile_series_window';
 
 /*

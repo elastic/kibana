@@ -8,7 +8,7 @@ requestBody:
             list:
               - 8853df00-ae2e-11ed-90af-09bb6422b258
             purgePolicy:
-              purgeType: fixed-age
+              purgeType: fixed_age
               age: 7d
         purgeByTimestampExample:
           summary: Purge rollup data before a specific date
@@ -17,56 +17,76 @@ requestBody:
               - 8853df00-ae2e-11ed-90af-09bb6422b258
               - d077e940-1515-11ee-9c50-9d096392f520
             purgePolicy:
-              purgeType: fixed-time
+              purgeType: fixed_time
               timestamp: '2024-12-31T00:00:00.000Z'
 responses:
   '200':
-    description: Successful request
     content:
       application/json:
-        schema:
-          $ref: ../oas_schemas.yaml#/bulk_purge_rollup_response
         examples:
           bulkPurgeResponse:
             summary: Bulk purge response with task ID
             value:
-              taskId: 8853df00-ae2e-11ed-90af-09bb6422b258
+              taskId: '-sOV3daHSeqIWgQLNaKYtw:35832'
   '400':
     description: Bad request
     content:
       application/json:
         schema:
-          $ref: ../oas_schemas.yaml#/400_response
+          $ref: ../oas_error_schemas.yaml#/400_response
         examples:
-          badRequestExample:
-            summary: Bad request
+          badRequestBodyExample:
+            summary: Invalid purge policy type
             value:
               statusCode: 400
               error: Bad Request
-              message: 'Invalid value ''foo'' supplied to: purgePolicy/purgeType'
+              message: |-
+                [
+                  {
+                    "code": "invalid_union",
+                    "errors": [],
+                    "note": "No matching discriminator",
+                    "discriminator": "purgeType",
+                    "options": [
+                      "fixed_age",
+                      "fixed_time"
+                    ],
+                    "path": [
+                      "purgePolicy",
+                      "purgeType"
+                    ],
+                    "message": "Invalid discriminator value. Expected 'fixed_age' | 'fixed_time'"
+                  }
+                ]
+          badRequestPurgePolicyExample:
+            summary: Purge policy shorter than the SLO time window
+            value:
+              statusCode: 400
+              error: Bad Request
+              message: 'The provided purge policy is invalid. At least one SLO has a time window that is longer than the provided purge policy.'
   '401':
     description: Unauthorized response
     content:
       application/json:
         schema:
-          $ref: ../oas_schemas.yaml#/401_response
+          $ref: ../oas_error_schemas.yaml#/401_response
         examples:
           unauthorizedExample:
             summary: Unauthorized
             value:
               statusCode: 401
               error: Unauthorized
-              message: 'security_exception: unable to authenticate user for REST request [/api/observability/slos]'
+              message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
   '403':
     description: Forbidden response
     content:
       application/json:
         schema:
-          $ref: ../oas_schemas.yaml#/403_response
+          $ref: ../oas_error_schemas.yaml#/403_response
         examples:
           forbiddenExample:
             summary: Forbidden
             value:
               statusCode: 403
               error: Forbidden
-              message: 'security_exception: action [slo_write] is unauthorized for user'
+              message: 'API [POST /api/observability/slos/_bulk_purge_rollup] is unauthorized for user, this action is granted by the Kibana privileges [slo_write]'

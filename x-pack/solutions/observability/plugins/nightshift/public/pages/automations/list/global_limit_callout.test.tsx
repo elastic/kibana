@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { RunQuotasResponse } from '@kbn/significant-events-plugin/common';
+import type { InvestigationQuotasResponse } from '@kbn/nightshift-investigations-plugin/common';
 import { GlobalLimitCallout } from './global_limit_callout';
 import { getAutomationBlockingLimit } from '../utils/filter_automations';
 
@@ -20,24 +20,19 @@ const quotas = ({
   totalUsed = 0,
 }: {
   enabled?: boolean;
-  limit?: number;
+  limit?: number | null;
   used?: number;
-  totalLimit?: number;
+  totalLimit?: number | null;
   totalUsed?: number;
-}): RunQuotasResponse => ({
+}): InvestigationQuotasResponse => ({
   enabled,
-  investigationLimitsEnabled: true,
   limits: {
-    detection: 0,
-    ki_extraction: 0,
-    investigation: limit,
+    automatic_investigation: limit,
     manual_investigation: 5,
     total_investigation: totalLimit,
   },
   counts: {
-    detection: 0,
-    ki_extraction: 0,
-    investigation: used,
+    automatic_investigation: used,
     manual_investigation: 0,
     total_investigation: totalUsed,
   },
@@ -54,7 +49,7 @@ describe('GlobalLimitCallout', () => {
     render(
       <I18nProvider>
         <GlobalLimitCallout
-          group="investigation"
+          group="automatic_investigation"
           limit={10}
           settingsHref="/app/nightshift/settings/investigations"
         />
@@ -71,13 +66,13 @@ describe('getAutomationBlockingLimit', () => {
   it.each([
     [undefined, undefined],
     [quotas({ used: 2 }), undefined],
-    [quotas({ used: 3 }), 'investigation'],
-    [quotas({ used: 5 }), 'investigation'],
-    [quotas({ limit: 0, used: 5 }), undefined],
-    [quotas({ enabled: false }), 'investigation'],
+    [quotas({ used: 3 }), 'automatic_investigation'],
+    [quotas({ used: 5 }), 'automatic_investigation'],
+    [quotas({ limit: null, used: 5 }), undefined],
+    [quotas({ enabled: false }), undefined],
     [quotas({ used: 0, totalUsed: 10 }), 'total_investigation'],
     [quotas({ used: 3, totalUsed: 10 }), 'total_investigation'],
-    [quotas({ used: 0, totalLimit: 0, totalUsed: 50 }), undefined],
+    [quotas({ used: 0, totalLimit: null, totalUsed: 50 }), undefined],
   ])('%j -> %s', (input, expected) => {
     expect(getAutomationBlockingLimit(input)).toBe(expected);
   });

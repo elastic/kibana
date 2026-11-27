@@ -184,13 +184,24 @@ export class ScoutFailedTestReporter implements Reporter {
         .map((test) => getTestIdentity(test).id)
     );
 
-    // Save & conclude the report
+    // Saved independently, and never throwing: Playwright marks the whole run failed if a
+    // reporter hook throws (see the note in onBegin).
     try {
-      this.report.save(this.reportRootPath);
-      // Save failure tracking file for GitHub issue integration
-      this.failureTracker?.save({ excludeTestIds: flakyTestIds });
+      this.saveOrLog('report artifact', () => this.report.save(this.reportRootPath));
+      this.saveOrLog('failure tracking file', () =>
+        this.failureTracker?.save({ excludeTestIds: flakyTestIds })
+      );
     } finally {
       this.report.conclude();
+    }
+  }
+
+  private saveOrLog(what: string, save: () => void) {
+    try {
+      save();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.log.error(`Failed to save Scout ${what}: ${message}`);
     }
   }
 }

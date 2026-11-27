@@ -26,8 +26,16 @@ const DISABLED_RUN_TEST_TIMEOUT_MS = 150_000;
 const ZEROED_COUNTERS = {
   'metrics.signalsGenerated': 0,
   'metrics.ruleEventsGenerated': 0,
+  'metrics.breachedEventsGenerated': 0,
+  'metrics.recoveredEventsGenerated': 0,
+  'metrics.noDataEventsGenerated': 0,
   'metrics.newEpisodesGenerated': 0,
+  'metrics.episodesTransitionedToPending': 0,
+  'metrics.episodesTransitionedToActive': 0,
+  'metrics.episodesTransitionedToRecovering': 0,
+  'metrics.episodesTransitionedToInactive': 0,
   'metrics.rowsReturnedByQuery': 0,
+  'metrics.queryBatchesProcessed': 0,
   'metrics.groupsDroppedByLimit': 0,
   'metrics.rowsDroppedByLimit': 0,
 } as const;
@@ -117,7 +125,18 @@ apiTest.describe(
         expect(run['rule.version']).toBe(rule.version);
 
         expect(run['metrics.rowsReturnedByQuery']).toBeGreaterThanOrEqual(1);
+        expect(run['metrics.queryBatchesProcessed']).toBeGreaterThanOrEqual(1);
         expect(run['metrics.newEpisodesGenerated']).toBeGreaterThanOrEqual(1);
+
+        // The run breached, so its persisted events carry `status: 'breached'`.
+        expect(run['metrics.breachedEventsGenerated']).toBeGreaterThanOrEqual(1);
+        expect(run['metrics.recoveredEventsGenerated']).toBe(0);
+        expect(run['metrics.noDataEventsGenerated']).toBe(0);
+
+        expect(run['metrics.episodesTransitionedToPending']).toBe(0);
+        expect(run['metrics.episodesTransitionedToActive']).toBe(1);
+        expect(run['metrics.episodesTransitionedToRecovering']).toBe(0);
+        expect(run['metrics.episodesTransitionedToInactive']).toBe(0);
 
         // `kind: 'alert'` rules persist `type: 'alert'` documents, and the
         // signal counter only counts `type: 'signal'` ones.

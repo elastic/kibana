@@ -20,11 +20,14 @@ import { assertSignificantEventsAccess } from '../../../routes/utils/assert_sign
 import { createSignificantEventsAvailability } from '../significant_events_availability';
 import { getSourceWriteConflictMetadata } from '../../../lib/errors/source_write_conflict_error';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
+import { getWorkflowExecutionIdFromRequest } from '../../../lib/telemetry/ebt/workflow_execution_id';
 import {
   loadSourceCatalog,
   resolveSourcesBySlugOrId,
   toSourceRef,
 } from '../../utils/resolve_source_slugs';
+import { trackTelemetryBestEffort } from '../../../lib/telemetry/track_telemetry_best_effort';
+import { reportToolFailure, toTelemetryErrorMessage } from '../tool_failure';
 import { createFeatureKnowledgeIndicatorToolHandler } from './handler';
 
 export const SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_CREATE_FEATURE_TOOL_ID =
@@ -58,7 +61,7 @@ export function createFeatureKnowledgeIndicatorTool({
     id: SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_CREATE_FEATURE_TOOL_ID,
     type: ToolType.builtin,
     description: dedent`
-      Create a feature Knowledge Indicator (KI) for a Nightshift source and persist it to
+      Create a feature Knowledge Indicator (KI) for a nightshift source and persist it to
       significant events feature storage.
 
       Use this tool when the conversation discovers a new source behavior pattern and it should be
@@ -95,6 +98,7 @@ export function createFeatureKnowledgeIndicatorTool({
     availability: createSignificantEventsAvailability({ server, logger }),
     handler: async ({ slug, expires_at, ...featureInput }, context) => {
       const { request } = context;
+      const workflowExecutionId = getWorkflowExecutionIdFromRequest(request);
       let sourceId = '';
       try {
         const scopedClients = await getScopedClients({
@@ -119,11 +123,22 @@ export function createFeatureKnowledgeIndicatorTool({
           logger,
         });
 
-        telemetry.trackAgentBuilderKnowledgeIndicatorCreated({
-          ki_kind: 'feature',
-          tool_id: 'ki_feature_create',
-          success: true,
-          source_id: source.id,
+        trackTelemetryBestEffort({
+          logger,
+          description: 'ki_feature_create telemetry',
+          track: () =>
+            telemetry.trackAgentBuilderKnowledgeIndicatorCreated(
+              {
+                workflow_execution_id: workflowExecutionId,
+                ki_kind: 'feature',
+                tool_id: 'ki_feature_create',
+                success: true,
+                source_id: source.id,
+                space_id: request.spaceId,
+                knowledge_indicator_id: id,
+              },
+              request
+            ),
         });
 
         return {
@@ -142,19 +157,32 @@ export function createFeatureKnowledgeIndicatorTool({
         };
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error';
-        logger.error(`Error running ki_feature_create: ${message}`);
-        if (error instanceof Error) {
-          logger.debug(error.stack ?? error.message);
-        } else {
-          logger.debug(String(error));
-        }
+        const failure = reportToolFailure({
+          error,
+          toolId: SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_CREATE_FEATURE_TOOL_ID,
+          errorLogMessage: `Error running ki_feature_create: ${message}`,
+          logger,
+          telemetry,
+          request,
+          runContext: context.runContext,
+        });
 
-        telemetry.trackAgentBuilderKnowledgeIndicatorCreated({
-          ki_kind: 'feature',
-          tool_id: 'ki_feature_create',
-          success: false,
-          source_id: sourceId,
-          error_message: message,
+        trackTelemetryBestEffort({
+          logger,
+          description: 'failed ki_feature_create telemetry',
+          track: () =>
+            telemetry.trackAgentBuilderKnowledgeIndicatorCreated(
+              {
+                workflow_execution_id: workflowExecutionId,
+                ki_kind: 'feature',
+                tool_id: 'ki_feature_create',
+                success: false,
+                source_id: sourceId,
+                space_id: request.spaceId,
+                error_message: toTelemetryErrorMessage(failure, message),
+              },
+              request
+            ),
         });
 
         return {

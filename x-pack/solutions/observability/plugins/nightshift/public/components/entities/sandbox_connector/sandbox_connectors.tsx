@@ -20,9 +20,15 @@ import {
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { getEbtProps } from '@kbn/ebt-click';
 import { KbnInfoCallout } from '@kbn/ui-callout';
 import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import type { SandboxConnector } from '@kbn/nightshift-investigations-plugin/common';
+import {
+  NIGHTSHIFT_EBT_ACTIONS,
+  NIGHTSHIFT_EBT_DETAILS,
+  NIGHTSHIFT_EBT_ELEMENTS,
+} from '../../../common/ebt_constants';
 import { isHttpNotFoundError } from '../../../common/http_error';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useFetchSandboxConnectors } from '../../../data/sandbox_connectors/use_fetch_sandbox_connectors';
@@ -99,6 +105,10 @@ export function SandboxConnectorsTable(): React.ReactElement | null {
                 <EuiLink
                   onClick={() => openEdit(connector)}
                   data-test-subj={`nightshiftConnectorName-${connector.id}`}
+                  {...getEbtProps({
+                    action: NIGHTSHIFT_EBT_ACTIONS.EDIT_CONNECTOR,
+                    element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+                  })}
                 >
                   {name}
                 </EuiLink>
@@ -156,6 +166,11 @@ export function SandboxConnectorsTable(): React.ReactElement | null {
                 isDisabled={!canEditAgent}
                 onClick={() => unassign(connector)}
                 data-test-subj={`nightshiftConnectorRemove-${connector.id}`}
+                {...getEbtProps({
+                  action: NIGHTSHIFT_EBT_ACTIONS.TOGGLE_SANDBOX_CONNECTOR,
+                  element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+                  detail: NIGHTSHIFT_EBT_DETAILS.DISABLE,
+                })}
               />
             </EuiToolTip>
           );
@@ -171,7 +186,7 @@ export function SandboxConnectorsTable(): React.ReactElement | null {
         announceOnMount
         size="s"
         title={i18n.translate('xpack.nightshift.sandboxConnectors.notEnabledTitle', {
-          defaultMessage: 'Elastic Nightshift is not enabled in this space yet.',
+          defaultMessage: 'Elastic nightshift is not enabled in this space yet.',
         })}
         data-test-subj="nightshiftSandboxConnectorsNotEnabled"
       >
@@ -180,7 +195,7 @@ export function SandboxConnectorsTable(): React.ReactElement | null {
           data-test-subj="nightshiftSandboxConnectorsEnableLink"
         >
           {i18n.translate('xpack.nightshift.sandboxConnectors.notEnabledLink', {
-            defaultMessage: 'Enable it from the Nightshift onboarding to connect tools.',
+            defaultMessage: 'Enable it from the nightshift onboarding to connect tools.',
           })}
         </EuiLink>
       </KbnInfoCallout>

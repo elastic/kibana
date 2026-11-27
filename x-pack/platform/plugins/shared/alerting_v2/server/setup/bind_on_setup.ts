@@ -21,13 +21,14 @@ import { registerFeaturePrivileges } from '../lib/security/privileges';
 import { registerSavedObjects } from '../saved_objects';
 import { LoggerServiceToken } from '../lib/services/logger_service/logger_service';
 import { registerCreateAlertEventStep } from '../lib/workflow_extensions/register_create_alert_event_step';
+import { registerCreateSignalEventStep } from '../lib/workflow_extensions/register_create_signal_event_step';
 import { registerTriggerDefinitions } from '../lib/workflow_extensions/register_trigger_definitions';
 import { registerAlertingV2ManagedWorkflowOwner } from '../lib/workflow_extensions/managed_workflows';
 import { registerAlertingV2UsageCollector } from '../lib/usage/usage_collector';
 import {
   ACTION_POLICY_EVENT_ACTIONS,
   ACTION_POLICY_EVENT_PROVIDER,
-} from '../lib/dispatcher/steps/constants';
+} from '../lib/services/event_log_service/constants';
 import { registerAlertingAdvancedSettings } from '../settings/advanced_settings';
 import { registerTelemetryEvents } from '../lib/telemetry/register_ebt_events';
 
@@ -87,6 +88,11 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
             PrivilegeChecker
           ).canWrite('alerts');
         registerCreateAlertEventStep(
+          workflowsExtensions,
+          getAlertEventsClient,
+          checkAlertWritePrivilege
+        );
+        registerCreateSignalEventStep(
           workflowsExtensions,
           getAlertEventsClient,
           checkAlertWritePrivilege

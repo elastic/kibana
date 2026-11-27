@@ -95,6 +95,18 @@ describe('getScoutTestTarget', () => {
       mode: 'unknown',
     });
   });
+
+  // Runs against an existing deployment never start Kibana, so the domain stays unresolved and
+  // this is the common shape on MKI and ECH. The location still has to say `cloud`, because the
+  // failed test reporter reads it to decide whether the Cloud infra rules apply.
+  it('keeps the cloud location when the serverless target cannot be determined', () => {
+    process.env.TEST_CLOUD = '1';
+
+    expect(getScoutTestTarget(createConfig({ serverless: true }))).toEqual({
+      type: 'cloud',
+      mode: 'unknown',
+    });
+  });
 });
 
 const createServerlessConfig = (serverArgs: string[]) =>

@@ -137,7 +137,6 @@ export const ActionPoliciesListHeader = ({
   return (
     <>
       <AppHeader
-        sticky={false}
         title={ACTION_POLICIES_LIST_PAGE_TITLE}
         badges={[universalRulesOnlyBadge]}
         spacing="bleed"

@@ -4,7 +4,8 @@
       "error_trace": "__flag__",
       "filter_path": [],
       "human": "__flag__",
-      "pretty": "__flag__"
+      "pretty": "__flag__",
+      "validate": "__flag__"
     },
     "data_autocomplete_rules": {
       "query": "",
@@ -16,8 +17,8 @@
     "patterns": [
       "_query/view/{name}"
     ],
-    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch#TODO",
-    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch#TODO",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-esql-put-view",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-esql-put-view",
     "availability": {
       "stack": true,
       "serverless": true

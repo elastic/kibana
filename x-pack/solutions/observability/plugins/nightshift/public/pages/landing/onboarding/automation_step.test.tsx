@@ -20,6 +20,7 @@ import { OnboardingAutomationStep } from './automation_step';
 jest.mock('../../../data/automations/use_automations', () => ({
   useDeleteAutomation: jest.fn(),
   useCreateAutomation: jest.fn(),
+  useRunAutomation: () => ({ mutate: jest.fn(), isLoading: false }),
 }));
 
 jest.mock('../../../data/service_accounts/use_investigator_service_account', () => ({
@@ -120,13 +121,18 @@ const mockServiceAccount = ({
     data: pending ? undefined : { serviceAccountsEnabled, canModifyBoundWorkflows },
   });
 
-const renderStep = (automations: Automation[] = [], onInvestigationClick = jest.fn()) =>
+const renderStep = (
+  automations: Automation[] = [],
+  onInvestigationClick = jest.fn(),
+  isInvestigationSelected = false
+) =>
   render(
     <I18nProvider>
       <OnboardingAutomationStep
         investigation={investigation}
         automations={automations}
         automationsAvailable
+        isInvestigationSelected={isInvestigationSelected}
         onInvestigationClick={onInvestigationClick}
       />
     </I18nProvider>
@@ -144,7 +150,7 @@ describe('OnboardingAutomationStep', () => {
     renderStep([], onInvestigationClick);
 
     expect(screen.getByTestId('nightshiftOnboardingTrialInvestigationStatus')).toHaveTextContent(
-      'Results are ready'
+      'Investigation results are ready'
     );
     expect(
       screen.queryByTestId('nightshiftOnboardingTrialCreateAutomation')
@@ -165,6 +171,12 @@ describe('OnboardingAutomationStep', () => {
 
     fireEvent.click(screen.getByTestId('nightshiftOnboardingCreateAutomation'));
     expect(screen.getByTestId('createAutomationFlyout')).toBeInTheDocument();
+  });
+
+  it('disables the view results button while the investigation is open', () => {
+    renderStep([], jest.fn(), true);
+
+    expect(screen.getByTestId('nightshiftOnboardingTrialInvestigationOpen')).toBeDisabled();
   });
 
   it('lists a saved automation beside a card to add another, and opens its overview', () => {

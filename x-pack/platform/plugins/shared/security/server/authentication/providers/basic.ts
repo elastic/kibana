@@ -8,6 +8,7 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 
+import type { AuthenticationOptions } from './base';
 import { BaseAuthenticationProvider } from './base';
 import { NEXT_URL_QUERY_STRING_PARAMETER } from '../../../common/constants';
 import { getDetailedErrorMessage } from '../../errors';
@@ -87,22 +88,30 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider<Prov
   }
 
   /**
-   * Performs request authentication using Basic HTTP Authentication.
+   * Authenticates the request with the Basic credentials stored in its session.
+   * During session renewal, ignore the expired token that Core put in the Authorization header.
+   * Use the supplied session and contact Elasticsearch, even on minimal-authentication routes.
+   * The request headers stay unchanged.
    * @param request Request instance.
    * @param [session] Optional session object associated with the provider.
+   * @param [options] Explicit session reauthentication controls.
    */
-  public async authenticate(request: KibanaRequest, session?: SessionValue<ProviderState> | null) {
+  public async authenticate(
+    request: KibanaRequest,
+    session?: SessionValue<ProviderState> | null,
+    options?: AuthenticationOptions
+  ) {
     this.logger.debug(
       `Trying to authenticate user request to ${request.url.pathname}${request.url.search}.`
     );
 
-    if (HTTPAuthorizationHeader.parseFromRequest(request) != null) {
+    if (!options?.reauthenticate && HTTPAuthorizationHeader.parseFromRequest(request) != null) {
       this.logger.debug('Cannot authenticate requests with `Authorization` header.');
       return AuthenticationResult.notHandled();
     }
 
     if (session) {
-      return await this.authenticateViaState(request, session);
+      return await this.authenticateViaState(request, session, options);
     }
 
     // If session isn't present let's redirect user to the login page.
@@ -149,8 +158,13 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider<Prov
    * it's forwarded to Elasticsearch backend.
    * @param request Request instance.
    * @param session Session value previously created by the provider.
+   * @param [options] Reauthentication options forwarded to full backend credential validation.
    */
-  private async authenticateViaState(request: KibanaRequest, session: SessionValue<ProviderState>) {
+  private async authenticateViaState(
+    request: KibanaRequest,
+    session: SessionValue<ProviderState>,
+    options?: AuthenticationOptions
+  ) {
     this.logger.debug('Trying to authenticate via state.');
 
     if (!session.state.authorization) {
@@ -160,7 +174,7 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider<Prov
 
     const authHeaders = { authorization: session.state.authorization };
     try {
-      const user = await this.getUser(request, authHeaders, session);
+      const user = await this.getUser(request, authHeaders, session, options);
 
       this.logger.debug('Request has been authenticated via state.');
       return AuthenticationResult.succeeded(user, { authHeaders });

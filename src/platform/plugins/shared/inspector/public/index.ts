@@ -26,6 +26,7 @@ export {
   apiHasInspectorAdapters,
   type HasInspectorAdapters,
 } from './adapters/has_inspector_adapters';
+export { disambiguateRequestNames } from './views/requests/components/disambiguate_request_names';
 export { InspectorPublicPlugin as Plugin } from './plugin';
 export type { Setup, Start } from './plugin';
 export type {

@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import { CONTENT_LIST_TEST_SUBJECTS } from '@kbn/content-list-common';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
+
+const STARRED_FILTER = CONTENT_LIST_TEST_SUBJECTS.starredFilter;
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { dashboard, security } = getPageObjects(['dashboard', 'security']);
@@ -91,20 +94,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('can favorite and unfavorite a dashboard', async () => {
-      await testSubjects.exists('favoritesFilterButton');
+      await testSubjects.exists(STARRED_FILTER);
       await listingTable.expectItemsCount('dashboard', 1);
 
-      await testSubjects.click('favoritesFilterButton');
+      await testSubjects.click(STARRED_FILTER);
       await listingTable.expectItemsCount('dashboard', 0, 1000);
 
-      await testSubjects.click('favoritesFilterButton');
+      await testSubjects.click(STARRED_FILTER);
       await listingTable.expectItemsCount('dashboard', 1);
 
-      await testSubjects.moveMouseTo('~dashboardListingTitleLink-A-Dashboard');
+      await testSubjects.moveMouseTo(CONTENT_LIST_TEST_SUBJECTS.itemLink);
       await testSubjects.click('favoriteButton');
       await listingTable.expectItemsCount('dashboard', 1);
 
-      await testSubjects.click('favoritesFilterButton');
+      await testSubjects.click(STARRED_FILTER);
       await listingTable.expectItemsCount('dashboard', 1);
 
       await browser.refresh(); // make sure the favorite state is persisted and filter state is preserved
@@ -112,12 +115,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await listingTable.expectItemsCount('dashboard', 1);
       await testSubjects.click('unfavoriteButton');
       await listingTable.expectItemsCount('dashboard', 0, 1000);
-      await testSubjects.click('favoritesFilterButton');
+      await testSubjects.click(STARRED_FILTER);
       await listingTable.expectItemsCount('dashboard', 1);
     });
 
     it('can favorite a dashboard from the dashboard view', async () => {
-      await listingTable.clickItemLink('dashboard', 'A-Dashboard');
+      await listingTable.clickItemLink('dashboard', 'A Dashboard');
       await dashboard.waitForRenderComplete();
       await testSubjects.click('favoriteButton');
       await testSubjects.exists('unfavoriteButton');

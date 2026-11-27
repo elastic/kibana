@@ -6,9 +6,9 @@
  */
 
 import type { Query } from '@kbn/es-query';
-import type { ISearchGeneric } from '@kbn/search-types';
+import type { ISearchMethods } from '@kbn/search-types';
 import type { DocumentCountStats } from '@kbn/aiops-log-rate-analysis/types';
-import { appendToESQLQuery, getESQLResults, sanitazeESQLInput } from '@kbn/esql-utils';
+import { appendToESQLQuery, sanitazeESQLInput } from '@kbn/esql-utils';
 
 /**
  * Builds an ES|QL query counting documents per interval. BUCKET with a time span rounds
@@ -47,7 +47,7 @@ export const getEsqlDocumentCountStats = async ({
   signal,
 }: {
   esql: string;
-  search: ISearchGeneric;
+  search: Pick<ISearchMethods, 'esql'>;
   timeFieldName: string;
   earliest: number;
   latest: number;
@@ -55,25 +55,28 @@ export const getEsqlDocumentCountStats = async ({
   searchQuery?: Query['query'];
   signal?: AbortSignal;
 }): Promise<{ totalCount: number; documentCountStats: DocumentCountStats }> => {
-  const { response } = await getESQLResults({
-    esqlQuery: buildEsqlDocumentCountQuery({ esql, timeFieldName, intervalMs }),
-    search,
-    signal,
-    // Binds ?_tstart / ?_tend if the user's query references them.
-    timeRange: { from: new Date(earliest).toISOString(), to: new Date(latest).toISOString() },
-    filter: {
-      bool: {
-        filter: [
-          ...(typeof searchQuery === 'object' ? [searchQuery] : []),
-          {
-            range: {
-              [timeFieldName]: { gte: earliest, lte: latest, format: 'epoch_millis' },
+  const { rawResponse: response } = await search.esql(
+    {
+      query: buildEsqlDocumentCountQuery({ esql, timeFieldName, intervalMs }),
+      filter: {
+        bool: {
+          filter: [
+            ...(typeof searchQuery === 'object' ? [searchQuery] : []),
+            {
+              range: {
+                [timeFieldName]: { gte: earliest, lte: latest, format: 'epoch_millis' },
+              },
             },
-          },
-        ],
+          ],
+        },
+      },
+      // Binds ?_tstart / ?_tend if the user's query references them.
+      kibanaQueryContext: {
+        timeRange: { from: new Date(earliest).toISOString(), to: new Date(latest).toISOString() },
       },
     },
-  });
+    { abortSignal: signal }
+  );
 
   const countIndex = response.columns.findIndex(({ name }) => name === 'Count');
   const bucketIndex = response.columns.findIndex(({ name }) => name === 'Bucket');

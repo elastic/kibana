@@ -37,6 +37,15 @@ telemetry.tracing:
         headers:
           authorization: 'ApiKey [REDACTED]'
 
+# For browser traces with EDOT Browser (experimental, runs alongside the APM RUM agent).
+# The url and headers are sent to every browser, so they must not contain secrets.
+telemetry.tracing.browser:
+  enabled: true
+  url: <URL_TO_THE_BROWSER_OTLP_COLLECTOR> # must allow CORS from Kibana's origin
+  headers: {}
+# Keep any other origins your deployment already allows (e.g. the APM Server URL used by RUM below).
+csp.connect_src: ['<URL_TO_THE_BROWSER_OTLP_COLLECTOR>', '<URL_TO_THE_APM_SERVER>']
+
 # For RUM traces (pending to be migrated to OTel when OTel RUM is production-ready)
 elastic.apm:
   serverUrl: <URL_TO_THE_APM_SERVER>
@@ -48,6 +57,10 @@ elastic.apm:
 > [!TIP]
 > The best way to get started is by using an ECH deployment. It offers a Managed OTLP endpoint (mOTLP) that you can use to ship your OTel Traces, Metrics and Logs without the hassle of starting one locally. The same applies to the APM Server.
 > To retrieve the `<URL_TO_THE_OTLP_ENDPOINT>` and the `ApiKey`, in the Kibana of your ECH deployment, head to `Observability` > `Add data` (top-right corner) > `Application` > `OpenTelemetry`. The URL and credentials will be shown in the section `Configure the OpenTelemetry SDK`.
+
+> [!IMPORTANT]
+> The browser cannot use the managed OTLP endpoint API key above without exposing it to every user. If your upstream needs credentials, point `telemetry.tracing.browser.url` at a CORS-enabled collector or proxy that adds them server-side.
+> When `telemetry.tracing.browser.enabled` is true, the APM RUM agent stops instrumenting `fetch` and XHR requests, so EDOT Browser owns trace propagation. Those request traces are expected to move from the APM Server to the OTLP destination; RUM keeps page-load, route-change and error data.
 
 ## How to instrument each type of signal
 

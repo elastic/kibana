@@ -16,7 +16,7 @@ import { useChangeHistoryList } from '../../hooks/use_change_history_list';
 import { useChangeHistoryConfig } from '../../provider/use_change_history_config';
 import { useChangeHistoryModal } from '../../provider/use_change_history_modal';
 import { ChangeHistoryModalSelectionContext } from '../../provider/change_history_modal_selection_context';
-import type { ChangeHistoryCompareRowOverride } from '../../types/change_history_compare_override';
+import type { ChangeHistoryCompareMode } from '../../types/change_history_compare_mode';
 import type { ChangeHistoryListItem } from '../../types/change_history_list_item';
 import type { ChangeHistorySelectionSource } from '../../telemetry/types';
 import { findCommittedChangeHistoryListItem } from '../../utils/find_committed_change_history_list_item';
@@ -40,14 +40,15 @@ const getHistoryStartedAt = (timestamps: string[]): Date | undefined => {
 
 export function ChangeHistoryModal(): JSX.Element | null {
   const { euiTheme } = useEuiTheme();
-  const { adapter, objectId, labels, supports, telemetry } = useChangeHistoryConfig();
+  const { adapter, objectId, labels, supports, telemetry, onSelectChange, defaultCompareMode } =
+    useChangeHistoryConfig();
   const { isOpen, closeModal } = useChangeHistoryModal();
   const modalTitleId = useGeneratedHtmlId();
 
+  const initialCompareMode = supports.compare ? defaultCompareMode : undefined;
+
   const [selectedChangeId, setSelectedChangeId] = useState<string | undefined>();
-  const [compareOverride, setCompareOverride] = useState<
-    ChangeHistoryCompareRowOverride | undefined
-  >();
+  const [compareMode, setCompareMode] = useState<ChangeHistoryCompareMode | undefined>();
   const [restoreConfirmChangeId, setRestoreConfirmChangeId] = useState<string | undefined>();
   const lastReportedChangeIdBySourceRef = useRef<
     Partial<Record<ChangeHistorySelectionSource, string>>
@@ -90,27 +91,51 @@ export function ChangeHistoryModal(): JSX.Element | null {
     enabled: isOpen,
     selectedChangeId,
     setSelectedChangeId,
-    onAutoSelect: (item) => reportChangeSelected(item, 'auto_latest'),
+    onAutoSelect: (item) => {
+      setCompareMode(initialCompareMode);
+      reportChangeSelected(item, 'auto_latest');
+    },
   });
 
   useEffect(() => {
     if (!isOpen) {
       setSelectedChangeId(undefined);
-      setCompareOverride(undefined);
+      setCompareMode(initialCompareMode);
       setRestoreConfirmChangeId(undefined);
       lastReportedChangeIdBySourceRef.current = {};
       unlockSelectionDecision();
     }
-  }, [isOpen, unlockSelectionDecision]);
+  }, [initialCompareMode, isOpen, unlockSelectionDecision]);
 
   const handleSelectItem = useCallback(
     (item: ChangeHistoryListItem) => {
       lockSelectionDecision();
-      setCompareOverride(undefined);
+      setCompareMode(initialCompareMode);
       setSelectedChangeId(item.id);
       reportChangeSelected(item, 'user_click');
+      onSelectChange?.(item);
     },
-    [lockSelectionDecision, reportChangeSelected]
+    [initialCompareMode, lockSelectionDecision, onSelectChange, reportChangeSelected]
+  );
+
+  const requestCompareToPrevious = useCallback(
+    (changeId: string) => {
+      if (!supports.compare) {
+        return;
+      }
+
+      const item = items.find((listItem) => listItem.id === changeId);
+      if (!item) {
+        return;
+      }
+
+      lockSelectionDecision();
+      setSelectedChangeId(changeId);
+      setCompareMode({ type: 'vs_previous' });
+      reportChangeSelected(item, 'user_click');
+      onSelectChange?.(item);
+    },
+    [items, lockSelectionDecision, onSelectChange, reportChangeSelected, supports.compare]
   );
 
   const requestCompareToVersion = useCallback(
@@ -129,7 +154,7 @@ export function ChangeHistoryModal(): JSX.Element | null {
       }
 
       lockSelectionDecision();
-      setCompareOverride({ type: 'vs_row', rowChangeId });
+      setCompareMode({ type: 'vs_row', rowChangeId });
     },
     [items, lockSelectionDecision, selectedChangeId, supports.compare]
   );
@@ -152,10 +177,16 @@ export function ChangeHistoryModal(): JSX.Element | null {
 
   const modalSelectionValue = useMemo(
     () => ({
-      ...(supports.compare ? { requestCompareToVersion } : {}),
+      ...(supports.compare ? { requestCompareToVersion, requestCompareToPrevious } : {}),
       ...(supports.restore ? { requestRestoreVersion } : {}),
     }),
-    [requestCompareToVersion, requestRestoreVersion, supports.compare, supports.restore]
+    [
+      requestCompareToPrevious,
+      requestCompareToVersion,
+      requestRestoreVersion,
+      supports.compare,
+      supports.restore,
+    ]
   );
 
   const currentChange = useMemo(
@@ -322,7 +353,7 @@ export function ChangeHistoryModal(): JSX.Element | null {
               <ChangeHistoryPreviewPanel
                 selectedChangeId={selectedChangeId}
                 listItems={items}
-                compareOverride={compareOverride}
+                compareMode={compareMode}
               />
             </ChangeHistoryPreviewShell>
 

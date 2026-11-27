@@ -85,11 +85,17 @@ beforeEach(() => {
  */
 const getRenderedFlyout = (callIndex = 0) => {
   const controller = mockReactDomRender.mock.calls[callIndex][0].props.children;
-  return controller.props.children({
+  const titleBound = controller.props.children({
     type: controller.props.initialType ?? 'overlay',
     size: controller.props.initialSize,
     onResize: jest.fn(),
   });
+  // The flyout is wrapped in a component that reads the live title. Evaluate it outside React,
+  // reading the current snapshot, to reach the `EuiFlyout` element.
+  jest
+    .spyOn(React, 'useSyncExternalStore')
+    .mockImplementation((_subscribe, getSnapshot) => getSnapshot());
+  return titleBound.type(titleBound.props);
 };
 
 afterEach(() => {
@@ -310,6 +316,33 @@ describe('SystemFlyoutService', () => {
       expect(euiFlyoutElement.props.flyoutMenuProps.title).toBe('Top Level Title');
     });
 
+    it('setTitle updates the rendered flyout title', () => {
+      const ref = systemFlyouts.open(<div>System flyout content</div>, { title: 'Initial' });
+
+      ref.setTitle('Updated');
+
+      expect(getRenderedFlyout().props.flyoutMenuProps.title).toBe('Updated');
+    });
+
+    it('setTitle is ignored when flyoutMenuProps.title was passed', () => {
+      const ref = systemFlyouts.open(<div>System flyout content</div>, {
+        flyoutMenuProps: { title: 'Menu Title' },
+      });
+
+      ref.setTitle('Updated');
+
+      expect(getRenderedFlyout().props.flyoutMenuProps.title).toBe('Menu Title');
+    });
+
+    it('setTitle is a no-op once the flyout is closed', () => {
+      const ref = systemFlyouts.open(<div>System flyout content</div>, { title: 'Initial' });
+      ref.close();
+
+      ref.setTitle('Updated');
+
+      expect(getRenderedFlyout().props.flyoutMenuProps.title).toBe('Initial');
+    });
+
     it('renders flyoutMenuProps with custom properties', () => {
       const expectedFlyoutMenuProps = {
         title: 'Visible Title',
@@ -433,7 +466,7 @@ describe('SystemFlyoutService', () => {
       expect(mockReactDomRender).toHaveBeenCalledTimes(1);
 
       const { getByRole } = render(mockReactDomRender.mock.calls[0][0]);
-      expect(getByRole('heading', { level: 3, name: 'My Flyout Title' })).toBeInTheDocument();
+      expect(getByRole('heading', { level: 2, name: 'My Flyout Title' })).toBeInTheDocument();
     });
 
     it('runs content hooks inside React, so state updates re-render the zones', () => {
@@ -454,9 +487,9 @@ describe('SystemFlyoutService', () => {
       systemFlyouts.openTemplate({ session: 'never' }, Content);
       const { getByRole } = render(mockReactDomRender.mock.calls[0][0]);
 
-      expect(getByRole('heading', { level: 3, name: 'Count 0' })).toBeInTheDocument();
+      expect(getByRole('heading', { level: 2, name: 'Count 0' })).toBeInTheDocument();
       fireEvent.click(getByRole('button', { name: 'increment' }));
-      expect(getByRole('heading', { level: 3, name: 'Count 1' })).toBeInTheDocument();
+      expect(getByRole('heading', { level: 2, name: 'Count 1' })).toBeInTheDocument();
     });
 
     it('lets nested content close the flyout through useFlyoutClose', () => {

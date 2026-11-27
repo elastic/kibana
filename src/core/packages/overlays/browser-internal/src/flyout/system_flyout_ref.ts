@@ -20,10 +20,16 @@ export class SystemFlyoutRef implements OverlayRef {
   private _isClosed = false;
   private closeSubject = new Subject<void>();
   private container: HTMLElement;
+  /** Wired by the service once the flyout is rendered. */
+  public titleSetter: ((title: string) => void) | null = null;
 
   constructor(container: HTMLElement) {
     this.container = container;
     this.onClose = firstValueFrom(this.closeSubject);
+  }
+
+  public setTitle(title: string): void {
+    if (!this._isClosed) this.titleSetter?.(title);
   }
 
   public get isClosed(): boolean {

@@ -15,6 +15,7 @@ import type {
   ConversationRoundOrigin,
   AttachmentAddedEvent,
   AttachmentUpdatedEvent,
+  AgentMessageEvent,
 } from '@kbn/agent-builder-common';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents';
 import type {
@@ -47,13 +48,24 @@ export interface AgentTurnItem {
   triggerAttachmentRefs?: AttachmentVersionRef[];
 }
 
+/** Status shown on standalone steer messages. */
+export type SteerState = 'waiting' | 'before_pause';
+
 export interface UserMessageItem {
   kind: 'userMessage';
   key: string;
   event: UserMessageEvent;
   isPending?: boolean;
+  steerState?: SteerState;
   /** Legacy refs, then the refs of the attachments sent with the message. */
   attachmentRefs?: AttachmentVersionRef[];
+}
+
+/** A message another agent posted, such as a background sub-agent's report. */
+export interface AgentMessageItem {
+  kind: 'agentMessage';
+  key: string;
+  event: AgentMessageEvent;
 }
 
 /**
@@ -90,15 +102,21 @@ export interface CustomEventItem extends UnresolvedCustomEventItem {
 /** What the grouping emits. Attachment and custom event items still need resolving. */
 export type GroupedItem =
   | UserMessageItem
+  | AgentMessageItem
   | AgentTurnItem
   | UnresolvedAttachmentItem
   | UnresolvedCustomEventItem;
 
 /** What `Timeline` and the scroll anchor receive: every item here can draw. */
-export type TimelineItem = UserMessageItem | AgentTurnItem | AttachmentItem | CustomEventItem;
+export type TimelineItem =
+  | UserMessageItem
+  | AgentMessageItem
+  | AgentTurnItem
+  | AttachmentItem
+  | CustomEventItem;
 
-/** A timeline item that speaks for a human, not for a run. */
-export type UserEntry = UserMessageItem;
+/** A timeline item that speaks for a participant, not for a run. */
+export type UserEntry = UserMessageItem | AgentMessageItem;
 
 /** One run, collected from its events before it becomes an {@link AgentTurnItem}. */
 export interface ExecutionAccumulator {

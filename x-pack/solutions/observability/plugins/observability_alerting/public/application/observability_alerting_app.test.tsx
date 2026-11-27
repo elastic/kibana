@@ -26,19 +26,29 @@ import {
   ADD_TO_CASE_EPISODE_ACTION_ID,
   closeAddToCaseModal,
 } from '@kbn/alerting-v2-episodes-ui/actions';
-import { INVESTIGATE_EPISODE_ACTION_ID } from '../actions/investigate_episode_action';
-import { VIEW_V1_ALERT_IN_APP_ACTION_ID } from '../actions/view_in_app';
+import {
+  INVESTIGATE_EPISODE_ACTION_ID,
+  VIEW_V1_ALERT_IN_APP_ACTION_ID,
+} from '@kbn/observability-plugin/public';
 import { ObservabilityAlertingApp } from './observability_alerting_app';
 import {
   OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
   OBSERVABILITY_ALERTING_ALERTS_PATH,
   OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
+  OBSERVABILITY_ALERTING_IMPORTS_PATH,
   OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
   OBSERVABILITY_ALERTING_RULES_V1_PATH,
   OBSERVABILITY_ALERTING_RULES_V2_PATH,
 } from '../constants';
 
 jest.mock('@kbn/observability-plugin/public', () => ({
+  ...jest.requireActual(
+    '@kbn/observability-plugin/public/episode_actions/create_observability_episode_actions'
+  ),
+  ...jest.requireActual(
+    '@kbn/observability-plugin/public/episode_actions/investigate_episode_action'
+  ),
+  ...jest.requireActual('@kbn/observability-plugin/public/episode_actions/view_in_app'),
   AlertingNavPromo: () => <div data-test-subj="alertingNavPromo" />,
 }));
 
@@ -111,6 +121,7 @@ const mockAlertingVTwo = {
       {...(manageRulesHref ? { 'data-manage-rules-href': manageRulesHref } : {})}
     />
   ),
+  AlertsProvider: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
   ActionPoliciesPage: ({ hostApp, privilegeCheck }: AlertingV2PageProps) => (
     <Placeholder
       name={`actionPoliciesPage:${hostApp?.actionPolicies?.app ?? 'none'}`}
@@ -120,6 +131,12 @@ const mockAlertingVTwo = {
   ExecutionHistoryPage: ({ hostApp, privilegeCheck }: AlertingV2PageProps) => (
     <Placeholder
       name={`executionHistoryPage:${hostApp?.executionHistory?.app ?? 'none'}`}
+      privilegeCheck={privilegeCheck}
+    />
+  ),
+  ImportsPage: ({ hostApp, privilegeCheck }: AlertingV2PageProps) => (
+    <Placeholder
+      name={`importsPage:${hostApp?.rules?.app ?? 'none'}`}
       privilegeCheck={privilegeCheck}
     />
   ),
@@ -457,6 +474,11 @@ describe('ObservabilityAlertingApp', () => {
     {
       path: OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
       testId: `executionHistoryPage:${OBSERVABILITY_ALERTING_APP_ID}`,
+      hasPrivilegeCheck: 'false',
+    },
+    {
+      path: OBSERVABILITY_ALERTING_IMPORTS_PATH,
+      testId: `importsPage:${OBSERVABILITY_ALERTING_APP_ID}`,
       hasPrivilegeCheck: 'false',
     },
   ])(

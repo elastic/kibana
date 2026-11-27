@@ -211,11 +211,14 @@ export const investigationAlertSnapshotSchema = z.discriminatedUnion('alert_vers
  * believing the attach happened. If a single investigation ever needs several triggers, that is a
  * deliberate change to the subject shape, not an extra key smuggled through the context.
  */
-export const alertInvestigationContextSchema = z
-  .object({
-    alerts: z.array(investigationAlertSnapshotSchema).min(1).max(MAX_ALERTS_PER_INVESTIGATION),
-  })
-  .strict();
+export const alertInvestigationContextSchema = lazySchema(() =>
+  z
+    .object({
+      alerts: z.array(investigationAlertSnapshotSchema).min(1).max(MAX_ALERTS_PER_INVESTIGATION),
+      source_workflow_execution_id: z.string().trim().min(1).max(500).optional(),
+    })
+    .strict()
+);
 
 /**
  * Legacy `event_uuid` key, kept optional and id-shaped. The workflow no longer interpolates it
@@ -235,12 +238,14 @@ const significantEventUuidSchema = z
  * add a field. Only the key with a hazard attached is constrained; the bounds on key count and key
  * length stay, so an open context is still not an unbounded one.
  */
-export const freeFormContextSchema = z
-  .looseObject({ event_uuid: significantEventUuidSchema.optional() })
-  .refine((value) => Object.keys(value).length <= 50, { message: 'context exceeds 50 key limit' })
-  .refine((value) => Object.keys(value).every((key) => key.length <= 128), {
-    message: 'context has a key longer than 128 characters',
-  });
+export const freeFormContextSchema = lazySchema(() =>
+  z
+    .looseObject({ event_uuid: significantEventUuidSchema.optional() })
+    .refine((value) => Object.keys(value).length <= 50, { message: 'context exceeds 50 key limit' })
+    .refine((value) => Object.keys(value).every((key) => key.length <= 128), {
+      message: 'context has a key longer than 128 characters',
+    })
+);
 
 export type InvestigationSubject = z.infer<typeof investigationSubjectSchema>;
 export type InvestigationNotificationDestination = z.infer<

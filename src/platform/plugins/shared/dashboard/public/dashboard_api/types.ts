@@ -244,6 +244,8 @@ export type DashboardApi = CanExpandPanels &
     addPanelsToSelection: (panelIds: string[]) => void;
     /** Removes several panels from the layout in a single state update */
     removePanels: (panelIds: string[]) => void;
+    /** Moves several panels into a new collapsible section at the bottom of the dashboard */
+    groupPanelsInSection: (panelIds: string[]) => void;
     scrollToPanel: (panelRef: HTMLDivElement) => void;
     scrollToPanelId$: PublishingSubject<string | undefined>;
     scrollToTop: () => void;

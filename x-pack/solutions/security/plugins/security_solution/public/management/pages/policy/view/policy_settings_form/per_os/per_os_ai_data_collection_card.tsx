@@ -15,7 +15,7 @@ import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { TECHNICAL_PREVIEW } from '../../../../../../common/translations';
 import type { AiDataCollectionOSes } from '../../../types';
 import { PerOsSettingCard } from './per_os_setting_card';
-import { SupportedVersionForProtectionNotice } from '../components/notify_user_option';
+import { SupportedVersionForProtectionNotice } from './supported_version_for_protection_notice';
 import type { PolicyFormComponentCommonProps } from '../types';
 import { OsRow, POLICY_OS_TO_OPERATING_SYSTEM } from './os_row';
 import { POLICY_SETTING_SECTION_DESCRIPTIONS } from './policy_setting_section_descriptions';

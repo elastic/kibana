@@ -29,7 +29,7 @@ jest.mock('../schema_editor/hooks/use_schema_fields', () => {
 jest.mock('@kbn/unsaved-changes-prompt', () => ({
   useUnsavedChangesPrompt: jest.fn(),
 }));
-jest.mock('@kbn/ebt-tools', () => ({
+jest.mock('@kbn/ebt-tools/react', () => ({
   usePerformanceContext: jest.fn(() => ({
     onPageReady: jest.fn(),
   })),

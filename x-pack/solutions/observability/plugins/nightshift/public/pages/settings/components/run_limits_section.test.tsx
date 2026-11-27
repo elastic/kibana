@@ -75,11 +75,9 @@ const ALL_GROUPS = ['detection', 'investigation', 'ki_extraction'] as const;
 
 const TestRunLimits = ({
   groups = ALL_GROUPS,
-  exhaustionCallouts = 'automations',
   sharedSwitch,
 }: {
   groups?: readonly RunQuotaGroup[];
-  exhaustionCallouts?: 'automations' | 'groups';
   sharedSwitch?: boolean;
 }) => {
   const form = useRunLimitsForm({ groups, sharedSwitch });
@@ -92,13 +90,7 @@ const TestRunLimits = ({
 
   return (
     <>
-      <RunLimitsSection
-        groups={groups}
-        form={form}
-        exhaustionCallouts={exhaustionCallouts}
-        onSave={onSave}
-        onConfirmSave={onConfirmSave}
-      />
+      <RunLimitsSection groups={groups} form={form} onSave={onSave} onConfirmSave={onConfirmSave} />
       <SettingsSaveBar
         hasChanges={form.isDirty}
         isSaving={form.isSaving}
@@ -113,7 +105,6 @@ const TestRunLimits = ({
 const setup = (
   data: RunQuotasResponse = response(),
   groups?: readonly RunQuotaGroup[],
-  exhaustionCallouts?: 'automations' | 'groups',
   sharedSwitch?: boolean
 ) => {
   setQueryResponse(data);
@@ -122,11 +113,7 @@ const setup = (
 
   return render(
     <I18nProvider>
-      <TestRunLimits
-        groups={groups}
-        exhaustionCallouts={exhaustionCallouts}
-        sharedSwitch={sharedSwitch}
-      />
+      <TestRunLimits groups={groups} sharedSwitch={sharedSwitch} />
     </I18nProvider>
   );
 };
@@ -223,7 +210,6 @@ describe('RunLimitsSection', () => {
         },
       }),
       groups,
-      'automations',
       true
     );
 
@@ -256,7 +242,6 @@ describe('RunLimitsSection', () => {
         },
       }),
       ['investigation', 'manual_investigation', 'total_investigation'],
-      'automations',
       true
     );
 
@@ -277,7 +262,7 @@ describe('RunLimitsSection', () => {
       total_investigation: 9,
       ki_extraction: 20,
     };
-    setup(response({ limits }), groups, 'automations', true);
+    setup(response({ limits }), groups, true);
     save.mockResolvedValueOnce(response({ limits, investigationLimitsEnabled: false }));
 
     fireEvent.click(screen.getByTestId('nightshiftRunLimitsEnabledSwitch'));
@@ -304,7 +289,6 @@ describe('RunLimitsSection', () => {
         },
       }),
       ['investigation', 'manual_investigation', 'total_investigation'],
-      'automations',
       true
     );
 
@@ -336,7 +320,6 @@ describe('RunLimitsSection', () => {
         },
       }),
       ['investigation', 'manual_investigation', 'total_investigation'],
-      'automations',
       true
     );
 
@@ -361,7 +344,7 @@ describe('RunLimitsSection', () => {
       total_investigation: 9,
       ki_extraction: 20,
     };
-    setup(response({ limits }), groups, 'automations', true);
+    setup(response({ limits }), groups, true);
     save.mockResolvedValueOnce(response({ limits, investigationLimitsEnabled: false }));
     const values = () =>
       groups.map(
@@ -400,23 +383,6 @@ describe('RunLimitsSection', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('does not show the exhaustion callout for groups hidden from the tab', () => {
-    setup(
-      response({
-        counts: {
-          detection: 100,
-          investigation: 3,
-          manual_investigation: 0,
-          total_investigation: 0,
-          ki_extraction: 2,
-        },
-      }),
-      ['investigation']
-    );
-
-    expect(screen.queryByTestId('nightshiftRunLimitsBanner-investigation')).not.toBeInTheDocument();
-  });
-
   it('shows each reached detection callout above its limit', () => {
     setup(
       response({
@@ -428,8 +394,7 @@ describe('RunLimitsSection', () => {
           ki_extraction: 20,
         },
       }),
-      ['detection', 'ki_extraction'],
-      'groups'
+      ['detection', 'ki_extraction']
     );
 
     const discoveryCallout = screen.getByTestId('nightshiftRunQuotaReached-detection');
@@ -450,7 +415,6 @@ describe('RunLimitsSection', () => {
         screen.getByTestId('nightshiftRunLimitRow-ki_extraction')
       )
     ).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
-    expect(screen.queryByTestId('nightshiftRunLimitsBanner-investigation')).not.toBeInTheDocument();
   });
 
   it('saves zero when a category is switched to unlimited', async () => {
@@ -552,103 +516,6 @@ describe('RunLimitsSection', () => {
     expect(save).not.toHaveBeenCalled();
   });
 
-  it('keeps the active exhaustion banner while a raised limit is unsaved', () => {
-    setup(
-      response({
-        counts: {
-          detection: 4,
-          investigation: 30,
-          manual_investigation: 0,
-          total_investigation: 0,
-          ki_extraction: 2,
-        },
-      })
-    );
-    expect(screen.getByTestId('nightshiftRunLimitsBanner-investigation')).toBeInTheDocument();
-
-    fireEvent.change(screen.getByTestId('nightshiftRunLimitInput-investigation'), {
-      target: { value: '31' },
-    });
-
-    expect(screen.getByTestId('nightshiftRunLimitsBanner-investigation')).toBeInTheDocument();
-  });
-
-  it('opens the automations page from the exhaustion callout', () => {
-    setup(
-      response({
-        counts: {
-          detection: 4,
-          investigation: 30,
-          manual_investigation: 0,
-          total_investigation: 0,
-          ki_extraction: 2,
-        },
-      })
-    );
-
-    const callout = screen.getByTestId('nightshiftRunLimitsBanner-investigation');
-    expect(callout).toHaveTextContent(
-      'Automations reached a daily run limit of 30 for this deployment'
-    );
-    expect(callout).toHaveTextContent(
-      'Further triggers will be skipped until the limit resets at midnight (UTC). Already started investigations will continue.'
-    );
-    expect(callout).not.toHaveTextContent('You can still trigger investigations manually');
-    fireEvent.click(screen.getByTestId('nightshiftRunLimitsOpenAutomations'));
-
-    expect(navigateToUrl).toHaveBeenCalledWith('/app/nightshift/automations');
-  });
-
-  it('hides the automations button when automations are unavailable', () => {
-    automationsAvailable = false;
-    setup(
-      response({
-        counts: {
-          detection: 4,
-          investigation: 30,
-          manual_investigation: 0,
-          total_investigation: 0,
-          ki_extraction: 2,
-        },
-      })
-    );
-
-    expect(screen.getByTestId('nightshiftRunLimitsBanner-investigation')).toBeInTheDocument();
-    expect(screen.queryByTestId('nightshiftRunLimitsOpenAutomations')).not.toBeInTheDocument();
-  });
-
-  it('explains the manual and all-investigations limits when they are reached', () => {
-    setup(
-      response({
-        limits: {
-          detection: 100,
-          investigation: 30,
-          manual_investigation: 5,
-          total_investigation: 8,
-          ki_extraction: 20,
-        },
-        counts: {
-          detection: 4,
-          investigation: 3,
-          manual_investigation: 5,
-          total_investigation: 8,
-          ki_extraction: 2,
-        },
-      }),
-      ['investigation', 'manual_investigation', 'total_investigation']
-    );
-
-    expect(screen.queryByTestId('nightshiftRunLimitsBanner-investigation')).not.toBeInTheDocument();
-    const manual = screen.getByTestId('nightshiftRunLimitsBanner-manual_investigation');
-    expect(manual).toHaveTextContent(
-      'Manual investigations reached a daily limit of 5 for this deployment'
-    );
-    expect(manual).not.toHaveTextContent('Open automations');
-    expect(screen.getByTestId('nightshiftRunLimitsBanner-total_investigation')).toHaveTextContent(
-      'Investigations reached a daily limit of 8 for this deployment'
-    );
-  });
-
   it('shows the UTC reset value supplied by the API window', () => {
     setup(
       response({
@@ -674,7 +541,7 @@ describe('RunLimitsSection', () => {
       total_investigation: 0,
       ki_extraction: 20,
     };
-    const { rerender } = setup(response({ limits }), groups, 'automations', true);
+    const { rerender } = setup(response({ limits }), groups, true);
     const manual = () => screen.getByTestId('nightshiftRunLimitInput-manual_investigation');
     fireEvent.change(manual(), { target: { value: '3' } });
     fireEvent.change(manual(), { target: { value: '' } });

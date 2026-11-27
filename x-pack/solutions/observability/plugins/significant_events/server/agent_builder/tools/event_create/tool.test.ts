@@ -6,6 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { setWorkflowEventChainContext } from '@kbn/workflows-extensions/server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { createMockToolContext, invokeHandler, mockSourcesClient } from '../../utils/test_helpers';
 import type { GetScopedClients } from '../../../routes/types';
@@ -77,6 +78,11 @@ describe('event_create tool', () => {
       telemetry: telemetry as never,
     });
 
+    const context = createMockToolContext();
+    setWorkflowEventChainContext(context.request, {
+      depth: 0,
+      sourceExecutionId: 'workflow-run-1',
+    });
     const result = await invokeHandler(
       tool as never,
       {
@@ -86,7 +92,7 @@ describe('event_create tool', () => {
         slugs: ['logs.a'],
         confidence: 0.8,
       },
-      createMockToolContext()
+      context
     );
 
     if ('results' in result) {
@@ -94,6 +100,15 @@ describe('event_create tool', () => {
     }
     expect(assertCanManageSignificantEvents).toHaveBeenCalledWith(
       expect.objectContaining({ request: expect.anything() })
+    );
+    expect(eventsWriteHandler).toHaveBeenCalledWith(
+      expect.objectContaining({
+        input: expect.objectContaining({ workflow_execution_id: 'workflow-run-1' }),
+      })
+    );
+    expect(telemetry.trackAgentToolEventCreate).toHaveBeenCalledWith(
+      expect.objectContaining({ workflow_execution_id: 'workflow-run-1' }),
+      expect.anything()
     );
   });
 

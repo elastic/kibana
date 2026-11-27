@@ -12,6 +12,7 @@ import { EuiCode, useGeneratedHtmlId, EuiSpacer, EuiSplitPanel } from '@elastic/
 import { KbnWarningCallout, KbnDangerCallout } from '@kbn/ui-callout';
 import { EuiTitle } from '@elastic/eui';
 import type { Error } from '../../../../shared_imports';
+import { useKibana } from '../../../../shared_imports';
 import { getErrorText, isIntegrationsPipeline } from '../../utils';
 
 interface Props {
@@ -27,6 +28,12 @@ export const NotFoundPanel: FunctionComponent<Props> = ({
   displayWarning,
   onCreatePipeline,
 }) => {
+  const {
+    services: {
+      config: { canManage },
+    },
+  } = useKibana();
+
   const renderErrorCallOut = () => {
     const isCustom = isIntegrationsPipeline(pipelineName);
     if (displayWarning || (error.statusCode === 404 && isCustom)) {
@@ -50,18 +57,22 @@ export const NotFoundPanel: FunctionComponent<Props> = ({
             )
           }
           data-test-subj="missingCustomPipeline"
-          actionProps={{
-            primary: {
-              onClick: onCreatePipeline,
-              'data-test-subj': 'createCustomPipeline',
-              children: (
-                <FormattedMessage
-                  id="xpack.ingestPipelines.list.missingCustomPipeline.button"
-                  defaultMessage="Create pipeline"
-                />
-              ),
-            },
-          }}
+          actionProps={
+            canManage
+              ? {
+                  primary: {
+                    onClick: onCreatePipeline,
+                    'data-test-subj': 'createCustomPipeline',
+                    children: (
+                      <FormattedMessage
+                        id="xpack.ingestPipelines.list.missingCustomPipeline.button"
+                        defaultMessage="Create pipeline"
+                      />
+                    ),
+                  },
+                }
+              : undefined
+          }
         />
       );
     }

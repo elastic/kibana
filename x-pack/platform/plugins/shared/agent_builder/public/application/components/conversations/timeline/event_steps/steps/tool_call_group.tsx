@@ -59,7 +59,7 @@ export const ToolCallGroup: React.FC<ToolCallGroupProps> = ({ steps, isAborted =
         onClick={onToggle}
         isExpanded={isExpanded}
         expansion={
-          <EuiFlexGroup direction="column" gutterSize="s">
+          <EuiFlexGroup direction="column" gutterSize="m">
             {steps.map((step) => (
               <EuiFlexItem grow={false} key={step.tool_call_id}>
                 <ToolCallStep step={step} isAborted={isAborted} />

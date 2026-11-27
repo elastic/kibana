@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
 import { InvestigationSection } from './investigation_section';
@@ -77,6 +77,7 @@ const renderSection = ({
   error = null,
   onShowMore = jest.fn(),
   onRetry = jest.fn(),
+  isLoadingNewFilters = false,
 }: {
   isInitialLoading?: boolean;
   investigations?: InvestigationSummary[];
@@ -85,6 +86,7 @@ const renderSection = ({
   error?: Error | null;
   onShowMore?: () => void;
   onRetry?: () => void;
+  isLoadingNewFilters?: boolean;
 } = {}) =>
   render(
     <I18nProvider>
@@ -97,11 +99,46 @@ const renderSection = ({
         error={error}
         onShowMore={onShowMore}
         onRetry={onRetry}
+        isLoadingNewFilters={isLoadingNewFilters}
       />
     </I18nProvider>
   );
 
 describe('InvestigationSection', () => {
+  it('draws its own loading line, after a short delay, while new filters load', () => {
+    jest.useFakeTimers();
+    try {
+      renderSection({ investigations: [investigation], total: 1, isLoadingNewFilters: true });
+
+      expect(
+        screen.queryByTestId('nightshiftInvestigationSectionLoading-critical')
+      ).not.toBeInTheDocument();
+      act(() => {
+        jest.advanceTimersByTime(500);
+      });
+      expect(
+        screen.getByTestId('nightshiftInvestigationSectionLoading-critical')
+      ).toBeInTheDocument();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('draws no loading line when nothing new is loading', () => {
+    jest.useFakeTimers();
+    try {
+      renderSection({ investigations: [investigation], total: 1 });
+      act(() => {
+        jest.advanceTimersByTime(500);
+      });
+      expect(
+        screen.queryByTestId('nightshiftInvestigationSectionLoading-critical')
+      ).not.toBeInTheDocument();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it('shows a skeleton, and no count, while the section is still loading', () => {
     renderSection({ isInitialLoading: true });
 
@@ -152,7 +189,7 @@ describe('InvestigationSection', () => {
 
     const showMore = screen.getByTestId('nightshiftInvestigationSectionShowMore-critical');
     expect(showMore).toBeInTheDocument();
-    expect(showMore).toHaveTextContent('Show 3 more');
+    expect(showMore).toHaveTextContent('Show 3 more of 10');
   });
 
   it('loads more investigations for this section only', () => {
@@ -207,6 +244,59 @@ describe('InvestigationSection', () => {
 
     fireEvent.click(screen.getByTestId('nightshiftInvestigationSectionRetry-critical'));
     expect(onRetry).toHaveBeenCalledTimes(1);
-    expect(screen.queryByText('No investigations found')).not.toBeInTheDocument();
+    expect(screen.queryByText('No open investigations')).not.toBeInTheDocument();
+  });
+
+  it('shows the refresh warning callout when a collapsed Closed section has rows and refetch fails', () => {
+    const onRetry = jest.fn();
+    const closedInvestigation: InvestigationSummary = {
+      ...investigation,
+      metadata: { ...investigation.metadata, status: 'closed' },
+    };
+    const { rerender } = render(
+      <I18nProvider>
+        <InvestigationSection
+          id="closed"
+          investigations={[closedInvestigation]}
+          total={1}
+          hasMore={false}
+          isOpen={false}
+          onShowMore={jest.fn()}
+          onRetry={onRetry}
+        />
+      </I18nProvider>
+    );
+
+    expect(
+      screen.queryByText('Showing the last loaded results; refreshing failed.')
+    ).not.toBeInTheDocument();
+
+    rerender(
+      <I18nProvider>
+        <InvestigationSection
+          id="closed"
+          investigations={[closedInvestigation]}
+          total={1}
+          hasMore={false}
+          isOpen={false}
+          error={new Error('Network unavailable')}
+          onShowMore={jest.fn()}
+          onRetry={onRetry}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByText('Showing the last loaded results; refreshing failed.')).toBeVisible();
+    expect(screen.queryByText('Unable to load investigations')).not.toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftInvestigationSectionToggle-closed')).toHaveAttribute(
+      'aria-expanded',
+      'false'
+    );
+    expect(screen.getByTestId('nightshiftInvestigationSectionCount-closed')).toHaveTextContent('1');
+
+    const retry = screen.getByRole('button', { name: 'Retry loading Closed investigations' });
+    expect(retry).toBeVisible();
+    fireEvent.click(retry);
+    expect(onRetry).toHaveBeenCalledTimes(1);
   });
 });

@@ -97,7 +97,7 @@ const mockUnit = async (page: ScoutPage) => {
       body: JSON.stringify(MOCK_UNIT),
     });
   });
-  await page.route('**/internal/streams/unit/*/_resolve_indices', async (route) => {
+  await page.route('**/internal/streams/unit/*/_resolve_indices?**', async (route) => {
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -109,7 +109,7 @@ const mockUnit = async (page: ScoutPage) => {
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({
-        components: { destinations: {}, processors: {} },
+        components: { destinations: {}, processors: {}, sources: {} },
         meta: { window: { start: '2026-01-01T00:00:00.000Z', end: '2026-01-01T00:15:00.000Z' } },
       }),
     });
@@ -140,6 +140,7 @@ test.describe('Streams V2 privileges', { tag: tags.serverless.observability.comp
     await expect(page).toHaveURL(/\/app\/streams\/v2\/unit\/default\/map/);
     await expect(pageObjects.streams.canvasTab).toBeVisible();
     await expect(pageObjects.collapsibleNav.getNavItemByDeepLinkId('streams')).toBeVisible();
+    await expect(pageObjects.streams.getStreamsLayoutTab('classic')).toHaveCount(0);
   });
 
   test('a legacy-only read user is sent back from V2', async ({ browserAuth, page }) => {

@@ -18,10 +18,11 @@ import type {
   EntityStoreSetupContract,
 } from './types';
 import { createRequestHandlerContext } from './request_context_factory';
-import { PLUGIN_ID } from '../common';
+import { PLUGIN_ID, getErrorMessage } from '../common';
 import { registerTasks } from './tasks/register_tasks';
 import { getExtractEntityTaskId } from './tasks/extract_entity_task';
 import { scheduleLegacySecurityAssetsMigrationIfNeeded } from './tasks/legacy_security_assets_migration_task';
+import { scheduleLatestIndexMappingsMigration } from './tasks/latest_index_mappings_migration_task';
 import { registerTriggers } from './workflow/triggers';
 import { registerSteps } from './workflow/steps';
 import { registerUiSettings } from './infra/feature_flags/register';
@@ -154,16 +155,6 @@ export class EntityStorePlugin
     this.entityDefinitionRegistry.closeSetupRegistration();
     this.logger.info('Initializing plugin');
 
-    plugins.taskManager.registerEncryptedSavedObjectsClient(
-      plugins.encryptedSavedObjects.getClient({
-        includedHiddenTypes: ['task', 'api_key_to_invalidate'],
-      })
-    );
-
-    plugins.taskManager.registerApiKeyInvalidateFn(
-      plugins.security?.authc.apiKeys.invalidateAsInternalUser
-    );
-
     subscribeToLegacySecurityAssetsMigrationFlag({
       coreStart: core,
       logger: this.logger,
@@ -174,6 +165,17 @@ export class EntityStorePlugin
           taskManager: plugins.taskManager,
           logger: this.logger,
         }),
+    });
+
+    // Not awaited: start() is synchronous and must neither block nor throw on this.
+    scheduleLatestIndexMappingsMigration({
+      coreStart: core,
+      taskManager: plugins.taskManager,
+      logger: this.logger,
+    }).catch((error) => {
+      this.logger.error(
+        `Failed to schedule latest index mappings migration: ${getErrorMessage(error)}`
+      );
     });
 
     subscribeToDualProcessFlag({

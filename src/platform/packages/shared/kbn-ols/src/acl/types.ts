@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EntryLevel, GeneralAccessLevel } from '../levels';
-import type { Principal } from '../principals';
+import type { EntryAccess, GeneralAccess } from '../levels';
+import type { Principal, StoredPrincipal } from '../principals';
 
 /**
  * Well-formed ACL, the only shape Kibana writes to an object's `acl` field.
@@ -22,17 +22,34 @@ export interface Acl {
    */
   owner: Principal;
   /** What everyone who can reach the object can do. */
-  general_access: GeneralAccessLevel;
+  general: AclGeneral;
   /** Grants to named principals. */
   entries: AclEntry[];
 }
 
 /**
- * Entry of an {@link Acl}: a grant of one level to one named principal.
+ * General access of an ACL: what everyone who can reach the object can do. It's an object, not a
+ * single value, so that it has the same shape as an entry and can get more fields later without a
+ * new mapping.
  */
-export interface AclEntry extends Principal {
-  /** The granted level. */
-  access: EntryLevel;
+export interface AclGeneral {
+  /** The access everyone gets. It has to be a value the object's type allows for general access. */
+  access: GeneralAccess;
+}
+
+/**
+ * A grant of access to one named principal, without the time it was added. A caller asks for
+ * grants in this shape, and every kind of ACL entry extends it.
+ */
+export interface AclGrant extends Principal {
+  /** The granted access. It has to be a value the object's type allows for entries. */
+  access: EntryAccess;
+}
+
+/**
+ * Entry of an {@link Acl}: a grant with the time it was added.
+ */
+export interface AclEntry extends AclGrant {
   /** When the grant was added, as an ISO 8601 timestamp. */
   added_at: string;
 }
@@ -41,11 +58,11 @@ export interface AclEntry extends Principal {
  * ACL as it is read back from storage, as opposed to {@link Acl}, the shape Kibana writes.
  *
  * Elasticsearch lets any stored field hold several values, for example
- * `"general_access": ["edit", "none"]` in a hand-edited document, and a search matches the document
- * when any of those values matches. For reading a single object to agree with searching for it,
- * the read keeps every value of every field, in stored order, and the access rules decide what
- * several values mean (for levels, the lowest allowed one wins). Fields that don't affect access,
- * such as `added_at`, are arrays only so that every field is read the same way.
+ * `"general": { "access": ["edit", "none"] }` in a hand-edited document, and a search matches the
+ * document when any of those values matches. For reading a single object to agree with searching
+ * for it, the read keeps every value of every field, in stored order, and the access rules decide
+ * what several values mean (for access values, the lowest allowed one wins). Fields that don't
+ * affect access, such as `added_at`, are arrays only so that every field is read the same way.
  */
 export interface StoredAcl {
   /**
@@ -54,33 +71,39 @@ export interface StoredAcl {
    */
   version: unknown[];
   /**
-   * Every stored owner kind and ID. Unknown kinds are ignored, and the ACL is damaged unless
-   * exactly one known kind and at least one ID remain. Each ID then owns the object: the package
-   * README explains why several IDs all count.
+   * The stored owner. The ACL is damaged unless it names a principal: exactly one known kind and
+   * at least one ID. Each ID then owns the object: the package README explains why several IDs all
+   * count.
    */
-  owner: { type: string[]; id: string[] };
-  /**
-   * Every stored general access value. The ACL is damaged unless at least one value is a level
-   * that general access can take. The lowest value the type allows then applies, or `none` when
-   * the type allows none of them.
-   */
-  general_access: string[];
+  owner: StoredPrincipal;
+  /** The stored general access. */
+  general: StoredAclGeneral;
   /** Every stored entry. */
   entries: StoredAclEntry[];
 }
 
 /**
- * Entry of a {@link StoredAcl}. Like every other field of a stored ACL, each field is an array.
+ * General access of a {@link StoredAcl}. Like every other field of a stored ACL, its field is an
+ * array.
  */
-export interface StoredAclEntry {
+export interface StoredAclGeneral {
   /**
-   * Every stored principal kind. Unknown kinds are ignored, and the entry grants nothing unless
-   * exactly one known kind remains. The rest of the ACL still applies.
+   * Every stored general access value. The ACL is damaged unless at least one value is one that
+   * general access can take. The lowest value the type allows then applies, or `none` when the
+   * type allows none of them.
    */
-  type: string[];
-  /** Every stored principal ID. The entry grants its level to each of them. */
-  id: string[];
-  /** Every stored level. The lowest one the type allows for entries applies, else nothing. */
+  access: string[];
+}
+
+/**
+ * Entry of a {@link StoredAcl}. Like every other field of a stored ACL, each field is an array.
+ * An entry that names no principal grants nothing, and the rest of the ACL still applies. An entry
+ * that names one grants its access to each of its IDs.
+ */
+export interface StoredAclEntry extends StoredPrincipal {
+  /**
+   * Every stored access value. The lowest one the type allows for entries applies, else nothing.
+   */
   access: string[];
   /** Every stored timestamp. It doesn't affect access. */
   added_at: string[];

@@ -50,7 +50,12 @@ import { MAX_FLYOUT_WIDTH } from '../../../../constants';
 
 import type { Output, FleetProxy } from '../../../../types';
 
-import { useBreadcrumbs, useFleetStatus, useStartServices } from '../../../../hooks';
+import {
+  useBreadcrumbs,
+  useFleetStatus,
+  useOtlpOutputEnabled,
+  useStartServices,
+} from '../../../../hooks';
 import { useYaml } from '../../../../../../services';
 
 import { ProxyWarning } from '../fleet_proxies_table/proxy_warning';
@@ -64,6 +69,7 @@ import { OutputFormRemoteEsSection } from './output_form_remote_es';
 import { OutputHealth } from './output_health';
 import { OutputFormLogstashSection } from './output_form_logstash';
 import { OutputFormElasticsearchSection } from './output_form_elasticsearch';
+import { OutputFormOtlpSection } from './output_form_otlp';
 
 export interface EditOutputFlyoutProps {
   defaultOutput?: Output;
@@ -86,6 +92,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
   const { docLinks, cloud } = useStartServices();
   const fleetStatus = useFleetStatus();
   const isServerless = !!cloud?.isServerlessEnabled;
+  const isOtlpOutputEnabled = useOtlpOutputEnabled();
 
   const [secretsToggleState, setSecretsToggleState] = useState<'disabled' | true | false>(
     'disabled'
@@ -113,6 +120,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
   const isRemoteESOutput = inputs.typeInput.value === outputType.RemoteElasticsearch;
   const isESOutput = inputs.typeInput.value === outputType.Elasticsearch;
   const isKafkaOutput = inputs.typeInput.value === outputType.Kafka;
+  const isOtlpOutput = inputs.typeInput.value === outputType.Otlp;
   const supportsPresets = inputs.typeInput.value
     ? outputTypeSupportPresets({ type: inputs.typeInput.value as ValueOf<OutputType> })
     : false;
@@ -139,6 +147,10 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
     { value: outputType.RemoteElasticsearch, text: 'Remote Elasticsearch' },
     { value: outputType.Logstash, text: 'Logstash' },
     { value: outputType.Kafka, text: 'Kafka' },
+    // an existing OTLP output keeps its type in the list, even with the feature flag off
+    ...(isOtlpOutputEnabled || output?.type === outputType.Otlp
+      ? [{ value: outputType.Otlp, text: 'OTLP' }]
+      : []),
   ];
 
   const renderLogstashSection = () => {
@@ -184,6 +196,8 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
 
   const renderOutputTypeSection = (type: string) => {
     switch (type) {
+      case outputType.Otlp:
+        return <OutputFormOtlpSection inputs={inputs} />;
       case outputType.Logstash:
         return renderLogstashSection();
       case outputType.Kafka:
@@ -338,7 +352,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
           </EuiFormRow>
 
           {renderOutputTypeSection(inputs.typeInput.value)}
-          {isRemoteESOutput || isKafkaOutput ? null : (
+          {isRemoteESOutput || isKafkaOutput || isOtlpOutput ? null : (
             <EuiFormRow
               fullWidth
               label={
@@ -378,48 +392,53 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
             </EuiFormRow>
           )}
 
-          <EuiFormRow fullWidth {...inputs.defaultOutputInput.formRowProps}>
-            <EuiSwitch
-              {...inputs.defaultOutputInput.props}
-              label={
-                <FormattedMessage
-                  id="xpack.fleet.settings.editOutputFlyout.defaultOutputSwitchLabel"
-                  defaultMessage="Make this output the default for {boldAgentIntegrations}."
-                  values={{
-                    boldAgentIntegrations: (
-                      <strong>
-                        <FormattedMessage
-                          id="xpack.fleet.settings.editOutputFlyout.agentIntegrationsBold"
-                          defaultMessage="agent integrations"
-                        />
-                      </strong>
-                    ),
-                  }}
+          {/* An OTLP output can be the default neither for data nor for monitoring */}
+          {!isOtlpOutput && (
+            <>
+              <EuiFormRow fullWidth {...inputs.defaultOutputInput.formRowProps}>
+                <EuiSwitch
+                  {...inputs.defaultOutputInput.props}
+                  label={
+                    <FormattedMessage
+                      id="xpack.fleet.settings.editOutputFlyout.defaultOutputSwitchLabel"
+                      defaultMessage="Make this output the default for {boldAgentIntegrations}."
+                      values={{
+                        boldAgentIntegrations: (
+                          <strong>
+                            <FormattedMessage
+                              id="xpack.fleet.settings.editOutputFlyout.agentIntegrationsBold"
+                              defaultMessage="agent integrations"
+                            />
+                          </strong>
+                        ),
+                      }}
+                    />
+                  }
                 />
-              }
-            />
-          </EuiFormRow>
-          <EuiFormRow fullWidth {...inputs.defaultMonitoringOutputInput.formRowProps}>
-            <EuiSwitch
-              {...inputs.defaultMonitoringOutputInput.props}
-              label={
-                <FormattedMessage
-                  id="xpack.fleet.settings.editOutputFlyout.defaultMontoringOutputSwitchLabel"
-                  defaultMessage="Make this output the default for {boldAgentMonitoring}."
-                  values={{
-                    boldAgentMonitoring: (
-                      <strong>
-                        <FormattedMessage
-                          id="xpack.fleet.settings.editOutputFlyout.agentMonitoringBold"
-                          defaultMessage="agent monitoring"
-                        />
-                      </strong>
-                    ),
-                  }}
+              </EuiFormRow>
+              <EuiFormRow fullWidth {...inputs.defaultMonitoringOutputInput.formRowProps}>
+                <EuiSwitch
+                  {...inputs.defaultMonitoringOutputInput.props}
+                  label={
+                    <FormattedMessage
+                      id="xpack.fleet.settings.editOutputFlyout.defaultMontoringOutputSwitchLabel"
+                      defaultMessage="Make this output the default for {boldAgentMonitoring}."
+                      values={{
+                        boldAgentMonitoring: (
+                          <strong>
+                            <FormattedMessage
+                              id="xpack.fleet.settings.editOutputFlyout.agentMonitoringBold"
+                              defaultMessage="agent monitoring"
+                            />
+                          </strong>
+                        ),
+                      }}
+                    />
+                  }
                 />
-              }
-            />
-          </EuiFormRow>
+              </EuiFormRow>
+            </>
+          )}
           {supportsPresets && (
             <>
               <EuiSpacer size="l" />
@@ -555,39 +574,43 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
                 </KbnWarningCallout>
               </>
             )}
-          <EuiFormRow
-            label={
-              <EuiLink href={docLinks.links.fleet.esSettings} external target="_blank">
-                {i18n.translate('xpack.fleet.settings.editOutputFlyout.yamlConfigInputLabel', {
-                  defaultMessage: 'Advanced YAML configuration',
-                })}
-              </EuiLink>
-            }
-            {...inputs.additionalYamlConfigInput.formRowProps}
-            fullWidth
-          >
-            <div data-test-subj="settingsOutputsFlyout.yamlConfigInput">
-              <YamlCodeEditorWithPlaceholder
-                value={inputs.additionalYamlConfigInput.value}
-                onChange={(value) => {
-                  if (parseFn && outputYmlIncludesReservedPerformanceKey(value, parseFn)) {
-                    inputs.presetInput.setValue('custom');
-                  }
+          {!isOtlpOutput && (
+            <EuiFormRow
+              label={
+                <EuiLink href={docLinks.links.fleet.esSettings} external target="_blank">
+                  {i18n.translate('xpack.fleet.settings.editOutputFlyout.yamlConfigInputLabel', {
+                    defaultMessage: 'Advanced YAML configuration',
+                  })}
+                </EuiLink>
+              }
+              {...inputs.additionalYamlConfigInput.formRowProps}
+              fullWidth
+            >
+              <div data-test-subj="settingsOutputsFlyout.yamlConfigInput">
+                <YamlCodeEditorWithPlaceholder
+                  value={inputs.additionalYamlConfigInput.value}
+                  onChange={(value) => {
+                    if (parseFn && outputYmlIncludesReservedPerformanceKey(value, parseFn)) {
+                      inputs.presetInput.setValue('custom');
+                    }
 
-                  inputs.additionalYamlConfigInput.setValue(value);
-                }}
-                disabled={inputs.additionalYamlConfigInput.props.disabled}
-                placeholder={i18n.translate(
-                  'xpack.fleet.settings.editOutputFlyout.yamlConfigInputPlaceholder',
-                  {
-                    defaultMessage:
-                      '# YAML settings here will be added to the output section of each agent policy.',
-                  }
-                )}
-              />
-            </div>
-          </EuiFormRow>
-          <AdvancedOptionsSection enabled={form.isShipperEnabled} inputs={inputs} />
+                    inputs.additionalYamlConfigInput.setValue(value);
+                  }}
+                  disabled={inputs.additionalYamlConfigInput.props.disabled}
+                  placeholder={i18n.translate(
+                    'xpack.fleet.settings.editOutputFlyout.yamlConfigInputPlaceholder',
+                    {
+                      defaultMessage:
+                        '# YAML settings here will be added to the output section of each agent policy.',
+                    }
+                  )}
+                />
+              </div>
+            </EuiFormRow>
+          )}
+          {!isOtlpOutput && (
+            <AdvancedOptionsSection enabled={form.isShipperEnabled} inputs={inputs} />
+          )}
           {supportsOtelExporter && (
             <>
               <EuiSpacer size="l" />

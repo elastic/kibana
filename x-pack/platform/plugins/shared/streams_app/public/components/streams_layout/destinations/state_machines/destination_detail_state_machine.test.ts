@@ -17,12 +17,14 @@ import {
 const indices: ResolvedDestinationIndex[] = [
   {
     name: 'logs-a-default',
+    documents: 10,
+    ingestion_rate: 1,
     is_data_stream: true,
     lifecycle: { dsl: { data_retention: '7d' } },
     failure_store_enabled: false,
     privileges: { read_failure_store: true },
   },
-  { name: 'legacy-index', is_data_stream: false },
+  { name: 'legacy-index', documents: 5, ingestion_rate: 0.5, is_data_stream: false },
 ];
 
 const timeRange = { start: 0, end: 1000 };
@@ -39,7 +41,6 @@ const createDetailActor = (initialIndices?: ResolvedDestinationIndex[]) => {
       docs: Object.fromEntries(input.dataStreamNames.map((name) => [name, 1])),
       degradedDocs: {},
       failedDocs: {},
-      ingestedDocs: {},
       storageBytes: {},
     })
   );
@@ -127,7 +128,6 @@ describe('destination detail state machine', () => {
       docs: {},
       degradedDocs: {},
       failedDocs: {},
-      ingestedDocs: {},
       storageBytes: undefined,
     });
 

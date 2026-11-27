@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import type { RasterTileSource } from 'maplibre-gl';
 import { AbstractSource } from '../source';
 import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters';
-// @ts-ignore
 import { WmsClient } from './wms_client';
 import { SOURCE_TYPES } from '../../../../common/constants';
 import type { IRasterSource, RasterTileSourceData } from '../raster_source';
@@ -19,7 +18,7 @@ export const sourceTitle = i18n.translate('xpack.maps.source.wmsTitle', {
   defaultMessage: 'Web Map Service',
 });
 
-export class WMSSource extends AbstractSource implements IRasterSource {
+export class WMSSource extends AbstractSource<WMSSourceDescriptor> implements IRasterSource {
   static type = SOURCE_TYPES.WMS;
   readonly _descriptor: WMSSourceDescriptor;
   static createDescriptor({ serviceUrl, layers, styles }: Partial<WMSSourceDescriptor>) {

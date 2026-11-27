@@ -8,14 +8,9 @@
  */
 
 import { timerange, type ApmFields } from '@kbn/synthtrace-client';
-import type { ToolingLog } from '@kbn/tooling-log';
 import { generateClassicRumPageLoads } from './classic_rum_page_loads';
 
-const range = timerange(
-  new Date('2026-10-16T12:00:00.000Z'),
-  new Date('2026-10-16T12:02:00.000Z'),
-  {} as ToolingLog
-);
+const range = timerange(new Date('2026-10-16T12:00:00.000Z'), new Date('2026-10-16T12:02:00.000Z'));
 
 const collect = (): ApmFields[] =>
   Array.from(

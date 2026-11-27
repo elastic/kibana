@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/core'
   - '@kbn/core-chrome-browser'
+  - '@kbn/core-chrome-layout'
   - '@kbn/config-schema'
   - '@kbn/i18n'
   - '@kbn/observability-shared-plugin'
@@ -38,6 +39,11 @@ dependsOn:
   - '@kbn/i18n-react'
   - '@kbn/react-hooks'
   - '@kbn/ui-callout'
+  - '@kbn/entity-inventory-plugin'
+  - '@kbn/server-route-repository-client'
+  - '@kbn/shared-ux-router'
+  - '@kbn/rison'
+  - '@kbn/kibana-utils-plugin'
 tags:
   - plugin
   - prod

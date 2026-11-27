@@ -12,7 +12,7 @@ import { AppHeader, type AppHeaderBadge } from '@kbn/app-header';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
 import type { BoolQuery, Filter } from '@kbn/es-query';
-import { usePageReady } from '@kbn/ebt-tools';
+import { usePageReady } from '@kbn/ebt-tools/react';
 import { i18n } from '@kbn/i18n';
 import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';

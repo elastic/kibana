@@ -13,7 +13,7 @@ export const LAST_EPISODE_TIMESTAMP_ESQL_VARIABLE = 'lastEpisodeTimestamp';
 export const RELATED_ALERT_EPISODES_PAGE_SIZE = 5;
 /** Max episodes returned per list page (ESQL LIMIT). */
 export const ALERT_EPISODES_LIST_PAGE_SIZE = 1000;
-/** Source id used when settling the native v2 ES|QL episode fetches. */
+/** Row source id for native v2 episodes. Not a source-filter value. */
 export const ALERTING_V2_EPISODE_SOURCE_ID = 'v2';
 export const QUERY_STALE_TIME = 30_000;
 /**

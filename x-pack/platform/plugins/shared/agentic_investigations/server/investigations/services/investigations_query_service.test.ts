@@ -175,7 +175,11 @@ describe('InvestigationsQueryService', () => {
       const { service, client, inProgress } = setup({
         subjects: [
           subject('conv-1', 'alert-2', { createdAt: '2026-01-02T00:00:00.000Z' }),
-          subject('conv-1', 'alert-1', { triggerType: 'automatic', summary: 'High latency' }),
+          subject('conv-1', 'alert-1', {
+            triggerType: 'automatic',
+            summary: 'High latency',
+            via: { label: 'Payments alerts', locator: { id: 'L', params: { a: '1' } } },
+          }),
         ],
         impacts: [impact('conv-1')],
         hypotheses,
@@ -225,6 +229,7 @@ describe('InvestigationsQueryService', () => {
             id: 'alert-1',
             summary: 'High latency',
             trigger_type: 'automatic',
+            via: { label: 'Payments alerts', locator: { id: 'L', params: { a: '1' } } },
             created_at: '2026-01-01T00:00:00.000Z',
           },
           { type: 'alert', id: 'alert-2', created_at: '2026-01-02T00:00:00.000Z' },
@@ -382,6 +387,42 @@ describe('InvestigationsQueryService', () => {
       expect(filter).toContain('metadata.severity: high');
       expect(filter).toContain('metadata.severity: critical');
       expect(filter).toContain('created_at >= 2026-01-01T00\\:00\\:00.000Z');
+    });
+
+    it('pushes the last-modified window into the search filter', async () => {
+      const { service, client } = setup({ searchResults: [] });
+
+      await service.list(
+        request,
+        parseQuery({
+          updated_after: '2026-01-01T00:00:00.000Z',
+          updated_before: '2026-01-04T00:00:00.000Z',
+        })
+      );
+
+      const filter = searchFilter(client);
+      expect(filter).toContain('updated_at >= 2026-01-01T00\\:00\\:00.000Z');
+      expect(filter).toContain('updated_at <= 2026-01-04T00\\:00\\:00.000Z');
+    });
+
+    it('drops conversations modified outside the last-modified window', async () => {
+      const { service } = setup({
+        searchResults: [
+          conversation('old', { updated_at: '2025-12-30T00:00:00.000Z' }),
+          conversation('in', { updated_at: '2026-01-02T00:00:00.000Z' }),
+          conversation('future', { updated_at: '2026-01-09T00:00:00.000Z' }),
+        ],
+      });
+
+      const response = await service.list(
+        request,
+        parseQuery({
+          updated_after: '2026-01-01T00:00:00.000Z',
+          updated_before: '2026-01-04T00:00:00.000Z',
+        })
+      );
+
+      expect(response.results.map(({ id }) => id)).toEqual(['in']);
     });
 
     it('pages, sorts, and hydrates only the requested page', async () => {

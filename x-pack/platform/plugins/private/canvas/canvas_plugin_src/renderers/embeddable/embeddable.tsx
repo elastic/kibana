@@ -59,13 +59,15 @@ const renderReactEmbeddable = ({
   type,
   uuid,
   input,
+  filters,
   container,
   handlers,
   core,
 }: {
   type: string;
   uuid: string;
-  input: { filters?: Filter[] };
+  input: Record<string, unknown>;
+  filters: Filter[];
   container: CanvasContainerApi;
   handlers: RendererHandlers;
   core: CoreStart;
@@ -83,12 +85,12 @@ const renderReactEmbeddable = ({
 
     // set intial panel state onMount
     useMemo(() => {
-      container.setSerializedStateForChild(uuid, omit(input, ['disableTriggers', 'filters']));
+      container.setSerializedStateForChild(uuid, omit(input, ['disableTriggers']));
     }, []);
 
     const searchApi = useMemo(() => {
       return {
-        filters$: new BehaviorSubject<Filter[] | undefined>(input.filters),
+        filters$: new BehaviorSubject<Filter[] | undefined>(filters),
         query$: new BehaviorSubject<Query | AggregateQuery | undefined>(undefined),
         timeRange$: new BehaviorSubject<TimeRange | undefined>(undefined),
       };
@@ -124,15 +126,15 @@ const renderReactEmbeddable = ({
           }
           children[uuid] = {
             ...api,
-            setFilters: (filters: Filter[] | undefined) => {
+            setFilters: (nextFilters: Filter[] | undefined) => {
               if (
-                !onlyDisabledFiltersChanged(searchApi.filters$.getValue(), filters, {
+                !onlyDisabledFiltersChanged(searchApi.filters$.getValue(), nextFilters, {
                   ...COMPARE_ALL_OPTIONS,
                   // do not compare $state to avoid refreshing when filter is pinned/unpinned (which does not impact results)
                   state: false,
                 })
               ) {
-                searchApi.filters$.next(filters);
+                searchApi.filters$.next(nextFilters);
               }
             },
           };
@@ -159,13 +161,14 @@ export const embeddableRendererFactory = (
     displayName: strings.getDisplayName(),
     help: strings.getHelpDescription(),
     reuseDomNode: true,
-    render: async (domNode, { input, embeddableType, canvasApi }, handlers) => {
+    render: async (domNode, { input, filters, embeddableType, canvasApi }, handlers) => {
       const uuid = handlers.getElementId();
       const api = children[uuid];
       if (!api) {
         ReactDOM.render(
           renderReactEmbeddable({
             input,
+            filters,
             handlers,
             uuid,
             type: embeddableType,
@@ -182,7 +185,7 @@ export const embeddableRendererFactory = (
           return ReactDOM.unmountComponentAtNode(domNode);
         });
       } else {
-        api.setFilters((input as { filters?: Filter[] }).filters);
+        api.setFilters(filters);
       }
     },
   });

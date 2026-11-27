@@ -73,7 +73,7 @@ export const registerSignificantEventsSkills = async ({
   const getCoreSkills = (): SignificantEventsSkill[] => [
     knowledgeIndicatorsManagementSkill,
     nightshiftSourcesManagementSkill,
-    createKIQueryGenerationSkill({ getScopedClients, server, logger }),
+    createKIQueryGenerationSkill({ getScopedClients, server, logger, telemetry }),
     significantEventsKIGroundingSkill,
     significantEventsManagementSkill,
     featureIdentificationSkill,
@@ -81,6 +81,7 @@ export const registerSignificantEventsSkills = async ({
       ? [
           createKiIdentificationManagementSkill({
             server,
+            logger,
             telemetry,
             streamsKIsOnboardingClient,
             maintenanceService,

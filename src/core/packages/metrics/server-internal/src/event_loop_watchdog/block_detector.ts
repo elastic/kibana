@@ -51,6 +51,12 @@ export class BlockDetector {
   private lastRefillAt?: number;
   private suppressedBlocks = 0;
 
+  /** The block in progress as of the last poll, if any. */
+  public get current(): Readonly<{ startedAt: number; phase: Phase }> | undefined {
+    const { ongoing } = this;
+    return ongoing && { startedAt: ongoing.startedAt, phase: ongoing.phase };
+  }
+
   /**
    * Returns the block that ended, or a report on the block still ongoing when one is due, given
    * the main thread's last heartbeat.

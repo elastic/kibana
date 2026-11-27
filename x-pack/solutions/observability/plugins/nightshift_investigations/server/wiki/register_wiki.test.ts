@@ -9,7 +9,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import { createConversationNotFoundError } from '@kbn/agent-builder-common';
 import {
-  NIGHTSHIFT_INVESTIGATION_MEMORY_USAGE_ID,
+  NIGHTSHIFT_INVESTIGATION_WIKI_USAGE_ID,
   NIGHTSHIFT_USAGE_PARENT_ID,
   NIGHTSHIFT_USAGE_PRODUCT_FEATURE,
   NIGHTSHIFT_USAGE_PRODUCT_SOLUTION,
@@ -314,7 +314,7 @@ describe('runWikiOptimize', () => {
       request,
       defaultConnectorId: 'anthropic-sonnet',
       telemetryMetadata: {
-        pluginId: NIGHTSHIFT_INVESTIGATION_MEMORY_USAGE_ID,
+        pluginId: NIGHTSHIFT_INVESTIGATION_WIKI_USAGE_ID,
         aggregateBy: NIGHTSHIFT_USAGE_PARENT_ID,
         productSolution: NIGHTSHIFT_USAGE_PRODUCT_SOLUTION,
         productFeature: NIGHTSHIFT_USAGE_PRODUCT_FEATURE,

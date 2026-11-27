@@ -82,7 +82,15 @@
                     true,
                     false
                   ]
-                }
+                },
+                "force_merge_on_clone": {
+                  "__one_of": [
+                    true,
+                    false
+                  ]
+                },
+                "total_shards_per_node": "",
+                "replicate_for": ""
               },
               "shrink": {
                 "number_of_shards": "",
@@ -164,7 +172,15 @@
                     true,
                     false
                   ]
-                }
+                },
+                "force_merge_on_clone": {
+                  "__one_of": [
+                    true,
+                    false
+                  ]
+                },
+                "total_shards_per_node": "",
+                "replicate_for": ""
               },
               "shrink": {
                 "number_of_shards": "",
@@ -246,7 +262,15 @@
                     true,
                     false
                   ]
-                }
+                },
+                "force_merge_on_clone": {
+                  "__one_of": [
+                    true,
+                    false
+                  ]
+                },
+                "total_shards_per_node": "",
+                "replicate_for": ""
               },
               "shrink": {
                 "number_of_shards": "",
@@ -328,7 +352,15 @@
                     true,
                     false
                   ]
-                }
+                },
+                "force_merge_on_clone": {
+                  "__one_of": [
+                    true,
+                    false
+                  ]
+                },
+                "total_shards_per_node": "",
+                "replicate_for": ""
               },
               "shrink": {
                 "number_of_shards": "",
@@ -410,7 +442,15 @@
                     true,
                     false
                   ]
-                }
+                },
+                "force_merge_on_clone": {
+                  "__one_of": [
+                    true,
+                    false
+                  ]
+                },
+                "total_shards_per_node": "",
+                "replicate_for": ""
               },
               "shrink": {
                 "number_of_shards": "",

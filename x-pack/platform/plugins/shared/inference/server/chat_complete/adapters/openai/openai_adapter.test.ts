@@ -19,7 +19,7 @@ import {
   MessageRole,
   InferenceConnectorType,
 } from '@kbn/inference-common';
-import type { InferenceConnector } from '@kbn/inference-common';
+import type { ChatCompletionReasoning, InferenceConnector } from '@kbn/inference-common';
 import { observableIntoEventSourceStream } from '../../../util/observable_into_event_source_stream';
 import type { InferenceExecutor } from '../../utils/inference_executor';
 import { openAIAdapter } from './openai_adapter';
@@ -556,6 +556,152 @@ describe('openAIAdapter', () => {
 
       expect(executorMock.invoke).toHaveBeenCalledTimes(1);
       expect(getRequest().body.model).toBe('gpt-4o');
+    });
+
+    describe('reasoning effort', () => {
+      const tools = {
+        my_function: {
+          description: 'my function',
+          schema: { type: 'object' as const, properties: {} },
+        },
+      };
+      const messages = [{ role: MessageRole.User as const, content: 'question' }];
+
+      it('sends reasoning_effort none for gpt-5.6 models when native tools are present', () => {
+        openAIAdapter
+          .chatComplete({ ...defaultArgs, messages, tools, modelName: 'gpt-5.6-terra' })
+          .subscribe(noop);
+
+        expect(getRequest().body.reasoning_effort).toBe('none');
+      });
+
+      it('falls back to the connector default model', () => {
+        executorMock.getConnector.mockReturnValue({
+          ...connector,
+          config: { defaultModel: 'gpt-6-luna' },
+        });
+
+        openAIAdapter.chatComplete({ ...defaultArgs, messages, tools }).subscribe(noop);
+
+        expect(getRequest().body.reasoning_effort).toBe('none');
+      });
+
+      it('uses the model configured on an Azure connector', () => {
+        executorMock.getConnector.mockReturnValue({
+          ...connector,
+          config: {
+            apiProvider: 'Azure OpenAI',
+            apiUrl:
+              'https://my-resource.openai.azure.com/openai/deployments/production-chat/chat/completions?api-version=2026-06-01',
+            defaultModel: 'gpt-6-luna',
+          },
+        });
+
+        openAIAdapter.chatComplete({ ...defaultArgs, messages, tools }).subscribe(noop);
+
+        expect(getRequest().body.reasoning_effort).toBe('none');
+      });
+
+      it('does not infer the model from the Azure deployment name', () => {
+        executorMock.getConnector.mockReturnValue({
+          ...connector,
+          config: {
+            apiProvider: 'Azure OpenAI',
+            apiUrl:
+              'https://my-resource.openai.azure.com/openai/deployments/gpt-6-luna-prod/chat/completions?api-version=2026-06-01',
+          },
+        });
+
+        openAIAdapter.chatComplete({ ...defaultArgs, messages, tools }).subscribe(noop);
+
+        expect(getRequest().body).not.toHaveProperty('reasoning_effort');
+      });
+
+      it('omits reasoning_effort for models that do not require it', () => {
+        openAIAdapter
+          .chatComplete({ ...defaultArgs, messages, tools, modelName: 'gpt-5.4' })
+          .subscribe(noop);
+
+        expect(getRequest().body).not.toHaveProperty('reasoning_effort');
+      });
+
+      it('omits reasoning_effort when no tools are present', () => {
+        openAIAdapter
+          .chatComplete({ ...defaultArgs, messages, modelName: 'gpt-5.6-terra' })
+          .subscribe(noop);
+
+        expect(getRequest().body).not.toHaveProperty('reasoning_effort');
+      });
+
+      it('omits reasoning_effort with simulated function calling', () => {
+        openAIAdapter
+          .chatComplete({
+            ...defaultArgs,
+            messages,
+            tools,
+            modelName: 'gpt-5.6-terra',
+            functionCalling: 'simulated',
+          })
+          .subscribe(noop);
+
+        expect(getRequest().body).not.toHaveProperty('reasoning_effort');
+      });
+
+      it('sends none and logs when the caller requested reasoning on a model that requires none', () => {
+        const requested: ChatCompletionReasoning[] = [{ effort: 'high' }, { enabled: true }];
+
+        for (const reasoning of requested) {
+          logger.debug.mockClear();
+          executorMock.invoke.mockClear();
+
+          openAIAdapter
+            .chatComplete({
+              ...defaultArgs,
+              messages,
+              tools,
+              modelName: 'gpt-5.6-terra',
+              reasoning,
+            })
+            .subscribe(noop);
+
+          expect(getRequest().body.reasoning_effort).toBe('none');
+          expect(logger.debug).toHaveBeenCalledWith(
+            expect.stringContaining('Overriding the requested reasoning')
+          );
+        }
+      });
+
+      it('does not log when the caller did not ask for reasoning', () => {
+        logger.debug.mockClear();
+
+        openAIAdapter
+          .chatComplete({
+            ...defaultArgs,
+            messages,
+            tools,
+            modelName: 'gpt-5.6-terra',
+            reasoning: { effort: 'none' },
+          })
+          .subscribe(noop);
+
+        expect(getRequest().body.reasoning_effort).toBe('none');
+        expect(logger.debug).not.toHaveBeenCalled();
+      });
+
+      it('does not forward the caller reasoning for other models', () => {
+        openAIAdapter
+          .chatComplete({
+            ...defaultArgs,
+            messages,
+            tools,
+            modelName: 'gpt-4o',
+            reasoning: { effort: 'high', summary: 'auto' },
+          })
+          .subscribe(noop);
+
+        expect(getRequest().body).not.toHaveProperty('reasoning_effort');
+        expect(getRequest().body).not.toHaveProperty('reasoning');
+      });
     });
   });
 

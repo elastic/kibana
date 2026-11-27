@@ -16,12 +16,12 @@ export function getKibanaConnectors(): InternalConnectorContract[] {
   // FIX: this is not really a lazy load, we should use a dynamic import instead
   const {
     GENERATED_KIBANA_CONNECTORS,
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
   } = require('./generated');
 
   const {
     KIBANA_OVERRIDES,
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
   } = require('./overrides');
 
   const mergedConnectors: InternalConnectorContract[] = [];

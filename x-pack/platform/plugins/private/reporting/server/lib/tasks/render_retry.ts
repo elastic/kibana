@@ -48,7 +48,11 @@ export type RenderRetryDecision =
 export function decideRenderRetry(
   error: unknown,
   state: RenderRetryState | undefined,
-  { attempts, maxAttempts }: { attempts: number; maxAttempts: number },
+  {
+    attempts,
+    maxAttempts,
+    claimedRunAt,
+  }: { attempts: number; maxAttempts: number; claimedRunAt: Date },
   now: number = Date.now(),
   random: () => number = Math.random
 ): RenderRetryDecision | undefined {
@@ -62,11 +66,11 @@ export function decideRenderRetry(
   const waiting = waitingSince === undefined ? {} : { waitingSince };
   switch (error.retryClass) {
     case RenderServiceRetryClass.CAPACITY:
-      // Task Manager picks it straight back up, and the next run waits again.
+      // The claimed runAt keeps its place ahead of reports queued after it.
       return {
         action: RenderRetryAction.HAND_BACK,
         reason: RenderRetryReason.SATURATED,
-        runAt: new Date(now),
+        runAt: claimedRunAt,
         state: { unavailableRuns, queued: true, ...waiting },
       };
     case RenderServiceRetryClass.UNAVAILABLE:

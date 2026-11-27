@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { IBasePath } from '@kbn/core/server';
-import { updateState, setRecoveredAlertsContext } from './common';
+import { getDefaultRecoveredSummary, updateState, setRecoveredAlertsContext } from './common';
 import type {
   AlertOverviewStatus,
   StaleDownConfig,
@@ -1308,5 +1308,26 @@ describe('setRecoveredAlertsContext for pending alerts', () => {
         recoveryReason: 'the alert condition is no longer met',
       }),
     });
+  });
+});
+
+describe('getDefaultRecoveredSummary', () => {
+  it('leaves timestamp empty when the previous alert has no time', () => {
+    const summary = getDefaultRecoveredSummary({
+      recoveredAlert: {
+        hit: {
+          'monitor.id': monitorId,
+          'monitor.name': monitorName,
+          'monitor.type': 'http',
+          'location.id': 'us_west',
+          configId,
+        },
+      } as unknown as Parameters<typeof getDefaultRecoveredSummary>[0]['recoveredAlert'],
+      tz: 'UTC',
+      dateFormat,
+    });
+
+    expect(summary?.timestamp).toBeUndefined();
+    expect(summary?.checkedAt).toBeUndefined();
   });
 });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TimeRange } from '../../entities_grid/common';
+import type { TimeRange } from '../../queries/time_range';
 import { buildAnomalyTileHead } from './entities_with_anomalies_query';
 import { buildGroupFilterSteps } from './group_filter_steps';
 import {
