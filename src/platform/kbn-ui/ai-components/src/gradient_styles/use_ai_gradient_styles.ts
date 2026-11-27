@@ -123,8 +123,8 @@ const gradientLabelCss = (
   ${hoverGradient
     ? `button:hover:not(:disabled) &,
       button:focus-visible:not(:disabled) &,
-      a:hover:not(:disabled) &,
-      a:focus-visible:not(:disabled) & {
+      a:hover &,
+      a:focus-visible & {
         background: ${hoverGradient} !important;
         background-clip: text !important;
         -webkit-background-clip: text !important;
@@ -133,16 +133,15 @@ const gradientLabelCss = (
       @media (forced-colors: active) {
         button:hover:not(:disabled) &,
         button:focus-visible:not(:disabled) &,
-        a:hover:not(:disabled) &,
-        a:focus-visible:not(:disabled) & {
+        a:hover &,
+        a:focus-visible & {
           background: none !important;
           background-clip: initial !important;
           -webkit-background-clip: initial !important;
         }
       }`
     : ''}
-  button:disabled &,
-  a:disabled & {
+  button:disabled & {
     color: ${euiTheme.colors.textDisabled} !important;
     background: none !important;
     -webkit-text-fill-color: ${euiTheme.colors.textDisabled} !important;
@@ -162,8 +161,7 @@ const plainLabelCss = (euiTheme: UseEuiTheme['euiTheme'], color: string) => css`
     -webkit-text-fill-color: currentColor !important;
   }
 
-  button:disabled &,
-  a:disabled & {
+  button:disabled & {
     color: ${euiTheme.colors.textDisabled} !important;
     -webkit-text-fill-color: ${euiTheme.colors.textDisabled} !important;
 
