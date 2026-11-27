@@ -122,8 +122,10 @@ export function OnboardingShell() {
 
   // Once something is deployed (resumed with ?deploymentId=, or deployed in this session), leaving
   // only drops the unsaved changes: the policies stay in Fleet.
+  // Resumed from an existing instance: `?deploymentId=` stays in the URL as the edit-mode indicator.
+  const isEditMode = new URLSearchParams(location.search).has('deploymentId');
   const hasDeployment =
-    new URLSearchParams(location.search).has('deploymentId') ||
+    isEditMode ||
     Object.keys(detectAndReviewStep.serviceStatuses).length > 0 ||
     Object.keys(detectAndReviewStep.policyIdsByInstance).length > 0;
 
@@ -192,7 +194,28 @@ export function OnboardingShell() {
                   text-align: center;
                 `}
               >
-                <h1>{meta.title}</h1>
+                <h1>
+                  {isEditMode ? (
+                    <FormattedMessage
+                      id="xpack.ingestHub.onboardingShell.editTitle"
+                      defaultMessage="<light>Edit</light> {title}"
+                      values={{
+                        title: meta.title,
+                        light: (chunks) => (
+                          <span
+                            css={css`
+                              font-weight: ${euiTheme.font.weight.regular};
+                            `}
+                          >
+                            {chunks}
+                          </span>
+                        ),
+                      }}
+                    />
+                  ) : (
+                    meta.title
+                  )}
+                </h1>
               </EuiTitle>
             </EuiFlexGroup>
             <EuiFlexItem grow={false}>

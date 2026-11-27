@@ -1,0 +1,339 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+// Real installable content shipped for AWS, verified against the `aws`
+// integration package (github.com/elastic/integrations, 53 dashboards /
+// 13 saved searches / 8 alerting rule templates) and epr.elastic.co
+// (`?type=content` — the per-service OTel content packages, all beta).
+// Services without prebuilt content simply don't appear on step 5.
+
+import type { AwsSchema } from './aws_services_data';
+
+export type AwsContentType =
+  | 'dashboard'
+  | 'search'
+  | 'alert_rule'
+  | 'content_package'
+  | 'detection_rule'
+  | 'index_template'
+  | 'component_template'
+  | 'ingest_pipeline'
+  | 'transform';
+
+export interface AwsContentItem {
+  id: string;
+  title: string;
+  type: AwsContentType;
+  description?: string;
+}
+
+// Real ES transforms shipped by the aws package (latest_cdr_*), keyed by the
+// service whose data stream feeds them.
+export const TRANSFORMS_BY_SERVICE: Record<string, string[]> = {
+  securityhub_cspm: ['latest_cdr_misconfigurations'],
+  config: ['latest_cdr_misconfigurations_awsconfig'],
+  inspector: ['latest_cdr_vulnerabilities_awsinspector'],
+};
+
+// Required technical assets for a service's data streams, following Fleet's
+// real naming conventions (`logs-aws.<ds>`, `<template>@package/@custom`,
+// versioned ingest pipelines). These install with the package and are not
+// removable.
+export function getTechnicalAssets(services: Array<{ id: string; name: string; dataTypes: string[] }>): Array<{
+  id: string;
+  title: string;
+  type: AwsContentType;
+  serviceName: string;
+}> {
+  const assets: Array<{ id: string; title: string; type: AwsContentType; serviceName: string }> =
+    [];
+  for (const service of services) {
+    for (const dataType of service.dataTypes) {
+      const ds = `${dataType.toLowerCase()}-aws.${service.id}`;
+      assets.push(
+        { id: `${ds}-it`, title: ds, type: 'index_template', serviceName: service.name },
+        {
+          id: `${ds}-ct-package`,
+          title: `${ds}@package`,
+          type: 'component_template',
+          serviceName: service.name,
+        },
+        {
+          id: `${ds}-ct-custom`,
+          title: `${ds}@custom`,
+          type: 'component_template',
+          serviceName: service.name,
+        },
+        {
+          id: `${ds}-pipeline`,
+          title: `${ds}-7.1.1`,
+          type: 'ingest_pipeline',
+          serviceName: service.name,
+        }
+      );
+    }
+    for (const transform of TRANSFORMS_BY_SERVICE[service.id] ?? []) {
+      assets.push({
+        id: `${service.id}-${transform}`,
+        title: transform,
+        type: 'transform',
+        serviceName: service.name,
+      });
+    }
+  }
+  return assets;
+}
+
+// Prebuilt SIEM detection rules from the `security_detection_engine` package
+// (github.com/elastic/detection-rules ships 195 AWS rules; a representative
+// sample per service, all real rule names). Rendered as their own group on
+// step 5 since they install from a separate package than `aws`.
+export const DETECTION_RULES_BY_SERVICE: Record<string, AwsContentItem[]> = {
+  cloudtrail: [
+    { id: 'dr-ct-deleted', title: 'AWS CloudTrail Log Deleted', type: 'detection_rule' },
+    { id: 'dr-ct-suspended', title: 'AWS CloudTrail Log Suspended', type: 'detection_rule' },
+  ],
+  guardduty: [
+    { id: 'dr-gd-detector', title: 'AWS GuardDuty Detector Deletion', type: 'detection_rule' },
+  ],
+  ec2: [
+    {
+      id: 'dr-ec2-nacl',
+      title: 'AWS EC2 Network Access Control List Deletion',
+      type: 'detection_rule',
+    },
+    {
+      id: 'dr-ec2-creds',
+      title: 'AWS EC2 Unauthorized Admin Credential Fetch via Assumed Role',
+      type: 'detection_rule',
+    },
+  ],
+  lambda: [
+    { id: 'dr-lambda-deleted', title: 'AWS Lambda Function Deletion', type: 'detection_rule' },
+    {
+      id: 'dr-lambda-layer',
+      title: 'AWS Lambda Layer Added to Existing Function',
+      type: 'detection_rule',
+    },
+  ],
+};
+
+// Package-wide content that isn't tied to a single service.
+export const GENERAL_CONTENT: AwsContentItem[] = [
+  { id: 'aws-overview', title: '[Metrics AWS] Overview', type: 'dashboard' },
+];
+
+export const CONTENT_BY_SERVICE: Record<string, AwsContentItem[]> = {
+  cloudtrail: [{ id: 'ct-dash', title: '[Logs AWS] CloudTrail', type: 'dashboard' }],
+  cloudtrail_otel: [
+    {
+      id: 'ct-otel-pkg',
+      title: 'AWS CloudTrail Logs OpenTelemetry Assets',
+      type: 'content_package',
+      description: 'beta',
+    },
+  ],
+  config: [{ id: 'config-dash', title: '[Logs AWS] Config', type: 'dashboard' }],
+  guardduty: [
+    { id: 'gd-overview', title: '[Logs AWS] Guardduty Findings Overview', type: 'dashboard' },
+    { id: 'gd-threat', title: '[Logs AWS] Guardduty Findings Threat', type: 'dashboard' },
+  ],
+  inspector: [
+    { id: 'insp-dash', title: '[Logs AWS] Inspector Findings Overview', type: 'dashboard' },
+  ],
+  securityhub_cspm: [
+    {
+      id: 'cspm-dash',
+      title: '[Logs AWS] Security Hub CSPM Summary Dashboard',
+      type: 'dashboard',
+    },
+  ],
+  waf: [{ id: 'waf-dash', title: '[Logs AWS] WAF Log Overview', type: 'dashboard' }],
+  waf_otel: [
+    {
+      id: 'waf-otel-pkg',
+      title: 'AWS WAF Logs OpenTelemetry Assets',
+      type: 'content_package',
+      description: 'beta',
+    },
+  ],
+  firewall: [
+    { id: 'fw-overview', title: '[Logs AWS] Firewall Overview', type: 'dashboard' },
+    { id: 'fw-alerts', title: '[Logs AWS] Firewall Alerts', type: 'dashboard' },
+    { id: 'fw-flows', title: '[Logs AWS] Firewall Flows', type: 'dashboard' },
+    { id: 'fw-metrics', title: '[Metrics AWS] Firewall Overview', type: 'dashboard' },
+  ],
+
+  ec2: [
+    { id: 'ec2-dash', title: '[Metrics AWS] EC2 Overview', type: 'dashboard' },
+    { id: 'ec2-cpu-rule', title: 'EC2 high CPU utilization', type: 'alert_rule' },
+    { id: 'ec2-status-rule', title: 'EC2 status check failed', type: 'alert_rule' },
+  ],
+  ec2_otel: [
+    {
+      id: 'ec2-otel-pkg',
+      title: 'AWS EC2 Metrics OpenTelemetry Assets',
+      type: 'content_package',
+      description: 'beta',
+    },
+  ],
+  lambda: [
+    { id: 'lambda-metrics-dash', title: '[Metrics AWS] Lambda Overview', type: 'dashboard' },
+    { id: 'lambda-logs-dash', title: '[Logs AWS] Lambda Log Overview', type: 'dashboard' },
+    { id: 'lambda-errors-rule', title: 'Lambda errors', type: 'alert_rule' },
+    { id: 'lambda-throttles-rule', title: 'Lambda throttles', type: 'alert_rule' },
+  ],
+  lambda_otel: [
+    {
+      id: 'lambda-otel-pkg',
+      title: 'AWS Lambda Metrics OpenTelemetry Assets',
+      type: 'content_package',
+      description: 'beta',
+    },
+  ],
+  ecs_otel: [
+    {
+      id: 'ecs-otel-pkg',
+      title: 'AWS ECS Metrics OpenTelemetry Assets',
+      type: 'content_package',
+      description: 'beta',
+    },
+  ],
+  emr: [
+    { id: 'emr-metrics-dash', title: '[Metrics AWS] EMR Overview', type: 'dashboard' },
+    { id: 'emr-logs-dash', title: '[Logs AWS] EMR Overview', type: 'dashboard' },
+  ],
+
+  vpcflow: [
+    { id: 'vpc-dash', title: '[Logs AWS] VPC Flow Log Overview', type: 'dashboard' },
+  ],
+  vpcflow_otel: [
+    {
+      id: 'vpc-otel-pkg',
+      title: 'AWS VPC Flow Logs OpenTelemetry Assets',
+      type: 'content_package',
+      description: 'beta',
+    },
+  ],
+  vpn: [{ id: 'vpn-dash', title: '[Metrics AWS] VPN Overview', type: 'dashboard' }],
+  natgateway: [
+    { id: 'nat-dash', title: '[Metrics AWS] NAT Gateway Overview', type: 'dashboard' },
+  ],
+  transitgateway: [
+    { id: 'tgw-dash', title: '[Metrics AWS] Transit Gateway Overview', type: 'dashboard' },
+  ],
+  elb: [
+    { id: 'elb-metrics-dash', title: '[Metrics AWS] ELB Overview', type: 'dashboard' },
+    { id: 'alb-dash', title: '[Metrics AWS] ALB Overview', type: 'dashboard' },
+    { id: 'nlb-dash', title: '[Metrics AWS] NLB Overview', type: 'dashboard' },
+    { id: 'elb-logs-dash', title: '[Logs AWS] ELB Access Log Overview', type: 'dashboard' },
+  ],
+  elb_logs_otel: [
+    {
+      id: 'elb-logs-otel-pkg',
+      title: 'AWS ELB Logs OpenTelemetry Assets',
+      type: 'content_package',
+      description: 'beta',
+    },
+  ],
+  elb_metrics_otel: [
+    {
+      id: 'elb-metrics-otel-pkg',
+      title: 'AWS ELB Metrics OpenTelemetry Assets',
+      type: 'content_package',
+      description: 'beta',
+    },
+  ],
+  apigateway: [
+    { id: 'apigw-rest-dash', title: '[Metrics AWS] API Gateway REST Overview', type: 'dashboard' },
+    { id: 'apigw-http-dash', title: '[Metrics AWS] API Gateway HTTP Overview', type: 'dashboard' },
+    {
+      id: 'apigw-ws-dash',
+      title: '[Metrics AWS] API Gateway WebSocket Overview',
+      type: 'dashboard',
+    },
+    { id: 'apigw-logs-dash', title: '[Logs AWS] API Gateway Overview', type: 'dashboard' },
+  ],
+
+  s3: [
+    { id: 's3-metrics-dash', title: '[Metrics AWS] S3 Overview', type: 'dashboard' },
+    { id: 's3-logs-dash', title: '[Logs AWS] S3 Server Access Log Overview', type: 'dashboard' },
+  ],
+  s3_storage_lens: [
+    { id: 's3-lens-dash', title: '[Metrics AWS] S3 Storage Lens Overview', type: 'dashboard' },
+  ],
+  ebs: [{ id: 'ebs-dash', title: '[Metrics AWS] EBS Overview', type: 'dashboard' }],
+
+  rds: [{ id: 'rds-dash', title: '[Metrics AWS] RDS Overview', type: 'dashboard' }],
+  rds_otel: [
+    {
+      id: 'rds-otel-pkg',
+      title: 'AWS RDS Metrics OpenTelemetry Assets',
+      type: 'content_package',
+      description: 'beta',
+    },
+  ],
+  dynamodb: [
+    { id: 'ddb-dash', title: '[Metrics AWS] DynamoDB Overview', type: 'dashboard' },
+  ],
+  redshift: [
+    { id: 'redshift-dash', title: '[Metrics AWS] Redshift Overview', type: 'dashboard' },
+  ],
+
+  kinesis: [
+    { id: 'kinesis-dash', title: '[Metrics AWS] Kinesis Overview', type: 'dashboard' },
+  ],
+  kafka: [{ id: 'msk-dash', title: '[Metrics AWS] MSK Overview', type: 'dashboard' }],
+
+  sns: [
+    { id: 'sns-dash', title: '[Metrics AWS] SNS Overview', type: 'dashboard' },
+    { id: 'sns-failed-rule', title: 'SNS notifications failed', type: 'alert_rule' },
+    { id: 'sns-filtered-rule', title: 'SNS notifications filtered out', type: 'alert_rule' },
+  ],
+  sqs: [
+    { id: 'sqs-dash', title: '[Metrics AWS] SQS Overview', type: 'dashboard' },
+    { id: 'sqs-visible-rule', title: 'SQS messages visible', type: 'alert_rule' },
+    { id: 'sqs-oldest-rule', title: 'SQS oldest message age', type: 'alert_rule' },
+  ],
+  sqs_otel: [
+    {
+      id: 'sqs-otel-pkg',
+      title: 'AWS SQS Metrics OpenTelemetry Assets',
+      type: 'content_package',
+      description: 'beta',
+    },
+  ],
+
+  billing: [
+    { id: 'billing-dash', title: '[Metrics AWS] Billing Overview', type: 'dashboard' },
+  ],
+  usage: [{ id: 'usage-dash', title: '[Metrics AWS] Usage Overview', type: 'dashboard' }],
+
+  awshealth: [
+    { id: 'health-dash', title: '[Metrics AWS] Health Overview', type: 'dashboard' },
+  ],
+};
+
+// The OTel content packages above are keyed separately from their ECS-mode
+// service (e.g. `cloudtrail_otel`) since a single service tile can only have
+// one entry in CONTENT_BY_SERVICE. ELB is the one case where OTel splits
+// into two packages (logs and metrics) instead of one.
+const OTEL_CONTENT_KEY_OVERRIDES: Record<string, string[]> = {
+  elb: ['elb_logs_otel', 'elb_metrics_otel'],
+};
+
+// Resolves which prebuilt content applies to a service under the Step 1
+// schema choice. Falls back to the ECS-mode content if a service has no
+// dedicated OTel content package yet.
+export function getContentForService(serviceId: string, schema: AwsSchema): AwsContentItem[] {
+  if (schema === 'otel') {
+    const otelKeys = OTEL_CONTENT_KEY_OVERRIDES[serviceId] ?? [`${serviceId}_otel`];
+    const otelItems = otelKeys.flatMap((key) => CONTENT_BY_SERVICE[key] ?? []);
+    if (otelItems.length > 0) return otelItems;
+  }
+  return CONTENT_BY_SERVICE[serviceId] ?? [];
+}

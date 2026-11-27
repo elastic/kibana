@@ -23,6 +23,7 @@ import { CopyPackagePolicyPage } from '../../../fleet/sections/agent_policy/copy
 import { CreatePackagePolicyPage } from '../../../fleet/sections/agent_policy/create_package_policy_page';
 
 import { EPMHomePage } from './screens/home';
+import { AwsOnboardingPage } from './screens/aws_onboarding/version_switcher';
 import { Detail } from './screens/detail';
 import { Policy } from './screens/policy';
 import { CreateIntegration } from './screens/create';
@@ -40,6 +41,9 @@ export const EPMApp: React.FunctionComponent = () => {
 
   return (
     <Routes>
+      <Route path={INTEGRATIONS_ROUTING_PATHS.integration_aws_onboarding}>
+        <AwsOnboardingPage />
+      </Route>
       <Route path={INTEGRATIONS_ROUTING_PATHS.add_integration_to_policy}>
         <CreatePackagePolicyPage />
       </Route>
