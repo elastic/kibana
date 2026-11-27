@@ -1,0 +1,741 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import {
+  type DropResult,
+  EuiAccordion,
+  EuiBadge,
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiCheckbox,
+  EuiConfirmModal,
+  EuiDragDropContext,
+  euiDragDropReorder,
+  EuiDraggable,
+  EuiDroppable,
+  EuiEmptyPrompt,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiIcon,
+  EuiIconTip,
+  EuiPanel,
+  EuiSelect,
+  EuiSpacer,
+  EuiSwitch,
+  EuiText,
+  EuiTextArea,
+  EuiToolTip,
+  useEuiTheme,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { SchemaListDragClone } from './schema_list_drag_clone';
+import {
+  applyTypeChange,
+  createEmptySchemaProperty,
+  validateSchemaPropertyName,
+} from './schema_property_model';
+import { schemaPropertyNameErrorMessage } from './schema_property_name_error_message';
+import {
+  SCALAR_SCHEMA_PROPERTY_TYPES,
+  SCHEMA_PROPERTY_MAX_DEPTH,
+  SCHEMA_PROPERTY_TYPE_OPTIONS,
+  type SchemaPropertyField,
+  type SchemaPropertyType,
+} from './types';
+
+export interface SchemaPropertyListProps {
+  readonly properties: readonly SchemaPropertyField[];
+  readonly onChange: (next: readonly SchemaPropertyField[]) => void;
+  /** Nesting depth; root list is 0. */
+  readonly depth?: number;
+  /** When set, used for empty-state copy (inputs vs nested properties). */
+  readonly emptyTitle?: string;
+  readonly emptyBody?: string;
+  readonly addButtonLabel?: string;
+  readonly dataTestSubjPrefix?: string;
+  /**
+   * Resolve step names that reference this property name (for delete/rename
+   * confirms). Only needed at the root inputs list.
+   */
+  readonly findReferencingSteps?: (name: string) => string[];
+  /** Shows the properties without letting the user change them: no add, remove, reorder or edit. */
+  readonly readOnly?: boolean;
+}
+
+const PropertyEditor = ({
+  field,
+  siblings,
+  depth,
+  dataTestSubjPrefix,
+  onUpdate,
+  onRequestDelete,
+  dragHandleProps,
+  readOnly,
+}: {
+  readonly field: SchemaPropertyField;
+  readonly siblings: readonly SchemaPropertyField[];
+  readonly depth: number;
+  readonly dataTestSubjPrefix: string;
+  readonly onUpdate: (next: SchemaPropertyField) => void;
+  readonly onRequestDelete: () => void;
+  readonly dragHandleProps?: object;
+  readonly readOnly?: boolean;
+}) => {
+  const { euiTheme } = useEuiTheme();
+  const accordionId = useGeneratedHtmlId({ prefix: `${dataTestSubjPrefix}-acc` });
+  const nameError = validateSchemaPropertyName(field.name, siblings, field.id);
+  const isScalar = SCALAR_SCHEMA_PROPERTY_TYPES.has(field.type);
+  const atNestingLimit = depth >= SCHEMA_PROPERTY_MAX_DEPTH;
+  const displayName = field.name.trim() || '—';
+
+  const buttonContent = (
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+      {readOnly ? null : (
+        <EuiFlexItem grow={false}>
+          <span
+            {...dragHandleProps}
+            data-drag-grip
+            css={{
+              cursor: 'grab',
+              display: 'inline-flex',
+              alignItems: 'center',
+              width: 16,
+              minWidth: 16,
+              opacity: 1,
+              marginInlineEnd: 6,
+            }}
+          >
+            <EuiIcon type="drag" color="subdued" size="s" aria-hidden={true} />
+          </span>
+        </EuiFlexItem>
+      )}
+      <EuiFlexItem grow={false}>
+        <EuiText size="s">
+          <code>{displayName}</code>
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiText size="s" color="subdued">
+          {`· ${field.type}`}
+        </EuiText>
+      </EuiFlexItem>
+      {field.required ? (
+        <EuiFlexItem grow={false}>
+          <EuiBadge color="hollow">
+            {i18n.translate('workflows.schemaPropertyBuilder.requiredBadge', {
+              defaultMessage: 'Required',
+            })}
+          </EuiBadge>
+        </EuiFlexItem>
+      ) : null}
+    </EuiFlexGroup>
+  );
+
+  const typeOptions =
+    depth >= SCHEMA_PROPERTY_MAX_DEPTH
+      ? SCHEMA_PROPERTY_TYPE_OPTIONS.filter((o) => o.value !== 'object' && o.value !== 'array')
+      : [...SCHEMA_PROPERTY_TYPE_OPTIONS];
+
+  const itemTypeOptions = SCHEMA_PROPERTY_TYPE_OPTIONS.filter((o) => o.value !== 'array');
+
+  const removeLabel = i18n.translate('workflows.schemaPropertyBuilder.remove', {
+    defaultMessage: 'Remove',
+  });
+
+  return (
+    <EuiPanel hasBorder paddingSize="s" css={{ marginBottom: euiTheme.size.s }}>
+      <EuiAccordion
+        id={accordionId}
+        initialIsOpen
+        paddingSize="s"
+        buttonContent={buttonContent}
+        extraAction={
+          readOnly ? undefined : (
+            <EuiToolTip content={removeLabel} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="trash"
+                color="danger"
+                aria-label={removeLabel}
+                onClick={(e: React.MouseEvent) => {
+                  e.stopPropagation();
+                  onRequestDelete();
+                }}
+                data-test-subj={`${dataTestSubjPrefix}-remove-${field.id}`}
+              />
+            </EuiToolTip>
+          )
+        }
+        data-test-subj={`${dataTestSubjPrefix}-row-${field.id}`}
+      >
+        {/* A disabled fieldset makes every control inside inert, so nothing added later can be
+            missed; the reset keeps it from drawing a border or changing the layout. */}
+        <fieldset
+          disabled={readOnly}
+          css={{ border: 0, margin: 0, padding: 0, minWidth: 0 }}
+          data-test-subj={`${dataTestSubjPrefix}-fields-${field.id}`}
+        >
+          <EuiFlexGroup gutterSize="m" responsive={false} alignItems="flexStart">
+            <EuiFlexItem grow={2}>
+              <EuiFormRow
+                label={i18n.translate('workflows.schemaPropertyBuilder.name', {
+                  defaultMessage: 'Name',
+                })}
+                helpText={
+                  field.name.trim()
+                    ? i18n.translate('workflows.schemaPropertyBuilder.nameHelp', {
+                        defaultMessage: 'Reference as inputs.{name}',
+                        values: { name: field.name.trim() },
+                      })
+                    : undefined
+                }
+                isInvalid={nameError != null && field.name.length > 0}
+                error={schemaPropertyNameErrorMessage(nameError)}
+                fullWidth
+              >
+                <EuiFieldText
+                  compressed
+                  fullWidth
+                  value={field.name}
+                  isInvalid={nameError != null && field.name.length > 0}
+                  onChange={(e) => onUpdate({ ...field, name: e.target.value })}
+                  data-test-subj={`${dataTestSubjPrefix}-name-${field.id}`}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+            <EuiFlexItem grow={1}>
+              <EuiFormRow
+                label={i18n.translate('workflows.schemaPropertyBuilder.type', {
+                  defaultMessage: 'Type',
+                })}
+                fullWidth
+              >
+                <EuiSelect
+                  compressed
+                  fullWidth
+                  options={typeOptions}
+                  value={field.type}
+                  onChange={(e) =>
+                    onUpdate(applyTypeChange(field, e.target.value as SchemaPropertyType))
+                  }
+                  data-test-subj={`${dataTestSubjPrefix}-type-${field.id}`}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="s" />
+          <EuiFormRow
+            label={i18n.translate('workflows.schemaPropertyBuilder.description', {
+              defaultMessage: 'Description',
+            })}
+            fullWidth
+          >
+            <EuiFieldText
+              compressed
+              fullWidth
+              value={field.description}
+              onChange={(e) => onUpdate({ ...field, description: e.target.value })}
+              data-test-subj={`${dataTestSubjPrefix}-description-${field.id}`}
+            />
+          </EuiFormRow>
+
+          {isScalar ? (
+            <>
+              <EuiSpacer size="s" />
+              <EuiFormRow
+                label={i18n.translate('workflows.schemaPropertyBuilder.allowedValues', {
+                  defaultMessage: 'Allowed values',
+                })}
+                helpText={i18n.translate('workflows.schemaPropertyBuilder.allowedValuesHelp', {
+                  defaultMessage: 'Comma-separated. Leave empty for free-form input.',
+                })}
+                fullWidth
+              >
+                <EuiFieldText
+                  compressed
+                  fullWidth
+                  value={field.allowedValues.join(', ')}
+                  onChange={(e) =>
+                    onUpdate({
+                      ...field,
+                      allowedValues: e.target.value
+                        .split(',')
+                        .map((s) => s.trim())
+                        .filter(Boolean),
+                    })
+                  }
+                  data-test-subj={`${dataTestSubjPrefix}-allowed-${field.id}`}
+                />
+              </EuiFormRow>
+              {field.allowedValues.length > 0 ? (
+                <>
+                  <EuiSpacer size="s" />
+                  <EuiFormRow fullWidth>
+                    <EuiSwitch
+                      label={i18n.translate('workflows.schemaPropertyBuilder.allowOther', {
+                        defaultMessage: 'Allow other values',
+                      })}
+                      checked={field.allowOtherValues}
+                      onChange={(e) => onUpdate({ ...field, allowOtherValues: e.target.checked })}
+                      data-test-subj={`${dataTestSubjPrefix}-allowOther-${field.id}`}
+                    />
+                  </EuiFormRow>
+                </>
+              ) : null}
+            </>
+          ) : null}
+
+          <EuiSpacer size="s" />
+          <EuiFormRow fullWidth>
+            <EuiCheckbox
+              id={`${field.id}-required`}
+              label={
+                <span css={{ display: 'inline-flex', alignItems: 'center', gap: euiTheme.size.xs }}>
+                  {i18n.translate('workflows.schemaPropertyBuilder.required', {
+                    defaultMessage: 'Required',
+                  })}
+                  <EuiIconTip
+                    type="info"
+                    color="subdued"
+                    content={i18n.translate('workflows.schemaPropertyBuilder.requiredInfo', {
+                      defaultMessage: 'The caller must provide a value',
+                    })}
+                    aria-label={i18n.translate('workflows.schemaPropertyBuilder.requiredInfoAria', {
+                      defaultMessage: 'About required inputs',
+                    })}
+                    anchorProps={{
+                      'data-test-subj': `${dataTestSubjPrefix}-requiredInfo-${field.id}`,
+                      // The icon sits inside the checkbox's label: a click must not toggle it.
+                      onClick: (event) => event.preventDefault(),
+                    }}
+                  />
+                </span>
+              }
+              checked={field.required}
+              onChange={(e) => onUpdate({ ...field, required: e.target.checked })}
+              data-test-subj={`${dataTestSubjPrefix}-required-${field.id}`}
+            />
+          </EuiFormRow>
+          <EuiFlexGroup
+            gutterSize="s"
+            alignItems="flexStart"
+            responsive={false}
+            // Keep the checkbox and its value on the same row.
+            css={{ flexWrap: 'nowrap' }}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiCheckbox
+                id={`${field.id}-hasDefault`}
+                label={i18n.translate('workflows.schemaPropertyBuilder.useDefault', {
+                  defaultMessage: 'Default value',
+                })}
+                checked={field.hasDefault}
+                onChange={(e) => onUpdate({ ...field, hasDefault: e.target.checked })}
+                data-test-subj={`${dataTestSubjPrefix}-hasDefault-${field.id}`}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={true}>
+              <EuiTextArea
+                compressed
+                fullWidth
+                // Grows with its lines, up to a few: a default is often long, or an ES|QL query.
+                rows={Math.min(Math.max(field.defaultValue.split('\n').length, 1), 8)}
+                value={field.defaultValue}
+                disabled={!field.hasDefault}
+                aria-label={i18n.translate('workflows.schemaPropertyBuilder.defaultValueAria', {
+                  defaultMessage: 'Default value',
+                })}
+                placeholder={i18n.translate(
+                  'workflows.schemaPropertyBuilder.defaultValuePlaceholder',
+                  { defaultMessage: 'Empty when left blank' }
+                )}
+                onClick={(e) => e.stopPropagation()}
+                onChange={(e) => onUpdate({ ...field, defaultValue: e.target.value })}
+                data-test-subj={`${dataTestSubjPrefix}-default-${field.id}`}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+
+          {field.type === 'array' ? (
+            <>
+              <EuiSpacer size="m" />
+              <EuiFormRow
+                label={i18n.translate('workflows.schemaPropertyBuilder.itemType', {
+                  defaultMessage: 'Item type',
+                })}
+                fullWidth
+              >
+                <EuiSelect
+                  compressed
+                  fullWidth
+                  options={itemTypeOptions}
+                  value={field.itemType ?? 'string'}
+                  onChange={(e) => {
+                    const itemType = e.target.value as SchemaPropertyType;
+                    onUpdate({
+                      ...field,
+                      itemType,
+                      // Choosing an item type replaces whatever union of types the items had.
+                      itemSchema: undefined,
+                      itemProperties:
+                        itemType === 'object' ? field.itemProperties ?? [] : undefined,
+                    });
+                  }}
+                  data-test-subj={`${dataTestSubjPrefix}-itemType-${field.id}`}
+                />
+              </EuiFormRow>
+              {field.itemType === 'object' ? (
+                <>
+                  <EuiSpacer size="s" />
+                  {atNestingLimit ? (
+                    <EuiText size="xs" color="subdued">
+                      {i18n.translate('workflows.schemaPropertyBuilder.nestingLimit', {
+                        defaultMessage: 'Deeper nested shapes can still be edited in the YAML tab.',
+                      })}
+                    </EuiText>
+                  ) : (
+                    <EuiPanel color="subdued" paddingSize="m" hasBorder={false}>
+                      <SchemaPropertyList
+                        properties={field.itemProperties ?? []}
+                        onChange={(itemProperties) => onUpdate({ ...field, itemProperties })}
+                        depth={depth + 1}
+                        dataTestSubjPrefix={`${dataTestSubjPrefix}-itemProps`}
+                        emptyTitle={i18n.translate(
+                          'workflows.schemaPropertyBuilder.noItemPropsTitle',
+                          { defaultMessage: 'No item properties yet' }
+                        )}
+                        emptyBody={i18n.translate(
+                          'workflows.schemaPropertyBuilder.noItemPropsBody',
+                          {
+                            defaultMessage: 'Define the shape of each array item.',
+                          }
+                        )}
+                        addButtonLabel={i18n.translate(
+                          'workflows.schemaPropertyBuilder.addItemProperty',
+                          { defaultMessage: 'Add property' }
+                        )}
+                        readOnly={readOnly}
+                      />
+                    </EuiPanel>
+                  )}
+                </>
+              ) : null}
+            </>
+          ) : null}
+
+          {field.type === 'object' ? (
+            <>
+              <EuiSpacer size="m" />
+              {atNestingLimit ? (
+                <EuiText size="xs" color="subdued">
+                  {i18n.translate('workflows.schemaPropertyBuilder.nestingLimit', {
+                    defaultMessage: 'Deeper nested shapes can still be edited in the YAML tab.',
+                  })}
+                </EuiText>
+              ) : (
+                <EuiPanel color="subdued" paddingSize="m" hasBorder={false}>
+                  <SchemaPropertyList
+                    properties={field.properties ?? []}
+                    onChange={(properties) => onUpdate({ ...field, properties })}
+                    depth={depth + 1}
+                    dataTestSubjPrefix={`${dataTestSubjPrefix}-props`}
+                    emptyTitle={i18n.translate(
+                      'workflows.schemaPropertyBuilder.noNestedPropsTitle',
+                      {
+                        defaultMessage: 'No properties yet',
+                      }
+                    )}
+                    emptyBody={i18n.translate('workflows.schemaPropertyBuilder.noNestedPropsBody', {
+                      defaultMessage: 'Add fields that belong on this object.',
+                    })}
+                    addButtonLabel={i18n.translate(
+                      'workflows.schemaPropertyBuilder.addNestedProperty',
+                      { defaultMessage: 'Add property' }
+                    )}
+                    readOnly={readOnly}
+                  />
+                </EuiPanel>
+              )}
+            </>
+          ) : null}
+        </fieldset>
+      </EuiAccordion>
+    </EuiPanel>
+  );
+};
+
+/**
+ * Reusable JSON-Schema property list editor (workflow inputs today; outputs later).
+ * Must stay outside the trigger flyout so other surfaces can import it.
+ */
+export function SchemaPropertyList({
+  properties,
+  onChange,
+  depth = 0,
+  emptyTitle,
+  emptyBody,
+  addButtonLabel,
+  dataTestSubjPrefix = 'schemaProperty',
+  findReferencingSteps,
+  readOnly = false,
+}: SchemaPropertyListProps) {
+  const droppableId = useGeneratedHtmlId({ prefix: `${dataTestSubjPrefix}-drop` });
+  const deleteModalTitleId = useGeneratedHtmlId({ prefix: `${dataTestSubjPrefix}-delete-title` });
+  const renameModalTitleId = useGeneratedHtmlId({ prefix: `${dataTestSubjPrefix}-rename-title` });
+  const [pendingDelete, setPendingDelete] = useState<{
+    field: SchemaPropertyField;
+    steps: string[];
+  } | null>(null);
+  const [pendingRename, setPendingRename] = useState<{
+    field: SchemaPropertyField;
+    nextName: string;
+    steps: string[];
+  } | null>(null);
+
+  const resolvedEmptyTitle =
+    emptyTitle ??
+    i18n.translate('workflows.schemaPropertyBuilder.emptyTitle', {
+      defaultMessage: 'No inputs yet',
+    });
+  const resolvedEmptyBody =
+    emptyBody ??
+    i18n.translate('workflows.schemaPropertyBuilder.emptyBody', {
+      defaultMessage:
+        'This workflow will run immediately when started. Add inputs for values the runner should provide — a hostname, a severity, a channel.',
+    });
+  const resolvedAddLabel =
+    addButtonLabel ??
+    i18n.translate('workflows.schemaPropertyBuilder.addInput', {
+      defaultMessage: 'Add input',
+    });
+
+  const onDragEnd = useCallback(
+    ({ source, destination }: DropResult) => {
+      if (!source || !destination || source.index === destination.index) return;
+      onChange(euiDragDropReorder([...properties], source.index, destination.index));
+    },
+    [onChange, properties]
+  );
+
+  const handleAdd = useCallback(() => {
+    const nextIndex = properties.length + 1;
+    onChange([
+      ...properties,
+      createEmptySchemaProperty({
+        name: depth === 0 ? `input_${nextIndex}` : `field_${nextIndex}`,
+      }),
+    ]);
+  }, [depth, onChange, properties]);
+
+  const commitDelete = useCallback(
+    (field: SchemaPropertyField) => {
+      onChange(properties.filter((p) => p.id !== field.id));
+      setPendingDelete(null);
+    },
+    [onChange, properties]
+  );
+
+  const requestDelete = useCallback(
+    (field: SchemaPropertyField) => {
+      const steps = field.name.trim() ? findReferencingSteps?.(field.name.trim()) ?? [] : [];
+      if (steps.length > 0) {
+        setPendingDelete({ field, steps });
+        return;
+      }
+      commitDelete(field);
+    },
+    [commitDelete, findReferencingSteps]
+  );
+
+  const handleUpdate = useCallback(
+    (next: SchemaPropertyField) => {
+      const prev = properties.find((p) => p.id === next.id);
+      if (
+        prev &&
+        prev.name.trim() &&
+        next.name.trim() &&
+        prev.name.trim() !== next.name.trim() &&
+        findReferencingSteps
+      ) {
+        const steps = findReferencingSteps(prev.name.trim());
+        if (steps.length > 0) {
+          setPendingRename({ field: next, nextName: next.name, steps });
+          // Keep previous name until confirmed — still apply other field edits.
+          onChange(properties.map((p) => (p.id === next.id ? { ...next, name: prev.name } : p)));
+          return;
+        }
+      }
+      onChange(properties.map((p) => (p.id === next.id ? next : p)));
+    },
+    [findReferencingSteps, onChange, properties]
+  );
+
+  const list = useMemo(() => properties, [properties]);
+
+  if (list.length === 0) {
+    return (
+      <EuiEmptyPrompt
+        title={<h3>{resolvedEmptyTitle}</h3>}
+        titleSize="xs"
+        body={
+          <EuiText size="s">
+            <p>{resolvedEmptyBody}</p>
+          </EuiText>
+        }
+        actions={
+          readOnly ? undefined : (
+            <EuiButtonEmpty
+              size="s"
+              iconType="plusCircle"
+              onClick={handleAdd}
+              data-test-subj={`${dataTestSubjPrefix}-add`}
+            >
+              {resolvedAddLabel}
+            </EuiButtonEmpty>
+          )
+        }
+        data-test-subj={`${dataTestSubjPrefix}-empty`}
+      />
+    );
+  }
+
+  return (
+    <>
+      {readOnly ? null : (
+        <>
+          <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="xs"
+                flush="both"
+                color="primary"
+                iconType="plusCircle"
+                onClick={handleAdd}
+                data-test-subj={`${dataTestSubjPrefix}-add`}
+              >
+                {resolvedAddLabel}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="s" />
+        </>
+      )}
+      <EuiDragDropContext onDragEnd={onDragEnd}>
+        <EuiDroppable
+          droppableId={droppableId}
+          spacing="none"
+          renderClone={(provided, _snapshot, rubric) => {
+            const field = list[rubric.source.index];
+            return (
+              <SchemaListDragClone
+                name={field?.name ?? ''}
+                typeLabel={field?.type ?? 'string'}
+                provided={provided}
+              />
+            );
+          }}
+        >
+          {list.map((field, index) => (
+            <EuiDraggable
+              key={field.id}
+              index={index}
+              draggableId={field.id}
+              spacing="none"
+              customDragHandle
+              hasInteractiveChildren
+              isDragDisabled={readOnly}
+            >
+              {(provided) => (
+                <PropertyEditor
+                  field={field}
+                  siblings={list}
+                  depth={depth}
+                  dataTestSubjPrefix={dataTestSubjPrefix}
+                  onUpdate={handleUpdate}
+                  onRequestDelete={() => requestDelete(field)}
+                  dragHandleProps={provided.dragHandleProps ?? undefined}
+                  readOnly={readOnly}
+                />
+              )}
+            </EuiDraggable>
+          ))}
+        </EuiDroppable>
+      </EuiDragDropContext>
+
+      {pendingDelete ? (
+        <EuiConfirmModal
+          aria-labelledby={deleteModalTitleId}
+          titleProps={{ id: deleteModalTitleId }}
+          title={i18n.translate('workflows.schemaPropertyBuilder.deleteTitle', {
+            defaultMessage: 'Delete input “{name}”?',
+            values: { name: pendingDelete.field.name },
+          })}
+          onCancel={() => setPendingDelete(null)}
+          onConfirm={() => commitDelete(pendingDelete.field)}
+          cancelButtonText={i18n.translate('workflows.schemaPropertyBuilder.cancel', {
+            defaultMessage: 'Cancel',
+          })}
+          confirmButtonText={i18n.translate('workflows.schemaPropertyBuilder.deleteConfirm', {
+            defaultMessage: 'Delete',
+          })}
+          buttonColor="danger"
+          defaultFocusedButton="cancel"
+        >
+          <EuiText size="s">
+            {i18n.translate('workflows.schemaPropertyBuilder.deleteReferencedBody', {
+              defaultMessage:
+                'This input is referenced by: {steps}. Deleting it may break those steps.',
+              values: { steps: pendingDelete.steps.join(', ') },
+            })}
+          </EuiText>
+        </EuiConfirmModal>
+      ) : null}
+
+      {pendingRename ? (
+        <EuiConfirmModal
+          aria-labelledby={renameModalTitleId}
+          titleProps={{ id: renameModalTitleId }}
+          title={i18n.translate('workflows.schemaPropertyBuilder.renameTitle', {
+            defaultMessage: 'Rename input?',
+          })}
+          onCancel={() => setPendingRename(null)}
+          onConfirm={() => {
+            onChange(
+              properties.map((p) =>
+                p.id === pendingRename.field.id
+                  ? { ...pendingRename.field, name: pendingRename.nextName }
+                  : p
+              )
+            );
+            setPendingRename(null);
+          }}
+          cancelButtonText={i18n.translate('workflows.schemaPropertyBuilder.cancel', {
+            defaultMessage: 'Cancel',
+          })}
+          confirmButtonText={i18n.translate('workflows.schemaPropertyBuilder.renameConfirm', {
+            defaultMessage: 'Rename',
+          })}
+          defaultFocusedButton="cancel"
+        >
+          <EuiText size="s">
+            {i18n.translate('workflows.schemaPropertyBuilder.renameReferencedBody', {
+              defaultMessage:
+                '“{name}” is referenced by: {steps}. Update those steps after renaming.',
+              values: {
+                name: properties.find((p) => p.id === pendingRename.field.id)?.name ?? '',
+                steps: pendingRename.steps.join(', '),
+              },
+            })}
+          </EuiText>
+        </EuiConfirmModal>
+      ) : null}
+    </>
+  );
+}
