@@ -7,52 +7,53 @@
 
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 
-/** Loaders keep the YAML-editor schemas out of the page-load bundle. */
+// Loaders keep the YAML-editor schemas out of the page-load bundle. They share this one
+// `import()`, because each `import()` adds its own chunk-loading code to that bundle.
+const loadStepDefinitions = () => import('./step_definitions');
+
 export const registerAlertZeroPublicStepDefinitions = (
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup
 ) => {
   workflowsExtensions.registerStepDefinition(() =>
-    import('./report_worker_outcome_step').then((m) => m.reportWorkerOutcomePublicStepDefinition)
+    loadStepDefinitions().then((m) => m.reportWorkerOutcomePublicStepDefinition)
   );
   workflowsExtensions.registerStepDefinition(() =>
-    import('./triage_decision_steps').then((m) => m.triageStoreFpDecisionsPublicStepDefinition)
+    loadStepDefinitions().then((m) => m.triageStoreFpDecisionsPublicStepDefinition)
   );
   workflowsExtensions.registerStepDefinition(() =>
-    import('./triage_decision_steps').then((m) => m.triageMatchFpDecisionsPublicStepDefinition)
+    loadStepDefinitions().then((m) => m.triageMatchFpDecisionsPublicStepDefinition)
   );
   workflowsExtensions.registerStepDefinition(() =>
-    import('./triage_decision_steps').then((m) => m.triageRevokeFpDecisionPublicStepDefinition)
+    loadStepDefinitions().then((m) => m.triageRevokeFpDecisionPublicStepDefinition)
   );
   workflowsExtensions.registerStepDefinition(() =>
-    import('./alert_triage_steps').then((m) => m.triageHeadroomPublicStepDefinition)
+    loadStepDefinitions().then((m) => m.triageHeadroomPublicStepDefinition)
   );
   workflowsExtensions.registerStepDefinition(() =>
-    import('./alert_triage_steps').then((m) => m.triagePlanSweepPublicStepDefinition)
+    loadStepDefinitions().then((m) => m.triagePlanSweepPublicStepDefinition)
   );
   workflowsExtensions.registerStepDefinition(() =>
-    import('./alert_triage_steps').then((m) => m.triageLoadAlertsPublicStepDefinition)
+    loadStepDefinitions().then((m) => m.triageLoadAlertsPublicStepDefinition)
   );
   workflowsExtensions.registerStepDefinition(() =>
-    import('./alert_triage_steps').then((m) => m.triageTagPatternKeysPublicStepDefinition)
+    loadStepDefinitions().then((m) => m.triageTagPatternKeysPublicStepDefinition)
   );
   workflowsExtensions.registerStepDefinition(() =>
-    import('./alert_triage_steps').then((m) => m.triageGroupFpCandidatesPublicStepDefinition)
+    loadStepDefinitions().then((m) => m.triageGroupFpCandidatesPublicStepDefinition)
   );
   workflowsExtensions.registerStepDefinition(() =>
-    import('./alert_triage_steps').then((m) => m.triageJoinProposalPublicStepDefinition)
+    loadStepDefinitions().then((m) => m.triageJoinProposalPublicStepDefinition)
   );
   workflowsExtensions.registerStepDefinition(() =>
-    import('./alert_triage_steps').then((m) => m.triageRetagProposalAlertsPublicStepDefinition)
+    loadStepDefinitions().then((m) => m.triageRetagProposalAlertsPublicStepDefinition)
   );
   workflowsExtensions.registerStepDefinition(() =>
-    import('./resolve_proposals_step').then((m) => m.resolveProposalsPublicStepDefinition)
+    loadStepDefinitions().then((m) => m.resolveProposalsPublicStepDefinition)
   );
   workflowsExtensions.registerStepDefinition(() =>
-    import('./summarize_investigation_step').then(
-      (m) => m.summarizeInvestigationPublicStepDefinition
-    )
+    loadStepDefinitions().then((m) => m.summarizeInvestigationPublicStepDefinition)
   );
   workflowsExtensions.registerStepDefinition(() =>
-    import('./package_report_step').then((m) => m.packageReportPublicStepDefinition)
+    loadStepDefinitions().then((m) => m.packageReportPublicStepDefinition)
   );
 };
