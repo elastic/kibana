@@ -19,11 +19,21 @@ import type { LatencyStats } from '../observables_load_test/stats';
 import { delay, sample, timed } from '../observables_load_test/stats';
 import type { BenchmarkConfig } from './config';
 import {
+  countBelowVersion,
   getIndexStats,
   getMigrationTask,
   getObjectCounts,
+  getTypeVersionCounts,
   HAS_FIELD_OBSERVABLES,
 } from './es_stats';
+import type { MetadataCheck } from './metadata_writes';
+import {
+  checkMetadata,
+  findReturnsMetadata,
+  metadataFor,
+  sampleObservables,
+  writeMetadata,
+} from './metadata_writes';
 import type { IndexStats, MigrationTask, ObjectCounts } from './es_stats';
 
 const TAG = 'observables-migration-benchmark';
@@ -56,6 +66,23 @@ interface Reads {
   checks: Record<string, number | string | null>;
 }
 
+interface UpgradeCheck {
+  targetVersion: string;
+  expected: number;
+  total: number;
+  belowTarget: number;
+  byVersion: Record<string, number>;
+  ok: boolean;
+}
+
+interface MetadataRoundTrip {
+  set: { written: number; failed: number; failures: string[]; latency: LatencyStats };
+  stored: MetadataCheck;
+  find: { checked: number; returned: number };
+  cleared: { written: number; failed: number; latency: LatencyStats };
+  clearedStored: MetadataCheck;
+}
+
 interface SnapshotReport {
   label: string;
   takenAt: string;
@@ -65,7 +92,39 @@ interface SnapshotReport {
   task?: MigrationTask;
   verification?: Verification;
   reads?: Reads;
+  upgrade?: UpgradeCheck;
+  metadata?: MetadataRoundTrip;
 }
+
+/** Sets metadata on sampled observables, reads it back from the index and the API, then clears it. */
+const measureMetadata = async (
+  es: Client,
+  request: Requester,
+  size: number
+): Promise<MetadataRoundTrip> => {
+  const observables = await sampleObservables(es, size);
+  const set = await writeMetadata(request, observables, metadataFor);
+  const stored = await checkMetadata(es, set.observables, set.metadata);
+  const findSample = Math.min(20, set.observables.length);
+  const find = await findReturnsMetadata(
+    request,
+    set.observables.slice(0, findSample),
+    set.metadata.slice(0, findSample)
+  );
+  const cleared = await writeMetadata(request, set.observables, () => null);
+  const clearedStored = await checkMetadata(
+    es,
+    cleared.observables,
+    cleared.observables.map(() => null)
+  );
+  return {
+    set: { written: set.written, failed: set.failed, failures: set.failures, latency: set.latency },
+    stored,
+    find,
+    cleared: { written: cleared.written, failed: cleared.failed, latency: cleared.latency },
+    clearedStored,
+  };
+};
 
 /** A reproducible random sample of cases that hold observables in their field. */
 const sampleCases = async (es: Client, size: number, owner?: string): Promise<SampledCase[]> => {
@@ -218,7 +277,16 @@ const measureReads = async (
   }
 };
 
-const printSnapshot = ({ label, index, counts, task, verification, reads }: SnapshotReport) => {
+const printSnapshot = ({
+  label,
+  index,
+  counts,
+  task,
+  verification,
+  reads,
+  upgrade,
+  metadata,
+}: SnapshotReport) => {
   logger.info(`Snapshot ${label}: ${ALERTING_CASES_INDEX} (primaries)\n${formatTable({ index })}`);
   logger.info(
     `Objects\n${formatTable({
@@ -252,6 +320,28 @@ const printSnapshot = ({ label, index, counts, task, verification, reads }: Snap
     );
     logger.info(`Checks\n${formatTable({ values: reads.checks })}`);
   }
+  if (upgrade != null) {
+    logger.info(
+      `Upgrade check\n${formatTable({
+        upgrade: { ...upgrade, byVersion: JSON.stringify(upgrade.byVersion) },
+      })}`
+    );
+  }
+  if (metadata != null) {
+    logger.info(
+      `Metadata round trip\n${formatTable({
+        set: { ...latencyRow(metadata.set.latency), failed: metadata.set.failed },
+        clear: { ...latencyRow(metadata.cleared.latency), failed: metadata.cleared.failed },
+      })}`
+    );
+    logger.info(
+      `Metadata checks\n${formatTable({
+        stored: metadata.stored,
+        'find returns': metadata.find,
+        'cleared stored': metadata.clearedStored,
+      })}`
+    );
+  }
 };
 
 /** Records storage, object counts and, optionally, correctness and read latency at one point. */
@@ -283,7 +373,27 @@ export const runSnapshot = async (
     config.verifyCases > 0 && counts.observableAttachments > 0
       ? await verifySample(es, config.verifyCases)
       : undefined;
-  const reads = request != null ? await measureReads(es, request, config) : undefined;
+  const reads =
+    config.reads && request != null ? await measureReads(es, request, config) : undefined;
+
+  let upgrade: UpgradeCheck | undefined;
+  if (config.expectAttachments != null) {
+    const byVersion = await getTypeVersionCounts(es);
+    const total = Object.values(byVersion).reduce((sum, count) => sum + count, 0);
+    const belowTarget = countBelowVersion(byVersion, config.targetVersion);
+    upgrade = {
+      targetVersion: config.targetVersion,
+      expected: config.expectAttachments,
+      total,
+      belowTarget,
+      byVersion,
+      ok: belowTarget === 0 && total === config.expectAttachments,
+    };
+  }
+  const metadata =
+    config.metadataWrites > 0 && request != null
+      ? await measureMetadata(es, request, config.metadataWrites)
+      : undefined;
 
   const report: SnapshotReport = {
     label: config.label,
@@ -294,6 +404,8 @@ export const runSnapshot = async (
     task,
     verification,
     reads,
+    upgrade,
+    metadata,
   };
 
   const out = path.join(config.out, `snapshot-${config.label}.json`);

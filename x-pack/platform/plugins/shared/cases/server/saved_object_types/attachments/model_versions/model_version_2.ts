@@ -17,7 +17,7 @@ import { attachmentCreateSchemaV1, attachmentDataSchemaV1 } from './model_versio
 
 const observableKeyword = { type: 'keyword', ignore_above: 1024 } as const;
 
-const attachmentDataSchemaV2 = attachmentDataSchemaV1.extends({
+export const attachmentDataSchemaV2 = attachmentDataSchemaV1.extends({
   typeKey: schema.maybe(schema.string({ maxLength: MAX_OBSERVABLE_TYPE_KEY_LENGTH })),
   value: schema.maybe(schema.string({ maxLength: MAX_OBSERVABLE_VALUE_LENGTH })),
   description: schema.maybe(

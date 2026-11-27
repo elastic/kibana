@@ -16,13 +16,14 @@ import {
   OBSERVABLE_ID_MAX_LENGTH,
 } from '../../../constants';
 import { limitedArraySchema, limitedStringSchema } from '../../../schema';
-import { CaseObservableSchema } from '../../domain/observable/v1';
+import { CaseObservableSchema, ObservableMetadataSchema } from '../../domain/observable/v1';
 
 export const ObservablePostSchema = lazySchema(() =>
   z.object({
     typeKey: z.string().max(MAX_OBSERVABLE_TYPE_KEY_LENGTH),
     value: z.string().max(MAX_OBSERVABLE_VALUE_LENGTH),
     description: z.string().max(MAX_OBSERVABLE_DESCRIPTION_LENGTH).nullable(),
+    metadata: ObservableMetadataSchema.optional(),
   })
 );
 
@@ -30,6 +31,8 @@ export const ObservablePatchSchema = lazySchema(() =>
   z.object({
     value: z.string().max(MAX_OBSERVABLE_VALUE_LENGTH),
     description: z.string().max(MAX_OBSERVABLE_DESCRIPTION_LENGTH).nullable(),
+    /** Absent keeps the metadata, an object replaces it and `null` clears it. */
+    metadata: ObservableMetadataSchema.nullable().optional(),
   })
 );
 

@@ -8,7 +8,7 @@
 import yargs from 'yargs';
 
 export interface BenchmarkConfig {
-  mode: 'snapshot' | 'watch';
+  mode: 'snapshot' | 'watch' | 'prepare' | 'upgrade';
   label: string;
   kibana: string;
   elasticsearch: string;
@@ -26,16 +26,24 @@ export interface BenchmarkConfig {
   probeIntervalMs: number;
   intervalSeconds: number;
   maxMinutes: number;
+  kibanaLog: string[];
+  targetVersion: string;
+  zdt: boolean;
+  metadataWrites: number;
+  metadataWritesDuring: number;
+  expectAttachments?: number;
 }
 
 export const parseConfig = (): BenchmarkConfig =>
   yargs.help().options({
     mode: {
-      choices: ['snapshot', 'watch'] as const,
+      choices: ['snapshot', 'watch', 'prepare', 'upgrade'] as const,
       demandOption: true,
       describe:
         'snapshot: storage, counts and optionally correctness and reads at one point. ' +
-        'watch: follow the migration from Kibana start to completion',
+        'watch: follow the migration from Kibana start to completion. ' +
+        'prepare: create the probe rule a later upgrade run uses, and record the dataset. ' +
+        'upgrade: follow a saved-object model version upgrade from before Kibana starts',
     },
     label: { type: 'string', demandOption: true, describe: 'Name of the report files' },
     kibana: { type: 'string', default: 'http://localhost:5601' },
@@ -69,5 +77,40 @@ export const parseConfig = (): BenchmarkConfig =>
     probeSeconds: { type: 'number', default: 30, describe: 'Rule write probe duration (snapshot)' },
     probeIntervalMs: { type: 'number', default: 100, describe: 'Pause between rule writes' },
     intervalSeconds: { type: 'number', default: 10, describe: 'Sampling interval (watch)' },
-    maxMinutes: { type: 'number', default: 600, describe: 'Give up watching after (watch)' },
+    maxMinutes: {
+      type: 'number',
+      default: 600,
+      describe: 'Give up watching after (watch, upgrade)',
+    },
+    kibanaLog: {
+      type: 'array',
+      string: true,
+      default: [] as string[],
+      describe: 'Kibana log files to parse for the migration steps (upgrade); repeat per node',
+    },
+    targetVersion: {
+      type: 'string',
+      default: '10.3.0',
+      describe: 'cases-attachments version the upgrade migrates to (upgrade, snapshot)',
+    },
+    zdt: {
+      type: 'boolean',
+      default: false,
+      describe: 'The upgrade uses the zdt algorithm: Kibana serves traffic while docs migrate',
+    },
+    metadataWrites: {
+      type: 'number',
+      default: 0,
+      describe: 'Observables whose metadata is set, read back and cleared (snapshot)',
+    },
+    metadataWritesDuring: {
+      type: 'number',
+      default: 0,
+      describe:
+        'Outdated observables whose metadata is set while the docs migrate, checked after (upgrade --zdt)',
+    },
+    expectAttachments: {
+      type: 'number',
+      describe: 'Check every cases-attachments doc is at --targetVersion and the count (snapshot)',
+    },
   }).argv as BenchmarkConfig;

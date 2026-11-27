@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { MAX_OBSERVABLES_PER_CASE, OBSERVABLE_ID_MAX_LENGTH } from '../../../constants';
+import {
+  MAX_OBSERVABLES_PER_CASE,
+  MAX_OBSERVABLE_METADATA_ENTRIES,
+  MAX_OBSERVABLE_METADATA_KEY_LENGTH,
+  MAX_OBSERVABLE_METADATA_VALUE_LENGTH,
+  OBSERVABLE_ID_MAX_LENGTH,
+} from '../../../constants';
 import { parseErrors } from '../../../test_helpers/zod_schema_test_utils';
 import {
   AddObservableRequestSchema,
@@ -26,6 +32,48 @@ describe('AddObservableRequestSchema', () => {
     expect(result.success).toBe(true);
     expect(result.data).toStrictEqual(defaultRequest);
   });
+
+  it('accepts metadata', () => {
+    const request = {
+      observable: {
+        description: null,
+        typeKey: 'observable-type-ipv4',
+        value: '10.0.0.1',
+        metadata: {
+          verdict: 'malicious',
+          virustotal: 'https://www.virustotal.com/gui/ip/10.0.0.1',
+        },
+      },
+    };
+    const result = AddObservableRequestSchema.safeParse(request);
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual(request);
+  });
+
+  it(`rejects more than ${MAX_OBSERVABLE_METADATA_ENTRIES} metadata entries`, () => {
+    const metadata = Object.fromEntries(
+      Array.from({ length: MAX_OBSERVABLE_METADATA_ENTRIES + 1 }, (_, index) => [`k${index}`, 'v'])
+    );
+    const result = AddObservableRequestSchema.safeParse({
+      observable: {
+        description: null,
+        typeKey: 'observable-type-ipv4',
+        value: '10.0.0.1',
+        metadata,
+      },
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects metadata keys and values over their bounds', () => {
+    const parse = (metadata: Record<string, string>) =>
+      AddObservableRequestSchema.safeParse({
+        observable: { description: null, typeKey: 'observable-type-ipv4', value: 'v', metadata },
+      }).success;
+    expect(parse({ ['k'.repeat(MAX_OBSERVABLE_METADATA_KEY_LENGTH + 1)]: 'v' })).toBe(false);
+    expect(parse({ '': 'v' })).toBe(false);
+    expect(parse({ k: 'v'.repeat(MAX_OBSERVABLE_METADATA_VALUE_LENGTH + 1) })).toBe(false);
+  });
 });
 
 describe('UpdateObservableRequestSchema', () => {
@@ -39,6 +87,15 @@ describe('UpdateObservableRequestSchema', () => {
     const result = UpdateObservableRequestSchema.safeParse(defaultRequest);
     expect(result.success).toBe(true);
     expect(result.data).toStrictEqual(defaultRequest);
+  });
+
+  it('accepts metadata to replace and null to clear it', () => {
+    for (const metadata of [{ verdict: 'benign' }, null]) {
+      const request = { observable: { description: null, value: '10.0.0.1', metadata } };
+      const result = UpdateObservableRequestSchema.safeParse(request);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(request);
+    }
   });
 });
 
