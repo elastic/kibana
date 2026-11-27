@@ -55,6 +55,9 @@ export const casesQueriesKeys = {
     [...casesQueriesKeys.userActions, 'conversation-access', conversationId] as const,
   caseUserActions: (id: string, params: unknown) =>
     [...casesQueriesKeys.case(id), ...casesQueriesKeys.userActions, params] as const,
+  // Separate from `caseUserActions`: the two queries cache different data shapes.
+  caseUserActionsInfinite: (id: string, params: unknown) =>
+    [...casesQueriesKeys.case(id), ...casesQueriesKeys.userActions, 'infinite', params] as const,
   caseUserActionsStats: (id: string) => [
     ...casesQueriesKeys.case(id),
     ...casesQueriesKeys.userActions,

@@ -36,7 +36,7 @@ export const useInfiniteFindCaseUserActions = (
   const shouldFetchAllPages = hasNonTypeActivityFilter(params);
 
   return useInfiniteQuery<InternalFindCaseUserActions, ServerError>(
-    casesQueriesKeys.caseUserActions(caseId, params),
+    casesQueriesKeys.caseUserActionsInfinite(caseId, params),
     async ({ pageParam = 1 }) => {
       return findCaseUserActions(caseId, { ...params, page: pageParam }, abortCtrlRef.signal);
     },
@@ -46,7 +46,8 @@ export const useInfiniteFindCaseUserActions = (
         showErrorToast(error, { title: ERROR_TITLE });
       },
       getNextPageParam: (lastPage, pages) => {
-        const lastPageNumber = Math.ceil(lastPage.total / lastPage.perPage);
+        const initialTotal = pages[0].total;
+        const lastPageNumber = Math.ceil(initialTotal / lastPage.perPage);
         // here last page fetching is skipped because last page is fetched separately using useQuery hook
         const lastFetchablePage = shouldFetchAllPages ? lastPageNumber : lastPageNumber - 1;
         if (lastPage.page < lastFetchablePage) {

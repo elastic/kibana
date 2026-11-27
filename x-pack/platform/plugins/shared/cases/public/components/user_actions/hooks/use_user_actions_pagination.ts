@@ -47,25 +47,21 @@ export const useUserActionsPagination = ({
     return { userActions: userActionsData, latestAttachments };
   }, [caseInfiniteUserActionsData, isLoadingInfiniteUserActions]);
 
+  // Follows the active filters (unlike `userActionsStats`) and is the same on every page.
+  const total = caseInfiniteUserActionsData?.pages?.[0]?.total ?? 0;
+
   const remainingActionCount = useMemo(() => {
     if (!caseInfiniteUserActionsData?.pages?.length) {
       return 0;
     }
 
-    const lastPageData =
-      caseInfiniteUserActionsData.pages[caseInfiniteUserActionsData.pages.length - 1];
     const loadedCount = caseInfiniteUserActionsData.pages.reduce(
       (sum, page) => sum + page.userActions.length,
       0
     );
 
-    return Math.max(lastPageData.total - loadedCount, 0);
-  }, [caseInfiniteUserActionsData]);
-
-  // The `total` reported by the API reflects the current type/author/search
-  // filters, unlike `userActionsStats` which is always unfiltered. It's the
-  // same across all fetched pages, so the first one is enough.
-  const total = caseInfiniteUserActionsData?.pages?.[0]?.total ?? 0;
+    return Math.max(total - loadedCount, 0);
+  }, [caseInfiniteUserActionsData, total]);
 
   return {
     isLoadingInfiniteUserActions,
