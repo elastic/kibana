@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type { ApiClientFixture } from '@kbn/scout';
+import type { ApiClientFixture, ElasticsearchRoleDescriptor } from '@kbn/scout';
 import {
   AB_CONVERSATIONS_PATH,
   AB_CONVERSATION_BY_ID_PATH,
+  ESCALATIONS_ALL_PRIVILEGE,
   IMPACT_PATH,
   INTERNAL_HEADERS,
   PUBLIC_HEADERS,
@@ -70,6 +71,55 @@ export const deleteConversations = async (
     const messages = failures.map((f) => String(f.reason)).join('\n');
     throw new Error(`Teardown cleanup failed:\n${messages}`);
   }
+};
+
+/**
+ * Stateful editor is base Kibana All. Escalation manage is `includeIn: 'none'`, so All can
+ * list escalations but not update them. Adds `escalations_all` to the editor's Kibana
+ * application privileges so the caller passes the `manage_escalations` route check.
+ */
+export const editorWithEscalationManage = (
+  editor: ElasticsearchRoleDescriptor
+): ElasticsearchRoleDescriptor => {
+  const applications = (editor.applications ?? []).map((application) =>
+    application.application.startsWith('kibana')
+      ? { ...application, privileges: [...application.privileges, ESCALATIONS_ALL_PRIVILEGE] }
+      : application
+  );
+  if (!applications.some(({ privileges }) => privileges.includes(ESCALATIONS_ALL_PRIVILEGE))) {
+    throw new Error('editor role has no Kibana application privileges to extend');
+  }
+  return { ...editor, applications };
+};
+
+/**
+ * Resolves a user's profile uid (the stable `u_*` id used for ACL entries and assignees) by
+ * creating a probe conversation as them and reading `user.id` from the response. The uid is
+ * only available once the user has an activated profile, which happens on first interactive
+ * login. The caller owns the probe and must delete it in teardown.
+ */
+export const resolveProfileUid = async (
+  apiClient: ApiClientFixture,
+  cookieHeader: Record<string, string>
+): Promise<{ uid: string; probeConversationId: string }> => {
+  const response = await apiClient.post(AB_CONVERSATIONS_PATH, {
+    headers: { ...PUBLIC_HEADERS, ...cookieHeader },
+    body: {
+      title: '__profile-uid-probe__',
+      template_id: 'investigation',
+      access_control: { access_mode: 'public' },
+      metadata: { status: 'open' },
+    },
+    responseType: 'json',
+  });
+  const probeConversationId = expectCreated(response, 'profile uid probe conversation');
+  const uid: string | undefined = response.body.user?.id;
+  if (!uid) {
+    throw new Error(
+      'resolveProfileUid: response did not include user.id — profile may not be activated yet'
+    );
+  }
+  return { uid, probeConversationId };
 };
 
 /** Prefixes a path with `/s/<spaceId>` for a non-default Space. */
