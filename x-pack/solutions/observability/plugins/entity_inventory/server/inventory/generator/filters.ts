@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { canonicalizeEsqlFilter as canonicalizeFilter } from '@kbn/entity-store/common';
+import { canonicalizeEsqlFilter as canonicalizeFilter } from '@kbn/entity-store/server';
 import { InventoryDefinitionError } from './errors';
 
 /**

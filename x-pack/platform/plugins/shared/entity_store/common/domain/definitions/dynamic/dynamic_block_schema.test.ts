@@ -14,7 +14,6 @@ import {
   MAX_FILTER_LENGTH,
   MAX_INDEX_PATTERN_LENGTH,
   MAX_METRICS_PER_SOURCE,
-  MAX_QUERY_PLANS,
   MAX_SOURCES,
   MAX_SUGGESTED_FILTERS,
   MAX_VALUE_LABEL_LENGTH,
@@ -352,108 +351,6 @@ describe('dynamicBlockSchema', () => {
 
     it('treats empty metrics like absent metrics', () => {
       expect(dynamicSourceSchema.safeParse(source({ metrics: [] })).success).toBe(true);
-    });
-  });
-
-  describe('query plan budget', () => {
-    const sourcesWithFilteredMetric = (count: number): DynamicSource[] =>
-      Array.from({ length: count }, (_, index) =>
-        source({
-          indexPattern: `metrics-${index}-*`,
-          metrics: [
-            metric({ name: 'cpu', field: 'cpu' }),
-            metric({ name: 'cpu_idle', field: 'cpu', filter: 'state == "idle"' }),
-          ],
-        })
-      );
-
-    it(`accepts ${MAX_SOURCES} sources without metrics, ${MAX_QUERY_PLANS} plans`, () => {
-      const sources = Array.from({ length: MAX_SOURCES }, (_, index) =>
-        source({ indexPattern: `metrics-${index}-*` })
-      );
-      expect(dynamicBlockSchema.safeParse({ sources }).success).toBe(true);
-    });
-
-    it('accepts a block that can expand to exactly the budget', () => {
-      expect(
-        dynamicBlockSchema.safeParse({ sources: sourcesWithFilteredMetric(MAX_QUERY_PLANS / 4) })
-          .success
-      ).toBe(true);
-    });
-
-    it('rejects a block that can expand past the budget, naming the count', () => {
-      const result = dynamicBlockSchema.safeParse({
-        sources: sourcesWithFilteredMetric(MAX_QUERY_PLANS / 4 + 1),
-      });
-      expect(result.success).toBe(false);
-      expect(issuePaths(result)).toEqual([['sources']]);
-      expect(result.error?.issues[0].message).toContain(
-        `can expand to ${MAX_QUERY_PLANS + 4} query plans`
-      );
-    });
-
-    it('counts metrics that share a filter as one plan group', () => {
-      const sharedFilter = (name: string) =>
-        metric({ name, field: name, filter: 'state == "idle"' });
-      const sources = Array.from({ length: MAX_SOURCES }, (_, index) =>
-        source({
-          indexPattern: `metrics-${index}-*`,
-          metrics: [sharedFilter('a'), sharedFilter('b'), sharedFilter('c')],
-        })
-      );
-      expect(dynamicBlockSchema.safeParse({ sources }).success).toBe(true);
-    });
-
-    it('counts two spellings of one filter as one plan group', () => {
-      const sources = Array.from({ length: MAX_SOURCES }, (_, index) =>
-        source({
-          indexPattern: `metrics-${index}-*`,
-          metrics: [
-            metric({ name: 'a', field: 'a', filter: 'state=="idle"' }),
-            metric({ name: 'b', field: 'b', filter: 'state == "idle"' }),
-          ],
-        })
-      );
-      expect(dynamicBlockSchema.safeParse({ sources }).success).toBe(true);
-    });
-
-    it('accepts one differently spelled filter among sources that fill the budget', () => {
-      const sources = Array.from({ length: MAX_SOURCES }, (_, index) =>
-        source({
-          indexPattern: `metrics-${index}-*`,
-          metrics: [
-            metric({ name: 'a', field: 'a', filter: 'state == "idle"' }),
-            ...(index === 0 ? [metric({ name: 'b', field: 'b', filter: 'state=="idle"' })] : []),
-          ],
-        })
-      );
-      expect(dynamicBlockSchema.safeParse({ sources }).success).toBe(true);
-    });
-
-    it('still counts two different filters as two plan groups', () => {
-      const sources = Array.from({ length: MAX_SOURCES }, (_, index) =>
-        source({
-          indexPattern: `metrics-${index}-*`,
-          metrics: [
-            metric({ name: 'a', field: 'a', filter: 'state=="idle"' }),
-            metric({ name: 'b', field: 'b', filter: 'state == "user"' }),
-          ],
-        })
-      );
-      expect(dynamicBlockSchema.safeParse({ sources }).success).toBe(false);
-    });
-
-    it('counts a filter that does not parse as written', () => {
-      const sources = Array.from({ length: MAX_SOURCES }, (_, index) =>
-        source({
-          indexPattern: `metrics-${index}-*`,
-          metrics: [
-            metric({ name: 'a', field: 'a', filter: 'state == "idle"' }),
-            metric({ name: 'b', field: 'b', filter: 'state ==' }),
-          ],
-        })
-      );
-      expect(dynamicBlockSchema.safeParse({ sources }).success).toBe(false);
     });
   });
 });
