@@ -75,6 +75,7 @@ import { WorkflowManagementAuditLog } from './routes/utils/workflow_audit_loggin
 import type {
   DeleteWorkflowsResponse,
   GetExecutionStepExecutionsParams,
+  GetStepExecutionByStepIdParams,
   GetStepExecutionParams,
   GetWorkflowAggsOptions,
   GetWorkflowsParams,
@@ -837,6 +838,14 @@ export class WorkflowsService {
   ): Promise<EsWorkflowStepExecution | null> {
     await this.ensureInitialized();
     return this.executionQueryService.getStepExecution(params, spaceId);
+  }
+
+  public async getStepExecutionByStepId(
+    params: GetStepExecutionByStepIdParams & { stepExecutionIds?: string[] },
+    spaceId: string
+  ): Promise<EsWorkflowStepExecution | null> {
+    await this.ensureInitialized();
+    return this.executionQueryService.getStepExecutionByStepId(params, spaceId);
   }
 
   public async getAvailableConnectors(

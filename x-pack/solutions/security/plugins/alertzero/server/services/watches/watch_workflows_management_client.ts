@@ -246,20 +246,14 @@ export class WatchWorkflowsManagementClientImpl implements WatchWorkflowsManagem
     spaceId: string,
     request: KibanaRequest
   ): Promise<WorkflowStepExecutionDto | undefined> {
-    const { results } = await this.management.searchStepExecutions(
-      {
-        request,
-        workflowId,
-        stepId,
-        workflowExecutionIds: [workflowExecutionId],
-        includeOutput: true,
-        sourceIncludes: ['stepId', 'startedAt', 'finishedAt', 'output'],
-        page: 1,
-        size: 5,
-      },
-      spaceId
+    // Never a search: the engine writes step documents with refresh:false, so a search can miss
+    // the step of an execution that a search of the executions index already shows as finished.
+    const step = await this.management.getStepExecutionByStepId(
+      { executionId: workflowExecutionId, stepId },
+      spaceId,
+      request
     );
-    return results.find(({ output }) => output !== undefined) ?? results[0];
+    return step?.workflowId === workflowId ? step : undefined;
   }
 
   cancelAllActiveWorkflowExecutions(
