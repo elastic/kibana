@@ -7,7 +7,8 @@
 
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
-import { EuiText } from '@elastic/eui';
+import { EuiBadge, EuiPanel, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { parse as parseYaml } from 'yaml';
 import { FormProvider, useForm } from 'react-hook-form';
 import type { InlineField } from '../../../../common/types/domain/template/fields';
@@ -54,12 +55,19 @@ FieldDefinitionPreviewInner.displayName = 'FieldDefinitionPreviewInner';
 interface FieldDefinitionPreviewProps {
   definition: string;
   onDefaultChange: (fieldName: string, value: string, control: string) => void;
+  /** When set, shown above the control to summarize its requirement rule. */
+  requirementBadge?: string;
+  /** When set, the control is shown subdued with this visibility note. */
+  hiddenNote?: string;
 }
 
 export const FieldDefinitionPreview: FC<FieldDefinitionPreviewProps> = ({
   definition,
   onDefaultChange,
+  requirementBadge,
+  hiddenNote,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const parsedField = useMemo<InlineField | null>(() => {
     if (!definition.trim()) return null;
     try {
@@ -72,7 +80,21 @@ export const FieldDefinitionPreview: FC<FieldDefinitionPreviewProps> = ({
     return null;
   }, [definition]);
 
-  if (!parsedField) {
+  const fieldForRender = useMemo((): InlineField | null => {
+    if (!parsedField) {
+      return null;
+    }
+    if (!hiddenNote) {
+      return parsedField;
+    }
+    // The note replaces `show_when`: the preview has no sibling values, so evaluating the
+    // condition would always hide the control being previewed.
+    const next: InlineField = { ...parsedField };
+    delete next.display;
+    return next;
+  }, [hiddenNote, parsedField]);
+
+  if (!fieldForRender) {
     return (
       <EuiText color="subdued" size="s">
         <p>{i18n.FIELD_DEFINITION_PREVIEW_PLACEHOLDER}</p>
@@ -80,12 +102,44 @@ export const FieldDefinitionPreview: FC<FieldDefinitionPreviewProps> = ({
     );
   }
 
-  return (
+  const control = (
     <FieldDefinitionPreviewInner
-      key={`${parsedField.name}:${parsedField.type}:${parsedField.control}`}
-      parsedField={parsedField}
+      key={`${fieldForRender.name}:${fieldForRender.type}:${fieldForRender.control}`}
+      parsedField={fieldForRender}
       onDefaultChange={onDefaultChange}
     />
+  );
+
+  return (
+    <div data-test-subj="fieldDefinitionPreview">
+      {requirementBadge ? (
+        <>
+          <EuiBadge data-test-subj="fieldDefinitionPreview-requirementBadge">
+            {requirementBadge}
+          </EuiBadge>
+          <EuiSpacer size="s" />
+        </>
+      ) : null}
+      {hiddenNote ? (
+        <EuiPanel color="subdued" paddingSize="s" hasShadow={false}>
+          <EuiText size="xs" color="subdued">
+            <p data-test-subj="fieldDefinitionPreview-hiddenNote">{hiddenNote}</p>
+          </EuiText>
+          <EuiSpacer size="s" />
+          <div
+            css={css({
+              opacity: 0.55,
+              pointerEvents: 'none',
+              transition: `opacity ${euiTheme.animation.fast}`,
+            })}
+          >
+            {control}
+          </div>
+        </EuiPanel>
+      ) : (
+        control
+      )}
+    </div>
   );
 };
 
