@@ -1,0 +1,13 @@
+Running 30s test @ http://localhost:5601/internal/search/esql_async
+  2 threads and 10 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency   285.60ms   34.92ms 369.23ms   73.73%
+    Req/Sec    18.78     11.38    40.00     72.84%
+  Latency Distribution
+     50%  295.98ms
+     75%  307.60ms
+     90%  318.10ms
+     99%  347.25ms
+  1043 requests in 30.04s, 20.49GB read
+Requests/sec:     34.72
+Transfer/sec:    698.33MB
