@@ -2293,10 +2293,9 @@ describe('Agent policy', () => {
 
   describe('getSpacesForPoliciesUsingOutput', () => {
     it('maps a legacy policy returned without namespaces to all spaces (*)', async () => {
+      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
       const soClient = createSavedObjectClientMock();
 
-      // A space-agnostic (legacy) policy comes back with no namespaces. It must not be dropped:
-      // it spans every space, so the result must force a global privilege check via '*'.
       soClient.find.mockResolvedValueOnce({
         saved_objects: [{ id: 'legacy-policy', namespaces: undefined }],
         total: 1,
@@ -2312,6 +2311,9 @@ describe('Agent policy', () => {
         'output-id-123'
       );
 
+      expect(soClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({ type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE })
+      );
       expect(spaceIds).toEqual(new Set(['*']));
       expect(truncated).toBe(false);
     });

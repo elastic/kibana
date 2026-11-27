@@ -1253,33 +1253,38 @@ class OutputService {
     return outputSavedObjectToOutput(outputSO);
   }
 
-  // Policies reference the public output id, which may differ from the saved-object id.
+  // Policies may reference an output by its public id or by the id the request used.
+  private getOutputRefIds(requestId: string, output: Output) {
+    return _.uniq([requestId, output.id]);
+  }
+
   private assertCanWriteOutput(
-    output: Output,
+    refIds: string[],
     request: KibanaRequest,
     action: 'update' | 'delete',
     isDefault = false
   ) {
+    // Only delete rewrites package policies.
+    const packagePolicyPrivileges =
+      action === 'delete'
+        ? ['integrations-all', 'fleet-agent-policies-all']
+        : ['fleet-agent-policies-all'];
     return assertCanWriteSettingsObject({
       request,
       objectType: 'output',
-      id: output.id,
+      id: refIds[0],
       action,
       isDefault,
-      references: [
+      references: refIds.flatMap((refId) => [
         {
-          getSpaces: () => agentPolicyService.getSpacesForPoliciesUsingOutput(output.id),
+          getSpaces: () => agentPolicyService.getSpacesForPoliciesUsingOutput(refId),
           apiPrivileges: ['fleet-agent-policies-all'],
         },
         {
-          getSpaces: () => packagePolicyService.getSpacesForPoliciesUsingOutput(output.id),
-          // Only delete rewrites package policies.
-          apiPrivileges:
-            action === 'delete'
-              ? ['integrations-all', 'fleet-agent-policies-all']
-              : ['fleet-agent-policies-all'],
+          getSpaces: () => packagePolicyService.getSpacesForPoliciesUsingOutput(refId),
+          apiPrivileges: packagePolicyPrivileges,
         },
-      ],
+      ]),
     });
   }
 
@@ -1309,21 +1314,23 @@ class OutputService {
       throw new OutputUnauthorizedError(`Default monitoring output ${id} cannot be deleted.`);
     }
 
+    const refIds = this.getOutputRefIds(id, originalOutput);
     if (request) {
-      await this.assertCanWriteOutput(originalOutput, request, 'delete');
+      await this.assertCanWriteOutput(refIds, request, 'delete');
     }
 
-    await packagePolicyService.removeOutputFromAll(
-      appContextService.getInternalUserESClient(),
-      id,
-      {
-        force: fromPreconfiguration,
-      }
-    );
-
-    await agentPolicyService.removeOutputFromAll(appContextService.getInternalUserESClient(), id, {
-      force: fromPreconfiguration,
-    });
+    for (const refId of refIds) {
+      await packagePolicyService.removeOutputFromAll(
+        appContextService.getInternalUserESClient(),
+        refId,
+        { force: fromPreconfiguration }
+      );
+      await agentPolicyService.removeOutputFromAll(
+        appContextService.getInternalUserESClient(),
+        refId,
+        { force: fromPreconfiguration }
+      );
+    }
 
     auditLoggingService.writeCustomSoAuditLog({
       action: 'delete',
@@ -1373,7 +1380,7 @@ class OutputService {
 
     if (request && !fromPreconfiguration) {
       await this.assertCanWriteOutput(
-        originalOutput,
+        this.getOutputRefIds(id, originalOutput),
         request,
         'update',
         Boolean(

@@ -6289,6 +6289,58 @@ describe('Output Service', () => {
           })
         );
       });
+
+      it('authorizes and clears both ids when deleting by saved-object id', async () => {
+        mockSecurity(true);
+        getMockedSoClient();
+        const savedObjectId = outputIdToUuid('output-test');
+
+        await outputService.delete(savedObjectId, { request: mockRequest });
+
+        for (const refId of [savedObjectId, 'output-test']) {
+          expect(mockedAgentPolicyService.getSpacesForPoliciesUsingOutput).toHaveBeenCalledWith(
+            refId
+          );
+          expect(mockedPackagePolicyService.getSpacesForPoliciesUsingOutput).toHaveBeenCalledWith(
+            refId
+          );
+          expect(mockedAgentPolicyService.removeOutputFromAll).toHaveBeenCalledWith(
+            expect.anything(),
+            refId,
+            expect.anything()
+          );
+          expect(mockedPackagePolicyService.removeOutputFromAll).toHaveBeenCalledWith(
+            expect.anything(),
+            refId,
+            expect.anything()
+          );
+        }
+      });
+
+      it('authorizes both ids when updating by saved-object id', async () => {
+        mockSecurity(false);
+        const soClient = getMockedSoClient();
+        const savedObjectId = outputIdToUuid('output-test');
+
+        await expect(
+          outputService.update(
+            soClient,
+            esClientMock,
+            savedObjectId,
+            { name: 'Renamed' },
+            { fromPreconfiguration: false, request: mockRequest }
+          )
+        ).rejects.toThrow(/Insufficient privileges to update output/);
+
+        for (const refId of [savedObjectId, 'output-test']) {
+          expect(mockedAgentPolicyService.getSpacesForPoliciesUsingOutput).toHaveBeenCalledWith(
+            refId
+          );
+          expect(mockedPackagePolicyService.getSpacesForPoliciesUsingOutput).toHaveBeenCalledWith(
+            refId
+          );
+        }
+      });
     });
   });
 

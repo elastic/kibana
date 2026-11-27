@@ -214,7 +214,7 @@ export async function deleteFleetProxy(
     throw new FleetProxyUnauthorizedError(`Cannot delete ${id} preconfigured proxy`);
   }
 
-  // Authorize and detach the same set of related objects.
+  // Authorize the set that will be detached.
   const related = await getFleetProxyRelatedSavedObjects(id);
   const { outputs, fleetServerHosts, downloadSources } = related;
 
@@ -234,7 +234,14 @@ export async function deleteFleetProxy(
     );
   }
 
-  await updateRelatedSavedObject(soClient, esClient, fleetServerHosts, outputs, downloadSources);
+  await updateRelatedSavedObject(
+    soClient,
+    esClient,
+    id,
+    fleetServerHosts,
+    outputs,
+    downloadSources
+  );
   logger.debug(`Deleted fleet proxy ${id}`);
 
   return await soClient.delete(FLEET_PROXY_SAVED_OBJECT_TYPE, id);
@@ -304,39 +311,49 @@ export async function bulkGetFleetProxies(
     );
 }
 
+// Detach from a fresh copy, skipping objects reassigned to another proxy since they were listed.
 async function updateRelatedSavedObject(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
+  proxyId: string,
   fleetServerHosts: FleetServerHost[],
   outputs: Output[],
   downloadSources: DownloadSource[]
 ) {
   await pMap(
     fleetServerHosts,
-    (fleetServerHost) =>
-      fleetServerHostService.update(soClient, esClient, fleetServerHost.id, {
+    async ({ id }) => {
+      const fleetServerHost = await fleetServerHostService.get(id);
+      if (fleetServerHost.proxy_id !== proxyId) return;
+      await fleetServerHostService.update(soClient, esClient, id, {
         ...omit(fleetServerHost, 'id'),
         proxy_id: null,
-      }),
+      });
+    },
     { concurrency: MAX_CONCURRENT_FLEET_PROXIES_OPERATIONS }
   );
 
   await pMap(
     outputs,
-    (output) =>
-      outputService.update(soClient, esClient, output.id, {
+    async ({ id }) => {
+      const output = await outputService.get(id);
+      if (output.proxy_id !== proxyId) return;
+      await outputService.update(soClient, esClient, id, {
         ...omit(output, 'id'),
         proxy_id: null,
-      } as Partial<Output>),
+      } as Partial<Output>);
+    },
     { concurrency: MAX_CONCURRENT_FLEET_PROXIES_OPERATIONS }
   );
 
-  await pMap(downloadSources, (downloadSource) =>
-    downloadSourceService.update(soClient, esClient, downloadSource.id, {
+  await pMap(downloadSources, async ({ id }) => {
+    const downloadSource = await downloadSourceService.get(id);
+    if (downloadSource.proxy_id !== proxyId) return;
+    await downloadSourceService.update(soClient, esClient, id, {
       ...omit(downloadSource, 'id'),
       proxy_id: null,
-    })
-  );
+    });
+  });
 }
 
 export async function getFleetProxyRelatedSavedObjects(proxyId: string) {
