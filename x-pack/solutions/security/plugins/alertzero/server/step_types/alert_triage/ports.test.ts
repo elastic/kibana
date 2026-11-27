@@ -15,11 +15,13 @@ import {
   type DecisionCursor,
   fetchTriageAlerts,
   findAlertIdsByTag,
-  findAlertIdsClosedAsOther,
+  findAlertsClosedWithoutFalsePositiveReason,
+  findAlertsClosedAsFalsePositive,
   findAlertsNotClosedAsFalsePositive,
   findKeyTagsWithVerdicts,
   findAlertIdsWithTag,
   findOpenAlertIds,
+  findStillOpenAlertIds,
   listLiveExecutionIds,
   loadAlertsByIds,
   readKeyHistory,
@@ -608,14 +610,15 @@ describe('fetchDecisionCandidates', () => {
     expect(after).toBeUndefined();
   });
 
-  it("fetches the signers' trust flags, without which `on` would hold every signed match", async () => {
+  it("fetches the library signer's trust flag, without which `on` would hold every signed library match", async () => {
     const { run: fetch, callKibanaApi } = run([]);
 
     await fetch();
 
-    expect(callKibanaApi.mock.calls[0][0].body._source).toEqual(
-      expect.arrayContaining(['process.code_signature.trusted', 'dll.code_signature.trusted'])
-    );
+    const { _source: fields } = callKibanaApi.mock.calls[0][0].body;
+    expect(fields).toContain('dll.code_signature.trusted');
+    // `on` holds every process key in shadow, so its trust flag is not read.
+    expect(fields).not.toContain('process.code_signature.trusted');
   });
 
   const fullPage = (timestampOf: (i: number) => number) =>
@@ -812,10 +815,18 @@ describe('helpers that drive a write, on a partial search result', () => {
       'findKeyTagsWithVerdicts',
       (api) => findKeyTagsWithVerdicts(api, ['k1'], ['az:true_positive']),
     ],
-    ['findAlertIdsClosedAsOther', (api) => findAlertIdsClosedAsOther(api, ['a'])],
+    [
+      'findAlertsClosedWithoutFalsePositiveReason',
+      (api) => findAlertsClosedWithoutFalsePositiveReason(api, ['a']),
+    ],
     ['findAlertIdsByTag', (api) => findAlertIdsByTag(api, 'az:closed_by_decision:fp-decision-1')],
     ['findOpenAlertIds', (api) => findOpenAlertIds(api, ['a'])],
+    ['findStillOpenAlertIds', (api) => findStillOpenAlertIds(api, ['a'])],
     ['findAlertIdsWithTag', (api) => findAlertIdsWithTag(api, ['a'], 'az:skipped_by_decision:x')],
+    [
+      'findAlertsClosedAsFalsePositive',
+      (api) => findAlertsClosedAsFalsePositive(api, ['a'], 'az:closed_by_decision:fp-decision-1'),
+    ],
     ['findAlertsNotClosedAsFalsePositive', (api) => findAlertsNotClosedAsFalsePositive(api, ['a'])],
     [
       'fetchDecisionCandidates',
@@ -856,5 +867,52 @@ describe('helpers that drive a write, on a partial search result', () => {
       .mockResolvedValue({ status: 200, headers: {}, body: { ...complete, timed_out: true } });
 
     await expect(call({ callKibanaApi })).rejects.toThrow('partial result');
+  });
+});
+
+describe('findAlertsClosedWithoutFalsePositiveReason', () => {
+  it('tells a close for another reason apart from a close with no reason, and leaves false positives out of the query', async () => {
+    const callKibanaApi = jest.fn().mockResolvedValue({
+      status: 200,
+      headers: {},
+      body: {
+        hits: {
+          hits: [
+            { _id: 'tp', _source: { 'kibana.alert.workflow_reason': 'true_positive' } },
+            { _id: 'none', _source: {} },
+          ],
+        },
+      },
+    });
+
+    const found = await findAlertsClosedWithoutFalsePositiveReason({ callKibanaApi }, [
+      'tp',
+      'none',
+      'fp',
+    ]);
+
+    expect(found).toEqual({ closedAsOther: ['tp'], closedWithoutReason: ['none'] });
+    const { query } = callKibanaApi.mock.calls[0][0].body;
+    expect(query.bool.must_not).toEqual([
+      { term: { 'kibana.alert.workflow_reason': 'false_positive' } },
+    ]);
+  });
+});
+
+describe('findAlertsClosedAsFalsePositive', () => {
+  it('asks for closed false positives that still carry the tag, so an alert closed after the tag was taken off is not one of them', async () => {
+    const callKibanaApi = jest
+      .fn()
+      .mockResolvedValue({ status: 200, headers: {}, body: { hits: { hits: [{ _id: 'a' }] } } });
+
+    const found = await findAlertsClosedAsFalsePositive({ callKibanaApi }, ['a', 'b'], 'az:x');
+
+    expect(found).toEqual(['a']);
+    expect(callKibanaApi.mock.calls[0][0].body.query.bool.filter).toEqual([
+      { ids: { values: ['a', 'b'] } },
+      { term: { 'kibana.alert.workflow_status': 'closed' } },
+      { term: { 'kibana.alert.workflow_reason': 'false_positive' } },
+      { term: { 'kibana.alert.workflow_tags': 'az:x' } },
+    ]);
   });
 });

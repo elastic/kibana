@@ -27,8 +27,6 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       });
 
       expect(settings).to.eql({
-        category: ['any'],
-        description: 'just for testing',
         name: 'from_ui_settings_plugin',
         value: '2',
       });

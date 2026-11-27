@@ -64,6 +64,8 @@ Helper overview:
 | `withChatCompleteSpan(options, cb)`    | Chat completion calls             |
 | `withExecuteToolSpan(options, cb)`     | Tool execution calls              |
 
+When token usage is available, `withChatCompleteSpan` records the total output in `gen_ai.usage.output_tokens`. If the provider reports reasoning tokens separately, the span includes them in that total and also records the breakdown in `gen_ai.usage.reasoning.output_tokens`.
+
 ### Examples
 
 ```ts

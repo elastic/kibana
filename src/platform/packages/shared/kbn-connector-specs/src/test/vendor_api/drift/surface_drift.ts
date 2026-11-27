@@ -9,7 +9,8 @@
 
 import type { ConnectorDrift, DriftReportEntry, FailedDrift } from './detect_drift';
 import { connectorOf, DRIFT_ISSUE_LABEL, markerOf } from './issue_marker';
-import { changeList, findingsOf, renderDriftIssue } from './issue';
+import { findingsOf, renderDriftIssue } from './drift_issue';
+import { renderRefreshPr } from './refresh_issue/refresh_pr';
 import type { VendorApiLog } from '../record/update_vendor_api';
 import { errorMessage } from '../values';
 
@@ -79,28 +80,6 @@ export interface SurfaceDriftOptions {
 }
 
 const isFailed = (entry: DriftReportEntry): entry is FailedDrift => 'error' in entry;
-
-/** The body of the bot PR refreshing the artifacts of connectors with non-breaking drift. */
-export const renderRefreshPr = (drifts: readonly ConnectorDrift[]): string =>
-  [
-    'Refreshes the `vendor_api` artifacts of connectors whose vendor specs changed without breaking them, as found by the weekly vendor API drift check (`node scripts/connector_vendor_api --drift`). The actions pass against the latest specs.',
-    '',
-    ...drifts.flatMap((drift) => {
-      const changes = Object.entries(drift.sources).flatMap(([name, source]) =>
-        (source.changes ?? []).map((change) => ({ ...change, text: `${name}: ${change.text}` }))
-      );
-      return [
-        `### \`${drift.connector}\``,
-        '',
-        ...(drift.operationsChanged ? ['- The actions call other operations.'] : []),
-        ...changeList(changes),
-        ...(changes.length === 0 && !drift.operationsChanged
-          ? ['- The specs changed outside what `oasdiff` reports.']
-          : []),
-        '',
-      ];
-    }),
-  ].join('\n');
 
 /**
  * Turns a drift report into GitHub issues: one per connector that needs one, found again by the
@@ -232,6 +211,6 @@ export const surfaceDrift = async ({
     dryRun,
     actions,
     refresh: refreshed.map(({ connector }) => connector),
-    refreshPrBody: renderRefreshPr(refreshed),
+    refreshPrBody: renderRefreshPr(refreshed, buildUrl),
   };
 };

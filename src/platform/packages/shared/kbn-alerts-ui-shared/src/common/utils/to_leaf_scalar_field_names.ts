@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FieldDescriptor } from '@kbn/data-views-plugin/server';
+export interface LeafScalarFieldCandidate {
+  name: string;
+  type: string;
+  subType?: { nested?: unknown };
+}
 
 /**
  * Field types that never resolve to a scalar leaf value via the dot-path
@@ -23,7 +27,7 @@ const NON_SCALAR_FIELD_TYPES = new Set(['object', 'nested']);
  * dot-path snapshot resolves to `null` (see issue #275054). Names are
  * de-duplicated and sorted alphabetically.
  */
-export const toLeafScalarFieldNames = (fields: FieldDescriptor[]): string[] => {
+export const toLeafScalarFieldNames = (fields: readonly LeafScalarFieldCandidate[]): string[] => {
   const seen = new Set<string>();
   const names: string[] = [];
 

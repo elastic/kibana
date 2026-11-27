@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { act, render, screen, within } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { EuiProvider } from '@elastic/eui';
@@ -169,6 +169,137 @@ describe('PacksTable', () => {
         'packs/so-1/edit'
       );
       expect(screen.getByText('pack-beta').closest('a')).toHaveAttribute('href', 'packs/so-2/edit');
+    });
+  });
+
+  describe('effective policy count', () => {
+    it.each([
+      { effectiveIds: ['policy-1', 'policy-2'], count: '2', warning: true },
+      { effectiveIds: ['policy-1'], count: '1', warning: false },
+      { effectiveIds: [], count: '0', warning: false },
+      { effectiveIds: undefined, count: '1', warning: false },
+    ])(
+      'renders effective targets $effectiveIds with fallback and shared integration info icon',
+      async ({ effectiveIds, count, warning }) => {
+        mockUsePacks.mockReturnValue({
+          data: { data: [createPack({ effective_policy_ids: effectiveIds })], total: 1 },
+          isLoading: false,
+          isFetching: false,
+        });
+        renderComponent();
+        const row = screen.getByText('test-pack').closest('tr');
+        expect(row).not.toBeNull();
+        const cells = within(row as HTMLElement).getAllByRole('cell');
+        expect(cells[2]).toHaveTextContent(count);
+        const infoIcon = within(cells[2]).queryByTestId('packEffectivePoliciesInfo');
+        expect(!!infoIcon).toBe(warning);
+        if (infoIcon) {
+          expect(infoIcon).toHaveTextContent('1 selected + 1 via shared integration');
+          expect(infoIcon).toHaveAttribute('tabindex', '0');
+          act(() => infoIcon.focus());
+          expect(await screen.findByRole('tooltip')).toHaveTextContent(
+            '1 selected + 1 via shared integration'
+          );
+        }
+      }
+    );
+
+    it.each([
+      { policyIds: ['policy-1'], effectiveIds: [], count: '1' },
+      { policyIds: ['policy-1', 'policy-2'], effectiveIds: undefined, count: '2' },
+      { policyIds: [], effectiveIds: [], count: '0' },
+    ])(
+      'should show saved targets $policyIds for a disabled pack with effective targets $effectiveIds',
+      ({ policyIds, effectiveIds, count }) => {
+        mockUsePacks.mockReturnValue({
+          data: {
+            data: [
+              createPack({
+                enabled: false,
+                policy_ids: policyIds,
+                effective_policy_ids: effectiveIds,
+              }),
+            ],
+            total: 1,
+          },
+          isLoading: false,
+          isFetching: false,
+        });
+        renderComponent();
+        const row = screen.getByText('test-pack').closest('tr');
+        expect(row).not.toBeNull();
+        const cells = within(row as HTMLElement).getAllByRole('cell');
+        expect(cells[2]).toHaveTextContent(count);
+        expect(within(cells[2]).queryByTestId('packEffectivePoliciesInfo')).not.toBeInTheDocument();
+      }
+    );
+
+    it('should break the count down by which policies overlap, not by list length', async () => {
+      mockUsePacks.mockReturnValue({
+        data: {
+          data: [
+            createPack({
+              policy_ids: ['policy-1', 'policy-2'],
+              effective_policy_ids: ['policy-1', 'policy-3', 'policy-4'],
+            }),
+          ],
+          total: 1,
+        },
+        isLoading: false,
+        isFetching: false,
+      });
+      renderComponent();
+      const row = screen.getByText('test-pack').closest('tr');
+      const cells = within(row as HTMLElement).getAllByRole('cell');
+      expect(cells[2]).toHaveTextContent('3');
+      act(() => within(cells[2]).getByTestId('packEffectivePoliciesInfo').focus());
+      expect(await screen.findByRole('tooltip')).toHaveTextContent(
+        '1 selected + 2 via shared integration'
+      );
+    });
+
+    it('should render a pack without policy_ids and count its effective targets as shared', async () => {
+      mockUsePacks.mockReturnValue({
+        data: {
+          data: [createPack({ policy_ids: undefined, effective_policy_ids: ['policy-1'] })],
+          total: 1,
+        },
+        isLoading: false,
+        isFetching: false,
+      });
+      renderComponent();
+      const row = screen.getByText('test-pack').closest('tr');
+      const cells = within(row as HTMLElement).getAllByRole('cell');
+      expect(cells[2]).toHaveTextContent('1');
+      act(() => within(cells[2]).getByTestId('packEffectivePoliciesInfo').focus());
+      expect(await screen.findByRole('tooltip')).toHaveTextContent(
+        '0 selected + 1 via shared integration'
+      );
+    });
+
+    it('should keep live targets for a disabled pack that Fleet still delivers', () => {
+      mockUsePacks.mockReturnValue({
+        data: {
+          data: [
+            createPack({
+              enabled: false,
+              policy_ids: ['policy-1'],
+              effective_policy_ids: ['policy-1', 'policy-2'],
+            }),
+          ],
+          total: 1,
+        },
+        isLoading: false,
+        isFetching: false,
+      });
+      renderComponent();
+      const row = screen.getByText('test-pack').closest('tr');
+      expect(row).not.toBeNull();
+      const cells = within(row as HTMLElement).getAllByRole('cell');
+      expect(cells[2]).toHaveTextContent('2');
+      expect(within(cells[2]).getByTestId('packEffectivePoliciesInfo')).toHaveTextContent(
+        '1 selected + 1 via shared integration'
+      );
     });
   });
 

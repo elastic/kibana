@@ -8,7 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import { createTestServers } from '@kbn/core-test-helpers-kbn-server';
-import { compileKnownFailureQuery } from '../compile_known_failure_query';
+import { compileEvidenceQuery, compileKnownFailureQuery } from '../compile_known_failure_query';
 
 const MINUTE_MS = 60_000;
 /** Minutes of history seeded before now; more than the window, so the window starts full. */
@@ -27,7 +27,15 @@ type Level = typeof BASE | typeof HIGH | number;
  */
 const SCENARIOS: Record<string, (minutesAgo: number) => Level> = {
   quiet: () => 0,
-  spike: (minutesAgo) => (minutesAgo === 3 ? 80 : BASE),
+  // A minute with only non-matching lines just before the spike, so the evidence shows a true 0.
+  spike: (minutesAgo) => {
+    if (minutesAgo === 4) {
+      return 0;
+    }
+    return minutesAgo === 3 ? 80 : BASE;
+  },
+  // A spike inside the hour the normal level is measured over, as an incident an hour ago leaves.
+  spike_in_baseline: (minutesAgo) => (minutesAgo === 40 ? 48 : BASE),
   step_up: (minutesAgo) => (minutesAgo <= 20 ? HIGH : BASE),
   // A one-minute spike after a step up, so the spike is the newest change `CHANGE_POINT` marks.
   step_then_spike: (minutesAgo) => {
@@ -122,6 +130,7 @@ const getCounts = (newestMinuteCounts: unknown): number[] =>
 describe('compileKnownFailureQuery against Elasticsearch', () => {
   let esServer: TestElasticsearchUtils;
   let esClient: ElasticsearchClient;
+  let nowMinute: number;
 
   beforeAll(async () => {
     const { startES } = createTestServers({
@@ -132,7 +141,7 @@ describe('compileKnownFailureQuery against Elasticsearch', () => {
     esServer = await startES();
     esClient = esServer.es.getClient();
 
-    const nowMinute = Math.floor(Date.now() / MINUTE_MS) * MINUTE_MS;
+    nowMinute = Math.floor(Date.now() / MINUTE_MS) * MINUTE_MS;
     await Promise.all(
       Object.entries(SCENARIOS).map(([scenario, shape]) =>
         seedScenario({ esClient, scenario, shape, nowMinute })
@@ -186,6 +195,42 @@ describe('compileKnownFailureQuery against Elasticsearch', () => {
       })
     );
     expect(row.change_point_minutes_before).toBeGreaterThan(300);
+  });
+
+  // A KEEP too long for a signal swaps the lines for counts; a breach whose evidence fails to run
+  // or miscounts gives the judge nothing to read.
+  it('counts the matches per minute when the indicator’s KEEP is too long for the evidence', async () => {
+    const keep = `KEEP ${Array.from({ length: 2_000 }, (_, index) => `field_${index}`).join(', ')}`;
+    const spikeMinute = nowMinute - 3 * MINUTE_MS;
+    const query = compileEvidenceQuery({
+      esql: `FROM ${getIndex(
+        'spike'
+      )} | WHERE log.level == "error" AND message : "timeout" | ${keep}`,
+      from: spikeMinute - MINUTE_MS,
+      to: spikeMinute + 2 * MINUTE_MS,
+      cpsEnabled: false,
+    });
+
+    const { columns, values } = await esClient.esql.query({ query });
+
+    expect(columns.map(({ name }) => name)).toEqual(['matches', 'period']);
+    // The empty minute as 0, not left out; 3 is the base level's wobble two minutes ago.
+    expect(values).toEqual([
+      [0, new Date(spikeMinute - MINUTE_MS).toISOString()],
+      [80, new Date(spikeMinute).toISOString()],
+      [3, new Date(spikeMinute + MINUTE_MS).toISOString()],
+    ]);
+  });
+
+  // Live, one minute of 48 against a normal of 2 raised the threshold from 7 to 21 for the hour
+  // after it, and a burst of 11 went unreported.
+  it('leaves a spike out of the mean and spread of the hour it measures the normal level over', async () => {
+    const [row] = await runCompiledQuery(esClient, 'spike_in_baseline');
+
+    // The wobble of one around 2, as if the spike were not there.
+    expect(row.baseline_mean).toBeCloseTo(2, 0);
+    expect(row.baseline_std_dev as number).toBeLessThan(1);
+    expect(row).toEqual(expect.objectContaining({ baseline_median: 2, baseline_mad: 1 }));
   });
 
   it('keeps reporting a step up after a later one-minute spike', async () => {

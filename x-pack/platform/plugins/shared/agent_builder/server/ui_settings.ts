@@ -13,6 +13,7 @@ import {
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
   AGENT_BUILDER_BASH_SUPPORT_SETTING_ID,
   AGENT_BUILDER_API_DISCOVERY_SETTING_ID,
+  AGENT_BUILDER_THREADS_SETTING_ID,
   AGENT_BUILDER_INCLUDE_FROZEN_BY_DEFAULT_SETTING_ID,
   AGENT_BUILDER_TRACING_ENABLED_SETTING_ID,
   AGENT_BUILDER_TRACING_USER_PROMPTS_SETTING_ID,
@@ -82,6 +83,20 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
       value: false,
       technicalPreview: true,
       requiresPageReload: false,
+      readonly: false,
+    },
+    [AGENT_BUILDER_THREADS_SETTING_ID]: {
+      description: i18n.translate('xpack.agentBuilder.uiSettings.threads.description', {
+        defaultMessage:
+          'Enables threads in Elastic Agent Builder. Disabled by default while the feature is under development.',
+      }),
+      name: i18n.translate('xpack.agentBuilder.uiSettings.threads.name', {
+        defaultMessage: 'Elastic Agent Builder: Threads',
+      }),
+      schema: schema.boolean(),
+      value: false,
+      experimental: true,
+      requiresPageReload: true,
       readonly: false,
     },
     [AGENT_BUILDER_INCLUDE_FROZEN_BY_DEFAULT_SETTING_ID]: {

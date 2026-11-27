@@ -79,4 +79,8 @@ describe('toLeafScalarFieldNames', () => {
 
     expect(names).toEqual(['host.name']);
   });
+
+  it('returns an empty list for no fields', () => {
+    expect(toLeafScalarFieldNames([])).toEqual([]);
+  });
 });

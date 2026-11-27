@@ -4,7 +4,7 @@
   "owner": ["@elastic/workflows-eng"],
   "group": "platform",
   "visibility": "shared",
-  "description": "Phase 1 bridge: forwards Actions inbound connector events to Workflows emitEvent. Replace with the shared event bus in Phase 2 without changing the hub URL.",
+  "description": "Forwards Actions inbound connector events to Workflows until a workflow definition can carry an identity.",
   "plugin": {
     "id": "connectorEventsBridge",
     "browser": false,
