@@ -515,7 +515,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
         await testSubjects.missingOrFail('deleteIdsConfirmation');
 
-        await supertest.get(`/api/actions/connector/${connector.id}`).expect(404);
+        await retry.try(async () => {
+          await supertest.get(`/api/actions/connector/${connector.id}`).expect(404);
+        });
 
         // Wait to ensure the table is finished loading
         await pageObjects.triggersActionsUI.tableFinishedLoading();

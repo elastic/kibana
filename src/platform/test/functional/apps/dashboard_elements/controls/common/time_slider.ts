@@ -105,6 +105,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await dashboardControls.getControlsCount()).to.be(2);
         const secondId = (await dashboardControls.getAllControlIds())[1];
         await dashboardControls.validateRange('placeholder', secondId, '100', '1200');
+        await dashboard.clearUnsavedChanges();
       });
 
       it('making changes to time slice causes unsaved changes', async () => {
