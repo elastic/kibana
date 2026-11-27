@@ -158,7 +158,7 @@ describe('getFormatter', () => {
       expect(source.getFormatter(nanosDate, fieldFormats).type.id).toBe('duration');
     });
 
-    it('formats a time series counter column like its field, without the counter prefix', async () => {
+    it('formats a time series counter field without the counter prefix, whichever API supplied it', async () => {
       const fieldFormats = buildFieldFormats({ long: { id: 'bytes', params: {}, es: true } });
       const source = await EsqlSource.create({
         query: 'FROM metrics-*',
@@ -167,10 +167,15 @@ describe('getFormatter', () => {
         ],
       });
       const [column] = source.getColumns();
+      const filterableField = (await source.toFilterableSource()).getFieldByName('requests');
 
       expect(column.esType).toBe('counter_long');
+      expect(filterableField?.esTypes).toEqual(['counter_long']);
       expect(source.getFormatter(column, fieldFormats).type.id).toBe('bytes');
       expect(source.getFormatter(source.fields[0], fieldFormats).type.id).toBe('bytes');
+      expect(filterableField && source.getFormatter(filterableField, fieldFormats).type.id).toBe(
+        'bytes'
+      );
     });
 
     it('uses the esType of a field whose esTypes is empty', async () => {

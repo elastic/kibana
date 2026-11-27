@@ -14,11 +14,13 @@ import type { Column } from './types';
 
 const COUNTER_PREFIX = 'counter_';
 
+/** An Elasticsearch type without the prefix of an ES|QL time series counter: `counter_long` becomes `long`. */
+export const stripCounterPrefix = (esType: string): string =>
+  esType.startsWith(COUNTER_PREFIX) ? esType.slice(COUNTER_PREFIX.length) : esType;
+
 /** The Elasticsearch types of a column: its single type, without the prefix of a time series counter. */
-export const getColumnEsTypes = (esType: string | undefined): string[] | undefined => {
-  const type = esType?.startsWith(COUNTER_PREFIX) ? esType.slice(COUNTER_PREFIX.length) : esType;
-  return type ? [type] : undefined;
-};
+export const getColumnEsTypes = (esType: string | undefined): string[] | undefined =>
+  esType ? [stripCounterPrefix(esType)] : undefined;
 
 /** A column as a field; ES|QL counter types (`counter_long`, …) become their base type plus `timeSeriesMetric`. */
 export function columnToFieldBase(

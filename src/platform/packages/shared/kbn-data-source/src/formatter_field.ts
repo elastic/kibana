@@ -10,11 +10,11 @@
 import type { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { FieldFormat, FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import type { FormatterField } from './types';
-import { getColumnEsTypes } from './to_column';
+import { getColumnEsTypes, stripCounterPrefix } from './to_column';
 
-/** The Elasticsearch types of a field: its `esTypes`, or the single `esType` of a `Column`. */
+/** The Elasticsearch types of a field, `esTypes` or the single `esType` of a `Column`, without counter prefixes. */
 export const getFormatterEsTypes = ({ esTypes, esType }: FormatterField): string[] | undefined =>
-  esTypes?.length ? esTypes : getColumnEsTypes(esType);
+  esTypes?.length ? esTypes.map(stripCounterPrefix) : getColumnEsTypes(esType);
 
 /** The formatter of a field from its types alone: a default for its Elasticsearch type wins over its Kibana type. */
 export const getDefaultFormatter = (
