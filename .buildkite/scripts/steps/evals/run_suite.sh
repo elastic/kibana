@@ -760,12 +760,16 @@ validate_pin_preconditions() {
   fi
   # The branch is a build label, not proof of the checked-out code: an on-demand build
   # selects branch and commit separately. Require the evaluated commit to sit on main's
-  # history too, whenever the ref is available to check against.
-  if [[ "${EVAL_PIN_BASELINE_ALLOW_BRANCH:-}" != "1" ]] &&
-    git rev-parse --verify -q origin/main >/dev/null 2>&1; then
-    if ! git merge-base --is-ancestor HEAD origin/main 2>/dev/null; then
-      echo "EVAL_PIN_BASELINE=1 but the checked-out commit is not on main's history; refusing to pin it as the baseline."
-      return 1
+  # history too, whenever the ref is available to check against. The local origin/main
+  # can be stale on agents that check out by SHA, so refresh it first: a commit newer
+  # than a stale ref would otherwise be rejected as off-main.
+  if [[ "${EVAL_PIN_BASELINE_ALLOW_BRANCH:-}" != "1" ]]; then
+    git fetch --quiet origin main 2>/dev/null || true
+    if git rev-parse --verify -q origin/main >/dev/null 2>&1; then
+      if ! git merge-base --is-ancestor HEAD origin/main 2>/dev/null; then
+        echo "EVAL_PIN_BASELINE=1 but the checked-out commit is not on main's history; refusing to pin it as the baseline."
+        return 1
+      fi
     fi
   fi
   # An explicitly requested pin that cannot be published must fail the step: a scheduled

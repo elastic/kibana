@@ -98,8 +98,9 @@ describe('PinnedBaselineService', () => {
     expect(initializeClient).toHaveBeenCalledWith(EvaluationIndices.PINNED_BASELINES);
     expect(create).toHaveBeenCalledTimes(2);
     // Scores land before the pointer: an interrupted pin must never leave a pointer
-    // referencing a partial snapshot. Only the final pointer write waits for a refresh.
-    expect(create.mock.calls.map(([args]) => args.refresh)).toEqual([false, 'wait_for']);
+    // referencing a partial snapshot. The scores batch also waits for a refresh, so a
+    // concurrent pin's read-back can see these documents before any pointer answers.
+    expect(create.mock.calls.map(([args]) => args.refresh)).toEqual(['wait_for', 'wait_for']);
     expect(captured.map(({ _id }) => _id)).toEqual([
       `baseline-1:${createHash('sha256').update('score-doc-1').digest('hex')}`,
       // The first pin's pointer is write-once: racing first pins conflict on this ID

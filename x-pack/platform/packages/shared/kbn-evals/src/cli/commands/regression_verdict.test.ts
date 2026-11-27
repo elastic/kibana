@@ -148,6 +148,15 @@ describe('formatRegressionReportMarkdown', () => {
     expect(markdown).not.toContain('No regression against the pinned baseline');
   });
 
+  it('renders fractional gate thresholds without rounding them away', () => {
+    const markdown = formatRegressionReportMarkdown(report({}), {
+      config: { defaults: { failRelativeChange: 0.15, warnRelativeChange: 0.005, alpha: 0.05 } },
+    });
+    // A 0.5% warn threshold printed as "1%" would contradict the verdicts above it.
+    expect(markdown).toContain('>=0.5%');
+    expect(markdown).toContain('>=15%');
+  });
+
   it('leaves a full-coverage pass headline unqualified', () => {
     expect(formatRegressionReportMarkdown(report({}))).toContain(
       'No regression against the pinned baseline'

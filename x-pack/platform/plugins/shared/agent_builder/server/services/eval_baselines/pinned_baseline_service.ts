@@ -182,11 +182,12 @@ export class PinnedBaselineService {
 
     // Bulk writes are not atomic, and `findLatest` selects whatever pointer exists: write
     // the snapshot first and publish the pointer only once every score landed, so a
-    // partially-written pin never becomes the active baseline. Only the pointer write
-    // waits for a refresh; the scores become searchable with it, and waiting per chunk
-    // would serialize a full pin over many refresh intervals.
+    // partially-written pin never becomes the active baseline. The batch waits for one
+    // refresh (on its last chunk): a losing concurrent pin's read-back below must be able
+    // to see these documents, and a pointer-write conflict has nothing of its own to wait
+    // on when every item conflicts.
     if (scoreDocuments.length > 0) {
-      await this.createDocuments(client, scoreDocuments, pointer.baseline_id, false);
+      await this.createDocuments(client, scoreDocuments, pointer.baseline_id, 'wait_for');
     }
     const conflicts = await this.createDocuments(
       client,
@@ -300,9 +301,13 @@ export class PinnedBaselineService {
   ): Promise<number> {
     let totalConflicted = 0;
     for (let offset = 0; offset < documents.length; offset += BULK_WRITE_CHUNK_SIZE) {
+      // A refresh makes everything indexed before it searchable, so honoring the
+      // requested refresh on the last chunk alone gives the whole batch visibility
+      // without serializing every chunk over a refresh interval.
+      const isLastChunk = offset + BULK_WRITE_CHUNK_SIZE >= documents.length;
       const response = await client.create({
         documents: documents.slice(offset, offset + BULK_WRITE_CHUNK_SIZE),
-        refresh,
+        refresh: isLastChunk ? refresh : false,
       });
 
       const conflicted = response.items.filter((item) => item.create?.status === 409).length;

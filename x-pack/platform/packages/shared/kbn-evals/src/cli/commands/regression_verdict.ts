@@ -169,10 +169,13 @@ export const formatRegressionReportMarkdown = (
   // significant" in the table below with no visible reason.
   if (config) {
     const { failRelativeChange, warnRelativeChange, alpha } = config.defaults;
+    // Full precision, trimmed: a 0.5% threshold rounded to "1%" would contradict the
+    // verdicts computed right above it.
+    const pct = (fraction: number): string => `${parseFloat((fraction * 100).toFixed(4))}%`;
     lines.push('');
     lines.push(
-      `_Gates: fail at a >=${(failRelativeChange * 100).toFixed(0)}% significant worsening ` +
-        `(p < ${alpha}), warn at >=${(warnRelativeChange * 100).toFixed(0)}% or any significant ` +
+      `_Gates: fail at a >=${pct(failRelativeChange)} significant worsening ` +
+        `(p < ${alpha}), warn at >=${pct(warnRelativeChange)} or any significant ` +
         `worsening${config.evaluators ? ', with per-evaluator overrides' : ''}. The comparison ` +
         `table below marks significance at p < ${DEFAULT_SIGNIFICANCE_THRESHOLD}, independently ` +
         `of these gates._`
