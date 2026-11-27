@@ -62,13 +62,18 @@ describe('detectionAlerts.waitForAlerts', () => {
 
   test('includes the last retryable error when the timeout is reached', async () => {
     const { service, count } = setup();
-    count.mockRejectedValue(createResponseError(429));
+    const lastError = createResponseError(503);
+    count.mockRejectedValueOnce(createResponseError(429)).mockRejectedValue(lastError);
 
     const result = service.waitForAlerts(RULE_NAME, 1, 3_000);
-    const assertion = expect(result).rejects.toThrow(/the last poll failed with: status_429/);
+    const assertion = expect(result).rejects.toMatchObject({
+      message: expect.stringMatching(/the last poll failed with: status_503$/),
+      cause: lastError,
+    });
     await jest.advanceTimersByTimeAsync(3_000);
 
     await assertion;
+    await expect(result).rejects.not.toThrow(/status_429/);
   });
 
   test('reports a plain timeout when the last poll succeeded without enough alerts', async () => {
