@@ -30,6 +30,7 @@ export const SearchInputSchema = lazySchema(() =>
       ),
     path: z
       .string()
+      .regex(/^(?:|\/.*|ns:[0-9]+\/\/.*|id:[A-Za-z0-9_-]+)$/)
       .max(1024)
       .optional()
       .describe(
@@ -77,6 +78,7 @@ export const ListFolderInputSchema = lazySchema(() =>
   z.object({
     path: z
       .string()
+      .regex(/^(?:|\/.*|ns:[0-9]+\/\/.*)$/)
       .max(1024)
       .describe(
         'Path to the folder to list. Use an empty string "" for the root folder, or a path like "/team-projects/finance".'
@@ -94,7 +96,7 @@ export const GetFileMetadataInputSchema = lazySchema(() =>
   z.object({
     path: z
       .string()
-      .min(1)
+      .regex(/^(?:\/.*|ns:[0-9]+\/\/.*|id:[A-Za-z0-9_-]+)$/)
       .max(1024)
       .describe(
         'Path to the file or folder to retrieve metadata for. Example: "/Documents/report.pdf". Use paths from search or listFolder results.'
@@ -107,7 +109,7 @@ export const GetFileContentInputSchema = lazySchema(() =>
   z.object({
     path: z
       .string()
-      .min(1)
+      .regex(/^(?:\/.*|ns:[0-9]+\/\/.*|id:[A-Za-z0-9_-]+)$/)
       .max(1024)
       .describe(
         'Path to the file to retrieve content for. Example: "/Documents/notes.txt". Use paths from search or listFolder results. WARNING: Returns base64-encoded binary content — only use when you have a plan to process the data (e.g. via an Elasticsearch ingest pipeline attachment processor). Large files can produce very large payloads.'
@@ -120,7 +122,7 @@ export const CreateSharedLinkInputSchema = lazySchema(() =>
   z.object({
     path: z
       .string()
-      .min(1)
+      .regex(/^(?:\/.*|ns:[0-9]+\/\/.*|id:[A-Za-z0-9_-]+)$/)
       .max(1024)
       .describe(
         'Path to the file or folder to create a shared link for. Example: "/Documents/report.pdf".'
@@ -140,6 +142,7 @@ export const ListSharedLinksInputSchema = lazySchema(() =>
   z.object({
     path: z
       .string()
+      .regex(/^(?:|\/.*|ns:[0-9]+\/\/.*|id:[A-Za-z0-9_-]+)$/)
       .max(1024)
       .optional()
       .describe(
