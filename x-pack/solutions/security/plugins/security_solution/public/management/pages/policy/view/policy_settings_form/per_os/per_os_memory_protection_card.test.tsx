@@ -115,6 +115,21 @@ describe('PerOsMemoryProtectionCard', () => {
     ).toBeInTheDocument();
   });
 
+  it('shows the custom message field on the Windows row when Windows is not at Disable and notification is on', () => {
+    policy.windows.memory_protection.mode = ProtectionModes.prevent;
+    policy.windows.popup.memory_protection.enabled = true;
+    policy.windows.popup.memory_protection.message = 'windows memory message';
+    render();
+
+    const customMessage = within(renderResult.getByTestId(testSubj.windows.row)).getByRole(
+      'textbox',
+      { name: 'Customize message' }
+    );
+    expect(customMessage).toBeVisible();
+    expect(customMessage).toBeEnabled();
+    expect(customMessage).toHaveValue('windows memory message');
+  });
+
   it('Disable leaves stored notify values; Detect sets popup.enabled false and Prevent sets it true', async () => {
     policy.windows.memory_protection.mode = ProtectionModes.detect;
     policy.windows.popup.memory_protection.enabled = true;

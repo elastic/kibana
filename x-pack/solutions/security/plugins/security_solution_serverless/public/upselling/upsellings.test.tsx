@@ -103,6 +103,62 @@ describe('Endpoint policy upselling', () => {
     }
   );
 
+  it.each([
+    ['Security Essentials only', [securityEssentials], false],
+    [
+      'Security Essentials with Endpoint Essentials',
+      [
+        securityEssentials,
+        { product_line: ProductLine.endpoint, product_tier: ProductTier.essentials },
+      ],
+      false,
+    ],
+    [
+      'Security Essentials with Endpoint Complete',
+      [
+        securityEssentials,
+        { product_line: ProductLine.endpoint, product_tier: ProductTier.complete },
+      ],
+      true,
+    ],
+  ] as const)(
+    'gates custom notification for %s',
+    (_name, productTypes, customNotificationEnabled) => {
+      const customNotificationUpsell = upsellingSections.find(
+        ({ id }) => id === 'endpoint_custom_notification'
+      );
+
+      expect(customNotificationUpsell?.pli).toBe(ProductFeatureKey.endpointCustomNotification);
+      expect(
+        getEnabledProductFeatures([...productTypes]).includes(
+          ProductFeatureKey.endpointCustomNotification
+        )
+      ).toBe(customNotificationEnabled);
+    }
+  );
+
+  it('registers the custom notification upsell for Endpoint Essentials but not for Endpoint Complete', () => {
+    const upsellingService = mockServices.securitySolution.getUpselling();
+
+    registerUpsellings(
+      [
+        securityEssentials,
+        { product_line: ProductLine.endpoint, product_tier: ProductTier.essentials },
+      ],
+      mockServices
+    );
+    expect(upsellingService.getSectionsValue().has('endpoint_custom_notification')).toBe(true);
+
+    registerUpsellings(
+      [
+        securityEssentials,
+        { product_line: ProductLine.endpoint, product_tier: ProductTier.complete },
+      ],
+      mockServices
+    );
+    expect(upsellingService.getSectionsValue().has('endpoint_custom_notification')).toBe(false);
+  });
+
   it('renders the registered policy protections upsell for Security Essentials only', async () => {
     registerUpsellings([securityEssentials], mockServices);
 

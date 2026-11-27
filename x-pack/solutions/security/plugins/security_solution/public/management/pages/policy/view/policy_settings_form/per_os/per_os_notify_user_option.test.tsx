@@ -17,6 +17,7 @@ import { FleetPackagePolicyGenerator } from '../../../../../../../common/endpoin
 import { ProtectionModes } from '../../../../../../../common/endpoint/types';
 import type { PolicyConfig } from '../../../../../../../common/endpoint/types';
 import { createLicenseServiceMock } from '../../../../../../../common/license/mocks';
+import type { MalwareProtectionOSes } from '../../../types';
 import { expectIsViewOnly } from '../mocks';
 import { createMalwarePolicyAccessor } from './policy_accessor';
 import type { PerOsNotifyUserOptionProps } from './per_os_notify_user_option';
@@ -35,13 +36,17 @@ describe('PerOsNotifyUserOption', () => {
   let mockedContext: AppContextTestRender;
   let hasRendered: boolean;
 
-  const render = (mode: 'edit' | 'view' = 'edit', policyToRender: PolicyConfig = policy) => {
+  const render = (
+    mode: 'edit' | 'view' = 'edit',
+    policyToRender: PolicyConfig = policy,
+    os: MalwareProtectionOSes = 'mac'
+  ) => {
     const props: PerOsNotifyUserOptionProps = {
-      accessor: createMalwarePolicyAccessor(policyToRender, 'mac'),
+      accessor: createMalwarePolicyAccessor(policyToRender, os),
       onChange,
       mode,
       protection: 'malware',
-      os: 'mac',
+      os,
       'data-test-subj': 'test',
     };
     const component = <PerOsNotifyUserOption {...props} />;
@@ -80,6 +85,20 @@ describe('PerOsNotifyUserOption', () => {
     expect(renderResult.getByTestId('test-customMessage')).toHaveValue('mac message');
     expect(renderResult.getByRole('textbox', { name: 'Customize message' })).toBeInTheDocument();
   });
+
+  it.each(['windows', 'mac'] as const)(
+    'shows an enabled custom message field on the %s row when no custom notification upsell is registered',
+    (os) => {
+      policy[os].malware.mode = ProtectionModes.prevent;
+      policy[os].popup.malware.enabled = true;
+      render('edit', policy, os);
+
+      const customMessage = renderResult.getByTestId('test-customMessage');
+      expect(customMessage).toBeVisible();
+      expect(customMessage).toBeEnabled();
+      expect(customMessage).toHaveValue(`${os} message`);
+    }
+  );
 
   it('shows the { action } and { filename } tokens in the notify tooltip for malware', async () => {
     render();
