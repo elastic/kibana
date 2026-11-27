@@ -4443,8 +4443,8 @@ importers:
         specifier: 9.3.1
         version: 9.3.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@tanstack/react-virtual':
-        specifier: 3.14.23
-        version: 3.14.23(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: 3.14.26
+        version: 3.14.26(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@turf/along':
         specifier: 6.0.1
         version: 6.0.1
@@ -4893,8 +4893,8 @@ importers:
         specifier: 18.2.0
         version: 18.2.0
       react-day-picker:
-        specifier: 10.0.1
-        version: 10.0.1(@types/react@18.2.79)(react@18.2.0)
+        specifier: 10.0.2
+        version: 10.0.2(@types/react@18.2.79)(react@18.2.0)
       react-diff-view:
         specifier: 3.3.3
         version: 3.3.3(react@18.2.0)
@@ -14640,8 +14640,8 @@ packages:
     peerDependencies:
       react: '>=18'
 
-  '@tanstack/react-virtual@3.14.23':
-    resolution: {integrity: sha512-Oyy58qQwdaQieA+A4WUDtnh9D1rv5FZvGdw8og9Xeyh88V6HH94vMSyV5i9ATIbYNe9t5Ix0WXRo9NOTpHDkYw==}
+  '@tanstack/react-virtual@3.14.26':
+    resolution: {integrity: sha512-HUDlfsrYH6ko5xH56L62Mcl/uzT+AGVNMHFuDNqDJMdZWc1AQa2oeVKNUvZ/RWBZQ4TYtyQerFrNvLnp39h65A==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
@@ -14653,8 +14653,8 @@ packages:
     resolution: {integrity: sha512-zQvlxSNi2qGM3L4jh85Z6hqMfdIR5qOfD9KHOU32nuKFJGN0RlJ7UvV1lsPb1fPVhpFYI0VP3jJGxLdLDpTKjQ==}
     engines: {node: '>=20'}
 
-  '@tanstack/virtual-core@3.19.8':
-    resolution: {integrity: sha512-Oz/SYBo/aVPyQkwtOw7Q23myITUgFIof2glQqydYJAPL6mH2SkJDkvDKZTklB+7gv5jGLZQhyTcd7SO1A1EODQ==}
+  '@tanstack/virtual-core@3.19.11':
+    resolution: {integrity: sha512-/5iHb0RHBvj8Di59FDs4ESNm45jls33aZAi4zccVXZjc/6ZvwQP6nzEYeT6weXjTf9E6/vrp2JhYWRyO+ZP13A==}
 
   '@tediousjs/connection-string@1.1.0':
     resolution: {integrity: sha512-z9ZBWEG+8pIB5V1zYzlRPXx0oRJ5H7coPnMQK8EZOw03UTPI9Umn6viL36f5w+CuqkKsnCM50RVStpjZmR0Bng==}
@@ -22356,8 +22356,8 @@ packages:
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
 
-  react-day-picker@10.0.1:
-    resolution: {integrity: sha512-eNh6BlwcYInWaJtRv18mXQ06Ys/H6rdTZAnTaSdOYJuTpwP1JMCHNd1FDRadA+gbeinq+psdULN5Xnowy9mV8w==}
+  react-day-picker@10.0.2:
+    resolution: {integrity: sha512-QetiKtZWE9Uaw/pM/SYNv6WPYOTRnSJ2puL0GgwkmUFMIwiY0dtjH1W4B7DOVXVNQM0ZOClGpH/heOfBSzWeiA==}
     engines: {node: '>=18'}
     peerDependencies:
       '@types/react': 18.2.79
@@ -30711,9 +30711,9 @@ snapshots:
     transitivePeerDependencies:
       - react-dom
 
-  '@tanstack/react-virtual@3.14.23(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
+  '@tanstack/react-virtual@3.14.26(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
-      '@tanstack/virtual-core': 3.19.8
+      '@tanstack/virtual-core': 3.19.11
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
 
@@ -30723,7 +30723,7 @@ snapshots:
     dependencies:
       '@tanstack/store': 0.11.2
 
-  '@tanstack/virtual-core@3.19.8': {}
+  '@tanstack/virtual-core@3.19.11': {}
 
   '@tediousjs/connection-string@1.1.0': {}
 
@@ -39915,7 +39915,7 @@ snapshots:
       '@babel/runtime': 7.29.7
       react: 18.2.0
 
-  react-day-picker@10.0.1(@types/react@18.2.79)(react@18.2.0):
+  react-day-picker@10.0.2(@types/react@18.2.79)(react@18.2.0):
     dependencies:
       '@date-fns/tz': 1.5.0
       date-fns: 4.4.0
