@@ -2287,6 +2287,68 @@ describe('observables in either store', () => {
       expect(mockCaseService.patchCase).not.toHaveBeenCalled();
       expect(mockUserActionService.creator.createUserAction).not.toHaveBeenCalled();
     });
+
+    it('counts a field id that a concurrent request removed before the retry as deleted', async () => {
+      holdInType(typeObservable1);
+      mockCaseService.getCase
+        .mockResolvedValueOnce(caseSOWithMultipleObservables)
+        .mockResolvedValueOnce(withFieldObservables([mockObservable, mockObservable3]));
+      mockCaseService.patchCase.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createConflictError('cases', caseSO.id)
+      );
+
+      await bulkDeleteObservables(
+        {
+          caseId: caseSO.id,
+          observableIds: [mockObservable2.id, mockObservable3.id, typeObservable1.id],
+        },
+        mockClientArgs
+      );
+
+      expect(patches()[1].updatedAttributes).toEqual({
+        observables: [mockObservable],
+        total_observables: 1,
+      });
+      expect(mockUserActionService.creator.createUserAction).toHaveBeenCalledWith({
+        userAction: expect.objectContaining({
+          payload: { observables: { count: 2, actionType: 'delete' } },
+        }),
+      });
+    });
+
+    it('records no user action when a concurrent request removed every requested id before the retry', async () => {
+      mockCaseService.getCase
+        .mockResolvedValueOnce(caseSOWithMultipleObservables)
+        .mockResolvedValueOnce(withFieldObservables([mockObservable, mockObservable2]));
+      mockCaseService.patchCase.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createConflictError('cases', caseSO.id)
+      );
+
+      await bulkDeleteObservables(
+        { caseId: caseSO.id, observableIds: [mockObservable3.id] },
+        mockClientArgs
+      );
+
+      expect(patches()[1].updatedAttributes).toEqual({ total_observables: 2 });
+      expect(mockUserActionService.creator.createUserAction).not.toHaveBeenCalled();
+    });
+
+    it('keeps the type objects deleted and records no user action when the case write keeps conflicting', async () => {
+      // Failure scenario: the two stores are not written atomically.
+      holdInType(typeObservable1);
+      mockCaseService.patchCase.mockRejectedValue(
+        SavedObjectsErrorHelpers.createConflictError('cases', caseSO.id)
+      );
+
+      const error = await bulkDeleteObservables(
+        { caseId: caseSO.id, observableIds: [mockObservable3.id, typeObservable1.id] },
+        mockClientArgs
+      ).catch((e) => e);
+
+      expect(Boom.isBoom(error, 409)).toBe(true);
+      expect(mockObservableService.bulkDelete).toHaveBeenCalledWith([typeObservable1]);
+      expect(mockUserActionService.creator.createUserAction).not.toHaveBeenCalled();
+    });
   });
 
   describe('bulkGetObservables', () => {

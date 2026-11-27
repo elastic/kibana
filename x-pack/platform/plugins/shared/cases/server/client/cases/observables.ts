@@ -810,45 +810,31 @@ export const bulkDeleteObservables = async (
     prefetchedCase: retrievedCase,
     caseService,
     observableService,
+    // The type objects are already deleted, so a field id that a concurrent request removed
+    // before a retry counts as deleted rather than failing the request.
     compute: (currentCase) => {
-      if (fieldIds.size === 0) {
-        return { result: 0 };
-      }
-
       const currentObservables = currentCase.attributes.observables ?? [];
-      const currentIdSet = new Set(currentObservables.map(({ id }) => id));
+      const updatedObservables = currentObservables.filter(({ id }) => !fieldIds.has(id));
+      const removed = currentObservables.length - updatedObservables.length;
 
-      const missingFieldIds = [...fieldIds].filter((id) => !currentIdSet.has(id));
-      if (missingFieldIds.length > 0) {
-        throw Boom.notFound(
-          `Failed to bulk delete observables: observable ids not found: ${missingFieldIds.join(
-            ', '
-          )}`
-        );
-      }
-
-      const updatedObservables = currentObservables.filter(
-        (observable) => !fieldIds.has(observable.id)
-      );
-
-      return {
-        observables: updatedObservables,
-        result: currentObservables.length - updatedObservables.length,
-      };
+      return { ...(removed > 0 && { observables: updatedObservables }), result: removed };
     },
   });
 
-  await userActionService.creator.createUserAction({
-    userAction: {
-      type: UserActionTypes.observables,
-      caseId: latestCase.id,
-      owner: latestCase.attributes.owner,
-      user,
-      payload: {
-        observables: { count: removedFromField + typeObservables.length, actionType: 'delete' },
+  const deletedCount = removedFromField + typeObservables.length;
+  if (deletedCount > 0) {
+    await userActionService.creator.createUserAction({
+      userAction: {
+        type: UserActionTypes.observables,
+        caseId: latestCase.id,
+        owner: latestCase.attributes.owner,
+        user,
+        payload: {
+          observables: { count: deletedCount, actionType: 'delete' },
+        },
       },
-    },
-  });
+    });
+  }
 
   const flattenedCase = flattenCaseSavedObject({
     savedObject: {
