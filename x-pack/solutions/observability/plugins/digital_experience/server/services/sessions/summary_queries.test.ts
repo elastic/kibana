@@ -148,9 +148,7 @@ describe('sessionSummaryQuery', () => {
       'BY service = resource.attributes.service.name, session = attributes.session.id)'
     );
     // On the source fields, so that Lucene applies the filter.
-    expect(query).toContain(
-      '(WHERE event_name IN ("documentLoad", "browser.navigation") OR name IN ("documentLoad", "browser.navigation")'
-    );
+    expect(query).toContain('(WHERE event_name IN ("browser.navigation")\n');
     expect(query).toContain(
       'BY service = resource.attributes.service.name, session = attributes.session.id, page_url = attributes.url.full)'
     );
@@ -164,6 +162,14 @@ describe('sessionSummaryQuery', () => {
     expect(query).toMatch(
       /BY service, session\n\| EVAL [^|]+\n\| EVAL [^|]+\n\| DROP raw_\*\n\| LIMIT 10000$/
     );
+  });
+
+  it('counts a page load once, from its navigation log rather than also its documentLoad span', () => {
+    const { query } = sessionSummaryQuery(REBUILD, ['a']);
+
+    expect(query).toContain('is_page_view = event IN ("browser.navigation"),');
+    expect(query).toContain('page_view_count = COUNT(*) WHERE is_page_view');
+    expect(query).not.toContain('documentLoad');
   });
 
   it('counts the replay start records apart, and leaves them out of the counts and times of the session', () => {

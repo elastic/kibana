@@ -21,6 +21,7 @@ import {
   BROWSER_CSS_SELECTOR,
   BROWSER_SDK_LANGUAGE,
   CLICK_EVENTS,
+  EVENT_DOCUMENT_LOAD,
   EVENT_EXCEPTION,
   EVENT_WEB_VITAL,
   EXCEPTION_STACKTRACE,
@@ -229,6 +230,35 @@ export const buildTimeline = (
 ): SessionTimelineEvent[] =>
   events.flatMap((event) => toTimelineEvent(event, sessionStartMs) ?? []);
 
+/**
+ * The page view each `documentLoad` span starts, by their indices. EDOT Browser logs a page load's
+ * `browser.navigation` at `DOMContentLoaded`, so without its span, whose timestamp is when the
+ * navigation started, the errors the loading page throws would land on the page before it. A span
+ * not followed by its page view starts none, as the summary doesn't count it.
+ */
+const pageLoadStarts = (
+  events: OtelEventFields[]
+): Map<number, { pageView: number; startTime: string }> => {
+  const starts = new Map<number, { pageView: number; startTime: string }>();
+  let nextPageView: number | undefined;
+  for (let index = events.length - 1; index >= 0; index--) {
+    const event = events[index];
+    const startTime = fieldString(event, '@timestamp');
+    if (classify(event) === 'page_view') {
+      nextPageView = index;
+    } else if (
+      eventNameOf(event) === EVENT_DOCUMENT_LOAD &&
+      startTime &&
+      nextPageView !== undefined &&
+      pageOf(events[nextPageView]) === pageOf(event)
+    ) {
+      starts.set(index, { pageView: nextPageView, startTime });
+      nextPageView = undefined;
+    }
+  }
+  return starts;
+};
+
 /** Splits the session into consecutive page visits, attributing events to the page they ran on. */
 export const buildPageVisits = (
   events: OtelEventFields[],
@@ -262,7 +292,32 @@ export const buildPageVisits = (
     return [...visits].reverse().find((visit) => visit.page === page) ?? current;
   };
 
-  for (const event of events) {
+  const open = (page: string | null, url: string | null, startTime: string) => {
+    close(startTime);
+    current = {
+      page,
+      url,
+      startTime,
+      endTime: startTime,
+      durationMs: 0,
+      clickCount: 0,
+      errorCount: 0,
+      frustrationCount: 0,
+      webVitals: emptyWebVitals(),
+      load: null,
+    };
+  };
+
+  const loadStarts = pageLoadStarts(events);
+  const startedPageViews = new Set([...loadStarts.values()].map(({ pageView }) => pageView));
+
+  for (const [index, event] of events.entries()) {
+    const loadStart = loadStarts.get(index);
+    if (loadStart) {
+      const pageView = events[loadStart.pageView];
+      open(pageOf(pageView), detailOf('page_view', pageView), loadStart.startTime);
+      continue;
+    }
     const timelineEvent = toTimelineEvent(event, sessionStartMs);
     if (!timelineEvent) {
       continue;
@@ -275,20 +330,8 @@ export const buildPageVisits = (
     // why a page view with no URL opens one too, rather than leaving its events on the page
     // before it. Any other event only opens one when there is none, to place the events before
     // the first page view.
-    if (kind === 'page_view' || (page && !current)) {
-      close(timelineEvent.timestamp);
-      current = {
-        page,
-        url: kind === 'page_view' ? timelineEvent.detail : null,
-        startTime: timelineEvent.timestamp,
-        endTime: timelineEvent.timestamp,
-        durationMs: 0,
-        clickCount: 0,
-        errorCount: 0,
-        frustrationCount: 0,
-        webVitals: emptyWebVitals(),
-        load: null,
-      };
+    if ((kind === 'page_view' && !startedPageViews.has(index)) || (page && !current)) {
+      open(page, kind === 'page_view' ? timelineEvent.detail : null, timelineEvent.timestamp);
     }
     if (!current) {
       continue;
@@ -332,9 +375,13 @@ const sessionStartOf = (startMs: number, events: OtelEventFields[]): number => {
   return (events[0] && timestampMsOf(events[0])) ?? 0;
 };
 
-/** The event names the journey shows, from the logs or, as span names, the traces. */
+/**
+ * The event names the journey shows, from the logs or, as span names, the traces, and the page
+ * load spans that start its visits.
+ */
 const JOURNEY_EVENT_NAMES = [
   ...PAGE_VIEW_EVENTS,
+  EVENT_DOCUMENT_LOAD,
   ...CLICK_EVENTS,
   EVENT_EXCEPTION,
   EVENT_WEB_VITAL,

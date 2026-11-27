@@ -574,7 +574,9 @@ A tab of EDOT Browser applications only, as sessions are built from EDOT Browser
   error click opens to its uncaught exception (type, message and stack trace when the event has
   them) and, like an error, a **View trace** link when the event has a trace id.
   Every page view opens a visit, so loading the same URL again is a visit of its own with the web
-  vitals it measured, and the visits add up to the summary's `page_view_count`.
+  vitals it measured, and the visits add up to the summary's `page_view_count`. A page load's
+  visit starts with its `documentLoad` span, when the navigation started, as EDOT Browser logs its
+  `browser.navigation` only at `DOMContentLoaded`: the errors the loading page throws stay on it.
 - **States:** a 404 leads back to the list; a timeline cut at the event limit is flagged.
 
 ## Sessions
@@ -659,7 +661,10 @@ it never left the page it landed on, counted from the distinct pages it saw rath
 views, as a browser can report more than one of those for the same page. Sessions without a captured
 page (only clicks or errors) aren't bounces, and the bounce rate is over sessions with at least one
 page view. `page_view_count` counts
-page loads and in-app navigations (`documentLoad`, `browser.navigation`); `page_load_count`,
+page loads and in-app navigations, which EDOT Browser both logs as `browser.navigation`. Its
+`documentLoad` span is left out: since 1.0 it is sent for every page load, so counting it too
+would count each load twice. Summaries built before this change keep the double count until their
+session gets new events, as it didn't bump `SESSIONS_VERSION`. `page_load_count`,
 `js_error_count` and the HTTP request counts use the applications list's own definitions. The
 summary also keeps a lowercased `search` field (`wildcard`) of the session id, user, browser, OS,
 country, city and pages, which the list's search matches anywhere in.

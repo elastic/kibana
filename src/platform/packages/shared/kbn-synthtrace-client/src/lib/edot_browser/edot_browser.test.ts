@@ -1165,6 +1165,25 @@ describe('edotBrowser', () => {
         expect(rageShare(20)).toBeGreaterThan(5 * rageShare(0.1));
       });
 
+      it('does not retry a click whose slow response arrives', () => {
+        // Without rage bursts, every click is one attempt, so more clicks would be retries
+        const clicks = (latencyFactor: number) =>
+          Array.from({ length: 200 }, (_, seed) =>
+            clicksOn(
+              createSession({
+                seed,
+                site: pageWith([
+                  { ...addToCart, request: { ...addToCart.request, latencyFactor } },
+                ]),
+                pageViews: 3,
+              }),
+              '#add-to-cart'
+            )
+          ).reduce((sum, count) => sum + count, 0);
+
+        expect(clicks(20)).toBeLessThanOrEqual(clicks(0.1));
+      });
+
       it('dead-clicks only elements that do not react, more on small screens', () => {
         const site = pageWith([
           { tagName: 'A', cssSelector: 'a.link' },

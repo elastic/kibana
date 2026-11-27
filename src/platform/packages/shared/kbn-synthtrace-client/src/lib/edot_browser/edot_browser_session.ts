@@ -1029,9 +1029,11 @@ const interactWithPage = (
     repeatedClickTimes.push(...burst.slice(1));
     events.push(...burst.map((time) => client.click({ ...target, pageX, pageY }).timestamp(time)));
     clicks.push({ time: clickTime, target, pageX, pageY, count: burst.length, dead });
+    // A slow response that arrives still worked: retrying would send the same request again, and
+    // the wait already shows as rage clicks.
     return {
       settledAt: Math.max(settledAt, burst[burst.length - 1]),
-      outcome: failed || thrown ? 'failed' : slow || dead ? 'nothing' : 'worked',
+      outcome: failed || thrown ? 'failed' : dead ? 'nothing' : 'worked',
     };
   };
 

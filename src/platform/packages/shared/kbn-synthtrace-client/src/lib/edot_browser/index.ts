@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { pickWeighted } from '../edot_shared/random';
 import { BROWSER_PROFILES, pickBrowserProfile, withoutBrowserDetails } from './browser_profiles';
 import { EdotBrowserApp, type EdotBrowserAppOptions } from './edot_browser_app';
 import { idleTab, readPropertyErrors, session, sessionWithDocuments } from './edot_browser_session';
@@ -45,6 +46,7 @@ export const edotBrowser = {
   replaySizes: REPLAY_SIZES,
   idleTab,
   readPropertyErrors,
+  pickWeighted,
   browserProfiles: BROWSER_PROFILES,
   pickBrowserProfile,
   withoutBrowserDetails,

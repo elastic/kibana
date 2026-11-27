@@ -288,6 +288,7 @@ export function FrustrationPanel({
   const [pageIndex, setPageIndex] = useState(0);
   const isDashboardAvailable = useFrustrationDashboardAvailable();
   const isEmpty = frustration.total === 0;
+  const showDashboardLink = isDashboardAvailable && dashboardHref !== undefined;
   const rowHref = (query: SessionsListUrlQuery | undefined) => query && sessionsHref(query);
 
   const items: BarListItem[] =
@@ -335,9 +336,10 @@ export function FrustrationPanel({
       title={TITLE}
       subtitle={isEmpty ? undefined : subtitleOf(frustration.total, frustration.sessions)}
       actions={
-        !isEmpty && (
+        // The dashboard ignores the Overview's filters, so it can have signals when this is empty.
+        (showDashboardLink || !isEmpty) && (
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            {isDashboardAvailable && dashboardHref && (
+            {showDashboardLink && (
               <EuiFlexItem grow={false}>
                 <EuiLink
                   href={dashboardHref}
@@ -351,29 +353,33 @@ export function FrustrationPanel({
                 </EuiLink>
               </EuiFlexItem>
             )}
-            <EuiFlexItem grow={false}>
-              <EuiIconTip
-                type="info"
-                aria-label={DEFINITIONS_LABEL}
-                content={DEFINITIONS.map((definition) => (
-                  <p key={definition}>{definition}</p>
-                ))}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonGroup
-                legend={TABS_LEGEND}
-                type="single"
-                buttonSize="compressed"
-                options={TAB_OPTIONS}
-                idSelected={tab}
-                onChange={(id) => {
-                  setTab(id === 'pages' ? 'pages' : 'elements');
-                  setPageIndex(0);
-                }}
-                data-test-subj="digitalExperienceOverviewFrustrationTabs"
-              />
-            </EuiFlexItem>
+            {!isEmpty && (
+              <>
+                <EuiFlexItem grow={false}>
+                  <EuiIconTip
+                    type="info"
+                    aria-label={DEFINITIONS_LABEL}
+                    content={DEFINITIONS.map((definition) => (
+                      <p key={definition}>{definition}</p>
+                    ))}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonGroup
+                    legend={TABS_LEGEND}
+                    type="single"
+                    buttonSize="compressed"
+                    options={TAB_OPTIONS}
+                    idSelected={tab}
+                    onChange={(id) => {
+                      setTab(id === 'pages' ? 'pages' : 'elements');
+                      setPageIndex(0);
+                    }}
+                    data-test-subj="digitalExperienceOverviewFrustrationTabs"
+                  />
+                </EuiFlexItem>
+              </>
+            )}
           </EuiFlexGroup>
         )
       }

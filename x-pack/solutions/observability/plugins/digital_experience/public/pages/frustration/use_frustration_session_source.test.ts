@@ -58,6 +58,8 @@ describe('sessionSourceOf', () => {
     ['healthy summaries', status(), LAST_DAY, 'summaries'],
     ['lagging summaries', status({ health: 'lagging' }), LAST_DAY, 'events'],
     ['the oldest kept day', status(), NOW - 30 * DAY_MS, 'summaries'],
+    // `now-30d` resolved a moment before `now` is read
+    ['the retention resolved just before now', status(), NOW - 30 * DAY_MS - 5, 'summaries'],
     ['a range older than the kept sessions', status(), NOW - 31 * DAY_MS, 'events'],
     [
       'sessions that are not set up',

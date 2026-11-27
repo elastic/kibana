@@ -1443,6 +1443,22 @@ describe('ApplicationsListPage', () => {
       );
     });
 
+    it('says nothing about retention for a range as long as it, resolved before the response', async () => {
+      respondWith(
+        [app({ source: 'otel' })],
+        [],
+        [],
+        null,
+        [],
+        'complete',
+        Date.now() - 30 * 24 * 60 * 60 * 1000 - 5
+      );
+      renderPage();
+      await screen.findByTestId('digitalExperienceApplicationLink');
+
+      expect(screen.queryByTestId('digitalExperienceSessionsRetention')).not.toBeInTheDocument();
+    });
+
     it('says nothing about sessions when only Classic RUM is shown', async () => {
       mockSourceFilter('classic');
       mockSessionsStatus({ status: NOT_SET_UP });

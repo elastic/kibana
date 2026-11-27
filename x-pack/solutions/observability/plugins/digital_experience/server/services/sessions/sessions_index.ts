@@ -41,7 +41,7 @@ export interface SessionDocument {
   end_time: string;
   duration_ms: number;
   event_count: number;
-  /** Page loads and in-app navigations (`documentLoad`, `browser.navigation`). */
+  /** Page loads and in-app navigations, the `browser.navigation` events. */
   page_view_count: number;
   /** Full page loads (`browser.navigation_timing`), as the applications list counts them. */
   page_load_count: number;

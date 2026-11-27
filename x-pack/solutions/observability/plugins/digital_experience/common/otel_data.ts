@@ -108,6 +108,7 @@ export const NAVIGATION_TIMING_LOAD_EVENT_END = 'browser.navigation_timing.load_
 export const EVENT_NAVIGATION_TIMING = 'browser.navigation_timing';
 export const EVENT_WEB_VITAL = 'browser.web_vital';
 export const EVENT_EXCEPTION = 'exception';
+/** EDOT Browser's span of a page load, from its navigation start to its load event. */
 export const EVENT_DOCUMENT_LOAD = 'documentLoad';
 export const EVENT_NAVIGATION = 'browser.navigation';
 export const EVENT_CLICK = 'click';
@@ -133,8 +134,11 @@ export const FRUSTRATION_EVENTS = [EVENT_RAGE_CLICK, EVENT_DEAD_CLICK, EVENT_ERR
 export const EVENT_REPLAY_EVENT = 'elastic.replay.event';
 export const EVENT_REPLAY_START = 'elastic.replay.start';
 
-/** Page loads and in-app navigations, which sessions count as page views. */
-export const PAGE_VIEW_EVENTS = [EVENT_DOCUMENT_LOAD, EVENT_NAVIGATION] as const;
+/**
+ * Page loads and in-app navigations, which sessions count as page views: EDOT Browser logs
+ * `browser.navigation` for both. Not its `documentLoad` span, which repeats the page load's.
+ */
+export const PAGE_VIEW_EVENTS = [EVENT_NAVIGATION] as const;
 export const CLICK_EVENTS = [EVENT_CLICK, EVENT_USER_ACTION_CLICK] as const;
 
 /** Clicks in a rage click burst. */

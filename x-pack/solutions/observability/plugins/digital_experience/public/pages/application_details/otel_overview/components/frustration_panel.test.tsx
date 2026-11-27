@@ -145,11 +145,15 @@ describe('FrustrationPanel', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('has no dashboard link without signals', () => {
+  it('keeps the dashboard link without signals, as the dashboard ignores the Overview filters', () => {
     renderPanel({ frustration: NO_FRUSTRATION, elements: [], pages: [] });
 
+    expect(screen.getByTestId('digitalExperienceOverviewFrustrationDashboardLink')).toHaveAttribute(
+      'href',
+      '/frustration-dashboard'
+    );
     expect(
-      screen.queryByTestId('digitalExperienceOverviewFrustrationDashboardLink')
+      screen.queryByTestId('digitalExperienceOverviewFrustrationTabs')
     ).not.toBeInTheDocument();
   });
 
