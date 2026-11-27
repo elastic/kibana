@@ -363,7 +363,7 @@ describe('tab_state actions', () => {
       );
       const refetchQueries = () =>
         esql.mock.calls.map(([{ query }]) => query).filter((query) => query.includes('_id =='));
-      return { ...toolkit, refetchQueries };
+      return { ...toolkit, esql, refetchQueries, toResponse };
     };
 
     it('links a document the current query finds again', async () => {
@@ -394,6 +394,44 @@ describe('tab_state actions', () => {
 
       const tab = selectTab(internalState.getState(), tabId);
       expect(refetchQueries()).toHaveLength(1);
+      expect(tab.expandedDoc?.raw._id).toBe('span-1');
+      expect(tab.expandedDocOwner).toBe(QUERY_EXPANDED_DOC_OWNER);
+      expect(tab.appState.expandedDoc).toBeUndefined();
+    });
+
+    it('opens without a link when the current query changes during the refetch', async () => {
+      const { internalState, tabId, esql, refetchQueries, toResponse } = await setupLookup({
+        editorQuery: 'FROM traces-* METADATA _id, _index',
+        refetchedRow: span,
+      });
+      let resolveRefetch: (response: ReturnType<typeof toResponse>) => void = () => {};
+      esql.mockImplementation(async ({ query }) => {
+        if (query === lookupQuery) {
+          return toResponse(span);
+        }
+        return new Promise((resolve) => {
+          resolveRefetch = resolve;
+        });
+      });
+
+      const opening = internalState.dispatch(
+        internalStateActions.setExpandedDocByQuery({ tabId, esqlQueryText: lookupQuery })
+      );
+      await waitFor(() => expect(refetchQueries()).toHaveLength(1));
+      internalState.dispatch(
+        internalStateActions.updateAppState({
+          tabId,
+          appState: {
+            query: {
+              esql: 'FROM traces-* METADATA _id, _index | WHERE span.name == "other"',
+            },
+          },
+        })
+      );
+      resolveRefetch(toResponse(span));
+      await opening;
+
+      const tab = selectTab(internalState.getState(), tabId);
       expect(tab.expandedDoc?.raw._id).toBe('span-1');
       expect(tab.expandedDocOwner).toBe(QUERY_EXPANDED_DOC_OWNER);
       expect(tab.appState.expandedDoc).toBeUndefined();
