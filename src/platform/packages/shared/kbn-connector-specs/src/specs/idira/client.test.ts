@@ -10,17 +10,19 @@
 import type { ActionContext } from '../../connector_spec';
 import {
   IdiraApiError,
-  MAX_ATTEMPTS,
-  MIN_ATTEMPT_MS,
-  REQUEST_BUDGET_MS,
+  articleFor,
   REQUEST_TIMEOUT_MS,
   buildAccountsFilter,
   getApiUrl,
   idiraPage,
   idiraRequest,
   isSecureApiUrl,
+  MAX_ATTEMPTS,
+  MAX_TOTAL_RETRY_WAIT_MS,
   nextOffsetFrom,
   parseRetryAfter,
+  pathSegment,
+  requestTimeout,
   retryDelay,
   retryTiming,
 } from './client';
@@ -59,16 +61,24 @@ const get = (overrides: Partial<IdiraRequestOptions> = {}): IdiraRequestOptions 
 });
 
 describe('Idira client', () => {
-  let sleep: jest.SpyInstance;
-  let random: jest.SpyInstance;
-
-  beforeEach(() => {
-    sleep = jest.spyOn(retryTiming, 'sleep').mockResolvedValue(undefined);
-    random = jest.spyOn(retryTiming, 'random').mockReturnValue(0.5);
-  });
-
   afterEach(() => {
     jest.restoreAllMocks();
+  });
+
+  describe('articleFor', () => {
+    it.each([
+      ['id', 'an'],
+      ['Activities', 'an'],
+      ['offset', 'an'],
+      ['Users', 'a'],
+      ['user', 'a'],
+      ['unique', 'a'],
+      ['value', 'a'],
+      ['LiveSessions', 'a'],
+      ['memberName', 'a'],
+    ])('%s takes "%s"', (word, article) => {
+      expect(articleFor(word)).toBe(article);
+    });
   });
 
   describe('getApiUrl', () => {
@@ -160,188 +170,223 @@ describe('Idira client', () => {
       });
     });
 
-    it('retries a 429 with back-off and returns the later answer', async () => {
-      const { ctx, request } = createContext();
-      request
-        .mockRejectedValueOnce(httpError(429))
-        .mockRejectedValueOnce(httpError(429))
-        .mockResolvedValue({ status: 200, data: { ok: 1 } });
-
-      await expect(idiraRequest(ctx, get())).resolves.toEqual({ status: 200, data: { ok: 1 } });
-      expect(request).toHaveBeenCalledTimes(3);
-      // Full jitter with random() = 0.5: half of 1 s, then half of 2 s.
-      expect(sleep.mock.calls).toEqual([[500], [1000]]);
-    });
-
-    it('retries a 429 on a POST too: the vendor rejects it without processing it', async () => {
-      const { ctx, request } = createContext();
-      request.mockRejectedValueOnce(httpError(429)).mockResolvedValue({ status: 200, data: '' });
-
-      await idiraRequest(ctx, get({ method: 'POST', path: '/Accounts/12_3/Change' }));
-      expect(request).toHaveBeenCalledTimes(2);
-    });
-
-    it('honours Retry-After, capped at 60 s', async () => {
-      const { ctx, request } = createContext();
-      request
-        .mockRejectedValueOnce(httpError(429, {}, { 'retry-after': '7' }))
-        .mockRejectedValueOnce(httpError(429, {}, { 'retry-after': '600' }))
-        .mockResolvedValue({ status: 200, data: {} });
-
-      await idiraRequest(ctx, get());
-      expect(sleep.mock.calls).toEqual([[7000], [60000]]);
-    });
-
-    it('fails with a rate-limit error after 3 retries', async () => {
-      const { ctx, request } = createContext();
-      request.mockRejectedValue(
-        httpError(429, { ErrorCode: 'TOO_MANY_REQUESTS', ErrorMessage: 'Too many requests' })
-      );
-
-      await expect(idiraRequest(ctx, get())).rejects.toThrow(
-        'Rate limited by Privilege Cloud on GET /PasswordVault/API/Accounts/12_3; retried 3 times'
-      );
-      expect(request).toHaveBeenCalledTimes(MAX_ATTEMPTS);
-    });
-
-    describe('time budget', () => {
-      /** Kibana's HTTP server drops a request idle for 120 s (server.socketTimeout default). */
-      const KIBANA_EXECUTE_LIMIT_MS = 120_000;
-      let clock: number;
-
+    describe('retries a 429 with backoff', () => {
+      let sleep: jest.SpyInstance;
       beforeEach(() => {
-        clock = 0;
-        jest.spyOn(retryTiming, 'now').mockImplementation(() => clock);
-        sleep.mockImplementation(async (ms: number) => {
-          clock += ms;
-        });
+        sleep = jest.spyOn(retryTiming, 'sleep').mockResolvedValue(undefined);
       });
 
-      it('stays under the execute limit in the worst case: slow 429s with the longest Retry-After', async () => {
-        const { ctx, request } = createContext();
-        // Every attempt uses its whole timeout, then answers 429 with a 60 s Retry-After.
-        request.mockImplementation(async ({ timeout }: { timeout: number }) => {
-          clock += timeout;
-          throw httpError(429, { ErrorMessage: 'Too many requests' }, { 'retry-after': '600' });
-        });
-
-        await expect(idiraRequest(ctx, get())).rejects.toThrow(
-          'Rate limited by Privilege Cloud on GET /PasswordVault/API/Accounts/12_3; retried 1 time'
+      const tooMany = (headers: Record<string, string> = {}) =>
+        httpError(
+          429,
+          { ErrorCode: 'TOO_MANY_REQUESTS', ErrorMessage: 'Too many requests' },
+          headers
         );
-        expect(clock).toBeLessThanOrEqual(REQUEST_BUDGET_MS);
-        expect(REQUEST_BUDGET_MS).toBeLessThan(KIBANA_EXECUTE_LIMIT_MS);
-        for (const [config] of request.mock.calls) {
-          expect(config.timeout).toBeGreaterThanOrEqual(MIN_ATTEMPT_MS);
-          expect(config.timeout).toBeLessThanOrEqual(REQUEST_TIMEOUT_MS);
-        }
-      });
 
-      it('skips a retry whose Retry-After would overrun the budget and says why', async () => {
+      it('retries after the Retry-After wait and returns the next answer', async () => {
         const { ctx, request } = createContext();
         request
-          .mockRejectedValueOnce(httpError(429, {}, { 'retry-after': '60' }))
-          .mockImplementationOnce(async () => {
-            clock += 30_000;
-            throw httpError(
-              429,
-              { ErrorCode: 'TOO_MANY_REQUESTS', ErrorMessage: 'Too many requests' },
-              { 'retry-after': '60' }
-            );
-          })
-          .mockResolvedValue({ status: 200, data: {} });
+          .mockRejectedValueOnce(tooMany({ 'retry-after': '7' }))
+          .mockResolvedValueOnce({ status: 200, data: { id: '12_3' } });
 
-        await expect(idiraRequest(ctx, get())).rejects.toThrow(
-          "retried 1 time (HTTP 429 TOO_MANY_REQUESTS: Too many requests). Wait and try again. No further retry was made: waiting 60 s before it would pass the connector's 100 s time limit for one call."
+        await expect(idiraRequest(ctx, get())).resolves.toEqual({
+          status: 200,
+          data: { id: '12_3' },
+        });
+        expect(request).toHaveBeenCalledTimes(2);
+        expect(sleep).toHaveBeenCalledWith(7_000);
+        expect(ctx.log.debug).toHaveBeenCalledWith(
+          'Privilege Cloud GET /PasswordVault/API/Accounts/12_3 answered 429; retrying in 7000 ms (attempt 2 of 4)'
+        );
+      });
+
+      it('backs off 1 s, 2 s, then 4 s without a Retry-After and fails after 4 attempts', async () => {
+        const { ctx, request } = createContext();
+        request.mockRejectedValue(tooMany());
+
+        const error = await idiraRequest(ctx, get()).catch((e) => e);
+        expect(error).toBeInstanceOf(IdiraApiError);
+        expect(error.status).toBe(429);
+        expect(error.message).toBe(
+          'Rate limited by Privilege Cloud on GET /PasswordVault/API/Accounts/12_3 (HTTP 429 TOO_MANY_REQUESTS: Too many requests). Still rate limited after 4 attempts. Wait, then run the action again.'
+        );
+        expect(request).toHaveBeenCalledTimes(MAX_ATTEMPTS);
+        expect(sleep.mock.calls.map(([ms]) => ms)).toEqual([1_000, 2_000, 4_000]);
+      });
+
+      it('stops when the next wait would pass the total cap, and reports the Retry-After', async () => {
+        const { ctx, request } = createContext();
+        request.mockRejectedValue(tooMany({ 'retry-after': '20' }));
+
+        const error = await idiraRequest(ctx, get()).catch((e) => e);
+        expect(error.message).toBe(
+          'Rate limited by Privilege Cloud on GET /PasswordVault/API/Accounts/12_3 (HTTP 429 TOO_MANY_REQUESTS: Too many requests). Still rate limited after 2 attempts. Privilege Cloud asks to wait 20 s before the next request (Retry-After).'
         );
         expect(request).toHaveBeenCalledTimes(2);
-        expect(sleep.mock.calls).toEqual([[60000]]);
+        expect(sleep).toHaveBeenCalledTimes(1);
       });
 
-      it('gives each retry only the remaining budget as its timeout', async () => {
+      it('does not retry when the first Retry-After is longer than the cap', async () => {
         const { ctx, request } = createContext();
-        request
-          .mockRejectedValueOnce(httpError(503, {}, { 'retry-after': '60' }))
-          .mockImplementationOnce(async () => {
-            clock += 10_000;
-            throw httpError(503, {}, { 'retry-after': '20' });
-          })
-          .mockResolvedValue({ status: 200, data: { ok: 1 } });
+        const inNinetySeconds = new Date(Date.now() + 90_000).toUTCString();
+        request.mockRejectedValue(tooMany({ 'retry-after': inNinetySeconds }));
 
-        await expect(idiraRequest(ctx, get())).resolves.toEqual({ status: 200, data: { ok: 1 } });
-        expect(request.mock.calls.map(([config]) => config.timeout)).toEqual([
-          REQUEST_TIMEOUT_MS,
-          REQUEST_TIMEOUT_MS,
-          REQUEST_BUDGET_MS - 60_000 - 10_000 - 20_000,
-        ]);
-      });
-
-      it('reports a request cut by the budget as a timeout of the whole call', async () => {
-        const { ctx, request } = createContext();
-        request
-          .mockRejectedValueOnce(httpError(429, {}, { 'retry-after': '60' }))
-          .mockImplementationOnce(async () => {
-            clock += 15_000;
-            throw httpError(429, {}, { 'retry-after': '10' });
-          })
-          .mockImplementationOnce(async ({ timeout }: { timeout: number }) => {
-            clock += timeout;
-            throw Object.assign(new Error(`timeout of ${timeout}ms exceeded`), {
-              isAxiosError: true,
-              code: 'ECONNABORTED',
-            });
-          });
-
-        await expect(idiraRequest(ctx, get())).rejects.toThrow(
-          "failed: timeout of 15000ms exceeded. The request was stopped at the connector's 100 s time limit for one call. Try again later."
+        const error = await idiraRequest(ctx, get()).catch((e) => e);
+        expect(error.message).toContain(
+          `The connector did not retry, because the wait is longer than the ${
+            MAX_TOTAL_RETRY_WAIT_MS / 1000
+          } s it waits per call.`
         );
-        expect(clock).toBe(REQUEST_BUDGET_MS);
-      });
-
-      it('never starts a request when an overrunning wait left no budget', async () => {
-        const { ctx, request } = createContext();
-        sleep.mockImplementation(async (ms: number) => {
-          clock += ms + REQUEST_BUDGET_MS; // a timer that fires far too late
-        });
-        request.mockRejectedValue(httpError(429));
-
-        await expect(idiraRequest(ctx, get())).rejects.toThrow(
-          "No further retry was made: the connector's 100 s time limit for one call was spent."
-        );
+        expect(error.message).toMatch(/asks to wait (89|90) s before the next request/);
         expect(request).toHaveBeenCalledTimes(1);
+        expect(sleep).not.toHaveBeenCalled();
+      });
+
+      it('retries a rate-limited write too, because it was not processed', async () => {
+        const { ctx, request } = createContext();
+        request
+          .mockRejectedValueOnce(tooMany({ 'retry-after': '3' }))
+          .mockResolvedValueOnce({ status: 200, data: '' });
+
+        await expect(
+          idiraRequest(ctx, get({ method: 'POST', path: '/Accounts/12_3/Change' }))
+        ).resolves.toEqual({ status: 200, data: '' });
+        expect(request).toHaveBeenCalledTimes(2);
+        expect(sleep).toHaveBeenCalledWith(3_000);
+      });
+
+      it.each([
+        [1, undefined, 1_000],
+        [2, undefined, 2_000],
+        [3, undefined, 4_000],
+        [1, '5', 5_000],
+        [3, '0', 0],
+      ])('retryDelay(attempt %p, Retry-After %p) is %p ms', (attempt, header, delay) => {
+        expect(retryDelay(header, attempt)).toBe(delay);
       });
     });
 
-    it.each([502, 503, 504])('retries a %s on a GET', async (status) => {
-      const { ctx, request } = createContext();
-      request.mockRejectedValueOnce(httpError(status)).mockResolvedValue({ status: 200, data: {} });
+    describe('every other error is sent once', () => {
+      it.each([500, 502, 503, 504])(
+        'fails a %s on a GET after one request, without a may-have-applied note',
+        async (status) => {
+          const { ctx, request } = createContext();
+          request.mockRejectedValue(httpError(status, { ErrorMessage: 'Service unavailable' }));
 
-      await idiraRequest(ctx, get());
-      expect(request).toHaveBeenCalledTimes(2);
-    });
-
-    it.each(['POST', 'PATCH', 'DELETE'] as const)(
-      'never retries a 503 on a %s, which may already have been processed',
-      async (method) => {
-        const { ctx, request } = createContext();
-        request.mockRejectedValue(httpError(503, { ErrorMessage: 'Service unavailable' }));
-
-        await expect(idiraRequest(ctx, get({ method }))).rejects.toThrow(
-          'Privilege Cloud error 503'
-        );
-        expect(request).toHaveBeenCalledTimes(1);
-      }
-    );
-
-    it('never retries a network error on a write', async () => {
-      const { ctx, request } = createContext();
-      request.mockRejectedValue(new Error('socket hang up'));
-
-      await expect(
-        idiraRequest(ctx, get({ method: 'POST', path: '/Accounts/12_3/Change' }))
-      ).rejects.toThrow(
-        'Privilege Cloud request POST /PasswordVault/API/Accounts/12_3/Change failed: socket hang up'
+          const error = await idiraRequest(ctx, get()).catch((e) => e);
+          expect(error.message).toBe(
+            `Privilege Cloud error ${status} on GET /PasswordVault/API/Accounts/12_3 (HTTP ${status}: Service unavailable).`
+          );
+          expect(request).toHaveBeenCalledTimes(1);
+        }
       );
-      expect(request).toHaveBeenCalledTimes(1);
+
+      it('reports the Retry-After of a 503', async () => {
+        const { ctx, request } = createContext();
+        request.mockRejectedValue(httpError(503, {}, { 'retry-after': '120' }));
+
+        await expect(idiraRequest(ctx, get())).rejects.toThrow(
+          'Privilege Cloud asks to wait 120 s before the next request (Retry-After).'
+        );
+      });
+
+      it.each(['POST', 'PATCH', 'DELETE'] as const)(
+        'says a %s that got a 5xx may have been applied, and does not resend it',
+        async (method) => {
+          const { ctx, request } = createContext();
+          request.mockRejectedValue(httpError(503, { ErrorMessage: 'Service unavailable' }));
+
+          const error = await idiraRequest(ctx, get({ method })).catch((e) => e);
+          expect(error.message).toBe(
+            `Privilege Cloud error 503 on ${method} /PasswordVault/API/Accounts/12_3 (HTTP 503: Service unavailable). Privilege Cloud may have applied the change: check the current state before you run the action again.`
+          );
+          expect(request).toHaveBeenCalledTimes(1);
+        }
+      );
+
+      it.each([
+        [
+          'a timeout',
+          Object.assign(new Error('timeout of 30000ms exceeded'), {
+            isAxiosError: true,
+            code: 'ECONNABORTED',
+          }),
+        ],
+        [
+          'a connection reset after sending',
+          Object.assign(new Error('socket hang up'), { isAxiosError: true, code: 'ECONNRESET' }),
+        ],
+      ])('says a write cut by %s may have been applied', async (_name, failure) => {
+        const { ctx, request } = createContext();
+        request.mockRejectedValue(failure);
+
+        const error = await idiraRequest(
+          ctx,
+          get({ method: 'POST', path: '/Accounts/12_3/Change' })
+        ).catch((e) => e);
+        expect(error.message).toContain(
+          'Privilege Cloud request POST /PasswordVault/API/Accounts/12_3/Change failed: '
+        );
+        expect(error.message).toContain('Privilege Cloud may have applied the change');
+        expect(request).toHaveBeenCalledTimes(1);
+      });
+
+      it('does not say a write was applied when the connection was refused', async () => {
+        const { ctx, request } = createContext();
+        request.mockRejectedValue(
+          Object.assign(new Error('connect ECONNREFUSED 127.0.0.1:443'), {
+            isAxiosError: true,
+            code: 'ECONNREFUSED',
+          })
+        );
+
+        const error = await idiraRequest(ctx, get({ method: 'POST' })).catch((e) => e);
+        expect(error.message).toBe(
+          'Privilege Cloud request POST /PasswordVault/API/Accounts/12_3 failed: connect ECONNREFUSED 127.0.0.1:443.'
+        );
+      });
+
+      it('does not add the may-have-applied note to a read that timed out', async () => {
+        const { ctx, request } = createContext();
+        request.mockRejectedValue(
+          Object.assign(new Error('timeout of 30000ms exceeded'), {
+            isAxiosError: true,
+            code: 'ECONNABORTED',
+          })
+        );
+
+        const error = await idiraRequest(ctx, get()).catch((e) => e);
+        expect(error.message).toBe(
+          'Privilege Cloud request GET /PasswordVault/API/Accounts/12_3 failed: timeout of 30000ms exceeded.'
+        );
+      });
+    });
+
+    describe('request timeout', () => {
+      const withConfiguredTimeout = (timeout: number | undefined) => {
+        const { ctx, request } = createContext();
+        Object.assign(ctx.client, { defaults: { timeout } });
+        request.mockResolvedValue({ status: 200, data: {} });
+        return { ctx, request };
+      };
+
+      it('uses the configured Actions timeout when it is lower', async () => {
+        const { ctx, request } = withConfiguredTimeout(10_000);
+        await idiraRequest(ctx, get());
+        expect(requestTimeout(ctx)).toBe(10_000);
+        expect(request.mock.calls[0][0].timeout).toBe(10_000);
+      });
+
+      it('keeps its own 30 s timeout when the configured one is higher', async () => {
+        const { ctx, request } = withConfiguredTimeout(120_000);
+        await idiraRequest(ctx, get());
+        expect(request.mock.calls[0][0].timeout).toBe(REQUEST_TIMEOUT_MS);
+      });
+
+      it.each([undefined, 0])('keeps its own timeout when the configured one is %p', (value) => {
+        const { ctx } = withConfiguredTimeout(value);
+        expect(requestTimeout(ctx)).toBe(REQUEST_TIMEOUT_MS);
+      });
     });
 
     it.each([
@@ -359,7 +404,7 @@ describe('Idira client', () => {
       ],
       [404, 'Not found: account 12_3 (HTTP 404 PASWS001E: Invalid request).'],
       [409, 'Already exists: account 12_3 (HTTP 409 PASWS001E: Invalid request).'],
-    ])('maps a %s at once, without retrying', async (status, message) => {
+    ])('maps a %s after one request', async (status, message) => {
       const { ctx, request } = createContext();
       request.mockRejectedValue(
         httpError(status, { ErrorCode: 'PASWS001E', ErrorMessage: 'Invalid request' })
@@ -371,7 +416,6 @@ describe('Idira client', () => {
       expect(error.status).toBe(status);
       expect(error.code).toBe('PASWS001E');
       expect(request).toHaveBeenCalledTimes(1);
-      expect(sleep).not.toHaveBeenCalled();
     });
 
     it('gives 401 and 403 different explanations', async () => {
@@ -437,12 +481,13 @@ describe('Idira client', () => {
 
       const error = await idiraRequest(ctx, get({ method: 'POST' })).catch((e) => e);
       expect(error.message).toBe(
-        'Privilege Cloud error 502 on POST /PasswordVault/API/Accounts/12_3 (HTTP 502: Request failed with status code 502).'
+        'Privilege Cloud error 502 on POST /PasswordVault/API/Accounts/12_3 (HTTP 502: Request failed with status code 502). Privilege Cloud may have applied the change: check the current state before you run the action again.'
       );
+      expect(error.message).not.toContain('<html>');
     });
   });
 
-  describe('retry helpers', () => {
+  describe('parseRetryAfter', () => {
     it.each([
       ['3', 3000],
       [5, 5000],
@@ -456,13 +501,6 @@ describe('Idira client', () => {
     it('parses an HTTP date', () => {
       const inTenSeconds = new Date(Date.now() + 10_000).toUTCString();
       expect(parseRetryAfter(inTenSeconds)).toBeGreaterThan(8_000);
-    });
-
-    it('caps the jittered back-off at 30 s', () => {
-      random.mockReturnValue(0.999999);
-      expect(retryDelay(undefined, 1)).toBe(999);
-      expect(retryDelay(undefined, 3)).toBe(3999);
-      expect(retryDelay(undefined, 10)).toBe(29999);
     });
   });
 
@@ -484,8 +522,65 @@ describe('Idira client', () => {
     });
   });
 
+  describe('pathSegment', () => {
+    const resolvedPath = (segment: string) =>
+      new URL(`${API_URL}/PasswordVault/API/Safes/S1/Members/${segment}`).pathname;
+
+    it.each([
+      ['an empty value', ''],
+      ['a dot segment', '.'],
+      ['a double dot segment', '..'],
+      ['an encoded dot', '%2e'],
+      ['an encoded double dot', '%2e%2e'],
+      ['a mixed double dot', '.%2E'],
+      ['an encoded slash', 'a%2Fb'],
+      ['an encoded backslash', 'a%5cb'],
+      ['a slash', 'a/b'],
+      ['a trailing slash', 'jsmith/'],
+      ['a backslash', 'a\\b'],
+    ])('refuses %s (%p)', (_name, value) => {
+      expect(() => pathSegment(value)).toThrow(IdiraApiError);
+      expect(() => pathSegment(value)).toThrow('cannot be used as a name or ID in a request URL');
+    });
+
+    it.each([
+      ['a query mark', 'a?b', 'a%3Fb'],
+      ['a fragment mark', 'team #1', 'team%20%231'],
+      ['three dots', '...', '...'],
+      ['dots inside a name', 'a..b', 'a..b'],
+      ['an e-mail style name', 'jsmith@corp.example.com', 'jsmith%40corp.example.com'],
+      ['non-ASCII', 'jürgen', 'j%C3%BCrgen'],
+    ])('encodes %s so it stays in its path segment', (_name, value, encoded) => {
+      expect(pathSegment(value)).toBe(encoded);
+      expect(resolvedPath(pathSegment(value))).toBe(
+        `/PasswordVault/API/Safes/S1/Members/${encoded}`
+      );
+    });
+
+    it('keeps a very long value in one segment', () => {
+      const long = 'x'.repeat(10_000);
+      expect(resolvedPath(pathSegment(long))).toBe(`/PasswordVault/API/Safes/S1/Members/${long}`);
+    });
+
+    it('shows why the check is needed: the URL parser resolves an unchecked ".."', () => {
+      expect(resolvedPath(encodeURIComponent('..'))).toBe('/PasswordVault/API/Safes/S1/');
+    });
+
+    it('cuts a long refused value in the error message', () => {
+      const error = (() => {
+        try {
+          pathSegment(`${'a'.repeat(300)}/`);
+        } catch (e) {
+          return e as Error;
+        }
+      })();
+      expect(error?.message).toContain(`"${'a'.repeat(100)}"`);
+      expect(error?.message).not.toContain('a'.repeat(101));
+    });
+  });
+
   describe('idiraPage', () => {
-    it('returns the page with the vendor count and a parsed nextOffset, and requests only the API URL', async () => {
+    it('returns the page with the vendor count and a parsed nextOffset, never the vendor nextLink, and requests only the API URL', async () => {
       const { ctx, request } = createContext();
       request.mockResolvedValue({
         status: 200,
@@ -501,9 +596,10 @@ describe('Idira client', () => {
       expect(page).toEqual({
         value: [{ id: '12_3' }, { id: '12_4' }],
         count: 7,
-        nextLink: 'https://evil.example/api/accounts?offset=2&limit=2',
         nextOffset: 2,
       });
+      // The vendor URL is not handed to the caller: nextOffset carries the same information.
+      expect(page).not.toHaveProperty('nextLink');
       expect(request).toHaveBeenCalledTimes(1);
       expect(request.mock.calls[0][0].url).toBe(`${API_URL}/PasswordVault/API/Accounts`);
     });
@@ -518,13 +614,13 @@ describe('Idira client', () => {
       });
     });
 
-    it('returns an empty page when the body has no value array', async () => {
+    it('fails on a body without a value array instead of returning an empty page', async () => {
       const { ctx, request } = createContext();
       request.mockResolvedValue({ status: 200, data: '' });
 
-      await expect(idiraPage(ctx, { ...get({ path: '/Accounts' }), offset: 0 })).resolves.toEqual({
-        value: [],
-      });
+      await expect(idiraPage(ctx, { ...get({ path: '/Accounts' }), offset: 0 })).rejects.toThrow(
+        'answered GET /PasswordVault/API/Accounts with HTTP 200 and an empty body instead of the value list'
+      );
     });
   });
 

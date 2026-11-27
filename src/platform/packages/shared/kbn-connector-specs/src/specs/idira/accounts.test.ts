@@ -7,26 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { retryTiming } from './client';
 import {
   AccountIdInputSchema,
   AddAccountInputSchema,
   ListAccountsInputSchema,
   UpdateAccountInputSchema,
 } from './types';
+import { Idira } from './idira';
 import { BASE, httpError, createContext, run, sent, ACCOUNT } from './test_helpers';
 
 describe('Idira Privilege Cloud connector', () => {
-  beforeEach(() => {
-    jest.spyOn(retryTiming, 'sleep').mockResolvedValue(undefined);
-  });
-
   afterEach(() => {
     jest.restoreAllMocks();
   });
 
   describe('listAccounts', () => {
-    it('sends search, the combined filter, savedfilter, sort and paging as query parameters', async () => {
+    it('sends search, the combined filter, sort and paging as query parameters', async () => {
       const { ctx, request } = createContext();
       request.mockResolvedValue({
         status: 200,
@@ -39,7 +35,6 @@ describe('Idira Privilege Cloud connector', () => {
         safeName: 'SOC-Servers',
         platformId: 'WinServerLocal',
         filter: 'modificationTime gte 1700000000',
-        savedFilter: 'Recently',
         sort: 'userName asc',
         offset: 50,
         limit: 10,
@@ -54,7 +49,7 @@ describe('Idira Privilege Cloud connector', () => {
           searchType: 'startswith',
           filter:
             'safeName eq SOC-Servers AND platformId eq WinServerLocal AND modificationTime gte 1700000000',
-          savedfilter: 'Recently',
+          savedfilter: undefined,
           sort: 'userName asc',
           offset: 50,
           limit: 10,
@@ -63,8 +58,27 @@ describe('Idira Privilege Cloud connector', () => {
       expect(result).toEqual({
         value: [ACCOUNT],
         count: 120,
-        nextLink: 'api/accounts?offset=60&limit=10',
         nextOffset: 60,
+      });
+      expect(result).not.toHaveProperty('nextLink');
+    });
+
+    it('trims search, filter and sort, and drops a whitespace-only value', async () => {
+      const { ctx, request } = createContext();
+      request.mockResolvedValue({ status: 200, data: { value: [], count: 0 } });
+
+      await run('listAccounts', ctx, { search: '   ', filter: '\t ', sort: ' userName asc ' });
+      expect(request.mock.calls[0][0].params).toMatchObject({
+        search: undefined,
+        filter: undefined,
+        sort: 'userName asc',
+      });
+
+      await run('listAccounts', ctx, { search: ' svc-backup ', filter: ' address eq 10.0.0.5 ' });
+      expect(request.mock.calls[1][0].params).toMatchObject({
+        search: 'svc-backup',
+        filter: 'address eq 10.0.0.5',
+        sort: undefined,
       });
     });
 
@@ -122,9 +136,17 @@ describe('Idira Privilege Cloud connector', () => {
         [{ limit: 1001 }, false],
         [{ limit: 0 }, false],
         [{ offset: -1 }, false],
+        [{ offset: 10_000_000 }, true],
+        [{ offset: 10_000_001 }, false],
         [{ search: 'x'.repeat(500) }, true],
         [{ search: 'x'.repeat(501) }, false],
+        [{ search: `  ${'x'.repeat(500)}  ` }, true],
+        [{ filter: 'x'.repeat(500) }, true],
         [{ filter: 'x'.repeat(501) }, false],
+        [{ filter: ` ${'x'.repeat(500)} ` }, true],
+        [{ sort: 'x'.repeat(100) }, true],
+        [{ sort: 'x'.repeat(101) }, false],
+        [{ sort: ` ${'x'.repeat(100)} ` }, true],
         [{ savedFilter: 'FailedChange' }, true],
         [{ savedFilter: 'Failed Change' }, false],
         [{ searchType: 'exact' }, false],
@@ -199,42 +221,55 @@ describe('Idira Privilege Cloud connector', () => {
       ['12_', false],
       ['_3', false],
       ['', false],
+      ['.', false],
+      ['..', false],
+      ['%2e%2e', false],
+      ['12_3%2F..', false],
+      ['12_3/', false],
+      ['12_3?x=1', false],
+      ['12_3#x', false],
+      ['١٢_٣', false],
     ])('accountId %j -> %s', (accountId, valid) => {
       expect(AccountIdInputSchema.safeParse({ accountId }).success).toBe(valid);
     });
-  });
 
-  describe('getAccountActivity', () => {
-    it('returns Activities and Total as the API sends them', async () => {
+    it('encodes a non-ASCII account ID that skipped the schema, so it stays in its path segment', async () => {
       const { ctx, request } = createContext();
-      const body = {
-        Activities: [
-          {
-            Date: 1760000000,
-            User: 'jsmith',
-            Action: 'Retrieve Password',
-            ActionID: 7,
-            ClientID: 'PVWA',
-            MoreInfo: '',
-            Reason: 'INC-42',
-            Alert: false,
-          },
-        ],
-        Total: 1,
-      };
-      request.mockResolvedValue({ status: 200, data: body });
+      request.mockResolvedValue({ status: 200, data: ACCOUNT });
 
-      await expect(run('getAccountActivity', ctx, { accountId: '12_3' })).resolves.toEqual(body);
-      expect(request.mock.calls[0][0].url).toBe(`${BASE}/Accounts/12_3/Activities`);
+      await Idira.actions.getAccountDetails.handler(ctx, { accountId: '١٢_٣' });
+      const url = request.mock.calls[0][0].url as string;
+      expect(new URL(url).pathname).toBe('/PasswordVault/API/Accounts/%D9%A1%D9%A2_%D9%A3');
     });
 
-    it('names View audit log on a 403', async () => {
+    it.each(['.', '..', '%2e%2e', '12_3%2F..', ''])(
+      'refuses the account ID %p in the path even when the schema is skipped',
+      async (accountId) => {
+        const { ctx, request } = createContext();
+        await expect(Idira.actions.getAccountDetails.handler(ctx, { accountId })).rejects.toThrow(
+          'cannot be used as a name or ID in a request URL'
+        );
+        expect(request).not.toHaveBeenCalled();
+      }
+    );
+    it.each([
+      ['<html><head><title>Sign In</title></head></html>', 'an HTML page titled "Sign In"'],
+      ['', 'an empty body'],
+      [{ count: 3 }, 'a JSON body without a value list'],
+    ])('fails on HTTP 200 with %p instead of reporting no accounts', async (data, what) => {
       const { ctx, request } = createContext();
-      request.mockRejectedValue(httpError(403));
+      request.mockResolvedValue({ status: 200, data });
 
-      await expect(run('getAccountActivity', ctx, { accountId: '12_3' })).rejects.toThrow(
-        'View audit log'
+      await expect(run('listAccounts', ctx, {})).rejects.toThrow(
+        `answered GET /PasswordVault/API/Accounts with HTTP 200 and ${what} instead of the value list`
       );
+    });
+
+    it('returns an empty page for an empty value list', async () => {
+      const { ctx, request } = createContext();
+      request.mockResolvedValue({ status: 200, data: { value: [], count: 0 } });
+
+      await expect(run('listAccounts', ctx, {})).resolves.toEqual({ value: [], count: 0 });
     });
   });
 
@@ -247,6 +282,9 @@ describe('Idira Privilege Cloud connector', () => {
       )}\n-----END OPENSSH PRIVATE KEY-----`;
       expect(
         AddAccountInputSchema.safeParse({ ...required, secretType: 'key', secret: sshKey }).success
+      ).toBe(true);
+      expect(
+        AddAccountInputSchema.safeParse({ ...required, secret: 'a'.repeat(16_384) }).success
       ).toBe(true);
       expect(
         AddAccountInputSchema.safeParse({ ...required, secret: 'a'.repeat(16_385) }).success
@@ -309,6 +347,43 @@ describe('Idira Privilege Cloud connector', () => {
       await expect(
         run('addAccount', ctx, { safeName: 'SOC-Servers', platformId: 'WinServerLocal' })
       ).rejects.toThrow('Already exists');
+    });
+
+    it.each([
+      [
+        { userName: 'svc-backup', address: '10.0.0.5' },
+        'the account svc-backup@10.0.0.5 in safe SOC-Servers',
+      ],
+      [{ name: 'db01-svc', userName: 'svc-backup' }, 'the account db01-svc in safe SOC-Servers'],
+      [{ address: '10.0.0.5' }, 'the account 10.0.0.5 in safe SOC-Servers'],
+      [{}, 'the account in safe SOC-Servers'],
+    ])(
+      'names the duplicate account, not the safe or platform, on a 409 (%j)',
+      async (extra, named) => {
+        const { ctx, request } = createContext();
+        request.mockRejectedValue(
+          httpError(409, { ErrorCode: 'PASWS027E', ErrorMessage: 'The object already exists' })
+        );
+
+        await expect(
+          run('addAccount', ctx, {
+            safeName: 'SOC-Servers',
+            platformId: 'WinServerLocal',
+            ...extra,
+          })
+        ).rejects.toThrow(
+          `Already exists: ${named} (HTTP 409 PASWS027E: The object already exists).`
+        );
+      }
+    );
+
+    it('still names the safe or platform on a 404', async () => {
+      const { ctx, request } = createContext();
+      request.mockRejectedValue(httpError(404, { ErrorCode: 'ITATS982I', ErrorMessage: 'gone' }));
+
+      await expect(
+        run('addAccount', ctx, { safeName: 'SOC-Servers', platformId: 'WinServerLocal' })
+      ).rejects.toThrow('Not found: safe SOC-Servers or platform WinServerLocal');
     });
 
     it.each([

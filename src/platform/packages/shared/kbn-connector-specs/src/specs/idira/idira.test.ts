@@ -11,15 +11,11 @@ import type { AxiosInstance } from 'axios';
 import type { AuthContext } from '../../connector_spec';
 import { OAuth } from '../../auth_types/oauth';
 import { getSchemaForAuthType } from '../../lib/get_schema_for_auth_type';
+import { describeUnexpectedBody, isListBody } from './client';
 import { Idira } from './idira';
-import { retryTiming } from './client';
 import { API_URL, BASE, httpError, createContext, run, sent, ACCOUNT } from './test_helpers';
 
 describe('Idira Privilege Cloud connector', () => {
-  beforeEach(() => {
-    jest.spyOn(retryTiming, 'sleep').mockResolvedValue(undefined);
-  });
-
   afterEach(() => {
     jest.restoreAllMocks();
   });
@@ -42,6 +38,9 @@ describe('Idira Privilege Cloud connector', () => {
           'removeSafeMember',
           'suspendUser',
           'activateUser',
+          'getVaultUser',
+          'listRiskySessions',
+          'listUsers',
         ].sort()
       );
     });
@@ -76,6 +75,9 @@ describe('Idira Privilege Cloud connector', () => {
           'getAccountDetails',
           'getAccountActivity',
           'listSafeMembers',
+          'getVaultUser',
+          'listRiskySessions',
+          'listUsers',
           'changeAccountPassword',
           'reconcileAccountCredentials',
           'verifyAccountCredentials',
@@ -104,6 +106,9 @@ describe('Idira Privilege Cloud connector', () => {
       ['getAccountDetails', 'read'],
       ['getAccountActivity', 'read'],
       ['listSafeMembers', 'read'],
+      ['getVaultUser', 'read'],
+      ['listRiskySessions', 'read'],
+      ['listUsers', 'read'],
       ['changeAccountPassword', 'destroy'],
       ['reconcileAccountCredentials', 'destroy'],
       ['setAccountPassword', 'destroy'],
@@ -271,6 +276,42 @@ describe('Idira Privilege Cloud connector', () => {
     });
   });
 
+  describe('test-connection body check helpers', () => {
+    it.each([
+      [{ value: [], count: 0 }, true],
+      [{ value: [{ id: '12_3' }] }, true],
+      [{}, false],
+      [{ value: 'x' }, false],
+      ['', false],
+      ['<html></html>', false],
+      [null, false],
+      [undefined, false],
+    ])('isListBody(%p) -> %p', (data, expected) => {
+      expect(isListBody(data)).toBe(expected);
+    });
+
+    it.each([
+      ['', 'an empty body'],
+      ['   ', 'an empty body'],
+      [undefined, 'an empty body'],
+      [null, 'an empty body'],
+      [
+        '<!DOCTYPE html><html><head><title> Sign In </title></head></html>',
+        'an HTML page titled "Sign In"',
+      ],
+      ['<html><body>portal</body></html>', 'an HTML page'],
+      ['Service is starting', 'the text "Service is starting"'],
+      [
+        { ErrorCode: 'PASWS006E', ErrorMessage: 'Unauthorized' },
+        'the error PASWS006E: Unauthorized',
+      ],
+      [{ ErrorMessage: 'Bad host' }, 'the error Bad host'],
+      [{ accounts: [] }, 'a JSON body without a value list'],
+    ])('describeUnexpectedBody(%p) -> %p', (data, expected) => {
+      expect(describeUnexpectedBody(data)).toBe(expected);
+    });
+  });
+
   describe('test handler', () => {
     it('lists one account and reports success', async () => {
       const { ctx, request } = createContext();
@@ -285,6 +326,28 @@ describe('Idira Privilege Cloud connector', () => {
         params: { limit: 1 },
         data: undefined,
       });
+    });
+
+    it.each([
+      [
+        'an HTML sign-in page',
+        '<html><head><title>Privilege Cloud Sign In</title></head></html>',
+        'an HTML page titled "Privilege Cloud Sign In"',
+      ],
+      ['an empty body', '', 'an empty body'],
+      ['a JSON body without a value list', {}, 'a JSON body without a value list'],
+      [
+        'a vendor error with status 200',
+        { ErrorCode: 'PASWS006E', ErrorMessage: 'Session expired' },
+        'the error PASWS006E: Session expired',
+      ],
+    ])('fails on %s returned with HTTP 200 and quotes it', async (_name, data, quoted) => {
+      const { ctx, request } = createContext();
+      request.mockResolvedValue({ status: 200, data });
+
+      await expect(Idira.test.handler(ctx)).rejects.toThrow(
+        `Privilege Cloud answered GET /PasswordVault/API/Accounts with HTTP 200 and ${quoted} instead of an accounts list. Check the Privilege Cloud URL`
+      );
     });
 
     it('fails when the credentials are rejected', async () => {

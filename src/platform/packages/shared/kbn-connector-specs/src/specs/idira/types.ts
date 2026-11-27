@@ -14,6 +14,11 @@ export const ACCOUNTS_DEFAULT_LIMIT = 50;
 /** Safe members page size: the API defaults to 25; 1000 is this connector's cap, matching accounts. */
 export const MEMBERS_DEFAULT_LIMIT = 25;
 export const MAX_PAGE_SIZE = 1000;
+/**
+ * Activities getAccountActivity returns by default. The endpoint has no paging, so the connector
+ * keeps the newest ones and keeps the result small enough for an agent.
+ */
+export const ACTIVITIES_DEFAULT_LIMIT = 100;
 /** Upper bound on offset: far above any realistic vault, it only stops absurd values. */
 const MAX_OFFSET = 10_000_000;
 /** Vault safe names are at most 28 characters. */
@@ -26,8 +31,9 @@ export const MAX_PLATFORM_PROPERTIES = 50;
 /** Vault account IDs are two numbers joined by an underscore, for example 12_3; the length is capped by AccountIdSchema. */
 const ACCOUNT_ID_PATTERN = /^\d+_\d+$/;
 /**
- * Safe names cannot contain \ / : * < > " . | ? % & + (vault naming rules). Excluding them, and
- * control characters, also keeps a safe name from breaking out of the `safeName eq ...` filter.
+ * Safe names cannot contain \ / : * < > " . | ? % & + (vault naming rules); control characters are
+ * refused too. A name with spaces can still add conditions to the `safeName eq ...` filter of
+ * listAccounts, which allows nothing that the raw filter input does not already allow.
  */
 const SAFE_NAME_PATTERN = /^[^\\/:*<>".|?%&+\u0000-\u001f]+$/;
 const SAFE_NAME_MESSAGE =
@@ -36,6 +42,9 @@ const SAFE_NAME_MESSAGE =
 const MEMBER_NAME_PATTERN = /^[^\\/:*<>"|?%&+\u0000-\u001f]+$/;
 const MEMBER_NAME_MESSAGE =
   'Member names cannot contain \\ / : * < > " | ? % & + or control characters.';
+/** "." and ".." are dot segments: in a URL path they would move the request to another route. */
+const isNotDotSegment = (value: string) => value !== '.' && value !== '..';
+const DOT_SEGMENT_MESSAGE = 'Member names cannot be "." or "..".';
 /** Account object names cannot contain \ / : * ? " < > | or control characters such as a tab. */
 const ACCOUNT_NAME_PATTERN = /^[^\\/:*?"<>|\u0000-\u001f]+$/;
 /** An SSH private key is far longer than a password; no vendor maximum is documented. */
@@ -102,54 +111,115 @@ const UserIdSchema = lazySchema(() =>
 // Accounts
 // ---------------------------------------------------------------------------
 
+/** The saved filters the Get accounts API documents for savedfilter. */
+export const ACCOUNT_SAVED_FILTERS = [
+  'Regular',
+  'Recently',
+  'New',
+  'Link',
+  'Deleted',
+  'PolicyFailures',
+  'AccessedByUsers',
+  'ModifiedByUsers',
+  'ModifiedByCPM',
+  'DisabledPasswordByUser',
+  'DisabledPasswordByCPM',
+  'ScheduledForChange',
+  'ScheduledForVerify',
+  'ScheduledForReconcile',
+  'SuccessfullyReconciled',
+  'FailedChange',
+  'FailedVerify',
+  'FailedReconcile',
+  'LockedOrNew',
+  'Locked',
+  'Favorites',
+] as const;
+
+/** The Get accounts API accepts up to eight fields and values in one search query. */
+export const MAX_ACCOUNT_FILTER_CONDITIONS = 8;
+
+export const MIXED_FILTER_OPERATORS_MESSAGE =
+  'The account filter can use only AND operators or only OR operators, not both. safeName and platformId are joined to the filter with AND, so a filter that uses OR cannot be combined with them.';
+export const TOO_MANY_FILTER_CONDITIONS_MESSAGE = `The account filter can have at most ${MAX_ACCOUNT_FILTER_CONDITIONS} conditions, counting safeName and platformId.`;
+
+/**
+ * The AND and OR operators of a filter expression: whole words in upper case, as the Get accounts
+ * API writes them, so a lower-case "and" or "or" inside a value is not read as an operator.
+ */
+const filterOperators = (filter: string): string[] =>
+  (filter.match(/\s(AND|OR)\s/g) ?? []).map((operator) => operator.trim());
+
 export const ListAccountsInputSchema = lazySchema(() =>
-  z.object({
-    search: z
-      .string()
-      .max(500)
-      .optional()
-      .describe(
-        'Space-separated keywords matched against account name, address and user name, for example "svc-backup 10.0.0.5". Take them from the alert (user name, host address).'
+  z
+    .object({
+      search: z
+        .string()
+        .trim()
+        .max(500)
+        .optional()
+        .describe(
+          'Space-separated keywords matched against account name, address and user name, for example "svc-backup 10.0.0.5". Take them from the alert (user name, host address).'
+        ),
+      searchType: z
+        .enum(['contains', 'startswith'])
+        .optional()
+        .describe('How keywords match: "contains" (vendor default) or "startswith".'),
+      safeName: SafeNameSchema.optional().describe(
+        'Only accounts in this safe, for example "SOC-Servers". Sent as the filter condition safeName eq <value>.'
       ),
-    searchType: z
-      .enum(['contains', 'startswith'])
-      .optional()
-      .describe('How keywords match: "contains" (vendor default) or "startswith".'),
-    safeName: SafeNameSchema.optional().describe(
-      'Only accounts in this safe, for example "SOC-Servers". Sent as the filter condition safeName eq <value>.'
-    ),
-    platformId: PlatformIdSchema.optional().describe(
-      'Only accounts managed by this platform, for example "WinServerLocal" or "UnixSSH". Sent as the filter condition platformId eq <value>.'
-    ),
-    filter: z
-      .string()
-      .max(500)
-      .optional()
-      .describe(
-        'Raw filter expression, for example "modificationTime gte 1700000000". Joined with AND to the safeName and platformId conditions.'
+      platformId: PlatformIdSchema.optional().describe(
+        'Only accounts managed by this platform, for example "WinServerLocal" or "UnixSSH". Sent as the filter condition platformId eq <value> (platformId is one of the advanced search properties the filter accepts).'
       ),
-    savedFilter: z
-      .string()
-      .max(50)
-      .regex(/^[A-Za-z]+$/, 'Saved filter names contain only letters.')
-      .optional()
-      .describe(
-        'Name of a vault preset filter, for example "Recently", "Locked" or "FailedChange". Passed through as savedfilter.'
-      ),
-    sort: z
-      .string()
-      .max(100)
-      .optional()
-      .describe('Property and direction, for example "userName asc" or "address desc".'),
-    offset: OffsetSchema,
-    limit: z
-      .number()
-      .int()
-      .min(1)
-      .max(MAX_PAGE_SIZE)
-      .optional()
-      .describe(`Page size, 1 to ${MAX_PAGE_SIZE} (default ${ACCOUNTS_DEFAULT_LIMIT}).`),
-  })
+      filter: z
+        .string()
+        .trim()
+        .max(500)
+        .optional()
+        .describe(
+          `Raw filter expression, for example "modificationTime gte 1700000000" or "userName contains admin AND address contains 10.0.0". Use only AND or only OR (in upper case) between conditions, at most ${MAX_ACCOUNT_FILTER_CONDITIONS} conditions in all. Joined with AND to the safeName and platformId conditions, so use OR only without them.`
+        ),
+      savedFilter: z
+        .enum(ACCOUNT_SAVED_FILTERS)
+        .optional()
+        .describe(
+          'A vault saved filter, sent as savedfilter, for example "Recently", "FailedChange", "ScheduledForChange" or "Locked" (Locked returns only accounts locked by the service user). Can be combined with search, filter, safeName and platformId.'
+        ),
+      sort: z
+        .string()
+        .trim()
+        .max(100)
+        .optional()
+        .describe('Property and direction, for example "userName asc" or "address desc".'),
+      offset: OffsetSchema,
+      limit: z
+        .number()
+        .int()
+        .min(1)
+        .max(MAX_PAGE_SIZE)
+        .optional()
+        .describe(`Page size, 1 to ${MAX_PAGE_SIZE} (default ${ACCOUNTS_DEFAULT_LIMIT}).`),
+    })
+    .superRefine((value, ctx) => {
+      // Checked after trimming: a whitespace-only filter counts as not set.
+      if (!value.filter) {
+        return;
+      }
+      const operators = filterOperators(value.filter);
+      const joinedWithAnd = Boolean(value.safeName || value.platformId);
+      if (new Set(operators).size > 1 || (joinedWithAnd && operators.includes('OR'))) {
+        ctx.addIssue({ code: 'custom', message: MIXED_FILTER_OPERATORS_MESSAGE, path: ['filter'] });
+      }
+      const conditions =
+        operators.length + 1 + (value.safeName ? 1 : 0) + (value.platformId ? 1 : 0);
+      if (conditions > MAX_ACCOUNT_FILTER_CONDITIONS) {
+        ctx.addIssue({
+          code: 'custom',
+          message: TOO_MANY_FILTER_CONDITIONS_MESSAGE,
+          path: ['filter'],
+        });
+      }
+    })
 );
 export type ListAccountsInput = z.infer<typeof ListAccountsInputSchema>;
 
@@ -160,6 +230,22 @@ export const AccountIdInputSchema = lazySchema(() =>
 );
 export type AccountIdInput = z.infer<typeof AccountIdInputSchema>;
 
+export const AccountActivityInputSchema = lazySchema(() =>
+  z.object({
+    accountId: AccountIdSchema,
+    limit: z
+      .number()
+      .int()
+      .min(1)
+      .max(MAX_PAGE_SIZE)
+      .optional()
+      .describe(
+        `Most activities to return, newest first, 1 to ${MAX_PAGE_SIZE} (default ${ACTIVITIES_DEFAULT_LIMIT}). Older activities beyond it are left out.`
+      ),
+  })
+);
+export type AccountActivityInput = z.infer<typeof AccountActivityInputSchema>;
+
 export const ChangeAccountPasswordInputSchema = lazySchema(() =>
   z.object({
     accountId: AccountIdSchema,
@@ -167,7 +253,7 @@ export const ChangeAccountPasswordInputSchema = lazySchema(() =>
       .boolean()
       .optional()
       .describe(
-        'Only matters for an account in an account group. The vendor default (when omitted) is true: every account in the group changes. Set false to change only this account.'
+        'Only matters for an account in an account group. Defaults to false: only this account changes. The connector always sends the value, as both ChangeEntireGroup and ChangeCredsForGroup because the vendor docs use both names and the vendor default is true. Set true to change every account in the group.'
       ),
   })
 );
@@ -181,7 +267,7 @@ export const SetAccountPasswordInputSchema = lazySchema(() =>
       .min(1)
       .max(128)
       .describe(
-        'The new password, at most 128 characters, meeting the platform password policy. A secret: take it from a secret store, never from alert data. It is saved with the tool call and never returned.'
+        'The new password, at most 128 characters, meeting the platform password policy. A secret: take it from a secret store, never from alert data. It is passed straight to Privilege Cloud and never stored, logged or returned by the connector.'
       ),
     changeImmediately: z
       .boolean()
@@ -243,7 +329,7 @@ export const AddAccountInputSchema = lazySchema(() =>
       .max(SECRET_MAX)
       .optional()
       .describe(
-        'Initial credential: a password, or an SSH private key when secretType is "key". A secret: take it from a secret store, never from alert data. It is saved with the tool call and never returned.'
+        'Initial credential: a password, or an SSH private key when secretType is "key". A secret: take it from a secret store, never from alert data. It is passed straight to Privilege Cloud and never stored, logged or returned by the connector.'
       ),
     platformAccountProperties: PlatformAccountPropertiesSchema.optional().describe(
       `Platform-defined properties as string values, for example {"LogonDomain": "corp"}; at most ${MAX_PLATFORM_PROPERTIES}.`
@@ -307,9 +393,15 @@ export type UpdateAccountInput = z.infer<typeof UpdateAccountInputSchema>;
 export const ListSafeMembersInputSchema = lazySchema(() =>
   z.object({
     safeName: SafeNameSchema,
-    search: z.string().max(200).optional().describe('Member name keywords, for example "jsmith".'),
+    search: z
+      .string()
+      .trim()
+      .max(200)
+      .optional()
+      .describe('Member name keywords, for example "jsmith".'),
     filter: z
       .string()
+      .trim()
       .max(200)
       .optional()
       .describe(
@@ -317,6 +409,7 @@ export const ListSafeMembersInputSchema = lazySchema(() =>
       ),
     sort: z
       .string()
+      .trim()
       .max(100)
       .optional()
       .describe('Property and direction, for example "memberName asc".'),
@@ -385,6 +478,7 @@ export const AddSafeMemberInputSchema = lazySchema(() =>
       .min(1)
       .max(255)
       .regex(MEMBER_NAME_PATTERN, MEMBER_NAME_MESSAGE)
+      .refine(isNotDotSegment, DOT_SEGMENT_MESSAGE)
       .describe(
         'Existing vault or directory user, group or role to add, for example "jsmith" or "jsmith@corp.example.com".'
       ),
@@ -428,6 +522,7 @@ export const RemoveSafeMemberInputSchema = lazySchema(() =>
       .min(1)
       .max(255)
       .regex(MEMBER_NAME_PATTERN, MEMBER_NAME_MESSAGE)
+      .refine(isNotDotSegment, DOT_SEGMENT_MESSAGE)
       .describe(
         'Member to remove, exactly as listed in `memberName` by listSafeMembers, for example "jsmith".'
       ),
@@ -436,8 +531,186 @@ export const RemoveSafeMemberInputSchema = lazySchema(() =>
 export type RemoveSafeMemberInput = z.infer<typeof RemoveSafeMemberInputSchema>;
 
 // ---------------------------------------------------------------------------
+// Privileged sessions
+// ---------------------------------------------------------------------------
+
+/** Live sessions page size: the API defaults to 25. */
+export const LIVE_SESSIONS_DEFAULT_LIMIT = 25;
+/** Live sessions sort: highest risk score first, so a risky session leads the page. */
+export const LIVE_SESSIONS_DEFAULT_SORT = '-RiskScore';
+/** Upper bound on a Unix time in seconds (year 3000): it only stops absurd values. */
+const MAX_EPOCH_SECONDS = 32_503_680_000;
+
+/** Properties the LiveSessions API sorts by; a leading "-" sorts in descending order. */
+const LIVE_SESSION_SORT_FIELDS = [
+  'RiskScore',
+  'FileName',
+  'SafeName',
+  'FolderName',
+  'PSMVaultUserName',
+  'FromIP',
+  'RemoteMachine',
+  'Client',
+  'Protocol',
+  'AccountUserName',
+  'AccountAddress',
+  'AccountPlatformID',
+  'PSMStartTime',
+  'TicketID',
+] as const;
+export const LIVE_SESSION_SORTS = [
+  ...LIVE_SESSION_SORT_FIELDS,
+  ...LIVE_SESSION_SORT_FIELDS.map((field) => `-${field}` as const),
+] as [string, ...string[]];
+
+const EpochSecondsSchema = lazySchema(() => z.number().int().min(0).max(MAX_EPOCH_SECONDS));
+
+export const ListRiskySessionsInputSchema = lazySchema(() =>
+  z
+    .object({
+      fromTime: EpochSecondsSchema.optional().describe(
+        'Only sessions started at or after this Unix time in seconds, for example 1767225600.'
+      ),
+      toTime: EpochSecondsSchema.optional().describe(
+        'Only sessions started at or before this Unix time in seconds.'
+      ),
+      safeName: SafeNameSchema.optional().describe(
+        'Only sessions that use an account in this safe, for example "SOC-Servers".'
+      ),
+      search: z
+        .string()
+        .trim()
+        .max(500)
+        .optional()
+        .describe(
+          'Keywords matched against session properties such as the account user name, target address or vault user, for example "svc-backup".'
+        ),
+      activities: z
+        .string()
+        .trim()
+        .max(500)
+        .optional()
+        .describe('Only sessions with these recorded activities, as Privilege Cloud filters them.'),
+      sort: z
+        .enum(LIVE_SESSION_SORTS)
+        .optional()
+        .describe(
+          `Property to sort by; a leading "-" sorts in descending order. Defaults to "${LIVE_SESSIONS_DEFAULT_SORT}" (highest risk score first). Other examples: "-PSMStartTime" (newest first), "AccountAddress".`
+        ),
+      offset: OffsetSchema,
+      limit: z
+        .number()
+        .int()
+        .min(1)
+        .max(MAX_PAGE_SIZE)
+        .optional()
+        .describe(`Page size, 1 to ${MAX_PAGE_SIZE} (default ${LIVE_SESSIONS_DEFAULT_LIMIT}).`),
+    })
+    .refine(
+      (value) =>
+        value.fromTime === undefined ||
+        value.toTime === undefined ||
+        value.fromTime <= value.toTime,
+      { message: 'fromTime must not be later than toTime.', path: ['fromTime'] }
+    )
+);
+export type ListRiskySessionsInput = z.infer<typeof ListRiskySessionsInputSchema>;
+
+// ---------------------------------------------------------------------------
 // Vault users
 // ---------------------------------------------------------------------------
+
+/** Users page size of listUsers. The vendor SDK reads users in pages of 200; 100 keeps a page small for an agent. */
+export const USERS_DEFAULT_LIMIT = 100;
+/**
+ * User names, user types and other values sent inside a `<property> eq <value>` filter cannot
+ * contain control characters; a value with " AND " adds a condition, which allows nothing a
+ * caller of the API could not already ask for.
+ */
+const FILTER_VALUE_PATTERN = /^[^\u0000-\u001f]+$/;
+
+/** Properties the Get users API sorts by. */
+export const USERS_SORT_FIELDS = [
+  'username',
+  'source',
+  'userType',
+  'location',
+  'lastname',
+  'firstname',
+  'middlename',
+] as const;
+const USERS_SORT_TERM = `(?:${USERS_SORT_FIELDS.join('|')})(?:\\s+(?:asc|desc))?`;
+/** One to three "<property> [asc|desc]" terms separated by commas. */
+const USERS_SORT_PATTERN = new RegExp(
+  `^${USERS_SORT_TERM}(?:\\s*,\\s*${USERS_SORT_TERM}){0,2}$`,
+  'i'
+);
+const USERS_SORT_MESSAGE = `sort takes up to 3 of ${USERS_SORT_FIELDS.join(
+  ', '
+)}, separated by commas, each optionally followed by asc or desc.`;
+
+export const ListUsersInputSchema = lazySchema(() =>
+  z.object({
+    search: z
+      .string()
+      .trim()
+      .max(500)
+      .optional()
+      .describe(
+        'Keywords matched against the user name, first name and last name, for example "jsmith".'
+      ),
+    userName: z
+      .string()
+      .trim()
+      .min(1)
+      .max(128)
+      .regex(FILTER_VALUE_PATTERN, 'User names cannot contain control characters.')
+      .optional()
+      .describe(
+        'Exact vault user name, for example "jsmith@corp.example.com", sent as the filter condition userName eq <value>. Use it to turn the user name an alert carries into the numeric user ID.'
+      ),
+    userType: z
+      .string()
+      .trim()
+      .min(1)
+      .max(50)
+      .regex(/^[A-Za-z0-9_]+$/, 'User types contain only letters, digits and "_".')
+      .optional()
+      .describe('Only users of this type, for example "EPVUser". Sent as userType eq <value>.'),
+    componentUser: z
+      .boolean()
+      .optional()
+      .describe(
+        'true: only component (application) users; false: only personal users. Sent as componentUser eq <value>.'
+      ),
+    sort: z
+      .string()
+      .trim()
+      .max(200)
+      .regex(USERS_SORT_PATTERN, USERS_SORT_MESSAGE)
+      .optional()
+      .describe(
+        `Up to 3 properties, separated by commas, each optionally followed by asc (default) or desc, for example "lastname asc, firstname". Properties: ${USERS_SORT_FIELDS.join(
+          ', '
+        )}.`
+      ),
+    extendedDetails: z
+      .boolean()
+      .optional()
+      .describe(
+        'true also returns enabled, suspended (true after too many failed logons), groupsMembership and, for LDAP users, userDN. Sent as ExtendedDetails; the API default is false.'
+      ),
+    offset: OffsetSchema,
+    limit: z
+      .number()
+      .int()
+      .min(1)
+      .max(MAX_PAGE_SIZE)
+      .optional()
+      .describe(`Page size, 1 to ${MAX_PAGE_SIZE} (default ${USERS_DEFAULT_LIMIT}).`),
+  })
+);
+export type ListUsersInput = z.infer<typeof ListUsersInputSchema>;
 
 export const UserIdInputSchema = lazySchema(() =>
   z.object({
