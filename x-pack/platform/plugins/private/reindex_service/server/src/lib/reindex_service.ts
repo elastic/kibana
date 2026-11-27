@@ -132,6 +132,18 @@ export interface ReindexService {
   }>;
 }
 
+const DEFAULT_REINDEX_BATCH_SIZE = 1000;
+const TARGET_REINDEX_BATCH_BYTES = 10 * 1024 * 1024; // 10 MiB
+const LARGE_DOC_SYSTEM_INDEX_PREFIXES = ['.ml-state-'] as const;
+const LARGE_DOC_SYSTEM_INDEX_FALLBACK_BATCH_SIZE = 2;
+
+const getFallbackBatchSize = (indexName: string): number | undefined => {
+  const normalizedIndexName = indexName.replace(/^(\.?)(?:reindexed-v\d+-)+/, '$1');
+  return LARGE_DOC_SYSTEM_INDEX_PREFIXES.some((prefix) => normalizedIndexName.startsWith(prefix))
+    ? LARGE_DOC_SYSTEM_INDEX_FALLBACK_BATCH_SIZE
+    : undefined;
+};
+
 export const reindexServiceFactory = (
   esClient: ElasticsearchClient,
   actions: ReindexActions,
@@ -289,6 +301,46 @@ export const reindexServiceFactory = (
   };
 
   /**
+   * Resolves a safe `source.size` batch size for reindexing based on average document size.
+   * Falls back to a conservative batch size for known large-document system indices if stats
+   * are unavailable or incomplete.
+   */
+  const resolveReindexBatchSize = async (indexName: string): Promise<number | undefined> => {
+    try {
+      const statsResponse = await esClient.indices.stats({
+        index: indexName,
+        metric: ['docs', 'store'],
+        level: 'indices',
+        expand_wildcards: 'all',
+      });
+
+      const primaries = statsResponse.indices?.[indexName]?.primaries;
+      const docsCount = primaries?.docs?.count ?? 0;
+      const storeSizeBytes = primaries?.store?.size_in_bytes ?? 0;
+
+      if (
+        statsResponse._shards?.failed === 0 &&
+        Number.isFinite(docsCount) &&
+        docsCount > 0 &&
+        Number.isFinite(storeSizeBytes) &&
+        storeSizeBytes > 0
+      ) {
+        const avgDocBytes = storeSizeBytes / docsCount;
+        return Math.max(
+          1,
+          Math.min(DEFAULT_REINDEX_BATCH_SIZE, Math.floor(TARGET_REINDEX_BATCH_BYTES / avgDocBytes))
+        );
+      }
+    } catch (err) {
+      log.debug(
+        `Failed to retrieve index stats for ${indexName} to calculate reindex batch size: ${err}`
+      );
+    }
+
+    return getFallbackBatchSize(indexName);
+  };
+
+  /**
    * Begins the reindex process via Elasticsearch's Reindex API.
    * @param reindexOp
    */
@@ -309,10 +361,17 @@ export const reindexServiceFactory = (
       throw error.indexNotFound(`Index ${indexName} does not exist.`);
     }
 
+    const batchSize = await resolveReindexBatchSize(indexName);
+
     const startReindexResponse = await esClient.reindex({
       refresh: true,
       wait_for_completion: false,
-      source: { index: indexName },
+      source: {
+        index: indexName,
+        ...(batchSize !== undefined && batchSize < DEFAULT_REINDEX_BATCH_SIZE
+          ? { size: batchSize }
+          : {}),
+      },
       dest: { index: reindexOp.attributes.newIndexName },
       // Speed optimization https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-reindex.html#docs-reindex-automatic-slice
       // It doesn't work on CCS, but remote clusters should be upgraded individually with their own Upgrade Assistant.
