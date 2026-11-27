@@ -18,7 +18,8 @@ export const AUDIT_META_ALERT_AS_EVIDENCE_EVALUATOR_NAME = 'MetaAlertAsEvidence'
  * without a meta alert beside them, is judged on those alerts by the other evaluators.
  *
  * - no meta groups in the gold: score null (N/A)
- * - no discoveries: score 1, label `no_discoveries` (nothing was treated as evidence)
+ * - no discoveries: score null (N/A). Nothing was cited, so there is nothing to judge; a silent
+ *   model is penalised by `NegativeControl` / `PositiveControlRecall`, not credited here.
  * - discoveries but none cites a known alert id: score null, label `no_citations`. Ids absent from
  *   `gold.alertGroups` (invented by the model) are ignored, so a meta alert beside an invented id
  *   is still meta-only.
@@ -45,7 +46,7 @@ export const createAuditMetaAlertAsEvidenceEvaluator = (
       return notApplicable('Scenario has no threshold/meta alerts.');
     }
     if (discoveries.length === 0) {
-      return { score: 1, label: 'no_discoveries' };
+      return notApplicable('No discoveries, so no citation to check for meta-alert use.');
     }
 
     // The generation schema accepts any id string, so an invented id must not pass for evidence.

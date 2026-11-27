@@ -11,7 +11,18 @@ import { notApplicable, resolveAuditInputs } from './audit_evaluator_helpers';
 
 export const AUDIT_NEGATIVE_CONTROL_EVALUATOR_NAME = 'NegativeControl';
 
-/** For scenarios with nothing to find: 1 only when the model reports no discoveries. */
+const MAX_LABEL_TITLE_LENGTH = 80;
+
+const quoteTitle = (title: string) =>
+  `"${
+    title.length > MAX_LABEL_TITLE_LENGTH ? `${title.slice(0, MAX_LABEL_TITLE_LENGTH)}…` : title
+  }"`;
+
+/**
+ * For scenarios with nothing to find: 1 only when the model reports no discoveries. A miss is
+ * labelled with the first reported title (and how many more), so the invented discovery shows in
+ * the score list without opening the explanation.
+ */
 export const createAuditNegativeControlEvaluator = (
   resolveReference?: AuditReferenceResolver
 ): Evaluator<AttackDiscoveryDatasetExample, AttackDiscoveryTaskOutput> => ({
@@ -31,7 +42,9 @@ export const createAuditNegativeControlEvaluator = (
       ? { score: 1, label: 'no_discoveries' }
       : {
           score: 0,
-          label: 'false_positive',
+          label: `false_positive: ${quoteTitle(discoveries[0].title)}${
+            discoveries.length > 1 ? ` (+${discoveries.length - 1} more)` : ''
+          }`,
           explanation: `${discoveries.length} discoveries reported: ${discoveries
             .map(({ title }) => `"${title}"`)
             .join(', ')}`,

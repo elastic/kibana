@@ -284,8 +284,9 @@ Its gold also sets `expectedDiscoveries: 'none'`, so `NegativeControl` scores th
 any discovery, even one about a single principal, is a false positive. That is deliberate. Each
 principal has only two low-severity alerts of one kind (a console login, a bucket listing or an
 `AssumeRole` call from the shared NAT address) with no later privilege change, data access or
-persistence, so there is no behaviour to report. `ForbiddenJoin` isolates the join failure;
-`NegativeControl` checks the batch is not turned into a story at all.
+persistence, so there is no behaviour to report. `NegativeControl` scores this scenario and
+`ForbiddenJoin` is N/A here, so one joined discovery does not fail twice; its explanation still
+names which principals were joined.
 
 Filter results by example-name suffix (`.baseline` / `.enriched` / `.enriched_context`) for a
 model x input-variant grid.
@@ -294,12 +295,12 @@ model x input-variant grid.
 
 | Evaluator | Scores |
 |---|---|
-| `ForbiddenJoin` | 0 if one discovery cites alerts from two groups the gold forbids joining; 1 when there are no discoveries (nothing was joined; `NegativeControl` and `PositiveControlRecall` are what penalise a silent model); N/A without forbidden pairs; N/A (null, `no_citations`) when discoveries exist but none cites an alert id from the scenario (invented ids are ignored) |
-| `MetaAlertAsEvidence` | 0 if a discovery's citations are only meta-alert groups (`metaAlertGroups`); 1 (label `no_discoveries`) when there are no discoveries, for the same reason as `ForbiddenJoin`; N/A without meta-alert gold; N/A (`no_citations`) when no discovery cites a known alert id |
+| `ForbiddenJoin` | 0 if one discovery cites alerts from two groups the gold forbids joining; 1 when there are no discoveries (nothing was joined; `NegativeControl` and `PositiveControlRecall` are what penalise a silent model); N/A without forbidden pairs; N/A on a scenario that expects no discoveries, where `NegativeControl` already fails any discovery (the explanation still names each join); N/A (null, `no_citations`) when discoveries exist but none cites an alert id from the scenario (invented ids are ignored) |
+| `MetaAlertAsEvidence` | 0 if a discovery's citations are only meta-alert groups (`metaAlertGroups`); N/A when there are no discoveries (nothing was cited, so nothing to check; `NegativeControl` and `PositiveControlRecall` judge a silent model); N/A without meta-alert gold; N/A (`no_citations`) when no discovery cites a known alert id |
 | `EntityCoOccurrence` | Grounded / asserted pairs of a `user.*` token with a `source.ip`, `cloud.account.id` or `host.*` token in one discovery; a pair is grounded when one cited alert carries both values; N/A with no asserted pair |
-| `NegativeControl` | On a `none`-expected scenario: 1 when it produced zero discoveries, 0 (`false_positive`) when it reported any; N/A on scenarios that expect a discovery |
+| `NegativeControl` | On a `none`-expected scenario: 1 when it produced zero discoveries, 0 when it reported any, labelled `false_positive: "<first title>" (+N more)` so the invented discovery shows in the score list (the explanation lists every title); N/A on scenarios that expect a discovery |
 | `PositiveControlRecall` | Fraction of the required group's alert ids cited by discoveries that cite no group the gold forbids joining with it (a discovery merging the group with a forbidden partner earns it no recall); with `requiredAnyOf`, the best fraction over those groups; label `recalled` at >= 0.6 |
-| `ConditionalRemediation` | Scores each discovery that is not fully backed by a confirmed group; 0 when its markdown tells the reader to revoke, rotate, disable, delete, block, isolate, terminate, quarantine, suspend, deactivate, reset, kill, remove, contain, lock, reimage, wipe, shut down or ban something without a condition; N/A when nothing is scored |
+| `ConditionalRemediation` | Scores each discovery that is not fully backed by a confirmed group; 0 when its markdown tells the reader to revoke, rotate, disable, delete, block, isolate, terminate, quarantine, suspend, deactivate, reset, kill, remove, contain, lock, reimage, wipe, shut down or ban something without a condition; 1 with label `conditional` when the advice is conditioned, or `no_containment_advice` when no scored discovery advises containment at all; N/A when nothing is scored |
 
 A run with no parsed insights is reported as `task_error` with a null score, never as a pass. A null
 score is stored as a null `evaluator.score` with the label `N/A` (or `no_citations`) and is left out of

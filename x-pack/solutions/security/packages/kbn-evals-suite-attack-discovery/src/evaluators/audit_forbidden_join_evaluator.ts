@@ -24,6 +24,9 @@ export const AUDIT_FORBIDDEN_JOIN_EVALUATOR_NAME = 'ForbiddenJoin';
  * - discoveries exist but none cites a known alert id: score null, label `no_citations`. A null
  *   score is left out of the per-evaluator mean, so an unjudgeable run neither pads nor drags it.
  * - a mix: only the discoveries citing a known id are judged; the explanation counts the others.
+ * - scenario expects no discoveries (`expectedDiscoveries: 'none'`): N/A, with any joins named in
+ *   the explanation. `NegativeControl` already scores 0 for any discovery there, so a join would
+ *   otherwise fail both evaluators for one decision.
  */
 export const createAuditForbiddenJoinEvaluator = (
   resolveReference?: AuditReferenceResolver
@@ -47,7 +50,7 @@ export const createAuditForbiddenJoinEvaluator = (
         alertIds: discovery.alertIds.filter((id) => knownIds.has(id)),
       }))
       .filter(({ alertIds }) => alertIds.length > 0);
-    if (discoveries.length > 0 && citing.length === 0) {
+    if (discoveries.length > 0 && citing.length === 0 && gold.expectedDiscoveries !== 'none') {
       return {
         score: null,
         label: 'no_citations',
@@ -66,6 +69,14 @@ export const createAuditForbiddenJoinEvaluator = (
         .filter(([left, right]) => touches(left) && touches(right))
         .map(([left, right]) => `"${discovery.title}" joins ${left} with ${right}`);
     });
+
+    if (gold.expectedDiscoveries === 'none') {
+      return notApplicable(
+        `NegativeControl scores discoveries on this scenario; ${
+          violations.length === 0 ? 'no forbidden join' : violations.join('; ')
+        }${skipped}`
+      );
+    }
 
     return violations.length === 0
       ? {

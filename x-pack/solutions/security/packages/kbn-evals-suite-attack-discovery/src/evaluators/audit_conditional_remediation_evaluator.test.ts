@@ -283,11 +283,19 @@ describe('ConditionalRemediation evaluator', () => {
 
   it('scores 1 when containment is conditional', async () => {
     const result = await run(['o1'], '- If confirmed unauthorized, revoke the access key.');
-    expect(result).toMatchObject({ score: 1, label: 'conditional_or_none' });
+    expect(result).toMatchObject({ score: 1, label: 'conditional' });
   });
 
   it('scores 1 when there is no containment advice', async () => {
-    expect(await run(['o1'], '- A console login occurred.')).toMatchObject({ score: 1 });
+    expect(await run(['o1'], '- A console login occurred.')).toMatchObject({
+      score: 1,
+      label: 'no_containment_advice',
+    });
+  });
+
+  it('labels a list governed by a conditional header as conditional', async () => {
+    const result = await run(['o1'], 'If confirmed unauthorized:\n- Revoke the access key.');
+    expect(result).toMatchObject({ score: 1, label: 'conditional' });
   });
 
   it('is N/A when every discovery cites only confirmed-malicious alerts', async () => {
