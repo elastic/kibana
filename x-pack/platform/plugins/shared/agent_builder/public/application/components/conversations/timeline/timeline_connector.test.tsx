@@ -89,12 +89,14 @@ const mockList = ({ items }: { items: TimelineItem[] }) => (
 );
 /** Swaps the list for the real `Timeline`, for tests that count how often a turn renders. */
 const mockUseRealTimeline = { current: false };
-jest.mock('./timeline', () => ({
-  Timeline: (props: { items: TimelineItem[] }) =>
-    mockUseRealTimeline.current
-      ? jest.requireActual('react').createElement(jest.requireActual('./timeline').Timeline, props)
-      : mockList(props),
-}));
+jest.mock('./timeline', () => {
+  const { createElement } = jest.requireActual('react');
+  const { Timeline: ActualTimeline } = jest.requireActual('./timeline');
+  return {
+    Timeline: (props: { items: TimelineItem[] }) =>
+      mockUseRealTimeline.current ? createElement(ActualTimeline, props) : mockList(props),
+  };
+});
 jest.mock('./items/user_message_event', () => ({ UserMessageEvent: () => null }));
 jest.mock('./items/attachment_event', () => ({ AttachmentEvent: () => null }));
 jest.mock('./items/custom_event', () => ({ CustomEvent: () => null }));
