@@ -9,5 +9,11 @@ import { EuiEmptyPrompt } from '@elastic/eui';
 import React from 'react';
 
 export const TimeseriesexplorerChartDataError = ({ errorMsg }: { errorMsg: string }) => {
-  return <EuiEmptyPrompt iconType="warning" title={<h2>{errorMsg}</h2>} />;
+  return (
+    <EuiEmptyPrompt
+      iconType="warning"
+      title={<h2>{errorMsg}</h2>}
+      data-test-subj="mlTimeSeriesExplorerChartDataError"
+    />
+  );
 };

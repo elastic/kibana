@@ -8,6 +8,7 @@
 import type { SeriesConfigWithMetadata } from '@kbn/ml-common-types/results';
 import type { ChartType } from '../constants/charts';
 import { CHART_TYPE } from '../constants/charts';
+import { isEsqlDatafeed } from './esql_metric_query';
 
 /**
  * Get the chart type based on its configuration
@@ -31,6 +32,15 @@ export function getChartType(config: SeriesConfigWithMetadata): ChartType {
     config.metricFunction !== null // Event distribution chart relies on the ML function mapping to an ES aggregation
   ) {
     chartType = CHART_TYPE.POPULATION_DISTRIBUTION;
+  }
+
+  if (
+    (chartType === CHART_TYPE.EVENT_DISTRIBUTION ||
+      chartType === CHART_TYPE.POPULATION_DISTRIBUTION) &&
+    isEsqlDatafeed(config.datafeedConfig)
+  ) {
+    // Distribution charts sample raw documents from the datafeed indices, which ES|QL datafeeds do not have.
+    return CHART_TYPE.SINGLE_METRIC;
   }
 
   if (
