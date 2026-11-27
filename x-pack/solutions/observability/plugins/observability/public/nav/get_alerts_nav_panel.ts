@@ -18,7 +18,11 @@ import {
   OBSERVABILITY_ALERTING_BASE_PATH,
   type ObservabilityAlertingLinkId,
 } from '@kbn/deeplinks-observability';
-import { hasObservabilityCapabilities } from '@kbn/observability-shared-plugin/public';
+import {
+  hasClassicAlertsReadCapability,
+  hasClassicRulesReadCapability,
+  hasObservabilityAlertReadCapabilities,
+} from '@kbn/observability-shared-plugin/public';
 
 const PANEL_ID = 'alerting';
 const ALERTS_LINK = 'observability-overview:alerts' as const;
@@ -33,7 +37,6 @@ export const getObservabilityAlertsLinkTitle = (alertingV2Enabled: boolean): str
     : i18n.translate('xpack.observability.alertsLinkTitle', {
         defaultMessage: 'Alerts',
       });
-const V1_RULES_MANAGEMENT_ID = 'triggersActionsRules';
 const MAINTENANCE_WINDOWS_MANAGEMENT_ID = 'maintenanceWindows';
 
 const obsAlertingLink = (deepLinkId: ObservabilityAlertingLinkId) =>
@@ -56,16 +59,17 @@ const getRulesIsActive: NonNullable<PanelOpenerChildDefinition['getIsActive']> =
 const hasManagementCapability = (core: CoreStart, capabilityId: string): boolean =>
   core.application.capabilities.management?.insightsAndAlerting?.[capabilityId] === true;
 
-/**
- * Same gate as classic nav (`updateGlobalNavigation` / `hasObservabilityCapabilities`):
- * any Observability app capability, not alerting-specific privileges.
- */
+/** Gate for the Alerting panel Alerts link. */
 export const canReadV1Alerts = (core: CoreStart): boolean =>
-  hasObservabilityCapabilities(core.application.capabilities);
+  hasClassicAlertsReadCapability(core.application.capabilities);
+
+/** Gate for the observability-overview Alerts table link. */
+export const canListClassicAlertsTable = (core: CoreStart): boolean =>
+  hasObservabilityAlertReadCapabilities(core.application.capabilities);
 
 /** Gate for the Classic rules link in the Alerting panel. */
 export const canReadV1Rules = (core: CoreStart): boolean =>
-  hasManagementCapability(core, V1_RULES_MANAGEMENT_ID);
+  hasClassicRulesReadCapability(core.application.capabilities);
 
 /** Gate for the Maintenance windows link in the Alerting panel. */
 export const canReadMaintenanceWindows = (core: CoreStart): boolean =>
@@ -95,7 +99,11 @@ const getAlertsSection = (core: CoreStart): PanelOpenerChildDefinition[] => {
     });
   }
 
-  if (isV2Enabled && canReadV1Alerts(core) && shouldShowV1ObservabilityAlertsTable(core)) {
+  if (
+    isV2Enabled &&
+    canListClassicAlertsTable(core) &&
+    shouldShowV1ObservabilityAlertsTable(core)
+  ) {
     alertsChildren.push({
       link: ALERTS_LINK,
       title: getObservabilityAlertsLinkTitle(isV2Enabled),

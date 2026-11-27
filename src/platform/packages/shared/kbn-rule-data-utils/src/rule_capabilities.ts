@@ -8,12 +8,68 @@
  */
 
 import type { Capabilities } from '@kbn/core-capabilities-common';
+import {
+  STACK_ALERTS_FEATURE_ID,
+  STACK_ALERTS_ONLY_FEATURE_ID,
+  STACK_ALERTS_SHOW_UI_CAPABILITY,
+} from './rule_types/stack_rules';
 
-/**
- * UI capability key under `capabilities.management.insightsAndAlerting` granting access to the
- * Stack Management Rules page served by `triggers_actions_ui` at `triggersActionsRoute`.
- */
+/** UI capability for the Stack Management Rules page. */
 export const TRIGGERS_ACTIONS_RULES_CAPABILITY_ID = 'triggersActionsRules' as const;
 
+// Matches ML_APP_ID in src/platform/packages/shared/deeplinks/ml/deep_links.ts.
+const ML_APP_ID = 'ml';
+
+// Matches PLUGIN_FEATURE_ID in x-pack/platform/plugins/shared/data_quality/common/index.ts.
+const DATA_QUALITY_FEATURE_ID = 'dataQuality';
+
+/** True for the Stack Management Rules capability, including Actions and Connectors and Classic Rules Settings. */
 export const canAccessTriggersActionsRules = (capabilities: Capabilities): boolean =>
   Boolean(capabilities.management?.insightsAndAlerting?.[TRIGGERS_ACTIONS_RULES_CAPABILITY_ID]);
+
+/** Platform features whose privileges grant classic rule read. Each one also grants `triggersActionsRules`. */
+export const hasPlatformRuleReadCapabilities = (capabilities: Capabilities): boolean =>
+  capabilities[STACK_ALERTS_FEATURE_ID]?.[STACK_ALERTS_SHOW_UI_CAPABILITY] === true ||
+  capabilities.navLinks?.[ML_APP_ID] === true ||
+  capabilities[DATA_QUALITY_FEATURE_ID]?.show === true;
+
+// ML Read sets canUseMlAlerts even when anomaly detection is disabled and its rule type is not registered.
+const ML_ANOMALY_ALERT_READ_CAPABILITY = 'canUseMlAlerts';
+const ML_ANOMALY_DETECTION_ENABLED_CAPABILITY = 'isADEnabled';
+
+/**
+ * UI capabilities whose privileges include the `rac` API.
+ * Literals match the Security Solution feature ids so this platform package does not depend on it.
+ * Observability features that grant `rac` are checked in `@kbn/observability-shared-plugin`.
+ */
+const RAC_UI_CAPABILITIES = [
+  ['siem', 'show'],
+  ['siemV2', 'show'],
+  ['siemV3', 'show'],
+  ['siemV4', 'show'],
+  ['siemV5', 'show'],
+  ['securitySolutionRulesV1', 'read_rules'],
+  ['securitySolutionRulesV2', 'read_rules'],
+  ['securitySolutionRulesV3', 'read_rules'],
+  ['securitySolutionRulesV4', 'read_rules'],
+  ['securitySolutionAlertsV1', 'read_alerts'],
+] as const;
+
+const hasMlAnomalyAlertRead = (capabilities: Capabilities): boolean =>
+  capabilities.ml?.[ML_ANOMALY_ALERT_READ_CAPABILITY] === true &&
+  capabilities.ml?.[ML_ANOMALY_DETECTION_ENABLED_CAPABILITY] === true;
+
+const hasRacFromAnotherFeature = (capabilities: Capabilities): boolean =>
+  RAC_UI_CAPABILITIES.some(
+    ([featureId, capabilityId]) => capabilities[featureId]?.[capabilityId] === true
+  );
+
+/**
+ * True when the user can read classic alerts and call `rac`.
+ * Stack Alerts grants both. Machine Learning grants anomaly-detection alert read only while
+ * anomaly detection is enabled, and only when another feature grants `rac`.
+ */
+export const hasPlatformAlertReadCapabilities = (capabilities: Capabilities): boolean =>
+  capabilities[STACK_ALERTS_FEATURE_ID]?.[STACK_ALERTS_SHOW_UI_CAPABILITY] === true ||
+  capabilities[STACK_ALERTS_ONLY_FEATURE_ID]?.show === true ||
+  (hasMlAnomalyAlertRead(capabilities) && hasRacFromAnotherFeature(capabilities));

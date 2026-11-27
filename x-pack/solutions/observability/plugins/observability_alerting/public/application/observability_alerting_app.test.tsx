@@ -303,7 +303,10 @@ describe('ObservabilityAlertingApp', () => {
   });
 
   it('renders the classic rules page at /rules/classic', async () => {
-    const { getByTestId, history } = renderAt(OBSERVABILITY_ALERTING_RULES_V1_PATH);
+    const { getByTestId, history } = renderAt(
+      OBSERVABILITY_ALERTING_RULES_V1_PATH,
+      v1RulesCapabilities
+    );
 
     await waitFor(() => {
       expect(getByTestId('classicRulesPage')).toBeInTheDocument();
@@ -320,6 +323,54 @@ describe('ObservabilityAlertingApp', () => {
       })
     );
     expect(mockTriggersActionsUi.getClassicRulesPage.mock.calls[0][0].showClassicBadge).toBe(false);
+  });
+
+  it('renders the classic rules page without classic rules read so its no-access prompt can show', async () => {
+    const { getByTestId } = renderAt(OBSERVABILITY_ALERTING_RULES_V1_PATH, {
+      securitySolutionRulesV4: { read_rules: true },
+    } as unknown as Capabilities);
+
+    await waitFor(() => {
+      expect(getByTestId('classicRulesPage')).toBeInTheDocument();
+    });
+    expect(mockTriggersActionsUi.getClassicRulesPage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        hideListBackButton: true,
+        host: {
+          app: OBSERVABILITY_ALERTING_APP_ID,
+          pathPrefix: OBSERVABILITY_ALERTING_RULES_V1_PATH,
+        },
+        showClassicBadge: false,
+        tabs: [],
+      })
+    );
+  });
+
+  it('redirects a v2-only user from the classic rules path to universal rules', async () => {
+    const { getByTestId, history } = renderAt(
+      OBSERVABILITY_ALERTING_RULES_V1_PATH,
+      v2RulesCapabilities
+    );
+
+    await waitFor(() => {
+      expect(history.location.pathname).toBe(OBSERVABILITY_ALERTING_RULES_V2_PATH);
+      expect(getByTestId(`rulesPage:${OBSERVABILITY_ALERTING_APP_ID}`)).toBeInTheDocument();
+    });
+    expect(mockTriggersActionsUi.getClassicRulesPage).not.toHaveBeenCalled();
+  });
+
+  it('keeps classic rules settings for a user with universal rules and classic rules settings', async () => {
+    const settingsPath = `${OBSERVABILITY_ALERTING_RULES_V1_PATH}/settings`;
+    const { getByTestId, history } = renderAt(settingsPath, {
+      alerting_v2_rules: { read: true },
+      rulesSettings: { show: true },
+    } as unknown as Capabilities);
+
+    await waitFor(() => {
+      expect(getByTestId('classicRulesPage')).toBeInTheDocument();
+    });
+    expect(history.location.pathname).toBe(settingsPath);
+    expect(mockTriggersActionsUi.getClassicRulesPage).toHaveBeenCalled();
   });
 
   it('shows both rules tabs for a mixed v1 and v2 user on the classic rules page', async () => {
@@ -522,6 +573,19 @@ describe('ObservabilityAlertingApp', () => {
     expect(getByTestId(`episodesPage:${OBSERVABILITY_ALERTING_APP_ID}`)).toHaveAttribute(
       'data-manage-rules-href',
       prepend(`${OBSERVABILITY_ALERTING_BASE_PATH}${OBSERVABILITY_ALERTING_RULES_V2_PATH}`)
+    );
+  });
+
+  it('omits manageRulesHref when the user can read alerts but not rules', async () => {
+    const { getByTestId } = renderAt(OBSERVABILITY_ALERTING_ALERTS_PATH, {
+      stackAlertsOnly: { show: true },
+    } as unknown as Capabilities);
+
+    await waitFor(() => {
+      expect(getByTestId(`episodesPage:${OBSERVABILITY_ALERTING_APP_ID}`)).toBeInTheDocument();
+    });
+    expect(getByTestId(`episodesPage:${OBSERVABILITY_ALERTING_APP_ID}`)).not.toHaveAttribute(
+      'data-manage-rules-href'
     );
   });
 

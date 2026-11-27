@@ -7,8 +7,10 @@
 
 import React, { useContext } from 'react';
 
-const ManageRulesHrefContext = React.createContext<string | undefined>(undefined);
+const ManageRulesHrefContext = React.createContext<string | null | undefined>(undefined);
 
 export const ManageRulesHrefProvider = ManageRulesHrefContext.Provider;
 
-export const useManageRulesHref = (): string | undefined => useContext(ManageRulesHrefContext);
+/** `undefined` uses the rules locator. `null` hides Manage rules. */
+export const useManageRulesHref = (): string | null | undefined =>
+  useContext(ManageRulesHrefContext);
