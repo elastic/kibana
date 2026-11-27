@@ -212,7 +212,7 @@ const openSidebarAndRegisterCallbacks = (
   const mockUpdateProps = mocks.updateProps ?? jest.fn();
   sidebarCtx.onRegisterCallbacks?.({
     updateProps: mockUpdateProps,
-    resetBrowserApiTools: jest.fn(),
+    resetChatConfig: jest.fn(),
     addAttachment: jest.fn(),
     removeAttachmentById: jest.fn(),
   });
@@ -408,6 +408,43 @@ describe('AgentBuilderPlugin', () => {
         newConversation: true,
         attachments: [mockGroup],
       });
+    });
+  });
+
+  describe('the config of the page', () => {
+    const startPlugin = () => {
+      const sidebarApp = createMockSidebarApp();
+      const plugin = new AgentBuilderPlugin(createMockInitializerContext());
+      plugin.setup(createMockCoreSetup(), createMockSetupDeps());
+      return plugin.start(createMockCoreStart(sidebarApp), createMockStartDeps());
+    };
+    const openedOptions = () => jest.mocked(setSidebarRuntimeContext).mock.calls[0][0].options;
+
+    it('opens the sidebar with the config set by the page, starters included', () => {
+      const start = startPlugin();
+      const conversationStarters = [{ label: 'Top errors' }];
+
+      start.setChatConfig({ sessionTag: 'discover', conversationStarters });
+      start.openChat();
+
+      expect(openedOptions()).toEqual({ sessionTag: 'discover', conversationStarters });
+    });
+
+    it('resets the config of the page in a sidebar that is already open', () => {
+      const start = startPlugin();
+      start.openChat({});
+      const [sidebarCtx] = jest.mocked(setSidebarRuntimeContext).mock.calls[0];
+      const resetChatConfig = jest.fn();
+      sidebarCtx.onRegisterCallbacks?.({
+        updateProps: jest.fn(),
+        resetChatConfig,
+        addAttachment: jest.fn(),
+        removeAttachmentById: jest.fn(),
+      });
+
+      start.clearChatConfig();
+
+      expect(resetChatConfig).toHaveBeenCalledTimes(1);
     });
   });
 

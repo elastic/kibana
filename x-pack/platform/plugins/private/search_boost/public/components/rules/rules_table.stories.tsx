@@ -23,7 +23,7 @@ const profileRules = mockRules.filter(
 );
 
 const meta: Meta<StoryProps> = {
-  title: 'Search boost/Boost rules table on a profile page',
+  title: 'Search boost/Tables/Boost rules table on a profile page',
   args: {
     title: 'Boost rules using this profile',
     showsProfile: false,

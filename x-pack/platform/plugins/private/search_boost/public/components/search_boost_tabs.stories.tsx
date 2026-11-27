@@ -18,7 +18,7 @@ import { SearchBoostTabs } from './search_boost_tabs';
 
 const meta: Meta<typeof SearchBoostTabs> = {
   component: SearchBoostTabs,
-  title: 'Search boost/Tabs',
+  title: 'Search boost/Tables/Tabs',
 };
 
 export default meta;

@@ -6,7 +6,5 @@
  */
 
 export enum RiskEngineAuditActions {
-  RISK_ENGINE_CONFIGURATION_GET = 'risk_engine_configuration_get',
   RISK_ENGINE_REMOVE_TASK = 'risk_engine_remove_task',
-  RISK_ENGINE_CONFIGURE_SAVED_OBJECT = 'risk_engine_configure_saved_object',
 }

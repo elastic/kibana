@@ -151,17 +151,26 @@ export const loadVendorSpecs = async ({
 
   const raw: Record<string, OpenApiDocument> = {};
   const protocols: Record<string, GraphQLSpec | McpSpec> = {};
+  // An overlay only applies to the OpenAPI sources, so only they decide whether it can be judged.
   let fetchedEverySource = true;
   for (const [name, source] of Object.entries(manifest.sources)) {
-    const { url, format, endpoints = [] } = source;
-    const snapshot = latest ? undefined : await read(snapshotFile(name, format));
+    const { url, format, endpoints = [], tools, captured } = source;
+    // A captured source has no latest to fetch: its snapshot is the only copy of it there is.
+    const snapshot = latest && !captured ? undefined : await read(snapshotFile(name, format));
+    if (captured && snapshot === undefined) {
+      // It only answers to credentials, so loading it from its URL would fail with a 401.
+      const file = snapshotFile(name, format);
+      throw new Error(
+        `${name} is captured, but ${file} is missing. Capture it again with ` +
+          `node scripts/connector_vendor_api --connector <id> --capture ${name}=<file>.`
+      );
+    }
     if (isProtocolFormat(format)) {
       if (snapshot === undefined) {
         log.info(`Fetching ${name} from ${url}`);
-        protocols[name] = await loadProtocolSpec(url, fetchText, format, endpoints);
+        protocols[name] = await loadProtocolSpec({ url, fetchText, format, endpoints, tools });
       } else {
         protocols[name] = parseProtocolSnapshot(format, snapshot, endpoints);
-        fetchedEverySource = false;
       }
     } else if (snapshot === undefined) {
       log.info(`Fetching ${name} from ${url}`);

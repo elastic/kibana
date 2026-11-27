@@ -12,7 +12,7 @@ import { RulesTab } from './rules_tab';
 
 const meta: Meta<typeof RulesTab> = {
   component: RulesTab,
-  title: 'Search boost/Boost rules tab',
+  title: 'Search boost/Tables/Boost rules tab',
   args: {
     rules: mockRules,
     getRuleLinkProps: (ruleName) => ({

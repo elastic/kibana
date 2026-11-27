@@ -8,9 +8,9 @@
 import type { FC } from 'react';
 import React, { useRef } from 'react';
 import type { DataProvider } from '@kbn/securitysolution-timeline-common';
-import type { AddToTimelineButtonProps } from '@kbn/timelines-plugin/public';
 import type { EuiButtonIcon } from '@elastic/eui';
 import { EuiButtonEmpty, EuiContextMenuItem, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import type { AddToTimelineButtonProps } from '../../../../timelines/components/add_to_timeline/add_to_timeline';
 import { ADD_TO_TIMELINE_ANNOUNCEMENT } from '../../query_bar/components/translations';
 import { extractTimelineCapabilities } from '../../../../common/utils/timeline_capabilities';
 import { generateDataProvider } from '../utils/data_provider';

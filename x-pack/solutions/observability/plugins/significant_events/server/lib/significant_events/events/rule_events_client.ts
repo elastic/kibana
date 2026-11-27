@@ -34,6 +34,7 @@ import {
   type SignificantEventCloseReason,
 } from '@kbn/significant-events-schema';
 import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import { lazySchema, z } from '@kbn/zod/v4';
 import {
   MAX_DEDUP_SCAN_LIMIT,
   type CommonSearchOptions,
@@ -219,6 +220,47 @@ interface RuleEventSourceRow {
 }
 
 type RuleEventSourceRowWithCreatedAt = RuleEventSourceRow & { created_at: string };
+
+export interface WrittenDetectionPair {
+  detection_id: string;
+  rule_uuid: string;
+}
+
+interface RuleEventDataRow extends Record<string, unknown> {
+  data_json: string;
+}
+
+const writtenDataSchema = lazySchema(() => z.object({ signals: z.array(z.unknown()) }));
+const writtenSignalSchema = lazySchema(() =>
+  z.object({
+    metadata: z.object({ detection_id: z.string(), rule_uuid: z.string() }),
+  })
+);
+
+const parseJson = (json: string): unknown => {
+  try {
+    return JSON.parse(json || '{}');
+  } catch {
+    return undefined;
+  }
+};
+
+/** A row that is not valid JSON, or a signal that lacks the pair, is skipped without failing the lookup. */
+const writtenDetectionPairs = (dataJson: string): WrittenDetectionPair[] => {
+  const data = writtenDataSchema.safeParse(parseJson(dataJson));
+  if (!data.success) return [];
+  return data.data.signals.flatMap((signal) => {
+    const parsed = writtenSignalSchema.safeParse(signal);
+    return parsed.success
+      ? [
+          {
+            detection_id: parsed.data.metadata.detection_id,
+            rule_uuid: parsed.data.metadata.rule_uuid,
+          },
+        ]
+      : [];
+  });
+};
 
 /**
  * `.rule-events` doesn't guarantee `source_ids` is an array — bridge docs write a scalar
@@ -722,6 +764,35 @@ export class RuleEventsClient {
     };
   }
 
+  async findDetectionsWrittenByRun({
+    workflowExecutionId,
+    limit,
+  }: {
+    workflowExecutionId: string;
+    limit: number;
+  }): Promise<{ pairs: WrittenDetectionPair[]; truncated: boolean }> {
+    const rows = esqlToObjects<RuleEventDataRow>(
+      await queryEsql({
+        esClient: this.clients.esClient,
+        query: withDataJsonProjection(
+          buildBaseQuery(this.clients.space).where`FIELD_EXTRACT(${esql.col('data')}, ${esql.str(
+            'workflow_execution_id'
+          )}) == ${esql.str(workflowExecutionId)}`
+        )
+          .sort(['@timestamp', 'DESC'])
+          .limit(limit + 1)
+          .keep('data_json'),
+      })
+    );
+    const truncated = rows.length > limit;
+    return {
+      pairs: rows
+        .slice(0, limit)
+        .flatMap(({ data_json: dataJson }) => writtenDetectionPairs(dataJson)),
+      truncated,
+    };
+  }
+
   /**
    * Returns the latest version per `group_hash` for all live (`active` or `recovering`) events
    * within the given time range, optionally narrowed to candidate source/rule identities so the
@@ -953,6 +1024,47 @@ export class RuleEventsClient {
       }
     }
     return live;
+  }
+
+  /**
+   * When each rule last recorded a breach at or after `from`, as epoch milliseconds. A rule runs its
+   * query on a schedule and writes a `breached` signal whenever the query matches, so a recent one says
+   * the query returns rows now. A rule with none is absent: it matched nothing, or did not run. The two
+   * are the same input, so a stopped or failing rule reads as quiet and a healthy verdict resting on it
+   * is not distinguishable from a fresh one. A shard failure fails the lookup, because the rows of the
+   * shards that answered would read as rules that recorded no breach.
+   */
+  async findLatestBreachedSignals({
+    ruleUuids,
+    from,
+  }: {
+    ruleUuids: string[];
+    from: string;
+  }): Promise<Map<string, number>> {
+    const latest = new Map<string, number>();
+    if (ruleUuids.length === 0) return latest;
+
+    const query = esql.from([RULE_EVENTS_INDEX]).where`space_id == ${esql.str(
+      this.clients.space
+    )} AND type == ${esql.str('signal')} AND status == ${esql.str('breached')} AND ${esql.col(
+      'rule.id'
+    )} IN (${ruleUuids.map((ruleUuid) => esql.str(ruleUuid))}) AND @timestamp >= TO_DATETIME(${{
+      from,
+    }})`.pipe`STATS latest = MAX(@timestamp) BY ${esql.col('rule.id')}`;
+
+    const rows = esqlToObjects<Record<string, unknown>>(
+      await queryEsql({ esClient: this.clients.esClient, query, allowPartialResults: false })
+    );
+
+    for (const row of rows) {
+      const ruleUuid = row['rule.id'];
+      const at = typeof row.latest === 'string' ? Date.parse(row.latest) : NaN;
+      if (typeof ruleUuid !== 'string' || Number.isNaN(at)) {
+        throw new Error('findLatestBreachedSignals returned an invalid breach row');
+      }
+      latest.set(ruleUuid, at);
+    }
+    return latest;
   }
 
   async findByEventId(eventId: string): Promise<{ hits: SignificantEventResponse[] }> {

@@ -8,6 +8,7 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/core-chrome-browser",
+    "@kbn/core-chrome-layout",
     "@kbn/config-schema",
     "@kbn/i18n",
     "@kbn/observability-shared-plugin",

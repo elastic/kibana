@@ -66,6 +66,12 @@ const labels = {
   source: i18n.translate('xpack.nightshift.automations.detail.source', {
     defaultMessage: 'Source',
   }),
+  runAs: i18n.translate('xpack.nightshift.automations.detail.runAs', {
+    defaultMessage: 'Run as',
+  }),
+  runAsServiceAccount: i18n.translate('xpack.nightshift.automations.detail.runAsServiceAccount', {
+    defaultMessage: 'Nightshift automations service account',
+  }),
   message: i18n.translate('xpack.nightshift.automations.detail.message', {
     defaultMessage: 'Message',
   }),
@@ -80,6 +86,9 @@ const labels = {
     defaultMessage: 'Automation',
   }),
 };
+
+const getRunAsItems = ({ runsAsServiceAccount }: Run) =>
+  runsAsServiceAccount ? [{ title: labels.runAs, description: labels.runAsServiceAccount }] : [];
 
 const formatDate = (value: string) =>
   new Date(value).toLocaleString(undefined, {
@@ -157,6 +166,7 @@ export const RunDetail = ({
                   description: formatStarted(run.startedAt),
                 },
                 { title: labels.source, description: getRunSourceLabel(run) },
+                ...getRunAsItems(run),
                 { title: labels.message, description: run.message ?? '—' },
                 {
                   title: labels.reason,
@@ -177,6 +187,7 @@ export const RunDetail = ({
               descriptionProps={DETAIL_VALUE_PROPS}
               listItems={[
                 { title: labels.source, description: getRunSourceLabel(run) },
+                ...getRunAsItems(run),
                 { title: labels.message, description: run.message ?? '—' },
                 ...(run.error ? [{ title: labels.reason, description: run.error }] : []),
                 {

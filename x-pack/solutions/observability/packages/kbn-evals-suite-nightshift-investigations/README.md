@@ -282,6 +282,7 @@ that scores it and the CI shard that runs it:
 | ------------------- | ---------------------------- | --------------- | --------------------------------- |
 | `golden`            | `customer0-golden`           | investigation   | `ns-investigation-golden-2710`    |
 | `connector-elastic` | `customer0-connector-probes` | connector-probe | `nightshift/ns-connector-elastic` |
+| `recovery`          | none yet (opt-in)            | recovery        | `ns-recovery-round-1811`          |
 
 Golden cuts are named `ns-investigation-golden-DDMM`, after the cut date: `2710` is 27 October.
 CI runs one pinned cut, so PR, weekly and daily scores share a baseline, and a newer cut on the
@@ -313,13 +314,88 @@ investigation starts.
    series, so compare runs within one cut, not across cuts.
 
 To run a different stored dataset in CI as well, add an entry naming its shard, and add that shard
-to `evals.suites.json` if it is new. Each entry's id is also a `NIGHTSHIFT_DATASETS` selector,
+to `evals.suites.json` if it is new. An entry without a `shard` is opt-in only. Each entry's id is also a `NIGHTSHIFT_DATASETS` selector,
 opt-in like `connector-probe`.
 
 Both datasets query the Customer-0 cluster live, so they run with the `default`
 [connector set](#connector-sets). Selecting them without it fails before any test runs, since
 without a connector the investigations would run without telemetry and score low instead of
 failing.
+
+### Alert-recovery rounds
+
+`ns-recovery-round-1811` scores the round that follows an alert's recovery, so a change to the
+recovery prompt can be compared on the same cases. Each example holds the investigation's earlier
+round (`input.question` and `input.prior_response`), optionally that round's tool calls with bounded
+results (`input.prior_steps`, each `{ tool_id, params, result, note? }`), and the alert's identifiers
+(`input.alert`, whose `recoveredAt` must be a real date). [`compose.ts`](evals/recovery/compose.ts)
+builds the recovery prompt from the branch under test when the run starts, so the stored dataset never
+pins a prompt, and the file is rejected on load if a case would compose to a message over the start
+route's 10,000-character limit. The earlier round (request, numbered steps, answer) goes to the
+investigator as `context.earlier_round`, because it does not fit in that message; the eval cannot
+write a native two-round conversation.
+
+The `customer0-recovery` tag holds the agent to evidence from within an hour of the recovery, and
+forbids it chat and incident records. Because those records are off limits here, the eval's
+evidence-families judge leaves that family out; the online judge, in production, counts it.
+`rca_anti_leakage` is excluded from this eval: it scores evidence after the recovery as leakage,
+which the guardrail's extra hour allows and a recovery round is meant to read.
+
+The examples hold customer telemetry, so they are not in the repository. The dataset file is JSON
+with the shape the run validates:
+
+```json
+{
+  "description": "What the cases are, for the dataset list.",
+  "tags": ["nightshift", "customer0-recovery"],
+  "examples": [
+    {
+      "input": {
+        "question": "<the earlier round's request>",
+        "prior_response": "<the earlier round's answer>",
+        "prior_steps": [{ "tool_id": "nightshift_sandbox_bash", "params": {}, "result": "" }],
+        "alert": { "alertUuid": "…", "alertId": "…", "recoveredAt": "2026-11-12T09:17:53.302Z" }
+      },
+      "metadata": { "case_id": "recovery-…" }
+    }
+  ]
+}
+```
+
+`tags` must include `customer0-recovery` and every `case_id` must be distinct. Register or refresh the
+dataset by running the eval once with the examples file, and score it later without the file:
+
+```bash
+# register (upserts the dataset under its name)
+NIGHTSHIFT_DATASETS=recovery NIGHTSHIFT_RECOVERY_EXAMPLES_FILE=/path/to/ns-recovery-round-1811.json \
+  node scripts/evals start --suite nightshift-investigations --profile dev-vault --repetitions 1 \
+  --model eis-anthropic-claude-5-5-sonnet --judge eis-openai-gpt-6-sol
+
+# score the stored dataset
+NIGHTSHIFT_DATASETS=recovery \
+  node scripts/evals start --suite nightshift-investigations --profile dev-vault --repetitions 3 \
+  --model eis-anthropic-claude-5-5-sonnet --judge eis-openai-gpt-6-sol
+```
+
+The cases carry no reference answers, so the reference-based RCA judges skip them. The recovery
+judges (`causal_checklist`, `root_cause_evidence` and `evidence_families`) share their prompts with
+the online evals and run on every case, next to execution success and tool-call health.
+
+#### Production replay
+
+`ns-recovery-production-1811` replays recovery rounds the production agent already ran, with the same
+recovery judges, so a prompt can be compared with what production did. No investigation runs, and the
+examples come from `NIGHTSHIFT_RECOVERY_PRODUCTION_FILE`, never the repository. Each example holds the
+recovery message in `input.question` and the round in `input.production`:
+`{ "steps": [{ "tool_id", "params", "result" }], "conclusion": "…", "summary"?: "…", "severity"?: "low" | "medium" | "high" | "critical" }`.
+The file has the same envelope as above.
+
+```bash
+NIGHTSHIFT_DATASETS=recovery-production \
+  NIGHTSHIFT_RECOVERY_PRODUCTION_FILE=/path/to/ns-recovery-production-1811.json \
+  node scripts/evals start --suite nightshift-investigations --profile dev-vault --repetitions 1 \
+  --model eis-anthropic-claude-5-5-sonnet --judge eis-openai-gpt-6-sol
+```
 
 ## Connector sets
 
@@ -334,7 +410,7 @@ is the group of preconfigured connectors one Scout stack starts with:
 | `orcabench` | none                                                                   | `orcabench-es` (`.elasticsearch`), by the eval | `nightshiftOrcaEs.{url,username,password}` |
 
 To add a connector to a set, declare it in the set's YAML and add its id to `CONNECTOR_SETS`. The
-hook selects `orcabench` on the ORCA shard (or `NIGHTSHIFT_DATASETS=orcabench`), and `default`
+hook selects `orcabench` on the ORCA shards (or `NIGHTSHIFT_DATASETS=orcabench`), and `default`
 whenever Elasticsearch credentials are configured. It exports `NIGHTSHIFT_CONNECTOR_SET` and points the
 Scout config set at the set's YAML; the eval then saves every connector in the set on the
 investigator through the Agent Builder agents API (`saveConnectorSetOnInvestigator` in
@@ -359,6 +435,7 @@ Profile values take precedence over these shell fallbacks, which replace the for
 | ----------------------- | --------------------------------------------------------------------------------- |
 | `NIGHTSHIFT_ES_URL`     | Elasticsearch endpoint, without embedded credentials. Requires the API key below. |
 | `NIGHTSHIFT_ES_API_KEY` | Encoded restricted API key, without the `ApiKey` prefix. Requires the URL above.  |
+| `NIGHTSHIFT_ES_URL_OVERRIDE`, `NIGHTSHIFT_ES_API_KEY_OVERRIDE` | Set both to use your own endpoint and key for one run instead of the profile's `nightshift.telemetry` block, which the plain variables above never override. Stop the Scout stack first, since it reads the key only when it starts. |
 
 A `readableIndices` field left in Vault is ignored.
 
@@ -601,21 +678,45 @@ diluted.
 
 ## Writeup
 
-`NIGHTSHIFT_DATASETS=writeup` rewrites the agent's final reply from a recorded investigation under
+The `nightshift-investigations-writeup` suite rewrites the agent's final reply from a recorded investigation under
 a given prompt, and scores how it's written up. No investigation runs: for each recorded round it
 rebuilds what the model saw just before it replied, and asks it to write that reply again under the
 investigator prompt in your checkout (or another one, below). A run takes minutes and changes only with the prompt, the model and the judge, so it can
 show a prompt change's before and after. How well the agent investigates is the end-to-end evals'
 job (trace-only and ORCA above).
 
-It is opt-in: unset and `all` never select it. It needs model connectors but no sandbox or
-telemetry, so it runs on a plain Scout server:
+It has its own suite and Playwright config (`writeup.playwright.config.ts`), so the
+`nightshift-investigations` suite never runs it. `NIGHTSHIFT_DATASET_NAME` picks the data: a stored
+dataset's name, or a conversations file (a `.json` path). Unset, it runs the pinned ORCA release. It
+needs model connectors but no sandbox or telemetry, so it runs on a plain Scout server:
 
 ```bash
-NIGHTSHIFT_DATASETS=writeup node scripts/evals start \
-  --suite nightshift-investigations --profile dev-vault --scout-arch stateful \
-  --model eis-anthropic-claude-5-sonnet --judge eis-anthropic-claude-5-opus
+node scripts/evals start --suite nightshift-investigations-writeup --profile dev-vault \
+  --model eis-anthropic-claude-5-5-sonnet --judge eis-openai-gpt-6-sol
 ```
+
+The reply rules live in their own file,
+[`response_style.md.text`](../../plugins/nightshift_investigations/server/agents/investigation/instructions/response_style.md.text),
+which the investigator prompt pulls in at `{{response_style_section}}`. A PR that changes that file
+(or this eval) gets the `evals:nightshift-investigations-writeup` label from `.github/paths-labeller.yml`, and the
+label runs the `nightshift-investigations-writeup` suite: this eval alone, on Sonnet 5.5, judged by GPT 6 Sol.
+The PR run rewrites each reply twice, under the PR's prompt and under the prompt at the commit the
+PR branched from, and the report's `vs_baseline` row is the head to head between them: more wins
+than losses means the change reads better to the judge. A PR that doesn't change the prompt (only
+the eval, say) has the same prompt on both sides, so the run skips the baseline and scores one arm.
+The command above reproduces it locally with `NIGHTSHIFT_WRITEUP_BASELINE_PROMPT=merge-base`.
+
+A change that only touches how the agent replies needs nothing else. A change to the method, the
+tools or the recorder can change how the agent investigates, which this eval can't see, so it
+needs the end-to-end evals too. To skip the run on a PR, add `evals:skip-nightshift-investigations-writeup`.
+
+The same suite runs on `main` every day and publishes to the golden cluster, so PR runs and
+the daily history share one suite id. It has its own Playwright config
+(`writeup.playwright.config.ts`) and runs on the plain evals server, without the Nightshift Vault
+secret or Scout hook: replay never touches the sandbox or a live target. That's the history to
+watch `main` over time. A prompt change is still measured against a baseline in the same run
+(below, and automatic on a PR), not against an old run: the head to head needs both replies in front of one judge, and an
+old run used whatever harness, judge and dataset it had then.
 
 `--model` writes the replies (Sonnet 5 wrote most production rounds) and `--judge` scores them.
 Use a judge from another family than the model, or at least a different model, so nothing grades
@@ -690,22 +791,36 @@ candidate before it replaces its golden file.
 
 ### Before and after a prompt change
 
-Run on `main` for a baseline, then on the prompt branch. To score both prompts in one run and add a
-head-to-head comparison, point `NIGHTSHIFT_WRITEUP_BASELINE_PROMPT` at a git ref or a prompt file.
+Set `NIGHTSHIFT_WRITEUP_BASELINE_PROMPT` to score a second prompt in the same run and compare the two
+head to head. Use `merge-base`, the commit the branch started from, so the only difference is the
+branch's own change; a moving ref like `origin/main` would also pick up other people's changes to
+the prompt. A git ref is read at the commit it names when the run starts, and the report labels it
+with that commit (`merge-base@1a2b3c4d5e`). A prompt file works too. On a PR build it defaults to
+the commit the PR branched from (`PR_MERGE_BASE`, which CI exports); set it empty to turn that off.
 `NIGHTSHIFT_WRITEUP_PROMPT` does the same for the prompt under test, which otherwise is the
-checkout's, so a branch's prompt can be measured without switching to it:
+checkout's, so a branch's prompt can be measured without switching to it. Without a baseline a run
+scores one prompt, and the only comparisons are the goldens and `recorded`, the reply the
+conversation actually got under an older prompt.
 
 ```bash
-NIGHTSHIFT_DATASETS=writeup NIGHTSHIFT_WRITEUP_BASELINE_PROMPT=origin/main \
-  node scripts/evals run --suite nightshift-investigations --profile dev-vault \
-  --model eis-anthropic-claude-5-sonnet --judge eis-anthropic-claude-5-opus
+NIGHTSHIFT_WRITEUP_BASELINE_PROMPT=merge-base \
+  node scripts/evals run --suite nightshift-investigations-writeup --profile dev-vault \
+  --model eis-anthropic-claude-5-5-sonnet --judge eis-openai-gpt-6-sol
 ```
 
 Replies are cached under `data/nightshift_writeup/cache/` by round, model, prompt and
-repetition, so a re-run only makes judge calls (`NIGHTSHIFT_WRITEUP_CACHE=off` regenerates). One
-repetition per round is usually enough to compare prompts, since averaging over rounds evens out a
-single reply's randomness. Use `--repetitions 2` or more before replacing a golden, which is decided
-per round, or when two prompts are only a few words apart.
+repetition, so a re-run only makes judge calls; delete that folder to regenerate. A round that ends
+without a reply (usually the model still wanting to query) is tried once more, under either prompt,
+before it counts as missing. Use
+`--repetitions 2` or more before replacing a golden, which is decided per round, or when two
+prompts are only a few words apart.
+
+How big a margin means something: before same-prompt baselines were skipped, a PR run that didn't
+change the prompt compared it with itself ([build 2151](https://buildkite.com/elastic/kibana-evals-pr-llm-evals/builds/2151))
+and came out 41–27, from sampling and judge noise alone. On the 20-round ORCA set that's about 70
+votes, and a sign test only clears p < 0.05 from about 43–25. Treat that as a floor, not a pass
+mark: votes on the same round aren't independent, so the real noise is wider. A change that should
+matter needs a clearly bigger margin, or `--repetitions 2` and a second look, before it counts.
 
 ### Judge agreement
 
@@ -758,8 +873,8 @@ node -r @kbn/setup-node-env x-pack/solutions/observability/packages/kbn-evals-su
   --goldens-dir x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations/evals/writeup/goldens/writeup_orca_v2 \
   exports/*.json
 gcloud storage cp writeup_orca_v2.json gs://nightshift-datasets/investigation-engine/writeup/orca/v2/
-NIGHTSHIFT_DATASETS=writeup NIGHTSHIFT_WRITEUP_EXAMPLES_FILE=writeup_orca_v2.json \
-  node scripts/evals start --suite nightshift-investigations --profile dev-vault \
+NIGHTSHIFT_DATASET_NAME=writeup_orca_v2.json \
+  node scripts/evals start --suite nightshift-investigations-writeup --profile dev-vault \
   --model <model-endpoint-id> --judge <model-endpoint-id>
 ```
 
@@ -774,12 +889,12 @@ node -r @kbn/setup-node-env x-pack/solutions/observability/packages/kbn-evals-su
   --dataset nightshift/writeup-c0 --rounds last exports/*.json
 
 # Run it; the executor stores it under its dataset name in the profile's evaluations cluster
-NIGHTSHIFT_DATASETS=writeup NIGHTSHIFT_WRITEUP_EXAMPLES_FILE=~/private/writeup-c0.json \
-  node scripts/evals start --suite nightshift-investigations --profile dev-vault ...
+NIGHTSHIFT_DATASET_NAME=~/private/writeup-c0.json \
+  node scripts/evals start --suite nightshift-investigations-writeup --profile dev-vault ...
 
 # Later runs read the stored dataset
-NIGHTSHIFT_DATASETS=writeup NIGHTSHIFT_DATASET_NAME=nightshift/writeup-c0 \
-  node scripts/evals run --suite nightshift-investigations --profile dev-vault ...
+NIGHTSHIFT_DATASET_NAME=nightshift/writeup-c0 \
+  node scripts/evals run --suite nightshift-investigations-writeup --profile dev-vault ...
 ```
 
 `--prototype-goldens <dir>` reads the prototype's last-round goldens, and `--goldens <file>` any
@@ -851,16 +966,13 @@ Follow [`evals/connector_probe/`](evals/connector_probe) for a quick agent call,
 
 | Variable                         | Effect                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `NIGHTSHIFT_DATASETS`            | Comma-separated dataset ids (whitespace trimmed), which can be combined, e.g. `trace-only,wiki-optimize`. `trace-only` selects the file-driven investigations; unset or `all` runs them too, and so does a stored `NIGHTSHIFT_DATASET_NAME` when selection is unset. Without sandbox credentials, unset, `all` and `trace-only` fail before any test runs, even when Scout is reused. `connector-probe` selects the [connector probes](#connector-probes), which unset and `all` never include; neither do the ids of the [Customer-0 stored datasets](#customer-0-stored-datasets). `wiki-optimize` selects the [Wiki optimizer replay](#wiki-optimizer-replay), which unset and `all` never include and which needs no sandbox credentials. `writeup` selects the [writeup eval](#writeup), which likewise is never included by unset or `all` and needs no sandbox credentials. `orcabench` selects the isolated ORCA dataset and cannot be combined with other ids; it requires an ORCA-configured Scout server. `reinforcement` selects the [reinforcement micro-eval](#reinforcement-micro-eval) and enables decision trees without turning Wiki on; it needs sandbox credentials, cannot be combined with other ids or with `NIGHTSHIFT_KNOWLEDGE`, and unset and `all` never include it. Unknown ids fail early. |
+| `NIGHTSHIFT_DATASETS`            | Comma-separated dataset ids (whitespace trimmed), which can be combined, e.g. `trace-only,wiki-optimize`. `trace-only` selects the file-driven investigations; unset or `all` runs them too, and so does a stored `NIGHTSHIFT_DATASET_NAME` when selection is unset. Without sandbox credentials, unset, `all` and `trace-only` fail before any test runs, even when Scout is reused. `connector-probe` selects the [connector probes](#connector-probes), which unset and `all` never include; neither do the ids of the [Customer-0 stored datasets](#customer-0-stored-datasets). `wiki-optimize` selects the [Wiki optimizer replay](#wiki-optimizer-replay), which unset and `all` never include and which needs no sandbox credentials. `orcabench` selects the isolated ORCA dataset and cannot be combined with other ids; it requires an ORCA-configured Scout server. `reinforcement` selects the [reinforcement micro-eval](#reinforcement-micro-eval) and enables decision trees without turning Wiki on; it needs sandbox credentials, cannot be combined with other ids or with `NIGHTSHIFT_KNOWLEDGE`, and unset and `all` never include it. Unknown ids fail early. |
 | `NIGHTSHIFT_KNOWLEDGE`           | Comma-separated knowledge systems (`memory`, `wiki`, `decision-trees`) to turn on and restore before the first example. Unset turns them all off. See [knowledge switches](#knowledge-switches).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | `NIGHTSHIFT_PROBE_EXAMPLES_FILE` | Examples file for `connector-probe`; required when it is selected. See [connector probes](#connector-probes).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | `NIGHTSHIFT_WIKI_REPLAY_FILE` | Replay file for `wiki-optimize`; the bundled synthetic examples when unset. Same `nightshift/` dataset-file format as the investigation examples, with the round and expectation fields in [Wiki optimizer replay](#wiki-optimizer-replay). |
 | `NIGHTSHIFT_PROBE_TIME_BUDGET_S` | Seconds a probe may take before `within_time_budget` scores 0 (default 30).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `NIGHTSHIFT_WRITEUP_EXAMPLES_FILE` | Conversations file for `writeup`, stored on the run. See [writeup](#writeup). |
 | `NIGHTSHIFT_WRITEUP_PROMPT` | Git ref or prompt file the writeup eval tests instead of the checkout's investigator prompt. |
-| `NIGHTSHIFT_WRITEUP_BASELINE_PROMPT` | Git ref or prompt file the writeup eval also rewrites replies under, and compares head to head. |
-| `NIGHTSHIFT_WRITEUP_VOTES` | Pairwise votes per order for the writeup judges (default 2). |
-| `NIGHTSHIFT_WRITEUP_CACHE` | `off` regenerates writeup replies instead of reading the cache. |
+| `NIGHTSHIFT_WRITEUP_BASELINE_PROMPT` | Git ref (`merge-base` for where the branch started) or prompt file the writeup eval also rewrites replies under, and compares head to head. Defaults to `PR_MERGE_BASE` on a PR build; empty turns it off. |
 | `NIGHTSHIFT_REINFORCEMENT_DATASET`     | When set, the micro-eval runs the first examples of this Customer-0 investigation dataset instead of replaying the committed rounds. A new tree from that path cannot declare merges. |
 | `NIGHTSHIFT_REINFORCEMENT_LIMIT`       | How many of that dataset's examples to run, from 1 to 5. Defaults to 3. Used only with `NIGHTSHIFT_REINFORCEMENT_DATASET`. |
 | `NIGHTSHIFT_REINFORCEMENT_TRACES_FILE` | JSON file of full investigation rounds. When set, the micro-eval replays those rounds instead of the committed ones. |
@@ -948,40 +1060,139 @@ PUT /_security/role/nightshift-orcabench-eval
 }
 ```
 
-ORCA's judges bind to `eis-openai-gpt-5-4`, not the agent connector; Customer-0's bind to
-`eis-openai-gpt-6-sol`. ORCA's model is the paper's judge model, but not its settings: the paper runs
-GPT-5.4 at reasoning effort "high", temperature 1, and 128,000 max tokens. Our judges answer
-through a forced `score` tool call, so the inference adapter sends reasoning effort "none" to
-gpt-5 models, and temperature falls back to the provider default of 1. Until the judges can set
-an effort ([#297542](https://github.com/elastic/kibana/pull/297542)), ORCA scores here come from a
-judge that does not reason and are not directly comparable to the paper's. `goal_pass` is unchanged: it scores the single best hypothesis and passes at
-4/5. ORCA also records three scores. RCA accuracy is 1 when the report names every flag in
-`metadata.plausible_flags`. A flag named without its variant still counts, and an extra cause
-does not fail accuracy. Hallucination is 1 when the report names at least one cause and none of
-them is in that set, and its direction is minimize. An empty incident report scores 0 on both.
-Only the control judge uses ORCA's prompt. Accuracy and hallucination use our own extraction
-prompt, `OrcaFlagsJudgePrompt`, which lists the flags a report names, and the set logic above is
-applied in code. They do not use the paper's incident judge prompt (`JUDGE_PROMPT_MULTI_HEADER`
-plus its scoring footer).
-Control passes an empty report and fails when a report places an incident inside
-`metadata.quiet_window`. Its judge prompt is ORCA's `JUDGE_PROMPT_CONTROL` from the Harbor tasks'
-`check_prediction.py`, word for word except that it answers through the `score` tool. Like ORCA's
-judge reading the agent's report file, it sees the whole report: the answer, the evidence, the
-impact summary and the proposed actions. It gets
-`current_time` and the quiet window moved ten minutes inward on each defined side, with an
-open-ended bound shown as `null`, as ORCA does. Past incidents and timeline lines that only record
-when the issue was reported are not false positives. A run that crashed, timed out, or ended without recording anything has
-no answer, so all three scores are `unscored` (null) instead of reading it as an empty report,
-as ORCA leaves unscored trials out. A run whose last agent round failed or was aborted counts
-as crashed even when it recorded a verdict first. A report too large to persist keeps only its
-summary and conclusion, so it is unscored too. `execution_success` still counts those runs, so quote it next
-to any ORCA rate. A run that ended without a verdict but recorded hypotheses is scored on them.
-A control is `metadata.control`, `metadata.task_type === "control"`,
-`metadata.no_incident === true`, or `metadata.section === "control"`. Accuracy and hallucination
-stay `n/a` on a control, including when its flag set is empty. Golden drops an empty metadata
-array on write, so the ten controls keep those markers and do not store `plausible_flags: []`.
+### Grading
+
+ORCA grades a `report.md` its agent writes at the end of a task, with the verifier every Harbor task
+ships as `tests/check_prediction.py`. This eval does the same in two steps.
+
+**report.md.** After an ORCA investigation finishes, the model under test (the agent's connector,
+not the judge) makes one more call that turns the investigation into ORCA's four-section report:
+Summary, Timeline, 5 Whys and Remediation. It reads the question, the recorded verdict, summary,
+hypotheses with their evidence, impact, and the tool calls with their results. Its instructions
+are the `## Instructions` section of the tasks' `instruction.md`, identical in all 755, in
+[`orca_instructions.text`](evals/investigation/orca/report_prompt/orca_instructions.text). The
+only change is "return an empty report" for "write an empty file to `/app/report.md`". It may use
+only what the investigation recorded and add no cause. Where a section asks for PromQL or Lucene
+it cites the ES|QL the investigation ran.
+
+The report is empty only when the investigation found no incident. ORCA asks "whether an incident
+actually occurred", not whether the reported symptom was confirmed, and every incident task's
+answer set is the flags active on the report day before detection that plausibly match the symptom
+(paper §B5); a control's is empty. An incident here is a period of failed or slow requests the
+investigation treated as a problem, even outside the reported window, already over, or judged
+unrelated to the symptom; isolated errors it dismissed as noise (one failed request, scanner 404s,
+start-up warm-up) are not. So an investigation that concludes "no incident in the reported window"
+but describes an earlier failure still gets a report naming that failure's cause, and ORCA's judge
+scores it, as a hallucination when that cause is not in the answer set. An empty report on an
+incident task scores 0 on every rubric and is never a hallucination; on a control it passes.
+ORCA's 5 Whys ends at "a process or system gap"; the writer stops at the investigation's own
+finding unless the record establishes such a gap, and keeps fixes it did not establish under
+Remediation, so the report does not invent a contributing cause. The report is stored on the task output as `orca_report_md`
+(at most 100,000 characters). A failed write is recorded as `orca_report_error`.
+
+**Graders.** [`orca/check_prediction.ts`](evals/investigation/orca/check_prediction.ts) ports the
+verifier: the rubric rendering (including `tabulate`'s GitHub tables), `build_judge_prompt`,
+`JUDGE_PROMPT_CONTROL`, both output schemas and the score maths.
+[`check_prediction.test.ts`](evals/investigation/orca/check_prediction.test.ts) holds the port to the
+Python's own output, byte for byte: judge prompts, three control prompts, both schemas and the
+verdict aggregations, generated by
+[`generate_parity_fixtures.py`](evals/investigation/orca/__fixtures__/generate_parity_fixtures.py)
+with `tabulate` 0.10.0. The committed fixture renders hand-written rubrics in ORCA's format
+([`synthetic_rubrics.json`](evals/investigation/orca/__fixtures__/synthetic_rubrics.json)) that cover
+every rendering path, so no ORCA ground truth is in the repo. To check the port against ORCA's own
+rubrics, one task for each of the 55 rubric sets the public tasks use, generate the full fixture
+outside the repo and point the same test at it:
+
+```bash
+python3 -I evals/investigation/orca/__fixtures__/generate_parity_fixtures.py \
+  <task>/tests/check_prediction.py --harbor <orca-bench dir> /tmp/parity_harbor.json
+ORCA_PARITY_FIXTURES=/tmp/parity_harbor.json node scripts/jest \
+  x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations/evals/investigation/orca/check_prediction.test.ts
+```
+
+**Rubrics.** The 32 rubric files the public tasks use live in the Golden dataset
+`nightshift/orca-bench-rubrics-v1` (`61ed5e46-7734-53a3-8396-f01ab4c47454`, 32 examples, sha256
+`6f02f19ae6ec61dfd92d5a5e838737d9eaa4fc3421e149e65c15fda4050ee6d6`), one example per event id:
+input `{event_id}`, output `{rubric}`, the task's `tests/rubrics/<event_id>.json` unchanged. Tasks
+reference them through `metadata.orca_expected.events[].event_id`. They are a dataset of their own
+rather than task metadata because the 755 would carry about 32 MB of them, over the dataset API's
+5 MB request limit. The eval loads the release by name and fails before any judge
+runs when its id, count or content digest ([`rubrics.ts`](evals/investigation/orca/rubrics.ts))
+differs. The digest keeps each rubric's key order, which the judge prompt renders in. ORCA's data and rubrics are CC BY 4.0, (c) the ORCA-bench authors; keep that attribution
+when sharing results or the rubrics.
+
+The judge is `eis-openai-gpt-5-4`, the paper's judge model, not the agent connector (Customer-0's
+judges bind to `eis-openai-gpt-6-sol`). An incident's
+judge gets ORCA's prompt for its rubrics (one per `metadata.orca_expected.events[].event_id`, in
+the verifier's order) with `orca_report_md` in place of `report.md`. It answers per rubric whether
+the report placed the onset within 10 minutes, named the flag, explained the mechanism, and cited
+each metric, log and trace cluster, plus a 0-3 score. A materially wrong claim lowers every
+rubric's score by one. The scores read those verdicts as the verifier does:
+
+| Score                  | Value                                                                                                          | Applies to |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------- | ---------- |
+| `orca_rca_accuracy`    | 1 when **every** rubric's flag was named (the prompt says "any one"; the code and the paper's numbers use all) | incidents  |
+| `orca_rca_depth`       | the paper's reward: mean per-rubric score / 3                                                                  | incidents  |
+| `orca_hallucination`   | 1 when the report is non-empty and matched no rubric's flag, even if it names no cause; minimize               | incidents  |
+| `orca_control`         | 1 when the report is empty or places no incident inside the quiet window                                       | controls   |
+| `orca_report_fidelity` | 1 when `report.md` adds no cause and keeps the investigation's verdict                                         | both       |
+
+The three incident scores come from one judge call per run. An empty incident report needs no
+call: every rubric scores 0 and it is not a hallucination. The control judge gets ORCA's
+`JUDGE_PROMPT_CONTROL` with `current_time` and the quiet window from `orca_expected`, each defined
+bound moved ten minutes inward and printed as Python's `isoformat` does, an open bound as `null`.
+An empty control report passes without a call. `orca_report_fidelity` is our own check, by the same
+judge, that the report step names no root or contributing cause the investigation did not and does
+not turn an incident into an empty report or the reverse. The judge also sees the task
+description, so facts taken from it are not counted as additions.
+
+The prompts are ORCA's byte for byte, and so is the incident judge's output schema, sent as the
+`score` tool's parameters. The inference API takes only `type`, `properties` and `required` at a
+tool schema's top level, so the top-level `additionalProperties: false` is left out; nested schemas
+keep theirs. The control judge's tool asks for `reasoning` before `claims_incident_in_quiet_window`:
+with the decision first it committed before comparing the times and contradicted its own
+reasoning. That field's description ("Compare each reported time of active impact with the window
+bounds, then state the verdict.") is the one instruction the control judge sees that ORCA's does
+not. `orca_hallucination` follows the verifier (`hallucinate_any = not any flag matched` for any
+non-empty report), which is stricter than the paper's formal definition (a named root cause outside
+the answer set): a non-empty report that names no cause counts. An incident judge answer without a
+verdict for every rubric is retried rather than scored. The metric checklist asks whether the
+report cited a query targeting each rubric's Prometheus metric family; the report cites the ES|QL
+the agent ran over the ORCA indices, so a correct query under different field names may not be
+credited. The paper runs GPT-5.4 at reasoning effort "high", temperature 1 and 128,000 max tokens.
+These judges answer through a forced tool call, so the inference adapter sends reasoning effort
+"none" to gpt-5 models, and temperature falls back to the provider default of 1. Until judges can
+set an effort ([#297542](https://github.com/elastic/kibana/pull/297542)), the incident judge decides
+without reasoning, and ORCA scores here are not directly comparable to the paper's.
+
+**Failed runs.** The paper retried failed trials except those that raised `AgentTimeoutError` or
+`NonZeroAgentExitCodeError` (Appendix I), and the verifier gives a trial without `report.md`
+reward 0, which Harbor aggregates as 0 on every score. So a run that failed because of the agent is
+scored as having no report: an investigation that timed out, whose agent round failed, or that
+ended having recorded nothing scores 0 on accuracy, depth and hallucination, fails a control, and
+is `n/a` for report fidelity. A failure of the harness, which the paper would have retried, is
+`unscored` (null) and left out: an investigation that was never created, a round aborted from
+outside, a conversation that did not persist, a structured report too large to keep its
+hypotheses, or a `report.md` that could not be written or was cut at its bound. `execution_success`
+counts the first three. The eval also fails when fewer than 80% of the reports it tried to write
+can be graded, and before any investigation when a task's event has no rubric. Quote
+`execution_success`, and the number of unscored runs, next to any ORCA rate. A run that ended without a verdict but recorded hypotheses gets a report written from them and is scored.
+A task without `orca_expected`, the 10 private medium tasks of the sampled 50, is `n/a`.
+
+**Earlier scores.** Before the port, accuracy and hallucination came from our own flag extraction
+(`OrcaFlagsJudgePrompt`) over the structured answer, compared with `metadata.plausible_flags` in
+code: the judge saw no evidence and no rubric, a flag named without a variant matched any variant,
+and hallucination needed at least one named cause. A slice 1 spot check found 22 partial hits and
+16 "no incident found" reports among incident runs that scored 0 on both, which ORCA's code also
+scores 0 on both when the investigation found nothing at all and its report is empty.
+`NIGHTSHIFT_ORCA_LEGACY_JUDGES=true` adds those two scores as `orca_flags_rca_accuracy` and
+`orca_flags_hallucination`, to compare both graders on the same runs.
+
+`goal_pass` is unchanged: it scores the single best hypothesis and passes at 4/5.
 `rca_anti_leakage` judges trajectory leakage of incident records and post-resolution writeups. It
-does not see prompt leakage, and a feature-flag key in telemetry is a legitimate signal.
+does not see prompt leakage, and a feature-flag key in telemetry is a legitimate signal. Nor does
+it look for the rubrics themselves: they are public in the ORCA-bench repository, and the sandbox
+can reach GitHub, as the paper's agents could reach the internet.
 
 `nightshift/orca-sampled50-v4` copies `plausible_flags` from the public Harbor dataset
 `orca-bench/orca-bench` (`sha256:2add497ac2f93468dba1b83977c295a784c89031754e6a35520195345ad62ada`).
@@ -1022,8 +1233,8 @@ a correlation and is not ORCA accuracy.
 
 Do not compare these scores with the paper's published rates yet. This agent reads telemetry with
 ES|QL and reaches the Astronomy Shop source by cloning it; the paper's agents have a checkout and
-Grafana (Prometheus, Jaeger, OpenSearch), an hour per task, and a `report.md` graded by ORCA's own
-judge. The closer paper baseline is the telemetry-only Sonnet 4.6 result, 21.4%,
+Grafana (Prometheus, Jaeger, OpenSearch), an hour per task, and write `report.md` themselves; ours
+is written after the investigation (see [grading](#grading)). The closer paper baseline is the telemetry-only Sonnet 4.6 result, 21.4%,
 against 30.9% for the same model with code. The 40 matched tasks above are the Verified view, so
 a later writeup may quote Verified only for those 40, still with this tool-surface caveat. The
 paper's 25.3% and 10.0% are not like-for-like.
@@ -1060,17 +1271,19 @@ Every root-cause event of the 755 falls inside the ORCA cluster's data. Its logs
 metrics each cover every hour from 2026-04-19T03:00Z through the 2026-04-24T19:00Z hour, which
 holds ORCA's last snapshot.
 
-The 755 is a periodic baseline, not a CI shard. The `orcabench` shard budgets 240 minutes for 50
-tasks, and release-gate issue elastic/nightshift-program#1893 wants gates under 30 minutes. At
+The 755 is a periodic baseline, not a CI shard. Each `orcabench-<index>-of-5` shard budgets 120
+minutes for its 10 of the sampled 50 tasks, and release-gate issue
+elastic/nightshift-program#1893 wants gates under 30 minutes. At
 eight investigations at a time the 755 needs tens of hours, so run it in slices. The score API
 returns at most 10,000 scores per experiment, so a run that would write more (the unsliced 755
 writes about 13,600) fails before any investigation starts.
 `NIGHTSHIFT_ORCA_RELEASE=public755` selects the release, and `NIGHTSHIFT_ORCA_SLICE=<index>/<count>`
-runs one contiguous part of it in `case_id` order. Each run validates the whole release before
-slicing. A slice runs as its own dataset, `nightshift/orca-bench-public755-v2/slice-<index>-of-<count>`,
-because the eval client upserts the dataset it runs, and under the release name a slice would
-remove the other tasks. The eval stores the slice first and runs it with the example ids the
-server gave it, so its scores show up in each example's history in the Evals UI. Keep one `<count>` for a baseline and join the slices on `case_id`.
+runs one contiguous part of it in `case_id` order. Each run validates the whole release, then runs
+only its slice's examples against the release itself, so every slice's scores land on the
+release's examples and show up in their history in the Evals UI. Each slice is its own experiment,
+`Nightshift ORCA investigation traces (slice <index>/<count>)`, so a slice's checks see only its own
+scores, while slices of one build share its execution and so merge into one row of a comparison.
+The slice count can change between runs without breaking that history.
 
 Report the 755 by `orca_difficulty` (Easy, Medium, Hard), so a rate is read against the paper's
 tier of the same name, with `execution_success` and the number of unscored runs next to each
@@ -1097,7 +1310,7 @@ NIGHTSHIFT_DATASETS=orcabench NIGHTSHIFT_ORCA_TELEMETRY_VARIANT=no-flags \
 The Nightshift Vault config must hold a `nightshiftOrcaEs` block (see
 [`vault/config.example.json`](vault/config.example.json)) with the ORCA cluster's `url` and the
 `username` and `password` of the eval user above. The Scout hook refuses an ORCA run without them,
-and exports them only to the ORCA shard. The block also holds `apiKey`, the read-only ORCA key that
+and exports them only to the ORCA shards. The block also holds `apiKey`, the read-only ORCA key that
 the [local dev setup](../../plugins/nightshift_investigations/scripts/local_dev/) reads; the evals
 themselves don't use it.
 
@@ -1105,9 +1318,11 @@ themselves don't use it.
   [`orca_dataset.ts`](evals/investigation/orca_dataset.ts). A changed release fails before any
   investigation starts, as does a source or key that fails the [preflight](#telemetry-cutoff).
 - Each task runs once, at most eight at a time, and Playwright doesn't retry the test.
-- The eval fails when fewer than 80% of investigations complete, or when none returned ORCA
-  telemetry. Judge scores are advisory.
-- All three shards draw on one sandbox pool. When it runs out, investigations end without a
+- The eval fails when fewer than 80% of investigations complete (60% for a slice of fewer than 50
+  tasks, such as a 10-task CI slice, which is too small for the full-run rate), when fewer than
+  80% of the report.md it tried to write are usable, or when none returned ORCA telemetry. Judge
+  scores are advisory.
+- All shards draw on one sandbox pool. When it runs out, investigations end without a
   conclusion and the eval fails, so leave room for overlapping builds.
 
 Locally, start a fresh Scout server for ORCA:
@@ -1130,13 +1345,19 @@ as `nightshift-investigations`.
 
 - **Where it runs:** a serverless observability Scout cluster; `run_suite.sh` reads `scoutArch` /
   `scoutDomain` from the suite entry.
-- **What runs:** the same four shards on PRs, weekly and daily, each on its own Scout server:
+- **What runs:** the same shards on PRs, weekly and daily, each on its own Scout server. ORCA
+  runs as five slices of the sampled 50, each on its own agent. The two Customer-0 shards run up
+  to 16 sandbox investigations each, so they share the `sandbox-heavy` concurrency group, capped
+  at 2 across builds; the ORCA slices and reinforcement share a cap of 12. A single-model build
+  runs every shard at once, and when such builds overlap, only the Customer-0 shards wait. The
+  weekly run's three models queue for both caps, and while it runs a PR's Customer-0 shards can
+  wait up to an hour:
 
   | Shard                        | Dataset                                                      | Judge                  |
   | ---------------------------- | ------------------------------------------------------------ | ---------------------- |
   | `customer0-golden`           | `ns-investigation-golden-2710` ([how to change it](#running-a-new-golden-cut-in-ci)) | `eis-openai-gpt-6-sol` |
   | `customer0-connector-probes` | `nightshift/ns-connector-elastic`                            | `eis-openai-gpt-6-sol` |
-  | `orcabench`                  | [ORCA sampled 50](#orca-benchmark)                           | `eis-openai-gpt-5-4`   |
+  | `orcabench-1-of-5` … `orcabench-5-of-5` | One fifth each of [ORCA sampled 50](#orca-benchmark) | `eis-openai-gpt-5-4`   |
   | `reinforcement`              | The committed [reinforcement replays](#reinforcement-micro-eval) | `eis-openai-gpt-6-sol` |
 
   The suite's ci-prod secret,

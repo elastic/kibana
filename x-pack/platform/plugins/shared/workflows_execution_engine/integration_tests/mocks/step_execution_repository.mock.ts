@@ -14,6 +14,14 @@ import type {
 
 export class StepExecutionRepositoryMock implements Required<StepExecutionRepository> {
   public stepExecutions = new Map<string, EsWorkflowStepExecution>();
+
+  /**
+   * When true, drop `output` (and `input`) from stored docs after each upsert.
+   * Use for heap measurement so the fake ES store does not retain every payload.
+   * Default false — rehydration / eviction suites assert on stored output.
+   */
+  public discardOutputsAfterUpsert = false;
+
   public searchStepExecutionsByExecutionId(
     executionId: string
   ): Promise<EsWorkflowStepExecution[]> {
@@ -85,10 +93,17 @@ export class StepExecutionRepositoryMock implements Required<StepExecutionReposi
         throw new Error('Step execution ID is required for upsert');
       }
 
-      this.stepExecutions.set(stepExecution.id, {
+      const merged: EsWorkflowStepExecution = {
         ...(this.stepExecutions.get(stepExecution.id) || {}),
         ...(stepExecution as EsWorkflowStepExecution),
-      });
+      };
+
+      if (this.discardOutputsAfterUpsert) {
+        delete (merged as { output?: unknown }).output;
+        delete (merged as { input?: unknown }).input;
+      }
+
+      this.stepExecutions.set(stepExecution.id, merged);
     }
     return Promise.resolve();
   }

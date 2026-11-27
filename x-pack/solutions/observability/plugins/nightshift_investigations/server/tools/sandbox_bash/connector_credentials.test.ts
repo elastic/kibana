@@ -109,8 +109,21 @@ describe('buildConnectorEnv', () => {
     });
   });
 
+  it('keeps connector hosts as allowed hosts when there are no auth headers', () => {
+    const { allowedHosts, secretEnvKeys } = buildConnectorEnv({
+      connectorId: CONNECTOR_ID,
+      actionTypeId: '.http',
+      config: { url: 'https://api.example.com' },
+      headers: {},
+      hosts: ['api.example.com'],
+    });
+
+    expect(allowedHosts).toEqual(['api.example.com']);
+    expect(secretEnvKeys).toEqual([]);
+  });
+
   it('marks every header env var, and no config env var, as a secret bound to the hosts', () => {
-    const { secretEnvKeys } = buildConnectorEnv({
+    const { secretEnvKeys, allowedHosts } = buildConnectorEnv({
       connectorId: CONNECTOR_ID,
       actionTypeId: '.github',
       config: { serverUrl: 'https://api.githubcopilot.com/mcp/' },
@@ -118,6 +131,7 @@ describe('buildConnectorEnv', () => {
       hosts: ['api.github.com', 'api.githubcopilot.com'],
     });
 
+    expect(allowedHosts).toEqual(['api.github.com', 'api.githubcopilot.com']);
     expect(secretEnvKeys).toEqual([
       {
         key: 'CONNECTOR_HEADER_AUTHORIZATION',
@@ -248,6 +262,7 @@ describe('createConnectorCredentialResolver', () => {
       },
       secretValues: [BEARER_AUTHORIZATION, 'ghp_topsecrettokenvalue'],
       secretEnvKeys: [{ key: 'CONNECTOR_HEADER_AUTHORIZATION', allowed_hosts: ['api.github.com'] }],
+      allowedHosts: ['api.github.com'],
     });
     expect(actionsClient.getSandboxCredentials).toHaveBeenCalledWith({ id: CONNECTOR_ID });
     expect(actionsClient.get).not.toHaveBeenCalled();
@@ -316,6 +331,7 @@ describe('createConnectorCredentialResolver', () => {
       secretEnvKeys: [
         { key: 'CONNECTOR_HEADER_AUTHORIZATION', allowed_hosts: ['api.example.com'] },
       ],
+      allowedHosts: ['api.example.com'],
     });
     expect(actionsClient.getSandboxCredentials).toHaveBeenCalledWith({ id: 'saved-object-1' });
     // The same call redacts the full header and the bare token from the command output.

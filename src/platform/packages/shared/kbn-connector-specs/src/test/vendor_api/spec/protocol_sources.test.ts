@@ -141,7 +141,12 @@ describe('protocol sources', () => {
         data: introspectionFromSchema(buildSchema('type Query { hello: String }')),
       });
       const load = (text: string) =>
-        loadProtocolSpec(GRAPHQL_SPEC_URL, async () => text, 'graphql', [GRAPHQL_ENDPOINT]);
+        loadProtocolSpec({
+          url: GRAPHQL_SPEC_URL,
+          fetchText: async () => text,
+          format: 'graphql',
+          endpoints: [GRAPHQL_ENDPOINT],
+        });
 
       expect(await load('type Query { hello: String }')).toEqual({
         format: 'graphql',
@@ -154,11 +159,40 @@ describe('protocol sources', () => {
 
     it('reads MCP from a tools/list result, wrapped in JSON-RPC or not', async () => {
       const load = (value: unknown) =>
-        loadProtocolSpec(MCP_SPEC_URL, async () => JSON.stringify(value), 'mcp', [MCP_ENDPOINT]);
+        loadProtocolSpec({
+          url: MCP_SPEC_URL,
+          fetchText: async () => JSON.stringify(value),
+          format: 'mcp',
+          endpoints: [MCP_ENDPOINT],
+        });
 
       expect(await load({ tools })).toEqual(mcpSpec);
       expect(await load({ jsonrpc: '2.0', id: 1, result: { tools } })).toEqual(mcpSpec);
       await expect(load({ tools: [{ name: 'no schema' }] })).rejects.toThrow(/tools\/list/);
+    });
+
+    it('assembles MCP tools from a document per tool, for a server that lists none', async () => {
+      const documents: Record<string, unknown> = Object.fromEntries(
+        tools.map((tool) => [new URL(`${tool.name}.json`, MCP_SPEC_URL).href, tool])
+      );
+      const load = (names: readonly string[]) =>
+        loadProtocolSpec({
+          url: MCP_SPEC_URL,
+          fetchText: async (url: string) => {
+            const document = documents[url];
+            if (document === undefined) {
+              throw new Error(`404 Not Found: ${url}`);
+            }
+            return JSON.stringify(document);
+          },
+          format: 'mcp',
+          endpoints: [MCP_ENDPOINT],
+          tools: names,
+        });
+
+      expect(await load(tools.map((tool) => `${tool.name}.json`))).toEqual(mcpSpec);
+      // A tool the vendor stopped publishing fails the source instead of shrinking the snapshot.
+      await expect(load(['gone.json'])).rejects.toThrow(/404 Not Found/);
     });
   });
 
@@ -729,6 +763,115 @@ describe('protocol sources', () => {
         search: [{ source: 'main', name: 'tools/call search' }],
       });
       expect(await offlineCheck(mcpConnector)).toEqual({ changed: [], problems: [] });
+    });
+
+    it('captures an MCP connector from a tools/list document, without a manifest or a fetch', async () => {
+      const neverFetch = async (url: string): Promise<string> => {
+        throw new Error(`Tried to fetch ${url}`);
+      };
+
+      const { changed, problems } = await updateVendorApi({
+        connector: mcpConnector,
+        directory,
+        sources: { main: MCP_SPEC_URL },
+        formats: { main: 'mcp' },
+        endpoints: { main: [MCP_ENDPOINT] },
+        captures: { main: JSON.stringify({ tools }) },
+        notes: { main: 'tools/list called with a developer token.' },
+        fetchText: neverFetch,
+        now,
+        log,
+      });
+
+      expect(problems).toEqual([]);
+      expect([...changed].sort()).toEqual([
+        'manifest.json',
+        path.join('snapshots', 'main.mcp.json'),
+      ]);
+      expect((await manifestOf()).sources.main).toMatchObject({
+        format: 'mcp',
+        url: MCP_SPEC_URL,
+        endpoints: [MCP_ENDPOINT],
+        captured: true,
+        note: 'tools/list called with a developer token.',
+      });
+      expect((await manifestOf()).operations).toEqual({
+        search: [{ source: 'main', name: 'tools/call search' }],
+      });
+      // The snapshot is usable on its own: offline and on a refresh, nothing is fetched.
+      expect(await offlineCheck(mcpConnector)).toEqual({ changed: [], problems: [] });
+      await expect(
+        updateVendorApi({
+          connector: mcpConnector,
+          directory,
+          refresh: true,
+          fetchText: neverFetch,
+          now,
+          log,
+        })
+      ).resolves.toMatchObject({ changed: [], problems: [] });
+    });
+
+    it('keeps the tool documents of an MCP source in the manifest, and reads them again on a refresh', async () => {
+      const TOOLS_URL = 'https://specs.example.com/tools/';
+      documents = Object.fromEntries(
+        tools.map((tool) => [new URL(`${tool.name}.json`, TOOLS_URL).href, JSON.stringify(tool)])
+      );
+      const toolDocuments = tools.map((tool) => `${tool.name}.json`);
+
+      const { problems } = await updateVendorApi({
+        connector: mcpConnector,
+        directory,
+        sources: { main: TOOLS_URL },
+        formats: { main: 'mcp' },
+        endpoints: { main: [MCP_ENDPOINT] },
+        tools: { main: toolDocuments },
+        fetchText,
+        now,
+        log,
+      });
+
+      expect(problems).toEqual([]);
+      expect((await manifestOf()).sources.main).toMatchObject({
+        url: TOOLS_URL,
+        tools: toolDocuments,
+      });
+
+      // Without flags, a refresh reads the documents the manifest lists, not the source's own URL.
+      const refreshed: string[] = [];
+      const { changed } = await updateVendorApi({
+        connector: mcpConnector,
+        directory,
+        refresh: true,
+        fetchText: async (url) => {
+          refreshed.push(url);
+          return documents[url];
+        },
+        now,
+        log,
+      });
+      expect(changed).toEqual([]);
+      expect(refreshed.sort()).toEqual(
+        toolDocuments.map((document) => new URL(document, TOOLS_URL).href).sort()
+      );
+      expect(refreshed).not.toContain(TOOLS_URL);
+      expect((await manifestOf()).sources.main.tools).toEqual(toolDocuments);
+    });
+
+    it('refuses --tool for a source that is not MCP', async () => {
+      await expect(
+        updateVendorApi({
+          connector: graphQLConnector,
+          directory,
+          sources: { main: GRAPHQL_SPEC_URL },
+          formats: { main: 'graphql' },
+          endpoints: { main: [GRAPHQL_ENDPOINT] },
+          tools: { main: ['a.json'] },
+          fetchText,
+          now,
+          log,
+        })
+      ).rejects.toThrow('--tool only applies to MCP sources');
     });
 
     it('needs endpoints for a GraphQL or MCP source, and only for those', async () => {

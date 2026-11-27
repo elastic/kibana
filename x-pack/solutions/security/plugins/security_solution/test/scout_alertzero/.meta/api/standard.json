@@ -1,9 +1,51 @@
 {
-  "sha1": "fbd9c165f6ba0ce010d16a90ff58e452cffaf242",
+  "sha1": "ac9eed9ec7141c921f57226184ce23954359649c",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "c7379e04d6c2c47-98ead6f69254d9e",
+      "title": "Alert Triage revoke decision - two spaces refuses an analyst who cannot write the decisions index, and changes nothing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/alert_triage_revoke_two_space.spec.ts",
+        "line": 321,
+        "column": 16
+      }
+    },
+    {
+      "id": "c7379e04d6c2c47-9a585e4deeb9133",
+      "title": "Alert Triage revoke decision - two spaces treats another space's decision as missing: not deleted, and no alert of either space changes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/alert_triage_revoke_two_space.spec.ts",
+        "line": 345,
+        "column": 16
+      }
+    },
+    {
+      "id": "c7379e04d6c2c47-f0906dae85cdf4b",
+      "title": "Alert Triage revoke decision - two spaces deletes its own space's decision and reopens only that space's alerts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/alert_triage_revoke_two_space.spec.ts",
+        "line": 363,
+        "column": 11
+      }
+    },
     {
       "id": "e11dd99e43856bd-8769fe0d7fbbac4",
       "title": "Hunt Watch - authz isolation and evidence projection returns 403 on every hunt route for a user without AlertZero",

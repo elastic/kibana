@@ -443,12 +443,12 @@ export class DiscoverPageObject extends FtrService {
 
     await searchInput.type(field, { charByChar: true });
 
-    await this.retry.waitFor('options to be filtered', async () => {
-      const isSearching = await this.testSubjects.getAttribute(
+    await this.retry.waitFor('the option list to reflect the search', async () => {
+      const searchTerm = await this.testSubjects.getAttribute(
         'unifiedHistogramBreakdownSelectorSelectable',
-        'data-is-searching'
+        'data-search-term'
       );
-      return isSearching === 'false';
+      return searchTerm === field;
     });
 
     const optionValue = value ?? field;

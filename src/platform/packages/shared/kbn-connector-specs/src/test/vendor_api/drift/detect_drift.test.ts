@@ -135,6 +135,7 @@ describe('detectDrift', () => {
           unmatched: [],
           snapshotProblems: [],
           latestProblems: [],
+          latestViolations: [],
           fieldUse: { 'main GET /items': { read: [], copied: [], returned: [''] } },
           tracked: true,
           fieldChanges: [],
@@ -177,6 +178,41 @@ describe('detectDrift', () => {
     });
   });
 
+  it('gives a change the type of its field, read from the refreshed snapshot', async () => {
+    documents[SPEC_URL] = specYaml({
+      itemProperties: '{ name: { type: string }, color: { type: string, enum: [red, blue] } }',
+    });
+    diffEntries = [
+      {
+        ...entry('response-optional-property-added', 1),
+        text: 'added the optional property `color` to the response with the `200` status',
+      },
+      entry('api-path-added', 1),
+    ];
+
+    const { sources } = await detect();
+
+    expect(sources.main.changes).toMatchObject([
+      { id: 'response-optional-property-added', type: 'red | blue' },
+      { id: 'api-path-added' },
+    ]);
+    expect(sources.main.changes?.[1]).not.toHaveProperty('type');
+  });
+
+  it('gives a changed field the type it had before as well as the one it has', async () => {
+    documents[SPEC_URL] = specYaml({ itemProperties: '{ name: { type: integer } }' });
+    diffEntries = [
+      {
+        ...entry('response-property-type-changed', 1),
+        text: "the `name` response's property `type` changed from `string` to `integer` for status `200`",
+      },
+    ];
+
+    const { sources } = await detect();
+
+    expect(sources.main.changes).toMatchObject([{ type: 'integer', typeBefore: 'string' }]);
+  });
+
   it('reports vendor drift when an action fails against the latest spec only', async () => {
     documents[SPEC_URL] = specYaml({ itemsPath: '/v2/items' });
     diffEntries = [entry('api-path-removed-without-deprecation', 3)];
@@ -199,6 +235,27 @@ describe('detectDrift', () => {
         unmatched: [],
         snapshotProblems: [],
         latestProblems: [expect.stringMatching(/^GET \/items matches no operation of any source/)],
+      },
+    ]);
+  });
+
+  it('names the operation a request the latest spec rejects was matched to', async () => {
+    documents[SPEC_URL] = specYaml().replace(
+      '    get:\n',
+      '    get:\n      security: [{ bearerAuth: [] }]\n'
+    ).concat(`components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer }
+`);
+    diffEntries = [entry('api-security-added', 3)];
+
+    const drift = await detect();
+
+    expect(drift.actions).toMatchObject([
+      {
+        action: 'getItems',
+        latestProblems: [expect.stringContaining('Request has no credentials for the operation')],
+        latestViolations: [{ source: 'main', operation: 'GET /items' }],
       },
     ]);
   });
@@ -421,6 +478,62 @@ components:
     expect(await detect()).toEqual(
       expect.objectContaining({ verdict: 'healthy', outcome: 'issue' })
     );
+  });
+
+  describe('with a captured source', () => {
+    const EXTRA_URL = 'https://specs.example.com/extra.yaml';
+    const NOTE = 'The vendor only serves this spec to a request carrying credentials.';
+
+    const capture = async (name: string, snapshot?: unknown) => {
+      const manifestFile = path.join(directory, 'manifest.json');
+      const manifest = JSON.parse(await fs.readFile(manifestFile, 'utf8'));
+      manifest.sources[name] = {
+        ...(manifest.sources[name] ?? {
+          format: 'openapi',
+          url: EXTRA_URL,
+          fetchedAt: '2026-10-07T12:00:00.000Z',
+        }),
+        captured: true,
+        note: NOTE,
+      };
+      await fs.writeFile(manifestFile, JSON.stringify(manifest));
+      if (snapshot) {
+        await fs.writeFile(
+          path.join(directory, 'snapshots', `${name}.openapi.json`),
+          JSON.stringify(snapshot)
+        );
+      }
+    };
+
+    it('reports it as pinned without fetching it, so a source only credentials open raises nothing', async () => {
+      await capture('main');
+      const fetchText = jest.fn(async () => {
+        throw new Error('401 Unauthorized');
+      });
+
+      const drift = await detect({ fetchText });
+
+      expect(fetchText).not.toHaveBeenCalled();
+      expect(drift.sources).toEqual({ main: { status: 'pinned' } });
+      expect(drift).toMatchObject({ verdict: 'healthy', outcome: 'none' });
+    });
+
+    it('is still reported when another source of the connector cannot be fetched', async () => {
+      await capture('extra', {
+        openapi: '3.0.3',
+        info: { title: 'Extra', version: '1' },
+        paths: {},
+      });
+      delete documents[SPEC_URL];
+
+      const { sources, outcome } = await detect();
+
+      expect(sources).toEqual({
+        main: { status: 'unreachable', error: '404 Not Found', url: SPEC_URL },
+        extra: { status: 'pinned' },
+      });
+      expect(outcome).toBe('issue');
+    });
   });
 
   it('opens an issue when the latest spec does not load', async () => {

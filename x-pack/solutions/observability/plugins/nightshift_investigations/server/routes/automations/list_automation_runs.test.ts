@@ -145,6 +145,7 @@ it.each([{ message: 'Investigate the alert' }, { instructions: 'Investigate the 
           investigationId: 'investigation-1',
           skipReason: null,
           dailyLimit: undefined,
+          runsAsServiceAccount: false,
         },
       ],
       total: 1,
@@ -535,6 +536,32 @@ it('resolves readable manual executors while retaining their stable identities a
   ]);
   expect(mockBulkGetUserProfiles).toHaveBeenCalledTimes(1);
   expect(mockBulkGetUserProfiles).toHaveBeenCalledWith({ uids: new Set(['u_alice', 'u_bob']) });
+});
+
+it('reports whether each run executed as a service account', async () => {
+  mockGet.mockResolvedValue({ attributes: { workflowId: 'wf-1', runtime: {} } });
+  mockGetWorkflowExecutions.mockResolvedValue({
+    results: [
+      {
+        id: 'sa',
+        status: 'completed',
+        triggeredBy: 'scheduled',
+        effectiveIdentity: { type: 'service_account', id: 'sa-1' },
+      },
+      { id: 'legacy', status: 'completed', triggeredBy: 'scheduled' },
+    ],
+    total: 2,
+    page: 1,
+    size: 20,
+  });
+  mockSearchStepExecutions.mockResolvedValue({ results: [] });
+
+  const result = await call('auto-1');
+
+  expect(result.runs.map(({ runsAsServiceAccount }) => runsAsServiceAccount)).toEqual([
+    true,
+    false,
+  ]);
 });
 
 it.each(['missing', 'failed'])(

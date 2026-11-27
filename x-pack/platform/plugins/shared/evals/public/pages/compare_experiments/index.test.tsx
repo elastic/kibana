@@ -78,6 +78,7 @@ describe('CompareExperimentsPage', () => {
           }),
         ],
         pairing: {
+          repetitionPolicy: 'mean',
           totalPairs: 24,
           skippedMissingPairs: 0,
           skippedNullScores: 0,
@@ -112,6 +113,96 @@ describe('CompareExperimentsPage', () => {
     expect(
       screen.getByText(/4 examples score 1 only in target, 1 example score 1 only in baseline/)
     ).toBeInTheDocument();
+
+    expect(screen.queryByRole('columnheader', { name: /Stability/ })).not.toBeInTheDocument();
+  });
+
+  it('uses the policy from the URL and shows the repetition details of each row', () => {
+    mockUseCompareExperiments.mockReturnValue({
+      data: {
+        results: [
+          buildResult({
+            repetitionWarning: true,
+            baseline: { mean: 0.5, used: 36, missing: 0, stability: 0.1 },
+            target: { mean: 0.7, used: 33, missing: 3, stability: null },
+          }),
+          buildResult({ evaluatorName: 'steady' }),
+        ],
+        pairing: {
+          repetitionPolicy: 'median',
+          totalPairs: 24,
+          skippedMissingPairs: 0,
+          skippedNullScores: 0,
+          truncatedBaseline: false,
+          truncatedTarget: false,
+          rejectedSlices: [{ datasetName: 'Dataset 1', evaluatorName: 'latency' }],
+        },
+      },
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    } as unknown as ReturnType<typeof useCompareExperiments>);
+
+    render(
+      <MemoryRouter
+        initialEntries={['/compare?baseline=baseline&target=target&repetition_policy=median']}
+      >
+        <CompareExperimentsPage />
+      </MemoryRouter>
+    );
+
+    expect(mockUseCompareExperiments).toHaveBeenLastCalledWith(
+      'experiment',
+      'baseline',
+      'target',
+      'median'
+    );
+    expect(screen.getByText(/Repetition policy: median\./)).toBeInTheDocument();
+    expect(screen.getByText(/N\*: some examples/)).toBeInTheDocument();
+    expect(screen.getByText('Score outside [0, 1]: Dataset 1 / latency.')).toBeInTheDocument();
+
+    const flaggedRow = screen.getByText('quality').closest('tr');
+    const steadyRow = screen.getByText('steady').closest('tr');
+    if (!flaggedRow || !steadyRow) {
+      throw new Error('Expected one row per evaluator');
+    }
+    expect(within(steadyRow).getByText('12')).toBeInTheDocument();
+    expect(within(flaggedRow).getByText('0.100 / -')).toBeInTheDocument();
+    expect(within(steadyRow).getByText('- / -')).toBeInTheDocument();
+
+    fireEvent.mouseOver(within(flaggedRow).getByText('12*'));
+    expect(
+      screen.getByText('Valid scores: 36 baseline, 33 target. Null scores: 0 baseline, 3 target.')
+    ).toBeInTheDocument();
+
+    // Swapping keeps the policy.
+    fireEvent.click(screen.getByRole('button', { name: 'Swap baseline and target' }));
+    expect(mockUseCompareExperiments).toHaveBeenLastCalledWith(
+      'experiment',
+      'target',
+      'baseline',
+      'median'
+    );
+  });
+
+  it('shows what the route said when it rejects the comparison', () => {
+    const message = 'repetition_policy=median needs scores in [0, 1].';
+    mockUseCompareExperiments.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: Object.assign(new Error('Bad Request'), { request: {}, body: { message } }),
+      refetch: jest.fn(),
+    } as unknown as ReturnType<typeof useCompareExperiments>);
+
+    render(
+      <MemoryRouter
+        initialEntries={['/compare?baseline=baseline&target=target&repetition_policy=median']}
+      >
+        <CompareExperimentsPage />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText(message, { exact: false })).toBeInTheDocument();
   });
 
   it('sorts the rows by the baseline mean', () => {
@@ -259,5 +350,38 @@ describe('ExampleDrilldownFlyout', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'View trace (baseline)' }));
     expect(screen.getByText('Trace baseline-trace')).toBeInTheDocument();
+  });
+
+  it('shows every repetition and marks only one-sided examples as excluded', () => {
+    const exampleHint = /This example has no valid score in one of the experiments/;
+    const example = (id: string, index: number, repetitions: number[]) => ({
+      example_id: id,
+      example_index: index,
+      scores: repetitions.map((repetition) => buildScore(0.5, repetition)),
+    });
+    mockUseExperimentDatasetExamples.mockImplementation(
+      (experimentId) =>
+        ({
+          data: {
+            examples:
+              experimentId === 'baseline'
+                ? [example('example-1', 0, [0, 1]), example('example-2', 1, [0])]
+                : [example('example-1', 0, [0, 2])],
+          },
+          isLoading: false,
+        } as ReturnType<typeof useExperimentDatasetExamples>)
+    );
+    renderFlyout();
+
+    // Repetition 3 exists only in target, for an example that baseline has too.
+    const oneSidedRepetition = screen.getByText('example-1 (rep 3)');
+    fireEvent.mouseOver(oneSidedRepetition);
+    expect(screen.queryByText(exampleHint)).not.toBeInTheDocument();
+    expect(oneSidedRepetition.closest('tr')).not.toHaveStyle({ opacity: '0.55' });
+
+    const oneSidedExample = screen.getByText('example-2 (rep 1)');
+    fireEvent.mouseOver(oneSidedExample);
+    expect(screen.getByText(exampleHint)).toBeInTheDocument();
+    expect(oneSidedExample.closest('tr')).toHaveStyle({ opacity: '0.55' });
   });
 });

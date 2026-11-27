@@ -19,18 +19,32 @@ import { withTimeout } from '@kbn/std';
 import type { DisposableAppender, Layout, LogLevel, LogRecord } from '@kbn/logging';
 import {
   ROOT_CONTEXT,
+  SeverityNumber,
   TraceFlags,
   metrics,
   trace,
   type Context,
   type Attributes,
   type AttributeValue,
+  type Logger,
   type MeterProvider,
 } from '@opentelemetry/api';
-import type { AnyValueMap } from '@opentelemetry/api-logs';
-import { SeverityNumber, type Logger } from '@opentelemetry/api-logs';
-import { resources } from '@elastic/opentelemetry-node/sdk';
-import { BatchLogRecordProcessor, LoggerProvider } from '@opentelemetry/sdk-logs';
+import {
+  BatchLogRecordProcessor,
+  LoggerProvider,
+  type ReadableLogRecord,
+} from '@opentelemetry/sdk-logs';
+import type { ExporterMetrics } from '@opentelemetry/otlp-exporter-base';
+import { createOtlpHttpExporterMetrics } from '@opentelemetry/otlp-exporter-base/node-http';
+import {
+  convertLegacyOtlpGrpcOptions,
+  createOtlpGrpcExporterMetrics,
+} from '@opentelemetry/otlp-grpc-exporter-base';
+import { LogsExporterMetricsHelper } from '@opentelemetry/otlp-transformer';
+import {
+  OTEL_COMPONENT_TYPE_VALUE_OTLP_GRPC_LOG_EXPORTER,
+  OTEL_COMPONENT_TYPE_VALUE_OTLP_HTTP_LOG_EXPORTER,
+} from '@opentelemetry/semantic-conventions/incubating';
 import type {
   OtelAppenderConfig,
   OtelAppenderPluginConfig,
@@ -39,6 +53,8 @@ import type {
 } from '@kbn/core-logging-server';
 import { buildOtelResources } from '@kbn/telemetry';
 import { getFlattenedObject } from '@kbn/std';
+import { resourceFromAttributes } from '@opentelemetry/resources';
+import type { Resource } from '@opentelemetry/resources';
 import { Layouts } from '../../layouts/layouts';
 import { JsonLayout } from '../../layouts/json_layout';
 import {
@@ -60,7 +76,7 @@ const isPromiseLike = (value: unknown): value is PromiseLike<unknown> =>
   typeof (value as { then?: unknown }).then === 'function';
 
 /** The value half of a raw resource-attribute entry: an AttributeValue, or a promise of one. */
-type ResolvedResourceValue = ReturnType<resources.Resource['getRawAttributes']>[number][1];
+type ResolvedResourceValue = ReturnType<Resource['getRawAttributes']>[number][1];
 
 /**
  * Captures the requested resource-attribute values from the resolved attribute map so they can be
@@ -328,12 +344,11 @@ export class OtelAppender implements DisposableAppender {
   constructor(config: OtelAppenderPluginConfig) {
     const meterProvider = metrics.getMeterProvider();
     const maxElapsedTimeMs = config.maxElapsedTime?.asMilliseconds();
-    const baseExporter = createExporter(config, meterProvider);
     // The SDK's built-in retry gives up after ~13s; the retry layer extends it to the budget.
     const exporter =
       maxElapsedTimeMs !== undefined
-        ? new RetryingLogRecordExporter(baseExporter, maxElapsedTimeMs)
-        : baseExporter;
+        ? createRetryingExporter(config, meterProvider, maxElapsedTimeMs)
+        : createExporter(config, meterProvider);
     // Layer the resource from three sources (each overriding the previous):
     //   1. Auto-detected: host, OS, process, env-var OTel attributes
     //   2. Derived: service.name / service.version / deployment.environment from the
@@ -349,7 +364,7 @@ export class OtelAppender implements DisposableAppender {
     const includeResources = config.includeResources ?? ['*'];
     const includeAll = includeResources.includes('*');
     const baseResource = buildOtelResources().merge(
-      resources.resourceFromAttributes(config.attributes ?? {})
+      resourceFromAttributes(config.attributes ?? {})
     );
 
     // The default appender (keep everything, no drops) uses the merged resource directly. Only when
@@ -357,7 +372,7 @@ export class OtelAppender implements DisposableAppender {
     // the attributes ourselves.
     const needsFilter = !includeAll || Boolean(config.dropResourceAttributes?.length);
     const needsPromotion = Boolean(config.promoteResourceAttributes?.length);
-    let resource: resources.Resource = baseResource;
+    let resource: Resource = baseResource;
     let promoted: Attributes = {};
 
     if (needsFilter || needsPromotion) {
@@ -389,7 +404,7 @@ export class OtelAppender implements DisposableAppender {
             ? !config.dropResourceAttributes?.includes(key)
             : includeResources.includes(key);
         const kept = [...resolved].filter(([key]) => keepAttribute(key));
-        resource = resources.resourceFromAttributes(Object.fromEntries(kept));
+        resource = resourceFromAttributes(Object.fromEntries(kept));
       }
     }
     this.promotedAttributes = promoted;
@@ -415,7 +430,7 @@ export class OtelAppender implements DisposableAppender {
 
     const layoutConfig = resolveLayoutConfig(config.layout);
     this.layout = Layouts.create(layoutConfig);
-    // JSON layout → sanitised LogRecord as AnyValueMap → indexed as body.structured.
+    // JSON layout → sanitised LogRecord as an OTel Attributes map → indexed as body.structured.
     // Pattern layout → formatted string → indexed as body.text (aliased to `message`).
     this.useStructuredBody = layoutConfig.type !== 'pattern';
     this.transformAttributes = config.transformAttributes;
@@ -460,16 +475,59 @@ export class OtelAppender implements DisposableAppender {
 }
 
 const omitDeepNilValues = (obj: Ecs) => {
-  const result: AnyValueMap = {};
+  const result: Attributes = {};
   Object.entries(getFlattenedObject(obj))
     .filter(([_, value]) => !isNil(value))
     .forEach(([key, value]) => set(result, key, value));
   return result;
 };
 
+/**
+ * Wraps the SDK exporter in the retry layer, which records the `otel.sdk.exporter.*` metrics in
+ * its place so each batch is counted once, after its final attempt.
+ */
+const createRetryingExporter = (
+  config: OtelAppenderConfig,
+  meterProvider: MeterProvider,
+  maxElapsedTimeMs: number
+): RetryingLogRecordExporter => {
+  // Created before the SDK exporter so it takes the `otel.component.name` that exporter would get.
+  const exporterMetrics = createExporterMetrics(config, meterProvider);
+  return new RetryingLogRecordExporter(
+    createExporter(config, undefined),
+    maxElapsedTimeMs,
+    exporterMetrics
+  );
+};
+
+/** The `otel.sdk.exporter.*` metrics recorder the SDK exporter for `config.protocol` would use. */
+const createExporterMetrics = (
+  config: OtelAppenderConfig,
+  meterProvider: MeterProvider
+): ExporterMetrics<ReadableLogRecord[]> => {
+  switch (config.protocol) {
+    case 'http':
+    case 'proto':
+      return createOtlpHttpExporterMetrics(
+        OTEL_COMPONENT_TYPE_VALUE_OTLP_HTTP_LOG_EXPORTER,
+        LogsExporterMetricsHelper,
+        config.url,
+        meterProvider
+      );
+    case 'grpc':
+      return createOtlpGrpcExporterMetrics(
+        OTEL_COMPONENT_TYPE_VALUE_OTLP_GRPC_LOG_EXPORTER,
+        LogsExporterMetricsHelper,
+        // The SDK exporter records the normalized `host[:port]`, not the configured URL.
+        convertLegacyOtlpGrpcOptions({ url: config.url }, 'LOGS').url,
+        meterProvider
+      );
+  }
+};
+
 const createExporter = (
   config: OtelAppenderConfig,
-  selfObsMeterProvider: MeterProvider
+  selfObsMeterProvider: MeterProvider | undefined
 ): OTLPLogExporterHTTP | OTLPLogExporterGRPC | OTLPLogExporterPROTO => {
   const tls = resolveTlsMaterial(config.ssl);
 

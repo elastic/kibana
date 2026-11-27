@@ -31,6 +31,12 @@ export const translations = {
             'Failed to update alerts with their last scheduled actions and maintenance windows: {errorMessage}',
           values: { errorMessage },
         }),
+      connectorNotFound: (connectorIds: string) =>
+        i18n.translate('xpack.alerting.taskRunner.warning.connectorNotFound', {
+          defaultMessage:
+            'Actions were not triggered because their connectors no longer exist: {connectorIds}',
+          values: { connectorIds },
+        }),
     },
   },
 };

@@ -7,7 +7,6 @@
 
 import { renderHook } from '@testing-library/react';
 import { useQuery } from '@kbn/react-query';
-import { getESQLResults } from '@kbn/esql-utils';
 import { getEntitiesAlias } from '@kbn/entity-store/common';
 import { useRecentAnomaliesQuery } from './recent_anomalies_query_hooks';
 import {
@@ -22,7 +21,6 @@ import { useInstalledSecurityJobsIds } from '../../../../common/components/ml/ho
 jest.mock('@kbn/react-query', () => ({ useQuery: jest.fn() }));
 jest.mock('@kbn/esql-utils', () => ({
   prettifyQuery: jest.fn((q) => q),
-  getESQLResults: jest.fn(),
 }));
 jest.mock('@kbn/entity-store/common', () => ({
   getEntitiesAlias: jest.fn(),
@@ -43,7 +41,7 @@ jest.mock('../../../../common/components/ml/hooks/use_installed_security_jobs', 
 jest.mock('../../../../common/hooks/use_error_toast', () => ({ useErrorToast: jest.fn() }));
 
 const mockUseQuery = useQuery as jest.Mock;
-const mockGetESQLResults = getESQLResults as jest.Mock;
+const mockEsql = jest.fn();
 const mockGetEntitiesAlias = getEntitiesAlias as jest.Mock;
 const mockTopRowsSource = useRecentAnomaliesTopRowsEsqlSource as jest.Mock;
 const mockDataSource = useRecentAnomaliesDataEsqlSource as jest.Mock;
@@ -99,7 +97,7 @@ describe('useRecentAnomaliesQuery', () => {
 
     mockUseKibana.mockReturnValue({
       services: {
-        data: { search: { search: jest.fn() }, dataViews: { getExistingIndices: jest.fn() } },
+        data: { search: { esql: mockEsql }, dataViews: { getExistingIndices: jest.fn() } },
       },
     });
     mockUseGlobalTime.mockReturnValue({ from: 'global-from', to: 'global-to' });
@@ -108,7 +106,7 @@ describe('useRecentAnomaliesQuery', () => {
     mockGetEntitiesAlias.mockReturnValue('entities-latest-default');
     mockTopRowsSource.mockReturnValue(TOP_ROWS_SQL);
     mockDataSource.mockReturnValue(DATA_SQL);
-    mockGetESQLResults.mockResolvedValue({ response: { columns: [], values: [] } });
+    mockEsql.mockResolvedValue({ rawResponse: { columns: [], values: [] } });
 
     mockUseQuery.mockImplementation((queryKey, _queryFn, _options) => {
       const key = queryKey as unknown[];
@@ -140,8 +138,11 @@ describe('useRecentAnomaliesQuery', () => {
       renderHook(() => useRecentAnomaliesQuery(baseParams));
 
       await topRowsCall()![1]({ signal: undefined });
-      expect(mockGetESQLResults).toHaveBeenCalledWith(
-        expect.objectContaining({ timeRange: { from: 'now-30d', to: 'now' } })
+      expect(mockEsql).toHaveBeenCalledWith(
+        expect.objectContaining({
+          kibanaQueryContext: { timeRange: { from: 'now-30d', to: 'now' } },
+        }),
+        expect.anything()
       );
     });
 
@@ -149,8 +150,11 @@ describe('useRecentAnomaliesQuery', () => {
       renderHook(() => useRecentAnomaliesQuery({ ...baseParams, timeRange: undefined }));
 
       await topRowsCall()![1]({ signal: undefined });
-      expect(mockGetESQLResults).toHaveBeenCalledWith(
-        expect.objectContaining({ timeRange: { from: 'global-from', to: 'global-to' } })
+      expect(mockEsql).toHaveBeenCalledWith(
+        expect.objectContaining({
+          kibanaQueryContext: { timeRange: { from: 'global-from', to: 'global-to' } },
+        }),
+        expect.anything()
       );
     });
 
@@ -162,7 +166,7 @@ describe('useRecentAnomaliesQuery', () => {
       renderHook(() => useRecentAnomaliesQuery(baseParams));
 
       await topRowsCall()![1]({ signal: undefined });
-      const callArgs = mockGetESQLResults.mock.calls.at(-1)![0];
+      const callArgs = mockEsql.mock.calls.at(-1)![0];
       expect(callArgs.filter).toBeUndefined();
     });
   });
@@ -177,7 +181,8 @@ describe('useRecentAnomaliesQuery', () => {
 
       await topRowsCall()![1]({ signal: undefined });
 
-      expect(mockGetESQLResults).toHaveBeenCalledWith(
+      expect(mockEsql).toHaveBeenCalledWith(
+        expect.anything(),
         expect.objectContaining({ executionContext: homePageContext('anomalies_top_rows') })
       );
     });
@@ -189,7 +194,8 @@ describe('useRecentAnomaliesQuery', () => {
 
       await dataCall()![1]({ signal: undefined });
 
-      expect(mockGetESQLResults).toHaveBeenCalledWith(
+      expect(mockEsql).toHaveBeenCalledWith(
+        expect.anything(),
         expect.objectContaining({ executionContext: homePageContext('anomalies_heatmap') })
       );
     });
@@ -201,7 +207,8 @@ describe('useRecentAnomaliesQuery', () => {
 
       await resolutionCall()![1]({ signal: undefined });
 
-      expect(mockGetESQLResults).toHaveBeenCalledWith(
+      expect(mockEsql).toHaveBeenCalledWith(
+        expect.anything(),
         expect.objectContaining({ executionContext: homePageContext('anomalies_entity_filter') })
       );
     });
@@ -229,8 +236,8 @@ describe('useRecentAnomaliesQuery', () => {
 
     it('resolves matching entity ids from the entity store', async () => {
       resolvedEntityIds = ['host:test_host_01'];
-      mockGetESQLResults.mockResolvedValue({
-        response: { columns: [{ name: 'entity.id' }], values: [['host:test_host_01']] },
+      mockEsql.mockResolvedValue({
+        rawResponse: { columns: [{ name: 'entity.id' }], values: [['host:test_host_01']] },
       });
 
       renderHook(() => useRecentAnomaliesQuery(baseParams));
@@ -241,8 +248,9 @@ describe('useRecentAnomaliesQuery', () => {
       expect(call![0][1]).toContain('KEEP entity.id');
 
       const resolved = await call![1]({ signal: undefined });
-      expect(mockGetESQLResults).toHaveBeenCalledWith(
-        expect.objectContaining({ filter: ACTIVE_BOOL })
+      expect(mockEsql).toHaveBeenCalledWith(
+        expect.objectContaining({ filter: ACTIVE_BOOL }),
+        expect.anything()
       );
       expect(resolved).toEqual(['host:test_host_01']);
     });
@@ -257,11 +265,11 @@ describe('useRecentAnomaliesQuery', () => {
       resolvedEntityIds = [];
       renderHook(() => useRecentAnomaliesQuery(baseParams));
 
-      mockGetESQLResults.mockClear();
+      mockEsql.mockClear();
       const result = await dataCall()![1]({ signal: undefined });
 
       expect(result).toEqual({ anomalyRecords: [], rowLabels: [] });
-      expect(mockGetESQLResults).not.toHaveBeenCalled();
+      expect(mockEsql).not.toHaveBeenCalled();
     });
   });
 
@@ -270,22 +278,23 @@ describe('useRecentAnomaliesQuery', () => {
       mlIndexExists = false;
       renderHook(() => useRecentAnomaliesQuery(baseParams));
 
-      mockGetESQLResults.mockClear();
+      mockEsql.mockClear();
       const result = await topRowsCall()![1]({ signal: undefined });
 
       expect(result).toEqual({ records: [], rawResponse: undefined });
-      expect(mockGetESQLResults).not.toHaveBeenCalled();
+      expect(mockEsql).not.toHaveBeenCalled();
     });
 
     it('runs the ES|QL query as normal when the index does exist', async () => {
       mlIndexExists = true;
       renderHook(() => useRecentAnomaliesQuery(baseParams));
 
-      mockGetESQLResults.mockClear();
+      mockEsql.mockClear();
       await topRowsCall()![1]({ signal: undefined });
 
-      expect(mockGetESQLResults).toHaveBeenCalledWith(
-        expect.objectContaining({ esqlQuery: TOP_ROWS_SQL })
+      expect(mockEsql).toHaveBeenCalledWith(
+        expect.objectContaining({ query: TOP_ROWS_SQL }),
+        expect.anything()
       );
     });
   });
@@ -308,22 +317,22 @@ describe('useRecentAnomaliesQuery', () => {
     it('short-circuits the top rows query to an empty result without querying ES|QL', async () => {
       renderHook(() => useRecentAnomaliesQuery(baseParams));
 
-      mockGetESQLResults.mockClear();
+      mockEsql.mockClear();
       const result = await topRowsCall()![1]({ signal: undefined });
 
       expect(result).toEqual({ records: [], rawResponse: undefined });
-      expect(mockGetESQLResults).not.toHaveBeenCalled();
+      expect(mockEsql).not.toHaveBeenCalled();
     });
 
     it('short-circuits the anomaly data query to an empty result without querying ES|QL', async () => {
       topRowsRecords = [{ entity_id: 'host:test_host_01', entity_name: 'h1', entity_type: 'host' }];
       renderHook(() => useRecentAnomaliesQuery(baseParams));
 
-      mockGetESQLResults.mockClear();
+      mockEsql.mockClear();
       const result = await dataCall()![1]({ signal: undefined });
 
       expect(result).toEqual({ anomalyRecords: [], rowLabels: [] });
-      expect(mockGetESQLResults).not.toHaveBeenCalled();
+      expect(mockEsql).not.toHaveBeenCalled();
     });
   });
 

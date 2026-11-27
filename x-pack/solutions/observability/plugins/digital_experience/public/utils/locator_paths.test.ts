@@ -35,6 +35,16 @@ const routerLinks: Record<ApplicationTabId, (serviceName: string) => string> = {
       path: { serviceName },
       query: { source: 'otel' },
     }),
+  reports: (serviceName) =>
+    digitalExperienceRouter.link('/{serviceName}/reports', {
+      path: { serviceName },
+      query: { source: 'otel' },
+    }),
+  crashes: (serviceName) =>
+    digitalExperienceRouter.link('/{serviceName}/crashes', {
+      path: { serviceName },
+      query: { source: 'otel' },
+    }),
 };
 
 describe('the paths of the locator', () => {

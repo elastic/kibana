@@ -10,7 +10,7 @@ import type { StreamFactoryReturnType } from '@kbn/ml-response-stream/server';
 import {
   ping,
   type AiopsLogRateAnalysisApiAction,
-} from '@kbn/aiops-log-rate-analysis/api/stream_reducer';
+} from '@kbn/aiops-log-rate-analysis/api/stream_actions';
 
 import type { LogDebugMessage } from './log_debug_message';
 import type { StateHandler } from './state_handler';

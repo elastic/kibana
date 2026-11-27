@@ -16,6 +16,15 @@ jest.mock('../../../data/run_quotas/use_significant_events_run_quotas');
 jest.mock('../../../data/maintenance/use_significant_events_maintenance', () => ({
   useBlocksNewActivity: () => ({ isBlocked: false }),
 }));
+jest.mock('../../../hooks/use_kibana', () => ({
+  useKibana: () => ({
+    services: {
+      application: {
+        getUrlForApp: (appId: string, { path }: { path: string }) => `/app/${appId}${path}`,
+      },
+    },
+  }),
+}));
 jest.mock('./knowledge_indicators_table', () => ({
   KnowledgeIndicatorsTable: () => <div data-test-subj="knowledgeIndicatorsTableStub" />,
 }));

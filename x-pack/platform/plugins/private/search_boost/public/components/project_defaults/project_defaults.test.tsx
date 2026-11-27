@@ -17,18 +17,15 @@ const defaultProps: ProjectDefaultsProps = {
   indices: {
     ruleName: 'default_indices',
     profile: { name: 'default_indices', is_builtin: true },
-    matches: [
-      { name: 'products', isHidden: false },
-      { name: 'users', isHidden: false },
-    ],
+    matches: [{ name: 'products' }, { name: 'users' }],
   },
   dataStreams: {
     ruleName: 'default_data_streams',
     profile: { name: 'default_data_streams_7d', is_builtin: true },
     matches: [
-      { name: 'logs-nginx-default', isHidden: false, outrankedByRuleName: 'web-logs' },
-      { name: 'metrics-system-default', isHidden: false },
-      { name: '.hidden-1', isHidden: true },
+      { name: 'logs-nginx-default', outrankedByRuleName: 'web-logs' },
+      { name: 'metrics-system-default' },
+      { name: '.hidden-1' },
     ],
   },
   onEdit: jest.fn(),
@@ -51,7 +48,7 @@ describe('ProjectDefaults', () => {
     render(<ProjectDefaults {...defaultProps} />);
 
     expect(screen.getByTestId('searchBoostProjectDefaultValue-indices')).toHaveTextContent(
-      'Performant'
+      'Default'
     );
     expect(screen.getByTestId('searchBoostProjectDefaultValue-data_streams')).toHaveTextContent(
       'Last 7 days'

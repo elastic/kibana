@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import type {
+  SaveSessionEventResult,
+  SaveSessionEventsResponse,
+} from '../../common/http_api/session_events';
+
 interface SessionEventBase {
   /** Unique within the session. */
   id: string;
@@ -22,7 +27,7 @@ export interface UserSessionEvent extends SessionEventBase {
 export interface AssistantToolCall {
   id: string;
   name: string;
-  args?: string;
+  args?: JsonValue;
 }
 
 export interface AssistantSessionEvent extends SessionEventBase {
@@ -36,11 +41,19 @@ export interface ReasoningSessionEvent extends SessionEventBase {
   content?: string;
 }
 
+export type JsonValue =
+  | string
+  | number
+  | boolean
+  | null
+  | JsonValue[]
+  | { [key: string]: JsonValue };
+
 export interface ToolSessionEvent extends SessionEventBase {
   type: 'tool';
   tool_call_id: string;
   tool_name: string;
-  result?: string;
+  result?: JsonValue;
   /** Null or missing when the outcome is unknown. */
   status?: 'successful' | 'failed' | null;
 }
@@ -91,17 +104,54 @@ export interface SaveEventsInput {
   events: readonly SessionEventInput[];
 }
 
-export type SaveEventResult =
-  | { id: string; status: 'created' }
-  | { id: string; status: 'failed'; error: string };
+export type SaveEventResult = SaveSessionEventResult;
+
+export interface ListSessionEventsInput {
+  space: string;
+  /** Only events that list this AI index in `ai_index_id`. */
+  aiIndexId: string;
+  /** ISO date: lists the events saved after it. */
+  since: string;
+  /** The last event listed at `since`: continues after it. */
+  after?: { sessionId: string; eventId: string };
+  /** ISO date: leaves out the events saved after it. */
+  until: string;
+  /** The most events one call lists. */
+  size: number;
+}
+
+/** Where a stored event sits in the order events are listed. */
+export interface SessionEventPosition {
+  savedAt: string;
+  sessionId: string;
+  eventId: string;
+  turnId: string;
+}
+
+export interface GetSessionTurnInput {
+  space: string;
+  /** Only events that list this AI index in `ai_index_id`. */
+  aiIndexId: string;
+  sessionId: string;
+  turnId: string;
+  /** The most events one call returns, oldest saved first. */
+  limit: number;
+}
 
 export interface SessionEventsService {
   /**
    * Writes one document per event. A resent event is stored again, so readers drop duplicates by
    * session and event id. Results follow the order of `input.events`.
    */
-  saveEvents(
-    scope: SessionEventsScope,
-    input: SaveEventsInput
-  ): Promise<{ results: SaveEventResult[] }>;
+  saveEvents(scope: SessionEventsScope, input: SaveEventsInput): Promise<SaveSessionEventsResponse>;
+  /**
+   * Lists the events saved in a time window, across all users of a space, oldest first. Events of
+   * one save share a time, so the session and event id order them.
+   */
+  listEvents(input: ListSessionEventsInput): Promise<SessionEventPosition[]>;
+  /**
+   * Returns the events of one turn across all users of a space, without resent duplicates, in the
+   * order the agent created them: by `seq` when every event has one, else by `event_at`.
+   */
+  getTurn(input: GetSessionTurnInput): Promise<StoredSessionEvent[]>;
 }

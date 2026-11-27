@@ -15,7 +15,7 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverAppState, TabState } from '../redux';
-import { migrateLegacyQuery } from '../../../../utils/migrate_legacy_query';
+import { migrateLegacyQuery } from '../../../../../common/migrate_legacy_query';
 import { getMaxAllowedSampleSize } from '../../../../utils/get_allowed_sample_size';
 import { createDataViewDataSource, createEsqlDataSource } from '../../../../../common/data_sources';
 import {

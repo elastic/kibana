@@ -6,6 +6,7 @@
  */
 
 import { createAsyncThunk } from 'redux-toolkit-v1';
+import { isHttpFetchError } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowDetailDto } from '@kbn/workflows';
 import { WorkflowApi } from '@kbn/workflows-ui';
@@ -37,6 +38,9 @@ export const loadWorkflowThunk = createAsyncThunk<
 
       return response;
     } catch (error) {
+      if (isHttpFetchError(error) && error.response?.status === 404) {
+        services.workflowsManagement.recentlyViewed.remove(id);
+      }
       // Extract error message from HTTP error body if available
       const errorMessage = error.body?.message || error.message || 'Failed to load workflow';
 

@@ -23,8 +23,9 @@ import {
   ChatEventType,
   AgentExecutionMode,
   EventActorType,
+  parseExecutionId,
   platformCoreTools,
-  timelineExecutionId,
+  unreadSettledSteerIds,
 } from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/agent-builder-server';
 import { HookLifecycle, resolveAllowedConnectorIds } from '@kbn/agent-builder-server';
@@ -52,7 +53,10 @@ import type { PreviousRoundInfo } from './utils/context_management';
 import { createSummarizationTransformer } from './utils/tool_summarization';
 import { buildResumeAnchors, pausedItems, type PausedItem } from './utils/attachment_placement';
 import { sourceEvents } from '../../conversation/client/source_events';
-import { nextResumeIndex, userMessageActor } from '../../conversation/client/rounds_to_events';
+import {
+  runTimelineExecutionId,
+  userMessageActor,
+} from '../../conversation/client/rounds_to_events';
 import { createAgentGraph } from './graph';
 import {
   RunAttachmentEvents,
@@ -70,6 +74,8 @@ import { steps } from './constants';
 import { createPromptFactory } from './prompts';
 import { createImageResolver } from './utils/image_resolver';
 import { BackgroundExecutionService } from './background_execution_service';
+import { createIncomingMessages } from './incoming_messages';
+import { currentUserActor } from '../../conversation/client/rounds_to_events';
 import { SubagentTracker } from './subagent_tracker';
 import type { StateUpdate } from './state';
 import {
@@ -161,15 +167,15 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     resumeAnchors.set(triggerEventId, pausedItems(pendingTurn.terminated));
   }
   const agentIdForEvents = agentId ?? conversation?.agent_id ?? 'unknown';
-  // Use raw persisted executions: the model-context timeline folds multiple resumes into one.
-  // Legacy rounds cannot recover exact history, but a pending turn is at least the first resume.
-  const roundExecutionIndex = pendingTurn
-    ? Math.max(1, nextResumeIndex({ events: conversation?.events }, pendingTurn.id))
-    : 0;
-  // The timeline id of this execution, which every event written for it carries. A resume mints
-  // its own round id but is persisted to the paused round. `executionId` names the execution
-  // record and is never persisted on conversation events.
-  const roundExecutionId = timelineExecutionId(pendingTurn?.id ?? roundId, roundExecutionIndex);
+  // The timeline id of this execution, which every event written for it carries, computed as the
+  // lock was. A resume mints its own round id but is persisted to the paused round. `executionId`
+  // names the execution record and is never persisted on conversation events.
+  const roundExecutionId = runTimelineExecutionId({
+    events: conversation?.events,
+    pausedRoundId: pendingTurn?.id,
+    roundId,
+  });
+  const roundExecutionIndex = parseExecutionId(roundExecutionId)?.index ?? 0;
 
   // Create background execution service from conversation state
   const backgroundExecutionService = new BackgroundExecutionService({
@@ -235,6 +241,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     metadata: conversation?.metadata,
     templateId: conversation?.template_id,
     resumeAnchors,
+    // Folding keeps the stamp but not the run's end, so settlement comes from the stored events.
+    unreadSteerIds: conversation?.events ? unreadSettledSteerIds(conversation.events) : undefined,
   });
   processedConversation.resumedRoundId = pendingTurn?.id;
   const pendingRound = pendingTurn?.compatRound;
@@ -435,6 +443,18 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       smlSearchSelected: staticTools.some(({ id }) => id === platformCoreTools.smlSearch),
     });
 
+    const incomingMessages =
+      storesConversation && conversationId && executionId
+        ? createIncomingMessages({
+            conversationClient,
+            conversationId,
+            executionId,
+            timelineExecutionId: roundExecutionId,
+            runOwnerId: currentUserActor(conversationClient.getUser()).id,
+            logger,
+          })
+        : undefined;
+
     const agentGraph = createAgentGraph({
       logger,
       events: { emit: eventEmitter },
@@ -465,6 +485,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
         toolManager,
       },
       cycleHooks,
+      incomingMessages,
     });
 
     logger.debug(`Running chat agent with graph: ${chatAgentGraphName}, runId: ${runId}`);

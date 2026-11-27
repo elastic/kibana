@@ -6,16 +6,12 @@
  */
 
 import { globalSetupHook, tags } from '@kbn/scout-oblt';
-import { SLO_COMPOSITE_ENABLED } from '../../../../common/feature_flags';
 import { installSloScoutHostsDataForge } from '../fixtures/slo_data_forge_lifecycle';
 
 globalSetupHook(
-  'Setup shared data and feature flags for SLO API tests',
+  'Setup shared data for SLO API tests',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
-  async ({ apiServices, esClient, sloData, log }) => {
-    await apiServices.core.settings({
-      'feature_flags.overrides': { [SLO_COMPOSITE_ENABLED]: true },
-    });
+  async ({ esClient, sloData, log }) => {
     await installSloScoutHostsDataForge(esClient, log);
     await sloData.generateSloData();
   }

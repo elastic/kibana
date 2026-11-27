@@ -6,6 +6,7 @@ exports[`buildResolvedEntityFilterOverridesQuery compares the resolved entity wi
 | EVAL rank = CASE(asset.criticality == \\"extreme_impact\\", 4, asset.criticality == \\"high_impact\\", 3, asset.criticality == \\"medium_impact\\", 2, asset.criticality == \\"low_impact\\", 1)
 | STATS alias_rank = MAX(rank), alias_sources = VALUES(entity.source), alias_watchlists = VALUES(entity.attributes.watchlists), alias_first_seen = MIN(entity.lifecycle.first_seen), alias_last_seen = MAX(\`@timestamp\`) BY group_key = entity.relationships.resolution.resolved_to
 | RENAME group_key AS \`entity.id\`
+| EVAL user.entity.id = TO_STRING(null)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NULL
 | EVAL own_matches = COALESCE(asset.criticality IN (\\"high_impact\\"), false)
@@ -24,6 +25,7 @@ exports[`buildResolvedEntityValuesQuery reads the aliases of the targets, then j
 | EVAL rank = CASE(asset.criticality == \\"extreme_impact\\", 4, asset.criticality == \\"high_impact\\", 3, asset.criticality == \\"medium_impact\\", 2, asset.criticality == \\"low_impact\\", 1)
 | STATS alias_rank = MAX(rank), alias_sources = VALUES(entity.source), alias_watchlists = VALUES(entity.attributes.watchlists), alias_first_seen = MIN(entity.lifecycle.first_seen), alias_last_seen = MAX(\`@timestamp\`) BY group_key = entity.relationships.resolution.resolved_to
 | RENAME group_key AS \`entity.id\`
+| EVAL user.entity.id = TO_STRING(null)
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NULL
 | EVAL own_rank = CASE(asset.criticality == \\"extreme_impact\\", 4, asset.criticality == \\"high_impact\\", 3, asset.criticality == \\"medium_impact\\", 2, asset.criticality == \\"low_impact\\", 1)

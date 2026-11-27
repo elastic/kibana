@@ -106,7 +106,7 @@ const toRect = (a: { x: number; y: number }, b: { x: number; y: number }): Selec
 });
 
 const isSelectAllShortcut = (e: KeyboardEvent): boolean =>
-  isSelectionModifier(e) && !e.shiftKey && !e.altKey && e.key.toLowerCase() === 'a';
+  isSelectionModifier(e) && e.key.toLowerCase() === 'a';
 
 const intersects = (a: SelectionRect, b: DOMRect) =>
   a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;

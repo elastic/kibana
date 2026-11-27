@@ -6,7 +6,8 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { CompositeSLODefinitionResponse, CreateCompositeSLOInput } from '@kbn/slo-schema';
+import type { CreateCompositeSLOParams, CreateCompositeSLOResponse } from '@kbn/slo-schema';
+import { createCompositeSLOResponseSchema } from '@kbn/slo-schema';
 import { v4 as uuidv4 } from 'uuid';
 import type { SloTelemetryReporter } from '../../lib/telemetry';
 import {
@@ -18,7 +19,7 @@ import type { SummaryClient } from '../summary_client';
 import type { CompositeSLORepository } from './composite_slo_repository';
 import { computeAndPersistCompositeSummaryDoc } from './composite_summary_writer';
 
-export interface CreateCompositeSloParams extends CreateCompositeSLOInput {
+export interface CreateCompositeSloParams extends CreateCompositeSLOParams {
   spaceId: string;
   userId: string;
 }
@@ -35,9 +36,9 @@ interface Dependencies {
 export async function createCompositeSlo(
   params: CreateCompositeSloParams,
   { esClient, compositeRepository, repository, summaryClient, logger, telemetry }: Dependencies
-): Promise<CompositeSLODefinitionResponse> {
+): Promise<CreateCompositeSLOResponse> {
   const { spaceId, userId, ...body } = params;
-  const now = new Date().toISOString();
+  const now = new Date();
   const compositeSlo = {
     ...body,
     id: body.id ?? uuidv4(),
@@ -64,5 +65,5 @@ export async function createCompositeSlo(
     spaceId,
   });
 
-  return created;
+  return createCompositeSLOResponseSchema.encode(created);
 }

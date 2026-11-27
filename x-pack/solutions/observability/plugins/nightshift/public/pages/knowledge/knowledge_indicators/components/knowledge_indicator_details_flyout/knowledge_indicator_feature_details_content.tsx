@@ -149,7 +149,7 @@ export function KnowledgeIndicatorFeatureDetailsContent({
           {listItems.map((item, index) => (
             <React.Fragment key={item.title}>
               <EuiDescriptionList
-                type="column"
+                type="responsiveColumn"
                 columnWidths={[1, 2]}
                 compressed
                 listItems={[item]}

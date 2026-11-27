@@ -15,6 +15,8 @@ import type { ConnectorSpec } from '../../../connector_spec';
 import { loadVendorSpec } from '../spec/load_vendor_spec';
 import { MANIFEST, OVERLAY, readOptional, snapshotFile } from '../spec/load_vendor_specs';
 import { compareFields } from './compare_fields';
+import { fieldTypesOf } from './refresh_issue/field_type';
+import type { SnapshotDocuments } from './refresh_issue/field_type';
 import type { OperationLocation } from './locate_operation';
 import { locateOperation, serverUrls } from './locate_operation';
 import {
@@ -53,11 +55,27 @@ export interface SpecChange {
   readonly text: string;
   /** `METHOD /path`, or an MCP tool's name, for changes to an operation. */
   readonly operation?: string;
+  /**
+   * The type of the field the change is about, such as `string` or `boolean | string | Slot`, read
+   * from the snapshot it is in: the committed one for a field that was removed, else the refreshed
+   * one. Missing when the change isn't about a field or its path can't be followed.
+   */
+  readonly type?: string;
+  /** What the type was in the committed snapshot, for a field that was there before. */
+  readonly typeBefore?: string;
+  /**
+   * For keys added to an `allOf` part, such as the base type a chat extends, the path of the field
+   * the part is of as the snapshot resolves it, '' for the body itself.
+   */
+  readonly owner?: string;
 }
 
 export interface SourceDrift {
-  /** `unreachable` when the latest spec couldn't be fetched or loaded. */
-  readonly status: 'unchanged' | 'changed' | 'unreachable';
+  /**
+   * `unreachable` when the latest spec couldn't be fetched or loaded, and `pinned` for a captured
+   * source, which has no latest to compare with until someone captures it again with credentials.
+   */
+  readonly status: 'unchanged' | 'changed' | 'unreachable' | 'pinned';
   readonly error?: string;
   /** For changed sources; undefined when no `oasdiff` was available to classify them. */
   readonly changes?: readonly SpecChange[];
@@ -86,6 +104,11 @@ export interface ActionDrift {
   readonly snapshotProblems: readonly string[];
   /** Problems recording it against the latest specs; undefined when those didn't load. */
   readonly latestProblems?: readonly string[];
+  /**
+   * The operations whose requests broke the latest specs, as those name them, so `METHOD /path`
+   * of a moved operation is its latest path.
+   */
+  readonly latestViolations?: readonly { readonly source: string; readonly operation: string }[];
   /**
    * What it did with the responses of each operation it calls, by `source METHOD /path`, across
    * the runs against the committed snapshot and the latest spec.
@@ -353,6 +376,19 @@ const outcomeOf = (drift: Omit<ConnectorDrift, 'outcome'>): DriftOutcome => {
     : 'none';
 };
 
+const parseSnapshot = (text: string | undefined): unknown => {
+  try {
+    return text === undefined ? undefined : JSON.parse(text);
+  } catch {
+    return undefined;
+  }
+};
+
+const withType = (change: SpecChange, documents: SnapshotDocuments): SpecChange => ({
+  ...change,
+  ...fieldTypesOf(change, documents),
+});
+
 const classifyChanges = async ({
   format,
   committed,
@@ -369,7 +405,10 @@ const classifyChanges = async ({
 }): Promise<readonly SpecChange[] | undefined> => {
   if (!isProtocolFormat(format)) {
     const entries = await diff(committed ?? '{}', current ?? '{}');
-    return entries?.filter((entry) => !stillInSpec(entry, latestDocument)).map(toSpecChange);
+    const documents = { committed: parseSnapshot(committed), current: parseSnapshot(current) };
+    return entries
+      ?.filter((entry) => !stillInSpec(entry, latestDocument))
+      .map((entry) => withType(toSpecChange(entry), documents));
   }
   if (committed === undefined || current === undefined) {
     return undefined;
@@ -461,7 +500,11 @@ const compareWithLatest = async ({
     );
     const refreshed = await readOptional(path.join(copy, MANIFEST));
     const sources: Record<string, SourceDrift> = {};
-    for (const [name, { format }] of Object.entries(manifest.sources)) {
+    for (const [name, { format, captured }] of Object.entries(manifest.sources)) {
+      if (captured) {
+        sources[name] = { status: 'pinned' };
+        continue;
+      }
       const [committed, current] = await Promise.all(
         [directory, copy].map((root) => readOptional(path.join(root, snapshotFile(name, format))))
       );
@@ -565,9 +608,21 @@ export const detectDrift = async ({
   const sources: Record<string, SourceDrift> = {};
   for (const [name, source] of Object.entries(manifest.sources)) {
     const { url } = source;
+    if (source.captured) {
+      // Fetching it would only answer 401, which is not news; it is refreshed by capturing it
+      // again. It is reported even when another source can't be fetched.
+      sources[name] = { status: 'pinned' };
+      continue;
+    }
     try {
       await (isProtocolFormat(source.format)
-        ? loadProtocolSpec(url, fetchOnce, source.format, source.endpoints ?? [])
+        ? loadProtocolSpec({
+            url,
+            fetchText: fetchOnce,
+            format: source.format,
+            endpoints: source.endpoints ?? [],
+            tools: source.tools,
+          })
         : loadVendorSpec(url, fetchOnce, source));
     } catch (error) {
       log.warning(
@@ -577,10 +632,9 @@ export const detectDrift = async ({
     }
   }
 
-  const latest =
-    Object.keys(sources).length === 0
-      ? await compareWithLatest({ connector, directory, manifest, fetchText: fetchOnce, now, diff })
-      : undefined;
+  const latest = Object.values(sources).some(({ status }) => status === 'unreachable')
+    ? undefined
+    : await compareWithLatest({ connector, directory, manifest, fetchText: fetchOnce, now, diff });
 
   const latestSpecs = latest?.result?.specs;
   const overlayText = await readOptional(path.join(directory, OVERLAY));
@@ -726,7 +780,12 @@ const describeAction = ({
       })
     ),
     snapshotProblems: snapshotResult?.problemsByAction[action] ?? [],
-    ...(latestResult ? { latestProblems: latestResult.problemsByAction[action] ?? [] } : {}),
+    ...(latestResult
+      ? {
+          latestProblems: latestResult.problemsByAction[action] ?? [],
+          latestViolations: latestResult.violatedOperationsByAction[action] ?? [],
+        }
+      : {}),
     ...(recorded.length > 0 ? { fieldUse, tracked, fieldChanges } : {}),
   };
 };

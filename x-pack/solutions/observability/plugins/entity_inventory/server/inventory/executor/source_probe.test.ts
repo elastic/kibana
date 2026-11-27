@@ -25,6 +25,26 @@ const probeResponse = (type?: string) => ({
   values: [],
 });
 
+// How a probe ran when Elasticsearch answered without execution metadata, or threw.
+const answered = {
+  stats: {
+    took: null,
+    documentsFound: null,
+    valuesLoaded: null,
+    rowsEmitted: null,
+    cpuNanos: null,
+    driverNanos: null,
+    bytesRead: null,
+    shards: null,
+    rowCount: 0,
+  },
+  isPartial: false,
+};
+const threw = {
+  stats: null,
+  isPartial: null,
+};
+
 const setup = (answer: (query: string) => Promise<Record<string, unknown>>) => {
   const client = elasticsearchServiceMock.createElasticsearchClient();
   // The mock's resolved type is the client's response, which lacks the execution metadata.
@@ -55,6 +75,7 @@ describe('probeSources', () => {
       failed: false,
       hasTimeSeries,
       query: buildProbeQuery('metrics-*'),
+      execution: answered,
     });
   });
 
@@ -65,6 +86,7 @@ describe('probeSources', () => {
       failed: false,
       hasTimeSeries: false,
       query: buildProbeQuery('metrics-*'),
+      execution: answered,
     });
   });
 
@@ -110,6 +132,7 @@ describe('probeSources', () => {
       failed: false,
       hasTimeSeries: false,
       query: buildProbeQuery('logs-app'),
+      execution: threw,
     });
   });
 
@@ -126,6 +149,7 @@ describe('probeSources', () => {
       status,
       reason: `${type}: ${reason}`,
       query: buildProbeQuery('metrics-*'),
+      execution: threw,
     });
   });
 
@@ -139,6 +163,7 @@ describe('probeSources', () => {
       status: null,
       reason: 'connection reset',
       query: buildProbeQuery('metrics-*'),
+      execution: threw,
     });
   });
 
@@ -152,6 +177,7 @@ describe('probeSources', () => {
       status: 400,
       reason: 'parsing_exception: verification_exception',
       query: buildProbeQuery('metrics-*'),
+      execution: threw,
     });
   });
 
@@ -176,7 +202,15 @@ describe('probeSources', () => {
 
     expect(results).toEqual(
       new Map([
-        ['metrics-*', { failed: false, hasTimeSeries: true, query: buildProbeQuery('metrics-*') }],
+        [
+          'metrics-*',
+          {
+            failed: false,
+            hasTimeSeries: true,
+            query: buildProbeQuery('metrics-*'),
+            execution: answered,
+          },
+        ],
         [
           'logs-*',
           {
@@ -184,10 +218,28 @@ describe('probeSources', () => {
             status: 503,
             reason: 'unavailable_shards_exception: no shard available',
             query: buildProbeQuery('logs-*'),
+            execution: threw,
           },
         ],
       ])
     );
+  });
+
+  it('keeps the stats and partial flag of each probe that answered', async () => {
+    const client = setup(async (query) => {
+      if (patternOf(query) === 'logs-*') {
+        throw responseError(503, 'unavailable_shards_exception', 'no shard available');
+      }
+      return { ...probeResponse('date'), took: 7, is_partial: true };
+    });
+
+    const results = await probeSources(client, ['metrics-*', 'logs-*']);
+
+    expect(results.get('metrics-*')?.execution).toMatchObject({
+      stats: { took: 7 },
+      isPartial: true,
+    });
+    expect(results.get('logs-*')?.execution).toMatchObject({ stats: null, isPartial: null });
   });
 
   it('passes the abort signal to every probe', async () => {

@@ -6,6 +6,7 @@
  */
 
 import { DEFAULT_SPACE_ID } from '@kbn/evals-common';
+import type { RepetitionPolicy } from '@kbn/evals-common';
 
 const EVALS_UI_APP_PATH = '/app/management/ai/evals';
 
@@ -59,17 +60,23 @@ export const buildExperimentUrl = ({
     execution_id: executionId,
   });
 
-/** Builds the evals UI link comparing two executions, or `undefined` when `kibanaUrl` is not a valid URL. */
+/**
+ * Builds the evals UI link comparing two executions, or `undefined` when `kibanaUrl` is not a valid URL.
+ * `mean` is the route default and is left out of the link.
+ */
 export const buildExecutionCompareUrl = ({
   baselineExecutionId,
   targetExecutionId,
+  repetitionPolicy,
   ...options
 }: EvalsUiUrlOptions & {
   baselineExecutionId: string;
   targetExecutionId: string;
+  repetitionPolicy?: RepetitionPolicy;
 }): string | undefined =>
   buildEvalsUiUrl(options, '/compare', {
     type: 'execution',
     baseline: baselineExecutionId,
     target: targetExecutionId,
+    repetition_policy: repetitionPolicy === 'mean' ? undefined : repetitionPolicy,
   });

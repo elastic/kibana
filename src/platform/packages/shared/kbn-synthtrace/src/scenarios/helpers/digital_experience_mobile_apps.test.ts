@@ -67,8 +67,16 @@ const logsOf = (docs: EdotReactNativeDocument[]): OtelLogDocument[] =>
 const serviceOf = (doc: EdotReactNativeDocument) =>
   (isSpan(doc) ? doc.resource.attributes : doc.resource?.attributes)?.['service.name'];
 
+const PLATFORM_BY_OS_NAME: Readonly<Record<string, string>> = {
+  Android: 'android',
+  iOS: 'ios',
+  iPadOS: 'ios',
+};
+
 const platformOf = (doc: EdotReactNativeDocument) =>
-  (isSpan(doc) ? doc.resource.attributes : doc.resource?.attributes)?.['telemetry.sdk.name'];
+  PLATFORM_BY_OS_NAME[
+    String((isSpan(doc) ? doc.resource.attributes : doc.resource?.attributes)?.['os.name'])
+  ];
 
 describe('digital experience mobile apps', () => {
   // A 30-minute run is enough for every app to show every signal, and shared by the tests
@@ -140,12 +148,12 @@ describe('digital experience mobile apps', () => {
 
     it('writes data of both platforms, and never as EDOT Browser', () => {
       const platforms = new Set(docs.map(platformOf));
-      expect([...platforms].sort()).toEqual(['android', 'iOS']);
+      expect([...platforms].sort()).toEqual(['android', 'ios']);
       docs.forEach((doc) => {
-        const language = (isSpan(doc) ? doc.resource.attributes : doc.resource?.attributes)?.[
-          'telemetry.sdk.language'
-        ];
-        expect(language).not.toBe('webjs');
+        const resource = isSpan(doc) ? doc.resource.attributes : doc.resource?.attributes;
+        expect(resource?.['telemetry.sdk.name']).toBe('opentelemetry');
+        expect(resource?.['telemetry.distro.name']).toBe('elastic');
+        expect(resource?.['telemetry.sdk.language']).not.toBe('webjs');
       });
     });
 
@@ -180,7 +188,7 @@ describe('digital experience mobile apps', () => {
 
     it('generates only one platform when asked to', () => {
       const iosDocs = collect({ platform: 'ios' });
-      expect(new Set(iosDocs.map(platformOf))).toEqual(new Set(['iOS']));
+      expect(new Set(iosDocs.map(platformOf))).toEqual(new Set(['ios']));
       // field-service-mobile is Android only
       expect(iosDocs.some((doc) => serviceOf(doc) === 'field-service-mobile')).toBe(false);
     });
@@ -547,12 +555,14 @@ describe('digital experience mobile apps', () => {
           );
           return onNewest.length / inWindow.length;
         };
-        // Every installation takes part in the rollout, from its initial adoption to all of them
+        // The rollout goes from its initial adoption to its target, and older versions keep the rest
         const initialAdoption = newest.rollout?.initialAdoption ?? 0;
+        const targetAdoption = newest.rollout?.targetAdoption ?? 1;
         expect(newestShare(0, 0.5)).toBeGreaterThan(initialAdoption - 0.15);
         expect(newestShare(0, 0.5)).toBeLessThan(initialAdoption + 0.2);
-        expect(newestShare(5.5, hours)).toBeGreaterThan(0.85);
-        expect(newestShare(hours, hours + cycleHours)).toBe(1);
+        expect(newestShare(5.5, hours)).toBeGreaterThan(targetAdoption - 0.15);
+        expect(newestShare(hours, hours + cycleHours)).toBeGreaterThan(targetAdoption - 0.1);
+        expect(newestShare(hours, hours + cycleHours)).toBeLessThan(targetAdoption + 0.1);
 
         // An installation never goes back to an older version
         const versionsByInstallation = new Map<unknown, string[]>();
@@ -632,6 +642,126 @@ describe('digital experience mobile apps', () => {
       expect(
         new Set(immediateLogs.map(({ resource }) => resource?.attributes?.['service.version']))
       ).toEqual(new Set([newest.serviceVersion]));
+    });
+
+    it('leaves older versions the installations above the target adoption', () => {
+      const [app] = DIGITAL_EXPERIENCE_NATIVE_APPS;
+      const [newest, ...older] = app.versions;
+      const halfway = {
+        ...app,
+        versions: [
+          { ...newest, rollout: { initialAdoption: 0.5, hours: 0, targetAdoption: 0.5 } },
+          ...older,
+        ],
+      };
+      const versions = logsOf(
+        generateEdotNativeSessions(range, {
+          environment: 'test',
+          from: FROM,
+          scale: 1,
+          platform: 'both',
+          seed: 'digital-experience-native-target-adoption',
+          apps: [halfway],
+        }).flatMap((generator) =>
+          Array.from(generator).flatMap((event): EdotReactNativeDocument[] => event.serialize())
+        )
+      )
+        .filter((doc) => doc.event_name === EVENT_SESSION_START)
+        .map((doc) => doc.resource?.attributes?.['service.version']);
+      const newestShare =
+        versions.filter((version) => version === newest.serviceVersion).length / versions.length;
+
+      expect(newestShare).toBeGreaterThan(0.35);
+      expect(newestShare).toBeLessThan(0.65);
+    });
+
+    it('runs no installation on the newest version before its rollout starts', () => {
+      const [app] = DIGITAL_EXPERIENCE_NATIVE_APPS;
+      const [newest, ...older] = app.versions;
+      // Starts halfway into the 30 minutes of the run, everywhere at once
+      const delayed = {
+        ...app,
+        versions: [
+          { ...newest, rollout: { initialAdoption: 1, hours: 0, startsAfterHours: 0.25 } },
+          ...older,
+        ],
+      };
+      const delayedLogs = logsOf(
+        generateEdotNativeSessions(range, {
+          environment: 'test',
+          from: FROM,
+          scale: 1,
+          platform: 'both',
+          seed: 'digital-experience-native-delayed-rollout',
+          apps: [delayed],
+        }).flatMap((generator) =>
+          Array.from(generator).flatMap((event): EdotReactNativeDocument[] => event.serialize())
+        )
+      );
+      const startsOn = (serviceVersion: string) =>
+        delayedLogs
+          .filter(
+            (doc) =>
+              doc.event_name === EVENT_SESSION_START &&
+              doc.resource?.attributes?.['service.version'] === serviceVersion
+          )
+          .map((doc) => Number(doc['@timestamp']));
+      const rolloutStart = FROM + 15 * 60_000;
+
+      expect(startsOn(newest.serviceVersion).length).toBeGreaterThan(0);
+      expect(Math.min(...startsOn(newest.serviceVersion))).toBeGreaterThanOrEqual(rolloutStart);
+      expect(startsOn(older[0].serviceVersion).some((time) => time < rolloutStart)).toBe(true);
+    });
+
+    it('keeps each installation on its older version until it upgrades, across a delayed start', () => {
+      const [app] = DIGITAL_EXPERIENCE_NATIVE_APPS;
+      const [newest, ...older] = app.versions;
+      const delayed = {
+        ...app,
+        versions: [
+          {
+            ...newest,
+            rollout: { initialAdoption: 0.6, hours: 0, startsAfterHours: 1.5, targetAdoption: 0.6 },
+          },
+          ...older,
+        ],
+      };
+      // Longer than a cycle of the installations on both sides of the start
+      const run = timerange(range.from, new Date(FROM + 4 * 60 * 60_000));
+      const starts = logsOf(
+        generateEdotNativeSessions(run, {
+          environment: 'test',
+          from: FROM,
+          scale: 0.25,
+          platform: 'both',
+          seed: 'digital-experience-native-delayed-no-downgrade',
+          apps: [delayed],
+        }).flatMap((generator) =>
+          Array.from(generator).flatMap((event): EdotReactNativeDocument[] => event.serialize())
+        )
+      ).filter((doc) => doc.event_name === EVENT_SESSION_START);
+      const versionsByInstallation = new Map<unknown, string[]>();
+      [...starts]
+        .sort((a, b) => Number(a['@timestamp']) - Number(b['@timestamp']))
+        .forEach(({ resource }) => {
+          const installationId = resource?.attributes?.['app.installation.id'];
+          versionsByInstallation.set(installationId, [
+            ...(versionsByInstallation.get(installationId) ?? []),
+            String(resource?.attributes?.['service.version']),
+          ]);
+        });
+
+      const repeated = [...versionsByInstallation.values()].filter(({ length }) => length > 1);
+      expect(repeated.length).toBeGreaterThan(0);
+      repeated.forEach((installed) => {
+        const upgradedAt = installed.indexOf(newest.serviceVersion);
+        const beforeUpgrade = upgradedAt === -1 ? installed : installed.slice(0, upgradedAt);
+        // One older version until the upgrade, and the newest from then on
+        expect(new Set(beforeUpgrade).size).toBeLessThanOrEqual(1);
+        if (upgradedAt !== -1) {
+          expect(new Set(installed.slice(upgradedAt))).toEqual(new Set([newest.serviceVersion]));
+        }
+      });
     });
 
     it('keeps the sessions in progress of apps that share a service name apart', () => {

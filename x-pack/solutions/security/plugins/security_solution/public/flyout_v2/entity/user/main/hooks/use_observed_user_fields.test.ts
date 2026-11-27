@@ -7,7 +7,7 @@
 
 import { renderHook } from '@testing-library/react';
 import { useObservedUserFields } from './use_observed_user_fields';
-import { mockObservedUser } from '../../../../../flyout/entity_details/user_right/mocks';
+import { mockObservedUser } from '../../mocks';
 import { TestProviders } from '../../../../../common/mock';
 
 describe('useObservedUserFields', () => {

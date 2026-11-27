@@ -19,6 +19,14 @@ export const isMarkdownFormat = (
 ): format is z.infer<typeof markdownSourceFormatSchema> =>
   markdownSourceFormatSchema.safeParse(format).success;
 
+/** API references published as one Aglio page (static HTML), by the vendor whose template it is. */
+export const aglioSourceFormatSchema = z.enum(['threatq-html']);
+
+export const isAglioFormat = (
+  format: string | undefined
+): format is z.infer<typeof aglioSourceFormatSchema> =>
+  aglioSourceFormatSchema.safeParse(format).success;
+
 /** Protocols whose operations go by name, with snapshots of their own format. */
 export const protocolSourceFormatSchema = z.enum(['graphql', 'mcp']);
 
@@ -36,20 +44,36 @@ const sourceSchema = z
     format: z.union([
       z.enum(['openapi', 'swagger', 'discovery', 'smithy']),
       markdownSourceFormatSchema,
+      aglioSourceFormatSchema,
       protocolSourceFormatSchema,
     ]),
     /**
-     * The spec, or for Markdown references, their `llms.txt` index. For GraphQL, a document with
-     * SDL or an introspection result; for MCP, one with a `tools/list` result.
+     * The spec, or for Markdown references, their `llms.txt` index, or for an Aglio reference, its
+     * page. For GraphQL, a document with SDL or an introspection result; for MCP, one with a
+     * `tools/list` result.
      */
     url: z.url(),
     /** GraphQL and MCP only: the URLs the connector calls, as the spec's URL can't tell. */
     endpoints: z.array(z.url()).min(1).optional(),
     /**
+     * MCP only: the tool documents the server's tools are assembled from, as URLs absolute or
+     * relative to `url`, for a vendor that publishes a document per tool rather than a
+     * `tools/list` result. Without them, `url` itself serves the tool list.
+     */
+    tools: z.array(z.string().min(1)).min(1).optional(),
+    /**
      * Markdown references only: URL prefixes, absolute or relative to the index, of the pages
      * to fetch, such as the folders of the API groups the connector calls.
      */
     pages: z.array(z.string().min(1)).min(1).optional(),
+    /**
+     * Set when the vendor only serves this spec to a request carrying credentials, so it was
+     * captured once and committed as the snapshot. It is never fetched again: `--refresh` and
+     * `--drift` read the snapshot, and drift reports the source as pinned rather than unreachable.
+     * Refreshing it means capturing it again, by hand, with credentials. Needs a `note` saying
+     * what the capture took.
+     */
+    captured: z.literal(true).optional(),
     /** The spec's `info.version`, when it has one. */
     apiVersion: z.string().optional(),
     /** When the snapshot last changed, as an ISO date-time. */
@@ -66,6 +90,14 @@ const sourceSchema = z
   .refine(({ format, endpoints }) => isProtocolFormat(format) === (endpoints !== undefined), {
     message: 'GraphQL and MCP sources need "endpoints", and other sources have none',
     path: ['endpoints'],
+  })
+  .refine(({ format, tools }) => tools === undefined || format === 'mcp', {
+    message: '"tools" only applies to MCP sources',
+    path: ['tools'],
+  })
+  .refine(({ captured, note }) => captured === undefined || note !== undefined, {
+    message: 'A captured source needs a "note" saying what capturing it took',
+    path: ['note'],
   });
 
 const located = { in: z.enum(['query', 'body', 'header']).optional() };
@@ -93,7 +125,7 @@ const paginationSchema = z.discriminatedUnion('style', [
       request: z.object({ ...cursorRequest, ...located }).strict(),
       response: z
         .object({
-          in: z.enum(['body', 'header']).optional(),
+          in: z.enum(['body', 'header', 'last_item']).optional(),
           itemsPath,
           nextPath: z.string().min(1),
           hasMorePath: z.string().optional(),
@@ -102,7 +134,11 @@ const paginationSchema = z.discriminatedUnion('style', [
       end: z.enum(['empty_string', 'null', 'missing']).optional(),
       ...defaultSize,
     })
-    .strict(),
+    .strict()
+    .refine(({ response, end }) => response.in !== 'last_item' || end === undefined, {
+      message: '"end" does not apply to a cursor held in the last item',
+      path: ['end'],
+    }),
   z
     .object({
       style: z.literal('offset'),
@@ -199,6 +235,7 @@ export type ManifestNamedOperation = z.infer<typeof namedOperationSchema>;
 export type ManifestCall = ManifestOperation | ManifestNamedOperation;
 export type ManifestSource = z.infer<typeof sourceSchema>;
 export type MarkdownSourceFormat = z.infer<typeof markdownSourceFormatSchema>;
+export type AglioSourceFormat = z.infer<typeof aglioSourceFormatSchema>;
 export type ProtocolFormat = z.infer<typeof protocolSourceFormatSchema>;
 export type UnmatchedRequest = z.infer<typeof unmatchedSchema>;
 export type ManifestPagination = NonNullable<ManifestOperation['pagination']>;

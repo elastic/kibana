@@ -383,6 +383,8 @@
       "@kbn/connector-schemas/*": ["./src/platform/packages/shared/kbn-connector-schemas/*"],
       "@kbn/connector-specs": ["./src/platform/packages/shared/kbn-connector-specs"],
       "@kbn/connector-specs/*": ["./src/platform/packages/shared/kbn-connector-specs/*"],
+      "@kbn/connector-topics": ["./src/platform/packages/shared/kbn-connector-topics"],
+      "@kbn/connector-topics/*": ["./src/platform/packages/shared/kbn-connector-topics/*"],
       "@kbn/console-plugin": ["./src/platform/plugins/shared/console"],
       "@kbn/console-plugin/*": ["./src/platform/plugins/shared/console/*"],
       "@kbn/content-connectors-plugin": ["./x-pack/platform/plugins/shared/content_connectors"],
@@ -2431,6 +2433,10 @@
       "@kbn/search-types/*": ["./src/platform/packages/shared/kbn-search-types/*"],
       "@kbn/searchprofiler-plugin": ["./x-pack/platform/plugins/shared/searchprofiler"],
       "@kbn/searchprofiler-plugin/*": ["./x-pack/platform/plugins/shared/searchprofiler/*"],
+      "@kbn/secrets": ["./x-pack/platform/packages/private/kbn-secrets"],
+      "@kbn/secrets/*": ["./x-pack/platform/packages/private/kbn-secrets/*"],
+      "@kbn/secrets-plugin": ["./x-pack/platform/plugins/private/secrets"],
+      "@kbn/secrets-plugin/*": ["./x-pack/platform/plugins/private/secrets/*"],
       "@kbn/security-ai-prompts": ["./x-pack/solutions/security/packages/security-ai-prompts"],
       "@kbn/security-ai-prompts/*": ["./x-pack/solutions/security/packages/security-ai-prompts/*"],
       "@kbn/security-api-integration-helpers": ["./x-pack/platform/test_plugins/security_api_integration/packages/helpers"],
@@ -2853,8 +2859,6 @@
       "@kbn/third-party-lens-navigation-prompt-plugin/*": ["./x-pack/examples/third_party_lens_navigation_prompt/*"],
       "@kbn/third-party-vis-lens-example-plugin": ["./x-pack/examples/third_party_vis_lens_example"],
       "@kbn/third-party-vis-lens-example-plugin/*": ["./x-pack/examples/third_party_vis_lens_example/*"],
-      "@kbn/timelines-plugin": ["./x-pack/solutions/security/plugins/timelines"],
-      "@kbn/timelines-plugin/*": ["./x-pack/solutions/security/plugins/timelines/*"],
       "@kbn/timelion-grammar": ["./src/platform/packages/private/kbn-timelion-grammar"],
       "@kbn/timelion-grammar/*": ["./src/platform/packages/private/kbn-timelion-grammar/*"],
       "@kbn/timerange": ["./src/platform/packages/shared/kbn-timerange"],
@@ -3105,7 +3109,6 @@
       "@emotion/core": ["./typings/@emotion"],
       // We need the custom typings "proxy" because our current import-resolver doesn't support "exports" in package.json.
       // We should be able to remove this once we support cjs/esm interop.
-      "@elastic/opentelemetry-node/sdk": ["./typings/@elastic/opentelemetry-node/sdk"],
       "@opentelemetry/semantic-conventions/incubating": [
         "./typings/@opentelemetry/semantic-conventions/incubating"
       ],

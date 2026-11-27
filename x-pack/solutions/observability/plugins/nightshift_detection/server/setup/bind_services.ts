@@ -9,7 +9,7 @@ import type { ContainerModuleLoadOptions } from 'inversify';
 import { Logger } from '@kbn/core-di';
 import { CoreStart } from '@kbn/core-di-server';
 import { AvailabilityService } from '../lib/availability/availability_service';
-import { DetectionEngineSystemClient } from '../lib/engine/es_client_tokens';
+import { DetectionEngineSystemClient } from '../lib/engine/tokens';
 import { SpaceRunLock } from '../lib/engine/space_run_lock';
 import { SpaceSetupLock } from '../lib/service_account/space_setup_lock';
 

@@ -40,7 +40,9 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
   it('shows 1 node with the words "Analyzed Event" in the label', async () => {
     await expect(
       simulator.map(() => {
-        return simulator.testSubject('resolver:node:description').map((element) => element.text());
+        return simulator
+          .testSubject('resolver:node:description')
+          .map((element) => element.textContent);
       })
     ).toYieldEqualTo(['Analyzed Event · Running Process', 'Running Process', 'Running Process']);
   });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { updateCompositeSLOParamsSchema } from '@kbn/slo-schema';
+import { updateCompositeSLOParamsSchema, updateCompositeSLOResponseSchema } from '@kbn/slo-schema';
 import { DefaultBurnRatesClient } from '../../services/burn_rates_client';
 import { updateCompositeSlo } from '../../services/composites/update_composite_slo';
 import { DefaultSummaryClient } from '../../services/summary_client';
@@ -20,6 +20,9 @@ export const updateCompositeSLORoute = createCompositeSloServerRoute({
     },
   },
   params: updateCompositeSLOParamsSchema,
+  responses: {
+    200: { description: 'Successful request', body: () => updateCompositeSLOResponseSchema },
+  },
   handler: async ({ context, params, logger, request, getScopedClients }) => {
     const { scopedClusterClient, repository, compositeRepository, spaceId, telemetry } =
       await getScopedClients({

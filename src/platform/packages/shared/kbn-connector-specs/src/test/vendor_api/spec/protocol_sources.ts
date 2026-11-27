@@ -43,6 +43,7 @@ import type { GraphQLSpec, McpSpec, McpTool } from '@kbn/connector-emulate';
 import type { SpecChange } from '../drift/detect_drift';
 import { isJsonObject } from '../json_pointer';
 import type { ProtocolFormat } from '../manifest';
+import { isMcpToolDefinition, loadMcpTools } from './load_mcp_tools';
 import { parseSpecText } from './parse_spec_text';
 import { toStableJson } from '../stable_json';
 
@@ -75,13 +76,7 @@ const readTools = (text: string): McpTool[] => {
   const parsed = parseSpecText(text);
   const holder = isJsonObject(parsed) && isJsonObject(parsed.result) ? parsed.result : parsed;
   const tools = isJsonObject(holder) ? holder.tools : undefined;
-  if (
-    !Array.isArray(tools) ||
-    !tools.every(
-      (tool) =>
-        isJsonObject(tool) && typeof tool.name === 'string' && isJsonObject(tool.inputSchema)
-    )
-  ) {
+  if (!Array.isArray(tools) || !tools.every(isMcpToolDefinition)) {
     throw new Error(
       'The MCP source is not a tools/list result: { tools: [{ name, inputSchema }] }'
     );
@@ -89,21 +84,38 @@ const readTools = (text: string): McpTool[] => {
   return tools as unknown as McpTool[];
 };
 
+export interface LoadProtocolSpecOptions {
+  readonly url: string;
+  readonly fetchText: (url: string) => Promise<string>;
+  readonly format: ProtocolFormat;
+  readonly endpoints: readonly string[];
+  /** MCP only: tool documents to assemble the server's tools from, instead of reading `url`. */
+  readonly tools?: readonly string[];
+}
+
 /**
  * Reads a GraphQL or MCP spec from what its source URL serves: SDL or an introspection result, or a
  * `tools/list` result. The URL is only read, so servers that need a request of their own, or
- * credentials, are captured once and served from a file.
+ * credentials, are captured once and served from a file, or, where the vendor publishes a document
+ * per tool, assembled from those with `tools`.
  */
-export const loadProtocolSpec = async (
-  url: string,
-  fetchText: (url: string) => Promise<string>,
-  format: ProtocolFormat,
-  endpoints: readonly string[]
-): Promise<ProtocolSpec> => {
-  const text = await fetchText(url);
+export const loadProtocolSpec = async ({
+  url,
+  fetchText,
+  format,
+  endpoints,
+  tools,
+}: LoadProtocolSpecOptions): Promise<ProtocolSpec> => {
   if (format === 'mcp') {
-    return { format, tools: readTools(text), endpoints };
+    return {
+      format,
+      tools: tools
+        ? await loadMcpTools({ url, tools, fetchText })
+        : readTools(await fetchText(url)),
+      endpoints,
+    };
   }
+  const text = await fetchText(url);
   const sdl = text.trimStart().startsWith('{') ? introspectionToSdl(text) : text;
   return { format, sdl: normalizeSdl(sdl), endpoints };
 };

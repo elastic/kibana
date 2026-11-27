@@ -6,7 +6,7 @@
  */
 
 import type { DataProvider } from '@kbn/securitysolution-timeline-common';
-import type { AddToTimelineButtonProps } from '@kbn/timelines-plugin/public';
+import type { AddToTimelineButtonProps } from '../../../../timelines/components/add_to_timeline/add_to_timeline';
 import { useKibana } from '../../../../common/lib/kibana';
 import { generateDataProvider } from '../utils/data_provider';
 import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../indicators/utils/field_value';

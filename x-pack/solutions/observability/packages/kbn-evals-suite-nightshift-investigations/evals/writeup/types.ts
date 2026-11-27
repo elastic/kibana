@@ -123,6 +123,8 @@ export interface GeneratedReply {
   error?: string;
   /** Read from the generation cache rather than the model. */
   cached?: boolean;
+  /** The first try ended without a reply, and this is the second. */
+  retried?: boolean;
 }
 
 export interface WriteupTaskOutput extends GeneratedReply {

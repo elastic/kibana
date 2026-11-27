@@ -213,6 +213,26 @@ export interface WorkflowValidationRules {
     values: Record<string, never>;
   };
 
+  // -- await executions ---------------------------------------------------------
+  /** A `from-steps` entry naming a step that does not exist. */
+  unknownAwaitedStep: {
+    owner: 'await-executions-validation';
+    defaultSeverity: 'error';
+    values: { stepName: string };
+  };
+  /** A `from-steps` entry naming a step that has not finished when the await runs. */
+  awaitedStepNotFinished: {
+    owner: 'await-executions-validation';
+    defaultSeverity: 'error';
+    values: { stepName: string };
+  };
+  /** A `from-steps` entry naming a step with no `workflow.executeAsync` step in it. */
+  awaitedStepStartsNoExecutions: {
+    owner: 'await-executions-validation';
+    defaultSeverity: 'error';
+    values: { stepName: string };
+  };
+
   // -- deprecations -------------------------------------------------------------
   deprecatedStepType: {
     owner: 'deprecated-step-validation';
@@ -223,6 +243,20 @@ export interface WorkflowValidationRules {
     owner: 'deprecated-step-validation';
     defaultSeverity: 'warning';
     values: { stepName: string };
+  };
+
+  // -- step exposure ------------------------------------------------------------
+  /** An `internal` step used in a workflow that isn't managed. */
+  internalStepType: {
+    owner: 'step-exposure-validation';
+    defaultSeverity: 'warning';
+    values: { stepType: string };
+  };
+  /** A `managed_only` step used in a workflow that isn't managed. */
+  managedOnlyStepType: {
+    owner: 'step-exposure-validation';
+    defaultSeverity: 'error';
+    values: { stepType: string };
   };
 
   // -- es|ql --------------------------------------------------------------------
@@ -313,8 +347,18 @@ export const WORKFLOW_VALIDATION_RULES: {
   },
   invalidParallelMode: { owner: 'parallel-mode-validation', defaultSeverity: 'error' },
 
+  unknownAwaitedStep: { owner: 'await-executions-validation', defaultSeverity: 'error' },
+  awaitedStepNotFinished: { owner: 'await-executions-validation', defaultSeverity: 'error' },
+  awaitedStepStartsNoExecutions: {
+    owner: 'await-executions-validation',
+    defaultSeverity: 'error',
+  },
+
   deprecatedStepType: { owner: 'deprecated-step-validation', defaultSeverity: 'warning' },
   ignoredFetcherSetting: { owner: 'deprecated-step-validation', defaultSeverity: 'warning' },
+
+  internalStepType: { owner: 'step-exposure-validation', defaultSeverity: 'warning' },
+  managedOnlyStepType: { owner: 'step-exposure-validation', defaultSeverity: 'error' },
 
   esqlDiagnostic: { owner: 'esql-validation', defaultSeverity: 'error' },
   esqlUnknownSource: { owner: 'esql-validation', defaultSeverity: 'error' },

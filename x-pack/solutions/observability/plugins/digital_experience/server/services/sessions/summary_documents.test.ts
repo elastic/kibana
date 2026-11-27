@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SESSIONS_FRUSTRATION_VALUES } from '../../../common/sessions';
 import {
   sessionDocumentId,
   toEsqlRows,
@@ -22,6 +23,10 @@ const summaryRow = (overrides: EsqlRow = {}): EsqlRow => ({
   page_load_count: 1,
   click_count: 4,
   js_error_count: 2,
+  rage_click_count: 2,
+  dead_click_count: 1,
+  error_click_count: 0,
+  frustration_count: 3,
   http_request_count: 5,
   http_failed_request_count: 1,
   attribute_environment: 'production',
@@ -33,6 +38,7 @@ const summaryRow = (overrides: EsqlRow = {}): EsqlRow => ({
   attribute_country_iso: 'ES',
   attribute_region: null,
   attribute_city: 'Madrid',
+  attribute_app_version: '2.4.0',
   lcp_p75: 2100.5,
   lcp_samples: 4,
   lcp_good: 2,
@@ -41,6 +47,8 @@ const summaryRow = (overrides: EsqlRow = {}): EsqlRow => ({
   inp_samples: 0,
   inp_good: 0,
   inp_up_to_needs_improvement: 0,
+  load_time_p75: 1800,
+  load_time_samples: 1,
   ...overrides,
 });
 
@@ -74,7 +82,7 @@ describe('toSessionDocuments', () => {
 
     expect(document).toEqual({
       session: { id: 'Session-A' },
-      service: { name: 'storefront-web' },
+      service: { name: 'storefront-web', version: '2.4.0' },
       start_time: '2026-11-10T10:00:00.000Z',
       end_time: '2026-11-10T10:05:00.000Z',
       duration_ms: 300_000,
@@ -83,6 +91,12 @@ describe('toSessionDocuments', () => {
       page_load_count: 1,
       click_count: 4,
       js_error_count: 2,
+      rage_click_count: 2,
+      dead_click_count: 1,
+      error_click_count: 0,
+      frustration_count: 3,
+      frustration_targets: [],
+      frustration_pages: [],
       http_request_count: 5,
       http_failed_request_count: 1,
       bounced: false,
@@ -102,6 +116,7 @@ describe('toSessionDocuments', () => {
         fcp: { count: 0, good: 0, needs_improvement: 0, poor: 0 },
         ttfb: { count: 0, good: 0, needs_improvement: 0, poor: 0 },
       },
+      load_time: { p75: 1800, count: 1 },
       search: [
         'session-a',
         'ana@example.com',
@@ -161,6 +176,94 @@ describe('toSessionDocuments', () => {
     ]);
 
     expect(document.journey).toEqual(['/x|y']);
+  });
+
+  it('has no load time without a page load that finished loading', () => {
+    const [document] = toSessionDocuments([
+      summaryRow({ load_time_p75: null, load_time_samples: 0 }),
+    ]);
+
+    expect(document.load_time).toEqual({ p75: null, count: 0 });
+  });
+
+  it('counts no frustration for a row without the columns', () => {
+    const [document] = toSessionDocuments([
+      summaryRow({
+        rage_click_count: null,
+        dead_click_count: null,
+        error_click_count: null,
+        frustration_count: null,
+      }),
+    ]);
+
+    expect(document).toMatchObject({
+      rage_click_count: 0,
+      dead_click_count: 0,
+      error_click_count: 0,
+      frustration_count: 0,
+    });
+  });
+
+  it('keeps the frustrated selectors, and the page paths of the frustrated URLs, without repeats', () => {
+    const [document] = toSessionDocuments([
+      summaryRow({
+        frustration_targets: ['#buy', 'button.promo', '#buy'],
+        frustration_urls: [
+          'https://shop.example.com/cart?item=1',
+          'https://shop.example.com/cart?item=2',
+          'https://shop.example.com/checkout?step=pay',
+        ],
+      }),
+    ]);
+
+    expect(document).toMatchObject({
+      frustration_targets: ['#buy', 'button.promo'],
+      frustration_pages: ['/cart', '/checkout'],
+    });
+  });
+
+  it('takes a single frustrated selector and URL, which ES|QL returns as values rather than lists', () => {
+    const [document] = toSessionDocuments([
+      summaryRow({ frustration_targets: '#buy', frustration_urls: 'https://shop.example.com/' }),
+    ]);
+
+    expect(document).toMatchObject({ frustration_targets: ['#buy'], frustration_pages: ['/'] });
+  });
+
+  it('keeps the frustrated selectors and pages with the most signals, in the order the query ranks them', () => {
+    // The query returns them by signals, most first, which is not their sorted order.
+    const ranked = Array.from({ length: 30 }, (_, index) =>
+      String(index).padStart(2, '0')
+    ).reverse();
+    const [document] = toSessionDocuments([
+      summaryRow({
+        frustration_targets: ranked.map((index) => `#target-${index}`),
+        frustration_urls: ranked.flatMap((index) => [
+          `https://shop.example.com/page-${index}?q=1`,
+          `https://shop.example.com/page-${index}?q=2`,
+        ]),
+      }),
+    ]);
+
+    const kept = ranked.slice(0, SESSIONS_FRUSTRATION_VALUES);
+    expect(document.frustration_targets).toEqual(kept.map((index) => `#target-${index}`));
+    expect(document.frustration_pages).toEqual(kept.map((index) => `/page-${index}`));
+  });
+
+  it('has no application version when the events report none', () => {
+    const [document] = toSessionDocuments([summaryRow({ attribute_app_version: null })]);
+
+    expect(document.service).toEqual({ name: 'storefront-web', version: null });
+  });
+
+  it('falls back to "Mobile" or "Desktop" from browser.mobile without a device model or type', () => {
+    const deviceOf = (overrides: EsqlRow) =>
+      toSessionDocuments([summaryRow(overrides)])[0].user_agent.device;
+
+    expect(deviceOf({ attribute_mobile: 'true' })).toBe('Mobile');
+    expect(deviceOf({ attribute_mobile: 'false' })).toBe('Desktop');
+    expect(deviceOf({ attribute_device: 'iPhone', attribute_mobile: 'true' })).toBe('iPhone');
+    expect(deviceOf({ attribute_mobile: null })).toBeNull();
   });
 
   it('skips rows without a session, an application or times', () => {

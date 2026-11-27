@@ -5,13 +5,47 @@
  * 2.0.
  */
 
-import { APPLICATION_SOURCE } from '../../../../common/application_source';
-import type { ApplicationSource, ApplicationSummary } from '../../../../common/types/applications';
+import { APPLICATION_SOURCE, APPLICATION_TYPE } from '../../../../common/application_source';
+import type {
+  ApplicationSource,
+  ApplicationSummary,
+  MobileApplicationSummary,
+  MobilePlatform,
+  WebApplicationSummary,
+} from '../../../../common/types/applications';
 
 /** A list row: an application, flagged when its name also has Classic RUM data. */
-export interface ApplicationRow extends ApplicationSummary {
-  hasClassicData: boolean;
-}
+export type ApplicationRow = WebApplicationSummary & { hasClassicData: boolean };
+
+/** Whether an application runs in a browser: an EDOT Browser or Classic RUM one. */
+export const isWebApplication = (app: ApplicationSummary): app is WebApplicationSummary =>
+  app.applicationType === APPLICATION_TYPE.web;
+
+/** Whether an application is a mobile one: EDOT Android or iOS, React Native on top. */
+export const isMobileApplication = (app: ApplicationSummary): app is MobileApplicationSummary =>
+  app.applicationType === APPLICATION_TYPE.mobile;
+
+/**
+ * The mobile applications of `applications` that run on `platform`, or all, whose name contains
+ * `search`; they have their own tab and columns.
+ */
+export const mobileApplicationsMatching = ({
+  applications,
+  search,
+  platform,
+}: {
+  applications: ApplicationSummary[];
+  search: string;
+  platform?: MobilePlatform;
+}): MobileApplicationSummary[] => {
+  const term = search.trim().toLowerCase();
+  return applications.filter(
+    (app): app is MobileApplicationSummary =>
+      isMobileApplication(app) &&
+      (!platform || app.platforms.includes(platform)) &&
+      (!term || app.serviceName.toLowerCase().includes(term))
+  );
+};
 
 interface ApplicationFilters {
   applications: ApplicationSummary[];
@@ -33,11 +67,13 @@ export const applicationsMatching = ({
 };
 
 /**
- * The rows to show: `applicationsMatching`, but with all sources a name with both an EDOT Browser
- * and a Classic RUM row shows only the EDOT Browser one, flagged with `hasClassicData`.
+ * The web rows to show: `applicationsMatching`, but with all sources a name with both an EDOT
+ * Browser and a Classic RUM row shows only the EDOT Browser one, flagged with `hasClassicData`.
  */
 export const filterApplications = (filters: ApplicationFilters): ApplicationRow[] => {
-  const { applications, source } = filters;
+  const { source } = filters;
+  // Mobile applications are EDOT data too, but have their own table.
+  const applications = filters.applications.filter(isWebApplication);
   const namesOf = (appSource: ApplicationSource) =>
     new Set(
       applications.filter((app) => app.source === appSource).map(({ serviceName }) => serviceName)
@@ -45,7 +81,8 @@ export const filterApplications = (filters: ApplicationFilters): ApplicationRow[
   const otelNames = namesOf(APPLICATION_SOURCE.otel);
   const classicNames = namesOf(APPLICATION_SOURCE.classic);
 
-  return applicationsMatching(filters)
+  return applicationsMatching({ ...filters, applications })
+    .filter(isWebApplication)
     .filter(
       (app) =>
         source !== undefined ||

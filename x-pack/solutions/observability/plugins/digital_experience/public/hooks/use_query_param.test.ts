@@ -7,7 +7,10 @@
 
 import { act, renderHook } from '@testing-library/react';
 import { useHistory, useLocation } from 'react-router-dom';
+import { ENVIRONMENT_ALL_VALUE } from '@kbn/apm-types';
+import { useApplicationType } from './use_application_type';
 import { useDigitalExperienceParams } from './use_digital_experience_params';
+import { useEnvironment } from './use_environment';
 import { useQueryParam } from './use_query_param';
 import { useSourceFilter } from './use_source_filter';
 
@@ -58,6 +61,60 @@ describe('useQueryParam', () => {
     act(() => result.current.setValue(undefined));
 
     expect(push).toHaveBeenCalledWith(expect.objectContaining({ search: 'rangeFrom=now-15m' }));
+  });
+
+  it("reads the mobile page's filters from the application's route", () => {
+    mockRoute({ release: '2.0.0' });
+    expect(renderHook(() => useQueryParam('release')).result.current.value).toBe('2.0.0');
+    expect(useDigitalExperienceParams).toHaveBeenCalledWith('/{serviceName}');
+  });
+});
+
+describe('useApplicationType', () => {
+  const search = '?platformFilter=ios&rangeFrom=now-15m&sourceFilter=classic';
+
+  it('reads the tab', () => {
+    mockRoute({ applicationType: 'mobile' });
+    expect(renderHook(() => useApplicationType()).result.current.applicationType).toBe('mobile');
+  });
+
+  it('clears the web source filter on the mobile tab, in the same history entry', () => {
+    mockRoute({}, search);
+    const { result } = renderHook(() => useApplicationType());
+
+    act(() => result.current.setApplicationType('mobile'));
+
+    expect(push).toHaveBeenCalledTimes(1);
+    expect(push).toHaveBeenCalledWith(
+      expect.objectContaining({
+        search: 'applicationType=mobile&platformFilter=ios&rangeFrom=now-15m',
+      })
+    );
+  });
+
+  it('clears the mobile platform filter on the web tab', () => {
+    mockRoute({}, search);
+    const { result } = renderHook(() => useApplicationType());
+
+    act(() => result.current.setApplicationType('web'));
+
+    expect(push).toHaveBeenCalledWith(
+      expect.objectContaining({
+        search: 'applicationType=web&rangeFrom=now-15m&sourceFilter=classic',
+      })
+    );
+  });
+});
+
+describe('useEnvironment', () => {
+  it('reads the environment', () => {
+    mockRoute({ environment: 'production' });
+    expect(renderHook(() => useEnvironment()).result.current.environment).toBe('production');
+  });
+
+  it('reads ENVIRONMENT_ALL as all environments', () => {
+    mockRoute({ environment: ENVIRONMENT_ALL_VALUE });
+    expect(renderHook(() => useEnvironment()).result.current.environment).toBeUndefined();
   });
 });
 

@@ -305,6 +305,10 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
     schemaHash: '5d5e07122f98c29f16a1128c42b72e6412c2c048312e019c32a15e4dc81f521a',
   },
   {
+    id: 'significant-events.knowledgeIndicatorsChanged',
+    schemaHash: '95a19ccef77967dc2b71a304ffc5e65d699912a2b9920d9893f2ce1db6298b73',
+  },
+  {
     id: 'slack2.app_mention',
     schemaHash: '2b9a3c2f21420860adb283c1a3a7e456eb944218c87bf9923995b19c70ee9400',
   },

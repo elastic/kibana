@@ -803,7 +803,7 @@ describe('Kerberos authentication', () => {
       });
     });
 
-    it('emits the keytab, and not the username, of the keytab authentication', () => {
+    it('emits the keytab and the username (the principal) of the keytab authentication', () => {
       expect(
         buildKafkaAuthData({
           auth_type: kafkaAuthType.Kerberos,
@@ -814,6 +814,7 @@ describe('Kerberos authentication', () => {
           enabled: true,
           auth_type: 'keytab',
           keytab: '/etc/kafka.keytab',
+          username: 'kafka',
           config_path: '/etc/krb5.conf',
           service_name: 'kafka',
           realm: 'EXAMPLE.COM',

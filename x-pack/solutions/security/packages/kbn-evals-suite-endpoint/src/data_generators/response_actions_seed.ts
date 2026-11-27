@@ -20,6 +20,12 @@ export type { IndexedFleetEndpointPolicyResponse };
 
 export const RESPONSE_ACTIONS_ISOLATE_AGENT_ID = `${RESPONSE_ACTIONS_AGENT_ID_PREFIX}isolate-001`;
 export const RESPONSE_ACTIONS_RELEASE_AGENT_ID = `${RESPONSE_ACTIONS_AGENT_ID_PREFIX}release-001`;
+export const RESPONSE_ACTIONS_SHARED_IP_AGENT_IDS = [
+  `${RESPONSE_ACTIONS_AGENT_ID_PREFIX}shared-ip-001`,
+  `${RESPONSE_ACTIONS_AGENT_ID_PREFIX}shared-ip-002`,
+] as const;
+/** An address held by both shared-IP hosts, so it cannot identify one endpoint. */
+export const RESPONSE_ACTIONS_SHARED_IP = '10.42.0.99';
 
 /**
  * The Fleet package the ERA host lookup keeps (`endpoint` is in
@@ -88,13 +94,18 @@ export const cleanupResponseActionsEndpointPolicy = async ({
   await deleteIndexedFleetEndpointPolicies(kbnClient, indexed);
 };
 
-/** The two ERA hosts, enrolled on `agentPolicyId` with the `endpoint` package. */
+/** The ERA hosts, enrolled on `agentPolicyId` with the `endpoint` package. */
 export const buildResponseActionsScenarios = (
   agentPolicyId: string
-): { isolate: EndpointScenario; release: EndpointScenario } => ({
+): {
+  isolate: EndpointScenario;
+  release: EndpointScenario;
+  sharedIp: [EndpointScenario, EndpointScenario];
+} => ({
   isolate: {
     agentId: RESPONSE_ACTIONS_ISOLATE_AGENT_ID,
     hostName: 'eval-host-isolate',
+    hostIp: ['10.42.0.15'],
     os: { name: 'Windows', version: '10' },
     policyName: 'eval-policy-response',
     policyStatus: 'success',
@@ -110,4 +121,26 @@ export const buildResponseActionsScenarios = (
     policyId: agentPolicyId,
     agentPackages: RESPONSE_ACTIONS_AGENT_PACKAGES,
   },
+  sharedIp: [
+    {
+      agentId: RESPONSE_ACTIONS_SHARED_IP_AGENT_IDS[0],
+      hostName: 'eval-host-shared-a',
+      hostIp: [RESPONSE_ACTIONS_SHARED_IP],
+      os: { name: 'Windows', version: '10' },
+      policyName: 'eval-policy-response',
+      policyStatus: 'success',
+      policyId: agentPolicyId,
+      agentPackages: RESPONSE_ACTIONS_AGENT_PACKAGES,
+    },
+    {
+      agentId: RESPONSE_ACTIONS_SHARED_IP_AGENT_IDS[1],
+      hostName: 'eval-host-shared-b',
+      hostIp: [RESPONSE_ACTIONS_SHARED_IP],
+      os: { name: 'Windows', version: '10' },
+      policyName: 'eval-policy-response',
+      policyStatus: 'success',
+      policyId: agentPolicyId,
+      agentPackages: RESPONSE_ACTIONS_AGENT_PACKAGES,
+    },
+  ],
 });

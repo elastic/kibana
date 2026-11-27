@@ -88,15 +88,16 @@ describe('createAssertAlertZeroAccess', () => {
     await expect(assertAccess(request, 'read')).rejects.toThrow('Missing AlertZero Read');
   });
 
-  it('rejects a Classic space even when the setting is on', async () => {
+  it('rejects a space with another solution view even when the setting is on', async () => {
     const { request, spaces, uiSettingsClient, assertAccess } = setup();
     spaces.spacesService.getActiveSpace.mockResolvedValue({
       id: DEFAULT_SPACE_ID,
       name: 'Default',
       disabledFeatures: [],
+      solution: 'oblt',
     });
     await expect(assertAccess(request, 'read')).rejects.toThrow(
-      'AlertZero is available only in a Security solution space.'
+      'AlertZero is available only in Security solution and Classic spaces.'
     );
     expect(uiSettingsClient.get).not.toHaveBeenCalled();
   });

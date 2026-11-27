@@ -407,6 +407,170 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
+    describe('package upgrade that drops the agent version condition', () => {
+      let agentPolicyId: string;
+      let packagePolicyId: string;
+      const agentId = `agent-upgrade-${Date.now()}`;
+
+      async function getInputsForVersions() {
+        const res: any = await es.transport.request({
+          method: 'GET',
+          path: `/${INGEST_SAVED_OBJECT_INDEX}/_doc/fleet-package-policies:${packagePolicyId}`,
+        });
+        return res._source?.['fleet-package-policies']?.inputs_for_versions ?? {};
+      }
+
+      async function getAgentPolicyId() {
+        const { body } = await supertest.get(`/api/fleet/agents/${agentId}`).expect(200);
+        return body.item.policy_id;
+      }
+
+      before(async () => {
+        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
+        await kibanaServer.savedObjects.cleanStandardList();
+        await fleetAndAgents.setup();
+
+        const { body: agentPolicyResponse } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ name: 'VSP upgrade policy', namespace: 'default', force: true })
+          .expect(200);
+        agentPolicyId = agentPolicyResponse.item.id;
+
+        // Enroll the agent before adding the package policy, so the one-shot reassignment task it
+        // schedules finds the agent. The periodic task is disabled in this config.
+        await fleetAndAgents.generateAgent(
+          'online',
+          agentId,
+          agentPolicyId,
+          previousMinorVersion,
+          undefined,
+          undefined,
+          true
+        );
+
+        const { body: packagePolicyResponse } = await supertest
+          .post(`/api/fleet/package_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'abnormal_security-upgrade',
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            enabled: true,
+            inputs: [
+              {
+                policy_template: 'abnormal_security',
+                type: 'cel',
+                enabled: true,
+                vars: {
+                  url: { value: 'https://api.abnormalplatform.com', type: 'url' },
+                  access_token: { value: 'token', type: 'password' },
+                },
+                streams: [
+                  {
+                    enabled: true,
+                    data_stream: { type: 'logs', dataset: 'abnormal_security.audit' },
+                    vars: {
+                      initial_interval: { value: '24h', type: 'text' },
+                      interval: { value: '5m', type: 'text' },
+                      page_size: { value: '100', type: 'text' },
+                      http_client_timeout: { value: '30s', type: 'text' },
+                      tags: { value: ['forwarded', 'abnormal_security-audit'], type: 'text' },
+                    },
+                  },
+                ],
+              },
+            ],
+            package: { name: 'abnormal_security', version: '1.12.0' },
+          })
+          .expect(200);
+        packagePolicyId = packagePolicyResponse.item.id;
+
+        // The package policy is upgraded to the latest installed version, so install it first.
+        await supertest
+          .post(`/api/fleet/epm/packages/abnormal_security/1.12.1`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ force: true })
+          .expect(200);
+      });
+
+      after(async () => {
+        await supertest.delete(`/api/fleet/agents/${agentId}`).set('kbn-xsrf', 'xxxx').expect(200);
+        await retry.tryForTime(20000, async () => {
+          await supertest
+            .post(`/api/fleet/agent_policies/delete`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ agentPolicyId })
+            .expect(200);
+        });
+      });
+
+      it('should clear inputs_for_versions and has_agent_version_conditions after upgrading to a package without the condition', async () => {
+        const { body: before } = await supertest
+          .get(`/api/fleet/agent_policies/${agentPolicyId}`)
+          .expect(200);
+        expect(before.item.has_agent_version_conditions).to.eql(true);
+        expect(Object.keys(await getInputsForVersions()).length).to.be.greaterThan(0);
+        // Wait for the reassignment task to move the agent to its version-specific policy, so it
+        // can't race with the reassignment back to the base policy that the upgrade triggers.
+        await retry.tryForTime(20000, async () => {
+          expect(await getAgentPolicyId()).to.eql(`${agentPolicyId}#${previousMinor}`);
+        });
+
+        const { body: upgradeResponse } = await supertest
+          .post(`/api/fleet/package_policies/upgrade`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ packagePolicyIds: [packagePolicyId] })
+          .expect(200);
+        // The route returns 200 with a per item result.
+        expect(upgradeResponse[0].success).to.eql(true);
+
+        const { body: upgraded } = await supertest
+          .get(`/api/fleet/package_policies/${packagePolicyId}`)
+          .expect(200);
+        expect(upgraded.item.package.version).to.eql('1.12.1');
+
+        expect(Object.keys(await getInputsForVersions()).length).to.eql(0);
+
+        const { body: after } = await supertest
+          .get(`/api/fleet/agent_policies/${agentPolicyId}`)
+          .expect(200);
+        expect(after.item.has_agent_version_conditions).to.eql(false);
+      });
+
+      it('should serve later edits to agents on the base policy', async () => {
+        await retry.tryForTime(20000, async () => {
+          expect(await getAgentPolicyId()).to.eql(agentPolicyId);
+        });
+
+        const { body: current } = await supertest
+          .get(`/api/fleet/package_policies/${packagePolicyId}`)
+          .expect(200);
+        const { id, revision, updated_at, updated_by, created_at, created_by, ...updatable } =
+          current.item;
+        updatable.inputs[0].streams[0].vars.interval.value = '10m';
+        await supertest
+          .put(`/api/fleet/package_policies/${packagePolicyId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send(updatable)
+          .expect(200);
+
+        await retry.tryForTime(20000, async () => {
+          const { body } = await supertest
+            .get(`/api/fleet/agent_policies/${agentPolicyId}/full`)
+            .expect(200);
+          const input = body.item.inputs.find(
+            (i: { meta?: { package?: { name?: string } } }) =>
+              i.meta?.package?.name === 'abnormal_security'
+          );
+          expect(input.streams[0].interval).to.eql('10m');
+        });
+
+        expect(Object.keys(await getInputsForVersions()).length).to.eql(0);
+        expect(await getAgentPolicyId()).to.eql(agentPolicyId);
+      });
+    });
+
     describe('version specific policies telemetry', () => {
       let policyWithPackageConditionsId: string;
       let policyWithTemplateConditionsId: string;

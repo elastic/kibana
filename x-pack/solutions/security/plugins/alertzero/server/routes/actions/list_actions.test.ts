@@ -55,7 +55,7 @@ describe('registerListActionsRoute', () => {
     expect(list).toHaveBeenCalledWith(
       'default',
       expect.objectContaining({ auth: { isAuthenticated: true } }),
-      ['contain', 'escalate']
+      { categories: ['contain', 'escalate'] }
     );
     expect(response.ok).toHaveBeenCalled();
   });
@@ -68,7 +68,7 @@ describe('registerListActionsRoute', () => {
     expect(list).toHaveBeenCalledWith(
       'default',
       expect.objectContaining({ auth: { isAuthenticated: true } }),
-      undefined
+      { categories: undefined }
     );
   });
 

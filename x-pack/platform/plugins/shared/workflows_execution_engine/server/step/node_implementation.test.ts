@@ -27,7 +27,7 @@ const createStepExecutionRuntime = (overrides: Record<string, unknown> = {}) => 
   failStep: jest.fn(),
   setInput: jest.fn(),
   isInputRecorded: false,
-  getCurrentStepResult: jest.fn(() => ({ input: {} })),
+  getCurrentStepInput: jest.fn(async () => ({})),
   stepExecutionId: 'step-exec-1',
   node: { configuration: {} },
   workflowExecution: { workflowDefinition: {} },
@@ -78,7 +78,7 @@ describe('BaseAtomicNodeImplementation', () => {
     const step: BaseStep = { name: 'test-step', stepId: 'test-step', type: 'atomic' };
     const runtime = createStepExecutionRuntime({
       isInputRecorded: true,
-      getCurrentStepResult: jest.fn(() => ({ input: { message: 'recorded' } })),
+      getCurrentStepInput: jest.fn(async () => ({ message: 'recorded' })),
     });
     const workflowRuntime = createWorkflowRuntime();
     const impl = new TestStepImpl(step, runtime as any, undefined, workflowRuntime as any);

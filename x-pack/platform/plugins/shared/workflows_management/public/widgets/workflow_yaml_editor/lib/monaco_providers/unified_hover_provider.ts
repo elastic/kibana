@@ -39,6 +39,15 @@ import { getMonacoRangeFromYamlNode } from '../utils';
 export const UNIFIED_HOVER_PROVIDER_ID = 'unified-hover-provider';
 
 /**
+ * Markers on a step type that still get the step hover: Monaco shows the marker message,
+ * and the step documentation is shown below it.
+ */
+const STEP_TYPE_MARKER_SOURCES: ReadonlySet<string> = new Set([
+  'deprecated-step-validation',
+  'step-exposure-validation',
+]);
+
+/**
  * Unified hover provider that delegates to connector-specific handlers
  * Replaces individual ES/Kibana hover providers with a single extensible system
  */
@@ -74,23 +83,24 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
     }
 
     const markers = monaco.editor.getModelMarkers({ resource: model.uri });
-    const deprecatedStepMarkerNearby = markers.find(
+    const stepTypeMarkerNearby = markers.find(
       (marker) =>
-        marker.source === 'deprecated-step-validation' &&
+        marker.source !== undefined &&
+        STEP_TYPE_MARKER_SOURCES.has(marker.source) &&
         marker.startLineNumber === position.lineNumber &&
         ((marker.startColumn <= position.column && marker.endColumn >= position.column) ||
           Math.abs(marker.startColumn - position.column) <= 3 ||
           Math.abs(marker.endColumn - position.column) <= 3)
     );
 
-    if (deprecatedStepMarkerNearby) {
-      return this.provideDeprecatedStepHover(model, position, deprecatedStepMarkerNearby);
+    if (stepTypeMarkerNearby) {
+      return this.provideStepTypeHover(model, position, stepTypeMarkerNearby);
     }
 
     return getInterceptedHover(model, position, cancellationToken);
   }
 
-  private async provideDeprecatedStepHover(
+  private async provideStepTypeHover(
     model: monaco.editor.ITextModel,
     position: monaco.Position,
     _marker: monaco.editor.IMarker
