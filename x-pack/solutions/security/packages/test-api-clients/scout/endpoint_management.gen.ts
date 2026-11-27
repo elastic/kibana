@@ -646,7 +646,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
     });
   },
   /**
-   * Run a script on a host. Currently supported only for some agent types.
+   * Run a script on a host.
    */
   async runScriptAction<TResponseType extends ScoutResponseType = 'json'>(
     props: RunScriptActionProps,
