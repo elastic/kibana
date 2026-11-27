@@ -92,6 +92,21 @@ describe('formatRetryNotice', () => {
     expect((result as any).tool_call_id).toBe((call as any).tool_calls[0].id);
   });
 
+  it.each(['', ' '])('uses a text retry notice for a blank tool name %p', (toolName) => {
+    const error = createAgentExecutionError(
+      'Tool "" called but was not available',
+      AgentExecutionErrorCode.toolNotFound,
+      { toolName, toolArgs: { a: 1 } }
+    );
+
+    const [ai, user] = formatRetryNotice(error);
+
+    expect(isAIMessage(ai)).toBe(true);
+    expect(ai).toMatchObject({ content: '...', tool_calls: [] });
+    expect(isHumanMessage(user)).toBe(true);
+    expect(user.content).toContain('The tool call was missing a tool name.');
+  });
+
   it('sanitizes the tool name of a tool-not-found error', () => {
     const error = createAgentExecutionError('no such tool', AgentExecutionErrorCode.toolNotFound, {
       toolName: 'ghost.tool',
