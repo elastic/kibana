@@ -105,13 +105,21 @@ export interface InvestigationsQueryServiceDeps {
 export class InvestigationsQueryService {
   constructor(private readonly deps: InvestigationsQueryServiceDeps) {}
 
-  async get(request: KibanaRequest, id: string): Promise<Investigation> {
+  private async getInvestigationConversation(request: KibanaRequest, id: string) {
     const client = await this.deps.getConversationClient(request);
     const conversation = await retryWhileShardUnavailable(() => client.get(id));
     if (conversation.template_id !== INVESTIGATION_TEMPLATE_ID) {
       throw new WrongTemplateError(id, INVESTIGATION_TEMPLATE_ID);
     }
+    return conversation;
+  }
 
+  async assertCanRead(request: KibanaRequest, id: string): Promise<void> {
+    await this.getInvestigationConversation(request, id);
+  }
+
+  async get(request: KibanaRequest, id: string): Promise<Investigation> {
+    const conversation = await this.getInvestigationConversation(request, id);
     const spaceId = this.deps.getSpaceId(request);
     const [subjects, impact, hypotheses, inProgress, proposals] = await Promise.all([
       this.deps.getSubjectsService().listByConversationIds([id], spaceId),

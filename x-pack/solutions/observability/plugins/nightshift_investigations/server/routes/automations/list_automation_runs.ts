@@ -152,6 +152,7 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
         title,
         message: getString(input['message']) ?? getString(input['instructions']),
         investigationId: getString(output['investigation_id']),
+        investigationExecutionId: getString(output['execution_id']),
         skipReason: skipReason ?? null,
         dailyLimit: typeof output['daily_limit'] === 'number' ? output['daily_limit'] : undefined,
         error: status === 'failed' ? exec.error?.message.slice(0, MAX_ERROR_LENGTH) : undefined,

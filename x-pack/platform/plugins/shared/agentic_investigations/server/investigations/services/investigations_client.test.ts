@@ -16,6 +16,7 @@ const request = httpServerMock.createKibanaRequest();
 
 const setup = (privileges: Partial<InvestigationsPrivilegesChecker> = {}) => {
   const queryService = {
+    assertCanRead: jest.fn().mockResolvedValue(undefined),
     get: jest.fn().mockResolvedValue({ id: 'conv-1' }),
     list: jest.fn().mockResolvedValue({ results: [] }),
     severityCounts: jest.fn().mockResolvedValue({}),
@@ -70,12 +71,16 @@ describe('createInvestigationsClient', () => {
     const deny = jest.fn().mockRejectedValue(new InvestigationsForbiddenError('nope'));
     const { client, queryService } = setup({ assertCanRead: deny });
 
+    await expect(client.assertCanRead('conv-1')).rejects.toBeInstanceOf(
+      InvestigationsForbiddenError
+    );
     await expect(client.get('conv-1')).rejects.toBeInstanceOf(InvestigationsForbiddenError);
     await expect(client.list()).rejects.toBeInstanceOf(InvestigationsForbiddenError);
     await expect(client.severityCounts()).rejects.toBeInstanceOf(InvestigationsForbiddenError);
     await expect(client.findOpenBySubjects([{ type: 'alert', id: 'a' }])).rejects.toBeInstanceOf(
       InvestigationsForbiddenError
     );
+    expect(queryService.assertCanRead).not.toHaveBeenCalled();
     expect(queryService.get).not.toHaveBeenCalled();
     expect(queryService.list).not.toHaveBeenCalled();
     expect(queryService.severityCounts).not.toHaveBeenCalled();

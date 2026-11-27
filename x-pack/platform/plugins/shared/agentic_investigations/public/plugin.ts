@@ -27,6 +27,7 @@ import type {
   AgenticInvestigationsPublicSetupDependencies,
   AgenticInvestigationsPublicStartDependencies,
   ImpactEntityOpener,
+  InvestigationOverviewFooter,
   AlertFlyoutRegistration,
 } from './types';
 
@@ -65,6 +66,7 @@ export class AgenticInvestigationsPublicPlugin
   private readonly groupedAttachments = createFlyoutGroupedAttachmentsRegistry();
   private impactEntityOpener: ImpactEntityOpener | undefined;
   private readonly alertFlyouts = new Map<string, AlertFlyoutRegistration>();
+  private readonly overviewFooters = new Map<string, InvestigationOverviewFooter>();
 
   constructor(context: PluginInitializerContext<AgenticInvestigationsPublicConfig>) {
     this.escalationsEnabled = context.config.get().escalations.enabled;
@@ -128,6 +130,7 @@ export class AgenticInvestigationsPublicPlugin
         escalationsEnabled: this.escalationsEnabled,
         groupedAttachments: this.groupedAttachments,
         getImpactEntityOpener: () => this.impactEntityOpener,
+        getOverviewFooter: (agentId) => this.overviewFooters.get(agentId),
         templates: this.escalationsEnabled
           ? [investigationTemplate, escalationTemplate]
           : [investigationTemplate],
@@ -137,6 +140,14 @@ export class AgenticInvestigationsPublicPlugin
       registerImpactEntityOpener: (opener) => {
         this.impactEntityOpener = opener;
       },
+      registerInvestigationOverviewFooter: (agentId, footer) => {
+        this.overviewFooters.set(agentId, footer);
+        return () => {
+          if (this.overviewFooters.get(agentId) === footer) {
+            this.overviewFooters.delete(agentId);
+          }
+        };
+      },
       InvestigationCard: LazyInvestigationCard,
     };
   }
@@ -144,5 +155,6 @@ export class AgenticInvestigationsPublicPlugin
   stop() {
     this.impactEntityOpener = undefined;
     this.alertFlyouts.clear();
+    this.overviewFooters.clear();
   }
 }

@@ -15,12 +15,14 @@ import {
   type OverviewSlotRenderProps,
 } from '@kbn/agentic-investigations-common';
 import type { ImpactEntityTarget } from '@kbn/agentic-investigations-impact';
+import { KibanaErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import type { Investigation } from '../../../../../common';
 import { HypothesisTreeCard } from '../../../../hypotheses/tree/hypothesis_tree_card';
 import { ImpactContent } from '../../../../impact/attachments/impact_view';
 import { SubjectList } from '../../../../subjects/attachments/subject_view';
 import { useInvestigation } from '../../../../investigations/hooks/use_investigation';
 import { getInvestigationDisplayTitle } from '../to_view_model';
+import type { InvestigationOverviewFooter } from '../../../../types';
 
 const readMetadataString = (value: unknown): string | undefined =>
   typeof value === 'string' && value.trim().length > 0 ? value : undefined;
@@ -114,6 +116,7 @@ export const InvestigationOverview: React.FC<
   OverviewSlotRenderProps & {
     /** Present when a solution registered an entity flyout. Entity-store ids open it. */
     onOpenEntity?: (entity: ImpactEntityTarget) => void;
+    footer?: InvestigationOverviewFooter;
   }
 > = ({
   conversation,
@@ -121,6 +124,7 @@ export const InvestigationOverview: React.FC<
   proposedActionsContent,
   proposedActionsCount,
   onOpenEntity,
+  footer: OverviewFooter,
 }) => {
   const { data } = useInvestigation(conversation.id);
   useRefetchProposalsOnChange(conversation.id, data?.proposals);
@@ -144,14 +148,21 @@ export const InvestigationOverview: React.FC<
     (data?.proposals.length ?? 0) > 0;
 
   return (
-    <OverviewTab
-      investigation={investigation}
-      attachments={conversation.attachments}
-      groupedAttachments={groupedAttachments}
-      proposedActionsContent={proposedActionsContent}
-      proposedActionsCount={proposedActionsCount}
-      sections={sections}
-      showLoadingSection={(data?.in_progress ?? false) && !hasFindings}
-    />
+    <>
+      <OverviewTab
+        investigation={investigation}
+        attachments={conversation.attachments}
+        groupedAttachments={groupedAttachments}
+        proposedActionsContent={proposedActionsContent}
+        proposedActionsCount={proposedActionsCount}
+        sections={sections}
+        showLoadingSection={(data?.in_progress ?? false) && !hasFindings}
+      />
+      {OverviewFooter && (
+        <KibanaErrorBoundary>
+          <OverviewFooter investigationId={conversation.id} />
+        </KibanaErrorBoundary>
+      )}
+    </>
   );
 };

@@ -8,9 +8,11 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import type { InvestigationNotificationDestination } from '../../../common';
 import type { NotifiableInvestigation, NotificationExecution } from './notification_delivery';
+import { MISSING_NOTIFICATION_THREAD } from './notification_routing';
 import type { NotificationPhase } from './notification_routing';
 import { deliverInvestigationNotifications } from './deliver_investigation_notifications';
 import { createRoutingTestContext, getTestIsomerRuntime } from './notification_routing.mock';
+import { getSlackDeliveryStatus } from './slack_delivery_status';
 
 const destination = {
   type: 'slack',
@@ -304,6 +306,41 @@ describe('investigation notification lifecycle', () => {
     expect(await send('started')).toEqual({ sent: 0, failed: 1, unconfirmed: 0 });
     expect(await send('started', 'exec-2')).toEqual({ sent: 1, failed: 0, unconfirmed: 0 });
     expect(execute).toHaveBeenCalledTimes(2);
+  });
+
+  it('records findings without a thread as failed in the first write', async () => {
+    const { send, execute, client } = setup();
+    const serviceMessage = 'This Slack channel needs to be linked again.';
+    execute.mockResolvedValueOnce({
+      status: 'error',
+      message: 'an error occurred while running the action',
+      serviceMessage,
+    } as never);
+    expect(await send('started')).toEqual({ sent: 0, failed: 1, unconfirmed: 0 });
+    const started = await client.get();
+    expect(started?.attempts[0]).toMatchObject({
+      phase: 'started',
+      status: 'failed',
+      error: serviceMessage,
+    });
+    expect(started && getSlackDeliveryStatus(started)).toMatchObject([
+      { phase: 'started', status: 'failed', message: serviceMessage },
+    ]);
+    const record = jest.spyOn(client, 'record');
+
+    expect(await send('completed')).toEqual({ sent: 0, failed: 1, unconfirmed: 0 });
+    const completed = await client.get();
+    expect(completed?.attempts[1]).toMatchObject({
+      phase: 'completed',
+      status: 'failed',
+      error: MISSING_NOTIFICATION_THREAD,
+    });
+    expect(completed && getSlackDeliveryStatus(completed, new Set(['exec-1']))).toMatchObject([
+      { phase: 'completed', status: 'failed', message: serviceMessage },
+    ]);
+    expect(await send('completed')).toEqual({ sent: 0, failed: 1, unconfirmed: 0 });
+    expect(execute).toHaveBeenCalledTimes(1);
+    expect(record).not.toHaveBeenCalled();
   });
 
   it('connector exceptions remain unconfirmed with bounded diagnostics', async () => {

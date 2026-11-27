@@ -51,6 +51,7 @@ export interface Run {
   title?: string;
   message?: string;
   investigationId?: string;
+  investigationExecutionId?: string;
   skipReason?: string | null;
   dailyLimit?: number;
   error?: string;

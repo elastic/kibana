@@ -244,12 +244,14 @@ export class NotificationRoutingClient {
     return routing.executions.find(({ id }) => id === executionId)?.lifecycle_claim_id === claimId;
   }
 
+  /** Reserves a delivery attempt or records a known failure when delivery cannot begin. */
   async claim(
     executionId: string,
     destinationId: string,
     phase: NotificationPhase,
     attemptId: string,
-    createsRoot: boolean
+    createsRoot: boolean,
+    preflightFailure?: string
   ): Promise<NotificationAttempt | undefined> {
     const routing = await this.write((current) => {
       const execution = current.executions.find(({ id }) => id === executionId);
@@ -278,7 +280,9 @@ export class NotificationRoutingClient {
             destination_id: destinationId,
             phase,
             attempt_id: attemptId,
-            status: 'unconfirmed',
+            ...(preflightFailure === undefined
+              ? { status: 'unconfirmed' }
+              : { status: 'failed', error: preflightFailure }),
             attempted_at: new Date().toISOString(),
             creates_root: createsRoot,
           },

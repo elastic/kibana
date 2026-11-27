@@ -61,6 +61,10 @@ export interface AgenticInvestigationsPublicPluginSetup {
 /** Opens the entity flyout for one impacted entity. Supplied by the solution that owns the flyout. */
 export type ImpactEntityOpener = (entity: ImpactEntityTarget) => void;
 
+export type InvestigationOverviewFooter = ComponentType<{
+  investigationId: string;
+}>;
+
 /** A flyout a solution registers for the alerts of one `source`. */
 export interface AlertFlyoutRegistration {
   Component: ComponentType<AlertFlyoutProps>;
@@ -88,6 +92,11 @@ export interface AgenticInvestigationsPublicPluginStart {
    * plugin's start, so the overview reads it when a row is clicked rather than at registration.
    */
   registerImpactEntityOpener: (opener: ImpactEntityOpener) => void;
+  /** Registers the footer shown in the investigation overview for this agent. */
+  registerInvestigationOverviewFooter: (
+    agentId: string,
+    footer: InvestigationOverviewFooter
+  ) => () => void;
   /**
    * The investigation card the `investigation` template's brief card renders, for a solution
    * that lists investigations from the query API itself. Loaded on first render.

@@ -159,6 +159,40 @@ describe('use_automations', () => {
     expect(result.current.total).toBe(101);
   });
 
+  it('refreshes a selected running run until dispatch has completed', async () => {
+    jest.useFakeTimers();
+    try {
+      const run = { id: 'r1', status: 'running', startedAt: '2026-10-01T00:00:00.000Z' };
+      const completed = {
+        ...run,
+        status: 'succeeded',
+        investigationId: 'inv-1',
+        investigationExecutionId: 'exec-1',
+      };
+      investigationsFetch
+        .mockResolvedValueOnce({ runs: [run], total: 1 })
+        .mockResolvedValue({ runs: [completed], total: 1 });
+      const { result, unmount } = renderWithClient(() =>
+        useAutomationRunsInRange(
+          'a',
+          '2026-10-01T00:00:00.000Z',
+          '2026-10-02T00:00:00.000Z',
+          run.id
+        )
+      );
+
+      await waitFor(() => expect(result.current.runs).toEqual([run]));
+      await act(async () => jest.advanceTimersByTime(5_000));
+      await waitFor(() => expect(result.current.runs).toEqual([completed]));
+
+      await act(async () => jest.advanceTimersByTime(10_000));
+      expect(investigationsFetch).toHaveBeenCalledTimes(2);
+      unmount();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it('stops fetching runs after a page fails and keeps the runs already loaded', async () => {
     investigationsFetch.mockImplementation((_endpoint, { params }) =>
       params.query.page === 1

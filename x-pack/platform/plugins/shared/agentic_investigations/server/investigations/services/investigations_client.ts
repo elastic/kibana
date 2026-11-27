@@ -39,6 +39,8 @@ export interface DeleteInvestigationDataResult {
  * needs manage. Conversations are read as the caller, so access control matches the HTTP API.
  */
 export interface InvestigationsClient {
+  /** Checks access to the investigation without loading its related data. */
+  assertCanRead: (id: string) => Promise<void>;
   get: (id: string) => Promise<Investigation>;
   list: (query?: ListInvestigationsQueryInput) => Promise<ListInvestigationsResponse>;
   severityCounts: (filters?: InvestigationFiltersInput) => Promise<InvestigationSeverityCounts>;
@@ -73,6 +75,10 @@ const parseOrThrow = <T>(
 export const createInvestigationsClient =
   ({ getQueryService, getSpaceId, privileges, deleteAllInSpace }: InvestigationsClientDeps) =>
   (request: KibanaRequest): InvestigationsClient => ({
+    assertCanRead: async (id) => {
+      await privileges.assertCanRead(request);
+      await getQueryService().assertCanRead(request, id);
+    },
     get: async (id) => {
       await privileges.assertCanRead(request);
       return getQueryService().get(request, id);

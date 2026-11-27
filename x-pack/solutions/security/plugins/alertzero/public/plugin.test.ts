@@ -481,6 +481,7 @@ describe('AlertZeroPublicPlugin Serverless entitlement', () => {
         agentBuilder,
         agenticInvestigations: {
           registerImpactEntityOpener: jest.fn(),
+          registerInvestigationOverviewFooter: jest.fn(() => jest.fn()),
           InvestigationCard: () => null,
         },
         proposals: {},

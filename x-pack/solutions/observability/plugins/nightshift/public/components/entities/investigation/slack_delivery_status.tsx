@@ -1,0 +1,276 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { isHttpFetchError, type HttpStart } from '@kbn/core-http-browser';
+import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';
+import { useQuery } from '@kbn/react-query';
+import { getEbtProps } from '@kbn/ebt-click';
+import type { NightshiftInvestigationsPublicStart } from '@kbn/nightshift-investigations-plugin/public';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
+import { parseSlackChannelInput } from '../../../common/parse_slack_channel_input';
+import { slackDeliveriesQueryKey } from '../../../data/query_keys';
+import {
+  formatChannelLabel,
+  useAllRelayAppBindingsWithHttp,
+  useAvailableChannelsWithHttp,
+} from '../../../data/relay_apps/use_relay_app_bindings';
+
+const endpoint = 'GET /internal/nightshift/investigations/{id}/slack_deliveries';
+const getHttpStatus = (error: unknown): number | undefined =>
+  isHttpFetchError(error) ? error.response?.status : undefined;
+const isInaccessible = (error: unknown): boolean => [403, 404].includes(getHttpStatus(error) ?? 0);
+
+const phaseLabels = {
+  started: i18n.translate('xpack.nightshift.slackDelivery.startedLabel', {
+    defaultMessage: 'Start notification',
+  }),
+  completed: i18n.translate('xpack.nightshift.slackDelivery.completedLabel', {
+    defaultMessage: 'Findings',
+  }),
+  failed: i18n.translate('xpack.nightshift.slackDelivery.failedLabel', {
+    defaultMessage: 'Failure notification',
+  }),
+  timed_out: i18n.translate('xpack.nightshift.slackDelivery.timedOutLabel', {
+    defaultMessage: 'Timeout notification',
+  }),
+};
+
+const statusLabels = {
+  sending: i18n.translate('xpack.nightshift.slackDelivery.sendingStatusLabel', {
+    defaultMessage: 'Sending',
+  }),
+  sent: i18n.translate('xpack.nightshift.slackDelivery.sentStatusLabel', {
+    defaultMessage: 'Delivered',
+  }),
+  failed: i18n.translate('xpack.nightshift.slackDelivery.failedStatusLabel', {
+    defaultMessage: 'Failed',
+  }),
+  unconfirmed: i18n.translate('xpack.nightshift.slackDelivery.unconfirmedStatusLabel', {
+    defaultMessage: 'Unconfirmed',
+  }),
+};
+
+const statusColors = {
+  sending: 'default',
+  sent: 'success',
+  failed: 'danger',
+  unconfirmed: 'warning',
+} as const;
+
+const failedMessage = i18n.translate('xpack.nightshift.slackDelivery.failedMessage', {
+  defaultMessage: 'Check the Slack connector and its access to this channel.',
+});
+
+const unconfirmedMessage = i18n.translate('xpack.nightshift.slackDelivery.unconfirmedMessage', {
+  defaultMessage: 'Check the channel for the message. Slack delivery could not be confirmed.',
+});
+
+export const SlackDeliveryStatus = ({
+  http,
+  investigationsClient,
+  investigationId,
+  executionId,
+  settingsHref,
+  firstReceiptPollUntil,
+}: {
+  http: HttpStart;
+  investigationsClient: NightshiftInvestigationsPublicStart['investigationsClient'];
+  investigationId: string;
+  executionId?: string;
+  settingsHref?: string;
+  firstReceiptPollUntil?: number;
+}) => {
+  const { euiTheme } = useEuiTheme();
+  const { data, error, isError, isFetching, refetch } = useQuery({
+    queryKey: slackDeliveriesQueryKey(investigationId, executionId),
+    queryFn: async ({ signal }) => {
+      const result = await investigationsClient.fetch(endpoint, {
+        params: {
+          path: { id: investigationId },
+          ...(executionId && { query: { executionId } }),
+        },
+        signal: signal ?? null,
+      });
+      if (!Array.isArray(result?.deliveries)) {
+        throw new Error('Invalid Slack delivery status response');
+      }
+      return result;
+    },
+    retry: false,
+    // Dispatch, investigation completion, and the failure sweep can record receipts at different times.
+    refetchInterval: (result, query) => {
+      if (isInaccessible(query.state.error)) return false;
+      const awaitingFirstReceipt =
+        result?.deliveries.length === 0 &&
+        firstReceiptPollUntil !== undefined &&
+        Date.now() < firstReceiptPollUntil;
+      return awaitingFirstReceipt || result?.deliveries.some(({ status }) => status === 'sending')
+        ? 5_000
+        : 30_000;
+    },
+  });
+  const inaccessible = isInaccessible(error);
+  const hasDeliveries = Boolean(data?.deliveries.length);
+  const { bindings, isLoading: isLoadingBindings } = useAllRelayAppBindingsWithHttp(
+    http,
+    !inaccessible && hasDeliveries
+  );
+  const canLookUpDisconnectedChannels =
+    Boolean(settingsHref) &&
+    !inaccessible &&
+    !isLoadingBindings &&
+    data?.deliveries.some(
+      ({ channel }) =>
+        parseSlackChannelInput(channel) === channel &&
+        !bindings.some((binding) => binding.channel === channel)
+    ) === true;
+  const { channels } = useAvailableChannelsWithHttp(http, canLookUpDisconnectedChannels);
+  if (inaccessible || (!hasDeliveries && !isError)) return null;
+
+  const httpStatus = getHttpStatus(error);
+  return (
+    <section data-test-subj="nightshiftSlackDeliveryStatus">
+      <EuiSpacer size="m" />
+      <EuiTitle size="xs">
+        <h3>
+          {executionId ? (
+            <FormattedMessage
+              id="xpack.nightshift.slackDelivery.title"
+              defaultMessage="Slack delivery status"
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.nightshift.slackDelivery.latestTitle"
+              defaultMessage="Last recorded Slack deliveries"
+            />
+          )}
+        </h3>
+      </EuiTitle>
+      {data?.deliveries.map((delivery) => {
+        const { id, channel, phase, status, attemptedAt } = delivery;
+        const binding = bindings.find((entry) => entry.channel === channel);
+        const available = canLookUpDisconnectedChannels
+          ? channels.find((entry) => entry.channel === channel)
+          : undefined;
+        const label = binding
+          ? formatChannelLabel(binding)
+          : available?.displayName !== undefined
+          ? `#${available.displayName}`
+          : channel;
+        const message =
+          status === 'failed'
+            ? delivery.message ?? failedMessage
+            : status === 'unconfirmed'
+            ? unconfirmedMessage
+            : undefined;
+        return (
+          <EuiFlexGroup
+            key={id}
+            direction="column"
+            gutterSize="xs"
+            css={{ marginBlockStart: euiTheme.size.s }}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s">
+                    <strong>{label}</strong>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color={statusColors[status]}>{statusLabels[status]}</EuiBadge>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText color="subdued" size="xs">
+                {phase && <>{phaseLabels[phase]} · </>}
+                <FormattedDate
+                  value={attemptedAt}
+                  month="short"
+                  day="numeric"
+                  hour="numeric"
+                  minute="numeric"
+                />
+              </EuiText>
+            </EuiFlexItem>
+            {message && (
+              <EuiFlexItem grow={false}>
+                <EuiText size="s">
+                  {message}
+                  {status === 'failed' && settingsHref && (
+                    <>
+                      {' '}
+                      <EuiLink
+                        href={settingsHref}
+                        data-test-subj="nightshiftSlackDeliverySettingsLink"
+                        {...getEbtProps({
+                          action: NIGHTSHIFT_EBT_ACTIONS.VIEW_SETTINGS,
+                          element: NIGHTSHIFT_EBT_ELEMENTS.SLACK_DELIVERY_STATUS,
+                        })}
+                      >
+                        <FormattedMessage
+                          id="xpack.nightshift.slackDelivery.settingsLink"
+                          defaultMessage="Open Slack settings"
+                        />
+                      </EuiLink>
+                    </>
+                  )}
+                </EuiText>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        );
+      })}
+      {isError && !hasDeliveries && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiText size="s" color="subdued">
+            {httpStatus === undefined ? (
+              <FormattedMessage
+                id="xpack.nightshift.slackDelivery.unavailableMessage"
+                defaultMessage="Slack delivery status is unavailable."
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.nightshift.slackDelivery.unavailableHttpErrorMessage"
+                defaultMessage="Slack delivery status is unavailable (HTTP {status})."
+                values={{ status: String(httpStatus) }}
+              />
+            )}{' '}
+            <EuiLink
+              data-test-subj="nightshiftSlackDeliveryRefreshStatus"
+              disabled={isFetching}
+              onClick={() => void refetch()}
+              {...getEbtProps({
+                action: NIGHTSHIFT_EBT_ACTIONS.REFRESH_SLACK_DELIVERY_STATUS,
+                element: NIGHTSHIFT_EBT_ELEMENTS.SLACK_DELIVERY_STATUS,
+              })}
+            >
+              <FormattedMessage
+                id="xpack.nightshift.slackDelivery.refreshStatusButtonLabel"
+                defaultMessage="Refresh status"
+              />
+            </EuiLink>
+          </EuiText>
+        </>
+      )}
+    </section>
+  );
+};

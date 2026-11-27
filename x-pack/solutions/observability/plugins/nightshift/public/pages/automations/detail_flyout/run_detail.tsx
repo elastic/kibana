@@ -21,8 +21,10 @@ import type { SerializedStyles } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
+import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { getNightshiftInvestigationPath } from '../../../common/url_params';
 import { useKibana } from '../../../hooks/use_kibana';
+import { SlackDeliveryStatus } from '../../../components/entities/investigation/slack_delivery_status';
 import { SectionHeader } from '../flyouts/form/section_header';
 import { getRunSourceLabel, RunStatusIndicator, type Run } from './run_history';
 
@@ -103,6 +105,7 @@ const formatStarted = (value: string) => `${formatDate(value)} (${moment(value).
 const DETAIL_COLUMN_WIDTHS: [string, string] = ['auto', 'minmax(0, 1fr)'];
 
 const DETAIL_VALUE_PROPS = { css: { overflowWrap: 'anywhere' } } as const;
+const FIRST_RECEIPT_WINDOW_MS = 30_000;
 
 const OpenInvestigationButton = ({ investigationId }: { investigationId: string }) => {
   const { application } = useKibana().services;
@@ -116,6 +119,31 @@ const OpenInvestigationButton = ({ investigationId }: { investigationId: string 
     >
       {labels.investigation}
     </EuiButton>
+  );
+};
+
+const RunSlackDeliveryStatus = ({
+  investigationId,
+  investigationExecutionId,
+  startedAt,
+  finishedAt,
+}: Run) => {
+  const { application, http, nightshiftInvestigations } = useKibana().services;
+  if (!investigationId || !investigationExecutionId || !nightshiftInvestigations) return null;
+  const { canManageAndConfigure } = getNightshiftCapabilities(application.capabilities.nightshift);
+  return (
+    <SlackDeliveryStatus
+      http={http}
+      investigationsClient={nightshiftInvestigations.investigationsClient}
+      investigationId={investigationId}
+      executionId={investigationExecutionId}
+      firstReceiptPollUntil={Date.parse(finishedAt ?? startedAt) + FIRST_RECEIPT_WINDOW_MS}
+      settingsHref={
+        canManageAndConfigure
+          ? application.getUrlForApp(NIGHTSHIFT_APP_ID, { path: '/settings/general' })
+          : undefined
+      }
+    />
   );
 };
 
@@ -207,6 +235,7 @@ export const RunDetail = ({
                 <OpenInvestigationButton investigationId={run.investigationId} />
               </>
             )}
+            <RunSlackDeliveryStatus {...run} />
           </>
         )}
       </div>

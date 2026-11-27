@@ -15,7 +15,11 @@ import type {
   RenderStatus,
 } from '@kbn/agentic-investigations-common';
 import type { SubjectServices } from '../../subjects/attachments/subject_services';
-import type { AgenticInvestigationsPublicStartDependencies, ImpactEntityOpener } from '../../types';
+import type {
+  AgenticInvestigationsPublicStartDependencies,
+  ImpactEntityOpener,
+  InvestigationOverviewFooter,
+} from '../../types';
 
 export type TemplateStartDependencies = AgenticInvestigationsPublicStartDependencies & {
   agentBuilder: AgentBuilderPluginStart;
@@ -58,6 +62,7 @@ export interface TemplateRegistrationContext {
   renderStatus: RenderStatus;
   /** Read at render time: a solution registers the opener from its own start, after this plugin's. */
   getImpactEntityOpener: () => ImpactEntityOpener | undefined;
+  getOverviewFooter?: (agentId: string) => InvestigationOverviewFooter | undefined;
 }
 
 /** A conversation template whose details flyout UI this plugin registers with Agent Builder. */

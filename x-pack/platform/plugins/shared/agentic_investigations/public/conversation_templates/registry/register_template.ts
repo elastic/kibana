@@ -28,6 +28,7 @@ export interface RegisterTemplateOptions {
   groupedAttachments: FlyoutGroupedAttachmentsRegistry;
   /** Read at render time: a solution registers the opener from its own start, after this plugin's. */
   getImpactEntityOpener: TemplateRegistrationContext['getImpactEntityOpener'];
+  getOverviewFooter?: TemplateRegistrationContext['getOverviewFooter'];
   templates: readonly TemplateDefinition[];
 }
 
@@ -42,6 +43,7 @@ export const registerTemplate = ({
   escalationsEnabled,
   groupedAttachments,
   getImpactEntityOpener,
+  getOverviewFooter,
   templates,
 }: RegisterTemplateOptions): void => {
   const services: TemplateServices = { ...core, ...startDeps };
@@ -139,6 +141,7 @@ export const registerTemplate = ({
     renderAssignees,
     renderStatus,
     getImpactEntityOpener,
+    getOverviewFooter,
   };
 
   for (const { templateId, register } of templates) {

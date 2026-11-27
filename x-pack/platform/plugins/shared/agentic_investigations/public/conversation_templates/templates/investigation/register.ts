@@ -53,6 +53,7 @@ export const investigationTemplate: TemplateDefinition = {
     renderAssignees,
     renderStatus,
     getImpactEntityOpener,
+    getOverviewFooter,
   }) => {
     const { agentBuilder, proposals } = startDeps;
 
@@ -124,6 +125,9 @@ export const investigationTemplate: TemplateDefinition = {
           React.createElement(InvestigationOverview, {
             ...props,
             onOpenEntity: getImpactEntityOpener(),
+            footer: props.conversation.agent_id
+              ? getOverviewFooter?.(props.conversation.agent_id)
+              : undefined,
           });
         return Overview;
       }
