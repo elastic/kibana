@@ -150,6 +150,8 @@ export const WorkflowDetailHeader = React.memo(
     const workflow = useSelector(selectWorkflow);
     const canUpdateWorkflow = hasUpdatePrivilege && workflow?.permissions?.edit !== false;
     const canManageAccess = hasUpdatePrivilege && workflow?.permissions?.manage === true;
+    // The page API checks this workflow's ACL, like Run and Test do.
+    const canSharePage = canExecuteWorkflow && workflow?.permissions?.execute !== false;
     const isManagedWorkflow = workflow?.managed === true;
     const canReadVisibleWorkflowExecution =
       canReadWorkflowExecution && (!isManagedWorkflow || canReadManagedWorkflowExecution);
@@ -336,7 +338,7 @@ export const WorkflowDetailHeader = React.memo(
           WORKFLOW_PAGE_API_VERSION
         );
       },
-      enabled: Boolean(workflowId && pageId),
+      enabled: Boolean(workflowId && pageId && canSharePage),
       refetchOnWindowFocus: false,
     });
     const pageShareStatus = useMemo(
@@ -345,7 +347,7 @@ export const WorkflowDetailHeader = React.memo(
     );
 
     const sharePageItem = useMemo<AppMenuItemType | undefined>(() => {
-      if (!workflowId || !savedPageTrigger || !canExecuteWorkflow || isViewingExecution) {
+      if (!workflowId || !savedPageTrigger || !canSharePage || isViewingExecution) {
         return undefined;
       }
       return {
@@ -360,7 +362,7 @@ export const WorkflowDetailHeader = React.memo(
         run: () => setIsPageShareOpen(true),
         testId: 'workflowDetailSharePageButton',
       };
-    }, [workflowId, savedPageTrigger, canExecuteWorkflow, isViewingExecution, pageShareStatus]);
+    }, [workflowId, savedPageTrigger, canSharePage, isViewingExecution, pageShareStatus]);
 
     const enabledSwitchConfig = useMemo<NonNullable<AppMenuConfig['switch']> | undefined>(() => {
       if (!workflowId) {

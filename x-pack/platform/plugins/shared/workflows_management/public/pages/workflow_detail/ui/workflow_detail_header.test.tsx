@@ -24,6 +24,7 @@ import {
 } from '../../../entities/workflows/store/workflow_detail/slice';
 import { saveYamlThunk } from '../../../entities/workflows/store/workflow_detail/thunks/save_yaml_thunk';
 import { TestWrapper } from '../../../shared/test_utils/test_wrapper';
+import { triggerSchemas } from '../../../trigger_schemas';
 
 const mockUseKibana = jest.fn();
 const mockUseParams = jest.fn();
@@ -226,6 +227,43 @@ describe('WorkflowDetailHeader', () => {
     );
     await findByTestId('saveWorkflowHeaderButton');
     unmount();
+  });
+
+  describe('Share page', () => {
+    const renderWithPage = (permissions: { execute: boolean }) => {
+      jest.spyOn(triggerSchemas, 'getTriggerSchemaOptions').mockReturnValue({
+        includePageTrigger: true,
+      });
+      const { services } = mockUseKibana();
+      mockUseKibana.mockReturnValue({
+        services: { ...services, http: { get: jest.fn().mockReturnValue(new Promise(() => {})) } },
+      });
+      const store = createMockStore();
+      store.dispatch(
+        setWorkflow({
+          ...mockWorkflow,
+          permissions: { read: true, execute: permissions.execute, edit: false, manage: false },
+          definition: { triggers: [{ type: 'page', id: 'default', title: 'Form' }] },
+        } as unknown as Parameters<typeof setWorkflow>[0])
+      );
+      return render(<WorkflowDetailHeader {...defaultProps} />, {
+        wrapper: ({ children }) => <TestWrapper store={store}>{children}</TestWrapper>,
+      });
+    };
+
+    afterEach(() => jest.restoreAllMocks());
+
+    it('shows Share page when the user can run this workflow', async () => {
+      const result = renderWithPage({ execute: true });
+      await openAppMenuOverflow();
+      expect(result.queryAllByText('Share page').length).toBeGreaterThan(0);
+    });
+
+    it('hides Share page when the workflow ACL denies execute', async () => {
+      const result = renderWithPage({ execute: false });
+      await openAppMenuOverflow();
+      expect(result.queryByText('Share page')).not.toBeInTheDocument();
+    });
   });
 
   it('should render', () => {
