@@ -17,7 +17,8 @@ import type { SessionPageVisit } from '../../../../common/sessions';
 import { DIGITAL_EXPERIENCE_EBT_ACTIONS, SESSIONS_EBT_ELEMENTS } from '../../../ebt_constants';
 import { UNKNOWN_PAGE } from '../../../labels';
 import { formatSessionDuration } from '../../../utils/format_session_duration';
-import type { SessionWaterfallLayout } from '../utils/session_timeline';
+import { frustrationLabelOf } from '../utils/visit_activity';
+import type { SessionWaterfallLayout, WaterfallMarker } from '../utils/session_timeline';
 import { formatOffset } from '../utils/session_timeline';
 
 const BAR_HEIGHT = 28;
@@ -31,6 +32,22 @@ const anchorStyle = (position: CSSProperties): CSSProperties => ({
   minWidth: 3,
   ...position,
 });
+
+const markerStyle =
+  (color: 'danger' | 'warning') =>
+  ({ euiTheme }: UseEuiTheme) =>
+    css({
+      width: '100%',
+      height: '100%',
+      display: 'flex',
+      justifyContent: 'center',
+      '&::after': {
+        content: '""',
+        width: 2,
+        background: euiTheme.colors[color],
+        boxShadow: `0 0 0 1px ${euiTheme.colors.emptyShade}`,
+      },
+    });
 
 const componentStyles = {
   bar: ({ euiTheme }: UseEuiTheme) =>
@@ -55,19 +72,8 @@ const componentStyles = {
       '&:hover, &:focus-visible': { filter: 'brightness(1.15)' },
     }),
   // A hit area wider than the 2px line, so the marker can be hovered and focused for its tooltip.
-  marker: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      width: '100%',
-      height: '100%',
-      display: 'flex',
-      justifyContent: 'center',
-      '&::after': {
-        content: '""',
-        width: 2,
-        background: euiTheme.colors.danger,
-        boxShadow: `0 0 0 1px ${euiTheme.colors.emptyShade}`,
-      },
-    }),
+  errorMarker: markerStyle('danger'),
+  frustrationMarker: markerStyle('warning'),
   swatch: ({ euiTheme }: UseEuiTheme) =>
     css({
       display: 'inline-block',
@@ -92,9 +98,56 @@ export const pageColors = (pageVisits: SessionPageVisit[]): Map<string, string> 
   return colors;
 };
 
+/** A marker per event on the bar, each with a tooltip of its label. */
+function Markers({
+  markers,
+  labelOf,
+  variant,
+  'data-test-subj': dataTestSubj,
+}: {
+  markers: WaterfallMarker[];
+  labelOf: (event: WaterfallMarker['event']) => string;
+  variant: 'errorMarker' | 'frustrationMarker';
+  'data-test-subj': string;
+}) {
+  const styles = useMemoCss(componentStyles);
+  return (
+    <>
+      {markers.map(({ offsetPercent, event }, index) => {
+        const label = labelOf(event);
+        return (
+          <EuiToolTip
+            key={index}
+            content={label}
+            anchorProps={{
+              style: anchorStyle({
+                // Shifted back by the same share of its width, so it stays inside the bar,
+                // which clips: centered mid-bar, flush with the end for a marker at 100%, as
+                // errors often end a session.
+                left: `${offsetPercent}%`,
+                transform: `translateX(-${offsetPercent}%)`,
+                width: MARKER_HIT_WIDTH,
+              }),
+            }}
+          >
+            <span
+              data-test-subj={dataTestSubj}
+              // Focusable, so keyboard users get the details too.
+              tabIndex={0}
+              role="img"
+              aria-label={label}
+              css={styles[variant]}
+            />
+          </EuiToolTip>
+        );
+      })}
+    </>
+  );
+}
+
 /**
  * The session on one bar: a segment per page visit, as wide as the time spent on the page, and a
- * marker at each error. Selecting a segment shows that visit in the journey.
+ * marker at each error and frustration signal. Selecting a segment shows that visit in the journey.
  */
 export function SessionWaterfall({
   layout,
@@ -150,36 +203,27 @@ export function SessionWaterfall({
             </EuiToolTip>
           );
         })}
-        {layout.errorMarkers.map(({ offsetPercent, event }, index) => {
-          const label = `${formatOffset(event.offsetMs)} ${event.name}${
-            event.detail ? `: ${event.detail}` : ''
-          }`;
-          return (
-            <EuiToolTip
-              key={index}
-              content={label}
-              anchorProps={{
-                style: anchorStyle({
-                  // Shifted back by the same share of its width, so it stays inside the bar,
-                  // which clips: centered mid-bar, flush with the end for an error at 100%, as
-                  // errors often end a session.
-                  left: `${offsetPercent}%`,
-                  transform: `translateX(-${offsetPercent}%)`,
-                  width: MARKER_HIT_WIDTH,
-                }),
-              }}
-            >
-              <span
-                data-test-subj="digitalExperienceSessionWaterfallError"
-                // Focusable, so keyboard users get the error's details too.
-                tabIndex={0}
-                role="img"
-                aria-label={label}
-                css={styles.marker}
-              />
-            </EuiToolTip>
-          );
-        })}
+        <Markers
+          markers={layout.errorMarkers}
+          labelOf={({ offsetMs, name, detail }) =>
+            `${formatOffset(offsetMs)} ${name}${detail ? `: ${detail}` : ''}`
+          }
+          variant="errorMarker"
+          data-test-subj="digitalExperienceSessionWaterfallError"
+        />
+        <Markers
+          markers={layout.frustrationMarkers}
+          labelOf={(event) =>
+            event.detail
+              ? i18n.translate('xpack.digitalExperience.sessionDetail.waterfall.frustrationLabel', {
+                  defaultMessage: '{label} on {selector}',
+                  values: { label: frustrationLabelOf(event), selector: event.detail },
+                })
+              : frustrationLabelOf(event)
+          }
+          variant="frustrationMarker"
+          data-test-subj="digitalExperienceSessionWaterfallFrustration"
+        />
       </div>
       <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
         <EuiFlexItem grow={false}>

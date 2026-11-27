@@ -8,6 +8,7 @@
 export * from './impl/schemas';
 export * from './constants';
 export { goldenClusterPrivileges } from './golden_cluster_privileges';
+export { resolveJudgeModelIds } from './impl/judge_models';
 export {
   buildExperimentFilterQuery,
   buildExampleScoresQuery,

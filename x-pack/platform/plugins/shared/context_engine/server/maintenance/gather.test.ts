@@ -242,7 +242,7 @@ describe('gatherMaintenance', () => {
     const stored = [
       memory('m-1', { governance: deleted }),
       fact('fact-traced', {
-        references: [...derivedFrom('m-1'), { uri: 'trace://abc', relation: 'derived_from' }],
+        references: [...derivedFrom('m-1'), { uri: 'session://abc', relation: 'derived_from' }],
       }),
     ];
 
@@ -336,11 +336,11 @@ describe('gatherMaintenance', () => {
       fact('fact-partial', { references: derivedFrom('m-3', 'm-2') }),
       fact('fact-kept', { references: derivedFrom('m-2'), updated_at: '2026-11-04T00:00:00.000Z' }),
       fact('fact-traced', {
-        references: [...derivedFrom('m-1'), { uri: 'trace://abc', relation: 'derived_from' }],
+        references: [...derivedFrom('m-1'), { uri: 'session://abc', relation: 'derived_from' }],
         updated_at: '2026-11-03T00:00:00.000Z',
       }),
       entity('entity-a', {
-        references: [...derivedFrom('m-1'), { uri: 'trace://abc', relation: 'derived_from' }],
+        references: [...derivedFrom('m-1'), { uri: 'session://abc', relation: 'derived_from' }],
       }),
       relationship('fact-lost', 'about', 'entity-a'),
       relationship('fact-partial', 'about', 'entity-a'),
@@ -374,7 +374,7 @@ describe('gatherMaintenance', () => {
       memory('m-1', { governance: deleted }),
       memory('m-2'),
       entity('entity-a', {
-        references: [...derivedFrom('m-1'), { uri: 'trace://abc', relation: 'derived_from' }],
+        references: [...derivedFrom('m-1'), { uri: 'session://abc', relation: 'derived_from' }],
       }),
       entity('entity-b', { references: derivedFrom('m-2') }),
     ];
@@ -543,7 +543,7 @@ describe('gatherMaintenance', () => {
     const gone = memory('m-gone', { governance: deleted });
     const leftOut = entity('entity-left-out', {
       permissions: restrictedTo('r-left-out'),
-      references: [...derivedFrom('m-gone'), { uri: 'trace://abc', relation: 'derived_from' }],
+      references: [...derivedFrom('m-gone'), { uri: 'session://abc', relation: 'derived_from' }],
     });
     const reader = fakeReader([memory('m-1'), gone, leftOut, ...changed], {
       changed: [...changed, gone],

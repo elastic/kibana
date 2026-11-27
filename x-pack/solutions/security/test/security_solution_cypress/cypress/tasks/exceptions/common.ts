@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EXCEPTION_ITEM_VIEWER_CONTAINER, FIELD_INPUT } from '../../screens/exceptions';
+import { EXCEPTION_ITEM_VIEWER_CONTAINER } from '../../screens/exceptions';
 
 export const assertNumberOfExceptionItemsExists = (numberOfItems: number) => {
   cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', numberOfItems);
@@ -20,9 +20,4 @@ export const assertExceptionItemsExists = (container: string, itemNames: string[
   for (const itemName of itemNames) {
     expectToContainItem(container, itemName);
   }
-};
-
-export const searchExceptionEntryFieldWithPrefix = (fieldPrefix: string, index = 0) => {
-  cy.get(FIELD_INPUT).eq(index).click({ force: true });
-  cy.get(FIELD_INPUT).eq(index).type(fieldPrefix);
 };

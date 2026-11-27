@@ -15,11 +15,22 @@ import type { ProfileSummary } from './profile_summary';
 /** Startup is noisier than steady state, so blocks are counted per phase. */
 export type Phase = 'starting' | 'running';
 
+/**
+ * Whether a capture may write a profile file:
+ * - `admitted`: the first capture this clock hour for its top frame, while the hour has slots left.
+ * - `same_frame`: this clock hour already admitted a capture with the same top frame.
+ * - `hour_limit`: this clock hour already admitted `FILES_PER_HOUR` captures.
+ */
+export type AdmissionOutcome = 'admitted' | 'same_frame' | 'hour_limit';
+
 export interface WatchdogProfilingData {
   startAfterMs: Readonly<Record<Phase, number>>;
   maxDurationMs: Readonly<Record<Phase, number>>;
   cooldownMs: Readonly<Record<Phase, number>>;
-  /** Where profiles are written. Unset when Node has no diagnostic directory. */
+  /**
+   * Profile output directory from `profiling.dir` or Node's `--diagnostic-dir`; unset means no
+   * profile files.
+   */
   diagnosticDir?: string;
 }
 
@@ -47,6 +58,9 @@ export interface BlockLogMeta extends LogMeta {
 
 /** Why a capture stopped. */
 export type CaptureStopReason = 'block_ended' | 'max_duration';
+
+/** Whether a capture was admitted for file output, or why no file was attempted. */
+export type ProfileFileOutcome = AdmissionOutcome | 'no_directory' | 'empty';
 
 export interface ProfileLogMeta extends LogMeta {
   kibana: {
@@ -76,6 +90,7 @@ export interface ProfileLogMeta extends LogMeta {
         /** The worker's heap in bytes after the profile is summarised. */
         heapUsed: number;
         stopReason: CaptureStopReason;
+        file: ProfileFileOutcome;
         /**
          * Largest heartbeat gap between the block's end and the profile reaching the worker: the
          * main-thread cost of the stop. Only set for `block_ended`.
@@ -91,7 +106,8 @@ export interface ProfilingStats {
   /**
    * Blocks that ended at or past `startAfter`, whether profiling was on or not. With profiling on,
    * more of these than captures means some long blocks weren't profiled. A capture is counted when
-   * its profile arrives, just after its block ends, so the two can land in different periods.
+   * its profile arrives, which can be before or after its block ends, so a block's `pastStartAfter`
+   * count and its capture's `profiled` or `emptyTooLate` count can be on different stats lines.
    */
   pastStartAfter: number;
   /** Captures with at least one busy (non-idle) sample within the block. */
@@ -101,17 +117,32 @@ export interface ProfilingStats {
    * while the profiler was starting.
    */
   emptyTooLate: number;
-  /** Captures that failed to start, to stop, or to summarise. */
+  /** Captures that failed to start, stop, or to summarise. */
   captureFailed: number;
   /** Blocks past `startAfter` that ended without a capture because of the cooldown. */
   skippedCooldown: number;
   /**
-   * Time captures were running in the period, from each request until its profile reached the
-   * worker. Event loop utilization (ELU) rises while a capture runs; compare the two with this.
+   * Time captures were running in the period, from each request until its profile was summarised
+   * and, if admitted, its file write finished. Event loop utilization (ELU) rises while the
+   * profiler samples; the write runs in the worker, so this can be longer than that rise.
    */
   profilingActiveMs: number;
   /** Largest `stopHeartbeatGapMs` of the captures that ended in the period. */
   maxStopHeartbeatGapMs: number;
+  /** Profile file outcomes. Captures without samples or without a directory aren't counted. */
+  files: FileCounts;
+}
+
+/** Profile file outcomes, combined across both phases. */
+export interface FileCounts {
+  /** Files written in full, counted when the write finishes. */
+  written: number;
+  /** Captures refused as duplicates within the same clock hour. */
+  sameFrame: number;
+  /** Captures refused as exceeding the per-hour limit. */
+  hourLimit: number;
+  /** Admitted captures whose write failed, counted when the write fails. */
+  writeFailed: number;
 }
 
 export interface StatsLogMeta extends LogMeta {
@@ -122,7 +153,10 @@ export interface StatsLogMeta extends LogMeta {
         heapUsed: number;
         /** Worker log lines lost since the last stats log line that was written. */
         droppedLogLines: number;
-        profiling: ProfilingStats;
+        profiling: ProfilingStats & {
+          /** Where profile files are written, while profiling is on; capture lines only give the file name. */
+          diagnosticDir?: string;
+        };
       };
     };
   };

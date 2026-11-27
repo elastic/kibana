@@ -80,7 +80,7 @@ export const SignalsPanel = ({ isLoading, aiIndex }: SignalsPanelProps) => {
     <EuiPanel hasBorder paddingSize="l" data-test-subj="contextSignalsPanel">
       <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
         <EuiFlexItem>
-          <EuiTitle size="s">
+          <EuiTitle size="xs">
             <h2>
               {i18n.translate('xpack.contextEngine.aiIndexDetail.signals.title', {
                 defaultMessage: 'Signals',

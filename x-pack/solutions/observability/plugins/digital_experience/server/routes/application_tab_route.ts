@@ -68,7 +68,7 @@ export const filteredApplicationTabRouteParams = lazySchema(() => {
   });
 });
 
-/** The params of a tab's route whose data has no page URL: the filters but the page. */
+/** The params of a tab's route whose data has no URL: the filters but the URL text. */
 export const documentFilteredApplicationTabRouteParams = lazySchema(() => {
   return z.object({
     path: z.object({

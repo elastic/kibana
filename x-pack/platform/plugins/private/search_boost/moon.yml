@@ -35,6 +35,9 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/shared-ux-router'
   - '@kbn/core-security-server'
+  - '@kbn/index-management-shared-types'
+  - '@kbn/share-plugin'
+  - '@kbn/router-utils'
 tags:
   - plugin
   - prod

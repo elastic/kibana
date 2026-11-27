@@ -12,7 +12,7 @@ import type {
   AlertInstanceContext,
   DefaultActionGroupId,
 } from '../../../common';
-import { setFlapping, isAlertFlapping } from './set_flapping';
+import { setFlapping, setFlappingOnOngoingRecoveredAlerts, isAlertFlapping } from './set_flapping';
 import {
   DEFAULT_FLAPPING_SETTINGS,
   DISABLE_FLAPPING_SETTINGS,
@@ -154,6 +154,44 @@ describe('setFlapping', () => {
         },
       }
     `);
+  });
+
+  describe('setFlappingOnOngoingRecoveredAlerts', () => {
+    test('should stop flapping once the look back window has no state changes', () => {
+      const ongoingRecoveredAlerts = {
+        '1': new Alert('1', { meta: { flapping: true, flappingHistory: notFlapping } }),
+        '2': new Alert('2', { meta: { flapping: true, flappingHistory: flapping } }),
+        '3': new Alert('3', { meta: { flapping: true, flappingHistory: [false, false] } }),
+      };
+
+      setFlappingOnOngoingRecoveredAlerts(DEFAULT_FLAPPING_SETTINGS, ongoingRecoveredAlerts);
+
+      expect(ongoingRecoveredAlerts['1'].getFlapping()).toBe(false);
+      expect(ongoingRecoveredAlerts['2'].getFlapping()).toBe(true);
+      expect(ongoingRecoveredAlerts['3'].getFlapping()).toBe(true);
+    });
+
+    test('should not start flapping on alerts that recovered while not flapping', () => {
+      const ongoingRecoveredAlerts = {
+        '1': new Alert('1', { meta: { flapping: false, flappingHistory: flapping } }),
+        '2': new Alert('2', { meta: { flappingHistory: flapping } }),
+      };
+
+      setFlappingOnOngoingRecoveredAlerts(DEFAULT_FLAPPING_SETTINGS, ongoingRecoveredAlerts);
+
+      expect(ongoingRecoveredAlerts['1'].getFlapping()).toBe(false);
+      expect(ongoingRecoveredAlerts['2'].getFlapping()).toBe(false);
+    });
+
+    test('should set flapping to false when flapping is disabled', () => {
+      const ongoingRecoveredAlerts = {
+        '1': new Alert('1', { meta: { flapping: true, flappingHistory: flapping } }),
+      };
+
+      setFlappingOnOngoingRecoveredAlerts(DISABLE_FLAPPING_SETTINGS, ongoingRecoveredAlerts);
+
+      expect(ongoingRecoveredAlerts['1'].getFlapping()).toBe(false);
+    });
   });
 
   describe('isAlertFlapping', () => {

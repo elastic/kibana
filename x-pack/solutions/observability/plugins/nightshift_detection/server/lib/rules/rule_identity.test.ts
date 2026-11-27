@@ -42,7 +42,7 @@ describe('computeRuleId', () => {
     expect(
       computeRuleId({
         ...identity,
-        rule: {
+        data: {
           kind: 'signal',
           time_field: '@timestamp',
           schedule: { every: '5m', lookback: '5m' },
@@ -52,7 +52,7 @@ describe('computeRuleId', () => {
     ).toBe(
       computeRuleId({
         ...identity,
-        rule: {
+        data: {
           query: { base: 'FROM logs' },
           schedule: { lookback: '5m', every: '5m' },
           time_field: '@timestamp',

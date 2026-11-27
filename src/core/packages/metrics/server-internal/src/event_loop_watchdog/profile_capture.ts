@@ -21,6 +21,7 @@ export interface CpuProfile {
       lineNumber?: number;
     };
     children?: readonly number[];
+    hitCount?: number;
   }>;
   /** Microseconds; when profiling was requested, before the first sample. */
   startTime: number;

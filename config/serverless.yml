@@ -141,6 +141,9 @@ xpack.cloud_connect.enabled: false
 # Shared Elasticsearch home page: re-enabled only by the project types that render it.
 xpack.elasticsearchHome.enabled: false
 
+# Workflow secrets: in development, off until product decisions are final.
+xpack.secrets.enabled: false
+
 xpack.reindex_service.rollupsEnabled: false
 
 # Management team UI configurations

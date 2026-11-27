@@ -269,7 +269,7 @@ export function useStreamDocCountsFetch({
 
       const histogramPromise = executeEsqlQuery({
         query: buildStreamIngestHistogramEsql(source, minInterval),
-        search: data.search.search,
+        search: data.search,
         timezone,
         signal: abortController.signal,
         start: timeState.start,

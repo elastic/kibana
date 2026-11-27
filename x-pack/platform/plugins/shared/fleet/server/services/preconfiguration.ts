@@ -33,7 +33,7 @@ import {
 } from '../../common/services/simplified_package_policy_helper';
 import { sanitizeAgentPolicyOverrides } from '../../common/services/agent_policy_overrides';
 
-import { FleetError } from '../errors';
+import { FleetError, PackagePolicyAgentVersionIncompatibleError } from '../errors';
 
 import { escapeSearchQueryPhrase } from './saved_object';
 import { pkgToPkgKey } from './epm/registry';
@@ -380,7 +380,12 @@ export async function ensurePreconfiguredPackagesAndPolicies(
           )}`
       );
       const s = apm.startSpan('Add preconfigured package policies', 'preconfiguration');
-      await addPreconfiguredPolicyPackages(esClient, policy!, packagePoliciesToAdd!, defaultOutput);
+      const addedPackagePoliciesCount = await addPreconfiguredPolicyPackages(
+        esClient,
+        policy!,
+        packagePoliciesToAdd!,
+        defaultOutput
+      );
       s?.end();
 
       logger.debug(
@@ -425,7 +430,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
       }
 
       if (
-        packagePoliciesToAdd.length > 0 ||
+        addedPackagePoliciesCount > 0 ||
         packagePoliciesUpdates.length > 0 ||
         shouldAddIsManagedFlag
       ) {
@@ -486,7 +491,8 @@ async function addPreconfiguredPolicyPackages(
   }>,
   defaultOutput: Output,
   bumpAgentPolicyRevison = false
-) {
+): Promise<number> {
+  let addedCount = 0;
   // Cache package info objects so we don't waste lookup time on the latest package
   // every time we call `getPackageInfo`
   const packageInfoMap = new Map<string, PackageInfo>();
@@ -504,44 +510,60 @@ async function addPreconfiguredPolicyPackages(
       });
     }
 
-    if (Array.isArray(packagePolicy.inputs)) {
-      const { id, name, description, inputs } = packagePolicy;
-      await addPackageToAgentPolicy(
-        namespacedSoClient,
-        esClient,
-        agentPolicy,
-        packageInfo,
-        name,
-        id,
-        description,
-        (policy) => preconfigurePackageInputs(policy, packageInfo, inputs),
-        bumpAgentPolicyRevison
-      );
-    } else {
-      const simplifiedPackagePolicy = packagePolicy as SimplifiedPackagePolicy;
-      const id = simplifiedPackagePolicy.id?.toString();
-      // Simplified package policy
-      const newPackagePolicy = simplifiedPackagePolicytoNewPackagePolicy(
-        {
-          ...(simplifiedPackagePolicy as SimplifiedPackagePolicy),
+    try {
+      if (Array.isArray(packagePolicy.inputs)) {
+        const { id, name, description, inputs } = packagePolicy;
+        await addPackageToAgentPolicy(
+          namespacedSoClient,
+          esClient,
+          agentPolicy,
+          packageInfo,
+          name,
           id,
-          policy_id: agentPolicy.id,
-          policy_ids: [agentPolicy.id],
-          namespace: packagePolicy.namespace || agentPolicy.namespace,
-        },
-        packageInfo,
-        {}
-      );
+          description,
+          (policy) => preconfigurePackageInputs(policy, packageInfo, inputs),
+          bumpAgentPolicyRevison
+        );
+      } else {
+        const simplifiedPackagePolicy = packagePolicy as SimplifiedPackagePolicy;
+        const id = simplifiedPackagePolicy.id?.toString();
+        // Simplified package policy
+        const newPackagePolicy = simplifiedPackagePolicytoNewPackagePolicy(
+          {
+            ...(simplifiedPackagePolicy as SimplifiedPackagePolicy),
+            id,
+            policy_id: agentPolicy.id,
+            policy_ids: [agentPolicy.id],
+            namespace: packagePolicy.namespace || agentPolicy.namespace,
+          },
+          packageInfo,
+          {}
+        );
 
-      await packagePolicyService.create(namespacedSoClient, esClient, newPackagePolicy, {
-        id,
-        bumpRevision: bumpAgentPolicyRevison,
-        skipEnsureInstalled: true,
-        skipUniqueNameVerification: true,
-        overwrite: true,
-        force: true, // To add package to managed policy we need the force flag
-        packageInfo,
-      });
+        await packagePolicyService.create(namespacedSoClient, esClient, newPackagePolicy, {
+          id,
+          bumpRevision: bumpAgentPolicyRevison,
+          skipEnsureInstalled: true,
+          skipUniqueNameVerification: true,
+          overwrite: true,
+          force: true, // To add package to managed policy we need the force flag
+          packageInfo,
+        });
+      }
+      addedCount++;
+    } catch (error) {
+      // A preconfigured package policy can't be acknowledged from kibana.yml: failing here would
+      // fail Fleet setup on a configuration the operator can only fix by editing kibana.yml.
+      if (!(error instanceof PackagePolicyAgentVersionIncompatibleError)) {
+        throw error;
+      }
+      appContextService
+        .getLogger()
+        .warn(
+          `Skipped preconfigured package policy ${packagePolicy.name} of agent policy ${agentPolicy.id}: ${error.message}`
+        );
     }
   }
+
+  return addedCount;
 }

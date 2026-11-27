@@ -44,13 +44,9 @@ export async function evaluateDependencies(
           dependency.actionGroupsToSuppressOn.includes(winDef.actionGroup)
         ),
       };
-      const results = await evaluate(
-        esClient,
-        slo,
-        paramsWithSuppressOnWindows,
-        startedAt,
-        projectRouting
-      );
+      const { results } = await evaluate(esClient, slo, paramsWithSuppressOnWindows, startedAt, {
+        projectRouting,
+      });
       const instanceIdsToSuppress = results
         .filter((res) => res.shouldAlert)
         .map((res) => res.instanceId);

@@ -136,6 +136,8 @@ export {
 
 export { toFromSourceQuery } from './src/sources/to_from_source_query';
 
+export { SOURCE_TIMESTAMP_FIELD, getTimestampColumnProblem } from './src/sources/timestamp_column';
+
 export {
   NIGHTSHIFT_USAGE_PARENT_ID,
   NIGHTSHIFT_USAGE_PRODUCT_FEATURE,

@@ -15,7 +15,7 @@ import {
   resetAllMocks,
 } from './config_loader.test.mocks';
 
-import { loadConfiguration } from './config_loader';
+import { getBrowserTracingConfiguration, loadConfiguration } from './config_loader';
 
 describe('loadConfiguration', () => {
   const argv = ['some', 'arbitrary', 'args'];
@@ -61,5 +61,42 @@ describe('loadConfiguration', () => {
     expect(ApmConfigurationMock).toHaveBeenCalledTimes(1);
     expect(ApmConfigurationMock).toHaveBeenCalledWith(rootDir, config, isDistributable);
     expect(instance).toBe(apmInstance);
+  });
+});
+
+describe('getBrowserTracingConfiguration', () => {
+  const loadWithTelemetry = (telemetry: {
+    enabled: boolean;
+    tracing: { browser: { enabled: boolean; url?: string; headers?: Record<string, string> } };
+  }) => {
+    ApmConfigurationMock.mockImplementation(() => ({ getTelemetryConfig: () => telemetry }));
+    loadConfiguration([], '/root/dir', false);
+  };
+
+  afterEach(() => {
+    resetAllMocks();
+  });
+
+  it('returns the url and headers when browser tracing is enabled', () => {
+    const browser = { enabled: true, url: 'https://otlp.example.com', headers: { a: 'b' } };
+    loadWithTelemetry({ enabled: true, tracing: { browser } });
+
+    expect(getBrowserTracingConfiguration()).toEqual({
+      url: browser.url,
+      headers: browser.headers,
+    });
+  });
+
+  it.each([
+    ['telemetry is disabled', { enabled: false, browser: { enabled: true, url: 'https://a.io' } }],
+    [
+      'browser tracing is disabled',
+      { enabled: true, browser: { enabled: false, url: 'https://a.io' } },
+    ],
+    ['no url is configured', { enabled: true, browser: { enabled: true } }],
+  ])('returns undefined when %s', (_, { enabled, browser }) => {
+    loadWithTelemetry({ enabled, tracing: { browser } });
+
+    expect(getBrowserTracingConfiguration()).toBeUndefined();
   });
 });

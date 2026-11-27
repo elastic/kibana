@@ -9,9 +9,7 @@ import type { ScopedHistory } from '@kbn/core/public';
 import type { HttpSetup, NotificationsStart } from '@kbn/core/public';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import type { ILicense } from '@kbn/licensing-types';
-import type { ThunkAction } from 'redux-thunk-v2';
-import type { Action as ReduxAction, Store } from 'redux-v4';
-import type { ThunkDispatch } from 'redux-thunk-v2';
+import type { ThunkAction, UnknownAction } from '@reduxjs/toolkit';
 import type { TelemetryPluginStart } from '@kbn/telemetry-plugin/public';
 import type { BreadcrumbService } from '../breadcrumbs';
 
@@ -32,14 +30,20 @@ export interface TrialStatusState {
   startTrialError?: string;
 }
 
+export interface PermissionsError {
+  message?: string;
+}
+
 export interface PermissionsState {
   loading?: boolean;
   hasPermission?: boolean;
-  error?: unknown;
+  error?: PermissionsError;
 }
 
+export type LicenseState = Pick<ILicense, 'type' | 'expiryDateInMillis' | 'isActive'>;
+
 export interface LicenseManagementState {
-  license: ILicense | null;
+  license: LicenseState | null;
   uploadStatus: UploadStatusState;
   uploadErrorMessage: string;
   trialStatus: TrialStatusState;
@@ -60,11 +64,5 @@ export type AppThunkAction<R = void> = ThunkAction<
   R,
   LicenseManagementState,
   ThunkServices,
-  ReduxAction
+  UnknownAction
 >;
-
-export type AppDispatch = ThunkDispatch<LicenseManagementState, ThunkServices, ReduxAction>;
-
-export type AppStore = Omit<Store<LicenseManagementState, ReduxAction>, 'dispatch'> & {
-  dispatch: AppDispatch;
-};

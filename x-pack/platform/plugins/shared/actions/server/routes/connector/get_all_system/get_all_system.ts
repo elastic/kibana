@@ -38,7 +38,10 @@ export const getAllConnectorsIncludingSystemRoute = (
 
         const responseBody: GetAllConnectorsResponseV1 = transformGetAllConnectorsResponseV1(
           result,
-          { includeInboundEventsField: actionsConfigUtils.isInboundEventsEnabled() }
+          {
+            includeInboundEventsField: actionsConfigUtils.isInboundEventsEnabled(),
+            includeSpecVersionField: actionsConfigUtils.isCatalogEnabled(),
+          }
         );
         return res.ok({ body: responseBody });
       })

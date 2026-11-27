@@ -93,6 +93,38 @@ describe('converse_task', () => {
       expect(result.messages[1].message).toBe('Requesting isolation.');
     });
 
+    it('recognises the response-action prompt id and ties it to the model tool call', async () => {
+      const client = createClient({
+        message: '',
+        steps: [isolateStep],
+        traceId: 'trace-4',
+        prompts: [{ type: 'confirmation', id: 'isolate.confirm.call-1', title: 'Isolate host?' }],
+      });
+
+      const result = await converseQuestionToTaskOutput(client, 'Isolate eval-host-isolate', {
+        includePendingConfirmations: true,
+      });
+
+      expect(result.pending_confirmations).toEqual([
+        { tool_id: 'endpoint-response-actions.isolate_host', tool_call_id: 'call-1' },
+      ]);
+    });
+
+    it('does not report a response-action card that no tool call of the round raised', async () => {
+      const client = createClient({
+        message: '',
+        steps: [isolateStep],
+        traceId: 'trace-5',
+        prompts: [{ type: 'confirmation', id: 'isolate.confirm.call-other' }],
+      });
+
+      const result = await converseQuestionToTaskOutput(client, 'Isolate eval-host-isolate', {
+        includePendingConfirmations: true,
+      });
+
+      expect(result.pending_confirmations).toEqual([]);
+    });
+
     it('records the model-supplied arguments from steps, not from the card', async () => {
       const result = await converseQuestionToTaskOutput(
         pausedClient(),

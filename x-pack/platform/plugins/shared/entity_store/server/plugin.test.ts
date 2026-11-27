@@ -22,6 +22,15 @@ import type {
   EntityStoreStartPlugins,
 } from './types';
 import type { RegistrableEntityDefinition } from './domain/definitions/registry';
+import { scheduleLatestIndexMappingsMigration } from './tasks/latest_index_mappings_migration_task';
+
+jest.mock('./tasks/latest_index_mappings_migration_task', () => {
+  const actual = jest.requireActual('./tasks/latest_index_mappings_migration_task');
+  return {
+    ...actual,
+    scheduleLatestIndexMappingsMigration: jest.fn(actual.scheduleLatestIndexMappingsMigration),
+  };
+});
 
 const makeDefinition = (type: string): RegistrableEntityDefinition => ({
   type,
@@ -155,5 +164,76 @@ describe('EntityStorePlugin entity definition registry', () => {
 
     expect(client.namespace).toBe('space-a');
     expect(startPlugins.spaces.spacesService.getSpaceId).toHaveBeenCalledWith(request);
+  });
+
+  describe('latest index mappings migration scheduling', () => {
+    const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
+
+    const migrationTask = expect.objectContaining({
+      id: 'entity_store:v2:latest_index_mappings_migration',
+      taskType: 'entity_store:v2:latest_index_mappings_migration',
+    });
+
+    const mockCoreStartWithFind = (find: jest.Mock) => {
+      const coreStart = coreMock.createStart();
+      jest.mocked(coreStart.savedObjects.createInternalRepository).mockReturnValue({
+        find,
+      } as unknown as ReturnType<typeof coreStart.savedObjects.createInternalRepository>);
+      return coreStart;
+    };
+
+    const startWithNamespaces = (namespaces: string[]) =>
+      plugin.start(
+        mockCoreStartWithFind(
+          jest.fn().mockResolvedValue({
+            saved_objects: namespaces.map((namespace) => ({ namespaces: [namespace] })),
+          })
+        ),
+        startPlugins
+      );
+
+    it('schedules the one-shot migration after start returns, once the installed spaces are listed', async () => {
+      let releaseNamespaceLookup: (response: unknown) => void = () => {};
+      const find = jest.fn().mockReturnValue(
+        new Promise((resolve) => {
+          releaseNamespaceLookup = resolve;
+        })
+      );
+
+      plugin.start(mockCoreStartWithFind(find), startPlugins);
+      await flushPromises();
+
+      // start() has returned while the namespace lookup is still pending: nothing is scheduled yet
+      expect(find).toHaveBeenCalled();
+      expect(startPlugins.taskManager.ensureScheduled).not.toHaveBeenCalledWith(migrationTask);
+
+      releaseNamespaceLookup({ saved_objects: [{ namespaces: ['default'] }] });
+      await flushPromises();
+
+      expect(startPlugins.taskManager.ensureScheduled).toHaveBeenCalledWith(migrationTask);
+    });
+
+    it('does not schedule the migration when no space has the Entity Store installed', async () => {
+      const find = jest.fn().mockResolvedValue({ saved_objects: [] });
+
+      plugin.start(mockCoreStartWithFind(find), startPlugins);
+      await flushPromises();
+
+      // The lookup ran and found nothing, so nothing is scheduled
+      expect(find).toHaveBeenCalled();
+      expect(startPlugins.taskManager.ensureScheduled).not.toHaveBeenCalledWith(migrationTask);
+    });
+
+    it('does not throw from start, and logs, when scheduling rejects', async () => {
+      jest.mocked(scheduleLatestIndexMappingsMigration).mockRejectedValueOnce(new Error('tm down'));
+
+      expect(() => startWithNamespaces(['default'])).not.toThrow();
+      await flushPromises();
+
+      // Other start-time subscriptions may log their own errors against the mocked core
+      expect(loggingSystemMock.collect(initializerContext.logger).error).toContainEqual([
+        expect.stringContaining('Failed to schedule latest index mappings migration: tm down'),
+      ]);
+    });
   });
 });

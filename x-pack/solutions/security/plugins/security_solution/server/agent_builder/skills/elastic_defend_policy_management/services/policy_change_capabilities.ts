@@ -6,10 +6,6 @@
  */
 
 import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
-import {
-  isAiDataCollectionEnabled,
-  isLinuxRansomwareProtectionEnabled,
-} from '../../../../../common/endpoint/models/policy_config_helpers';
 import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
 import type { PolicyChangeCapabilities } from '../domain/impact';
 
@@ -33,8 +29,8 @@ export const toPolicyChangeCapabilities = (
       ProductFeatureSecurityKey.endpointCustomYaraSignatures
     ),
     customYaraSignaturesExperimental: experimentalFeatures.customYaraSignaturesEnabled,
-    aiDataCollectionExperimental: isAiDataCollectionEnabled(experimentalFeatures),
-    linuxRansomwareProtection: isLinuxRansomwareProtectionEnabled(experimentalFeatures),
+    aiDataCollectionExperimental: experimentalFeatures.endpointAiDataCollection,
+    linuxRansomwareProtection: experimentalFeatures.linuxRansomwareProtection,
     endpointRegistryCredentialHardening: productFeatures.isEnabled(
       ProductFeatureSecurityKey.endpointRegistryCredentialHardening
     ),

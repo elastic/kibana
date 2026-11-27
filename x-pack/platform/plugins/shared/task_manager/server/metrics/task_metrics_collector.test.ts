@@ -110,7 +110,7 @@ describe('TaskManagerMetricsCollector', () => {
       logger,
       pollInterval,
       store: mockTaskStore,
-      taskTypes: new Set(['taskType1', 'taskType2', 'taskType3', 'taskType4']),
+      getTaskTypes: () => ['taskType1', 'taskType2', 'taskType3', 'taskType4'],
       excludedTypes: new Set(['taskType4', 'taskType5']),
     });
     const handler = jest.fn();
@@ -277,6 +277,45 @@ describe('TaskManagerMetricsCollector', () => {
     });
   });
 
+  test('includes task types registered after start in the next collection cycle', async () => {
+    mockTaskStore.aggregate.mockResolvedValue({
+      took: 1,
+      timed_out: false,
+      _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+      hits: { total: { value: 0, relation: 'eq' }, max_score: null, hits: [] },
+      aggregations: {
+        overallOverdueByHistogram: { buckets: [] },
+        byTaskType: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
+      },
+    });
+    const pollInterval = 100;
+    const getTaskTypes = jest
+      .fn<string[], []>()
+      .mockReturnValueOnce(['taskType1'])
+      .mockReturnValue(['taskType1', 'lateRegisteredTaskType']);
+
+    const taskManagerMetricsCollector = new TaskManagerMetricsCollector({
+      logger,
+      pollInterval,
+      store: mockTaskStore,
+      getTaskTypes,
+      excludedTypes: new Set(),
+    });
+    taskManagerMetricsCollector.events.subscribe(jest.fn());
+
+    await new Promise((resolve) => setImmediate(resolve));
+    expect(mockTaskStore.aggregate).toHaveBeenCalledTimes(1);
+
+    clock.tick(pollInterval);
+    await new Promise((resolve) => setImmediate(resolve));
+
+    expect(mockTaskStore.aggregate).toHaveBeenCalledTimes(2);
+    expect(mockTaskStore.aggregate.mock.calls[1][0].query).toHaveProperty(
+      'bool.filter[0].bool.must[0].bool.must[0].terms',
+      { 'task.taskType': ['taskType1', 'lateRegisteredTaskType'] }
+    );
+  });
+
   test('emits empty metric when querying for data fails and continues to query on interval', async () => {
     mockTaskStore.aggregate.mockImplementationOnce(async () => {
       throw new Error('failed to query');
@@ -322,12 +361,12 @@ describe('TaskManagerMetricsCollector', () => {
     const pollInterval = 100;
     const halfInterval = Math.floor(pollInterval / 2);
 
-    const taskTypes = new Set([]);
+    const taskTypes = new Set<string>();
     const taskManagerMetricsCollector = new TaskManagerMetricsCollector({
       logger,
       pollInterval,
       store: mockTaskStore,
-      taskTypes,
+      getTaskTypes: () => [],
       excludedTypes: taskTypes,
     });
     const handler = jest.fn();
@@ -391,12 +430,12 @@ describe('TaskManagerMetricsCollector', () => {
     const pollInterval = 100;
     const halfInterval = Math.floor(pollInterval / 2);
 
-    const taskTypes = new Set([]);
+    const taskTypes = new Set<string>();
     const taskManagerMetricsCollector = new TaskManagerMetricsCollector({
       logger,
       pollInterval,
       store: mockTaskStore,
-      taskTypes,
+      getTaskTypes: () => [],
       excludedTypes: taskTypes,
     });
     const handler = jest.fn();
