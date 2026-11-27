@@ -59,7 +59,7 @@ describe('session memory routes', () => {
       remember: jest.fn(async ({ id }) => ({ id: id ?? 'generated-id' })),
       forget: jest.fn(async ({ ids }) => ids.map((id) => ({ id, outcome: 'forgotten' as const }))),
     };
-    getSessionMemoryClient = jest.fn(() => client);
+    getSessionMemoryClient = jest.fn(async () => client);
 
     const router = {
       versioned: {

@@ -66,7 +66,7 @@ describe('session events routes', () => {
         results: events.map(({ id }) => ({ id, status: 'created' as const })),
       })),
     };
-    getSessionMemoryClient = jest.fn(() => client);
+    getSessionMemoryClient = jest.fn(async () => client);
 
     const router = {
       versioned: {

@@ -231,7 +231,7 @@ export const registerSessionEventsRoutes = ({
   getSessionMemoryClient,
 }: {
   router: IRouter;
-  getSessionMemoryClient: (request: KibanaRequest) => SessionMemoryClient;
+  getSessionMemoryClient: (request: KibanaRequest) => Promise<SessionMemoryClient>;
 }) => {
   router.versioned
     .post({
@@ -293,7 +293,8 @@ export const registerSessionEventsRoutes = ({
           events,
         } = request.body;
         try {
-          const body = await getSessionMemoryClient(request).saveEvents({
+          const client = await getSessionMemoryClient(request);
+          const body = await client.saveEvents({
             sessionId,
             userId,
             aiIndexIds,

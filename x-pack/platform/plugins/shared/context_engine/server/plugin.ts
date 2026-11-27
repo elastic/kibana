@@ -59,10 +59,8 @@ import { ImprovementsService } from './improvements/service';
 import { installImprovementsIndexTemplate } from './improvements/storage';
 import { BackgroundWriteTracker } from './session_memory/background_write_tracker';
 import { createSessionMemoryService } from './session_memory/service';
-import type { SessionMemoryService } from './session_memory/types';
 import { createSessionEventsService } from './session_events/service';
-import type { SessionEventsService } from './session_events/types';
-import type { SessionMemoryClient, SessionMemoryClientDeps } from './session_memory_client/client';
+import type { SessionMemoryClientDeps } from './session_memory_client/client';
 import { createSessionMemoryClient } from './session_memory_client/client';
 import { SignalsService } from './signals/service';
 import type { SignalsServiceApi } from './signals/service';
@@ -98,9 +96,6 @@ export class ContextEnginePlugin
   private createAiIndexDataReadService?: (
     params: GetAiIndexDataReadServiceParams
   ) => AiIndexDataReadService;
-  private sessionMemoryService?: SessionMemoryService;
-  private sessionEventsService?: SessionEventsService;
-  private createSessionMemoryClient?: (request: KibanaRequest) => SessionMemoryClient;
   private esClient?: ElasticsearchClient;
   private scheduleService?: FeedbackAnalysisScheduleService;
   private dreamingScheduleService?: DreamingScheduleService;
@@ -407,16 +402,12 @@ export class ContextEnginePlugin
         isMemoryEnabled: () => this.isGlobalMemoryEnabled(),
         checkReadPrivilege: checkContextEnginePrivilege(apiPrivileges.readContextEngine),
         getSessionMemoryService: async () => {
-          if (!this.sessionMemoryService) {
-            throw new Error('Session memory service not available — plugin has not started');
-          }
-          return this.sessionMemoryService;
+          const [coreStart] = await coreSetup.getStartServices();
+          return createSessionMemoryService(coreStart.elasticsearch.client.asInternalUser);
         },
         getSessionEventsService: async () => {
-          if (!this.sessionEventsService) {
-            throw new Error('Session events service not available — plugin has not started');
-          }
-          return this.sessionEventsService;
+          const [coreStart] = await coreSetup.getStartServices();
+          return createSessionEventsService(coreStart.elasticsearch.client.asInternalUser);
         },
       },
     });
@@ -457,11 +448,9 @@ export class ContextEnginePlugin
       getWorkflows: () => this.workflowsManagementApiPromise,
     });
 
-    const getSessionMemoryClient = (request: KibanaRequest) => {
-      if (!this.createSessionMemoryClient) {
-        throw new Error('Session memory client not available — plugin has not started');
-      }
-      return this.createSessionMemoryClient(request);
+    const getSessionMemoryClient = async (request: KibanaRequest) => {
+      const [, , contextEngineStart] = await coreSetup.getStartServices();
+      return contextEngineStart.getSessionMemoryClient(request);
     };
     registerSessionEventsRoutes({ router, getSessionMemoryClient });
     registerSessionMemoryRoutes({ router, getSessionMemoryClient });
@@ -550,21 +539,16 @@ export class ContextEnginePlugin
       sources: [createWorkflowExecutionsSpendSource({ getEsClient: () => internalEsClient })],
     });
 
-    this.sessionMemoryService = createSessionMemoryService(this.esClient);
-    this.sessionEventsService = createSessionEventsService(this.esClient);
     const sessionMemoryClientDeps: SessionMemoryClientDeps = {
       core: coreStart,
       authz: startDeps.security.authz,
       spaces: startDeps.spaces,
       aiIndexService,
-      sessionEvents: this.sessionEventsService,
-      sessionMemory: this.sessionMemoryService,
+      sessionEvents: createSessionEventsService(this.esClient),
+      sessionMemory: createSessionMemoryService(this.esClient),
       backgroundWrites: this.rememberWriteTracker,
       logger: this.logger.get('session_memory'),
     };
-    const getSessionMemoryClient = (request: KibanaRequest) =>
-      createSessionMemoryClient(sessionMemoryClientDeps, request);
-    this.createSessionMemoryClient = getSessionMemoryClient;
 
     const improvementsLogger = this.logger.get('improvements');
     this.createImprovementsService = (esClient: ElasticsearchClient, spaceId: string) =>
@@ -639,7 +623,8 @@ export class ContextEnginePlugin
       getAiIndexDataReadService: (params) => createAiIndexDataReadService(params),
       getSignalsService: () => signalsService,
       getImprovementsService: (esClient, spaceId) => createImprovementsService(esClient, spaceId),
-      getSessionMemoryClient,
+      getSessionMemoryClient: (request) =>
+        createSessionMemoryClient(sessionMemoryClientDeps, request),
     };
   }
 

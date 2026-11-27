@@ -85,7 +85,7 @@ registerAiIndexRoutes({
 const rejectAsDisabled = async () => {
   throw new ContextEngineDisabledError();
 };
-const disabledSessionMemoryClient = (): SessionMemoryClient => ({
+const disabledSessionMemoryClient = async (): Promise<SessionMemoryClient> => ({
   saveEvents: rejectAsDisabled,
   remember: rejectAsDisabled,
   forget: rejectAsDisabled,

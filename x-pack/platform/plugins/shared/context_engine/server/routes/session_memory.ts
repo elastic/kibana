@@ -178,7 +178,7 @@ export const registerSessionMemoryRoutes = ({
   getSessionMemoryClient,
 }: {
   router: IRouter;
-  getSessionMemoryClient: (request: KibanaRequest) => SessionMemoryClient;
+  getSessionMemoryClient: (request: KibanaRequest) => Promise<SessionMemoryClient>;
 }) => {
   router.versioned
     .post({
@@ -243,7 +243,8 @@ export const registerSessionMemoryRoutes = ({
           attributes,
         } = request.body;
         try {
-          const body = await getSessionMemoryClient(request).remember({
+          const client = await getSessionMemoryClient(request);
+          const body = await client.remember({
             id,
             sessionId,
             userId,
@@ -305,7 +306,8 @@ export const registerSessionMemoryRoutes = ({
       async (_ctx, request, response) => {
         const { user_id: userId, ids } = request.body;
         try {
-          const results = await getSessionMemoryClient(request).forget({ userId, ids });
+          const client = await getSessionMemoryClient(request);
+          const results = await client.forget({ userId, ids });
           return response.ok({ body: { results } });
         } catch (error) {
           return toMemoryWriteErrorResponse(error, response);
