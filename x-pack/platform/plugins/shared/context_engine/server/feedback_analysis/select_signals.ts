@@ -80,7 +80,7 @@ interface EvidenceSource {
   data: {
     query?: string;
     error?: string;
-    returned: { row_count: number };
+    returned: { row_count?: number };
     conversation_id?: string;
   };
 }
