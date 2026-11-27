@@ -159,8 +159,12 @@ export function RecoveryConditionStep({
 
       {strategy !== recoveryStrategy.manual && (
         <>
-          <EuiSpacer size="m" />
-          <EuiHorizontalRule margin="none" />
+          {isCustom && (
+            <>
+              <EuiSpacer size="m" />
+              <EuiHorizontalRule margin="none" />
+            </>
+          )}
           <EuiSpacer size="m" />
           <RecoveryDelayField />
         </>
