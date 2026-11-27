@@ -21,6 +21,12 @@ export class RulesListPage {
   public readonly contentList: ContentListWrapper;
   /** Header "Create rule" split button; hidden for read-only users. */
   public readonly createRuleButton: Locator;
+  /** The "Create rule" options flyout opened from the header button. */
+  public readonly createOptionsFlyout: Locator;
+  /** "What do you want to measure?" input of the create rule flyout (unified rule creation flag). */
+  public readonly createRuleSearchInput: Locator;
+  /** "Send to Agent" button in the footer of the create rule search dropdown. */
+  public readonly createRuleSendToAgentButton: Locator;
   /** Heading tab linking to the classic (v1) Rules page; hidden without v1 read access. */
   public readonly v1RulesTab: Locator;
   /** Heading tab for this (v2) Rules page; hidden alongside v1RulesTab when only one would show. */
@@ -36,6 +42,9 @@ export class RulesListPage {
     this.ruleSummaryFlyout = this.page.testSubj.locator('ruleSummaryFlyout');
     this.contentList = new ContentListWrapper(this.page);
     this.createRuleButton = this.page.testSubj.locator('createRuleButton');
+    this.createOptionsFlyout = this.page.testSubj.locator('ruleCreateOptionsFlyout');
+    this.createRuleSearchInput = this.page.testSubj.locator('ruleCreateSearchInput');
+    this.createRuleSendToAgentButton = this.page.testSubj.locator('ruleCreateSearchSendToAgent');
     this.v1RulesTab = this.page.testSubj.locator('v1RulesTab');
     this.v2RulesTab = this.page.testSubj.locator('v2RulesTab');
   }
