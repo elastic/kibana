@@ -66,7 +66,7 @@ import {
   type SessionValue,
 } from '../session_management';
 import type { UiamServicePublic } from '../uiam';
-import type { UserProfileServiceStartInternal } from '../user_profile';
+import type { UserProfileGrant, UserProfileServiceStartInternal } from '../user_profile';
 
 /**
  * List of query string parameters used to pass various authentication related metadata that should
@@ -268,6 +268,13 @@ export class Authenticator {
   // so calls that still hold an expired token can find the latest token and share its renewal.
   // Different incoming requests have different header objects, even when they use the same token.
   private readonly requestAuthenticationStates = new WeakMap<Headers, RequestAuthenticationState>();
+
+  // User profile activations that are in flight for existing sessions, by session ID. An
+  // activation is dropped from here as soon as it finishes.
+  private readonly userProfileActivationsInFlight = new Map<
+    string,
+    ReturnType<UserProfileServiceStartInternal['activate']>
+  >();
 
   /**
    * List of configured and instantiated authentication providers.
@@ -1142,18 +1149,15 @@ export class Authenticator {
     if (shouldActivateProfile) {
       this.logger.debug(`Activating profile for "${authenticationResult.user?.username}".`);
 
-      const startTime = performance.now();
-
+      // None of the cases above applied to a session that is still set here, so the user profile
+      // grant is for the user and provider that session already belongs to.
       userProfileId = (
-        await this.options.userProfileService.activate(authenticationResult.userProfileGrant)
+        await this.activateUserProfile(
+          authenticationResult.userProfileGrant,
+          provider.type,
+          existingSessionValue?.sid
+        )
       ).uid;
-
-      const duration = performance.now() - startTime;
-
-      securityTelemetry.recordUserProfileActivationDuration(duration, {
-        providerType: provider.type,
-        outcome: 'success',
-      });
 
       if (
         existingSessionValue?.userProfileId &&
@@ -1240,6 +1244,43 @@ export class Authenticator {
         isNewSessionAuthenticated &&
         (providerHasChanged || usernameHasChanged),
     };
+  }
+
+  /**
+   * Activates the user profile. Requests that renew the same session at the same time, for example
+   * a page that sends several of them just after the access token expired, share one activation:
+   * with one each, Elasticsearch writes the same profile in parallel and the writes conflict.
+   * @param grant User profile grant returned by the authentication provider.
+   * @param providerType Type of the authentication provider that returned the grant.
+   * @param [sid] ID of the session that is being renewed, if there is one.
+   */
+  private activateUserProfile(grant: UserProfileGrant, providerType: string, sid?: string) {
+    // The duration is recorded once for each activation, not for each request that waits for it.
+    const activate = async () => {
+      const startTime = performance.now();
+      const userProfile = await this.options.userProfileService.activate(grant);
+      securityTelemetry.recordUserProfileActivationDuration(performance.now() - startTime, {
+        providerType,
+        outcome: 'success',
+      });
+      return userProfile;
+    };
+
+    if (!sid) {
+      return activate();
+    }
+
+    const activationInFlight = this.userProfileActivationsInFlight.get(sid);
+    if (activationInFlight) {
+      this.logger.debug('Waiting for the user profile activation that is already in flight.');
+      return activationInFlight;
+    }
+
+    const activation = activate().finally(() => {
+      this.userProfileActivationsInFlight.delete(sid);
+    });
+    this.userProfileActivationsInFlight.set(sid, activation);
+    return activation;
   }
 
   /**
