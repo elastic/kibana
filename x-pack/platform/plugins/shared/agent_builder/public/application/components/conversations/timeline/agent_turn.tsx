@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingElastic, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -125,6 +125,7 @@ const AgentTurnComponent: React.FC<AgentTurnProps> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const conversationId = useConversationId();
+  const [isHovering, setIsHovering] = useState(false);
   const { status, startedAt, origin } = item;
   const isLoading = status === 'running' || isResuming;
 
@@ -136,10 +137,20 @@ const AgentTurnComponent: React.FC<AgentTurnProps> = ({
     min-inline-size: 0;
   `;
 
-  const content = renderContent(item, conversationId, conversationAttachments);
+  // Memoized so hovering the turn, which only reveals the time, does not render the response again.
+  const content = useMemo(
+    () => renderContent(item, conversationId, conversationAttachments),
+    [item, conversationId, conversationAttachments]
+  );
 
   return (
-    <EuiFlexGroup gutterSize={TURN_COLUMN_GUTTER} alignItems="flexStart" responsive={false}>
+    <EuiFlexGroup
+      gutterSize={TURN_COLUMN_GUTTER}
+      alignItems="flexStart"
+      responsive={false}
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+    >
       {/* The column keeps its width while the agent definition is still loading. */}
       <EuiFlexItem
         grow={false}
@@ -158,9 +169,9 @@ const AgentTurnComponent: React.FC<AgentTurnProps> = ({
             <EuiFlexItem grow={false}>
               <AuthorHeader
                 name={agent.name}
-                showAgentBadge
                 origin={origin}
                 startedAt={startedAt ?? new Date().toISOString()}
+                isTimeVisible={isHovering}
               />
             </EuiFlexItem>
           )}

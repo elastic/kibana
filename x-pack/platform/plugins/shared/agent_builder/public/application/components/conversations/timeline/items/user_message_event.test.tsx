@@ -22,18 +22,20 @@ describe('UserMessageEvent', () => {
     jest.clearAllMocks();
   });
 
-  it('sets a message sent to a running agent in by the turn content inset', () => {
+  it('renders a message sent to a running agent like any other message, with its status', () => {
     const steer = createUserMessageEvent({
       data: { message: 'actually trace data', steer: { execution_id: 'exec-1' } },
     });
     render(<UserMessageEvent event={steer} steerState="waiting" />);
 
-    expect(screen.getByTestId('agentBuilderSteerMessage')).toHaveStyle({
+    expect(screen.getByTestId('agentBuilderSteerMessage')).not.toHaveStyle({
       marginInlineStart: 'calc(24px + 8px)',
     });
+    expect(screen.getByTestId('agentBuilderSteerState-waiting')).toBeInTheDocument();
+    expect(mockUserMessage.mock.calls[0][0].input).toBe('actually trace data');
   });
 
-  it('keeps an ordinary message at the timeline edge', () => {
+  it('does not mark an ordinary message as a steer', () => {
     render(<UserMessageEvent event={createUserMessageEvent()} />);
 
     expect(screen.queryByTestId('agentBuilderSteerMessage')).not.toBeInTheDocument();

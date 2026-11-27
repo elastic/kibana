@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { EuiText } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type {
   UserMessageEvent as UserMessageEventData,
@@ -16,7 +15,6 @@ import type {
 import { isSteerMessageEvent } from '@kbn/agent-builder-common';
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
 import { UserMessage } from '../user_message/user_message';
-import { useTurnContentInset } from '../turn_content_inset';
 import { eventActorToRoundAuthor } from '../round_author';
 import type { SteerState } from '../types';
 
@@ -44,15 +42,8 @@ const UserMessageEventComponent: React.FC<UserMessageEventProps> = ({
   attachmentRefs,
   conversationAttachments,
 }) => {
-  const turnContentInset = useTurnContentInset();
-  // Align pending steers with their eventual position inside the turn.
-  const steerStyles = isSteerMessageEvent(event)
-    ? css`
-        margin-inline-start: ${turnContentInset};
-      `
-    : undefined;
   return (
-    <div css={steerStyles} data-test-subj={steerStyles ? 'agentBuilderSteerMessage' : undefined}>
+    <div data-test-subj={isSteerMessageEvent(event) ? 'agentBuilderSteerMessage' : undefined}>
       <UserMessage
         input={event.data.message}
         startedAt={event.created_at}
