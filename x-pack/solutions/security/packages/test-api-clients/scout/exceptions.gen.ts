@@ -222,10 +222,7 @@ block the deletion. Cross-space reference checking is deferred to a future relea
   > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
-    const path = `${basePath}${replaceParams(
-      '/api/detection_engine/rules/{id}/exceptions',
-      encodePathParams(props.params)
-    )}`;
+    const path = `${basePath}${replaceParams('/api/detection_engine/rules/{id}/exceptions', encodePathParams(props.params))}`;
 
     return apiClient.post<ScoutResponseBody<TResponseType, CreateRuleExceptionListItemsResponse>>(
       path,
