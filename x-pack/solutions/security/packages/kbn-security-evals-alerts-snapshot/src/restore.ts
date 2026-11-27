@@ -55,8 +55,12 @@ const deleteExistingAlertIndices = async (esClient: Client, log: ToolingLog): Pr
   });
 };
 
-const isOpenIndexConflictError = (errors: string[]): boolean =>
-  errors.some((e) => e.includes('open index with same name already exists in the cluster'));
+const isRestoreRaceConflictError = (errors: string[]): boolean =>
+  errors.some(
+    (e) =>
+      e.includes('open index with same name already exists in the cluster') ||
+      e.includes('has more than one write index')
+  );
 
 /**
  * Restore the shared security-alerts snapshot from GCS into the local
@@ -67,9 +71,11 @@ const isOpenIndexConflictError = (errors: string[]): boolean =>
  * This is safe in the disposable eval cluster (and only there) — never call
  * this against a production cluster.
  *
- * If restore fails with an open-index conflict (rare race when the alert
- * index is recreated between the delete and the restore), we delete and
- * retry once before failing hard.
+ * Kibana can recreate the alert index between the delete and the restore. The
+ * restore then fails with either an open-index conflict or, when the recreated
+ * and restored indices both claim the write alias, "more than one write
+ * index". Both clear on delete + re-restore (the init fires once per boot), so
+ * we retry once before failing hard.
  */
 export const restoreAlertsSnapshot = async ({
   esClient,
@@ -107,8 +113,8 @@ export const restoreAlertsSnapshot = async ({
     indices: [...ALERT_INDICES_TO_RESTORE_AND_OVERWRITE],
   });
 
-  if (!result.success && isOpenIndexConflictError(result.errors)) {
-    log.warning('Snapshot restore failed due to existing indices. Retrying once after deletion.');
+  if (!result.success && isRestoreRaceConflictError(result.errors)) {
+    log.warning('Snapshot restore hit an index conflict. Retrying once after deletion.');
     await deleteExistingAlertIndices(esClient, log);
     result = await restoreSnapshot({
       esClient,
