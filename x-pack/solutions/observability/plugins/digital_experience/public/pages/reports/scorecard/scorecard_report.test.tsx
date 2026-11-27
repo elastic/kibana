@@ -29,6 +29,11 @@ const REPORT: ScorecardReportData = {
   environments: ['production'],
   period: { start: 2000, end: 3000 },
   previousPeriod: { start: 1000, end: 2000 },
+  baselinePeriod: { start: -2000, end: 2000 },
+  coreWebVitals: {
+    current: { status: 'failed', failing: ['lcp'] },
+    previous: { status: 'passed', failing: [] },
+  },
   generatedAt: 4000,
   sections: [
     {
@@ -44,6 +49,9 @@ const REPORT: ScorecardReportData = {
           change: 0.2,
           changeUnit: 'relative',
           direction: 'neutral',
+          baseline: 1000,
+          baselineChange: 0.2,
+          sampleCount: null,
           rating: null,
           ratings: null,
         },
@@ -56,6 +64,9 @@ const REPORT: ScorecardReportData = {
           change: -0.25,
           changeUnit: 'relative',
           direction: 'better',
+          baseline: 1250,
+          baselineChange: 0.2,
+          sampleCount: 1150,
           rating: null,
           ratings: null,
         },
@@ -66,6 +77,21 @@ const REPORT: ScorecardReportData = {
       title: 'Core Web Vitals',
       measures: [
         {
+          id: 'lcp',
+          label: 'Largest Contentful Paint (p75)',
+          unit: 'ms',
+          value: 3000,
+          previous: 2400,
+          change: 0.25,
+          changeUnit: 'relative',
+          direction: 'worse',
+          baseline: null,
+          baselineChange: null,
+          sampleCount: 800,
+          rating: 'needsImprovement',
+          ratings: { good: 0.6, needsImprovement: 0.3, poor: 0.1 },
+        },
+        {
           id: 'inp',
           label: 'Interaction to Next Paint (p75)',
           unit: 'ms',
@@ -74,6 +100,9 @@ const REPORT: ScorecardReportData = {
           change: null,
           changeUnit: 'relative',
           direction: 'unknown',
+          baseline: null,
+          baselineChange: null,
+          sampleCount: 0,
           rating: null,
           ratings: null,
         },
@@ -138,14 +167,42 @@ describe('ScorecardReport', () => {
     renderReport();
 
     const inp = screen.getByTestId('digitalExperienceScorecardMeasure-inp');
-    expect(within(inp).getAllByText('—')).toHaveLength(3);
+    // This period, rating, good samples, previous period, change and baseline.
+    expect(within(inp).getAllByText('—')).toHaveLength(6);
+  });
+
+  it("shows each web vital's rating and share of good samples", () => {
+    renderReport();
+
+    const lcp = screen.getByTestId('digitalExperienceScorecardMeasure-lcp');
+    expect(lcp).toHaveTextContent('Needs improvement');
+    expect(lcp).toHaveTextContent('60.0%');
+  });
+
+  it('shows the baseline with the change from it, and the samples behind the value', () => {
+    renderReport();
+
+    const loadTime = screen.getByTestId('digitalExperienceScorecardMeasure-loadTime');
+    expect(loadTime).toHaveTextContent('1.25 s');
+    expect(loadTime).toHaveTextContent('(+20.0%)');
+    expect(loadTime).toHaveTextContent('1150');
+  });
+
+  it('shows the Core Web Vitals assessment of both periods', () => {
+    renderReport();
+
+    const assessment = screen.getByTestId('digitalExperienceScorecardAssessment');
+    expect(assessment).toHaveAttribute('data-status', 'failed');
+    expect(assessment).toHaveTextContent('Fails the Core Web Vitals assessment');
+    expect(assessment).toHaveTextContent('Not good at the 75th percentile: LCP.');
+    expect(assessment).toHaveTextContent('Previous period: passed.');
   });
 
   it('names both periods', () => {
     renderReport();
 
     expect(screen.getByTestId('digitalExperienceScorecardPeriods')).toHaveTextContent(
-      'date-2000 – date-3000, compared with date-1000 – date-2000'
+      'date-2000 – date-3000, compared with date-1000 – date-2000 and with the four periods from date--2000'
     );
   });
 

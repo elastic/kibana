@@ -7,7 +7,10 @@
 
 import { toComparedValue } from '../../../common/mobile/kpis';
 import type { ApplicationSearch } from '../../routes/application_tab_route';
-import { getOtelOverviewKpis } from '../../routes/overview/otel/get_otel_overview_kpis';
+import {
+  getOtelOverviewKpis,
+  getOtelPeriodKpis,
+} from '../../routes/overview/otel/get_otel_overview_kpis';
 import { getScorecardReport } from './get_scorecard_report';
 
 jest.mock('../../routes/overview/otel/get_otel_overview_kpis');
@@ -34,6 +37,21 @@ const response = (environments: string[]) => ({
   },
 });
 
+/** The baseline KPIs over four periods: 40 sessions, 400 page loads and 8 JS errors in all. */
+const BASELINE_KPIS = {
+  sessions: 40,
+  sessionsWithErrors: 4,
+  errorFreeSessions: 0.9,
+  pageLoads: 400,
+  loadTime: 1800,
+  loadTimeSamples: 400,
+  jsErrors: 8,
+  httpRequests: 100,
+  failedHttpRequests: 1,
+  failedHttpRatio: 0.01,
+  requestLatency: 250,
+};
+
 describe('getScorecardReport', () => {
   const search = jest.fn();
   const esClient = { search } as unknown as ApplicationSearch['esClient'];
@@ -51,6 +69,7 @@ describe('getScorecardReport', () => {
       requestLatency: compared,
       counts: {},
     } as unknown as Awaited<ReturnType<typeof getOtelOverviewKpis>>);
+    jest.mocked(getOtelPeriodKpis).mockResolvedValue(BASELINE_KPIS);
   });
 
   const run = () =>
@@ -67,7 +86,12 @@ describe('getScorecardReport', () => {
     expect(ranges).toEqual([
       expect.objectContaining({ gte: 10 * HOUR, lt: 12 * HOUR }),
       expect.objectContaining({ gte: 8 * HOUR, lt: 10 * HOUR }),
+      // The baseline: the four periods before this one.
+      expect.objectContaining({ gte: 2 * HOUR, lt: 10 * HOUR }),
     ]);
+    expect(getOtelPeriodKpis).toHaveBeenCalledWith(
+      expect.objectContaining({ start: 2 * HOUR, end: 10 * HOUR })
+    );
   });
 
   it('asks for no page-load percentiles, trend or filter facets', async () => {
@@ -88,13 +112,43 @@ describe('getScorecardReport', () => {
     ]);
   });
 
-  it('offers the environments of both periods', async () => {
-    search
-      .mockResolvedValueOnce(response(['production']))
-      .mockResolvedValueOnce(response(['production', 'staging']));
+  it('averages the counts of the baseline per period, and keeps its rates and percentiles', async () => {
+    search.mockResolvedValue(response([]));
 
     const report = await run();
 
-    expect(report.environments).toEqual(['production', 'staging']);
+    const measures = report.sections.flatMap(({ measures: list }) => list);
+    const baselineOf = (id: string) => measures.find((measure) => measure.id === id)?.baseline;
+    expect(baselineOf('sessions')).toBe(10);
+    expect(baselineOf('pageLoads')).toBe(100);
+    expect(baselineOf('jsErrors')).toBe(2);
+    expect(baselineOf('jsErrorsPer100')).toBe(2);
+    expect(baselineOf('loadTime')).toBe(1800);
+    expect(baselineOf('failedRequests')).toBe(0.01);
+    expect(report.baselinePeriod).toEqual({ start: 2 * HOUR, end: 10 * HOUR });
+  });
+
+  it('has no baseline when the application sent nothing then', async () => {
+    search.mockResolvedValue(response([]));
+    jest
+      .mocked(getOtelPeriodKpis)
+      .mockResolvedValue({ ...BASELINE_KPIS, sessions: 0, pageLoads: 0 });
+
+    const report = await run();
+
+    expect(
+      report.sections.flatMap(({ measures }) => measures.map(({ baseline }) => baseline))
+    ).toEqual(expect.not.arrayContaining([expect.any(Number)]));
+  });
+
+  it('offers the environments of this period, the previous one and the baseline', async () => {
+    search
+      .mockResolvedValueOnce(response(['production']))
+      .mockResolvedValueOnce(response(['production', 'staging']))
+      .mockResolvedValueOnce(response(['qa']));
+
+    const report = await run();
+
+    expect(report.environments).toEqual(['production', 'qa', 'staging']);
   });
 });

@@ -10,7 +10,12 @@ import { toComparedValue } from '../../../common/mobile/kpis';
 import type { WebVitals } from '../../../common/types/applications';
 import type { ApplicationOverviewKpisResponse } from '../../../common/types/overview';
 import type { ScorecardMeasure } from '../../../common/types/scorecard';
-import { buildScorecard } from './scorecard';
+import {
+  assessCoreWebVitals,
+  buildScorecard,
+  NO_BASELINE_KPIS,
+  type BaselineKpis,
+} from './scorecard';
 
 type KpiKey = Exclude<keyof ApplicationOverviewKpisResponse, 'percentile' | 'counts'>;
 type KpiValues = Partial<Record<KpiKey, [number | null, number | null]>>;
@@ -49,22 +54,35 @@ const kpis = (values: KpiValues = {}): ApplicationOverviewKpisResponse => {
 
 const PERIOD = { start: 2000, end: 3000 };
 const PREVIOUS_PERIOD = { start: 1000, end: 2000 };
+const BASELINE_PERIOD = { start: -2000, end: 2000 };
 
 const build = (
   values: KpiValues = {},
   webVitals: WebVitals = NO_WEB_VITALS,
-  previousWebVitals: WebVitals = NO_WEB_VITALS
+  previousWebVitals: WebVitals = NO_WEB_VITALS,
+  baselineKpis: BaselineKpis = NO_BASELINE_KPIS,
+  baselineWebVitals: WebVitals = NO_WEB_VITALS
 ) =>
   buildScorecard({
     kpis: kpis(values),
     serviceName: 'shop',
     webVitals,
     previousWebVitals,
+    baseline: { kpis: baselineKpis, webVitals: baselineWebVitals },
     environments: [],
     period: PERIOD,
     previousPeriod: PREVIOUS_PERIOD,
+    baselinePeriod: BASELINE_PERIOD,
     generatedAt: 4000,
   });
+
+/** Web vitals with these 75th percentiles and samples, and none for the others. */
+const vitals = (p75s: Partial<Record<'lcp' | 'inp' | 'cls', number>>): WebVitals => ({
+  ...NO_WEB_VITALS,
+  ...(p75s.lcp === undefined ? {} : { lcp: { p75Ms: p75s.lcp, sampleCount: 10, ratings: null } }),
+  ...(p75s.inp === undefined ? {} : { inp: { p75Ms: p75s.inp, sampleCount: 10, ratings: null } }),
+  ...(p75s.cls === undefined ? {} : { cls: { p75: p75s.cls, sampleCount: 10, ratings: null } }),
+});
 
 const measure = (report: ReturnType<typeof build>, id: string): ScorecardMeasure => {
   const found = report.sections.flatMap((section) => section.measures).find((m) => m.id === id);
@@ -164,12 +182,92 @@ describe('buildScorecard', () => {
         serviceName: 'shop',
         webVitals: NO_WEB_VITALS,
         previousWebVitals: NO_WEB_VITALS,
+        baseline: { kpis: NO_BASELINE_KPIS, webVitals: NO_WEB_VITALS },
         environment: 'production',
         environments: ['production'],
         period: PERIOD,
         previousPeriod: PREVIOUS_PERIOD,
+        baselinePeriod: BASELINE_PERIOD,
         generatedAt: 4000,
       }).environment
     ).toBe('production');
+  });
+
+  it('compares each measure with its baseline, in the unit of its change', () => {
+    const report = build(
+      { loadTime: [1500, 2000], errorFreeSessions: [0.95, 0.9] },
+      NO_WEB_VITALS,
+      NO_WEB_VITALS,
+      {
+        ...NO_BASELINE_KPIS,
+        loadTime: 1200,
+        errorFreeSessions: 0.97,
+        jsErrors: 5,
+        pageLoads: 500,
+      }
+    );
+
+    expect(measure(report, 'loadTime')).toMatchObject({ baseline: 1200, baselineChange: 0.25 });
+    expect(measure(report, 'errorFreeSessions').baseline).toBe(0.97);
+    expect(measure(report, 'errorFreeSessions').baselineChange).toBeCloseTo(-0.02);
+    expect(measure(report, 'jsErrorsPer100').baseline).toBe(1);
+  });
+
+  it('has no baseline without data then', () => {
+    expect(measure(build(), 'loadTime')).toMatchObject({ baseline: null, baselineChange: null });
+  });
+
+  it('names the samples behind each value, and none for a count', () => {
+    const report = build(
+      {},
+      { ...NO_WEB_VITALS, lcp: { p75Ms: 2000, sampleCount: 42, ratings: null } }
+    );
+
+    expect(measure(report, 'sessions').sampleCount).toBeNull();
+    expect(measure(report, 'loadTime').sampleCount).toBe(1000);
+    expect(measure(report, 'errorFreeSessions').sampleCount).toBe(500);
+    expect(measure(report, 'jsErrorsPer100').sampleCount).toBe(1000);
+    expect(measure(report, 'failedRequests').sampleCount).toBe(500);
+    expect(measure(report, 'lcp').sampleCount).toBe(42);
+  });
+
+  it("assesses this period's and the previous period's Core Web Vitals", () => {
+    const report = build(
+      {},
+      vitals({ lcp: 2000, inp: 150, cls: 0.05 }),
+      vitals({ lcp: 3000, cls: 0.05 })
+    );
+
+    expect(report.coreWebVitals).toEqual({
+      current: { status: 'passed', failing: [] },
+      previous: { status: 'failed', failing: ['lcp'] },
+    });
+  });
+});
+
+describe('assessCoreWebVitals', () => {
+  it('passes when LCP, INP and CLS are all good', () => {
+    expect(assessCoreWebVitals(vitals({ lcp: 2500, inp: 200, cls: 0.1 }))).toEqual({
+      status: 'passed',
+      failing: [],
+    });
+  });
+
+  it('lists every vital that is not good', () => {
+    expect(assessCoreWebVitals(vitals({ lcp: 2600, inp: 500, cls: 0.1 }))).toEqual({
+      status: 'failed',
+      failing: ['lcp', 'inp'],
+    });
+  });
+
+  it('assesses LCP and CLS alone without INP samples', () => {
+    expect(assessCoreWebVitals(vitals({ lcp: 2000, cls: 0.05 })).status).toBe('passed');
+  });
+
+  it('does not assess without LCP or CLS samples', () => {
+    expect(assessCoreWebVitals(vitals({ lcp: 2000, inp: 100 }))).toEqual({
+      status: 'notAssessed',
+      failing: [],
+    });
   });
 });

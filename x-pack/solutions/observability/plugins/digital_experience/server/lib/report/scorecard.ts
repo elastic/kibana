@@ -12,6 +12,7 @@ import type { VitalRatings, WebVitals } from '../../../common/types/applications
 import type { ApplicationOverviewKpisResponse } from '../../../common/types/overview';
 import { isNegligibleChange, type ChangeUnit } from '../../../common/negligible_change';
 import type {
+  CoreWebVitalsAssessment,
   MeasureUnit,
   ScorecardMeasure,
   ScorecardPeriod,
@@ -66,6 +67,8 @@ interface MeasureInput {
   betterWhen: BetterWhen;
   value: number | null;
   previous: number | null;
+  baseline: number | null;
+  sampleCount?: number | null;
   vital?: CoreWebVital;
   ratings?: VitalRatings | null;
 }
@@ -77,6 +80,8 @@ const toMeasure = ({
   betterWhen,
   value,
   previous,
+  baseline,
+  sampleCount,
   vital,
   ratings,
 }: MeasureInput): ScorecardMeasure => {
@@ -90,6 +95,9 @@ const toMeasure = ({
     change: getChange(value, previous, changeUnit),
     changeUnit,
     direction: getDirection(betterWhen, value, previous, changeUnit),
+    baseline,
+    baselineChange: getChange(value, baseline, changeUnit),
+    sampleCount: sampleCount ?? null,
     rating: vital && value !== null ? getVitalRating(vital, value) : null,
     ratings: ratings ?? null,
   };
@@ -127,6 +135,52 @@ const VITAL_LABELS: Record<CoreWebVital, string> = {
 
 const VITAL_ORDER: readonly CoreWebVital[] = ['lcp', 'inp', 'cls', 'fcp', 'ttfb'];
 
+/** The vitals Google's assessment rates, in its order; INP only counts with samples. */
+const ASSESSED_VITALS: readonly CoreWebVital[] = ['lcp', 'inp', 'cls'];
+
+/**
+ * Google's Core Web Vitals assessment, as PageSpeed Insights makes it: passed when the 75th
+ * percentiles of LCP, CLS and INP are all good, or of LCP and CLS without INP samples; not
+ * assessed without LCP or CLS samples.
+ */
+export const assessCoreWebVitals = (webVitals: WebVitals): CoreWebVitalsAssessment => {
+  if (vitalValue(webVitals, 'lcp') === null || vitalValue(webVitals, 'cls') === null) {
+    return { status: 'notAssessed', failing: [] };
+  }
+  const failing = ASSESSED_VITALS.filter((vital) => {
+    const value = vitalValue(webVitals, vital);
+    return value !== null && getVitalRating(vital, value) !== 'good';
+  });
+  return { status: failing.length > 0 ? 'failed' : 'passed', failing };
+};
+
+/** The periods a baseline covers, which it averages its counts over. */
+export const BASELINE_PERIODS = 4;
+
+/**
+ * The KPIs over the baseline's periods, counts per period: the sessions, page loads and JS errors
+ * divided by the number of periods, the rest as measured over all of them.
+ */
+export interface BaselineKpis {
+  sessions: number | null;
+  pageLoads: number | null;
+  loadTime: number | null;
+  errorFreeSessions: number | null;
+  jsErrors: number | null;
+  failedHttpRequests: number | null;
+  requestLatency: number | null;
+}
+
+export const NO_BASELINE_KPIS: BaselineKpis = {
+  sessions: null,
+  pageLoads: null,
+  loadTime: null,
+  errorFreeSessions: null,
+  jsErrors: null,
+  failedHttpRequests: null,
+  requestLatency: null,
+};
+
 export interface BuildScorecardParams {
   /** The KPIs of the period against the previous one. */
   kpis: ApplicationOverviewKpisResponse;
@@ -134,10 +188,13 @@ export interface BuildScorecardParams {
   /** The web vitals of the period and of the previous one. */
   webVitals: WebVitals;
   previousWebVitals: WebVitals;
+  /** The KPIs and web vitals over the `BASELINE_PERIODS` periods before this one. */
+  baseline: { kpis: BaselineKpis; webVitals: WebVitals };
   environment?: string;
   environments: string[];
   period: ScorecardPeriod;
   previousPeriod: ScorecardPeriod;
+  baselinePeriod: ScorecardPeriod;
   generatedAt: number;
 }
 
@@ -147,13 +204,25 @@ export const buildScorecard = ({
   serviceName,
   webVitals: currentWebVitals,
   previousWebVitals,
+  baseline,
   environment,
   environments,
   period,
   previousPeriod,
+  baselinePeriod,
   generatedAt,
 }: BuildScorecardParams): ScorecardReport => {
-  const { sessions, pageLoads, loadTime, jsErrors, errorFreeSessions, failedHttpRequests } = kpis;
+  const {
+    sessions,
+    pageLoads,
+    loadTime,
+    jsErrors,
+    errorFreeSessions,
+    failedHttpRequests,
+    requestLatency,
+    counts,
+  } = kpis;
+  const { kpis: baselineKpis, webVitals: baselineWebVitals } = baseline;
   const traffic: ScorecardMeasure[] = [
     toMeasure({
       id: 'sessions',
@@ -164,6 +233,7 @@ export const buildScorecard = ({
       betterWhen: 'neutral',
       value: sessions.value,
       previous: sessions.previous,
+      baseline: baselineKpis.sessions,
     }),
     toMeasure({
       id: 'pageLoads',
@@ -174,6 +244,7 @@ export const buildScorecard = ({
       betterWhen: 'neutral',
       value: pageLoads.value,
       previous: pageLoads.previous,
+      baseline: baselineKpis.pageLoads,
     }),
     toMeasure({
       id: 'loadTime',
@@ -185,6 +256,8 @@ export const buildScorecard = ({
       betterWhen: 'lower',
       value: loadTime.value,
       previous: loadTime.previous,
+      baseline: baselineKpis.loadTime,
+      sampleCount: counts.loadTimeSamples,
     }),
     toMeasure({
       id: 'errorFreeSessions',
@@ -195,6 +268,8 @@ export const buildScorecard = ({
       betterWhen: 'higher',
       value: errorFreeSessions.value,
       previous: errorFreeSessions.previous,
+      baseline: baselineKpis.errorFreeSessions,
+      sampleCount: sessions.value,
     }),
     toMeasure({
       id: 'jsErrors',
@@ -205,6 +280,7 @@ export const buildScorecard = ({
       betterWhen: 'lower',
       value: jsErrors.value,
       previous: jsErrors.previous,
+      baseline: baselineKpis.jsErrors,
     }),
     toMeasure({
       id: 'jsErrorsPer100',
@@ -215,6 +291,8 @@ export const buildScorecard = ({
       betterWhen: 'lower',
       value: errorsPer100(jsErrors.value, pageLoads.value),
       previous: errorsPer100(jsErrors.previous, pageLoads.previous),
+      baseline: errorsPer100(baselineKpis.jsErrors, baselineKpis.pageLoads),
+      sampleCount: pageLoads.value,
     }),
     toMeasure({
       id: 'failedRequests',
@@ -225,6 +303,8 @@ export const buildScorecard = ({
       betterWhen: 'lower',
       value: failedHttpRequests.value,
       previous: failedHttpRequests.previous,
+      baseline: baselineKpis.failedHttpRequests,
+      sampleCount: counts.httpRequests,
     }),
     toMeasure({
       id: 'requestLatency',
@@ -233,8 +313,10 @@ export const buildScorecard = ({
       }),
       unit: 'ms',
       betterWhen: 'lower',
-      value: kpis.requestLatency.value,
-      previous: kpis.requestLatency.previous,
+      value: requestLatency.value,
+      previous: requestLatency.previous,
+      baseline: baselineKpis.requestLatency,
+      sampleCount: counts.httpRequests,
     }),
   ];
 
@@ -246,6 +328,8 @@ export const buildScorecard = ({
       betterWhen: 'lower',
       value: vitalValue(currentWebVitals, vital),
       previous: vitalValue(previousWebVitals, vital),
+      baseline: vitalValue(baselineWebVitals, vital),
+      sampleCount: currentWebVitals[vital].sampleCount,
       vital,
       ratings: currentWebVitals[vital].ratings,
     })
@@ -257,6 +341,11 @@ export const buildScorecard = ({
     environments,
     period,
     previousPeriod,
+    baselinePeriod,
+    coreWebVitals: {
+      current: assessCoreWebVitals(currentWebVitals),
+      previous: assessCoreWebVitals(previousWebVitals),
+    },
     generatedAt,
     sections: [
       {

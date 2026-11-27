@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { VitalRating } from '../core_web_vitals';
+import type { CoreWebVital, VitalRating } from '../core_web_vitals';
 import type { ChangeUnit } from '../negligible_change';
 import type { VitalRatings } from './applications';
 
@@ -29,6 +29,18 @@ export interface ScorecardMeasure {
   changeUnit: ChangeUnit;
   /** Better, worse or unchanged by the same cutoffs as the Overview's KPIs. */
   direction: ScorecardVerdict;
+  /**
+   * The measure over the four periods before this one, per period for a count: how it usually is,
+   * so one unusual period doesn't read as a trend. `null` without data then.
+   */
+  baseline: number | null;
+  /** The change from the baseline, in the unit of `change`. */
+  baselineChange: number | null;
+  /**
+   * How many samples this period's value comes from, e.g. the timed page loads of the load time or
+   * the HTTP requests of the failed share; `null` for a count, which is its own sample.
+   */
+  sampleCount: number | null;
   /** Google's rating of a web vital, `null` for the other measures or without a value. */
   rating: VitalRating | null;
   /** Share of samples per rating of a web vital. */
@@ -46,6 +58,16 @@ export interface ScorecardPeriod {
   end: number;
 }
 
+/**
+ * Google's Core Web Vitals assessment of a period: passed when LCP, CLS and, with samples, INP are
+ * all good at the 75th percentile; not assessed without LCP or CLS samples.
+ */
+export interface CoreWebVitalsAssessment {
+  status: 'passed' | 'failed' | 'notAssessed';
+  /** The vitals that are not good, in LCP, INP, CLS order. */
+  failing: CoreWebVital[];
+}
+
 export interface ScorecardReport {
   serviceName: string;
   environment?: string;
@@ -53,6 +75,12 @@ export interface ScorecardReport {
   environments: string[];
   period: ScorecardPeriod;
   previousPeriod: ScorecardPeriod;
+  /** The four periods before this one, that the measures' baselines cover. */
+  baselinePeriod: ScorecardPeriod;
+  coreWebVitals: {
+    current: CoreWebVitalsAssessment;
+    previous: CoreWebVitalsAssessment;
+  };
   generatedAt: number;
   sections: ScorecardSection[];
 }

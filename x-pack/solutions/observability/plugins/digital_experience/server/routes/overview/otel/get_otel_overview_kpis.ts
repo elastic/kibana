@@ -76,6 +76,35 @@ const periodFilter = (
   },
 });
 
+/** The KPIs of one period, `start` included and `end` not. */
+export type PeriodKpis = ReturnType<typeof toKpis>;
+
+/**
+ * The KPIs of one EDOT Browser application over `start`-`end` alone, e.g. a baseline that spans
+ * several periods.
+ */
+export const getOtelPeriodKpis = async ({
+  esClient,
+  start,
+  end,
+  filters = {},
+  percentile = DEFAULT_OVERVIEW_PERCENTILE,
+  operationName,
+  ...application
+}: ApplicationSearch & {
+  percentile?: OverviewPercentile;
+  /** Names the search's span. */
+  operationName: string;
+}): Promise<PeriodKpis> => {
+  const [row] = await runEsql<OverviewKpisRow>(
+    esClient,
+    operationName,
+    overviewKpisQuery(filters, percentile),
+    periodFilter(application, start, end)
+  );
+  return toKpis(row);
+};
+
 /**
  * The KPI row of one EDOT Browser application's Overview: each KPI over the time range against
  * the period of equal length before, with the same filters.
