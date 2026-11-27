@@ -7,8 +7,9 @@
 
 import type { IRouter } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { McpServer } from '@modelcontextprotocol/server';
 import { registerMCPRoutes, filterToolsByNamespace, MCP_MAX_TOOL_INPUT_ELEMENTS } from './mcp';
+import { KibanaMcpHttpTransport } from '../utils/mcp/kibana_mcp_http_transport';
 import { AGENT_SOCKET_TIMEOUT_MS } from './utils';
 import type { RouteDependencies } from './types';
 import type { InternalToolDefinition } from '@kbn/agent-builder-server';
@@ -142,12 +143,20 @@ describe('filterToolsByNamespace', () => {
 });
 
 const mockRegisterTool = jest.fn();
-jest.mock('@modelcontextprotocol/sdk/server/mcp.js', () => ({
+jest.mock('@modelcontextprotocol/server', () => ({
+  ...jest.requireActual('@modelcontextprotocol/server'),
   McpServer: jest.fn().mockImplementation(() => ({
     registerTool: mockRegisterTool,
     connect: jest.fn(),
     close: jest.fn(),
   })),
+}));
+
+const mockIsModernMcpRequest = jest.fn().mockResolvedValue(false);
+const mockServeModernMcpRequest = jest.fn().mockResolvedValue({ status: 200 });
+jest.mock('../utils/mcp/modern_mcp_request', () => ({
+  isModernMcpRequest: (...args: unknown[]) => mockIsModernMcpRequest(...args),
+  serveModernMcpRequest: (...args: unknown[]) => mockServeModernMcpRequest(...args),
 }));
 
 jest.mock('../utils/mcp/kibana_mcp_http_transport', () => ({
@@ -268,7 +277,34 @@ describe('MCP route — registerTool arguments', () => {
     expect(McpServer).toHaveBeenCalledTimes(1);
     expect(McpServer).toHaveBeenCalledWith(expect.any(Object), {
       maxToolInputElements: MCP_MAX_TOOL_INPUT_ELEMENTS,
+      capabilities: { tools: { listChanged: false } },
     });
+  });
+
+  it('serves 2025-era requests through the Kibana transport', async () => {
+    await postHandler(createMockContext(), createMockRequest(), { customError: jest.fn() });
+
+    expect(KibanaMcpHttpTransport).toHaveBeenCalledTimes(1);
+    expect(mockServeModernMcpRequest).not.toHaveBeenCalled();
+  });
+
+  it('serves 2026-07-28 requests with a server built from the same tools', async () => {
+    mockIsModernMcpRequest.mockResolvedValueOnce(true);
+    const request = createMockRequest();
+    const response = { customError: jest.fn() };
+
+    await postHandler(createMockContext(), request, response);
+
+    expect(KibanaMcpHttpTransport).not.toHaveBeenCalled();
+    expect(mockServeModernMcpRequest).toHaveBeenCalledWith({
+      request,
+      response,
+      createServer: expect.any(Function),
+    });
+
+    const [{ createServer }] = mockServeModernMcpRequest.mock.calls[0];
+    await createServer();
+    expect(mockRegisterTool).toHaveBeenCalledTimes(2);
   });
 });
 
@@ -276,8 +312,8 @@ describe('MCP route — real SDK tool registration', () => {
   it('registers an unannotated tool without throwing', () => {
     jest.restoreAllMocks();
     const { McpServer: RealMcpServer } = jest.requireActual<
-      typeof import('@modelcontextprotocol/sdk/server/mcp.js')
-    >('@modelcontextprotocol/sdk/server/mcp.js');
+      typeof import('@modelcontextprotocol/server')
+    >('@modelcontextprotocol/server');
 
     const server = new RealMcpServer({ name: 'test', version: '0.0.1' });
     const handler = jest.fn().mockResolvedValue({
@@ -296,8 +332,8 @@ describe('MCP route — real SDK tool registration', () => {
   it('registers an annotated tool without throwing', () => {
     jest.restoreAllMocks();
     const { McpServer: RealMcpServer } = jest.requireActual<
-      typeof import('@modelcontextprotocol/sdk/server/mcp.js')
-    >('@modelcontextprotocol/sdk/server/mcp.js');
+      typeof import('@modelcontextprotocol/server')
+    >('@modelcontextprotocol/server');
 
     const server = new RealMcpServer({ name: 'test', version: '0.0.1' });
     const handler = jest.fn().mockResolvedValue({
@@ -326,8 +362,8 @@ describe('MCP route — real SDK tool registration', () => {
   it('rejects duplicate registration (proves first registration took effect)', () => {
     jest.restoreAllMocks();
     const { McpServer: RealMcpServer } = jest.requireActual<
-      typeof import('@modelcontextprotocol/sdk/server/mcp.js')
-    >('@modelcontextprotocol/sdk/server/mcp.js');
+      typeof import('@modelcontextprotocol/server')
+    >('@modelcontextprotocol/server');
 
     const server = new RealMcpServer({ name: 'test', version: '0.0.1' });
     const handler = jest.fn();
@@ -342,14 +378,14 @@ describe('MCP route — real SDK tool registration', () => {
   describe('tool input element limit', () => {
     const connectClient = async () => {
       const { McpServer: RealMcpServer } = jest.requireActual<
-        typeof import('@modelcontextprotocol/sdk/server/mcp.js')
-      >('@modelcontextprotocol/sdk/server/mcp.js');
+        typeof import('@modelcontextprotocol/server')
+      >('@modelcontextprotocol/server');
       const { Client } = jest.requireActual<
         typeof import('@modelcontextprotocol/sdk/client/index.js')
       >('@modelcontextprotocol/sdk/client/index.js');
       const { InMemoryTransport } = jest.requireActual<
-        typeof import('@modelcontextprotocol/sdk/inMemory.js')
-      >('@modelcontextprotocol/sdk/inMemory.js');
+        typeof import('@modelcontextprotocol/server')
+      >('@modelcontextprotocol/server');
 
       const server = new RealMcpServer(
         { name: 'test', version: '0.0.1' },
