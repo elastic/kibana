@@ -6,7 +6,7 @@
  */
 
 // The rule cards that the Detection Watch workers (Rule Tuning and Rule Coverage) attach for an
-// existing rule. Must match the attachment ids `attach_rule` uses in rule_tuning_review.yaml and
+// existing rule. Must match the id of every `security.rule` attachment in tuning_review.yaml and
 // coverage_review.yaml.
 export const DETECTION_WATCH_RULE_ATTACHMENT_IDS: readonly string[] = [
   'tuned-rule',
