@@ -33,11 +33,10 @@ import { servers as evalsTracingConfig } from '../../evals_tracing/stateful/clas
  * `xpack.alerting_v2.enabled` additionally gates the alerting_v2 plugin's
  * rule-authoring skill (defaults to true, set explicitly here for clarity).
  *
- * NOT enabled here: `SIEM_READINESS_AGENT_BUILDER_ENABLED` is a hardcoded internal
- * constant in security_solution/server/agent_builder/siem_readiness_feature_flag.ts,
- * not a runtime flag — it cannot be toggled via serverArgs. If the siem-readiness
- * skill needs coverage in this matrix, that constant must change or the skill needs
- * its own eval fixture, tracked as a follow-up.
+ * NOT enabled here historically: the SIEM Readiness agent skill used to be gated by a hardcoded
+ * internal constant (security_solution/server/agent_builder/siem_readiness_feature_flag.ts), which
+ * cannot be toggled via serverArgs. That constant is now the `siemReadinessAgentBuilder`
+ * experimental feature below, so this matrix can exercise the siem-readiness skill like any other.
  *
  * Skills that register unconditionally (always on, no flag needed): threat-hunting,
  * alert-analysis, alert-triage, workflow-authoring, entity-analytics (v1 path),
@@ -63,6 +62,7 @@ export const servers: ScoutServerConfig = {
         'pciComplianceAgentBuilder',
         'rulePreviewAttachmentEnabled',
         'entityAnalyticsEntityStoreV2',
+        'siemReadinessAgentBuilder',
       ])}`,
       '--xpack.alerting_v2.enabled=true',
     ],
