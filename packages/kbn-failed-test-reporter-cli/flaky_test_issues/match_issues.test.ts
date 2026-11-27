@@ -344,21 +344,46 @@ describe('findMatchingIssues', () => {
 
   it('matches Cypress issues, whose test name ends in the test title once or twice', () => {
     const filePath = 'x-pack/solutions/security/test/security_solution_cypress/e2e/timeline.cy.ts';
+    const title = 'opens from the alerts table';
     const [suite] = groupIntoSuites([
-      flakyTest({ framework: 'cypress', filePath, suiteTitle: 'Timeline', title: 'opens' }),
+      flakyTest({ framework: 'cypress', filePath, suiteTitle: 'Timeline', title }),
     ]);
+    const hook = `"before each" hook for "${title}"`;
     const related = findMatchingIssues(suite, [
-      describeIssue(cypressIssue(60, filePath, 'Timeline opens opens')),
-      describeIssue(cypressIssue(61, filePath, 'Timeline opens')),
+      // The JUnit transformer appends the title once more
+      describeIssue(cypressIssue(60, filePath, `Timeline ${title} ${title}`)),
+      // The title once, as other frameworks name a test
+      describeIssue(cypressIssue(61, filePath, `Timeline ${title}`)),
+      // Under more describe blocks than the suite title names
+      describeIssue(cypressIssue(62, filePath, `Investigations Timeline ${title} ${title}`)),
       // Another test of the suite
-      describeIssue(cypressIssue(62, filePath, 'Timeline closes closes')),
+      describeIssue(cypressIssue(63, filePath, 'Timeline closes closes')),
+      // A hook that failed for the test
+      describeIssue(cypressIssue(64, filePath, `Timeline ${hook} ${hook}`)),
+      // The same test name in another file
+      describeIssue(cypressIssue(65, 'x-pack/other/e2e/other.cy.ts', `Timeline ${title} ${title}`)),
     ]);
 
     expect(related.map(({ issue, match }) => [issue.number, match])).toEqual([
+      [62, 'test'],
       [61, 'test'],
       [60, 'test'],
-      [62, 'file'],
+      [64, 'file'],
+      [63, 'file'],
     ]);
+  });
+
+  it('keeps a Cypress issue to the describe block it names when sibling suites share a test title', () => {
+    const filePath = 'x-pack/solutions/security/test/security_solution_cypress/e2e/timeline.cy.ts';
+    const test = { framework: 'cypress' as const, filePath, title: 'loads' };
+    const [suiteA, suiteB] = groupIntoSuites([
+      flakyTest({ ...test, testId: 'a-loads', suiteTitle: 'A', failedBuilds: 9 }),
+      flakyTest({ ...test, testId: 'b-loads', suiteTitle: 'B', failedBuilds: 5 }),
+    ]);
+    const issueForA = describeIssue(cypressIssue(70, filePath, 'A loads loads'));
+
+    expect(findMatchingIssues(suiteA, [issueForA]).map(({ match }) => match)).toEqual(['test']);
+    expect(findMatchingIssues(suiteB, [issueForA]).map(({ match }) => match)).toEqual(['file']);
   });
 
   it('matches by test and file name when the file moved since the issue was filed', () => {
