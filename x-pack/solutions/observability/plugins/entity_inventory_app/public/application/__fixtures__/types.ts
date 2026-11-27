@@ -5,41 +5,61 @@
  * 2.0.
  */
 
-import type { EntityInventoryTypeDefinition } from '../../inventory_api_types';
+import type { InventoryType, InventoryTypeColumn } from '@kbn/entity-inventory-plugin/common';
 
-export const typesFixture: EntityInventoryTypeDefinition[] = [
-  {
+export const attributeColumn = (name: string, label?: string): InventoryTypeColumn => ({
+  name,
+  kind: 'attribute',
+  ...(label ? { label } : {}),
+});
+
+export const inventoryType = ({
+  type,
+  ...overrides
+}: Partial<InventoryType> & Pick<InventoryType, 'type'>): InventoryType => ({
+  type,
+  name: type,
+  identityFields: [],
+  columns: [],
+  suggestedFilters: [],
+  sources: [],
+  ...overrides,
+});
+
+export const typesFixture: InventoryType[] = [
+  inventoryType({
     type: 'host',
     name: 'Host',
-    category: 'hosts',
     sources: [{ indexPattern: 'metrics-hostmetricsreceiver.otel-*' }],
-    attributes: [{ name: 'os.type' }, { name: 'cloud.provider' }, { name: 'host.ip' }],
+    columns: [
+      attributeColumn('os.type'),
+      attributeColumn('cloud.provider'),
+      attributeColumn('host.ip'),
+    ],
     suggestedFilters: ['os.type', 'cloud.provider'],
-  },
-  {
+  }),
+  inventoryType({
     type: 'k8s.deployment',
     name: 'Deployment',
-    category: 'kubernetes',
     sources: [{ indexPattern: 'metrics-k8sclusterreceiver.otel-*' }],
-    attributes: [
-      { name: 'k8s.cluster.name' },
-      { name: 'k8s.namespace.name' },
-      { name: 'cloud.provider' },
-      { name: 'k8s.deployment.strategy' },
+    columns: [
+      attributeColumn('k8s.cluster.name'),
+      attributeColumn('k8s.namespace.name'),
+      attributeColumn('cloud.provider'),
+      attributeColumn('k8s.deployment.strategy'),
     ],
     suggestedFilters: ['k8s.cluster.name', 'k8s.namespace.name', 'cloud.provider'],
-  },
-  {
+  }),
+  inventoryType({
     type: 'k8s.pod',
     name: 'Pod',
-    category: 'kubernetes',
     sources: [{ indexPattern: 'metrics-k8sclusterreceiver.otel-*' }],
-    attributes: [
-      { name: 'k8s.cluster.name' },
-      { name: 'k8s.namespace.name' },
-      { name: 'k8s.pod.phase' },
-      { name: 'k8s.node.name' },
+    columns: [
+      attributeColumn('k8s.cluster.name'),
+      attributeColumn('k8s.namespace.name'),
+      attributeColumn('k8s.pod.phase'),
+      attributeColumn('k8s.node.name'),
     ],
     suggestedFilters: ['k8s.cluster.name', 'k8s.namespace.name', 'k8s.pod.phase'],
-  },
+  }),
 ];

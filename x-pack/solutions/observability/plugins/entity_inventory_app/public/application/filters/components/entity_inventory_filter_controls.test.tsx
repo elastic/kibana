@@ -12,7 +12,7 @@ import { typesFixture as types } from '../../__fixtures__/types';
 import { EntityInventoryFilterControls } from './entity_inventory_filter_controls';
 
 const mockUseAttributeValues = jest.fn(
-  (_params: { attribute: string; filters?: Record<string, string[]> }) => ({
+  (_params: { attribute: string; filters?: Record<string, string[]>; refreshToken?: number }) => ({
     values: ['one', 'two'],
     invalidSelections: [],
     isLoading: false,
@@ -20,8 +20,11 @@ const mockUseAttributeValues = jest.fn(
 );
 
 jest.mock('../hooks/use_attribute_values', () => ({
-  useAttributeValues: (params: { attribute: string; filters?: Record<string, string[]> }) =>
-    mockUseAttributeValues(params),
+  useAttributeValues: (params: {
+    attribute: string;
+    filters?: Record<string, string[]>;
+    refreshToken?: number;
+  }) => mockUseAttributeValues(params),
 }));
 
 const CATEGORY_FILTER = 'entityInventoryCategoryFilter';
@@ -205,5 +208,15 @@ describe('EntityInventoryFilterControls', () => {
       sent.forEach((filters) => expect(filters).not.toHaveProperty('not.in.the.view'));
       expect(sent).toContainEqual({ 'cloud.provider': ['aws'] });
     });
+  });
+
+  it('sends the refresh token to the values of every attribute filter', () => {
+    mockUseAttributeValues.mockClear();
+
+    renderControls({ pageCategory: 'hosts', refreshToken: 3 });
+
+    const attributes = mockUseAttributeValues.mock.calls.map(([{ attribute }]) => attribute);
+    expect(attributes.length).toBeGreaterThan(0);
+    mockUseAttributeValues.mock.calls.forEach(([{ refreshToken }]) => expect(refreshToken).toBe(3));
   });
 });

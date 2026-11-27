@@ -12,15 +12,8 @@ import type { PathsOf, RouteMap } from '@kbn/typed-react-router-config';
 import { EntityInventoryPageShell } from '../application/components/page_shell';
 import { EntityCategoryResults } from '../application/components/entity_category_results/entity_category_results';
 import { EntityInventoryPageFilterControls } from '../application/filters/components/page_filter_controls';
+import { ENTITY_TYPE_ID_PREFIX_BY_CATEGORY } from '../application/utils/entity_categories';
 import type { EntityInventoryEntityCategory } from '../types';
-
-// TODO: filter the `types` response by category once entity definitions carry one.
-const ENTITY_TYPE_ID_PREFIX_BY_CATEGORY: Readonly<
-  Partial<Record<EntityInventoryEntityCategory, string>>
-> = {
-  hosts: 'host',
-  kubernetes: 'k8s.',
-};
 
 const EntityInventoryPage = ({
   entityCategory,

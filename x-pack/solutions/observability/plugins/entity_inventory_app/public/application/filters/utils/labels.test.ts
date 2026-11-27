@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { typesFixture as types } from '../../__fixtures__/types';
+import { attributeColumn, inventoryType, typesFixture as types } from '../../__fixtures__/types';
 import { getAttributeLabel } from './labels';
 
 describe('getAttributeLabel', () => {
@@ -13,20 +13,8 @@ describe('getAttributeLabel', () => {
     expect(
       getAttributeLabel(
         [
-          {
-            type: 'a',
-            name: 'A',
-            sources: [],
-            attributes: [{ name: 'os.type' }],
-            suggestedFilters: [],
-          },
-          {
-            type: 'b',
-            name: 'B',
-            sources: [],
-            attributes: [{ name: 'os.type', label: 'Operating system' }],
-            suggestedFilters: [],
-          },
+          inventoryType({ type: 'a', columns: [attributeColumn('os.type')] }),
+          inventoryType({ type: 'b', columns: [attributeColumn('os.type', 'Operating system')] }),
         ],
         'os.type'
       )

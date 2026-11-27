@@ -123,6 +123,7 @@ describe('EntityInventoryShell', () => {
       const fixtureClient = createFixtureEntityInventoryApiClient();
       const getEntities = jest.fn(fixtureClient.getEntities);
       renderShellAt(path, {
+        ...fixtureClient,
         getTypes: () => Promise.reject(new Error('Types failed')),
         getEntities,
       });
@@ -142,6 +143,7 @@ describe('EntityInventoryShell', () => {
     const { types } = await fixtureClient.getTypes({});
     const getEntities = jest.fn(() => Promise.reject(new Error('Request failed')));
     renderShellAt('/kubernetes', {
+      ...fixtureClient,
       getTypes: async () => ({ types: types.filter(({ type }) => type === 'host') }),
       getEntities,
     });

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type { EntityInventoryTypeDefinition } from '../../../inventory_api_types';
+import type { InventoryType } from '@kbn/entity-inventory-plugin/common';
+import { getCategoryOfType } from '../../utils/entity_categories';
 import { getAttributeLabel, getCategoryLabel } from './labels';
 
 export interface FilterControlsParams {
-  types: EntityInventoryTypeDefinition[];
+  types: InventoryType[];
   pageCategory?: string;
   selectedCategory?: string;
   selectedType?: string;
@@ -26,8 +27,7 @@ export interface FilterControls {
   attributes: FilterOption[];
 }
 
-const getCategoryOrTypeId = ({ category, type }: EntityInventoryTypeDefinition): string =>
-  category ?? type;
+const getCategoryOrTypeId = ({ type }: InventoryType): string => getCategoryOfType(type) ?? type;
 
 const getActiveCategory = ({
   pageCategory,
@@ -35,10 +35,7 @@ const getActiveCategory = ({
 }: Pick<FilterControlsParams, 'pageCategory' | 'selectedCategory'>): string | undefined =>
   pageCategory ?? selectedCategory;
 
-export const getTypesOfCategory = (
-  types: EntityInventoryTypeDefinition[],
-  category?: string
-): EntityInventoryTypeDefinition[] => {
+export const getTypesOfCategory = (types: InventoryType[], category?: string): InventoryType[] => {
   if (!category) {
     return [];
   }
@@ -46,13 +43,11 @@ export const getTypesOfCategory = (
   return types.filter((type) => getCategoryOrTypeId(type) === category);
 };
 
-export const getCategories = (types: EntityInventoryTypeDefinition[]): string[] => [
+export const getCategories = (types: InventoryType[]): string[] => [
   ...new Set(types.map(getCategoryOrTypeId)),
 ];
 
-const getSuggestedFilterNamesInScope = (
-  typesInScope: EntityInventoryTypeDefinition[]
-): string[] => {
+const getSuggestedFilterNamesInScope = (typesInScope: InventoryType[]): string[] => {
   const typeCountByName = new Map<string, number>();
   typesInScope
     .flatMap(({ suggestedFilters }) => [...new Set(suggestedFilters)])
@@ -61,13 +56,10 @@ const getSuggestedFilterNamesInScope = (
   return [...typeCountByName.entries()].sort(([, a], [, b]) => b - a).map(([name]) => name);
 };
 
-const narrowToType = (
-  typesOfCategory: EntityInventoryTypeDefinition[],
-  selectedType?: string
-): EntityInventoryTypeDefinition[] =>
+const narrowToType = (typesOfCategory: InventoryType[], selectedType?: string): InventoryType[] =>
   selectedType ? typesOfCategory.filter(({ type }) => type === selectedType) : typesOfCategory;
 
-export const getTypesInScope = (params: FilterControlsParams): EntityInventoryTypeDefinition[] =>
+export const getTypesInScope = (params: FilterControlsParams): InventoryType[] =>
   narrowToType(getTypesOfCategory(params.types, getActiveCategory(params)), params.selectedType);
 
 export const getAttributeNamesInScope = (params: FilterControlsParams): string[] =>

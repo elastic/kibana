@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
+import type { TimeRange } from '@kbn/es-query';
 import { ENTITY_INVENTORY_EBT_ELEMENTS } from '../../../ebt_constants';
-import type { EntityInventoryAttributeValuesParams } from '../../../inventory_api_types';
 import { FilterSelect } from './filter_select';
 import { VALUES_ERROR_MESSAGE } from '../translations';
 import { useAttributeValues } from '../hooks/use_attribute_values';
@@ -17,7 +17,8 @@ interface AttributeFilterProps {
   label: string;
   types: string[];
   filters: Record<string, string[]>;
-  timeRange: EntityInventoryAttributeValuesParams['timeRange'];
+  timeRange: TimeRange;
+  refreshToken?: number;
   selected: string[];
   onChange: (selected: string[]) => void;
 }
@@ -28,6 +29,7 @@ export function AttributeFilter({
   types,
   filters,
   timeRange,
+  refreshToken,
   selected,
   onChange,
 }: AttributeFilterProps) {
@@ -37,6 +39,7 @@ export function AttributeFilter({
     filters,
     selected,
     timeRange,
+    refreshToken,
   });
 
   return (
