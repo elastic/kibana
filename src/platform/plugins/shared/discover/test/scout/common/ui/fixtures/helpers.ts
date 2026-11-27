@@ -410,22 +410,16 @@ const PAGE_TEST_SUBJ = '[data-test-subj="dscPage"]';
 const TABS_BAR_TEST_SUBJ = '[data-test-subj="unifiedTabs_tabsBar"]';
 
 /**
- * Left out of page-level scans, both pre-existing violations we do not own:
+ * Left out of page-level scans: a pre-existing violation we do not own. EUI's
+ * virtualized grid body scrolls without being keyboard focusable
+ * (`scrollable-region-focusable`) whenever it overflows.
  *
- * - the tabs bar's tablist holds its tabs through `aria-owns` rather than as
- *   children (`aria-required-children`, `@kbn/unified-tabs`);
- * - EUI's virtualized grid body scrolls without being keyboard focusable
- *   (`scrollable-region-focusable`) whenever it overflows.
- *
- * Both are scoped to the offending node so the rest of the tabs bar and the
- * rest of the grid stay covered. The grid scroll container has no test subject
- * or role, so its EUI class is the only handle — if that class is ever renamed
- * the scan fails loudly on the violation rather than silently losing coverage.
+ * It is scoped to the offending node so the rest of the grid stays covered. The
+ * grid scroll container has no test subject or role, so its EUI class is the
+ * only handle — if that class is ever renamed the scan fails loudly on the
+ * violation rather than silently losing coverage.
  */
-const PAGE_SCAN_EXCLUSIONS = [
-  '[data-test-subj="unifiedTabs_tabsBar"] [role="tablist"]',
-  '.euiDataGrid__virtualized',
-];
+const PAGE_SCAN_EXCLUSIONS = ['.euiDataGrid__virtualized'];
 
 /**
  * Runs an axe scan over the Discover page and returns the violations, so the

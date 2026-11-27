@@ -97,6 +97,40 @@ describe('TabsBar', () => {
     expect(onClose).not.toHaveBeenCalled();
   });
 
+  it('keeps non-tab controls outside of the tablist, which owns the tabs via aria-owns', () => {
+    render(
+      <TabsBar
+        tabContentId={tabContentId}
+        items={items}
+        recentlyClosedItems={recentlyClosedItems}
+        selectedItem={items[0]}
+        services={servicesMock}
+        onAdd={onAdd}
+        onLabelEdited={onLabelEdited}
+        onSelect={onSelect}
+        onSelectRecentlyClosed={onSelectRecentlyClosed}
+        onRestoreRecentlyClosedGroup={onRestoreRecentlyClosedGroup}
+        onClearRecentlyClosed={onClearRecentlyClosed}
+        onClose={onClose}
+        onReorder={onReorder}
+        getPreviewData={getPreviewData}
+        getTabMenuItems={() => []}
+        onEBTEvent={onEBTEvent}
+      />
+    );
+
+    const tablist = screen.getByRole('tablist');
+    expect(tablist).toBeEmptyDOMElement();
+
+    const ownedIds = (tablist.getAttribute('aria-owns') ?? '').split(' ');
+    const tabIds = screen.getAllByRole('tab').map((tab) => tab.id);
+    expect(ownedIds).toEqual(tabIds);
+
+    screen.getAllByRole('button', { name: 'Close tab' }).forEach((button) => {
+      expect(tablist).not.toContainElement(button);
+    });
+  });
+
   it('renders customNewTabButton when provided', () => {
     const selectedItem = items[0];
 
