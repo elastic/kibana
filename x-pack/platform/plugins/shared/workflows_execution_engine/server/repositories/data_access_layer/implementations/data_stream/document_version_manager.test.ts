@@ -45,7 +45,7 @@ describe('DocumentVersionManager', () => {
       ],
     } as never);
 
-    const versions = await manager.bulkGetVersions(['a']);
+    const lookup = await manager.bulkGetVersions(['a']);
 
     expect(esClient.search).not.toHaveBeenCalled();
     expect(esClient.mget).toHaveBeenCalledWith({
@@ -55,7 +55,8 @@ describe('DocumentVersionManager', () => {
         { _index: LEGACY_INDEX, _id: 'a', _source: false },
       ],
     });
-    expect(versions.a).toEqual({ index: OLDER_INDEX, seqNo: 4, primaryTerm: 1 });
+    expect(lookup.versions.a).toEqual({ index: OLDER_INDEX, seqNo: 4, primaryTerm: 1 });
+    expect(lookup.confirmedMissing.size).toBe(0);
   });
 
   it('searches only ids the realtime read missed', async () => {
@@ -75,7 +76,7 @@ describe('DocumentVersionManager', () => {
       },
     } as never);
 
-    const versions = await manager.bulkGetVersions(['a']);
+    const lookup = await manager.bulkGetVersions(['a']);
 
     expect(esClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -84,6 +85,70 @@ describe('DocumentVersionManager', () => {
         seq_no_primary_term: true,
       })
     );
-    expect(versions.a.index).toBe('.ds-.workflows-executions-ds-000000');
+    expect(lookup.versions.a.index).toBe('.ds-.workflows-executions-ds-000000');
+    expect(lookup.confirmedMissing.size).toBe(0);
+  });
+
+  it('confirms an id is missing only when every read says it is absent', async () => {
+    const { esClient, manager } = createManager();
+    esClient.mget.mockResolvedValue({
+      docs: [
+        { _id: 'a', _index: OLDER_INDEX, found: false },
+        { _id: 'a', _index: NEWER_INDEX, found: false },
+        { _id: 'a', _index: LEGACY_INDEX, found: false },
+      ],
+    } as never);
+    esClient.search.mockResolvedValue({
+      timed_out: false,
+      _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+      hits: { hits: [] },
+    } as never);
+
+    const lookup = await manager.bulkGetVersions(['a']);
+
+    expect(lookup.versions).toEqual({});
+    expect([...lookup.confirmedMissing]).toEqual(['a']);
+  });
+
+  it('does not confirm a miss when mget returns an error for the id', async () => {
+    const { esClient, manager } = createManager();
+    esClient.mget.mockResolvedValue({
+      docs: [
+        { _id: 'a', _index: OLDER_INDEX, error: { type: 'shard_not_available_exception' } },
+        { _id: 'a', _index: NEWER_INDEX, found: false },
+        { _id: 'a', _index: LEGACY_INDEX, found: false },
+      ],
+    } as never);
+    esClient.search.mockResolvedValue({
+      timed_out: false,
+      _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+      hits: { hits: [] },
+    } as never);
+
+    const lookup = await manager.bulkGetVersions(['a']);
+
+    expect(lookup.versions).toEqual({});
+    expect(lookup.confirmedMissing.size).toBe(0);
+  });
+
+  it('does not confirm a miss when the search is incomplete', async () => {
+    const { esClient, manager } = createManager();
+    esClient.mget.mockResolvedValue({
+      docs: [
+        { _id: 'a', _index: OLDER_INDEX, found: false },
+        { _id: 'a', _index: NEWER_INDEX, found: false },
+        { _id: 'a', _index: LEGACY_INDEX, found: false },
+      ],
+    } as never);
+    esClient.search.mockResolvedValue({
+      timed_out: true,
+      _shards: { total: 2, successful: 1, skipped: 0, failed: 1 },
+      hits: { hits: [] },
+    } as never);
+
+    const lookup = await manager.bulkGetVersions(['a']);
+
+    expect(lookup.versions).toEqual({});
+    expect(lookup.confirmedMissing.size).toBe(0);
   });
 });

@@ -487,8 +487,9 @@ export class DataStreamDataClient<TExecution extends { id: string }>
     const pendingIndexes: number[] = [];
 
     // DataStream requires @timestamp on create. Copy it from the date field.
-    // An upsert of a document that is not in the data stream becomes a create; when that
-    // write has no date field (a cancel flush has no startedAt), stamp the current time.
+    // An upsert becomes a create when the document is not in the data stream. Stamp the
+    // current time only after the lookup confirmed the document is absent. A failed
+    // lookup must not turn a partial write into a second document.
     const withTimestamp = (
       item: BulkPlainItem<TExecution>,
       fallbackToNow = false
@@ -535,7 +536,9 @@ export class DataStreamDataClient<TExecution extends { id: string }>
     if (pendingIndexes.length > 0) {
       // Several items may target the same id; each keeps its own slot in the response.
       const uniqueIds = Array.from(new Set(pendingIndexes.map((i) => items[i].document.id)));
-      const versions = await this.deps.versionManager.bulkGetVersions(uniqueIds);
+      const { versions, confirmedMissing } = await this.deps.versionManager.bulkGetVersions(
+        uniqueIds
+      );
 
       for (const i of pendingIndexes) {
         const item = items[i];
@@ -550,12 +553,12 @@ export class DataStreamDataClient<TExecution extends { id: string }>
             originalIndex: i,
           });
         } else {
-          // No version found — document does not exist in the data stream.
-          // upsert without a version becomes a create; plain update has nothing to update.
+          // No version. An upsert becomes a create. Stamp the current time only when the
+          // lookup confirmed the document is absent; a failed lookup leaves @timestamp unset.
           if (item.operation === 'upsert') {
             sendable.push({
               item: {
-                ...withTimestamp(item, true),
+                ...withTimestamp(item, confirmedMissing.has(id)),
                 operation: 'create',
                 index: this.deps.dataStreamName,
               },

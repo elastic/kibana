@@ -21,7 +21,10 @@ describe('DataStreamDataClient', () => {
   const createClient = (additionalIndexesToQuery: string[] = []) => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     const versionManager = {
-      bulkGetVersions: jest.fn().mockResolvedValue({}),
+      bulkGetVersions: jest.fn(async (ids: string[]) => ({
+        versions: {},
+        confirmedMissing: new Set(ids),
+      })),
       bulkGetCachedVersions: jest.fn().mockReturnValue({}),
       setVersion: jest.fn(),
     };
@@ -178,6 +181,41 @@ describe('DataStreamDataClient', () => {
     }
   });
 
+  it('does not stamp the current time when the version lookup did not confirm the document is absent', async () => {
+    const { esClient, versionManager, dataAccess } = createClient();
+    versionManager.bulkGetVersions.mockResolvedValue({
+      versions: {},
+      confirmedMissing: new Set(),
+    });
+    esClient.bulk.mockResolvedValue({
+      errors: false,
+      items: [
+        {
+          create: {
+            _id: 'a',
+            _index: BACKING_INDEX,
+            result: 'created',
+            _seq_no: 1,
+            _primary_term: 1,
+          },
+        },
+      ],
+    } as never);
+
+    await dataAccess.bulk({
+      items: [{ operation: 'upsert', document: { id: 'a', status: 'cancelled' } }],
+    });
+
+    expect(esClient.bulk).toHaveBeenCalledWith(
+      expect.objectContaining({
+        operations: [
+          { create: { _id: 'a', _index: DATA_STREAM } },
+          { id: 'a', status: 'cancelled' },
+        ],
+      })
+    );
+  });
+
   it('does not rewrite a true create 409 into an update', async () => {
     const { esClient, dataAccess } = createClient();
 
@@ -268,7 +306,8 @@ describe('DataStreamDataClient', () => {
   it('keeps a response for every update of the same id', async () => {
     const { esClient, versionManager, dataAccess } = createClient();
     versionManager.bulkGetVersions.mockResolvedValue({
-      a: { index: BACKING_INDEX, seqNo: 4, primaryTerm: 1 },
+      versions: { a: { index: BACKING_INDEX, seqNo: 4, primaryTerm: 1 } },
+      confirmedMissing: new Set(),
     });
     esClient.bulk.mockResolvedValue({
       errors: false,
@@ -575,11 +614,12 @@ describe('DataStreamDataClient', () => {
 
     it('pages until a short page and hard-deletes the legacy index', async () => {
       const { esClient, versionManager, dataAccess } = createClient([LEGACY_INDEX]);
-      versionManager.bulkGetVersions.mockImplementation(async (ids: string[]) =>
-        Object.fromEntries(
+      versionManager.bulkGetVersions.mockImplementation(async (ids: string[]) => ({
+        versions: Object.fromEntries(
           ids.map((id) => [id, { index: BACKING_INDEX, seqNo: 1, primaryTerm: 1 }])
-        )
-      );
+        ),
+        confirmedMissing: new Set(),
+      }));
       esClient.search.mockResolvedValueOnce(searchPage(1000)).mockResolvedValueOnce(searchPage(1));
       esClient.bulk.mockResolvedValueOnce(bulkPage(1000)).mockResolvedValueOnce(bulkPage(1));
       esClient.deleteByQuery.mockResolvedValue({
@@ -636,11 +676,12 @@ describe('DataStreamDataClient', () => {
 
     it('stops paging when a data stream search times out', async () => {
       const { esClient, versionManager, dataAccess } = createClient([LEGACY_INDEX]);
-      versionManager.bulkGetVersions.mockImplementation(async (ids: string[]) =>
-        Object.fromEntries(
+      versionManager.bulkGetVersions.mockImplementation(async (ids: string[]) => ({
+        versions: Object.fromEntries(
           ids.map((id) => [id, { index: BACKING_INDEX, seqNo: 1, primaryTerm: 1 }])
-        )
-      );
+        ),
+        confirmedMissing: new Set(),
+      }));
       esClient.search
         .mockResolvedValueOnce(searchPage(1000, true))
         .mockResolvedValueOnce(searchPage(1000));

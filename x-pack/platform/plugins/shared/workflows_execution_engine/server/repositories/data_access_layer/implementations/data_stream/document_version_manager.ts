@@ -16,6 +16,17 @@ const VERSION_CACHE_TTL_MS = 60_000;
 // previous backing index, and a search cannot see a write that has not refreshed.
 const REALTIME_BACKING_INDEX_WINDOW = 2;
 
+const searchCompleted = (response: {
+  timed_out?: boolean;
+  _shards?: { failed: number };
+}): boolean => response.timed_out !== true && (response._shards?.failed ?? 0) === 0;
+
+export interface VersionLookup {
+  versions: Record<string, Required<DocumentVersionFields>>;
+  /** Ids every read reported as absent. An errored or partial read is not in this set. */
+  confirmedMissing: ReadonlySet<string>;
+}
+
 export interface DocumentVersionManagerDeps {
   esClient: ElasticsearchClient;
   dataStreamName: string;
@@ -47,45 +58,42 @@ export class DocumentVersionManager {
     return result;
   }
 
-  async bulkGetVersions(ids: string[]): Promise<Record<string, Required<DocumentVersionFields>>> {
+  async bulkGetVersions(ids: string[]): Promise<VersionLookup> {
     if (ids.length === 0) {
-      return {};
+      return { versions: {}, confirmedMissing: new Set() };
     }
 
-    const result: Record<string, Required<DocumentVersionFields>> = {};
+    const versions: Record<string, Required<DocumentVersionFields>> = {};
     const uncached: string[] = [];
 
     for (const id of ids) {
       const cached = this.cache.get(id);
       if (cached) {
-        result[id] = cached;
+        versions[id] = cached;
       } else {
         uncached.push(id);
       }
     }
 
-    if (uncached.length > 0) {
-      const fresh = await this.bulkGetFreshVersions(uncached);
-      Object.assign(result, fresh);
+    if (uncached.length === 0) {
+      return { versions, confirmedMissing: new Set() };
     }
 
-    return result;
+    const fresh = await this.bulkGetFreshVersions(uncached);
+    Object.assign(versions, fresh.versions);
+    return { versions, confirmedMissing: fresh.confirmedMissing };
   }
 
-  private async bulkGetFreshVersions(
-    ids: string[]
-  ): Promise<Record<string, Required<DocumentVersionFields>>> {
-    if (ids.length === 0) {
-      return {};
-    }
-
+  private async bulkGetFreshVersions(ids: string[]): Promise<VersionLookup> {
     const { backingIndexes, writableIndex } = await this.deps.metadataManager.getMetaOrLoad();
     const realtimeIndexes = backingIndexes
       .slice(-REALTIME_BACKING_INDEX_WINDOW)
       .concat(this.deps.additionalIndexesToQuery ?? []);
     const indexes = realtimeIndexes.length > 0 ? realtimeIndexes : [writableIndex];
-    const result: Record<string, Required<DocumentVersionFields>> = {};
+    const versions: Record<string, Required<DocumentVersionFields>> = {};
     const found = new Set<string>();
+    // Present until a read says otherwise. An error doc has no `found` field, so it drops out.
+    const confirmedMissing = new Set(ids);
 
     const mgetResponse = await this.deps.esClient.mget({
       docs: ids.flatMap((id) =>
@@ -94,6 +102,9 @@ export class DocumentVersionManager {
     });
 
     for (const doc of mgetResponse.docs) {
+      if (doc._id && (!('found' in doc) || doc.found !== false)) {
+        confirmedMissing.delete(doc._id);
+      }
       if (
         'found' in doc &&
         doc.found &&
@@ -109,35 +120,40 @@ export class DocumentVersionManager {
         };
         found.add(doc._id);
         this.cache.set(doc._id, version);
-        result[doc._id] = version;
+        versions[doc._id] = version;
       }
     }
 
     const missing = ids.filter((id) => !found.has(id));
+    if (missing.length === 0) {
+      return { versions, confirmedMissing };
+    }
 
-    if (missing.length > 0) {
-      const searchResponse = await this.deps.esClient.search({
-        index: [this.deps.dataStreamName, ...(this.deps.additionalIndexesToQuery ?? [])],
-        query: { ids: { values: missing } },
-        size: missing.length,
-        _source: false,
-        seq_no_primary_term: true,
-        ignore_unavailable: true,
-      });
+    const searchResponse = await this.deps.esClient.search({
+      index: [this.deps.dataStreamName, ...(this.deps.additionalIndexesToQuery ?? [])],
+      query: { ids: { values: missing } },
+      size: missing.length,
+      _source: false,
+      seq_no_primary_term: true,
+      ignore_unavailable: true,
+    });
+    if (!searchCompleted(searchResponse)) {
+      confirmedMissing.clear();
+    }
 
-      for (const hit of searchResponse.hits.hits) {
-        if (hit._id && hit._seq_no !== undefined && hit._primary_term !== undefined) {
-          const version: Required<DocumentVersionFields> = {
-            index: hit._index,
-            seqNo: hit._seq_no,
-            primaryTerm: hit._primary_term,
-          };
-          this.cache.set(hit._id, version);
-          result[hit._id] = version;
-        }
+    for (const hit of searchResponse.hits.hits) {
+      if (hit._id && hit._seq_no !== undefined && hit._primary_term !== undefined) {
+        const version: Required<DocumentVersionFields> = {
+          index: hit._index,
+          seqNo: hit._seq_no,
+          primaryTerm: hit._primary_term,
+        };
+        confirmedMissing.delete(hit._id);
+        this.cache.set(hit._id, version);
+        versions[hit._id] = version;
       }
     }
 
-    return result;
+    return { versions, confirmedMissing };
   }
 }
