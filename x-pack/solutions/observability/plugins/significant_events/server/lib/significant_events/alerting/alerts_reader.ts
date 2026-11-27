@@ -44,6 +44,8 @@ export interface ChangePointRuleBucket {
   change_points: {
     type: ChangePointTypeMap;
   };
+  /** Start of the series bucket the change point falls in; absent when the verdict names none. */
+  change_point_at?: string;
 }
 
 export interface RuleMetadata {

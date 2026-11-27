@@ -21,6 +21,7 @@ import {
   signalInputEntrySchema,
   significantEventSchema,
   MAX_ARRAY_LENGTH,
+  type Detection,
 } from '@kbn/significant-events-schema';
 import { nightshiftSourceSlugsField } from '@kbn/nightshift-shared';
 import { z, lazySchema } from '@kbn/zod/v4';
@@ -50,6 +51,7 @@ import { eventsWriteBulkHandler, type EventsWriteInput } from './handler';
 import { loadSourceCatalog, toSourceRef } from '../../utils/resolve_source_slugs';
 import { assignStoredSourceIds } from '../../utils/stored_source_fields';
 import { fillDetectionMetadata } from './detection_metadata';
+import { eventOnsetOf } from './onset';
 import { hasEventWorthySignal } from './event_facts';
 
 export const SIGNIFICANT_EVENTS_EVENTS_WRITE_TOOL_ID = platformSignificantEventsTools.eventsWrite;
@@ -422,12 +424,12 @@ export function createEventsWriteTool({
       const { request } = context;
       const workflowExecutionId = getWorkflowExecutionIdFromRequest(request);
       let storedItems: EventsWriteInput[] | undefined;
-      const runByDetectionId = new Map<string, string>();
+      const storedDetections = new Map<string, Detection>();
       const detectionRunsOf = ({ signals }: { signals?: EventsWriteInput['signals'] }) => {
         const ids = [
           ...new Set(
             (signals ?? []).flatMap(({ metadata }) => {
-              const run = runByDetectionId.get(metadata.detection_id);
+              const run = storedDetections.get(metadata.detection_id)?.workflow_execution_id;
               return run ? [run] : [];
             })
           ),
@@ -452,9 +454,9 @@ export function createEventsWriteTool({
           items: toolParams.items,
           findDetections: async (detectionIds) => {
             const found = await detectionClient.findByIds(detectionIds);
-            found.hits.forEach(({ detection_id: detectionId, workflow_execution_id: run }) => {
-              if (run) runByDetectionId.set(detectionId, run);
-            });
+            found.hits.forEach((detection) =>
+              storedDetections.set(detection.detection_id, detection)
+            );
             return found;
           },
         });
@@ -508,6 +510,10 @@ export function createEventsWriteTool({
                   written: result.written,
                   source_ids: input.source_ids,
                   ...detectionRunsOf(input),
+                  // Continuations and reopens are updates, so they report no onset.
+                  ...(result.written && result.created
+                    ? eventOnsetOf({ signals: input.signals, detections: storedDetections })
+                    : {}),
                   error_message: isBulkError ? result.error.reason : undefined,
                   ...(result.written ? { severity: result.severity } : {}),
                 },

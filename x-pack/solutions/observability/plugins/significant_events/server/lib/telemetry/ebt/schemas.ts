@@ -852,6 +852,37 @@ const agentToolEventWriteSchema: RootSchema<AgentToolEventWriteProps> = {
       optional: true,
     },
   },
+  onset_at: {
+    type: 'date',
+    _meta: {
+      description:
+        'Estimated start of the problem: the earliest change point among the detections behind the event, at the resolution of the scan bucket. Present only on the write that creates an event, and only when one of those detections carries a change point',
+      optional: true,
+    },
+  },
+  onset_source: {
+    type: 'keyword',
+    _meta: {
+      description: 'Where onset_at came from: change_point. Present with onset_at',
+      optional: true,
+    },
+  },
+  onset_change_point_type: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'Type of the change point onset_at was read from (step_change, spike, dip, trend_change, distribution_change). A sudden increase (step_change, spike) is a direct reading of when the matches rose; the other types locate the start of the problem less reliably. Present with onset_at',
+      optional: true,
+    },
+  },
+  detected_at: {
+    type: 'date',
+    _meta: {
+      description:
+        'When the earliest detection that carries a change point was written, among the detections behind the event. Splits onset-to-event into onset-to-detection and detection-to-event. Present with onset_at',
+      optional: true,
+    },
+  },
   error_message: {
     type: 'text',
     _meta: {

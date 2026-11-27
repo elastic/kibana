@@ -196,19 +196,26 @@ const detectionsHistoryRoute = createServerRoute({
 // Bounds one request; a Detection run writes at most one document per scanned rule.
 const MAX_DETECTIONS_PER_REQUEST = 1000;
 
-const createDetectionSchema = z.object({
-  detection_id: z.string().max(MAX_ID_LENGTH),
-  rule_uuid: z.string().max(MAX_ID_LENGTH),
-  rule_name: z.string().max(MAX_RULE_NAME_LENGTH).optional(),
-  source_id: z.string().max(MAX_ID_LENGTH).optional(),
-  // Not narrowed to CHANGE_POINT_TYPES: Elasticsearch can also report `indeterminable`,
-  // which the Detection workflow persists like any other non-stationary observation.
-  change_point_type: z.string().min(1).max(64),
-  p_value: z.number(),
-  severity_score: z.number().min(0).max(100).optional(),
-  alert_index: z.string().max(MAX_ID_LENGTH).optional(),
-  workflow_execution_id: z.string().max(MAX_ID_LENGTH).optional(),
-});
+const createDetectionSchema = lazySchema(() =>
+  z.object({
+    detection_id: z.string().max(MAX_ID_LENGTH),
+    rule_uuid: z.string().max(MAX_ID_LENGTH),
+    rule_name: z.string().max(MAX_RULE_NAME_LENGTH).optional(),
+    source_id: z.string().max(MAX_ID_LENGTH).optional(),
+    // Not narrowed to CHANGE_POINT_TYPES: Elasticsearch can also report `indeterminable`,
+    // which the Detection workflow persists like any other non-stationary observation.
+    change_point_type: z.string().min(1).max(64),
+    p_value: z.number(),
+    // Empty when the verdict names no change point: the workflow renders an absent value as ''.
+    change_point_at: z
+      .union([z.literal(''), isoDateTime({ offset: true })])
+      .optional()
+      .transform((value) => value || undefined),
+    severity_score: z.number().min(0).max(100).optional(),
+    alert_index: z.string().max(MAX_ID_LENGTH).optional(),
+    workflow_execution_id: z.string().max(MAX_ID_LENGTH).optional(),
+  })
+);
 
 /** Stamps server-side `@timestamp` and appends to the current space; Kibana writes as its internal user. */
 const appendDetectionDocuments = async ({

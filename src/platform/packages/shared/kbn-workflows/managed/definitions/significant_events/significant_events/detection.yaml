@@ -310,6 +310,7 @@ steps:
                 source_id: "{{ foreach.item.source_id }}"
                 change_point_type: "{{ steps.compute_rule_context.output.change_point_type }}"
                 p_value: "${{ steps.compute_transition.output.detection_p_value }}"
+                change_point_at: "{{ foreach.item.change_point_at }}"
                 severity_score: "${{ foreach.item.severity_score }}"
                 alert_index: "{{ steps.run_change_point_aggregation.output.alertIndex }}"
                 workflow_execution_id: "{{ execution.id }}"

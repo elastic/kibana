@@ -213,6 +213,34 @@ describe('SignificantEventsAlertsReaderV2', () => {
     ]);
   });
 
+  it('reports the start of the change point bucket', async () => {
+    const { client, search } = createEsClient();
+    search.mockResolvedValue({
+      aggregations: {
+        by_rule: {
+          buckets: [
+            {
+              key: RULE_UUID,
+              doc_count: 100,
+              change_points: {
+                bucket: { key: '2026-11-26T10:02:00.000Z', doc_count: 4 },
+                type: { spike: { p_value: 0.001, change_point: 31 } },
+              },
+            },
+          ],
+        },
+      },
+    });
+
+    const result = await reader.runChangePointScan(
+      client,
+      { lookback: LOOKBACK, bucketInterval: BUCKET_INTERVAL, spaceId: SPACE_ID },
+      [makeQueryLink()]
+    );
+
+    expect(result.by_rule.buckets[0].change_point_at).toBe('2026-11-26T10:02:00.000Z');
+  });
+
   // A rule without history for the whole window gets a series under
   // change_point's floor. `indeterminable` must not reach the workflow, which
   // reads the single key of `change_points.type` and would write it as a

@@ -232,6 +232,7 @@ const detectionSignalMetadataSchema = lazySchema(() =>
   detectionSchema
     .omit({
       '@timestamp': true,
+      change_point_at: true,
       alert_index: true,
       workflow_execution_id: true,
       processed: true,

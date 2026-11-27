@@ -46,8 +46,16 @@ const INDETERMINABLE_CHANGE_POINT_TYPE = 'indeterminable';
 interface RawRuleBucket {
   key: string;
   doc_count: number;
-  change_points?: { type?: ChangePointTypeMap };
+  change_points?: { type?: ChangePointTypeMap; bucket?: { key?: string | number } };
 }
+
+const toIsoTimestamp = (key: string | number | undefined): string | undefined => {
+  if (key === undefined) {
+    return undefined;
+  }
+  const date = new Date(key);
+  return Number.isNaN(date.getTime()) ? undefined : date.toISOString();
+};
 
 function hitsTotal(total: number | { value: number } | undefined): number {
   if (total == null) {
@@ -139,8 +147,13 @@ export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlerts
       track_total_hits: false,
       // Drop the per-bucket `over_time` series from the response: it can be large and is only
       // needed server-side as the buckets_path input for the change_point pipeline agg, not in
-      // the payload the Detection workflow consumes.
-      filter_path: '-aggregations.by_rule.buckets.over_time',
+      // the payload the Detection workflow consumes. The change point's own bucket is kept for its
+      // key, without the sub-aggregations it repeats.
+      filter_path: [
+        '-aggregations.by_rule.buckets.over_time',
+        '-aggregations.by_rule.buckets.change_points.bucket.per_minute',
+        '-aggregations.by_rule.buckets.change_points.bucket.metric_value',
+      ],
       ...this.buildChangePointScanBody(params),
     });
 
@@ -200,6 +213,7 @@ export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlerts
     const ruleName = meta?.ruleName ?? 'unknown';
     const sourceId = meta?.sourceId ?? 'unknown';
     const verdict = bucket.change_points?.type ?? EMPTY_CHANGE_POINT_TYPE;
+    const changePointAt = toIsoTimestamp(bucket.change_points?.bucket?.key);
 
     return {
       key: bucket.key,
@@ -212,6 +226,7 @@ export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlerts
       change_points: {
         type: INDETERMINABLE_CHANGE_POINT_TYPE in verdict ? EMPTY_CHANGE_POINT_TYPE : verdict,
       },
+      ...(changePointAt ? { change_point_at: changePointAt } : {}),
     };
   }
 }

@@ -67,7 +67,13 @@ const getFeatures = jest.fn().mockResolvedValue({ hits: [] });
 const createTool = (
   telemetry: { trackAgentToolEventsWrite: jest.Mock; trackAgentToolFailed?: jest.Mock },
   logger = loggingSystemMock.createLogger(),
-  storedDetections: Array<SignalEntry['metadata'] & { workflow_execution_id?: string }> = []
+  storedDetections: Array<
+    SignalEntry['metadata'] & {
+      workflow_execution_id?: string;
+      '@timestamp'?: string;
+      change_point_at?: string;
+    }
+  > = []
 ) => {
   const getScopedClients = jest.fn().mockResolvedValue({
     getEventSearchClient: jest.fn().mockReturnValue({}),
@@ -850,6 +856,41 @@ describe('events_write tool', () => {
       expect.objectContaining({ detection_workflow_execution_ids: ['run-1', 'run-2'] }),
       expect.anything()
     );
+  });
+
+  describe('onset telemetry', () => {
+    const storedDetection = {
+      ...confirmingSignal.metadata,
+      '@timestamp': '2026-11-26T10:07:00.000Z',
+      change_point_at: '2026-11-26T10:02:00.000Z',
+    };
+    const write = async (result: Record<string, unknown>) => {
+      (eventsWriteBulkHandler as jest.Mock).mockResolvedValue([
+        { index: 0, event_id: 'event-1', status: 'active', written: true, ...result },
+      ]);
+      const telemetry = { trackAgentToolEventsWrite: jest.fn() };
+      await invokeHandler(
+        createTool(telemetry, undefined, [storedDetection]) as never,
+        { items: [input] },
+        createMockToolContext()
+      );
+      return telemetry.trackAgentToolEventsWrite.mock.calls[0][0];
+    };
+
+    it('reports the onset on the write that creates an event', async () => {
+      expect(await write({ created: true, group_hash: 'hash-1' })).toEqual(
+        expect.objectContaining({
+          onset_at: '2026-11-26T10:02:00.000Z',
+          onset_source: 'change_point',
+          onset_change_point_type: 'spike',
+          detected_at: '2026-11-26T10:07:00.000Z',
+        })
+      );
+    });
+
+    it('reports no onset on a continuation', async () => {
+      expect(await write({ created: false })).not.toHaveProperty('onset_at');
+    });
   });
 
   it('sends no status to the writer, which takes it from the lifecycle', async () => {
