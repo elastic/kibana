@@ -47,17 +47,12 @@ const getSavedTitles = async (
 let dashboardId = '';
 // data view IDs must be unique across spaces, so use the generated ID instead of a fixed one
 let dataViewId = '';
-// creating the data view sets it as the default when none exists, so remember what to restore
-let previousDefaultIndex: unknown;
 
 // Focus: reordering pinned panels with the real move handle and the browser's own flex layout,
 // across rows that wrap, and persisting the new order when the dashboard is saved
 spaceTest.describe('Dashboard pinned panels reorder', { tag: tags.stateful.classic }, () => {
-  spaceTest.beforeAll(async ({ apiServices, kbnClient, scoutSpace }) => {
+  spaceTest.beforeAll(async ({ apiServices, scoutSpace }) => {
     await scoutSpace.savedObjects.cleanStandardList();
-    previousDefaultIndex = await kbnClient.uiSettings.get('defaultIndex', {
-      space: scoutSpace.id,
-    });
 
     const { data: dataView } = await apiServices.dataViews.create({
       title: 'logstash-*',
@@ -86,13 +81,18 @@ spaceTest.describe('Dashboard pinned panels reorder', { tag: tags.stateful.class
     await browserAuth.loginAsPrivilegedUser();
   });
 
-  spaceTest.afterAll(async ({ scoutSpace }) => {
+  spaceTest.afterAll(async ({ kbnClient, scoutSpace }) => {
+    // read before cleaning so a failed lookup never leaves the setting behind
+    const currentDefaultIndex = await kbnClient.uiSettings.get('defaultIndex', {
+      space: scoutSpace.id,
+    });
+
     await scoutSpace.savedObjects.cleanStandardList();
 
-    // cleaning the saved objects deletes the data view but not the default index setting
-    if (typeof previousDefaultIndex === 'string') {
-      await scoutSpace.uiSettings.set({ defaultIndex: previousDefaultIndex });
-    } else {
+    // cleaning the saved objects deletes the data view but not the default index setting. Only
+    // unset it when it points to this suite's data view: creating a data view leaves an existing
+    // default alone, and writing the setting fails when it is locked via uiSettings.overrides
+    if (dataViewId && currentDefaultIndex === dataViewId) {
       await scoutSpace.uiSettings.unset('defaultIndex');
     }
   });
