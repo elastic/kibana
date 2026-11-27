@@ -140,7 +140,7 @@ describe('useVisorNlToEsql', () => {
     expect(onSubmit).toHaveBeenCalledWith('FROM metrics-*\n| LIMIT 50');
   });
 
-  it('drops an edited suggestion and leaves the user query for Run to submit', () => {
+  it('drops an edited suggestion and runs the user query', () => {
     const model = buildModel(ORIGINAL);
     const onReject = jest.fn();
     const { result, onSubmit, emitContentChange } = renderVisor(model);
@@ -156,13 +156,14 @@ describe('useVisorNlToEsql', () => {
       accepted = result.current.acceptReview();
     });
 
-    expect(accepted).toBe(false);
-    expect(onSubmit).not.toHaveBeenCalled();
+    expect(accepted).toBe(true);
+    expect(onSubmit).toHaveBeenCalledTimes(1);
+    expect(onSubmit).toHaveBeenCalledWith('FROM traces-*');
     expect(onReject).not.toHaveBeenCalled();
     expect(model.getValue()).toBe('FROM traces-*');
   });
 
-  it('keeps a fully replaced buffer instead of restoring the suggestion', () => {
+  it('runs a fully replaced buffer instead of restoring the suggestion', () => {
     const model = buildModel(ORIGINAL);
     const { result, onSubmit, executeEdits, emitContentChange, collapseGeneratedBlock } =
       renderVisor(model);
@@ -180,8 +181,8 @@ describe('useVisorNlToEsql', () => {
       accepted = result.current.acceptReview();
     });
 
-    expect(accepted).toBe(false);
-    expect(onSubmit).not.toHaveBeenCalled();
+    expect(accepted).toBe(true);
+    expect(onSubmit).toHaveBeenCalledWith('FROM traces-*');
     expect(executeEdits).not.toHaveBeenCalled();
     expect(model.getValue()).toBe('FROM traces-*');
   });

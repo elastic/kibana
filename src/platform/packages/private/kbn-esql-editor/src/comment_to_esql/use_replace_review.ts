@@ -33,6 +33,11 @@ interface UseReplaceReviewParams {
   isReplaceMode?: (state: ReviewState) => boolean;
   /** Cleared when the review ends so the following accept/reject edit can publish. */
   previewPendingRef?: PreviewPendingRef;
+  /**
+   * Runs the user's own query when Run is pressed after they edited the buffer. Their edits
+   * were not published while the suggestion was pending, so the caller must publish them too.
+   */
+  onRunEditedQuery?: (query: string) => void;
   onAfterAccept?: (state: ReviewState, acceptedQuery: string) => void;
   onAfterReject?: (state: ReviewState) => void;
 }
@@ -54,7 +59,8 @@ const alwaysReplace = () => true;
  *  - dismiss     — removes the generated lines and cleans up, without calling any callback
  *  - reject      — dismiss, then calls onAfterReject
  *  - accept      — keeps the suggestion and drops the original lines; false if nothing was
- *                  pending, or if the user edited the query since (the suggestion is dismissed)
+ *                  pending. If the user edited the query since, the suggestion is dismissed
+ *                  and their query is passed to onRunEditedQuery instead
  */
 export const useReplaceReview = ({
   editorRef,
@@ -65,6 +71,7 @@ export const useReplaceReview = ({
   editSourceId,
   isReplaceMode = alwaysReplace,
   previewPendingRef,
+  onRunEditedQuery,
   onAfterAccept,
   onAfterReject,
 }: UseReplaceReviewParams) => {
@@ -133,9 +140,10 @@ export const useReplaceReview = ({
     const model = editorModel.current;
     const state = reviewStateRef.current;
 
-    if (state && isEditedRef.current) {
+    if (state && model && isEditedRef.current) {
       dismiss();
-      return false;
+      onRunEditedQuery?.(model.getValue());
+      return true;
     }
 
     cleanup();
@@ -163,7 +171,7 @@ export const useReplaceReview = ({
 
     onAfterAccept?.(state, model.getValue());
     return true;
-  }, [editorRef, editorModel, cleanup, dismiss, editSourceId, onAfterAccept]);
+  }, [editorRef, editorModel, cleanup, dismiss, editSourceId, onRunEditedQuery, onAfterAccept]);
 
   const showReview = useCallback(
     (state: ReviewState) => {

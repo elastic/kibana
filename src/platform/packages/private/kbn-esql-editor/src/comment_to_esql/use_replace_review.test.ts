@@ -127,6 +127,7 @@ describe('useReplaceReview', () => {
       contextKeyId: 'testContextKey',
       rejectAction: { id: 'test.reject', label: 'Reject' },
       editSourceId: 'test-edit',
+      onRunEditedQuery: jest.fn(),
       onAfterAccept: jest.fn(),
       onAfterReject: jest.fn(),
       ...overrides,
@@ -258,7 +259,7 @@ describe('useReplaceReview', () => {
     expect(params.onAfterReject).toHaveBeenCalledTimes(1);
   });
 
-  it('accept after the user edited the query removes the suggestion instead of applying it', () => {
+  it('accept after the user edited the query removes the suggestion and runs their query', () => {
     const params = makeParams();
     const { editor, executeEdits, emitContentChange } = buildEditor();
     params.editorRef.current = editor;
@@ -273,9 +274,10 @@ describe('useReplaceReview', () => {
       accepted = result.current.accept();
     });
 
-    expect(accepted).toBe(false);
+    expect(accepted).toBe(true);
     expect(executeEdits).toHaveBeenCalledTimes(1);
     expect(executeEdits).toHaveBeenCalledWith('test-edit-reject', expect.any(Array));
+    expect(params.onRunEditedQuery).toHaveBeenCalledWith(MODEL_VALUE);
     expect(params.onAfterAccept).not.toHaveBeenCalled();
     expect(params.onAfterReject).not.toHaveBeenCalled();
   });

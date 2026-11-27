@@ -141,6 +141,7 @@ export const useSuggestFix = ({
     },
     editSourceId: 'esql-suggest-fix',
     previewPendingRef,
+    onRunEditedQuery: onSubmit,
     onAfterAccept: (state, acceptedQuery) => {
       trackFixReview(AiReviewAction.ACCEPT, state.generatedLineEnd - state.generatedLineStart + 1);
       onSubmit(acceptedQuery);

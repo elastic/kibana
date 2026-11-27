@@ -132,6 +132,7 @@ export const useCommentToEsql = ({
     isReplaceMode: ({ firstChangedOriginalLine, lastChangedOriginalLine }) =>
       lastChangedOriginalLine >= firstChangedOriginalLine,
     previewPendingRef,
+    onRunEditedQuery: onSubmit,
     onAfterAccept: ({ generatedLineStart, generatedLineEnd }, acceptedQuery) => {
       telemetryService?.trackCommentToEsqlReviewed({
         action: AiReviewAction.ACCEPT,

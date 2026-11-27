@@ -88,6 +88,7 @@ export const useVisorNlToEsql = ({
     rejectAction,
     editSourceId: 'nl-to-esql-visor',
     previewPendingRef,
+    onRunEditedQuery: onSubmit,
     onAfterAccept,
     onAfterReject,
   });
