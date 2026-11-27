@@ -33,6 +33,10 @@ const getRemediation = (unmetPaths: string[], profile: string): string | undefin
     return undefined;
   }
 
+  if (profile === 'openllmetry-langchain') {
+    return 'unset TRACELOOP_TRACE_CONTENT or set it to true';
+  }
+
   if (profile !== 'elastic-inference') {
     return 'evidence not present in trace';
   }

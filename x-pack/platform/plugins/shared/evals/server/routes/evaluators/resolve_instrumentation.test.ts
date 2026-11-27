@@ -26,7 +26,10 @@ import {
   buildClaudeCodeToolSpanDoc,
   buildClaudeCodeUserPromptDoc,
   buildSearchMock,
+  buildSpanStoreSearchMock,
+  getOpenllmetryLangchainSpans,
   hasTermFilter,
+  OPENLLMETRY_LANGCHAIN_TRACE_IDS,
   withHits,
 } from './test_helpers';
 
@@ -240,6 +243,10 @@ const buildRouteSearchMock = () =>
       if (hasTermFilter(filters, 'attributes.elastic.inference.span.kind', 'TOOL')) {
         return emptySearchResponse;
       }
+      // Plain OTel GenAI spans carry a scope.name other than the LangChain instrumentation.
+      if (hasTermFilter(filters, 'scope.name', 'opentelemetry.instrumentation.langchain')) {
+        return emptySearchResponse;
+      }
       if (hasTermFilter(filters, 'attributes.gen_ai.operation.name', 'execute_tool')) {
         return withHits([
           {
@@ -396,6 +403,35 @@ describe('POST /internal/evals/traces/_resolve_instrumentation', () => {
     expect(payload.profiles).toContainEqual(
       expect.objectContaining({
         profile: 'otel-genai-attributes',
+        evidence: expect.objectContaining({
+          user_query: expect.objectContaining({ status: 'found' }),
+          agent_response: expect.objectContaining({ status: 'found' }),
+          tool_calls: expect.objectContaining({ status: 'found' }),
+        }),
+      })
+    );
+  });
+
+  it('recommends openllmetry-langchain for OpenLLMetry LangChain traces', async () => {
+    const { handler } = setup();
+    const traceId = OPENLLMETRY_LANGCHAIN_TRACE_IDS.readFile;
+
+    const response = await handler(
+      buildContext(
+        buildSpanStoreSearchMock(getOpenllmetryLangchainSpans(traceId))
+      ) as unknown as Parameters<typeof handler>[0],
+      {
+        body: { trace_id: traceId },
+      } as unknown as Parameters<typeof handler>[1],
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(200);
+    const payload = response.payload as ResolveInstrumentationResponse;
+    expect(payload.recommended_instrumentation).toEqual({ profile: 'openllmetry-langchain' });
+    expect(payload.profiles).toContainEqual(
+      expect.objectContaining({
+        profile: 'openllmetry-langchain',
         evidence: expect.objectContaining({
           user_query: expect.objectContaining({ status: 'found' }),
           agent_response: expect.objectContaining({ status: 'found' }),

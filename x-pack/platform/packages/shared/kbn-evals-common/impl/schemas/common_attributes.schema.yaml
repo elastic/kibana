@@ -37,6 +37,7 @@ components:
         - otel-genai-events
         - otel-genai-attributes
         - claude-code
+        - openllmetry-langchain
       description: Telemetry convention used to reconstruct normalized evaluator evidence.
 
     DatasetMaturity:
@@ -394,6 +395,7 @@ components:
         - otel-genai-events
         - otel-genai-attributes
         - claude-code
+        - openllmetry-langchain
 
     EvaluationSubject:
       type: object

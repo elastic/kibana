@@ -294,12 +294,15 @@ Evaluator routes reconstruct a normalized evidence round (`input.message`, `resp
 
 `_evaluate` and `_test` wait for a trace to finish exporting before grading it, so an in-flight response is not scored as if it were final. `_validate` deliberately does not wait: it reports the evidence present now, because "not indexed yet" is a useful answer when you are diagnosing instrumentation.
 
-| Profile                       | `user_query`                                                | `agent_response`                                             | `tool_calls`                               |
-| ----------------------------- | ----------------------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------ |
-| `elastic-inference` (default) | LLM spans, `gen_ai.input.messages` (`genai_messages`)       | LLM spans, `gen_ai.output.messages` (`genai_messages`)       | TOOL spans via Elastic inference span kind |
-| `otel-genai-attributes`       | Trace attributes `gen_ai.input.messages` (`genai_messages`) | Trace attributes `gen_ai.output.messages` (`genai_messages`) | `execute_tool` spans                       |
-| `otel-genai-events`           | Log event `gen_ai.user.message` (string)                    | Log event `gen_ai.choice` (string)                           | `execute_tool` spans                       |
-| `claude-code`                 | Log event `user_prompt` (string)                            | Log event `api_response_body` (`anthropic_message`)          | `claude_code.tool` spans (`prefixed_json`) |
+| Profile                       | `user_query`                                                | `agent_response`                                             | `tool_calls`                                |
+| ----------------------------- | ----------------------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------- |
+| `elastic-inference` (default) | LLM spans, `gen_ai.input.messages` (`genai_messages`)       | LLM spans, `gen_ai.output.messages` (`genai_messages`)       | TOOL spans via Elastic inference span kind  |
+| `otel-genai-attributes`       | Trace attributes `gen_ai.input.messages` (`genai_messages`) | Trace attributes `gen_ai.output.messages` (`genai_messages`) | `execute_tool` spans                        |
+| `openllmetry-langchain`       | Trace attributes `gen_ai.input.messages` (`genai_messages`) | Trace attributes `gen_ai.output.messages` (`genai_messages`) | `execute_tool` spans (`langchain_envelope`) |
+| `otel-genai-events`           | Log event `gen_ai.user.message` (string)                    | Log event `gen_ai.choice` (string)                           | `execute_tool` spans                        |
+| `claude-code`                 | Log event `user_prompt` (string)                            | Log event `api_response_body` (`anthropic_message`)          | `claude_code.tool` spans (`prefixed_json`)  |
+
+`openllmetry-langchain` reads LangChain, LangGraph and deepagents traces from OpenLLMetry's `LangchainInstrumentor`. It matches only spans with `scope.name: opentelemetry.instrumentation.langchain`, and `langchain_envelope` unwraps the tool arguments (`inputs`), the `ToolMessage` content and the `tool_call_id` from LangChain's callback envelopes. Auto-detect tries it before `otel-genai-attributes`, so these traces resolve to clean steps; GenAI traces with any other `scope.name` still resolve to `otel-genai-attributes`. If `_validate` reports missing evidence, unset `TRACELOOP_TRACE_CONTENT` or set it to `true`.
 
 Profile definitions live in [`server/evaluators/evidence/profiles.ts`](server/evaluators/evidence/profiles.ts).
 

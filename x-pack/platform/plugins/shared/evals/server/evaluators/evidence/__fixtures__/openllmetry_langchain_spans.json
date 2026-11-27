@@ -1,0 +1,464 @@
+[
+  {
+    "trace_id": "4f6b7d3ea02accd61aa9b9b9a9f6856f",
+    "span_id": "9448a4be2f5d5d0e",
+    "parent_span_id": "9e711c1cba7391ac",
+    "@timestamp": "2026-11-27T10:46:03.985Z",
+    "name": "ChatOpenAI.chat",
+    "scope": {
+      "name": "opentelemetry.instrumentation.langchain"
+    },
+    "attributes": {
+      "gen_ai.operation.name": "chat",
+      "gen_ai.input.messages": "[{\"role\": \"user\", \"parts\": [{\"type\": \"text\", \"content\": \"List the indices in this cluster and tell me how many there are.\"}]}]",
+      "gen_ai.output.messages": "[{\"role\": \"assistant\", \"parts\": [{\"type\": \"tool_call\", \"id\": \"toolu_01JCNeSqFzLuXb9LadRKmEtj\", \"name\": \"platform_core_list_indices\", \"arguments\": {}}], \"finish_reason\": \"tool_call\"}]"
+    }
+  },
+  {
+    "trace_id": "4f6b7d3ea02accd61aa9b9b9a9f6856f",
+    "span_id": "81218ccda5e86e82",
+    "parent_span_id": "9226db3d80e31cd5",
+    "@timestamp": "2026-11-27T10:46:05.810Z",
+    "name": "execute_tool platform_core_list_indices",
+    "scope": {
+      "name": "opentelemetry.instrumentation.langchain"
+    },
+    "attributes": {
+      "gen_ai.operation.name": "execute_tool",
+      "gen_ai.tool.name": "platform_core_list_indices",
+      "gen_ai.tool.call.arguments": "{\"input_str\": \"{}\", \"tags\": [\"seq:step:1\"], \"metadata\": {}, \"inputs\": {}, \"kwargs\": {\"color\": \"green\", \"name\": null, \"tool_call_id\": \"toolu_01JCNeSqFzLuXb9LadRKmEtj\"}}",
+      "gen_ai.tool.call.result": "{\"output\": {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"ToolMessage\"], \"kwargs\": {\"content\": [{\"type\": \"text\", \"text\": \"{\\\"results\\\": [{\\\"type\\\": \\\"other\\\", \\\"data\\\": {\\\"indices\\\": [], \\\"aliases\\\": [{\\\"name\\\": \\\".siem-signals-default\\\", \\\"indices\\\": [\\\".internal.alerts-security.alerts-default-000001\\\"]}], \\\"data_streams\\\": [{\\\"name\\\": \\\"logs-generic.otel-default\\\", \\\"indices\\\": [\\\".ds-logs-generic.otel-default-2026.11.27-000001\\\"]}, {\\\"name\\\": \\\"metrics-service_destination.1m.otel-default\\\", \\\"indices\\\": [\\\".ds-metrics-service_destination.1m.otel-default-2026.11.27-000001\\\"]}, {\\\"name\\\": \\\"metrics-service_summary.1m.otel-default\\\", \\\"indices\\\": [\\\".ds-metrics-service_summary.1m.otel-default-2026.11.27-000001\\\"]}, {\\\"name\\\": \\\"metrics-service_transaction.1m.otel-default\\\", \\\"indices\\\": [\\\".ds-metrics-service_transaction.1m.otel-default-2026.11.27-000001\\\"]}, {\\\"name\\\": \\\"metrics-transaction.1m.otel-default\\\", \\\"indices\\\": [\\\".ds-metrics-transaction.1m.otel-default-2026.11.27-000001\\\"]}, {\\\"name\\\": \\\"traces-generic.otel-default\\\", \\\"indices\\\": [\\\".ds-traces-generic.otel-default-2026.11.27-000001\\\"]}], \\\"datasets\\\": [], \\\"views\\\": [], \\\"warnings\\\": []}, \\\"tool_result_id\\\": \\\"LAHxK2\\\"}]}\", \"id\": \"lc_54a3b8e2-9f66-4142-814f-d9f99564a1eb\"}], \"type\": \"tool\", \"name\": \"platform_core_list_indices\", \"tool_call_id\": \"toolu_01JCNeSqFzLuXb9LadRKmEtj\", \"status\": \"success\"}}, \"kwargs\": {\"tags\": [\"seq:step:1\"], \"color\": \"green\", \"name\": \"platform_core_list_indices\"}}",
+      "gen_ai.task.status": "success"
+    }
+  },
+  {
+    "trace_id": "4f6b7d3ea02accd61aa9b9b9a9f6856f",
+    "span_id": "8f7fd841c4ec6661",
+    "parent_span_id": "9f17c237f6f68ee8",
+    "@timestamp": "2026-11-27T10:46:06.142Z",
+    "name": "ChatOpenAI.chat",
+    "scope": {
+      "name": "opentelemetry.instrumentation.langchain"
+    },
+    "attributes": {
+      "gen_ai.operation.name": "chat",
+      "gen_ai.input.messages": "[{\"role\": \"user\", \"parts\": [{\"type\": \"text\", \"content\": \"List the indices in this cluster and tell me how many there are.\"}]}, {\"role\": \"assistant\", \"parts\": [{\"type\": \"tool_call\", \"id\": \"toolu_01JCNeSqFzLuXb9LadRKmEtj\", \"name\": \"platform_core_list_indices\", \"arguments\": {}}]}, {\"role\": \"tool\", \"parts\": [{\"type\": \"tool_call_response\", \"id\": \"toolu_01JCNeSqFzLuXb9LadRKmEtj\", \"response\": \"[{\\\"type\\\": \\\"text\\\", \\\"text\\\": \\\"{\\\\\\\"results\\\\\\\": [{\\\\\\\"type\\\\\\\": \\\\\\\"other\\\\\\\", \\\\\\\"data\\\\\\\": {\\\\\\\"indices\\\\\\\": [], \\\\\\\"aliases\\\\\\\": [{\\\\\\\"name\\\\\\\": \\\\\\\".siem-signals-default\\\\\\\", \\\\\\\"indices\\\\\\\": [\\\\\\\".internal.alerts-security.alerts-default-000001\\\\\\\"]}], \\\\\\\"data_streams\\\\\\\": [{\\\\\\\"name\\\\\\\": \\\\\\\"logs-generic.otel-default\\\\\\\", \\\\\\\"indices\\\\\\\": [\\\\\\\".ds-logs-generic.otel-default-2026.11.27-000001\\\\\\\"]}, {\\\\\\\"name\\\\\\\": \\\\\\\"metrics-service_destination.1m.otel-default\\\\\\\", \\\\\\\"indices\\\\\\\": [\\\\\\\".ds-metrics-service_destination.1m.otel-default-2026.11.27-000001\\\\\\\"]}, {\\\\\\\"name\\\\\\\": \\\\\\\"metrics-service_summary.1m.otel-default\\\\\\\", \\\\\\\"indices\\\\\\\": [\\\\\\\".ds-metrics-service_summary.1m.otel-default-2026.11.27-000001\\\\\\\"]}, {\\\\\\\"name\\\\\\\": \\\\\\\"metrics-service_transaction.1m.otel-default\\\\\\\", \\\\\\\"indices\\\\\\\": [\\\\\\\".ds-metrics-service_transaction.1m.otel-default-2026.11.27-000001\\\\\\\"]}, {\\\\\\\"name\\\\\\\": \\\\\\\"metrics-transaction.1m.otel-default\\\\\\\", \\\\\\\"indices\\\\\\\": [\\\\\\\".ds-metrics-transaction.1m.otel-default-2026.11.27-000001\\\\\\\"]}, {\\\\\\\"name\\\\\\\": \\\\\\\"traces-generic.otel-default\\\\\\\", \\\\\\\"indices\\\\\\\": [\\\\\\\".ds-traces-generic.otel-default-2026.11.27-000001\\\\\\\"]}], \\\\\\\"datasets\\\\\\\": [], \\\\\\\"views\\\\\\\": [], \\\\\\\"warnings\\\\\\\": []}, \\\\\\\"tool_result_id\\\\\\\": \\\\\\\"LAHxK2\\\\\\\"}]}\\\", \\\"id\\\": \\\"lc_54a3b8e2-9f66-4142-814f-d9f99564a1eb\\\"}]\"}]}]",
+      "gen_ai.output.messages": "[{\"role\": \"assistant\", \"parts\": [{\"type\": \"text\", \"content\": \"Here's a summary of what's in this cluster:\\n\\n### Aliases (1)\\n| Name | Backing Index |\\n|------|--------------|\\n| `.siem-signals-default` | `.internal.alerts-security.alerts-default-000001` |\\n\\n### Data Streams (6)\\n| Name |\\n|------|\\n| `logs-generic.otel-default` |\\n| `metrics-service_destination.1m.otel…\"}], \"finish_reason\": \"stop\"}]"
+    }
+  },
+  {
+    "trace_id": "b88f334ff42c54a844c550781ae2e7fc",
+    "span_id": "24c0e7ec61dcb3fe",
+    "parent_span_id": "a0103ff52df90adb",
+    "@timestamp": "2026-11-27T10:48:08.515Z",
+    "name": "ChatOpenAI.chat",
+    "scope": {
+      "name": "opentelemetry.instrumentation.langchain"
+    },
+    "attributes": {
+      "gen_ai.operation.name": "chat",
+      "gen_ai.input.messages": "[{\"role\": \"user\", \"parts\": [{\"type\": \"text\", \"content\": \"Using your esql-investigation skill, read the skill file first, then tell me which data streams exist in this cluster and which fields traces-generic.otel-default has.\"}]}]",
+      "gen_ai.output.messages": "[{\"role\": \"assistant\", \"parts\": [{\"type\": \"tool_call\", \"id\": \"toolu_01VfEtP9mQEKL8p653H2xeDT\", \"name\": \"read_file\", \"arguments\": {\"file_path\": \"/skills/esql-investigation/SKILL.md\", \"limit\": 1000}}], \"finish_reason\": \"tool_call\"}]"
+    }
+  },
+  {
+    "trace_id": "b88f334ff42c54a844c550781ae2e7fc",
+    "span_id": "83f618a4509f6c00",
+    "parent_span_id": "32ebc4b033b90073",
+    "@timestamp": "2026-11-27T10:48:10.335Z",
+    "name": "execute_tool read_file",
+    "scope": {
+      "name": "opentelemetry.instrumentation.langchain"
+    },
+    "attributes": {
+      "gen_ai.operation.name": "execute_tool",
+      "gen_ai.tool.name": "read_file",
+      "gen_ai.tool.call.arguments": "{\"input_str\": \"{'file_path': '/skills/esql-investigation/SKILL.md', 'limit': 1000}\", \"tags\": [\"seq:step:1\"], \"metadata\": {}, \"inputs\": {\"file_path\": \"/skills/esql-investigation/SKILL.md\", \"limit\": 1000}, \"kwargs\": {\"color\": \"green\", \"name\": null, \"tool_call_id\": \"toolu_01VfEtP9mQEKL8p653H2xeDT\"}}",
+      "gen_ai.tool.call.result": "{\"output\": {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"ToolMessage\"], \"kwargs\": {\"content\": \"     1\\t---\\n     2\\tname: esql-investigation\\n     3\\tdescription: Use this skill when answering data questions that require exploring Elasticsearch indices with ES|QL or Agent Builder MCP tools before giving a grounded final answer.\", \"type\": \"tool\", \"name\": \"read_file\", \"tool_call_id\": \"toolu_01VfEtP9mQEKL8p653H2xeDT\", \"status\": \"success\"}}, \"kwargs\": {\"tags\": [\"seq:step:1\"], \"color\": \"green\", \"name\": \"read_file\"}}",
+      "gen_ai.task.status": "success"
+    }
+  },
+  {
+    "trace_id": "b88f334ff42c54a844c550781ae2e7fc",
+    "span_id": "029eb3f968fca7d1",
+    "parent_span_id": "d6620ce7c2506eb6",
+    "@timestamp": "2026-11-27T10:48:10.368Z",
+    "name": "ChatOpenAI.chat",
+    "scope": {
+      "name": "opentelemetry.instrumentation.langchain"
+    },
+    "attributes": {
+      "gen_ai.operation.name": "chat",
+      "gen_ai.input.messages": "[{\"role\": \"user\", \"parts\": [{\"type\": \"text\", \"content\": \"Using your esql-investigation skill, read the skill file first, then tell me which data streams exist in this cluster and which fields traces-generic.otel-default has.\"}]}, {\"role\": \"assistant\", \"parts\": [{\"type\": \"tool_call\", \"id\": \"toolu_01VfEtP9mQEKL8p653H2xeDT\", \"name\": \"read_file\", \"arguments\": {\"file_path\": \"/skills/esql-investigation/SKILL.md\", \"limit\": 1000}}]}, {\"role\": \"tool\", \"parts\": [{\"type\": \"tool_call_response\", \"id\": \"toolu_01VfEtP9mQEKL8p653H2xeDT\", \"response\": \"     1\\t---\\n     2\\tname: esql-investigation\\n     3\\tdescription: Use this skill when answering data questions that require exploring Elasticsearch indices with ES|QL or Agent Builder MCP tools before giving a grounded final answer.\"}]}]",
+      "gen_ai.output.messages": "[{\"role\": \"assistant\", \"parts\": [{\"type\": \"text\", \"content\": \"Now I'll follow the skill workflow — list indices and get the mapping for `traces-generic.otel-default` in parallel.\"}, {\"type\": \"tool_call\", \"id\": \"toolu_019S1wNGvWyczMcrJRc2ysJj\", \"name\": \"platform_core_list_indices\", \"arguments\": {}}, {\"type\": \"tool_call\", \"id\": \"toolu_01BN1rKJjsBcJAuxJx5vZ6du\", \"name\": \"platform_core_get_index_mapping\", \"arguments\": {\"indices\": [\"traces-generic.otel-default\"]}}], \"finish_reason\": \"tool_call\"}]"
+    }
+  },
+  {
+    "trace_id": "b88f334ff42c54a844c550781ae2e7fc",
+    "span_id": "104eac51100d03e6",
+    "parent_span_id": "ee6ec62da2411549",
+    "@timestamp": "2026-11-27T10:48:12.969Z",
+    "name": "execute_tool platform_core_list_indices",
+    "scope": {
+      "name": "opentelemetry.instrumentation.langchain"
+    },
+    "attributes": {
+      "gen_ai.operation.name": "execute_tool",
+      "gen_ai.tool.name": "platform_core_list_indices",
+      "gen_ai.tool.call.arguments": "{\"input_str\": \"{}\", \"tags\": [\"seq:step:1\"], \"metadata\": {}, \"inputs\": {}, \"kwargs\": {\"color\": \"green\", \"name\": null, \"tool_call_id\": \"toolu_019S1wNGvWyczMcrJRc2ysJj\"}}",
+      "gen_ai.tool.call.result": "{\"output\": {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"ToolMessage\"], \"kwargs\": {\"content\": [{\"type\": \"text\", \"text\": \"{\\\"results\\\": [{\\\"type\\\": \\\"other\\\", \\\"data\\\": {\\\"indices\\\": [], \\\"aliases\\\": [{\\\"name\\\": \\\".siem-signals-default\\\", \\\"indices\\\": [\\\".internal.alerts-security.alerts-default-000001\\\"]}], \\\"data_streams\\\": [{\\\"name\\\": \\\"logs-generic.otel-default\\\", \\\"indices\\\": [\\\".ds-logs-generic.otel-default-2026.11.27-000001\\\"]}, {\\\"name\\\": \\\"metrics-service_destination.1m.otel-default\\\", \\\"indices\\\": [\\\".ds-metrics-service_destination.1m.otel-default-2026.11.27-000001\\\"]}, {\\\"name\\\": \\\"metrics-service_summary.1m.otel-default\\\", \\\"indices\\\": [\\\".ds-metrics-service_summary.1m.otel-default-2026.11.27-000001\\\"]}, {\\\"name\\\": \\\"metrics-service_transaction.1m.otel-default\\\", \\\"indices\\\": [\\\".ds-metrics-service_transaction.1m.otel-default-2026.11.27-000001\\\"]}, {\\\"name\\\": \\\"metrics-transaction.1m.otel-default\\\", \\\"indices\\\": [\\\".ds-metrics-transaction.1m.otel-default-2026.11.27-000001\\\"]}, {\\\"name\\\": \\\"traces-generic.otel-default\\\", \\\"indices\\\": [\\\".ds-traces-generic.otel-default-2026.11.27-000001\\\"]}], \\\"datasets\\\": [], \\\"views\\\": [], \\\"warnings\\\": []}, \\\"tool_result_id\\\": \\\"ZuuwGm\\\"}]}\", \"id\": \"lc_f7d82b3f-471c-41af-883e-be478a17fa23\"}], \"type\": \"tool\", \"name\": \"platform_core_list_indices\", \"tool_call_id\": \"toolu_019S1wNGvWyczMcrJRc2ysJj\", \"status\": \"success\"}}, \"kwargs\": {\"tags\": [\"seq:step:1\"], \"color\": \"green\", \"name\": \"platform_core_list_indices\"}}",
+      "gen_ai.task.status": "success"
+    }
+  },
+  {
+    "trace_id": "b88f334ff42c54a844c550781ae2e7fc",
+    "span_id": "7c03fa34c78e2b21",
+    "parent_span_id": "5fccd3f50ca554ee",
+    "@timestamp": "2026-11-27T10:48:12.970Z",
+    "name": "execute_tool platform_core_get_index_mapping",
+    "scope": {
+      "name": "opentelemetry.instrumentation.langchain"
+    },
+    "attributes": {
+      "gen_ai.operation.name": "execute_tool",
+      "gen_ai.tool.name": "platform_core_get_index_mapping",
+      "gen_ai.tool.call.arguments": "{\"input_str\": \"{'indices': ['traces-generic.otel-default']}\", \"tags\": [\"seq:step:1\"], \"metadata\": {}, \"inputs\": {\"indices\": [\"traces-generic.otel-default\"]}, \"kwargs\": {\"color\": \"green\", \"name\": null, \"tool_call_id\": \"toolu_01BN1rKJjsBcJAuxJx5vZ6du\"}}",
+      "gen_ai.tool.call.result": "{\"output\": {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"ToolMessage\"], \"kwargs\": {\"content\": [{\"type\": \"text\", \"text\": \"{\\\"results\\\": [{\\\"type\\\": \\\"other\\\", \\\"data\\\": {\\\"resources\\\": {\\\"traces-generic.otel-default\\\": {\\\"type\\\": \\\"dataStream\\\", \\\"fields\\\": \\\"- resource.attributes.telemetry.sdk.name.text [text]\\\\n- k8s.namespace.name [keyword]\\\\n- container.image.tag [keyword]\\\\n- scope.name [keyword]\\\\n- db.operation.parameter.application [keyword]\\\\n- gen_ai.response.model [keyword]\\\\n- attributes.user_agent.original [keyword]\\\\n- attributes.traceloop.association.pr…\\\"}}}, \\\"tool_result_id\\\": \\\"XLSCUe\\\"}]}\", \"id\": \"lc_e2dd5c3a-857b-4c2a-877d-bb13bdf6f260\"}], \"type\": \"tool\", \"name\": \"platform_core_get_index_mapping\", \"tool_call_id\": \"toolu_01BN1rKJjsBcJAuxJx5vZ6du\", \"status\": \"success\"}}, \"kwargs\": {\"tags\": [\"seq:step:1\"], \"color\": \"green\", \"name\": \"platform_core_get_index_mapping\"}}",
+      "gen_ai.task.status": "success"
+    }
+  },
+  {
+    "trace_id": "b88f334ff42c54a844c550781ae2e7fc",
+    "span_id": "2de273a9fe8e121a",
+    "parent_span_id": "0f047302af6505eb",
+    "@timestamp": "2026-11-27T10:48:13.558Z",
+    "name": "ChatOpenAI.chat",
+    "scope": {
+      "name": "opentelemetry.instrumentation.langchain"
+    },
+    "attributes": {
+      "gen_ai.operation.name": "chat",
+      "gen_ai.input.messages": "[{\"role\": \"user\", \"parts\": [{\"type\": \"text\", \"content\": \"Using your esql-investigation skill, read the skill file first, then tell me which data streams exist in this cluster and which fields traces-generic.otel-default has.\"}]}, {\"role\": \"assistant\", \"parts\": [{\"type\": \"tool_call\", \"id\": \"toolu_01VfEtP9mQEKL8p653H2xeDT\", \"name\": \"read_file\", \"arguments\": {\"file_path\": \"/skills/esql-investigation/SKILL.md\", \"limit\": 1000}}]}, {\"role\": \"tool\", \"parts\": [{\"type\": \"tool_call_response\", \"id\": \"toolu_01VfEtP9mQEKL8p653H2xeDT\", \"response\": \"     1\\t---\\n     2\\tname: esql-investigation\\n     3\\tdescription: Use this skill when answering data questions that require exploring Elasticsearch indices with ES|QL or Agent Builder MCP tools before giving a grounded final answer.\"}]}, {\"role\": \"assistant\", \"parts\": [{\"type\": \"text\", \"content\": \"Now I'll follow the skill workflow — list indices and get the mapping for `traces-generic.otel-default` in parallel.\"}, {\"type\": \"tool_call\", \"id\": \"toolu_019S1wNGvWyczMcrJRc2ysJj\", \"name\": \"platform_core_list_indices\", \"arguments\": {}}, {\"type\": \"tool_call\", \"id\": \"toolu_01BN1rKJjsBcJAuxJx5vZ6du\", \"name\": \"platform_core_get_index_mapping\", \"arguments\": {\"indices\": [\"traces-generic.otel-default\"]}}]}, {\"role\": \"tool\", \"parts\": [{\"type\": \"tool_call_response\", \"id\": \"toolu_019S1wNGvWyczMcrJRc2ysJj\", \"response\": \"[{\\\"type\\\": \\\"text\\\", \\\"text\\\": \\\"{\\\\\\\"results\\\\\\\": [{\\\\\\\"type\\\\\\\": \\\\\\\"other\\\\\\\", \\\\\\\"data\\\\\\\": {\\\\\\\"indices\\\\\\\": [], \\\\\\\"aliases\\\\\\\": [{\\\\\\\"name\\\\\\\": \\\\\\\".siem-signals-default\\\\\\\", \\\\\\\"indices\\\\\\\": [\\\\\\\".internal.alerts-security.alerts-default-000001\\\\\\\"]}], \\\\\\\"data_streams\\\\\\\": [{\\\\\\\"name\\\\\\\": \\\\\\\"logs-generic.otel-default\\\\\\\", \\\\\\\"indices\\\\\\\": [\\\\\\\".ds-logs-generic.otel-default-2026.11.27-000001\\\\\\\"]}, {\\\\\\\"name\\\\\\\": \\\\\\\"metrics-service_destination.1m.otel-default\\\\\\\", \\\\\\\"indices\\\\\\\": [\\\\\\\".ds-metrics-service_destination.1m.otel-default-2026.11.27-000001\\\\\\\"]}, {\\\\\\\"name\\\\\\\": \\\\\\\"metrics-service_summary.1m.otel-default\\\\\\\", \\\\\\\"indices\\\\\\\": [\\\\\\\".ds-metrics-service_summary.1m.otel-default-2026.11.27-000001\\\\\\\"]}, {\\\\\\\"name\\\\\\\": \\\\\\\"metrics-service_transaction.1m.otel-default\\\\\\\", \\\\\\\"indices\\\\\\\": [\\\\\\\".ds-metrics-service_transaction.1m.otel-default-2026.11.27-000001\\\\\\\"]}, {\\\\\\\"name\\\\\\\": \\\\\\\"metrics-transaction.1m.otel-default\\\\\\\", \\\\\\\"indices\\\\\\\": [\\\\\\\".ds-metrics-transaction.1m.otel-default-2026.11.27-000001\\\\\\\"]}, {\\\\\\\"name\\\\\\\": \\\\\\\"traces-generic.otel-default\\\\\\\", \\\\\\\"indices\\\\\\\": [\\\\\\\".ds-traces-generic.otel-default-2026.11.27-000001\\\\\\\"]}], \\\\\\\"datasets\\\\\\\": [], \\\\\\\"views\\\\\\\": [], \\\\\\\"warnings\\\\\\\": []}, \\\\\\\"tool_result_id\\\\\\\": \\\\\\\"ZuuwGm\\\\\\\"}]}\\\", \\\"id\\\": \\\"lc_f7d82b3f-471c-41af-883e-be478a17fa23\\\"}]\"}]}, {\"role\": \"tool\", \"parts\": [{\"type\": \"tool_call_response\", \"id\": \"toolu_01BN1rKJjsBcJAuxJx5vZ6du\", \"response\": \"[{\\\"type\\\": \\\"text\\\", \\\"text\\\": \\\"{\\\\\\\"results\\\\\\\": [{\\\\\\\"type\\\\\\\": \\\\\\\"other\\\\\\\", \\\\\\\"data\\\\\\\": {\\\\\\\"resources\\\\\\\": {\\\\\\\"traces-generic.otel-default\\\\\\\": {\\\\\\\"type\\\\\\\": \\\\\\\"dataStream\\\\\\\", \\\\\\\"fields\\\\\\\": \\\\\\\"- resource.attributes.telemetry.sdk.name.text [text]\\\\\\\\n- k8s.namespace.name [keyword]\\\\\\\\n- container.image.tag [keyword]\\\\\\\\n- scope.name [keyword]\\\\\\\\n- db.operation.parameter.application [keyword]\\\\\\\\n- gen_ai.response.model [keyword]\\\\\\\\n- attributes.user_agent.original [keyword]\\\\\\\\n- attributes.traceloop.association.pr…\\\\\\\"}}}, \\\\\\\"tool_result_id\\\\\\\": \\\\\\\"XLSCUe\\\\\\\"}]}\\\", \\\"id\\\": \\\"lc_e2dd5c3a-857b-4c2a-877d-bb13bdf6f260\\\"}]\"}]}]",
+      "gen_ai.output.messages": "[{\"role\": \"assistant\", \"parts\": [{\"type\": \"text\", \"content\": \"Here's what the cluster contains:\\n\\n---\\n\\n## Data Streams in the Cluster\\n\\nThere are **6 data streams**:\\n\\n| Data Stream | Backing Index |\\n|---|---|\\n| `logs-generic.otel-default` | `.ds-logs-generic.otel-default-2026.11.27-000001` |\\n| `metrics-service_destination.1m.otel-default` | `.ds-metrics-service_…\"}], \"finish_reason\": \"stop\"}]"
+    }
+  },
+  {
+    "trace_id": "ac89be8f301f0b23458948c5a25844ae",
+    "span_id": "0062aff2e286fac1",
+    "parent_span_id": "3bc151e0eb7ddc79",
+    "@timestamp": "2026-11-27T10:58:14.991Z",
+    "name": "ChatOpenAI.chat",
+    "scope": {
+      "name": "opentelemetry.instrumentation.langchain"
+    },
+    "attributes": {
+      "gen_ai.operation.name": "chat",
+      "gen_ai.input.messages": "[{\"role\": \"user\", \"parts\": [{\"type\": \"text\", \"content\": \"Before doing anything else, use your write_todos tool to write a 2-item todo list: (1) list the indices, (2) report how many there are. Then do both and mark the todos completed.\"}]}]",
+      "gen_ai.output.messages": "[{\"role\": \"assistant\", \"parts\": [{\"type\": \"tool_call\", \"id\": \"toolu_0148BSaWXK3UtX9EdKjUVhAu\", \"name\": \"write_todos\", \"arguments\": {\"todos\": [{\"content\": \"List the indices\", \"status\": \"in_progress\"}, {\"content\": \"Report how many indices there are\", \"status\": \"pending\"}]}}], \"finish_reason\": \"tool_call\"}]"
+    }
+  },
+  {
+    "trace_id": "ac89be8f301f0b23458948c5a25844ae",
+    "span_id": "ae351908822c237e",
+    "parent_span_id": "1c8d33cac9246d8f",
+    "@timestamp": "2026-11-27T10:58:17.466Z",
+    "name": "execute_tool write_todos",
+    "scope": {
+      "name": "opentelemetry.instrumentation.langchain"
+    },
+    "attributes": {
+      "gen_ai.operation.name": "execute_tool",
+      "gen_ai.tool.name": "write_todos",
+      "gen_ai.tool.call.arguments": "{\"input_str\": \"{'todos': [{'content': 'List the indices', 'status': 'in_progress'}, {'content': 'Report how many indices there are', 'status': 'pending'}]}\", \"tags\": [\"seq:step:1\"], \"metadata\": {}, \"inputs\": {\"todos\": [{\"content\": \"List the indices\", \"status\": \"in_progress\"}, {\"content\": \"Report how many indices there are\", \"status\": \"pending\"}]}, \"kwargs\": {\"color\": \"green\", \"name\": null, \"tool_call_id\": \"toolu_0148BSaWXK3UtX9EdKjUVhAu\"}}",
+      "gen_ai.tool.call.result": "{\"output\": {\"graph\": null, \"update\": {\"todos\": [{\"content\": \"List the indices\", \"status\": \"in_progress\"}, {\"content\": \"Report how many indices there are\", \"status\": \"pending\"}], \"messages\": [{\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"ToolMessage\"], \"kwargs\": {\"content\": \"Updated todo list to [{'content': 'List the indices', 'status': 'in_progress'}, {'content': 'Report how many indices there are', 'status': 'pending'}]\", \"type\": \"tool\", \"tool_call_id\": \"toolu_0148BSaWXK3UtX9EdKjUVhAu\", \"status\": \"success\"}}]}, \"resume\": null, \"goto\": []}, \"kwargs\": {\"tags\": [\"seq:step:1\"], \"color\": \"green\", \"name\": \"write_todos\"}}",
+      "gen_ai.task.status": "success"
+    }
+  },
+  {
+    "trace_id": "ac89be8f301f0b23458948c5a25844ae",
+    "span_id": "84290f3eb87c31aa",
+    "parent_span_id": "10915968385ddfd0",
+    "@timestamp": "2026-11-27T10:58:17.498Z",
+    "name": "ChatOpenAI.chat",
+    "scope": {
+      "name": "opentelemetry.instrumentation.langchain"
+    },
+    "attributes": {
+      "gen_ai.operation.name": "chat",
+      "gen_ai.input.messages": "[{\"role\": \"user\", \"parts\": [{\"type\": \"text\", \"content\": \"Before doing anything else, use your write_todos tool to write a 2-item todo list: (1) list the indices, (2) report how many there are. Then do both and mark the todos completed.\"}]}, {\"role\": \"assistant\", \"parts\": [{\"type\": \"tool_call\", \"id\": \"toolu_0148BSaWXK3UtX9EdKjUVhAu\", \"name\": \"write_todos\", \"arguments\": {\"todos\": [{\"content\": \"List the indices\", \"status\": \"in_progress\"}, {\"content\": \"Report how many indices there are\", \"status\": \"pending\"}]}}]}, {\"role\": \"tool\", \"parts\": [{\"type\": \"tool_call_response\", \"id\": \"toolu_0148BSaWXK3UtX9EdKjUVhAu\", \"response\": \"Updated todo list to [{'content': 'List the indices', 'status': 'in_progress'}, {'content': 'Report how many indices there are', 'status': 'pending'}]\"}]}]",
+      "gen_ai.output.messages": "[{\"role\": \"assistant\", \"parts\": [{\"type\": \"tool_call\", \"id\": \"toolu_011tBfx9KWwqYJwtdUbxuxhu\", \"name\": \"platform_core_list_indices\", \"arguments\": {}}], \"finish_reason\": \"tool_call\"}]"
+    }
+  },
+  {
+    "trace_id": "ac89be8f301f0b23458948c5a25844ae",
+    "span_id": "00fb95e11967d06a",
+    "parent_span_id": "4bc30cd6444ebd68",
+    "@timestamp": "2026-11-27T10:58:18.830Z",
+    "name": "execute_tool platform_core_list_indices",
+    "scope": {
+      "name": "opentelemetry.instrumentation.langchain"
+    },
+    "attributes": {
+      "gen_ai.operation.name": "execute_tool",
+      "gen_ai.tool.name": "platform_core_list_indices",
+      "gen_ai.tool.call.arguments": "{\"input_str\": \"{}\", \"tags\": [\"seq:step:1\"], \"metadata\": {}, \"inputs\": {}, \"kwargs\": {\"color\": \"green\", \"name\": null, \"tool_call_id\": \"toolu_011tBfx9KWwqYJwtdUbxuxhu\"}}",
+      "gen_ai.tool.call.result": "{\"output\": {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"ToolMessage\"], \"kwargs\": {\"content\": [{\"type\": \"text\", \"text\": \"{\\\"results\\\": [{\\\"type\\\": \\\"other\\\", \\\"data\\\": {\\\"indices\\\": [], \\\"aliases\\\": [{\\\"name\\\": \\\".siem-signals-default\\\", \\\"indices\\\": [\\\".internal.alerts-security.alerts-default-000001\\\"]}], \\\"data_streams\\\": [{\\\"name\\\": \\\"logs-generic.otel-default\\\", \\\"indices\\\": [\\\".ds-logs-generic.otel-default-2026.11.27-000001\\\"]}, {\\\"name\\\": \\\"metrics-service_destination.1m.otel-default\\\", \\\"indices\\\": [\\\".ds-metrics-service_destination.1m.otel-default-2026.11.27-000001\\\"]}, {\\\"name\\\": \\\"metrics-service_summary.1m.otel-default\\\", \\\"indices\\\": [\\\".ds-metrics-service_summary.1m.otel-default-2026.11.27-000001\\\"]}, {\\\"name\\\": \\\"metrics-service_transaction.1m.otel-default\\\", \\\"indices\\\": [\\\".ds-metrics-service_transaction.1m.otel-default-2026.11.27-000001\\\"]}, {\\\"name\\\": \\\"metrics-transaction.1m.otel-default\\\", \\\"indices\\\": [\\\".ds-metrics-transaction.1m.otel-default-2026.11.27-000001\\\"]}, {\\\"name\\\": \\\"traces-generic.otel-default\\\", \\\"indices\\\": [\\\".ds-traces-generic.otel-default-2026.11.27-000001\\\"]}], \\\"datasets\\\": [], \\\"views\\\": [], \\\"warnings\\\": []}, \\\"tool_result_id\\\": \\\"yiZ6mm\\\"}]}\", \"id\": \"lc_80d6e295-f9d6-478c-b660-bf67b196eba2\"}], \"type\": \"tool\", \"name\": \"platform_core_list_indices\", \"tool_call_id\": \"toolu_011tBfx9KWwqYJwtdUbxuxhu\", \"status\": \"success\"}}, \"kwargs\": {\"tags\": [\"seq:step:1\"], \"color\": \"green\", \"name\": \"platform_core_list_indices\"}}",
+      "gen_ai.task.status": "success"
+    }
+  },
+  {
+    "trace_id": "ac89be8f301f0b23458948c5a25844ae",
+    "span_id": "72a20dab532637f3",
+    "parent_span_id": "1d8b41db76564c2c",
+    "@timestamp": "2026-11-27T10:58:19.034Z",
+    "name": "ChatOpenAI.chat",
+    "scope": {
+      "name": "opentelemetry.instrumentation.langchain"
+    },
+    "attributes": {
+      "gen_ai.operation.name": "chat",
+      "gen_ai.input.messages": "[{\"role\": \"user\", \"parts\": [{\"type\": \"text\", \"content\": \"Before doing anything else, use your write_todos tool to write a 2-item todo list: (1) list the indices, (2) report how many there are. Then do both and mark the todos completed.\"}]}, {\"role\": \"assistant\", \"parts\": [{\"type\": \"tool_call\", \"id\": \"toolu_0148BSaWXK3UtX9EdKjUVhAu\", \"name\": \"write_todos\", \"arguments\": {\"todos\": [{\"content\": \"List the indices\", \"status\": \"in_progress\"}, {\"content\": \"Report how many indices there are\", \"status\": \"pending\"}]}}]}, {\"role\": \"tool\", \"parts\": [{\"type\": \"tool_call_response\", \"id\": \"toolu_0148BSaWXK3UtX9EdKjUVhAu\", \"response\": \"Updated todo list to [{'content': 'List the indices', 'status': 'in_progress'}, {'content': 'Report how many indices there are', 'status': 'pending'}]\"}]}, {\"role\": \"assistant\", \"parts\": [{\"type\": \"tool_call\", \"id\": \"toolu_011tBfx9KWwqYJwtdUbxuxhu\", \"name\": \"platform_core_list_indices\", \"arguments\": {}}]}, {\"role\": \"tool\", \"parts\": [{\"type\": \"tool_call_response\", \"id\": \"toolu_011tBfx9KWwqYJwtdUbxuxhu\", \"response\": \"[{\\\"type\\\": \\\"text\\\", \\\"text\\\": \\\"{\\\\\\\"results\\\\\\\": [{\\\\\\\"type\\\\\\\": \\\\\\\"other\\\\\\\", \\\\\\\"data\\\\\\\": {\\\\\\\"indices\\\\\\\": [], \\\\\\\"aliases\\\\\\\": [{\\\\\\\"name\\\\\\\": \\\\\\\".siem-signals-default\\\\\\\", \\\\\\\"indices\\\\\\\": [\\\\\\\".internal.alerts-security.alerts-default-000001\\\\\\\"]}], \\\\\\\"data_streams\\\\\\\": [{\\\\\\\"name\\\\\\\": \\\\\\\"logs-generic.otel-default\\\\\\\", \\\\\\\"indices\\\\\\\": [\\\\\\\".ds-logs-generic.otel-default-2026.11.27-000001\\\\\\\"]}, {\\\\\\\"name\\\\\\\": \\\\\\\"metrics-service_destination.1m.otel-default\\\\\\\", \\\\\\\"indices\\\\\\\": [\\\\\\\".ds-metrics-service_destination.1m.otel-default-2026.11.27-000001\\\\\\\"]}, {\\\\\\\"name\\\\\\\": \\\\\\\"metrics-service_summary.1m.otel-default\\\\\\\", \\\\\\\"indices\\\\\\\": [\\\\\\\".ds-metrics-service_summary.1m.otel-default-2026.11.27-000001\\\\\\\"]}, {\\\\\\\"name\\\\\\\": \\\\\\\"metrics-service_transaction.1m.otel-default\\\\\\\", \\\\\\\"indices\\\\\\\": [\\\\\\\".ds-metrics-service_transaction.1m.otel-default-2026.11.27-000001\\\\\\\"]}, {\\\\\\\"name\\\\\\\": \\\\\\\"metrics-transaction.1m.otel-default\\\\\\\", \\\\\\\"indices\\\\\\\": [\\\\\\\".ds-metrics-transaction.1m.otel-default-2026.11.27-000001\\\\\\\"]}, {\\\\\\\"name\\\\\\\": \\\\\\\"traces-generic.otel-default\\\\\\\", \\\\\\\"indices\\\\\\\": [\\\\\\\".ds-traces-generic.otel-default-2026.11.27-000001\\\\\\\"]}], \\\\\\\"datasets\\\\\\\": [], \\\\\\\"views\\\\\\\": [], \\\\\\\"warnings\\\\\\\": []}, \\\\\\\"tool_result_id\\\\\\\": \\\\\\\"yiZ6mm\\\\\\\"}]}\\\", \\\"id\\\": \\\"lc_80d6e295-f9d6-478c-b660-bf67b196eba2\\\"}]\"}]}]",
+      "gen_ai.output.messages": "[{\"role\": \"assistant\", \"parts\": [{\"type\": \"tool_call\", \"id\": \"toolu_01GuiTUr8yYrArPFreeNdKAi\", \"name\": \"write_todos\", \"arguments\": {\"todos\": [{\"content\": \"List the indices\", \"status\": \"completed\"}, {\"content\": \"Report how many indices there are\", \"status\": \"in_progress\"}]}}], \"finish_reason\": \"tool_call\"}]"
+    }
+  },
+  {
+    "trace_id": "ac89be8f301f0b23458948c5a25844ae",
+    "span_id": "8b05fc9f900b533a",
+    "parent_span_id": "d8eb24316088a694",
+    "@timestamp": "2026-11-27T10:58:20.427Z",
+    "name": "execute_tool write_todos",
+    "scope": {
+      "name": "opentelemetry.instrumentation.langchain"
+    },
+    "attributes": {
+      "gen_ai.operation.name": "execute_tool",
+      "gen_ai.tool.name": "write_todos",
+      "gen_ai.tool.call.arguments": "{\"input_str\": \"{'todos': [{'content': 'List the indices', 'status': 'completed'}, {'content': 'Report how many indices there are', 'status': 'in_progress'}]}\", \"tags\": [\"seq:step:1\"], \"metadata\": {}, \"inputs\": {\"todos\": [{\"content\": \"List the indices\", \"status\": \"completed\"}, {\"content\": \"Report how many indices there are\", \"status\": \"in_progress\"}]}, \"kwargs\": {\"color\": \"green\", \"name\": null, \"tool_call_id\": \"toolu_01GuiTUr8yYrArPFreeNdKAi\"}}",
+      "gen_ai.tool.call.result": "{\"output\": {\"graph\": null, \"update\": {\"todos\": [{\"content\": \"List the indices\", \"status\": \"completed\"}, {\"content\": \"Report how many indices there are\", \"status\": \"in_progress\"}], \"messages\": [{\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"ToolMessage\"], \"kwargs\": {\"content\": \"Updated todo list to [{'content': 'List the indices', 'status': 'completed'}, {'content': 'Report how many indices there are', 'status': 'in_progress'}]\", \"type\": \"tool\", \"tool_call_id\": \"toolu_01GuiTUr8yYrArPFreeNdKAi\", \"status\": \"success\"}}]}, \"resume\": null, \"goto\": []}, \"kwargs\": {\"tags\": [\"seq:step:1\"], \"color\": \"green\", \"name\": \"write_todos\"}}",
+      "gen_ai.task.status": "success"
+    }
+  },
+  {
+    "trace_id": "ac89be8f301f0b23458948c5a25844ae",
+    "span_id": "b63dc93c46b6d551",
+    "parent_span_id": "e5f81a0adc2c7db8",
+    "@timestamp": "2026-11-27T10:58:20.463Z",
+    "name": "ChatOpenAI.chat",
+    "scope": {
+      "name": "opentelemetry.instrumentation.langchain"
+    },
+    "attributes": {
+      "gen_ai.operation.name": "chat",
+      "gen_ai.input.messages": "[{\"role\": \"user\", \"parts\": [{\"type\": \"text\", \"content\": \"Before doing anything else, use your write_todos tool to write a 2-item todo list: (1) list the indices, (2) report how many there are. Then do both and mark the todos completed.\"}]}, {\"role\": \"assistant\", \"parts\": [{\"type\": \"tool_call\", \"id\": \"toolu_0148BSaWXK3UtX9EdKjUVhAu\", \"name\": \"write_todos\", \"arguments\": {\"todos\": [{\"content\": \"List the indices\", \"status\": \"in_progress\"}, {\"content\": \"Report how many indices there are\", \"status\": \"pending\"}]}}]}, {\"role\": \"tool\", \"parts\": [{\"type\": \"tool_call_response\", \"id\": \"toolu_0148BSaWXK3UtX9EdKjUVhAu\", \"response\": \"Updated todo list to [{'content': 'List the indices', 'status': 'in_progress'}, {'content': 'Report how many indices there are', 'status': 'pending'}]\"}]}, {\"role\": \"assistant\", \"parts\": [{\"type\": \"tool_call\", \"id\": \"toolu_011tBfx9KWwqYJwtdUbxuxhu\", \"name\": \"platform_core_list_indices\", \"arguments\": {}}]}, {\"role\": \"tool\", \"parts\": [{\"type\": \"tool_call_response\", \"id\": \"toolu_011tBfx9KWwqYJwtdUbxuxhu\", \"response\": \"[{\\\"type\\\": \\\"text\\\", \\\"text\\\": \\\"{\\\\\\\"results\\\\\\\": [{\\\\\\\"type\\\\\\\": \\\\\\\"other\\\\\\\", \\\\\\\"data\\\\\\\": {\\\\\\\"indices\\\\\\\": [], \\\\\\\"aliases\\\\\\\": [{\\\\\\\"name\\\\\\\": \\\\\\\".siem-signals-default\\\\\\\", \\\\\\\"indices\\\\\\\": [\\\\\\\".internal.alerts-security.alerts-default-000001\\\\\\\"]}], \\\\\\\"data_streams\\\\\\\": [{\\\\\\\"name\\\\\\\": \\\\\\\"logs-generic.otel-default\\\\\\\", \\\\\\\"indices\\\\\\\": [\\\\\\\".ds-logs-generic.otel-default-2026.11.27-000001\\\\\\\"]}, {\\\\\\\"name\\\\\\\": \\\\\\\"metrics-service_destination.1m.otel-default\\\\\\\", \\\\\\\"indices\\\\\\\": [\\\\\\\".ds-metrics-service_destination.1m.otel-default-2026.11.27-000001\\\\\\\"]}, {\\\\\\\"name\\\\\\\": \\\\\\\"metrics-service_summary.1m.otel-default\\\\\\\", \\\\\\\"indices\\\\\\\": [\\\\\\\".ds-metrics-service_summary.1m.otel-default-2026.11.27-000001\\\\\\\"]}, {\\\\\\\"name\\\\\\\": \\\\\\\"metrics-service_transaction.1m.otel-default\\\\\\\", \\\\\\\"indices\\\\\\\": [\\\\\\\".ds-metrics-service_transaction.1m.otel-default-2026.11.27-000001\\\\\\\"]}, {\\\\\\\"name\\\\\\\": \\\\\\\"metrics-transaction.1m.otel-default\\\\\\\", \\\\\\\"indices\\\\\\\": [\\\\\\\".ds-metrics-transaction.1m.otel-default-2026.11.27-000001\\\\\\\"]}, {\\\\\\\"name\\\\\\\": \\\\\\\"traces-generic.otel-default\\\\\\\", \\\\\\\"indices\\\\\\\": [\\\\\\\".ds-traces-generic.otel-default-2026.11.27-000001\\\\\\\"]}], \\\\\\\"datasets\\\\\\\": [], \\\\\\\"views\\\\\\\": [], \\\\\\\"warnings\\\\\\\": []}, \\\\\\\"tool_result_id\\\\\\\": \\\\\\\"yiZ6mm\\\\\\\"}]}\\\", \\\"id\\\": \\\"lc_80d6e295-f9d6-478c-b660-bf67b196eba2\\\"}]\"}]}, {\"role\": \"assistant\", \"parts\": [{\"type\": \"tool_call\", \"id\": \"toolu_01GuiTUr8yYrArPFreeNdKAi\", \"name\": \"write_todos\", \"arguments\": {\"todos\": [{\"content\": \"List the indices\", \"status\": \"completed\"}, {\"content\": \"Report how many indices there are\", \"status\": \"in_progress\"}]}}]}, {\"role\": \"tool\", \"parts\": [{\"type\": \"tool_call_response\", \"id\": \"toolu_01GuiTUr8yYrArPFreeNdKAi\", \"response\": \"Updated todo list to [{'content': 'List the indices', 'status': 'completed'}, {'content': 'Report how many indices there are', 'status': 'in_progress'}]\"}]}]",
+      "gen_ai.output.messages": "[{\"role\": \"assistant\", \"parts\": [{\"type\": \"tool_call\", \"id\": \"toolu_01Lr5nvR9qfdegjN6J1Vaeea\", \"name\": \"write_todos\", \"arguments\": {\"todos\": [{\"content\": \"List the indices\", \"status\": \"completed\"}, {\"content\": \"Report how many indices there are\", \"status\": \"completed\"}]}}], \"finish_reason\": \"tool_call\"}]"
+    }
+  },
+  {
+    "trace_id": "ac89be8f301f0b23458948c5a25844ae",
+    "span_id": "8f9bda70362658a3",
+    "parent_span_id": "d12c815440967b46",
+    "@timestamp": "2026-11-27T10:58:21.944Z",
+    "name": "execute_tool write_todos",
+    "scope": {
+      "name": "opentelemetry.instrumentation.langchain"
+    },
+    "attributes": {
+      "gen_ai.operation.name": "execute_tool",
+      "gen_ai.tool.name": "write_todos",
+      "gen_ai.tool.call.arguments": "{\"input_str\": \"{'todos': [{'content': 'List the indices', 'status': 'completed'}, {'content': 'Report how many indices there are', 'status': 'completed'}]}\", \"tags\": [\"seq:step:1\"], \"metadata\": {}, \"inputs\": {\"todos\": [{\"content\": \"List the indices\", \"status\": \"completed\"}, {\"content\": \"Report how many indices there are\", \"status\": \"completed\"}]}, \"kwargs\": {\"color\": \"green\", \"name\": null, \"tool_call_id\": \"toolu_01Lr5nvR9qfdegjN6J1Vaeea\"}}",
+      "gen_ai.tool.call.result": "{\"output\": {\"graph\": null, \"update\": {\"todos\": [{\"content\": \"List the indices\", \"status\": \"completed\"}, {\"content\": \"Report how many indices there are\", \"status\": \"completed\"}], \"messages\": [{\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"ToolMessage\"], \"kwargs\": {\"content\": \"Updated todo list to [{'content': 'List the indices', 'status': 'completed'}, {'content': 'Report how many indices there are', 'status': 'completed'}]\", \"type\": \"tool\", \"tool_call_id\": \"toolu_01Lr5nvR9qfdegjN6J1Vaeea\", \"status\": \"success\"}}]}, \"resume\": null, \"goto\": []}, \"kwargs\": {\"tags\": [\"seq:step:1\"], \"color\": \"green\", \"name\": \"write_todos\"}}",
+      "gen_ai.task.status": "success"
+    }
+  },
+  {
+    "trace_id": "ac89be8f301f0b23458948c5a25844ae",
+    "span_id": "73409c51fbb1bbb7",
+    "parent_span_id": "a456270743678962",
+    "@timestamp": "2026-11-27T10:58:21.974Z",
+    "name": "ChatOpenAI.chat",
+    "scope": {
+      "name": "opentelemetry.instrumentation.langchain"
+    },
+    "attributes": {
+      "gen_ai.operation.name": "chat",
+      "gen_ai.input.messages": "[{\"role\": \"user\", \"parts\": [{\"type\": \"text\", \"content\": \"Before doing anything else, use your write_todos tool to write a 2-item todo list: (1) list the indices, (2) report how many there are. Then do both and mark the todos completed.\"}]}, {\"role\": \"assistant\", \"parts\": [{\"type\": \"tool_call\", \"id\": \"toolu_0148BSaWXK3UtX9EdKjUVhAu\", \"name\": \"write_todos\", \"arguments\": {\"todos\": [{\"content\": \"List the indices\", \"status\": \"in_progress\"}, {\"content\": \"Report how many indices there are\", \"status\": \"pending\"}]}}]}, {\"role\": \"tool\", \"parts\": [{\"type\": \"tool_call_response\", \"id\": \"toolu_0148BSaWXK3UtX9EdKjUVhAu\", \"response\": \"Updated todo list to [{'content': 'List the indices', 'status': 'in_progress'}, {'content': 'Report how many indices there are', 'status': 'pending'}]\"}]}, {\"role\": \"assistant\", \"parts\": [{\"type\": \"tool_call\", \"id\": \"toolu_011tBfx9KWwqYJwtdUbxuxhu\", \"name\": \"platform_core_list_indices\", \"arguments\": {}}]}, {\"role\": \"tool\", \"parts\": [{\"type\": \"tool_call_response\", \"id\": \"toolu_011tBfx9KWwqYJwtdUbxuxhu\", \"response\": \"[{\\\"type\\\": \\\"text\\\", \\\"text\\\": \\\"{\\\\\\\"results\\\\\\\": [{\\\\\\\"type\\\\\\\": \\\\\\\"other\\\\\\\", \\\\\\\"data\\\\\\\": {\\\\\\\"indices\\\\\\\": [], \\\\\\\"aliases\\\\\\\": [{\\\\\\\"name\\\\\\\": \\\\\\\".siem-signals-default\\\\\\\", \\\\\\\"indices\\\\\\\": [\\\\\\\".internal.alerts-security.alerts-default-000001\\\\\\\"]}], \\\\\\\"data_streams\\\\\\\": [{\\\\\\\"name\\\\\\\": \\\\\\\"logs-generic.otel-default\\\\\\\", \\\\\\\"indices\\\\\\\": [\\\\\\\".ds-logs-generic.otel-default-2026.11.27-000001\\\\\\\"]}, {\\\\\\\"name\\\\\\\": \\\\\\\"metrics-service_destination.1m.otel-default\\\\\\\", \\\\\\\"indices\\\\\\\": [\\\\\\\".ds-metrics-service_destination.1m.otel-default-2026.11.27-000001\\\\\\\"]}, {\\\\\\\"name\\\\\\\": \\\\\\\"metrics-service_summary.1m.otel-default\\\\\\\", \\\\\\\"indices\\\\\\\": [\\\\\\\".ds-metrics-service_summary.1m.otel-default-2026.11.27-000001\\\\\\\"]}, {\\\\\\\"name\\\\\\\": \\\\\\\"metrics-service_transaction.1m.otel-default\\\\\\\", \\\\\\\"indices\\\\\\\": [\\\\\\\".ds-metrics-service_transaction.1m.otel-default-2026.11.27-000001\\\\\\\"]}, {\\\\\\\"name\\\\\\\": \\\\\\\"metrics-transaction.1m.otel-default\\\\\\\", \\\\\\\"indices\\\\\\\": [\\\\\\\".ds-metrics-transaction.1m.otel-default-2026.11.27-000001\\\\\\\"]}, {\\\\\\\"name\\\\\\\": \\\\\\\"traces-generic.otel-default\\\\\\\", \\\\\\\"indices\\\\\\\": [\\\\\\\".ds-traces-generic.otel-default-2026.11.27-000001\\\\\\\"]}], \\\\\\\"datasets\\\\\\\": [], \\\\\\\"views\\\\\\\": [], \\\\\\\"warnings\\\\\\\": []}, \\\\\\\"tool_result_id\\\\\\\": \\\\\\\"yiZ6mm\\\\\\\"}]}\\\", \\\"id\\\": \\\"lc_80d6e295-f9d6-478c-b660-bf67b196eba2\\\"}]\"}]}, {\"role\": \"assistant\", \"parts\": [{\"type\": \"tool_call\", \"id\": \"toolu_01GuiTUr8yYrArPFreeNdKAi\", \"name\": \"write_todos\", \"arguments\": {\"todos\": [{\"content\": \"List the indices\", \"status\": \"completed\"}, {\"content\": \"Report how many indices there are\", \"status\": \"in_progress\"}]}}]}, {\"role\": \"tool\", \"parts\": [{\"type\": \"tool_call_response\", \"id\": \"toolu_01GuiTUr8yYrArPFreeNdKAi\", \"response\": \"Updated todo list to [{'content': 'List the indices', 'status': 'completed'}, {'content': 'Report how many indices there are', 'status': 'in_progress'}]\"}]}, {\"role\": \"assistant\", \"parts\": [{\"type\": \"tool_call\", \"id\": \"toolu_01Lr5nvR9qfdegjN6J1Vaeea\", \"name\": \"write_todos\", \"arguments\": {\"todos\": [{\"content\": \"List the indices\", \"status\": \"completed\"}, {\"content\": \"Report how many indices there are\", \"status\": \"completed\"}]}}]}, {\"role\": \"tool\", \"parts\": [{\"type\": \"tool_call_response\", \"id\": \"toolu_01Lr5nvR9qfdegjN6J1Vaeea\", \"response\": \"Updated todo list to [{'content': 'List the indices', 'status': 'completed'}, {'content': 'Report how many indices there are', 'status': 'completed'}]\"}]}]",
+      "gen_ai.output.messages": "[{\"role\": \"assistant\", \"parts\": [{\"type\": \"text\", \"content\": \"Here are the results:\\n\\n**Indices found: 6 data streams** (no standalone indices or aliases with separate backing indices beyond what's listed)\\n\\n| # | Type | Name |\\n|---|------|------|\\n| 1 | Data Stream | `logs-generic.otel-default` |\\n| 2 | Data Stream | `metrics-service_destination.1m.otel-default` …\"}], \"finish_reason\": \"stop\"}]"
+    }
+  },
+  {
+    "trace_id": "7ca58eed31ee13a3edca24224573fb3b",
+    "span_id": "3dafdaf5ad5febaa",
+    "parent_span_id": "4e5a0f7b834941be",
+    "@timestamp": "2026-11-27T10:58:28.264Z",
+    "name": "ChatOpenAI.chat",
+    "scope": {
+      "name": "opentelemetry.instrumentation.langchain"
+    },
+    "attributes": {
+      "gen_ai.operation.name": "chat",
+      "gen_ai.input.messages": "[{\"role\": \"user\", \"parts\": [{\"type\": \"text\", \"content\": \"Use the task tool to delegate to a sub-agent: ask it to list the indices in this cluster with its tools and report how many there are. Then give me its answer.\"}]}]",
+      "gen_ai.output.messages": "[{\"role\": \"assistant\", \"parts\": [{\"type\": \"tool_call\", \"id\": \"toolu_01JwRv5DeqrZnbKgW56FHiri\", \"name\": \"task\", \"arguments\": {\"subagent_type\": \"general-purpose\", \"description\": \"Use the `platform_core_list_indices` tool to list all indices in the Elasticsearch cluster. Count the total number of indices returned and report: (1) the total count, and (2) the full list of index names.\"}}], \"finish_reason\": \"tool_call\"}]"
+    }
+  },
+  {
+    "trace_id": "7ca58eed31ee13a3edca24224573fb3b",
+    "span_id": "75a7bc4681cec094",
+    "parent_span_id": "ab71a55204a6a374",
+    "@timestamp": "2026-11-27T10:58:30.671Z",
+    "name": "execute_tool task",
+    "scope": {
+      "name": "opentelemetry.instrumentation.langchain"
+    },
+    "attributes": {
+      "gen_ai.operation.name": "execute_tool",
+      "gen_ai.tool.name": "task",
+      "gen_ai.tool.call.arguments": "{\"input_str\": \"{'subagent_type': 'general-purpose', 'description': 'Use the `platform_core_list_indices` tool to list all indices in the Elasticsearch cluster. Count the total number of indices returned and report: (1) the total count, and (2) the full list of index names.'}\", \"tags\": [\"seq:step:1\"], \"metadata\": {}, \"inputs\": {\"subagent_type\": \"general-purpose\", \"description\": \"Use the `platform_core_list_indices` tool to list all indices in the Elasticsearch cluster. Count the total number of indices returned and report: (1) the total count, and (2) the full list of index names.\"}, \"kwargs\": {\"color\": \"green\", \"name\": null, \"tool_call_id\": \"toolu_01JwRv5DeqrZnbKgW56FHiri\"}}",
+      "gen_ai.tool.call.result": "{\"output\": {\"graph\": null, \"update\": {\"files\": {}, \"messages\": [{\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"ToolMessage\"], \"kwargs\": {\"content\": \"Here is the full report based on the results from `platform_core_list_indices`:\\n\\n---\\n\\n## Elasticsearch Cluster Index Report\\n\\n### (1) Total Count\\n\\nThe tool returned **0 standalone indices**, but there are **6 data streams** (each backed by 1 index), **1 alias** (pointing to 1 internal index), and **0…\", \"type\": \"tool\", \"tool_call_id\": \"toolu_01JwRv5DeqrZnbKgW56FHiri\", \"status\": \"success\"}}]}, \"resume\": null, \"goto\": []}, \"kwargs\": {\"tags\": [\"seq:step:1\"], \"color\": \"green\", \"name\": \"task\"}}",
+      "gen_ai.task.status": "success"
+    }
+  },
+  {
+    "trace_id": "7ca58eed31ee13a3edca24224573fb3b",
+    "span_id": "475f3d12f4706628",
+    "parent_span_id": "936d5c6f1a620c63",
+    "@timestamp": "2026-11-27T10:58:30.709Z",
+    "name": "ChatOpenAI.chat",
+    "scope": {
+      "name": "opentelemetry.instrumentation.langchain"
+    },
+    "attributes": {
+      "gen_ai.operation.name": "chat",
+      "gen_ai.input.messages": "[{\"role\": \"user\", \"parts\": [{\"type\": \"text\", \"content\": \"Use the `platform_core_list_indices` tool to list all indices in the Elasticsearch cluster. Count the total number of indices returned and report: (1) the total count, and (2) the full list of index names.\"}]}]",
+      "gen_ai.output.messages": "[{\"role\": \"assistant\", \"parts\": [{\"type\": \"tool_call\", \"id\": \"toolu_01TtKmqUnNo2HkHhZ69pSBvB\", \"name\": \"platform_core_list_indices\", \"arguments\": {}}], \"finish_reason\": \"tool_call\"}]"
+    }
+  },
+  {
+    "trace_id": "7ca58eed31ee13a3edca24224573fb3b",
+    "span_id": "759d31f300e010eb",
+    "parent_span_id": "5606ca09b067acf1",
+    "@timestamp": "2026-11-27T10:58:31.779Z",
+    "name": "execute_tool platform_core_list_indices",
+    "scope": {
+      "name": "opentelemetry.instrumentation.langchain"
+    },
+    "attributes": {
+      "gen_ai.operation.name": "execute_tool",
+      "gen_ai.tool.name": "platform_core_list_indices",
+      "gen_ai.tool.call.arguments": "{\"input_str\": \"{}\", \"tags\": [\"seq:step:1\"], \"metadata\": {}, \"inputs\": {}, \"kwargs\": {\"color\": \"green\", \"name\": null, \"tool_call_id\": \"toolu_01TtKmqUnNo2HkHhZ69pSBvB\"}}",
+      "gen_ai.tool.call.result": "{\"output\": {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"ToolMessage\"], \"kwargs\": {\"content\": [{\"type\": \"text\", \"text\": \"{\\\"results\\\": [{\\\"type\\\": \\\"other\\\", \\\"data\\\": {\\\"indices\\\": [], \\\"aliases\\\": [{\\\"name\\\": \\\".siem-signals-default\\\", \\\"indices\\\": [\\\".internal.alerts-security.alerts-default-000001\\\"]}], \\\"data_streams\\\": [{\\\"name\\\": \\\"logs-generic.otel-default\\\", \\\"indices\\\": [\\\".ds-logs-generic.otel-default-2026.11.27-000001\\\"]}, {\\\"name\\\": \\\"metrics-service_destination.1m.otel-default\\\", \\\"indices\\\": [\\\".ds-metrics-service_destination.1m.otel-default-2026.11.27-000001\\\"]}, {\\\"name\\\": \\\"metrics-service_summary.1m.otel-default\\\", \\\"indices\\\": [\\\".ds-metrics-service_summary.1m.otel-default-2026.11.27-000001\\\"]}, {\\\"name\\\": \\\"metrics-service_transaction.1m.otel-default\\\", \\\"indices\\\": [\\\".ds-metrics-service_transaction.1m.otel-default-2026.11.27-000001\\\"]}, {\\\"name\\\": \\\"metrics-transaction.1m.otel-default\\\", \\\"indices\\\": [\\\".ds-metrics-transaction.1m.otel-default-2026.11.27-000001\\\"]}, {\\\"name\\\": \\\"traces-generic.otel-default\\\", \\\"indices\\\": [\\\".ds-traces-generic.otel-default-2026.11.27-000001\\\"]}], \\\"datasets\\\": [], \\\"views\\\": [], \\\"warnings\\\": []}, \\\"tool_result_id\\\": \\\"q9FQwX\\\"}]}\", \"id\": \"lc_fb5acd21-e66a-4193-a061-1f3c8ed3dd49\"}], \"type\": \"tool\", \"name\": \"platform_core_list_indices\", \"tool_call_id\": \"toolu_01TtKmqUnNo2HkHhZ69pSBvB\", \"status\": \"success\"}}, \"kwargs\": {\"tags\": [\"seq:step:1\"], \"color\": \"green\", \"name\": \"platform_core_list_indices\"}}",
+      "gen_ai.task.status": "success"
+    }
+  },
+  {
+    "trace_id": "7ca58eed31ee13a3edca24224573fb3b",
+    "span_id": "8ef1ac53827e8ef3",
+    "parent_span_id": "13500f63e109c767",
+    "@timestamp": "2026-11-27T10:58:32.056Z",
+    "name": "ChatOpenAI.chat",
+    "scope": {
+      "name": "opentelemetry.instrumentation.langchain"
+    },
+    "attributes": {
+      "gen_ai.operation.name": "chat",
+      "gen_ai.input.messages": "[{\"role\": \"user\", \"parts\": [{\"type\": \"text\", \"content\": \"Use the `platform_core_list_indices` tool to list all indices in the Elasticsearch cluster. Count the total number of indices returned and report: (1) the total count, and (2) the full list of index names.\"}]}, {\"role\": \"assistant\", \"parts\": [{\"type\": \"tool_call\", \"id\": \"toolu_01TtKmqUnNo2HkHhZ69pSBvB\", \"name\": \"platform_core_list_indices\", \"arguments\": {}}]}, {\"role\": \"tool\", \"parts\": [{\"type\": \"tool_call_response\", \"id\": \"toolu_01TtKmqUnNo2HkHhZ69pSBvB\", \"response\": \"[{\\\"type\\\": \\\"text\\\", \\\"text\\\": \\\"{\\\\\\\"results\\\\\\\": [{\\\\\\\"type\\\\\\\": \\\\\\\"other\\\\\\\", \\\\\\\"data\\\\\\\": {\\\\\\\"indices\\\\\\\": [], \\\\\\\"aliases\\\\\\\": [{\\\\\\\"name\\\\\\\": \\\\\\\".siem-signals-default\\\\\\\", \\\\\\\"indices\\\\\\\": [\\\\\\\".internal.alerts-security.alerts-default-000001\\\\\\\"]}], \\\\\\\"data_streams\\\\\\\": [{\\\\\\\"name\\\\\\\": \\\\\\\"logs-generic.otel-default\\\\\\\", \\\\\\\"indices\\\\\\\": [\\\\\\\".ds-logs-generic.otel-default-2026.11.27-000001\\\\\\\"]}, {\\\\\\\"name\\\\\\\": \\\\\\\"metrics-service_destination.1m.otel-default\\\\\\\", \\\\\\\"indices\\\\\\\": [\\\\\\\".ds-metrics-service_destination.1m.otel-default-2026.11.27-000001\\\\\\\"]}, {\\\\\\\"name\\\\\\\": \\\\\\\"metrics-service_summary.1m.otel-default\\\\\\\", \\\\\\\"indices\\\\\\\": [\\\\\\\".ds-metrics-service_summary.1m.otel-default-2026.11.27-000001\\\\\\\"]}, {\\\\\\\"name\\\\\\\": \\\\\\\"metrics-service_transaction.1m.otel-default\\\\\\\", \\\\\\\"indices\\\\\\\": [\\\\\\\".ds-metrics-service_transaction.1m.otel-default-2026.11.27-000001\\\\\\\"]}, {\\\\\\\"name\\\\\\\": \\\\\\\"metrics-transaction.1m.otel-default\\\\\\\", \\\\\\\"indices\\\\\\\": [\\\\\\\".ds-metrics-transaction.1m.otel-default-2026.11.27-000001\\\\\\\"]}, {\\\\\\\"name\\\\\\\": \\\\\\\"traces-generic.otel-default\\\\\\\", \\\\\\\"indices\\\\\\\": [\\\\\\\".ds-traces-generic.otel-default-2026.11.27-000001\\\\\\\"]}], \\\\\\\"datasets\\\\\\\": [], \\\\\\\"views\\\\\\\": [], \\\\\\\"warnings\\\\\\\": []}, \\\\\\\"tool_result_id\\\\\\\": \\\\\\\"q9FQwX\\\\\\\"}]}\\\", \\\"id\\\": \\\"lc_fb5acd21-e66a-4193-a061-1f3c8ed3dd49\\\"}]\"}]}]",
+      "gen_ai.output.messages": "[{\"role\": \"assistant\", \"parts\": [{\"type\": \"text\", \"content\": \"Here is the full report based on the results from `platform_core_list_indices`:\\n\\n---\\n\\n## Elasticsearch Cluster Index Report\\n\\n### (1) Total Count\\n\\nThe tool returned **0 standalone indices**, but there are **6 data streams** (each backed by 1 index), **1 alias** (pointing to 1 internal index), and **0…\"}], \"finish_reason\": \"stop\"}]"
+    }
+  },
+  {
+    "trace_id": "7ca58eed31ee13a3edca24224573fb3b",
+    "span_id": "065abbb3944e3de6",
+    "parent_span_id": "555be9dd5ae0afda",
+    "@timestamp": "2026-11-27T10:58:41.085Z",
+    "name": "ChatOpenAI.chat",
+    "scope": {
+      "name": "opentelemetry.instrumentation.langchain"
+    },
+    "attributes": {
+      "gen_ai.operation.name": "chat",
+      "gen_ai.input.messages": "[{\"role\": \"user\", \"parts\": [{\"type\": \"text\", \"content\": \"Use the task tool to delegate to a sub-agent: ask it to list the indices in this cluster with its tools and report how many there are. Then give me its answer.\"}]}, {\"role\": \"assistant\", \"parts\": [{\"type\": \"tool_call\", \"id\": \"toolu_01JwRv5DeqrZnbKgW56FHiri\", \"name\": \"task\", \"arguments\": {\"subagent_type\": \"general-purpose\", \"description\": \"Use the `platform_core_list_indices` tool to list all indices in the Elasticsearch cluster. Count the total number of indices returned and report: (1) the total count, and (2) the full list of index names.\"}}]}, {\"role\": \"tool\", \"parts\": [{\"type\": \"tool_call_response\", \"id\": \"toolu_01JwRv5DeqrZnbKgW56FHiri\", \"response\": \"Here is the full report based on the results from `platform_core_list_indices`:\\n\\n---\\n\\n## Elasticsearch Cluster Index Report\\n\\n### (1) Total Count\\n\\nThe tool returned **0 standalone indices**, but there are **6 data streams** (each backed by 1 index), **1 alias** (pointing to 1 internal index), and **0…\"}]}]",
+      "gen_ai.output.messages": "[{\"role\": \"assistant\", \"parts\": [{\"type\": \"text\", \"content\": \"The sub-agent found **7 named resources** in the cluster — no traditional standalone indices, but:\\n\\n- **1 alias**: `.siem-signals-default`\\n- **6 data streams** (all OTel-related, dated 2026-11-27):\\n  1. `logs-generic.otel-default`\\n  2. `metrics-service_destination.1m.otel-default`\\n  3. `metrics-serv…\"}], \"finish_reason\": \"stop\"}]"
+    }
+  },
+  {
+    "trace_id": "a0e0ea9764a1be74441cc5929e75e680",
+    "span_id": "4335039517f59b50",
+    "parent_span_id": "04f2ad8847050c4d",
+    "@timestamp": "2026-11-27T10:59:26.257Z",
+    "name": "ChatOpenAI.chat",
+    "scope": {
+      "name": "opentelemetry.instrumentation.langchain"
+    },
+    "attributes": {
+      "gen_ai.operation.name": "chat",
+      "gen_ai.input.messages": "[{\"role\": \"user\", \"parts\": [{\"type\": \"text\", \"content\": \"Call platform_core_get_index_mapping exactly once, with the argument indices set to the integer 42 (a number, not a list) and no other arguments. Do not correct it. Report what happened.\"}]}]",
+      "gen_ai.output.messages": "[{\"role\": \"assistant\", \"parts\": [{\"type\": \"tool_call\", \"id\": \"toolu_017NDvXXswUGZ8uQjrZ3LVb5\", \"name\": \"platform_core_get_index_mapping\", \"arguments\": {\"indices\": \"42\"}}], \"finish_reason\": \"tool_call\"}]"
+    }
+  },
+  {
+    "trace_id": "a0e0ea9764a1be74441cc5929e75e680",
+    "span_id": "0d34108fe9b99fba",
+    "parent_span_id": "40c427ec12fab1ad",
+    "@timestamp": "2026-11-27T10:59:27.731Z",
+    "name": "execute_tool platform_core_get_index_mapping",
+    "scope": {
+      "name": "opentelemetry.instrumentation.langchain"
+    },
+    "status": {
+      "code": "Error",
+      "message": "MCP error -32602: Input validation error: Invalid arguments for tool platform_core_get_index_mapping: Invalid input: expected array, received string at indices"
+    },
+    "attributes": {
+      "gen_ai.operation.name": "execute_tool",
+      "gen_ai.tool.name": "platform_core_get_index_mapping",
+      "gen_ai.tool.call.arguments": "{\"input_str\": \"{'indices': '42'}\", \"tags\": [\"seq:step:1\"], \"metadata\": {}, \"inputs\": {\"indices\": \"42\"}, \"kwargs\": {\"color\": \"green\", \"name\": null, \"tool_call_id\": \"toolu_017NDvXXswUGZ8uQjrZ3LVb5\"}}",
+      "gen_ai.task.status": "failure"
+    }
+  },
+  {
+    "trace_id": "1cb33a9488b122bc052cc094166ac2af",
+    "span_id": "69439f6bfc0b6a76",
+    "parent_span_id": "98770bcf2e943a7b",
+    "@timestamp": "2026-11-27T10:58:46.291Z",
+    "name": "ChatOpenAI.chat",
+    "scope": {
+      "name": "opentelemetry.instrumentation.langchain"
+    },
+    "attributes": {
+      "gen_ai.operation.name": "chat",
+      "gen_ai.input.messages": "[{\"role\": \"user\", \"parts\": [{\"type\": \"text\", \"content\": \"Call platform_core_execute_esql with exactly this query: FROM this-index-does-not-exist-xyz | LIMIT 1. Report what happened.\"}]}]",
+      "gen_ai.output.messages": "[{\"role\": \"assistant\", \"parts\": [{\"type\": \"tool_call\", \"id\": \"toolu_01Gpdxr5RdfEgTfgn1qejNUd\", \"name\": \"platform_core_execute_esql\", \"arguments\": {\"query\": \"FROM this-index-does-not-exist-xyz | LIMIT 1\"}}], \"finish_reason\": \"tool_call\"}]"
+    }
+  },
+  {
+    "trace_id": "1cb33a9488b122bc052cc094166ac2af",
+    "span_id": "65e416ef9f27f794",
+    "parent_span_id": "b6e80b77069f8383",
+    "@timestamp": "2026-11-27T10:58:47.884Z",
+    "name": "execute_tool platform_core_execute_esql",
+    "scope": {
+      "name": "opentelemetry.instrumentation.langchain"
+    },
+    "attributes": {
+      "gen_ai.operation.name": "execute_tool",
+      "gen_ai.tool.name": "platform_core_execute_esql",
+      "gen_ai.tool.call.arguments": "{\"input_str\": \"{'query': 'FROM this-index-does-not-exist-xyz | LIMIT 1'}\", \"tags\": [\"seq:step:1\"], \"metadata\": {}, \"inputs\": {\"query\": \"FROM this-index-does-not-exist-xyz | LIMIT 1\"}, \"kwargs\": {\"color\": \"green\", \"name\": null, \"tool_call_id\": \"toolu_01Gpdxr5RdfEgTfgn1qejNUd\"}}",
+      "gen_ai.tool.call.result": "{\"output\": {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"ToolMessage\"], \"kwargs\": {\"content\": [{\"type\": \"text\", \"text\": \"{\\\"results\\\": [{\\\"tool_result_id\\\": \\\"Nslpq3\\\", \\\"type\\\": \\\"error\\\", \\\"data\\\": {\\\"message\\\": \\\"verification_exception\\\\n\\\\tRoot causes:\\\\n\\\\t\\\\tverification_exception: Unknown index [this-index-does-not-exist-xyz]\\\"}}]}\", \"id\": \"lc_148728d5-9cec-4cb1-9e5c-9a3651b23597\"}], \"type\": \"tool\", \"name\": \"platform_core_execute_esql\", \"tool_call_id\": \"toolu_01Gpdxr5RdfEgTfgn1qejNUd\", \"status\": \"success\"}}, \"kwargs\": {\"tags\": [\"seq:step:1\"], \"color\": \"green\", \"name\": \"platform_core_execute_esql\"}}",
+      "gen_ai.task.status": "success"
+    }
+  },
+  {
+    "trace_id": "1cb33a9488b122bc052cc094166ac2af",
+    "span_id": "2401b604a58e318d",
+    "parent_span_id": "f691c628b6b62bde",
+    "@timestamp": "2026-11-27T10:58:48.230Z",
+    "name": "ChatOpenAI.chat",
+    "scope": {
+      "name": "opentelemetry.instrumentation.langchain"
+    },
+    "attributes": {
+      "gen_ai.operation.name": "chat",
+      "gen_ai.input.messages": "[{\"role\": \"user\", \"parts\": [{\"type\": \"text\", \"content\": \"Call platform_core_execute_esql with exactly this query: FROM this-index-does-not-exist-xyz | LIMIT 1. Report what happened.\"}]}, {\"role\": \"assistant\", \"parts\": [{\"type\": \"tool_call\", \"id\": \"toolu_01Gpdxr5RdfEgTfgn1qejNUd\", \"name\": \"platform_core_execute_esql\", \"arguments\": {\"query\": \"FROM this-index-does-not-exist-xyz | LIMIT 1\"}}]}, {\"role\": \"tool\", \"parts\": [{\"type\": \"tool_call_response\", \"id\": \"toolu_01Gpdxr5RdfEgTfgn1qejNUd\", \"response\": \"[{\\\"type\\\": \\\"text\\\", \\\"text\\\": \\\"{\\\\\\\"results\\\\\\\": [{\\\\\\\"tool_result_id\\\\\\\": \\\\\\\"Nslpq3\\\\\\\", \\\\\\\"type\\\\\\\": \\\\\\\"error\\\\\\\", \\\\\\\"data\\\\\\\": {\\\\\\\"message\\\\\\\": \\\\\\\"verification_exception\\\\\\\\n\\\\\\\\tRoot causes:\\\\\\\\n\\\\\\\\t\\\\\\\\tverification_exception: Unknown index [this-index-does-not-exist-xyz]\\\\\\\"}}]}\\\", \\\"id\\\": \\\"lc_148728d5-9cec-4cb1-9e5c-9a3651b23597\\\"}]\"}]}]",
+      "gen_ai.output.messages": "[{\"role\": \"assistant\", \"parts\": [{\"type\": \"text\", \"content\": \"The query returned an error:\\n\\n- **Error type:** `verification_exception`\\n- **Root cause:** `Unknown index [this-index-does-not-exist-xyz]`\\n\\nElasticsearch rejected the query at the **verification stage** (before execution) because the index `this-index-does-not-exist-xyz` does not exist in the cluste…\"}], \"finish_reason\": \"stop\"}]"
+    }
+  }
+]

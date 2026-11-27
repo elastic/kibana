@@ -360,6 +360,100 @@ const parseMessageValue = (
   return undefined;
 };
 
+const getNonEmptyString = (value: unknown): string | undefined =>
+  typeof value === 'string' && value ? value : undefined;
+
+const isPlainObject = (value: unknown): value is Record<string, unknown> =>
+  !!value && typeof value === 'object' && !Array.isArray(value);
+
+const getLangchainKwargs = (value: unknown): Record<string, unknown> | undefined => {
+  if (!hasOwnProperty(value, 'kwargs')) {
+    return undefined;
+  }
+  const { kwargs } = value;
+  return isPlainObject(kwargs) ? kwargs : undefined;
+};
+
+const isLangchainToolMessage = (value: unknown): boolean =>
+  hasOwnProperty(getLangchainKwargs(value), 'content');
+
+// A tool returns either a serialized ToolMessage, or a `Command` whose
+// `update.messages` holds the ToolMessage (e.g. deepagents `write_todos`, `task`).
+const findLangchainToolMessage = (output: unknown): unknown => {
+  if (isLangchainToolMessage(output)) {
+    return output;
+  }
+  if (!hasOwnProperty(output, 'update') || !hasOwnProperty(output.update, 'messages')) {
+    return undefined;
+  }
+  const { messages } = output.update;
+  return Array.isArray(messages) ? messages.find(isLangchainToolMessage) : undefined;
+};
+
+const getLangchainToolMessageContent = (content: unknown): unknown => {
+  if (!Array.isArray(content)) {
+    return content;
+  }
+  const textBlocks = content.flatMap((block) =>
+    hasOwnProperty(block, 'type') && block.type === 'text' && typeof block.text === 'string'
+      ? [block.text]
+      : []
+  );
+  return textBlocks.length > 0 ? textBlocks.join('\n') : content;
+};
+
+interface ParsedToolPayloads {
+  toolCallId?: string;
+  arguments: unknown;
+  result: unknown;
+}
+
+// Unwraps OpenLLMetry LangChain callback envelopes: arguments
+// `{input_str, tags, metadata, inputs, kwargs}` and result `{output, kwargs}`.
+// Unrecognized shapes fall back to the parsed raw value.
+const parseLangchainEnvelope = (
+  toolArguments: unknown,
+  toolResult: unknown
+): ParsedToolPayloads => {
+  const parsedArguments = parseJsonIfPossible(toolArguments);
+  const parsedResult = parseJsonIfPossible(toolResult);
+
+  const inputs = hasOwnProperty(parsedArguments, 'inputs') ? parsedArguments.inputs : undefined;
+  const output = hasOwnProperty(parsedResult, 'output') ? parsedResult.output : parsedResult;
+  const toolMessage = findLangchainToolMessage(output);
+  const toolMessageKwargs = getLangchainKwargs(toolMessage);
+
+  return {
+    toolCallId:
+      getNonEmptyString(getLangchainKwargs(parsedArguments)?.tool_call_id) ??
+      getNonEmptyString(toolMessageKwargs?.tool_call_id),
+    arguments: inputs ?? parsedArguments,
+    result: toolMessageKwargs
+      ? parseJsonIfPossible(getLangchainToolMessageContent(toolMessageKwargs.content))
+      : output,
+  };
+};
+
+const parseToolPayloads = (
+  parse: EvidenceToolCallsItemSpec['parse'],
+  toolArguments: unknown,
+  toolResult: unknown
+): ParsedToolPayloads => {
+  if (parse === 'langchain_envelope') {
+    return parseLangchainEnvelope(toolArguments, toolResult);
+  }
+  if (parse === 'prefixed_json') {
+    return {
+      arguments: parseJsonIfPossible(stripToolPayloadPrefix(toolArguments)),
+      result: parseJsonIfPossible(stripToolPayloadPrefix(toolResult)),
+    };
+  }
+  return {
+    arguments: parseJsonIfPossible(toolArguments),
+    result: parseJsonIfPossible(toolResult),
+  };
+};
+
 const parseToolCallsValue = (
   itemSpec: EvidenceToolCallsItemSpec,
   documents: TraceSearchDocument[]
@@ -367,30 +461,27 @@ const parseToolCallsValue = (
   const entries = documents
     .map(({ source }) => {
       const evidence: ToolCallEvidence = {};
-      const toolCallId = getFieldValue(source, itemSpec.fields.tool_call_id);
       const toolId = getFieldValue(source, itemSpec.fields.tool_id);
-      const toolArguments = getFieldValue(source, itemSpec.fields.arguments);
-      const toolResult = getFieldValue(source, itemSpec.fields.result);
+      const payloads = parseToolPayloads(
+        itemSpec.parse,
+        getFieldValue(source, itemSpec.fields.arguments),
+        getFieldValue(source, itemSpec.fields.result)
+      );
+      const toolCallId =
+        getNonEmptyString(getFieldValue(source, itemSpec.fields.tool_call_id)) ??
+        payloads.toolCallId;
 
-      if (typeof toolCallId === 'string' && toolCallId) {
+      if (toolCallId) {
         evidence.tool_call_id = toolCallId;
       }
       if (typeof toolId === 'string' && toolId) {
         evidence.tool_id = toolId;
       }
-
-      const parsedArguments = parseJsonIfPossible(
-        itemSpec.parse === 'prefixed_json' ? stripToolPayloadPrefix(toolArguments) : toolArguments
-      );
-      if (parsedArguments !== undefined) {
-        evidence.arguments = parsedArguments;
+      if (payloads.arguments !== undefined) {
+        evidence.arguments = payloads.arguments;
       }
-
-      const parsedResult = parseJsonIfPossible(
-        itemSpec.parse === 'prefixed_json' ? stripToolPayloadPrefix(toolResult) : toolResult
-      );
-      if (parsedResult !== undefined) {
-        evidence.result = parsedResult;
+      if (payloads.result !== undefined) {
+        evidence.result = payloads.result;
       }
 
       if (

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { INSTRUMENTATION_PROFILES } from './profiles';
 import { getInstrumentationProfile } from './resolve_instrumentation';
 
 describe('getInstrumentationProfile', () => {
@@ -75,5 +76,48 @@ describe('getInstrumentationProfile', () => {
         result: 'attributes.new_context',
       },
     });
+  });
+
+  it('resolves openllmetry-langchain to the GenAI attribute paths scoped to the LangChain instrumentation', () => {
+    const mapping = getInstrumentationProfile('openllmetry-langchain');
+    const scopeFilter = { field: 'scope.name', value: 'opentelemetry.instrumentation.langchain' };
+
+    expect(mapping.user_query).toEqual({
+      source: 'traces',
+      filter: [scopeFilter],
+      contentField: 'attributes.gen_ai.input.messages',
+      select: 'first',
+      parse: 'genai_messages',
+    });
+
+    expect(mapping.agent_response).toEqual({
+      source: 'traces',
+      filter: [scopeFilter],
+      contentField: 'attributes.gen_ai.output.messages',
+      select: 'last',
+      parse: 'genai_messages',
+    });
+
+    expect(mapping.tool_calls).toEqual({
+      source: 'traces',
+      filter: [{ field: 'attributes.gen_ai.operation.name', value: 'execute_tool' }, scopeFilter],
+      parse: 'langchain_envelope',
+      fields: {
+        tool_call_id: 'attributes.gen_ai.tool.call.id',
+        tool_id: 'attributes.gen_ai.tool.name',
+        arguments: 'attributes.gen_ai.tool.call.arguments',
+        result: 'attributes.gen_ai.tool.call.result',
+      },
+    });
+  });
+
+  it('orders profiles so openllmetry-langchain is probed before otel-genai-attributes', () => {
+    expect(Object.keys(INSTRUMENTATION_PROFILES)).toEqual([
+      'otel-genai-events',
+      'elastic-inference',
+      'openllmetry-langchain',
+      'otel-genai-attributes',
+      'claude-code',
+    ]);
   });
 });

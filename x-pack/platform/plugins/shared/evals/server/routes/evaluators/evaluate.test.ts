@@ -32,7 +32,10 @@ import {
   buildClaudeCodeToolSpanDoc,
   buildClaudeCodeUserPromptDoc,
   buildSearchMock,
+  buildSpanStoreSearchMock,
+  getOpenllmetryLangchainSpans,
   hasTermFilter,
+  OPENLLMETRY_LANGCHAIN_TRACE_IDS,
   withHits,
 } from './test_helpers';
 
@@ -544,6 +547,61 @@ describe('POST /internal/evals/_evaluate', () => {
         },
       })
     );
+  });
+
+  it('passes clean openllmetry-langchain steps to the evaluator through the real readiness path', async () => {
+    const actualTraceReadiness = jest.requireActual(
+      '../../evaluators/trace_readiness'
+    ) as typeof import('../../evaluators/trace_readiness');
+    awaitTraceReadyMock.mockImplementation((traceAccessor, request, log) =>
+      actualTraceReadiness.awaitTraceReady(traceAccessor, request, log, {
+        retries: 2,
+        minTimeout: 1,
+        maxTimeout: 1,
+        factor: 1,
+        stabilityWindowMs: 0,
+      })
+    );
+
+    const evaluate = jest.fn().mockResolvedValue({
+      scores: [{ name: 'groundedness', score: 1, label: 'GROUNDED' }],
+    });
+    const traceId = OPENLLMETRY_LANGCHAIN_TRACE_IDS.mcpTool;
+    const { handler } = setup({
+      evaluatorRegistry: buildEvaluatorRegistry([
+        buildEvaluator({ name: 'groundedness', kind: 'code', evaluate }),
+      ]),
+    });
+
+    const response = await handler(
+      buildContext(
+        buildSpanStoreSearchMock(getOpenllmetryLangchainSpans(traceId))
+      ) as unknown as Parameters<typeof handler>[0],
+      {
+        body: {
+          subject: {
+            traces: [{ trace_id: traceId }],
+            instrumentation: { profile: 'openllmetry-langchain' },
+          },
+          evaluators: [{ name: 'groundedness' }],
+        },
+      } as unknown as Parameters<typeof handler>[1],
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(200);
+    expect(evaluate).toHaveBeenCalledTimes(1);
+    const [{ round }] = evaluate.mock.calls[0] as [{ round: EvidenceRound }];
+    expect(round.input.message).not.toBe('');
+    expect(round.response.message).not.toBe('');
+    expect(round.steps).toEqual([
+      {
+        tool_id: 'platform_core_list_indices',
+        tool_call_id: 'toolu_01JCNeSqFzLuXb9LadRKmEtj',
+        arguments: {},
+        result: { results: [expect.objectContaining({ type: 'other' })] },
+      },
+    ]);
   });
 
   it('rejects unknown instrumentation profiles at request validation', () => {

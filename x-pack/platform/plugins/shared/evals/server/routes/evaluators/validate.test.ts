@@ -23,10 +23,34 @@ import { EVALS_API_PRIVILEGES } from '../../../common';
 import { createEvaluatorRegistryMock } from '../../evaluators/registry.mock';
 import type { EvaluatorDefinition, EvaluatorRegistry } from '../../evaluators/types';
 import { registerValidateRoute } from './validate';
-import { buildSearchMock, hasTermFilter, withHits } from './test_helpers';
+import {
+  buildSearchMock,
+  buildSpanStoreSearchMock,
+  getOpenllmetryLangchainSpans,
+  hasTermFilter,
+  OPENLLMETRY_LANGCHAIN_TRACE_IDS,
+  withHits,
+} from './test_helpers';
 
 const FULL_TRACE_ID = '0af7651916cd43dd8448eb211c80319c';
 const REDACTED_TRACE_ID = '0af7651916cd43dd8448eb211c80319d';
+
+const TRACELOOP_CONTENT_ATTRIBUTES = [
+  'gen_ai.input.messages',
+  'gen_ai.output.messages',
+  'gen_ai.tool.call.arguments',
+  'gen_ai.tool.call.result',
+] as const;
+
+// Mirrors TRACELOOP_TRACE_CONTENT=false: spans keep their structure but drop all content.
+const getContentlessLangchainSpans = (): Array<Record<string, unknown>> =>
+  getOpenllmetryLangchainSpans(OPENLLMETRY_LANGCHAIN_TRACE_IDS.mcpTool).map((span) => {
+    const attributes = { ...(span.attributes as Record<string, unknown>) };
+    for (const attribute of TRACELOOP_CONTENT_ATTRIBUTES) {
+      delete attributes[attribute];
+    }
+    return { ...span, attributes };
+  });
 
 const buildRouteSearchMock = () =>
   buildSearchMock(async ({ index, filters, traceId, emptySearchResponse }) => {
@@ -288,6 +312,72 @@ describe('POST /internal/evals/evaluators/_validate', () => {
       evaluators: [{ name: 'latency', version: '1.0.0', ready: true, unmet: [] }],
     });
   });
+
+  it('marks evaluators ready for an openllmetry-langchain trace with content', async () => {
+    const { handler } = setup();
+
+    const response = await handler(
+      buildContext(
+        buildSpanStoreSearchMock(
+          getOpenllmetryLangchainSpans(OPENLLMETRY_LANGCHAIN_TRACE_IDS.mcpTool)
+        )
+      ) as unknown as Parameters<typeof handler>[0],
+      {
+        body: {
+          subject: {
+            traces: [{ trace_id: OPENLLMETRY_LANGCHAIN_TRACE_IDS.mcpTool }],
+            instrumentation: { profile: 'openllmetry-langchain' },
+          },
+          evaluators: [{ name: 'groundedness' }],
+        },
+      } as unknown as Parameters<typeof handler>[1],
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.payload).toEqual({
+      evaluators: [{ name: 'groundedness', version: '1.0.0', ready: true, unmet: [] }],
+    });
+  });
+
+  it.each([
+    ['openllmetry-langchain', 'unset TRACELOOP_TRACE_CONTENT or set it to true'],
+    ['otel-genai-attributes', 'evidence not present in trace'],
+  ])(
+    'returns the %s remediation when trace content is missing',
+    async (profile, expectedRemediation) => {
+      const { handler } = setup();
+
+      const response = await handler(
+        buildContext(
+          buildSpanStoreSearchMock(getContentlessLangchainSpans())
+        ) as unknown as Parameters<typeof handler>[0],
+        {
+          body: {
+            subject: {
+              traces: [{ trace_id: OPENLLMETRY_LANGCHAIN_TRACE_IDS.mcpTool }],
+              instrumentation: { profile },
+            },
+            evaluators: [{ name: 'groundedness' }],
+          },
+        } as unknown as Parameters<typeof handler>[1],
+        kibanaResponseFactory
+      );
+
+      expect(response.status).toBe(200);
+      const payload = response.payload as ValidateResponse;
+      expect(payload.evaluators).toEqual([
+        expect.objectContaining({
+          name: 'groundedness',
+          ready: false,
+          remediation: expectedRemediation,
+        }),
+      ]);
+      expect(payload.evaluators[0].unmet).toEqual(
+        expect.arrayContaining(['input.message', 'response.message'])
+      );
+    }
+  );
 
   it('rejects unknown instrumentation profiles at request validation', () => {
     const result = ValidateRequestBody.safeParse({
