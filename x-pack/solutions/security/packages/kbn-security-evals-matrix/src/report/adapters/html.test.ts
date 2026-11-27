@@ -194,4 +194,63 @@ describe('renderReportHtml', () => {
     expect(html).not.toContain('<script>');
     expect(html).not.toContain('<img src=x>');
   });
+
+  it('renders http(s) provenance links and degrades unsafe hrefs to text', () => {
+    // Assembled at runtime so the `no-script-url` lint rule does not fire on a literal.
+    const unsafe = `${'javascript'}:alert(1)`;
+    const html = renderReportHtml(
+      doc({
+        provenance: [
+          { text: 'build', href: 'https://ci.example.com/b/1' },
+          { text: 'evil', href: unsafe },
+          'plain <b>',
+        ],
+      })
+    );
+    expect(html).toContain('<a href="https://ci.example.com/b/1">build</a>');
+    expect(html).not.toMatch(/href="javascript:/i);
+    expect(html).toContain(`evil ${unsafe}`);
+    expect(html).toContain('plain &lt;b&gt;');
+  });
+
+  it('renders extra captioned summary tables, a legend and row-label header', () => {
+    const html = renderReportHtml(
+      doc({
+        summaryTable: {
+          rowLabelHeader: 'Model',
+          columns: [{ id: 'c', label: 'C' }],
+          rows: [{ label: 'm', cells: [{ text: '1' }] }],
+        },
+        summaryTables: [
+          {
+            caption: 'Token <cost>',
+            columns: [{ id: 'c', label: 'C' }],
+            rows: [{ label: 'm', cells: [{ text: '9k', title: 'in 1 / out 2' }] }],
+          },
+        ],
+        legend: 'Legend line',
+      })
+    );
+    expect(html).toContain('<th>Model</th>');
+    expect(html).toContain('<summary>Token &lt;cost&gt;</summary>');
+    expect(html).toContain('title="in 1 / out 2"');
+    expect(html).toContain('<p class="legend">Legend line</p>');
+  });
+
+  it('uses emptyNote only when the example has no answer, question or steps', () => {
+    const render = (extra: object) =>
+      renderReportHtml(
+        doc({
+          sections: [
+            {
+              id: 's',
+              title: 'S',
+              examples: [{ id: 'e', status: 'completed', emptyNote: 'No agent <here>', ...extra }],
+            },
+          ],
+        })
+      );
+    expect(render({})).toContain('<p class="empty">No agent &lt;here&gt;</p>');
+    expect(render({ question: 'q' })).toContain('No final answer message captured.');
+  });
 });
