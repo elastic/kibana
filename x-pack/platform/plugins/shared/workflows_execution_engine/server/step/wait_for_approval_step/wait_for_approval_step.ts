@@ -57,7 +57,7 @@ export class WaitForApprovalStepImpl implements NodeImplementation, CancellableN
   ) {}
 
   async onCancel(): Promise<void> {
-    invalidateHitlExternalResumeTokenIfPresent(this.stepExecutionRuntime);
+    await invalidateHitlExternalResumeTokenIfPresent(this.stepExecutionRuntime);
   }
 
   async run(): Promise<void> {
@@ -219,7 +219,7 @@ export class WaitForApprovalStepImpl implements NodeImplementation, CancellableN
     const startedAt = this.stepExecutionRuntime.stepExecution?.startedAt;
 
     if (resumeInput == null && hasHitlWaitExpired(startedAt, timeout)) {
-      invalidateHitlExternalResumeTokenIfPresent(this.stepExecutionRuntime);
+      await invalidateHitlExternalResumeTokenIfPresent(this.stepExecutionRuntime);
       failHitlWaitOnTimeout({
         stepExecutionRuntime: this.stepExecutionRuntime,
         executionId: execution.id,
@@ -232,7 +232,7 @@ export class WaitForApprovalStepImpl implements NodeImplementation, CancellableN
       return;
     }
 
-    invalidateHitlExternalResumeTokenIfPresent(this.stepExecutionRuntime);
+    await invalidateHitlExternalResumeTokenIfPresent(this.stepExecutionRuntime);
 
     resumeHitlWaitStep({
       stepExecutionRuntime: this.stepExecutionRuntime,

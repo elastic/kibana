@@ -14,9 +14,10 @@ import { actionsClientMock } from '../../../actions_client/actions_client.mock';
 import { createMockConnectorFindResult } from '../../../application/connector/mocks';
 import { actionsConfigMock } from '../../../actions_config.mock';
 
-const actionsConfigUtils = (inboundEventsEnabled = false) => {
+const actionsConfigUtils = (inboundEventsEnabled = false, catalogEnabled = false) => {
   const utils = actionsConfigMock.create();
   utils.isInboundEventsEnabled.mockReturnValue(inboundEventsEnabled);
+  utils.isCatalogEnabled.mockReturnValue(catalogEnabled);
   return utils;
 };
 
@@ -136,4 +137,48 @@ describe('getAllConnectorsIncludingSystemRoute', () => {
 
     expect(verifyAccessAndContext).toHaveBeenCalledWith(licenseState, expect.any(Function));
   });
+
+  it.each([
+    { catalogEnabled: true, expected: { spec_version: '1.3' } },
+    { catalogEnabled: false, expected: {} },
+  ])(
+    'returns spec_version only when catalog connectors are enabled (catalogEnabled: $catalogEnabled)',
+    async ({ catalogEnabled, expected }) => {
+      const licenseState = licenseStateMock.create();
+      const router = httpServiceMock.createRouter();
+      getAllConnectorsIncludingSystemRoute(
+        router,
+        licenseState,
+        actionsConfigUtils(false, catalogEnabled)
+      );
+      const [, handler] = router.get.mock.calls[0];
+
+      const actionsClient = actionsClientMock.create();
+      actionsClient.getAll.mockResolvedValueOnce([
+        createMockConnectorFindResult({
+          id: '1',
+          actionTypeId: '.abuseipdb',
+          config: {},
+          specVersion: '1.3',
+        }),
+      ]);
+
+      const [context, req, res] = mockHandlerArguments({ actionsClient }, {}, ['ok']);
+      await handler(context, req, res);
+
+      const [responseConnector] = (res.ok as jest.Mock).mock.calls[0][0].body;
+      expect(responseConnector).toEqual({
+        id: '1',
+        name: 'Test Connector',
+        config: {},
+        connector_type_id: '.abuseipdb',
+        is_preconfigured: false,
+        is_deprecated: false,
+        is_system_action: false,
+        is_connector_type_deprecated: false,
+        referenced_by_count: 0,
+        ...expected,
+      });
+    }
+  );
 });

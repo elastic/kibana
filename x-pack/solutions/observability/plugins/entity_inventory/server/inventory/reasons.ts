@@ -20,12 +20,6 @@ export const noIdentityCompositionReason = (indexPattern: string, wanted: string
     values: { indexPattern, wanted },
   });
 
-export const partialRowsReason = (): string =>
-  i18n.translate('xpack.entityInventory.reasons.partialRows', {
-    defaultMessage:
-      'partial result: some shards or clusters did not answer, so rows may be missing',
-  });
-
 export const partialValuesReason = (): string =>
   i18n.translate('xpack.entityInventory.reasons.partialValues', {
     defaultMessage:

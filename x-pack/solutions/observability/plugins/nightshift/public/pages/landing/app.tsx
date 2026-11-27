@@ -144,8 +144,10 @@ export function NightshiftApp({
     hasSeverityCountsError,
     activeInvestigationCount,
     isInitialLoading,
+    isOpenInitialLoading,
     isFetching,
     totalCount,
+    openTotalCount,
     loadedCount,
     refetchAll,
   } = useInvestigationSections({
@@ -305,9 +307,19 @@ export function NightshiftApp({
     () => sections.flatMap((section) => section.investigations),
     [sections]
   );
+  const openUnratedCount = useMemo(
+    () =>
+      sections
+        .filter((section) => section.id !== 'closed')
+        .flatMap((section) => section.investigations)
+        .filter(({ metadata }) => metadata.severity === undefined).length,
+    [sections]
+  );
   // Read by effects that must not re-run when the list refetches.
   const loadedInvestigationsRef = useRef(loadedInvestigations);
   loadedInvestigationsRef.current = loadedInvestigations;
+  const openUnratedCountRef = useRef(openUnratedCount);
+  openUnratedCountRef.current = openUnratedCount;
 
   // The landing page is "viewed" once its first load lands, with what it then shows.
   useEffect(() => {
@@ -324,9 +336,7 @@ export function NightshiftApp({
     reportNightshiftHomepageViewed(analytics, {
       investigationCount: loadedCount,
       severityCounts,
-      unratedCount: loadedInvestigationsRef.current.filter(
-        ({ metadata }) => metadata.severity === undefined
-      ).length,
+      unratedCount: openUnratedCountRef.current,
     });
   }, [
     allFailed,
@@ -355,15 +365,23 @@ export function NightshiftApp({
     });
   }, [analytics, isInitialLoading, selectedInvestigationId]);
 
-  // Searching is typing, not clicking. Reported once the debounced term's results have landed,
-  // so an empty result set is distinguishable from a hit. The term itself is never reported.
+  // Searching is typing, not clicking. Reported once every section has settled for the debounced
+  // term without an unloadable error, so a failed section is not reported as a partial count.
+  // The term itself is never reported.
+  const hasUnloadableSection = sections.some(
+    (section) => section.error != null && section.investigations.length === 0
+  );
   useEffect(() => {
     const query = debouncedSearchQuery;
     if (!query) {
       reportedSearchQuery.current = undefined;
       return;
     }
-    if (isFetching || reportedSearchQuery.current === query) {
+    if (reportedSearchQuery.current === query) {
+      return;
+    }
+    reportedSearchQuery.current = undefined;
+    if (isFetching || hasUnloadableSection) {
       return;
     }
     reportedSearchQuery.current = query;
@@ -371,7 +389,7 @@ export function NightshiftApp({
       queryLength: query.length,
       resultCount: totalCount,
     });
-  }, [analytics, debouncedSearchQuery, isFetching, totalCount]);
+  }, [analytics, debouncedSearchQuery, hasUnloadableSection, isFetching, totalCount]);
 
   usePageReady({
     isReady: !isInitialLoading && !allFailed,
@@ -380,11 +398,11 @@ export function NightshiftApp({
       key1: 'investigation_count',
       value1: loadedCount,
       key2: 'investigation_total',
-      value2: totalCount,
+      value2: openTotalCount,
       key3: 'active_investigation_count',
       value3: loadedInvestigations.filter(({ in_progress: inProgress }) => inProgress).length,
       key4: 'unrated_investigation_count',
-      value4: loadedInvestigations.filter(({ metadata }) => metadata.severity === undefined).length,
+      value4: openUnratedCount,
     },
     meta: {
       description: '[ttfmp_nightshift] The nightshift landing page has loaded investigations.',
@@ -437,7 +455,9 @@ export function NightshiftApp({
       `}
     >
       <NightshiftHeader
-        isLoading={isInitialLoading || (activeInvestigationCount === 0 && areSeverityCountsLoading)}
+        isLoading={
+          isOpenInitialLoading || (activeInvestigationCount === 0 && areSeverityCountsLoading)
+        }
         hasSeverityCountsError={hasSeverityCountsError}
         activeInvestigationCount={activeInvestigationCount}
         needsYouCount={needsYouCount}
@@ -502,7 +522,7 @@ export function NightshiftApp({
             // change) a number would be a default 0 or the previous filter's, contradicting the
             // rows below, so all four tiles show a skeleton and reveal together.
             isLoading={
-              isInitialLoading ||
+              isOpenInitialLoading ||
               areSeverityCountsLoading ||
               areSeverityCountsStale ||
               areUnfilteredSeverityCountsLoading

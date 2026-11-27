@@ -42,8 +42,8 @@ const ERROR_GROUP_AGGS = {
 
 /**
  * One application's JS errors by type and stack trace, and its environments with browser data. The
- * errors are those of the Overview's filters; the page filter does not apply, as an error carries
- * no page URL yet.
+ * errors are those of the Overview's filters, the page included; the filter on the URL text does
+ * not apply, as an error carries no URL.
  *
  * The message is never a group: it often holds ids or values that would split one error into many.
  * A stack trace over the index's `ignore_above` is not indexed, so it counts as missing.

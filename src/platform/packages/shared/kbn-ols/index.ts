@@ -42,11 +42,14 @@ export { buildAclReadFilter, type BuildAclReadFilterParams } from './src/read_fi
 export {
   evaluateAcl,
   generalAccessPermits,
+  getOperationsAtAccess,
   isRestricted,
+  ObjectAccessError,
   toObjectDecision,
   type AclDecision,
   type AclObjectDecision,
   type EvaluateAclParams,
+  type ObjectAccessErrorCode,
 } from './src/evaluation';
 export {
   AclChangeError,
@@ -56,6 +59,7 @@ export {
   readEditableAcl,
   type AclChange,
   type AclChangeErrorCode,
+  type AclWarning,
   type EditableAcl,
   type EditableAclEntry,
   type InitialAccess,

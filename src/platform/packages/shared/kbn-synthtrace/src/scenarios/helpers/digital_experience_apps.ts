@@ -84,6 +84,8 @@ export interface DigitalExperienceApp {
   accounts?: readonly string[];
   /** Omits `deployment.environment.name`, for lists that group apps by environment. */
   withoutEnvironment?: boolean;
+  /** Reports no page routes (`url.template`), like an app that sets `pageRoute: false`. */
+  withoutPageRoutes?: boolean;
   /**
    * Where the app runs when the `environments` option is on, with the share of its traffic in
    * each. Without it, all of it happens in the scenario's single environment.
@@ -100,6 +102,11 @@ export interface DigitalExperienceScenarioOpts {
    * instead of 0.4.0.
    */
   withSessionId: boolean;
+  /**
+   * Write the route of the page as `url.template` on logs, which EDOT Browser does by default.
+   * Turn off to match an SDK without page routes, or apps that set `pageRoute: false`.
+   */
+  withPageRoute: boolean;
   /** Write the web vital attribution as a JSON body, which EDOT Browser only does when opted in. */
   includeRawAttribution: boolean;
   /**
@@ -168,6 +175,7 @@ export interface DigitalExperienceScenarioOpts {
 
 const DEFAULT_SCENARIO_OPTS: Omit<DigitalExperienceScenarioOpts, 'seed'> = {
   withSessionId: true,
+  withPageRoute: true,
   includeRawAttribution: false,
   environments: false,
   edgeCases: false,
@@ -186,6 +194,15 @@ const STAGING_ENVIRONMENT = 'staging';
 const PREVIEW_ENVIRONMENT = 'preview';
 
 const STOREFRONT_ORIGIN = 'https://www.example-store.com';
+/** What the storefront tells EDOT Browser about its product pages, like a router's route does. */
+const PRODUCT_ROUTE = '/products/{slug}';
+const RELATED_PRODUCT_SLUGS = [
+  'waterproof-trail-jacket',
+  'road-running-shoes',
+  'merino-running-socks',
+  'hydration-vest',
+] as const;
+const ORDER_IDS = ['10482', '10477', '10463', '10451'] as const;
 const CHECKOUT_ORIGIN = 'https://checkout.example-store.com';
 const MEDIA_ORIGIN = 'https://www.example-news.com';
 const SUPPORT_ORIGIN = 'https://support.example-saas.com';
@@ -420,6 +437,7 @@ export const DIGITAL_EXPERIENCE_APPS: readonly DigitalExperienceApp[] = [
         },
         {
           path: '/products/trail-running-shoes',
+          route: PRODUCT_ROUTE,
           weight: 22,
           resources: [
             { path: '/assets/img/products/trail-1.webp', initiatorType: 'img', sizeBytes: 120_000 },
@@ -471,6 +489,13 @@ export const DIGITAL_EXPERIENCE_APPS: readonly DigitalExperienceApp[] = [
             { tagName: 'A', cssSelector: 'nav.breadcrumbs > a:nth-child(2)', weight: 2 },
           ],
         },
+        // More products behind the same route: the storefront tells it, so they are one page
+        ...RELATED_PRODUCT_SLUGS.map((slug) => ({
+          path: `/products/${slug}`,
+          route: PRODUCT_ROUTE,
+          weight: 3,
+          requests: [{ method: 'GET', url: `${STOREFRONT_ORIGIN}/api/products/${slug}` }],
+        })),
         {
           // Search is slow on a cold index, and shoppers hammer the button while they wait
           path: '/search?q=trail+shoes',
@@ -546,6 +571,12 @@ export const DIGITAL_EXPERIENCE_APPS: readonly DigitalExperienceApp[] = [
             },
           ],
         },
+        // Numeric IDs, which the SDK turns into `/account/orders/{id}` without being told
+        ...ORDER_IDS.map((id) => ({
+          path: `/account/orders/${id}`,
+          weight: 1,
+          requests: [{ method: 'GET', url: `${STOREFRONT_ORIGIN}/api/orders/ord-${id}` }],
+        })),
       ],
     },
   },
@@ -925,6 +956,7 @@ export const DIGITAL_EXPERIENCE_APPS: readonly DigitalExperienceApp[] = [
         },
         {
           path: '/articles/2026/10/city-council-approves-new-bike-lanes',
+          route: '/articles/{year}/{month}/{slug}',
           resources: [
             {
               path: '/images/articles/bike-lanes.jpg',
@@ -970,6 +1002,7 @@ export const DIGITAL_EXPERIENCE_APPS: readonly DigitalExperienceApp[] = [
         },
         {
           path: '/video/weekly-roundup',
+          route: '/video/{slug}',
           resources: [
             {
               path: '/images/video/roundup-poster.jpg',
@@ -1014,6 +1047,8 @@ export const DIGITAL_EXPERIENCE_APPS: readonly DigitalExperienceApp[] = [
   {
     serviceName: 'support-center-web',
     versions: [{ version: '0.9.3', weight: 1 }],
+    // Turns page routes off, so its pages are their URLs
+    withoutPageRoutes: true,
     health: 'critical',
     sessionsPerMinute: 2,
     // A B2B help desk, used by the customers' agents
@@ -1246,6 +1281,7 @@ export const DIGITAL_EXPERIENCE_APPS: readonly DigitalExperienceApp[] = [
 
 type BooleanOptKey =
   | 'withSessionId'
+  | 'withPageRoute'
   | 'includeRawAttribution'
   | 'environments'
   | 'edgeCases'
@@ -1379,6 +1415,7 @@ export const parseDigitalExperienceScenarioOpts = (
 
   return {
     withSessionId: parseBooleanOpt(opts, 'withSessionId'),
+    withPageRoute: parseBooleanOpt(opts, 'withPageRoute'),
     includeRawAttribution: parseBooleanOpt(opts, 'includeRawAttribution'),
     environments: parseBooleanOpt(opts, 'environments'),
     edgeCases: parseBooleanOpt(opts, 'edgeCases'),
@@ -1770,6 +1807,7 @@ export const generateEdotBrowserSessions = (
     environment,
     from,
     withSessionId,
+    withPageRoute,
     includeRawAttribution,
     environments: withEnvironments,
     edgeCases: withEdgeCases,
@@ -1794,6 +1832,7 @@ export const generateEdotBrowserSessions = (
       incident,
       sessionsPerMinute,
       withoutEnvironment,
+      withoutPageRoutes,
       environments: appEnvironments,
       site: appSite,
       browserWeights,
@@ -1856,6 +1895,7 @@ export const generateEdotBrowserSessions = (
         const reporting = {
           reportExceptions: !withoutExceptions,
           reportResourceTimings: !withoutResourceTimings,
+          reportPageRoutes: withPageRoute && !withoutPageRoutes,
         };
         const perMinute =
           ((sessionsPerMinute * scale * weight) / totalWeight) * PEAK_TRAFFIC_FACTOR;

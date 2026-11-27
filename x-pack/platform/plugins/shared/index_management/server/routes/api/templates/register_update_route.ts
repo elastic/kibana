@@ -33,7 +33,14 @@ export function registerUpdateRoute({ router, lib: { handleEsError } }: RouteDep
     async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const { name } = request.params as typeof paramsSchema.type;
-      const template = request.body as TemplateDeserialized;
+      const { template: bodyTemplate, ...restOfBody } = request.body as TemplateDeserialized;
+      // The UI sends the full template (e.g. when editing), but data_stream_options is
+      // always read from the existing template in ES, so the client value is ignored.
+      const { data_stream_options: _ignored, ...templateWithoutDsOptions } = bodyTemplate ?? {};
+      const template: TemplateDeserialized = {
+        ...restOfBody,
+        ...(bodyTemplate && { template: templateWithoutDsOptions }),
+      };
 
       try {
         const {
@@ -47,11 +54,15 @@ export function registerUpdateRoute({ router, lib: { handleEsError } }: RouteDep
           return response.notFound();
         }
 
-        const dataStreamOptions = await getTemplateDataStreamOptions({
-          name,
-          client,
-          isLegacy,
-        });
+        // ES rejects data_stream_options on templates that are not data stream templates,
+        // so only re-apply the stored options when the template has a data stream.
+        const dataStreamOptions = template.dataStream
+          ? await getTemplateDataStreamOptions({
+              name,
+              client,
+              isLegacy,
+            })
+          : undefined;
 
         // Next, update index template
         const responseBody = await saveTemplate({

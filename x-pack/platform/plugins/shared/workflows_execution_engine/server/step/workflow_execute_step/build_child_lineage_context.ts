@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { ExecutionChainHop } from '@kbn/workflows';
 import { isTopLevelWorkflowExecution } from '@kbn/workflows';
-import type { ExecutionChainHop } from '../../utils';
 import { hasExecutionChain, toExecutionChainHop } from '../../utils';
 
 /**

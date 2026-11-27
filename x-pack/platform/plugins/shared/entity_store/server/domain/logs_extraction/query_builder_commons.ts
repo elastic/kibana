@@ -409,21 +409,28 @@ function fieldValueToEsqlExpressionAfterStats(
   return `CONCAT(${parts.join(', ')})`;
 }
 
-export function buildPaginationSection(
-  docsLimit: number,
+/**
+ * Drops everything at or before the entity cursor. Returns nothing on the first page.
+ * It only compares the id column, so it can run on raw rows before `STATS ... BY id`
+ * as well as on the aggregated rows after it, with the same result.
+ */
+export function buildPaginationCursorFilter(
   paginationFields: PaginationFields,
   pagination?: PaginationParams
 ): string[] {
-  const parts = [];
-  parts.push(`| SORT ${paginationFields.idFieldInQuery} ASC`);
-
-  if (pagination) {
-    const escapedId = escapeEsqlStringLiteral(pagination.idCursor);
-    parts.push(`| WHERE ${paginationFields.idFieldInQuery} > "${escapedId}"`);
+  if (!pagination) {
+    return [];
   }
+  const escapedId = escapeEsqlStringLiteral(pagination.idCursor);
+  return [`| WHERE ${paginationFields.idFieldInQuery} > "${escapedId}"`];
+}
 
-  parts.push(`| LIMIT ${docsLimit}`);
-  return parts;
+/** Orders the aggregated entity rows by id and keeps the first `docsLimit` of them. */
+export function buildPaginationSortAndLimit(
+  docsLimit: number,
+  paginationFields: PaginationFields
+): string[] {
+  return [`| SORT ${paginationFields.idFieldInQuery} ASC`, `| LIMIT ${docsLimit}`];
 }
 
 export function hasFieldEvaluations(entityDefinition: EntityDefinition): boolean {

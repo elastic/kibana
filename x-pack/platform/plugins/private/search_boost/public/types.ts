@@ -5,11 +5,27 @@
  * 2.0.
  */
 
-import type { MouseEvent } from 'react';
+import type { FC, MouseEvent } from 'react';
+import type {
+  DatastreamFlyoutProps,
+  IndexManagementLocatorParams,
+  IndexManagementPluginStart,
+} from '@kbn/index-management-shared-types';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
+import type { LocatorPublic, SharePluginStart } from '@kbn/share-plugin/public';
 
 export interface SearchBoostSetupDependencies {
   management: ManagementSetup;
+}
+
+export interface SearchBoostStartDependencies {
+  indexManagement: IndexManagementPluginStart;
+  share: SharePluginStart;
+}
+
+export interface IndexManagementServices {
+  locator: LocatorPublic<IndexManagementLocatorParams>;
+  DataStreamFlyout: FC<DatastreamFlyoutProps>;
 }
 
 export interface LinkProps {

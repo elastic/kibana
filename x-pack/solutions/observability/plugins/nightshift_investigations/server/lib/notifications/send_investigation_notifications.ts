@@ -140,6 +140,7 @@ export const sendInvestigationNotificationsForExecution = async (
     routingClient,
     investigationId,
     executionId,
+    title: investigation.title,
     logger: context.logger,
   });
   return result;
@@ -155,12 +156,14 @@ const claimRootSlackThreads = async ({
   routingClient,
   investigationId,
   executionId,
+  title,
   logger,
 }: {
   client: ReturnType<GetInvestigationsClient>;
   routingClient: NotificationRoutingClient;
   investigationId: string;
   executionId: string;
+  title: string;
   logger: Pick<Logger, 'warn'>;
 }): Promise<void> => {
   const routing = await routingClient.get().catch((error: unknown) => {
@@ -199,7 +202,9 @@ const claimRootSlackThreads = async ({
         investigationId,
         externalConversationId: rootPost.external_conversation_id,
         channel: destination.thread.channel,
-        threadTs: destination.thread.thread_ts,
+        threadTs: rootPost.message_ts ?? destination.thread.thread_ts,
+        workspace: rootPost.workspace,
+        summary: title,
       });
     } catch (error) {
       logger.warn(

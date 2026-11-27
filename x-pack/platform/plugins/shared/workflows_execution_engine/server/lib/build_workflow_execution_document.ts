@@ -21,6 +21,7 @@ import {
 } from './execution_identity';
 import type { ResolvedExecutionIdentity } from './get_user';
 import { normalizeEventChainVisitedWorkflowIds } from './telemetry/utils/extract_execution_metadata';
+import { hasExecutionChain, toExecutionChainHop } from '../utils';
 import type { WorkflowExecutionForInputRendering } from '../workflow_context_manager/build_workflow_context';
 
 export interface BuildWorkflowExecutionDocumentParams {
@@ -131,6 +132,9 @@ export const buildWorkflowExecutionDocument = (
     ...(rootEventChainDepth !== undefined ? { eventChainDepth: rootEventChainDepth } : {}),
     ...(rootVisited.length > 0 ? { eventChainVisitedWorkflowIds: rootVisited } : {}),
     ...(dispatchEventId ? { dispatchEventId } : {}),
+    ...(hasExecutionChain(context)
+      ? { executionChain: context.executionChain.map(toExecutionChainHop) }
+      : {}),
   };
 
   stampExecutionWorkflowVersion(workflowExecution, workflow);

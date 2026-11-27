@@ -76,7 +76,7 @@ export const resolveWrittenDetectionsStepDefinition = ({ logger }: { logger: Log
     handler: async (context) => {
       const {
         batch,
-        reported_rule_uuids: reportedRuleUuids,
+        reported_rule_uuids: reportedRuleUuids = [],
         workflow_execution_id: workflowExecutionId,
       } = context.input;
       const { workflow } = context.contextManager.getContext();

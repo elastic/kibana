@@ -31,7 +31,6 @@ const meta: Meta<typeof DestinationDeliveryView> = {
   // The picker reads the page's time filter, which a story does not have.
   args: {
     destinationType: 'elasticsearch',
-    panelRole: 'failures',
     loading: false,
     showTimePicker: false,
   },
@@ -115,7 +114,6 @@ export const BothClasses: Story = {
 export const S3UploadAttempts: Story = {
   args: {
     destinationType: 's3',
-    panelRole: 'delivery',
     value: fixtureValue('s3Failures', 's3-test'),
   },
 };
@@ -133,14 +131,20 @@ export const PartialErrorWithSeries: Story = {
   args: { value: partialErrorWithSeriesValue() },
 };
 
-/** The flyout has a chart above, so this panel says that nothing failed. */
-export const HealthyFailuresPanel: Story = {
-  args: { panelRole: 'failures', value: healthyValue() },
+/** Nothing failed, so the panel shows what was delivered. */
+export const Healthy: Story = {
+  args: { destinationType: 'remote_elasticsearch', value: healthyValue() },
 };
 
-/** The panel is the delivery of the flyout, so it shows what was delivered, with a neutral title. */
-export const HealthyDeliveryPanel: Story = {
-  args: { destinationType: 'remote_elasticsearch', panelRole: 'delivery', value: healthyValue() },
+/** A local Elasticsearch destination: the documents delivered and the storage of its indices first. */
+export const LocalElasticsearchWithTotals: Story = {
+  args: {
+    value: healthyValue(),
+    totals: {
+      documents: { count: 1_284_310, loading: false },
+      storage: { bytes: 14_200_000, loading: false },
+    },
+  },
 };
 
 /** Nothing was attempted in the range, so there is no failure figure of any kind. */

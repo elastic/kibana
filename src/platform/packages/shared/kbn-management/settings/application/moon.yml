@@ -40,6 +40,7 @@ dependsOn:
   - '@kbn/core-spaces-common'
   - '@kbn/core'
   - '@kbn/ui-callout'
+  - '@kbn/management-settings-hooks'
 tags:
   - shared-browser
   - package

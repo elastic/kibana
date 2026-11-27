@@ -11,6 +11,7 @@ import type { Template } from '@kbn/workflows-library';
 import { LibraryBundleReader } from './library_bundle_reader';
 import { LibraryFetcher } from './library_fetcher';
 import { LibraryService } from './library_service';
+import { LIBRARY_CATALOG_FAILED_EVENT_TYPE } from './telemetry/events';
 import type { WorkflowsManagementConfig } from '../config';
 
 jest.mock('./library_fetcher');
@@ -53,6 +54,7 @@ const buildService = (templates: Template[]) => {
     logger: loggerMock.create(),
     kibanaVersion: '9.5.0',
     isServerless: false,
+    analytics: { reportEvent: jest.fn() },
   });
 };
 
@@ -129,12 +131,16 @@ describe('LibraryService source selection', () => {
     MockedLibraryBundleReader.mockReset();
   });
 
-  const buildWith = (library: Partial<WorkflowsManagementConfig['library']>) =>
+  const buildWith = (
+    library: Partial<WorkflowsManagementConfig['library']>,
+    analytics = { reportEvent: jest.fn() }
+  ) =>
     new LibraryService({
       config: { library: { ttlMs: 60_000, ...library } } as unknown as WorkflowsManagementConfig,
       logger: loggerMock.create(),
       kibanaVersion: '9.5.0',
       isServerless: false,
+      analytics,
     });
 
   it('uses the HTTP fetcher when bundlePath is not set', () => {
@@ -155,5 +161,29 @@ describe('LibraryService source selection', () => {
     expect(MockedLibraryBundleReader).toHaveBeenCalledWith(
       expect.objectContaining({ bundlePath: '/srv/workflows-library', kibanaVersion: '9.5.0' })
     );
+  });
+
+  it.each([
+    ['http', {}],
+    ['bundle', { bundlePath: '/srv/workflows-library' }],
+  ] as const)('reports %s source failures through its own telemetry', (sourceMode, library) => {
+    const source = { getHealth: () => ({ sourceMode, lastRefreshAt: null }) };
+    MockedLibraryFetcher.mockImplementation(() => source as unknown as LibraryFetcher);
+    MockedLibraryBundleReader.mockImplementation(() => source as unknown as LibraryBundleReader);
+    const analytics = { reportEvent: jest.fn() };
+
+    const service = buildWith(library, analytics);
+    const [[{ onFailure }]] =
+      sourceMode === 'http'
+        ? MockedLibraryFetcher.mock.calls
+        : MockedLibraryBundleReader.mock.calls;
+    onFailure?.({ operation: 'catalog', reason: 'timeout' });
+
+    expect(onFailure).toBe(service.telemetry.reportCatalogFailed);
+    expect(analytics.reportEvent).toHaveBeenCalledWith(LIBRARY_CATALOG_FAILED_EVENT_TYPE, {
+      operation: 'catalog',
+      fetchErrorReason: 'timeout',
+      sourceMode,
+    });
   });
 });

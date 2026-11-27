@@ -85,13 +85,24 @@ describe('DestinationsGrid', () => {
     ...partial,
   });
 
-  const renderGrid = (destinations: DestinationViewModel[]) =>
+  const renderGrid = (
+    destinations: DestinationViewModel[],
+    {
+      resolvedIndicesByDestination = new Map(),
+      resolvedIndicesStatus = 'ready',
+    }: Partial<
+      Pick<
+        React.ComponentProps<typeof DestinationsGrid>,
+        'resolvedIndicesByDestination' | 'resolvedIndicesStatus'
+      >
+    > = {}
+  ) =>
     render(
       <DestinationsGrid
         status="ready"
         destinations={destinations}
-        resolvedIndicesByDestination={new Map()}
-        resolvedIndicesStatus="ready"
+        resolvedIndicesByDestination={resolvedIndicesByDestination}
+        resolvedIndicesStatus={resolvedIndicesStatus}
         destinationDetailRefs={new Map()}
         sourceConnectedDestinationIds={new Set()}
         onShowDestinationDetail={jest.fn()}
@@ -166,6 +177,36 @@ describe('DestinationsGrid', () => {
     }
     return cell;
   };
+
+  describe('the index count', () => {
+    const twoIndices = new Map([
+      [
+        'es-logs',
+        [
+          { name: 'logs-a', documents: 1, ingestion_rate: 1, is_data_stream: false as const },
+          { name: 'logs-b', documents: 1, ingestion_rate: 1, is_data_stream: false as const },
+        ],
+      ],
+    ]);
+
+    it('counts the indices written to', () => {
+      renderGrid([destination()], { resolvedIndicesByDestination: twoIndices });
+
+      expect(screen.getByTestId('streamsDestinationIndexCountBadge')).toHaveTextContent('2');
+    });
+
+    it('is not shown while indices reload, as the previous count is of another range', () => {
+      const { container } = renderGrid([destination()], {
+        resolvedIndicesByDestination: twoIndices,
+        resolvedIndicesStatus: 'loading',
+      });
+
+      expect(screen.queryByTestId('streamsDestinationIndexCountBadge')).not.toBeInTheDocument();
+      expect(
+        getCell(container, 'indices').querySelector('[role="progressbar"]')
+      ).toBeInTheDocument();
+    });
+  });
 
   it('shows a remote row as Remote Elasticsearch with no index count', () => {
     const { container } = renderGrid([remoteDestination()]);

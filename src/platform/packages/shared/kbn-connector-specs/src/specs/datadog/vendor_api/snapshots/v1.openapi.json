@@ -8,6 +8,32 @@
               "$ref": "#/components/schemas/APIErrorResponse"
             }
           }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          "X-RateLimit-Period": {
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          "X-RateLimit-Remaining": {
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          "X-RateLimit-Reset": {
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
         }
       }
     },
@@ -211,6 +237,11 @@
             "readOnly": true,
             "type": "string"
           },
+          "attributes": {
+            "additionalProperties": {},
+            "readOnly": true,
+            "type": "object"
+          },
           "display_name": {
             "readOnly": true,
             "type": "string"
@@ -308,6 +339,11 @@
             "readOnly": true,
             "type": "string"
           },
+          "resp_version": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
+          },
           "series": {
             "items": {
               "$ref": "#/components/schemas/MetricsQueryMetadata"
@@ -319,10 +355,20 @@
             "readOnly": true,
             "type": "string"
           },
+          "times": {
+            "items": {},
+            "readOnly": true,
+            "type": "array"
+          },
           "to_date": {
             "format": "int64",
             "readOnly": true,
             "type": "integer"
+          },
+          "values": {
+            "items": {},
+            "readOnly": true,
+            "type": "array"
           }
         },
         "type": "object"
@@ -333,6 +379,11 @@
           "family": {
             "readOnly": true,
             "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "readOnly": true,
+            "type": "integer"
           },
           "name": {
             "readOnly": true,
@@ -693,7 +744,6 @@
       },
       "MonitorFormulaAndFunctionCostDataSource": {
         "enum": [
-          "metrics",
           "cloud_cost",
           "datadog_usage"
         ],
@@ -721,6 +771,14 @@
         ],
         "type": "object"
       },
+      "MonitorFormulaAndFunctionDataJobsMonitorOptions": {
+        "properties": {
+          "alert_on_every_failure": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
       "MonitorFormulaAndFunctionDataJobsQueryDefinition": {
         "properties": {
           "job_type": {
@@ -729,10 +787,16 @@
           "jobs_query": {
             "type": "string"
           },
+          "monitor_options": {
+            "$ref": "#/components/schemas/MonitorFormulaAndFunctionDataJobsMonitorOptions"
+          },
           "name": {
             "type": "string"
           },
           "query_dialect": {
+            "type": "string"
+          },
+          "run_filter": {
             "type": "string"
           }
         },
@@ -747,6 +811,13 @@
       "MonitorFormulaAndFunctionDataQualityDataSource": {
         "enum": [
           "data_quality_metrics"
+        ],
+        "type": "string"
+      },
+      "MonitorFormulaAndFunctionDataQualityDetectionType": {
+        "enum": [
+          "static",
+          "anomaly"
         ],
         "type": "string"
       },
@@ -839,6 +910,11 @@
       },
       "MonitorFormulaAndFunctionDataQualityMonitorOptions": {
         "properties": {
+          "consecutive_runs": {
+            "format": "int64",
+            "minimum": 1,
+            "type": "integer"
+          },
           "crontab_override": {
             "type": "string"
           },
@@ -847,6 +923,9 @@
           },
           "custom_where": {
             "type": "string"
+          },
+          "detection_type": {
+            "$ref": "#/components/schemas/MonitorFormulaAndFunctionDataQualityDetectionType"
           },
           "group_by_columns": {
             "items": {
@@ -860,12 +939,23 @@
           "model_type_override": {
             "$ref": "#/components/schemas/MonitorFormulaAndFunctionDataQualityModelTypeOverride"
           },
+          "platform_settings": {
+            "$ref": "#/components/schemas/MonitorFormulaAndFunctionDataQualityPlatformSettings"
+          },
           "sensitivity": {
             "format": "double",
             "type": "number"
           },
           "source_to_target_config": {
             "$ref": "#/components/schemas/MonitorFormulaAndFunctionDataQualitySourceToTargetConfig"
+          }
+        },
+        "type": "object"
+      },
+      "MonitorFormulaAndFunctionDataQualityPlatformSettings": {
+        "properties": {
+          "snowflake": {
+            "$ref": "#/components/schemas/MonitorFormulaAndFunctionDataQualitySnowflakeSettings"
           }
         },
         "type": "object"
@@ -893,6 +983,9 @@
           "name": {
             "type": "string"
           },
+          "run_filter": {
+            "type": "string"
+          },
           "schema_version": {
             "type": "string"
           },
@@ -906,6 +999,14 @@
           "measure",
           "filter"
         ],
+        "type": "object"
+      },
+      "MonitorFormulaAndFunctionDataQualitySnowflakeSettings": {
+        "properties": {
+          "warehouse": {
+            "type": "string"
+          }
+        },
         "type": "object"
       },
       "MonitorFormulaAndFunctionDataQualitySourceToTargetConfig": {
@@ -1066,9 +1167,38 @@
           "spans",
           "database_queries",
           "network",
-          "network_path"
+          "network_path",
+          "llm_observability"
         ],
         "type": "string"
+      },
+      "MonitorFormulaAndFunctionMetricQueryDataSource": {
+        "enum": [
+          "metrics"
+        ],
+        "type": "string"
+      },
+      "MonitorFormulaAndFunctionMetricQueryDefinition": {
+        "properties": {
+          "aggregator": {
+            "$ref": "#/components/schemas/MonitorFormulaAndFunctionCostAggregator"
+          },
+          "data_source": {
+            "$ref": "#/components/schemas/MonitorFormulaAndFunctionMetricQueryDataSource"
+          },
+          "name": {
+            "type": "string"
+          },
+          "query": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "data_source",
+          "query"
+        ],
+        "type": "object"
       },
       "MonitorFormulaAndFunctionMetricsAggregator": {
         "enum": [
@@ -1135,6 +1265,9 @@
           },
           {
             "$ref": "#/components/schemas/MonitorFormulaAndFunctionAggregateFilteredQueryDefinition"
+          },
+          {
+            "$ref": "#/components/schemas/MonitorFormulaAndFunctionMetricQueryDefinition"
           }
         ]
       },
@@ -1632,6 +1765,7 @@
               "incident_settings_write": "Configure Incident Settings.",
               "incident_write": "Create, view, and manage incidents in Datadog.",
               "metrics_read": "View custom metrics.",
+              "monitor_notification_rules_write": "Create, edit, and delete monitor notification rules.",
               "monitors_downtime": "Set downtimes to suppress alerts from any monitor in an organization. Mute and unmute monitors. The ability to write monitors is not required to set downtimes.",
               "monitors_draft_write": "Create, edit, and delete draft monitors. Does not allow editing live monitors or publishing drafts to production.",
               "monitors_read": "View monitors.",
@@ -1693,6 +1827,7 @@
   "paths": {
     "/api/v1/events": {
       "post": {
+        "deprecated": true,
         "operationId": "CreateEvent",
         "requestBody": {
           "content": {
@@ -1943,6 +2078,171 @@
           {
             "AuthZ": [
               "monitors_read"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/monitor/{monitor_id}/mute": {
+      "post": {
+        "operationId": "MuteMonitor",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "monitor_id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "scope",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "end",
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Monitor"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequestsResponse"
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": [],
+            "appKeyAuth": []
+          },
+          {
+            "AuthZ": [
+              "monitors_write"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/v1/monitor/{monitor_id}/unmute": {
+      "post": {
+        "operationId": "UnmuteMonitor",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "monitor_id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "scope",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "all_scopes",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Monitor"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequestsResponse"
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": [],
+            "appKeyAuth": []
+          },
+          {
+            "AuthZ": [
+              "monitors_write"
             ]
           }
         ]

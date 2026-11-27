@@ -87,8 +87,8 @@ steps:
           EVAL_INCLUDE_EIS_MODELS: '1'
           # Keep in sync with `weeklyEisModelGroups` for agent-builder-dashboards in evals.suites.json.
           # Intentionally not using *weekly_eis_core_models — Gemini Flash/Pro fail this suite's
-          # generate_dashboard tool-call schema. Weekly runs are Sonnet 5.5, Opus 5.5, and GPT 5.6 Sol.
-          EVAL_MODEL_GROUPS: 'eis/anthropic-claude-5.5-sonnet,eis/anthropic-claude-5.5-opus,eis/openai-gpt-5.6-sol'
+          # generate_dashboard tool-call schema. Weekly runs are Sonnet 5.5, Opus 5.5, and GPT-6 Sol.
+          EVAL_MODEL_GROUPS: 'eis/anthropic-claude-5.5-sonnet,eis/anthropic-claude-5.5-opus,eis/openai-gpt-6-sol'
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404
@@ -113,7 +113,7 @@ steps:
           EVAL_INCLUDE_EIS_MODELS: '1'
           # Keep in sync with `weeklyEisModelGroups` for agent-builder-visualizations in evals.suites.json.
           # Same allowlist as dashboards — suite timeout is 45m per model.
-          EVAL_MODEL_GROUPS: 'eis/anthropic-claude-5.5-sonnet,eis/anthropic-claude-5.5-opus,eis/openai-gpt-5.6-sol'
+          EVAL_MODEL_GROUPS: 'eis/anthropic-claude-5.5-sonnet,eis/anthropic-claude-5.5-opus,eis/openai-gpt-6-sol'
         timeout_in_minutes: 90
         agents:
           image: family/kibana-ubuntu-2404

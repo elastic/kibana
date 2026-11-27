@@ -1,0 +1,3183 @@
+{
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "title": "ThreatQ REST API"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/adversaries": {
+      "post": {
+        "operationId": "adversaries-adversary-list-post",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "sources": {
+                    "items": {
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "tlp": {
+                          "properties": {
+                            "name": {
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "type": "array"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "properties": {
+                        "created_at": {
+                          "type": "string"
+                        },
+                        "id": {
+                          "type": "integer"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "sources": {
+                          "items": {
+                            "properties": {
+                              "created_at": {
+                                "type": "string"
+                              },
+                              "id": {
+                                "type": "integer"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "type": {
+                                "type": "string"
+                              },
+                              "updated_at": {
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "type": "array"
+                        },
+                        "updated_at": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "properties": {
+                        "errors": {
+                          "properties": {
+                            "name": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "type": "object"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {}
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/events": {
+      "post": {
+        "operationId": "events-event-list-post",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "happened_at": {
+                    "type": "string"
+                  },
+                  "sources": {
+                    "items": {
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "tlp": {
+                          "properties": {
+                            "name": {
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "type": "array"
+                  },
+                  "title": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "properties": {
+                        "created_at": {
+                          "type": "string"
+                        },
+                        "happened_at": {
+                          "type": "string"
+                        },
+                        "hash": {
+                          "type": "string"
+                        },
+                        "id": {
+                          "type": "integer"
+                        },
+                        "sources": {
+                          "items": {
+                            "properties": {
+                              "created_at": {
+                                "type": "string"
+                              },
+                              "id": {
+                                "type": "integer"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "type": {
+                                "type": "string"
+                              },
+                              "updated_at": {
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "type": "array"
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "properties": {
+                            "created_at": {
+                              "type": "string"
+                            },
+                            "id": {
+                              "type": "integer"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "updated_at": {
+                              "type": "string"
+                            },
+                            "user_editable": {
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "type_id": {
+                          "type": "integer"
+                        },
+                        "updated_at": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "properties": {
+                        "errors": {
+                          "properties": {
+                            "happened_at": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            },
+                            "hash": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            },
+                            "title": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            },
+                            "type_id": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "hash": {
+                          "nullable": true
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {}
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/events/{event_id}/tags": {
+      "post": {
+        "operationId": "events-event-tag-list-post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "event_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "items": {
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "pivot": {
+                            "properties": {
+                              "created_at": {
+                                "type": "string"
+                              },
+                              "object_id": {
+                                "type": "integer"
+                              },
+                              "tag_id": {
+                                "type": "integer"
+                              },
+                              "updated_at": {
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "properties": {
+                        "errors": {
+                          "properties": {
+                            "name": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "type": "object"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {}
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/indicator/statuses": {
+      "get": {
+        "operationId": "indicators-indicator-statuses-list-get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "with",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "items": {
+                        "properties": {
+                          "created_at": {
+                            "type": "string"
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "integer"
+                          },
+                          "include_in_export": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "protected": {
+                            "type": "string"
+                          },
+                          "updated_at": {
+                            "type": "string"
+                          },
+                          "user_editable": {
+                            "type": "string"
+                          },
+                          "visible": {
+                            "type": "string"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {}
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/indicator/types": {
+      "get": {
+        "operationId": "indicators-indicator-types-list-get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "with",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "items": {
+                        "properties": {
+                          "class": {
+                            "type": "string"
+                          },
+                          "created_at": {
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "integer"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "score": {
+                            "nullable": true
+                          },
+                          "updated_at": {
+                            "type": "string"
+                          },
+                          "wildcard_matching": {
+                            "type": "string"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {}
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/indicators": {
+      "post": {
+        "operationId": "indicators-indicator-list-post",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "properties": {
+                    "attributes": {
+                      "items": {
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          },
+                          "sources": {
+                            "items": {
+                              "properties": {
+                                "name": {
+                                  "type": "string"
+                                },
+                                "published_at": {
+                                  "type": "string"
+                                },
+                                "tlp": {
+                                  "properties": {
+                                    "name": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "type": "object"
+                                }
+                              },
+                              "type": "object"
+                            },
+                            "type": "array"
+                          },
+                          "value": {
+                            "type": "string"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "class": {
+                      "type": "string"
+                    },
+                    "sources": {
+                      "items": {
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          },
+                          "published_at": {
+                            "type": "string"
+                          },
+                          "tlp": {
+                            "properties": {
+                              "name": {
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "status_id": {
+                      "type": "integer"
+                    },
+                    "type_id": {
+                      "type": "string"
+                    },
+                    "value": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                },
+                "type": "array"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "items": {
+                        "properties": {
+                          "attributes": {
+                            "items": {
+                              "properties": {
+                                "attribute": {
+                                  "properties": {
+                                    "created_at": {
+                                      "type": "string"
+                                    },
+                                    "id": {
+                                      "type": "integer"
+                                    },
+                                    "name": {
+                                      "type": "string"
+                                    },
+                                    "updated_at": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "type": "object"
+                                },
+                                "attribute_id": {
+                                  "type": "integer"
+                                },
+                                "created_at": {
+                                  "type": "string"
+                                },
+                                "id": {
+                                  "type": "integer"
+                                },
+                                "indicator_id": {
+                                  "type": "integer"
+                                },
+                                "name": {
+                                  "type": "string"
+                                },
+                                "sources": {
+                                  "items": {
+                                    "properties": {
+                                      "created_at": {
+                                        "type": "string"
+                                      },
+                                      "expire_days": {
+                                        "nullable": true
+                                      },
+                                      "id": {
+                                        "type": "integer"
+                                      },
+                                      "name": {
+                                        "type": "string"
+                                      },
+                                      "score": {
+                                        "nullable": true
+                                      },
+                                      "type": {
+                                        "type": "string"
+                                      },
+                                      "updated_at": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "type": "object"
+                                  },
+                                  "type": "array"
+                                },
+                                "updated_at": {
+                                  "type": "string"
+                                },
+                                "value": {
+                                  "type": "string"
+                                }
+                              },
+                              "type": "object"
+                            },
+                            "type": "array"
+                          },
+                          "class": {
+                            "type": "string"
+                          },
+                          "created_at": {
+                            "type": "string"
+                          },
+                          "existing": {
+                            "type": "string"
+                          },
+                          "expired_at": {
+                            "nullable": true
+                          },
+                          "expires_at": {
+                            "nullable": true
+                          },
+                          "expires_calculated_at": {
+                            "nullable": true
+                          },
+                          "hash": {
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "integer"
+                          },
+                          "last_detected_at": {
+                            "nullable": true
+                          },
+                          "sources": {
+                            "items": {
+                              "properties": {
+                                "created_at": {
+                                  "type": "string"
+                                },
+                                "id": {
+                                  "type": "integer"
+                                },
+                                "name": {
+                                  "type": "string"
+                                },
+                                "type": {
+                                  "type": "string"
+                                },
+                                "updated_at": {
+                                  "type": "string"
+                                }
+                              },
+                              "type": "object"
+                            },
+                            "type": "array"
+                          },
+                          "status_id": {
+                            "type": "integer"
+                          },
+                          "touched_at": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "properties": {
+                              "class": {
+                                "type": "string"
+                              },
+                              "created_at": {
+                                "type": "string"
+                              },
+                              "id": {
+                                "type": "integer"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "score": {
+                                "nullable": true
+                              },
+                              "updated_at": {
+                                "type": "string"
+                              },
+                              "wildcard_matching": {
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "type_id": {
+                            "type": "integer"
+                          },
+                          "updated_at": {
+                            "type": "string"
+                          },
+                          "value": {
+                            "type": "string"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "properties": {
+                        "errors": {
+                          "properties": {
+                            "class": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            },
+                            "status_id": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            },
+                            "type_id": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            },
+                            "value": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "type": "object"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {}
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/indicators/query": {
+      "post": {
+        "operationId": "indicators-indicator-search-post",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "criteria": {
+                    "properties": {
+                      "+or": {
+                        "items": {
+                          "properties": {
+                            "mentions": {
+                              "type": "string"
+                            },
+                            "value": {
+                              "properties": {
+                                "+contains": {
+                                  "type": "string"
+                                }
+                              },
+                              "type": "object"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "type": "array"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "filters": {
+                    "properties": {
+                      "+and": {
+                        "items": {
+                          "properties": {
+                            "+or": {
+                              "items": {
+                                "properties": {
+                                  "+and": {
+                                    "items": {
+                                      "properties": {
+                                        "published_at": {
+                                          "properties": {
+                                            "+lt": {
+                                              "type": "string"
+                                            }
+                                          },
+                                          "type": "object"
+                                        },
+                                        "source_created_at": {
+                                          "properties": {
+                                            "+lt": {
+                                              "type": "string"
+                                            }
+                                          },
+                                          "type": "object"
+                                        },
+                                        "source_name": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "type": "object"
+                                    },
+                                    "type": "array"
+                                  },
+                                  "cidr_ipv4": {
+                                    "type": "string"
+                                  },
+                                  "expired_at": {
+                                    "properties": {
+                                      "+gt": {
+                                        "type": "string"
+                                      },
+                                      "+lt": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "type": "object"
+                                  },
+                                  "expires_at": {
+                                    "properties": {
+                                      "+gt": {
+                                        "type": "string"
+                                      },
+                                      "+lt": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "type": "object"
+                                  },
+                                  "related": {
+                                    "properties": {
+                                      "id": {
+                                        "type": "integer"
+                                      },
+                                      "object": {
+                                        "type": "string"
+                                      },
+                                      "type": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "type": "object"
+                                  },
+                                  "score": {
+                                    "properties": {
+                                      "+gte": {
+                                        "type": "integer"
+                                      },
+                                      "+lte": {
+                                        "type": "integer"
+                                      }
+                                    },
+                                    "type": "object"
+                                  },
+                                  "source_name": {
+                                    "type": "string"
+                                  },
+                                  "status_name": {
+                                    "type": "string"
+                                  },
+                                  "tags": {
+                                    "type": "string"
+                                  },
+                                  "type_name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "type": "object"
+                              },
+                              "type": "array"
+                            },
+                            "created_at": {
+                              "properties": {
+                                "+lt": {
+                                  "type": "string"
+                                }
+                              },
+                              "type": "object"
+                            },
+                            "updated_at": {
+                              "properties": {
+                                "+lt": {
+                                  "type": "string"
+                                }
+                              },
+                              "type": "object"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "type": "array"
+                      },
+                      "+or": {
+                        "items": {
+                          "properties": {
+                            "attribute": {
+                              "properties": {
+                                "name": {
+                                  "type": "string"
+                                },
+                                "value": {
+                                  "type": "string"
+                                }
+                              },
+                              "type": "object"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "type": "array"
+                      }
+                    },
+                    "type": "object"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "items": {
+                        "properties": {
+                          "adversaries": {
+                            "items": {
+                              "properties": {
+                                "name": {
+                                  "type": "string"
+                                }
+                              },
+                              "type": "object"
+                            },
+                            "type": "array"
+                          },
+                          "attributes": {
+                            "items": {
+                              "properties": {
+                                "attribute_id": {
+                                  "type": "integer"
+                                },
+                                "created_at": {
+                                  "type": "string"
+                                },
+                                "id": {
+                                  "type": "integer"
+                                },
+                                "indicator_id": {
+                                  "type": "integer"
+                                },
+                                "name": {
+                                  "type": "string"
+                                },
+                                "touched_at": {
+                                  "type": "string"
+                                },
+                                "updated_at": {
+                                  "type": "string"
+                                },
+                                "value": {
+                                  "type": "string"
+                                }
+                              },
+                              "type": "object"
+                            },
+                            "type": "array"
+                          },
+                          "class": {
+                            "type": "string"
+                          },
+                          "created_at": {
+                            "type": "string"
+                          },
+                          "expired_at": {
+                            "type": "string"
+                          },
+                          "expires_calculated_at": {
+                            "type": "string"
+                          },
+                          "hash": {
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "integer"
+                          },
+                          "last_detected_at": {
+                            "type": "string"
+                          },
+                          "published_at": {
+                            "type": "string"
+                          },
+                          "score": {
+                            "type": "integer"
+                          },
+                          "sources": {
+                            "items": {
+                              "properties": {
+                                "created_at": {
+                                  "type": "string"
+                                },
+                                "creator_source_id": {
+                                  "type": "integer"
+                                },
+                                "id": {
+                                  "type": "integer"
+                                },
+                                "indicator_id": {
+                                  "type": "integer"
+                                },
+                                "indicator_status_id": {
+                                  "type": "integer"
+                                },
+                                "indicator_type_id": {
+                                  "type": "integer"
+                                },
+                                "name": {
+                                  "type": "string"
+                                },
+                                "published_at": {
+                                  "type": "string"
+                                },
+                                "reference_id": {
+                                  "type": "integer"
+                                },
+                                "source_id": {
+                                  "type": "integer"
+                                },
+                                "source_type": {
+                                  "type": "string"
+                                },
+                                "updated_at": {
+                                  "type": "string"
+                                }
+                              },
+                              "type": "object"
+                            },
+                            "type": "array"
+                          },
+                          "status": {
+                            "properties": {
+                              "description": {
+                                "type": "string"
+                              },
+                              "id": {
+                                "type": "integer"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "status_id": {
+                            "type": "integer"
+                          },
+                          "touched_at": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "properties": {
+                              "class": {
+                                "type": "string"
+                              },
+                              "id": {
+                                "type": "integer"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "type_id": {
+                            "type": "integer"
+                          },
+                          "updated_at": {
+                            "type": "string"
+                          },
+                          "value": {
+                            "type": "string"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "limit": {
+                      "type": "integer"
+                    },
+                    "offset": {
+                      "type": "integer"
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {}
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/indicators/{indicator_id}": {
+      "get": {
+        "operationId": "indicators-indicator-get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "indicator_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "with",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "properties": {
+                        "class": {
+                          "type": "string"
+                        },
+                        "created_at": {
+                          "type": "string"
+                        },
+                        "expired_at": {
+                          "nullable": true
+                        },
+                        "expires_at": {
+                          "nullable": true
+                        },
+                        "expires_calculated_at": {
+                          "nullable": true
+                        },
+                        "hash": {
+                          "type": "string"
+                        },
+                        "id": {
+                          "type": "integer"
+                        },
+                        "last_detected_at": {
+                          "type": "string"
+                        },
+                        "status_id": {
+                          "type": "integer"
+                        },
+                        "touched_at": {
+                          "type": "string"
+                        },
+                        "type_id": {
+                          "type": "integer"
+                        },
+                        "updated_at": {
+                          "type": "string"
+                        },
+                        "value": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {},
+          "404": {}
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      },
+      "put": {
+        "operationId": "indicators-indicator-put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "indicator_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "with",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "attributes": {
+                    "items": {
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "sources": {
+                          "items": {
+                            "properties": {
+                              "name": {
+                                "type": "string"
+                              },
+                              "published_at": {
+                                "type": "string"
+                              },
+                              "tlp": {
+                                "properties": {
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "type": "object"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "type": "array"
+                        },
+                        "value": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "type": "array"
+                  },
+                  "sources": {
+                    "items": {
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "published_at": {
+                          "type": "string"
+                        },
+                        "tlp": {
+                          "properties": {
+                            "name": {
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "type": "array"
+                  },
+                  "status_id": {
+                    "type": "integer"
+                  },
+                  "value": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "properties": {
+                        "attributes": {
+                          "items": {
+                            "properties": {
+                              "attribute": {
+                                "properties": {
+                                  "created_at": {
+                                    "type": "string"
+                                  },
+                                  "id": {
+                                    "type": "integer"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "updated_at": {
+                                    "type": "string"
+                                  }
+                                },
+                                "type": "object"
+                              },
+                              "attribute_id": {
+                                "type": "integer"
+                              },
+                              "created_at": {
+                                "type": "string"
+                              },
+                              "id": {
+                                "type": "integer"
+                              },
+                              "indicator_id": {
+                                "type": "integer"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "sources": {
+                                "items": {
+                                  "properties": {
+                                    "created_at": {
+                                      "type": "string"
+                                    },
+                                    "expire_days": {
+                                      "nullable": true
+                                    },
+                                    "id": {
+                                      "type": "integer"
+                                    },
+                                    "name": {
+                                      "type": "string"
+                                    },
+                                    "score": {
+                                      "nullable": true
+                                    },
+                                    "type": {
+                                      "type": "string"
+                                    },
+                                    "updated_at": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "type": "object"
+                                },
+                                "type": "array"
+                              },
+                              "updated_at": {
+                                "type": "string"
+                              },
+                              "value": {
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "type": "array"
+                        },
+                        "class": {
+                          "type": "string"
+                        },
+                        "created_at": {
+                          "type": "string"
+                        },
+                        "expired_at": {
+                          "nullable": true
+                        },
+                        "expires_at": {
+                          "nullable": true
+                        },
+                        "expires_calculated_at": {
+                          "nullable": true
+                        },
+                        "hash": {
+                          "type": "string"
+                        },
+                        "id": {
+                          "type": "integer"
+                        },
+                        "last_detected_at": {
+                          "nullable": true
+                        },
+                        "sources": {
+                          "items": {
+                            "properties": {
+                              "created_at": {
+                                "type": "string"
+                              },
+                              "id": {
+                                "type": "integer"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "type": {
+                                "type": "string"
+                              },
+                              "updated_at": {
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "type": "array"
+                        },
+                        "status_id": {
+                          "type": "integer"
+                        },
+                        "touched_at": {
+                          "type": "string"
+                        },
+                        "type_id": {
+                          "type": "integer"
+                        },
+                        "updated_at": {
+                          "type": "string"
+                        },
+                        "value": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {},
+          "404": {}
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/indicators/{indicator_id}/attributes": {
+      "post": {
+        "operationId": "indicators-indicator-attributes-list-post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "indicator_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "sources": {
+                    "items": {
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "published_at": {
+                          "type": "string"
+                        },
+                        "tlp": {
+                          "properties": {
+                            "name": {
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "type": "array"
+                  },
+                  "value": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "items": {
+                        "properties": {
+                          "attribute": {
+                            "properties": {
+                              "created_at": {
+                                "type": "string"
+                              },
+                              "id": {
+                                "type": "integer"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "updated_at": {
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "attribute_id": {
+                            "type": "integer"
+                          },
+                          "created_at": {
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "integer"
+                          },
+                          "indicator_id": {
+                            "type": "integer"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "sources": {
+                            "items": {
+                              "properties": {
+                                "created_at": {
+                                  "type": "string"
+                                },
+                                "id": {
+                                  "type": "integer"
+                                },
+                                "name": {
+                                  "type": "string"
+                                },
+                                "pivot": {
+                                  "properties": {
+                                    "creator_source_id": {
+                                      "type": "integer"
+                                    },
+                                    "id": {
+                                      "type": "integer"
+                                    },
+                                    "indicator_attribute_id": {
+                                      "type": "integer"
+                                    },
+                                    "source_id": {
+                                      "type": "integer"
+                                    }
+                                  },
+                                  "type": "object"
+                                },
+                                "published_at": {
+                                  "type": "string"
+                                },
+                                "tlp_id": {
+                                  "type": "integer"
+                                },
+                                "type": {
+                                  "type": "string"
+                                },
+                                "updated_at": {
+                                  "type": "string"
+                                }
+                              },
+                              "type": "object"
+                            },
+                            "type": "array"
+                          },
+                          "updated_at": {
+                            "type": "string"
+                          },
+                          "value": {
+                            "type": "string"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {}
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/indicators/{indicator_id}/events": {
+      "get": {
+        "operationId": "indicators-indicator-events-list-get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "indicator_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "with",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "items": {
+                        "properties": {
+                          "created_at": {
+                            "type": "string"
+                          },
+                          "deleted_at": {
+                            "nullable": true
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "happened_at": {
+                            "type": "string"
+                          },
+                          "hash": {
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "integer"
+                          },
+                          "pivot": {
+                            "properties": {
+                              "attributes": {
+                                "items": {
+                                  "properties": {
+                                    "id": {
+                                      "type": "integer"
+                                    },
+                                    "name": {
+                                      "type": "string"
+                                    },
+                                    "sources": {
+                                      "items": {
+                                        "properties": {
+                                          "id": {
+                                            "type": "integer"
+                                          },
+                                          "name": {
+                                            "type": "string"
+                                          },
+                                          "pivot": {
+                                            "properties": {
+                                              "created_at": {
+                                                "type": "string"
+                                              },
+                                              "updated_at": {
+                                                "type": "string"
+                                              }
+                                            },
+                                            "type": "object"
+                                          },
+                                          "type": {
+                                            "type": "string"
+                                          }
+                                        },
+                                        "type": "object"
+                                      },
+                                      "type": "array"
+                                    },
+                                    "value": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "type": "object"
+                                },
+                                "type": "array"
+                              },
+                              "comments": {
+                                "items": {
+                                  "properties": {
+                                    "created_at": {
+                                      "type": "string"
+                                    },
+                                    "creator_source_id": {
+                                      "type": "integer"
+                                    },
+                                    "id": {
+                                      "type": "integer"
+                                    },
+                                    "source": {
+                                      "type": "string"
+                                    },
+                                    "type": {
+                                      "type": "string"
+                                    },
+                                    "updated_at": {
+                                      "type": "string"
+                                    },
+                                    "value": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "type": "object"
+                                },
+                                "type": "array"
+                              },
+                              "created_at": {
+                                "type": "string"
+                              },
+                              "dest_object_id": {
+                                "type": "integer"
+                              },
+                              "dest_type": {
+                                "type": "string"
+                              },
+                              "id": {
+                                "type": "integer"
+                              },
+                              "sources": {
+                                "items": {
+                                  "properties": {
+                                    "id": {
+                                      "type": "integer"
+                                    },
+                                    "name": {
+                                      "type": "string"
+                                    },
+                                    "pivot": {
+                                      "properties": {
+                                        "created_at": {
+                                          "type": "string"
+                                        },
+                                        "updated_at": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "type": "object"
+                                    },
+                                    "type": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "type": "object"
+                                },
+                                "type": "array"
+                              },
+                              "src_object_id": {
+                                "type": "integer"
+                              },
+                              "src_type": {
+                                "type": "string"
+                              },
+                              "updated_at": {
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "sources": {
+                            "items": {
+                              "properties": {
+                                "name": {
+                                  "type": "string"
+                                }
+                              },
+                              "type": "object"
+                            },
+                            "type": "array"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "touched_at": {
+                            "type": "string"
+                          },
+                          "type_id": {
+                            "type": "integer"
+                          },
+                          "updated_at": {
+                            "type": "string"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "limit": {
+                      "type": "integer"
+                    },
+                    "offset": {
+                      "type": "integer"
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {}
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      },
+      "post": {
+        "operationId": "indicators-indicator-events-list-post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "indicator_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    }
+                  },
+                  "type": "object"
+                },
+                "type": "array"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "items": {
+                        "properties": {
+                          "created_at": {
+                            "type": "string"
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "happened_at": {
+                            "type": "string"
+                          },
+                          "hash": {
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "integer"
+                          },
+                          "pivot": {
+                            "properties": {
+                              "created_at": {
+                                "type": "string"
+                              },
+                              "id": {
+                                "type": "integer"
+                              },
+                              "updated_at": {
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "touched_at": {
+                            "type": "string"
+                          },
+                          "type_id": {
+                            "type": "integer"
+                          },
+                          "updated_at": {
+                            "type": "string"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "items": {
+                        "properties": {
+                          "errors": {
+                            "properties": {
+                              "id": {
+                                "items": {
+                                  "type": "string"
+                                },
+                                "type": "array"
+                              }
+                            },
+                            "type": "object"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {}
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/plugins": {
+      "get": {
+        "operationId": "plugins-plugin-list-get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "forceRefresh",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "with",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "items": {
+                        "properties": {
+                          "author": {
+                            "type": "string"
+                          },
+                          "created_at": {
+                            "type": "string"
+                          },
+                          "deleted_at": {
+                            "nullable": true
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "disable_proxy": {
+                            "type": "integer"
+                          },
+                          "enabled": {
+                            "type": "integer"
+                          },
+                          "friendly_name": {
+                            "type": "string"
+                          },
+                          "gate_oauth2_client_id": {
+                            "type": "integer"
+                          },
+                          "id": {
+                            "type": "integer"
+                          },
+                          "is_deletable": {
+                            "type": "boolean"
+                          },
+                          "logo_path": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "package_name": {
+                            "type": "string"
+                          },
+                          "required_threatq_version": {
+                            "type": "string"
+                          },
+                          "updated_at": {
+                            "type": "string"
+                          },
+                          "version": {
+                            "type": "string"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {}
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/plugins/{plugin_id}": {
+      "get": {
+        "operationId": "plugins-plugin-get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "plugin_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "with",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "properties": {
+                        "author": {
+                          "type": "string"
+                        },
+                        "created_at": {
+                          "type": "string"
+                        },
+                        "deleted_at": {
+                          "nullable": true
+                        },
+                        "description": {
+                          "type": "string"
+                        },
+                        "disable_proxy": {
+                          "type": "integer"
+                        },
+                        "enabled": {
+                          "type": "integer"
+                        },
+                        "friendly_name": {
+                          "type": "string"
+                        },
+                        "id": {
+                          "type": "integer"
+                        },
+                        "logo_path": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "package_name": {
+                          "type": "string"
+                        },
+                        "required_threatq_version": {
+                          "type": "string"
+                        },
+                        "updated_at": {
+                          "type": "string"
+                        },
+                        "version": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {},
+          "404": {}
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/plugins/{plugin_id}/execute": {
+      "post": {
+        "operationId": "plugins-plugin-execute-post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "plugin_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "action": {
+                    "type": "string"
+                  },
+                  "id": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "properties": {
+                        "data": {
+                          "properties": {
+                            "name_servers": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            },
+                            "parsed_whois": {
+                              "properties": {
+                                "contacts": {
+                                  "properties": {
+                                    "admin": {
+                                      "properties": {
+                                        "city": {
+                                          "type": "string"
+                                        },
+                                        "country": {
+                                          "type": "string"
+                                        },
+                                        "email": {
+                                          "type": "string"
+                                        },
+                                        "fax": {
+                                          "type": "string"
+                                        },
+                                        "name": {
+                                          "type": "string"
+                                        },
+                                        "org": {
+                                          "type": "string"
+                                        },
+                                        "phone": {
+                                          "type": "string"
+                                        },
+                                        "postal": {
+                                          "type": "string"
+                                        },
+                                        "state": {
+                                          "type": "string"
+                                        },
+                                        "street": {
+                                          "items": {
+                                            "type": "string"
+                                          },
+                                          "type": "array"
+                                        }
+                                      },
+                                      "type": "object"
+                                    },
+                                    "billing": {
+                                      "properties": {
+                                        "city": {
+                                          "type": "string"
+                                        },
+                                        "country": {
+                                          "type": "string"
+                                        },
+                                        "email": {
+                                          "type": "string"
+                                        },
+                                        "fax": {
+                                          "type": "string"
+                                        },
+                                        "name": {
+                                          "type": "string"
+                                        },
+                                        "org": {
+                                          "type": "string"
+                                        },
+                                        "phone": {
+                                          "type": "string"
+                                        },
+                                        "postal": {
+                                          "type": "string"
+                                        },
+                                        "state": {
+                                          "type": "string"
+                                        },
+                                        "street": {
+                                          "items": {},
+                                          "type": "array"
+                                        }
+                                      },
+                                      "type": "object"
+                                    },
+                                    "registrant": {
+                                      "properties": {
+                                        "city": {
+                                          "type": "string"
+                                        },
+                                        "country": {
+                                          "type": "string"
+                                        },
+                                        "email": {
+                                          "type": "string"
+                                        },
+                                        "fax": {
+                                          "type": "string"
+                                        },
+                                        "name": {
+                                          "type": "string"
+                                        },
+                                        "org": {
+                                          "type": "string"
+                                        },
+                                        "phone": {
+                                          "type": "string"
+                                        },
+                                        "postal": {
+                                          "type": "string"
+                                        },
+                                        "state": {
+                                          "type": "string"
+                                        },
+                                        "street": {
+                                          "items": {
+                                            "type": "string"
+                                          },
+                                          "type": "array"
+                                        }
+                                      },
+                                      "type": "object"
+                                    },
+                                    "tech": {
+                                      "properties": {
+                                        "city": {
+                                          "type": "string"
+                                        },
+                                        "country": {
+                                          "type": "string"
+                                        },
+                                        "email": {
+                                          "type": "string"
+                                        },
+                                        "fax": {
+                                          "type": "string"
+                                        },
+                                        "name": {
+                                          "type": "string"
+                                        },
+                                        "org": {
+                                          "type": "string"
+                                        },
+                                        "phone": {
+                                          "type": "string"
+                                        },
+                                        "postal": {
+                                          "type": "string"
+                                        },
+                                        "state": {
+                                          "type": "string"
+                                        },
+                                        "street": {
+                                          "items": {
+                                            "type": "string"
+                                          },
+                                          "type": "array"
+                                        }
+                                      },
+                                      "type": "object"
+                                    }
+                                  },
+                                  "type": "object"
+                                },
+                                "created_date": {
+                                  "type": "string"
+                                },
+                                "domain": {
+                                  "type": "string"
+                                },
+                                "expired_date": {
+                                  "type": "string"
+                                },
+                                "name_servers": {
+                                  "items": {
+                                    "type": "string"
+                                  },
+                                  "type": "array"
+                                },
+                                "other_properties": {
+                                  "properties": {
+                                    "admin_id": {
+                                      "type": "string"
+                                    },
+                                    "dnssec": {
+                                      "type": "string"
+                                    },
+                                    "registry_domain_id": {
+                                      "type": "string"
+                                    },
+                                    "registry_registrant_id": {
+                                      "type": "string"
+                                    },
+                                    "tech_id": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "type": "object"
+                                },
+                                "registrar": {
+                                  "properties": {
+                                    "abuse_contact_email": {
+                                      "type": "string"
+                                    },
+                                    "abuse_contact_phone": {
+                                      "type": "string"
+                                    },
+                                    "iana_id": {
+                                      "type": "string"
+                                    },
+                                    "name": {
+                                      "type": "string"
+                                    },
+                                    "url": {
+                                      "type": "string"
+                                    },
+                                    "whois_server": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "type": "object"
+                                },
+                                "statuses": {
+                                  "items": {
+                                    "type": "string"
+                                  },
+                                  "type": "array"
+                                },
+                                "updated_date": {
+                                  "type": "string"
+                                }
+                              },
+                              "type": "object"
+                            },
+                            "record_source": {
+                              "type": "string"
+                            },
+                            "registrant": {
+                              "type": "string"
+                            },
+                            "registration": {
+                              "properties": {
+                                "created": {
+                                  "type": "string"
+                                },
+                                "expires": {
+                                  "type": "string"
+                                },
+                                "registrar": {
+                                  "type": "string"
+                                },
+                                "statuses": {
+                                  "items": {
+                                    "type": "string"
+                                  },
+                                  "type": "array"
+                                },
+                                "updated": {
+                                  "type": "string"
+                                }
+                              },
+                              "type": "object"
+                            },
+                            "whois": {
+                              "properties": {
+                                "date": {
+                                  "type": "string"
+                                },
+                                "record": {
+                                  "type": "string"
+                                }
+                              },
+                              "type": "object"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "markup": {
+                          "properties": {
+                            "horizontal": {
+                              "type": "boolean"
+                            },
+                            "items": {
+                              "items": {
+                                "properties": {
+                                  "renderer": {
+                                    "type": "string"
+                                  },
+                                  "text": {
+                                    "type": "string"
+                                  },
+                                  "title": {
+                                    "type": "string"
+                                  }
+                                },
+                                "type": "object"
+                              },
+                              "type": "array"
+                            },
+                            "renderer": {
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "errors": {
+                      "properties": {
+                        "action": {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "id": {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "type": {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {},
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "errors": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/{object}/query": {
+      "post": {
+        "operationId": "search-threat-library-post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "object",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursorMark",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "criteria": {
+                    "properties": {
+                      "+or": {
+                        "items": {
+                          "properties": {
+                            "mentions": {
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "type": "array"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "filters": {
+                    "properties": {
+                      "+and": {
+                        "items": {
+                          "properties": {
+                            "+or": {
+                              "items": {
+                                "properties": {
+                                  "type_name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "type": "object"
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "type": "array"
+                      }
+                    },
+                    "type": "object"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "items": {
+                        "properties": {
+                          "adversaries": {
+                            "items": {},
+                            "type": "array"
+                          },
+                          "attributes": {
+                            "items": {
+                              "properties": {
+                                "attribute_id": {
+                                  "type": "integer"
+                                },
+                                "created_at": {
+                                  "type": "string"
+                                },
+                                "id": {
+                                  "type": "integer"
+                                },
+                                "indicator_id": {
+                                  "type": "integer"
+                                },
+                                "name": {
+                                  "type": "string"
+                                },
+                                "touched_at": {
+                                  "type": "string"
+                                },
+                                "updated_at": {
+                                  "type": "string"
+                                },
+                                "value": {
+                                  "type": "string"
+                                }
+                              },
+                              "type": "object"
+                            },
+                            "type": "array"
+                          },
+                          "class": {
+                            "type": "string"
+                          },
+                          "created_at": {
+                            "type": "string"
+                          },
+                          "expired_at": {
+                            "type": "string"
+                          },
+                          "hash": {
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "integer"
+                          },
+                          "last_detected_at": {
+                            "type": "string"
+                          },
+                          "published_at": {
+                            "type": "string"
+                          },
+                          "score": {
+                            "type": "string"
+                          },
+                          "sources": {
+                            "items": {
+                              "properties": {
+                                "created_at": {
+                                  "type": "string"
+                                },
+                                "creator_source_id": {
+                                  "type": "integer"
+                                },
+                                "id": {
+                                  "type": "integer"
+                                },
+                                "indicator_id": {
+                                  "type": "integer"
+                                },
+                                "indicator_status_id": {
+                                  "type": "integer"
+                                },
+                                "indicator_type_id": {
+                                  "type": "integer"
+                                },
+                                "name": {
+                                  "type": "string"
+                                },
+                                "published_at": {
+                                  "type": "string"
+                                },
+                                "reference_id": {
+                                  "type": "integer"
+                                },
+                                "source_id": {
+                                  "type": "integer"
+                                },
+                                "source_type": {
+                                  "type": "string"
+                                },
+                                "updated_at": {
+                                  "type": "string"
+                                }
+                              },
+                              "type": "object"
+                            },
+                            "type": "array"
+                          },
+                          "status": {
+                            "properties": {
+                              "description": {
+                                "type": "string"
+                              },
+                              "id": {
+                                "type": "integer"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "status_id": {
+                            "type": "integer"
+                          },
+                          "touched_at": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "properties": {
+                              "class": {
+                                "type": "string"
+                              },
+                              "id": {
+                                "type": "integer"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "type_id": {
+                            "type": "integer"
+                          },
+                          "updated_at": {
+                            "type": "string"
+                          },
+                          "value": {
+                            "type": "string"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "limit": {
+                      "type": "integer"
+                    },
+                    "nextCursorMark": {
+                      "type": "string"
+                    },
+                    "offset": {
+                      "type": "integer"
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {}
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://{hostname}/api",
+      "variables": {
+        "hostname": {
+          "default": "threatq.example.com"
+        }
+      }
+    }
+  ]
+}

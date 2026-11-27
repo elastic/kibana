@@ -3032,6 +3032,7 @@ export default function (providerContext: FtrProviderContext) {
         auth_type: 'keytab',
         config_path: '/etc/krb5.conf',
         keytab: '/etc/kafka.keytab',
+        username: 'kafka',
         realm: 'EXAMPLE.COM',
       };
       const passwordKerberos = {
@@ -3123,6 +3124,7 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(body.item.auth_type).to.eql('kerberos');
         expect(body.item.kerberos).to.eql(keytabKerberos);
+        expect(body.item.kerberos.username).to.eql('kafka');
         expect(body.item.username).to.be(undefined);
         expect(body.item.sasl).to.be(undefined);
         expect(body.item.secrets).to.be(undefined);
@@ -3166,8 +3168,24 @@ export default function (providerContext: FtrProviderContext) {
         expect(fullPolicy.secret_references).to.eql([{ id: secretId }]);
       });
 
+      it('should give the agent the username (the principal) with the keytab authentication', async () => {
+        const body = await createOutput(kerberosOutput());
+
+        const fullPolicy = await getFullAgentPolicy(body.item.id);
+
+        expect(fullPolicy.outputs[body.item.id].kerberos).to.eql({
+          enabled: true,
+          ...keytabKerberos,
+        });
+      });
+
       it('should not accept an output without its required settings', async () => {
         await createOutput(kerberosOutput({ kerberos: undefined }), 400);
+        // the keytab authentication needs the username too: it is the principal in the keytab
+        await createOutput(
+          kerberosOutput({ kerberos: { ...keytabKerberos, username: undefined } }),
+          400
+        );
         await createOutput(kerberosOutput({ kerberos: { ...keytabKerberos, realm: '' } }), 400);
         await createOutput(
           kerberosOutput({ kerberos: { ...keytabKerberos, keytab: undefined } }),
@@ -3182,6 +3200,34 @@ export default function (providerContext: FtrProviderContext) {
           }),
           400
         );
+      });
+
+      it('should not accept an update that replaces the keytab settings without a username', async () => {
+        const body = await createOutput(kerberosOutput());
+
+        // leaving the whole Kerberos block out is allowed, but replacing it with incomplete settings is not
+        const rejected = await updateOutput(
+          body.item.id,
+          {
+            // name is required by the update schema; without it the request would fail for that reason
+            name: body.item.name,
+            type: 'kafka',
+            hosts: ['test.fr:2000'],
+            auth_type: 'kerberos',
+            kerberos: { ...keytabKerberos, keytab: '/etc/other.keytab', username: undefined },
+          },
+          400
+        );
+        // it fails because of the username, not because of another missing field
+        // the schema names the field with the index of the union member, e.g. `kerberos.1.username`
+        expect(rejected.message).to.match(/kerberos(\.\d+)?\.username/);
+
+        // the previous settings, and the principal, are still stored
+        const { body: stored } = await supertest
+          .get(`/api/fleet/outputs/${body.item.id}`)
+          .expect(200);
+        expect(stored.item.kerberos).to.eql(keytabKerberos);
+        expect(stored.item.kerberos.username).to.eql('kafka');
       });
 
       it('should keep the settings and the secret when an update does not name the auth type', async () => {

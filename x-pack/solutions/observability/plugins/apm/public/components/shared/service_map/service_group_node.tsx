@@ -13,6 +13,10 @@ import { i18n } from '@kbn/i18n';
 import { getSeverity, getSeverityColor } from '../../../../common/anomaly_detection';
 import type { ServiceGroupNodeData } from '../../../../common/service_map';
 import {
+  getServiceGroupAriaLabel,
+  getServiceGroupMemberCountLabel,
+} from '../../../../common/service_map';
+import {
   NODE_BORDER_WIDTH_DEFAULT,
   NODE_BORDER_WIDTH_SELECTED,
   NODE_LABEL_MAX_WIDTH,
@@ -32,39 +36,27 @@ import { HighlightWrapper } from './highlight_wrapper';
 type ServiceGroupNodeType = Node<ServiceGroupNodeData, 'serviceGroup'>;
 
 /**
- * Closed service-group node (2+ services). Enter/Space selects only; opening is #300587.
+ * Closed service-group node (2+ services). Clicking it, or pressing Enter/Space, opens the group in
+ * place (handled by the graph).
  */
 export const ServiceGroupNode = memo(
-  ({ data, selected, sourcePosition, targetPosition }: NodeProps<ServiceGroupNodeType>) => {
+  ({ data, sourcePosition, targetPosition }: NodeProps<ServiceGroupNodeType>) => {
     const { euiTheme } = useEuiTheme();
     const apmPluginContext = useApmPluginContext();
     const canReadSlos = !!apmPluginContext?.core?.application?.capabilities?.slo?.read;
     const isInteractive = useServiceMapInteractivity();
     const showStats = data.stats !== undefined;
 
-    const { borderColor, borderWidth } = useMemo(() => {
+    // A group is never selected: activating it opens it, which replaces this node with a box.
+    const borderColor = useMemo(() => {
       const score = data.serviceAnomalyStats?.anomalyScore;
-      const hasScore = score !== undefined;
-
-      return {
-        borderColor: hasScore
-          ? getSeverityColor(score)
-          : selected
-          ? euiTheme.colors.primary
-          : euiTheme.colors.mediumShade,
-        borderWidth: selected
-          ? `${NODE_BORDER_WIDTH_SELECTED}px`
-          : `${NODE_BORDER_WIDTH_DEFAULT}px`,
-      };
-    }, [data.serviceAnomalyStats, selected, euiTheme]);
+      return score !== undefined ? getSeverityColor(score) : euiTheme.colors.mediumShade;
+    }, [data.serviceAnomalyStats, euiTheme]);
+    const borderWidth = `${NODE_BORDER_WIDTH_DEFAULT}px`;
 
     const ariaLabel = useMemo(() => {
       const parts = [
-        i18n.translate('xpack.apm.serviceMap.serviceGroupNode.ariaLabel', {
-          defaultMessage:
-            'Service group: {groupName}, {count} {count, plural, one {service} other {services}}',
-          values: { groupName: data.label, count: data.memberCount },
-        }),
+        getServiceGroupAriaLabel({ groupName: data.label, memberCount: data.memberCount }),
       ];
 
       if (data.serviceAnomalyStats?.anomalyScore !== undefined) {
@@ -170,13 +162,7 @@ export const ServiceGroupNode = memo(
     const showSloBadge =
       canReadSlos && (data.sloStatus === 'violated' || data.sloStatus === 'degrading');
 
-    const memberCountLabel = i18n.translate(
-      'xpack.apm.serviceMap.serviceGroupNode.memberCountLabel',
-      {
-        defaultMessage: '{count} {count, plural, one {service} other {services}}',
-        values: { count: data.memberCount },
-      }
-    );
+    const memberCountLabel = getServiceGroupMemberCountLabel(data.memberCount);
 
     return (
       <HighlightWrapper nodeId={data.id} contextHighlight={Boolean(data.contextHighlight)}>
@@ -195,7 +181,7 @@ export const ServiceGroupNode = memo(
               role={isInteractive ? 'button' : undefined}
               tabIndex={isInteractive ? 0 : -1}
               aria-label={ariaLabel}
-              aria-pressed={isInteractive ? selected : undefined}
+              aria-expanded={isInteractive ? false : undefined}
             >
               {showStats ? (
                 <FailureRing
@@ -228,7 +214,7 @@ export const ServiceGroupNode = memo(
                     count={data.alertsCount ?? 0}
                     serviceName={data.label}
                     data-test-subj="serviceMapNodeServiceGroupAlertsBadge"
-                    // Display-only until open-group / group alerts navigation exists
+                    // Display-only: there is no navigation to the alerts of a group yet
                   />
                 )}
                 {showSloBadge && data.sloStatus && (
@@ -243,7 +229,7 @@ export const ServiceGroupNode = memo(
               </EuiFlexGroup>
             </EuiFlexItem>
           )}
-          <NodeLabel label={data.label} selected={selected} />
+          <NodeLabel label={data.label} />
           <EuiFlexItem grow={false}>
             <EuiText css={memberCountLabelStyles} data-test-subj="serviceMapNodeServiceGroupCount">
               {memberCountLabel}

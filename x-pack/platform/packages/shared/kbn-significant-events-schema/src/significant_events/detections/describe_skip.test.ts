@@ -46,32 +46,69 @@ describe('describeSkip', () => {
       describeSkip(
         {
           reason: 'still_breaching',
-          probe_has_rows: true,
-          probe_window_minutes: 20,
+          rule_breached: true,
+          breach_window_minutes: 10,
           event_title: 'Checkout — request failures',
           stored_verdict: 'confirms',
         },
         formatTime
       )
     ).toEqual([
-      'The rule still matches (last 20 min).',
+      'The rule recorded a breach (last 10 min).',
       '"Checkout — request failures" already records it as breaching, so nothing changed.',
     ]);
   });
 
-  it('explains a healthy skip where the query returns nothing', () => {
+  it('explains a healthy skip where the rule matches nothing', () => {
     expect(
       describeSkip(
         {
           reason: 'still_healthy',
-          probe_has_rows: false,
+          rule_breached: false,
+          breach_window_minutes: 10,
+          stored_verdict: 'refutes',
+        },
+        formatTime
+      )
+    ).toEqual([
+      'The rule recorded no breach (last 10 min).',
+      'A live event already records it as healthy, so nothing changed.',
+    ]);
+  });
+
+  it('reads a marker stored with the names of the re-run query the same way', () => {
+    expect(
+      describeSkip(
+        {
+          reason: 'still_breaching',
+          probe_status: 'ok',
+          probe_has_rows: true,
+          probe_window_minutes: 20,
+          stored_verdict: 'confirms',
+        },
+        formatTime
+      )
+    ).toEqual([
+      'The rule still matches (last 20 min).',
+      'A live event already records it as breaching, so nothing changed.',
+    ]);
+  });
+
+  it('prefers the new names when a marker carries both', () => {
+    expect(
+      describeSkip(
+        {
+          reason: 'still_healthy',
+          rule_breached: false,
+          breach_window_minutes: 10,
+          probe_has_rows: true,
           probe_window_minutes: 20,
           stored_verdict: 'refutes',
         },
         formatTime
       )
     ).toEqual([
-      'The rule matches nothing (last 20 min).',
+      'The rule recorded no breach (last 10 min).',
       'A live event already records it as healthy, so nothing changed.',
     ]);
   });
