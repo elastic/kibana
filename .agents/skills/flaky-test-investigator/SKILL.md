@@ -20,6 +20,8 @@ A link to a GitHub issue with the `failed-test` label is required. If none is pr
 
 ## Investigation
 
+**Jest failures** (issue title starts with `Jest Tests.` or `Jest Integration Tests.`) have their own playbook — read `references/jest-failures.md`. They ship no screenshot, trace, or (by default) server log, and the most common failure is a bare timeout from event-loop starvation on a shared `--runInBand` agent, which needs a different approach than the Scout/FTR flow below.
+
 ### Understand the test environment
 
 - **Is it failing on `kibana-on-merge` (local pipeline), on Cloud pipelines, or both?**
@@ -67,6 +69,8 @@ Some runs ship server logs, others don't — and they're **INFO+ only** (no `deb
 | **FTR** | In the test stdout (`target/test_failures/*.log`, `proc [kibana]` lines) | None |
 | **Scout stateful** | `.scout/server.log` | Startup lines only in `.scout/server.log` |
 | **Scout serverless** | `.scout/server.log` | None (runs in Docker) |
+| **Jest unit** | None (jsdom) — see `references/jest-failures.md` | None |
+| **Jest integration** | `target/test_failures/` when the suite configures a file appender | `proc [es]` under `target/` (stateful); Docker container logs (serverless) |
 
 ### Understand the scope
 
