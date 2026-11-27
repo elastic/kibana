@@ -60,6 +60,11 @@ export const writeConnectorManifest = async ({
     '```',
     'Never print, log, or write credential values to files; they are redacted from command output.',
     'Only the connectors listed below can be requested.',
+    '',
+    'This sandbox has no direct DNS or internet access: all outbound HTTP/HTTPS traffic goes through',
+    'an egress proxy that blocks unlisted hosts, private IPs, and restricted ports. Pass `connector_id`',
+    "to reach a connector's host; if an HTTPS request fails with a `CONNECT` `403`, run `curl -i` to",
+    "see the proxy's refusal reason (`curl -sS` and Node `fetch` discard `CONNECT` status text).",
   ];
 
   if (connectors.length === 0) {
