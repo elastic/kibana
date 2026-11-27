@@ -173,10 +173,13 @@ Use these utilities from `src/platform/packages/shared/kbn-connector-specs/src/l
 
 The vendor API contract test needs `vendor_api/` artifacts or an exemption for every connector. An
 MCP-native connector calls MCP tools, not operations of an OpenAPI spec. Record it as an MCP source
-first: from the tool definitions the vendor publishes (`--tool name=url`), or from a `tools/list`
-captured once with credentials (`captured`). See "GraphQL and MCP sources" in the package README.
+first, in this order:
 
-Only if neither is possible, add it to
+1. The server's `tools/list`, when it answers without credentials: use the server URL as the source.
+2. The tool definitions the vendor publishes, one document per tool (`--tool name=url`).
+3. A `tools/list` captured once with credentials (`captured`).
+
+See "GraphQL and MCP sources" in the package README. Only if none of these is possible, add it to
 `src/platform/packages/shared/kbn-connector-specs/src/test/vendor_api/vendor_api_exemptions.json`, in the PR that adds the connector:
 
 ```json
