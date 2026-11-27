@@ -56,6 +56,8 @@ const GROUP: MobileCrashGroup = {
 };
 
 const RELEASES = [{ key: '4.2.0', count: 3 }];
+const OS_NAMES = [{ key: 'Android', count: 3 }];
+const ENVIRONMENTS = ['production'];
 
 const KPIS_STATE: MobileKpisState = {
   kpis: undefined,
@@ -69,8 +71,20 @@ const setCrashGroup = jest.fn();
 
 const mockCrashGroups = (state: Partial<MobileCrashGroupsState>) =>
   jest.mocked(useMobileCrashGroups).mockReturnValue({
-    response: { crashGroups: [GROUP], releases: RELEASES, isPartial: false },
-    lastResponse: { crashGroups: [GROUP], releases: RELEASES, isPartial: false },
+    response: {
+      crashGroups: [GROUP],
+      releases: RELEASES,
+      osNames: OS_NAMES,
+      environments: ENVIRONMENTS,
+      isPartial: false,
+    },
+    lastResponse: {
+      crashGroups: [GROUP],
+      releases: RELEASES,
+      osNames: OS_NAMES,
+      environments: ENVIRONMENTS,
+      isPartial: false,
+    },
     isLoading: false,
     error: undefined,
     refresh: jest.fn(),
@@ -119,20 +133,28 @@ describe('MobileCrashesTab', () => {
     );
   });
 
-  it('picks among the releases that crashed, which its filter is on', () => {
+  it('picks among the releases, OS names and environments that crashed, sent late ones included', () => {
     renderTab();
 
     expect(jest.mocked(MobileToolbar).mock.calls.at(-1)?.[0]).toEqual(
-      expect.objectContaining({ releaseOptions: { buckets: RELEASES } })
+      expect.objectContaining({
+        releaseOptions: { buckets: RELEASES },
+        osOptions: { buckets: OS_NAMES },
+        environmentOptions: { environments: ENVIRONMENTS },
+      })
     );
   });
 
-  it("has no release options of its own until the crashes load, rather than the KPIs'", () => {
+  it("has no options of its own until the crashes load, rather than the KPIs'", () => {
     mockCrashGroups({ response: undefined, lastResponse: undefined, isLoading: true });
     renderTab();
 
     expect(jest.mocked(MobileToolbar).mock.calls.at(-1)?.[0]).toEqual(
-      expect.objectContaining({ releaseOptions: { buckets: undefined } })
+      expect.objectContaining({
+        releaseOptions: { buckets: undefined },
+        osOptions: { buckets: undefined },
+        environmentOptions: { environments: undefined },
+      })
     );
   });
 
@@ -153,14 +175,24 @@ describe('MobileCrashesTab', () => {
   });
 
   it("says when the user can't read every logs index", () => {
-    mockCrashGroups({ response: { crashGroups: [GROUP], releases: RELEASES, isPartial: true } });
+    mockCrashGroups({
+      response: {
+        crashGroups: [GROUP],
+        releases: RELEASES,
+        osNames: OS_NAMES,
+        environments: ENVIRONMENTS,
+        isPartial: true,
+      },
+    });
     renderTab();
 
     expect(screen.getByTestId('digitalExperienceMobileCrashesPartialAccess')).toBeInTheDocument();
   });
 
   it('says there are no crashes, rather than showing an empty table', () => {
-    mockCrashGroups({ response: { crashGroups: [], releases: [], isPartial: false } });
+    mockCrashGroups({
+      response: { crashGroups: [], releases: [], osNames: [], environments: [], isPartial: false },
+    });
     renderTab();
 
     expect(screen.getByTestId('digitalExperienceMobileCrashesEmpty')).toHaveTextContent(
@@ -174,7 +206,9 @@ describe('MobileCrashesTab', () => {
       isFiltered: true,
       clearFiltersButton: <button type="button">Clear filters</button>,
     });
-    mockCrashGroups({ response: { crashGroups: [], releases: [], isPartial: false } });
+    mockCrashGroups({
+      response: { crashGroups: [], releases: [], osNames: [], environments: [], isPartial: false },
+    });
     renderTab();
 
     expect(screen.getByTestId('digitalExperienceMobileCrashesEmpty')).toHaveTextContent(

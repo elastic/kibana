@@ -6,7 +6,10 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { MAX_CRASH_FINGERPRINT_LENGTH } from '../../../common/mobile/crash_fingerprint';
+import {
+  MAX_CRASH_FINGERPRINT_LENGTH,
+  MAX_CRASH_TYPE_LENGTH,
+} from '../../../common/mobile/crash_fingerprint';
 import { MAX_OS_NAME_LENGTH, MAX_RELEASE_LENGTH } from '../../lib/constants';
 import {
   START_AFTER_END_ISSUE,
@@ -39,13 +42,21 @@ export const mobileSeriesParams = () =>
       .refine(isStartBeforeEnd, START_AFTER_END_ISSUE),
   });
 
-/** The params of a crash group's routes: the page's, and the group's fingerprint. */
+/**
+ * The params of a crash group's routes: the page's, the group's fingerprint, and its type when the
+ * app knows it, an empty one for none, so only the crashes of that type are fingerprinted.
+ */
 export const mobileCrashGroupParams = () => {
   const { shape } = mobileFiltersParams();
   return z.object({
     path: shape.path.extend({
       fingerprint: z.string().min(1).max(MAX_CRASH_FINGERPRINT_LENGTH),
     }),
-    query: shape.query,
+    query: z
+      .object({
+        ...mobileFiltersShape(),
+        crashType: z.string().max(MAX_CRASH_TYPE_LENGTH).optional(),
+      })
+      .refine(isStartBeforeEnd, START_AFTER_END_ISSUE),
   });
 };

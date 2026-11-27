@@ -9,6 +9,7 @@ import { esql } from '@elastic/esql';
 import {
   IOS_REPORT_OS_VERSION_RULE,
   IOS_REPORT_RELEASE_RULE,
+  canBeComputedFingerprint,
   crashFingerprint,
   crashFrameRuleFlags,
 } from './crash_fingerprint';
@@ -81,7 +82,11 @@ describe('crash fingerprint rules', () => {
 
   it("groups iOS reports without a crashed thread by type, never by their header's identifier", () => {
     expect(fingerprintOf('iosHeaderOnlyA')).toBe(fingerprintOf('iosHeaderOnlyB'));
-    expect(crashFramesOf(CRASH_FINGERPRINT_CASES.iosHeaderOnlyA)).toBe('');
+    expect(crashFramesOf(CRASH_FINGERPRINT_CASES.iosHeaderOnlyA)).toBe('ios|');
+  });
+
+  it('never groups an iOS report without frames with a crash of its type without a stack trace', () => {
+    expect(fingerprintOf('iosHeaderOnlyA')).not.toBe(fingerprintOf('noStacktrace'));
   });
 
   it('ignores the address of a symbolicated iOS frame, which changes per launch', () => {
@@ -99,6 +104,13 @@ describe('crash fingerprint rules', () => {
     );
   });
 
+  it('groups the JavaScript errors EDOT React Native reports itself by message, not by stack', () => {
+    expect(fingerprintOf('javascriptSourceA')).toBe(fingerprintOf('javascriptSourceB'));
+    expect(crashFramesOf(CRASH_FINGERPRINT_CASES.javascriptSourceA)).toBe(
+      "undefined is not an object (evaluating 'payee.iban')"
+    );
+  });
+
   it("tells an iOS report by how it starts, not by a line an error's message can repeat", () => {
     expect(isIosReportOf(CRASH_FINGERPRINT_CASES.iosLaunchA)).toBe(true);
     expect(isIosReportOf(CRASH_FINGERPRINT_CASES.jvmMentioningCrashed)).toBe(false);
@@ -111,6 +123,21 @@ describe('crash fingerprint rules', () => {
 
   it('keeps the stored fingerprint over the computed one', () => {
     expect(fingerprintOf('stored')).toBe('ingest-fingerprint');
+  });
+});
+
+describe('canBeComputedFingerprint', () => {
+  it('accepts every fingerprint Elasticsearch computes', () => {
+    const { stored, ...computed } = EXPECTED_CRASH_FINGERPRINTS;
+    Object.values(computed).forEach((fingerprint) =>
+      expect(canBeComputedFingerprint(fingerprint)).toBe(true)
+    );
+    expect(canBeComputedFingerprint(stored)).toBe(false);
+  });
+
+  it('rejects a key SHA256 never prints', () => {
+    expect(canBeComputedFingerprint('A'.repeat(64))).toBe(false);
+    expect(canBeComputedFingerprint('a'.repeat(63))).toBe(false);
   });
 });
 
@@ -158,11 +185,13 @@ describe('crashFingerprint', () => {
   const printed = esql`FROM logs`.pipe`EVAL fingerprint = ${crashFingerprint()}`.print('basic');
 
   it('prefers the stored fingerprint', () => {
-    expect(printed).toContain('COALESCE(`attributes.exception.fingerprint`, SHA256(');
+    expect(printed).toContain('COALESCE(`attributes.elastic.error.grouping_key`, SHA256(');
   });
 
   it('reads JavaScript errors from their message and other crashes from their stack trace', () => {
-    expect(printed).toContain('`attributes.exception.type` LIKE "*JavascriptException"');
+    expect(printed).toContain(
+      '`attributes.exception.type` LIKE "*JavascriptException" OR `attributes.elastic.exception.source` == "javascript"'
+    );
     expect(printed).toContain('REPLACE(`attributes.exception.message`, "(?s)\\\\n.*", "")');
     expect(printed).toContain('`attributes.exception.stacktrace` LIKE "Incident Identifier:*"');
   });

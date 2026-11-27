@@ -22,6 +22,7 @@ import {
   CRASH_APPS,
   IOS_CRASHED_OS_VERSION,
   IOS_CRASHED_RELEASE,
+  IOS_LATE_CRASH_ENVIRONMENT,
   NPE_LATEST_SESSION,
 } from '../../common/fixtures/mobile_crash_data';
 import { FLAG_ON_OVERRIDE, FLAG_RESET_OVERRIDE } from '../../feature_flag';
@@ -184,6 +185,10 @@ apiTest.describe('Digital Experience mobile crashes API', { tag: DIGITAL_EXPERIE
 
       const sending = await getGroups(apiClient, CRASH_APPS.ios, { release: '8.5.0' });
       expect(sending.crashGroups.map(({ events }) => events)).toStrictEqual([2]);
+      // The OS and environment pickers too: the environment's only crash, and one of the two
+      // sessions that crashed on iOS, were sent after the range.
+      expect(sending.osNames).toStrictEqual([{ key: 'iOS', count: 2 }]);
+      expect(sending.environments).toContain(IOS_LATE_CRASH_ENVIRONMENT);
       // The picker lists the release that crashed, which no resource has, whatever the filter.
       expect(sending.releases).toStrictEqual([
         { key: '8.5.0', count: 2 },

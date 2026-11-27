@@ -16,10 +16,12 @@ import {
   withCrashGroup,
   withCrashTypes,
   withLatestCrash,
+  withStoredCrashGroup,
   type CrashBreakdownName,
   type CrashBreakdownRow,
   type LatestCrashRow,
 } from '../../../../common/mobile/crash_groups';
+import { canBeComputedFingerprint } from '../../../../common/mobile/crash_fingerprint';
 import { MOBILE_FIELDS, RESULT_COLUMNS } from '../../../../common/mobile/fields';
 import type { MobilePanelFilters } from '../../../../common/mobile/filters';
 import {
@@ -39,6 +41,8 @@ export interface GetCrashGroupParams {
   esClient: TracedElasticsearchClient;
   filters: MobilePanelFilters;
   fingerprint: string;
+  /** The group's type, as its list shows it, when the app knows it; `null` for none. */
+  crashType?: string | null;
   start: number;
   end: number;
   environment?: string;
@@ -55,7 +59,7 @@ const toBreakdown = (rows: CrashBreakdownRow[]): CrashBreakdown => {
 };
 
 const toCrash = (row: LatestCrashRow): MobileCrash => ({
-  time: row[RESULT_COLUMNS.crashTime],
+  time: row[RESULT_COLUMNS.happenedAt],
   reportedAt: row[RESULT_COLUMNS.reportedAt],
   type: row[RESULT_COLUMNS.exceptionType] ?? null,
   message: row[RESULT_COLUMNS.message] ?? null,
@@ -117,25 +121,42 @@ export const getCrashGroup = async ({
   esClient,
   filters,
   fingerprint,
+  crashType,
   start,
   end,
   environment,
 }: GetCrashGroupParams): Promise<Omit<MobileCrashGroupDetailResponse, 'isPartial'>> => {
+  // A key SHA256 can't print is only ever stored, so its group has no computed crash to look for.
+  const storedOnly = !canBeComputedFingerprint(fingerprint);
   // `pipe` appends to the query it's called on, so each query starts from its own.
   const groupCrashes = (types?: ReadonlyArray<string | null>) => {
     const crashes = crashEvents({ ...filters, start, end });
+    if (storedOnly) {
+      return withStoredCrashGroup(crashes, fingerprint);
+    }
     return withCrashGroup(
       withCrashFingerprint(types ? withCrashTypes(crashes, types) : crashes),
       fingerprint
     );
   };
   const filter = timeFilter(start, end + CRASH_DELAY_MS, environment);
-  const [latestRow] = await runEsql<LatestCrashRow>(
-    esClient,
-    'get_mobile_crash_group_latest',
-    withLatestCrash(groupCrashes()),
-    filter
-  );
+  const latestOf = async (types?: ReadonlyArray<string | null>) => {
+    const [row] = await runEsql<LatestCrashRow>(
+      esClient,
+      'get_mobile_crash_group_latest',
+      withLatestCrash(groupCrashes(types)),
+      filter
+    );
+    return row;
+  };
+  // A known type only spares hashing the other crashes. The typed query keeps stored-fingerprint
+  // crashes of any type, so only a computed latest crash proves the type is the group's: a computed
+  // fingerprint hashes it. Otherwise a newer computed crash of another type could be missed.
+  const typedLatest = async () => {
+    const typed = crashType === undefined ? undefined : await latestOf([crashType]);
+    return typed && !typed[RESULT_COLUMNS.storedFingerprint] ? typed : latestOf();
+  };
+  const latestRow = storedOnly ? await latestOf() : await typedLatest();
   if (!latestRow) {
     const none: CrashBreakdown = { top: [], other: 0 };
     return {

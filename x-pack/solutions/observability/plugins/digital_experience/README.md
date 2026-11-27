@@ -804,7 +804,8 @@ its own window, so it never drops events the regular run has already summarized.
 session is rebuilt from 48 hours before its window rather than 24, the longest session and the
 latest crash, so a crash sent up to 24 hours late still sees all of its session; one sent later is
 left out, as its session's rebuild could miss its other events and replace the full summary with a
-partial one. The session ids decide what is read, so the range barely matters: 2 to 24 hours took
+partial one. An observed time more than 30 days before `@timestamp`, such as an exporter's zero, is
+unset rather than late: that crash counts at its `@timestamp`, as in the Crashes tab. The session ids decide what is read, so the range barely matters: 2 to 24 hours took
 the same time. Events
 that arrive more than 24 hours late are only summarized when another event of their session arrives.
 

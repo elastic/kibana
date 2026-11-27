@@ -9,6 +9,7 @@ import { createHash } from 'crypto';
 import {
   CRASH_FRAME_RULES,
   IOS_REPORT_MARKER,
+  JAVASCRIPT_EXCEPTION_SOURCE,
   JAVASCRIPT_EXCEPTION_SUFFIX,
   crashFrameRuleFlags,
   type CrashFrameRule,
@@ -19,6 +20,8 @@ export interface CrashFields {
   type?: string;
   message?: string;
   stacktrace?: string;
+  /** `elastic.exception.source`. */
+  source?: string;
   storedFingerprint?: string;
 }
 
@@ -34,8 +37,13 @@ export const isIosReportOf = ({ stacktrace }: CrashFields): boolean =>
   stacktrace?.startsWith(IOS_REPORT_MARKER) ?? false;
 
 /** The frames `crashFrames` computes in ES|QL, computed in JavaScript from the same rules. */
-export const crashFramesOf = ({ type, message, stacktrace }: CrashFields): string | null => {
-  if (type?.endsWith(JAVASCRIPT_EXCEPTION_SUFFIX)) {
+export const crashFramesOf = ({
+  type,
+  message,
+  stacktrace,
+  source,
+}: CrashFields): string | null => {
+  if (type?.endsWith(JAVASCRIPT_EXCEPTION_SUFFIX) || source === JAVASCRIPT_EXCEPTION_SOURCE) {
     return message === undefined ? null : applyRules(message, 'javascript');
   }
   if (stacktrace === undefined) {
@@ -146,6 +154,18 @@ const javascriptCrash = (message: string): CrashFields => ({
   ].join('\n'),
 });
 
+/** A JavaScript error as EDOT React Native reports it: its own type, and the JavaScript stack. */
+const javascriptSourceCrash = (line: number): CrashFields => ({
+  type: 'TypeError',
+  message: "undefined is not an object (evaluating 'payee.iban')",
+  stacktrace: [
+    "TypeError: undefined is not an object (evaluating 'payee.iban')",
+    `    at submitTransfer (index.android.bundle:1:${line})`,
+    '    at onPress (index.android.bundle:1:20117)',
+  ].join('\n'),
+  source: JAVASCRIPT_EXCEPTION_SOURCE,
+});
+
 /** Crashes that must share a fingerprint, or not, in ES|QL and at ingest alike. */
 export const CRASH_FINGERPRINT_CASES = {
   jvmLine88: {
@@ -225,6 +245,8 @@ export const CRASH_FINGERPRINT_CASES = {
   javascriptMap: javascriptCrash(
     "TypeError: Cannot read property 'map' of undefined, js engine: hermes"
   ),
+  javascriptSourceA: javascriptSourceCrash(48213),
+  javascriptSourceB: javascriptSourceCrash(51877),
   // Errors that mention an iOS report's lines: still read as what they are, not as iOS reports.
   jvmMentioningCrashed: {
     type: 'java.lang.IllegalStateException',
@@ -255,14 +277,16 @@ export const EXPECTED_CRASH_FINGERPRINTS: Record<keyof typeof CRASH_FINGERPRINT_
   iosExceptionA: 'b514cfbd8ddc65d16c3b79fb02481d43247ac3fb6860d3ecdb3058af88ecf709',
   iosExceptionB: 'b514cfbd8ddc65d16c3b79fb02481d43247ac3fb6860d3ecdb3058af88ecf709',
   iosCrlf: '2ff3f68c306a93625ec7cfe1d2db4587704a34b76bbfa9ed31afd8f69e8a0014',
-  iosHeaderOnlyA: '3005496ec4d1df64b0b8dd7156f3dad8f0620a373c2670c1a7f5ac1888d1eaed',
-  iosHeaderOnlyB: '3005496ec4d1df64b0b8dd7156f3dad8f0620a373c2670c1a7f5ac1888d1eaed',
+  iosHeaderOnlyA: 'b44e53763196892edfa049d92f83829df95acd20c62c626f14934a6b845371cb',
+  iosHeaderOnlyB: 'b44e53763196892edfa049d92f83829df95acd20c62c626f14934a6b845371cb',
   iosSymbolicatedA: 'f5a8725a56365c22ec6ee0aa21420567f609035ed6c378035cf881a4cf2c737b',
   iosSymbolicatedB: 'f5a8725a56365c22ec6ee0aa21420567f609035ed6c378035cf881a4cf2c737b',
   javascriptIndex5: '6fa897602de144d6484f9c78f7c7b442366dc466558d05a95c0c33b4d33190c2',
   javascriptIndex7: '6fa897602de144d6484f9c78f7c7b442366dc466558d05a95c0c33b4d33190c2',
   javascriptIban: '9cd1dde79ac088d104d51199ed83de21adee4505e4618b2df6e9221aa9bea494',
   javascriptMap: '5637ee732bc0a49b4e67e4e8fc8ce33e76ffdf371129843438e41c46229f72fb',
+  javascriptSourceA: 'a951ccc103d9057c229221a8b6626fa7d83219df85a6ca38aec81ef5df76ec45',
+  javascriptSourceB: 'a951ccc103d9057c229221a8b6626fa7d83219df85a6ca38aec81ef5df76ec45',
   jvmMentioningCrashed: '7a04469118d128cdbc214032c282877dad105bba1ed21e165fdaf7dbb4d6884c',
   jvmMentioningIncident: '7a04469118d128cdbc214032c282877dad105bba1ed21e165fdaf7dbb4d6884c',
   javascriptMentioningCrashed: '911c7fe74e02926a1dd689a73b2dd2635fad699bb11aa8c2af2fe929d4693390',

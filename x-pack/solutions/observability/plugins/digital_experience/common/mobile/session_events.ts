@@ -39,6 +39,28 @@ const KIND = {
   log: 'log',
 } as const satisfies Record<MobileSessionEventKind, MobileSessionEventKind>;
 
+/** `severity_text` of a warning or worse, uppercased, for a log without a `severity_number`. */
+const WARNING_OR_WORSE_TEXTS = ['WARN', 'WARNING', 'ERROR', 'FATAL', 'CRITICAL'] as const;
+
+/**
+ * Whether a log is a warning or worse: by its `severity_number` when set, as 0 is unspecified,
+ * else by its `severity_text`.
+ */
+const isWarningOrWorse = () => {
+  const severityNumber = mobileColumn('severityNumber');
+  const isWarningText = Builder.expression.func.binary('in', [
+    esql.exp`TO_UPPER(${mobileColumn('severity')})`,
+    Builder.expression.list.tuple({
+      values: WARNING_OR_WORSE_TEXTS.map((text) => Builder.expression.literal.string(text)),
+    }),
+  ]);
+  return esql.exp`CASE(
+    ${severityNumber} > 0,
+    ${severityNumber} >= ${OTEL_SEVERITY_WARN},
+    ${isWarningText}
+  )`;
+};
+
 /**
  * The kind of a mobile event, or `null` for one a session timeline doesn't list. Logs are listed
  * from warnings up, so chatty debug and info logs can't push the screens, taps and requests out.
@@ -56,9 +78,7 @@ const eventKind = () =>
     ${KIND.tap},
     ${mobileColumn('eventName')} == ${EVENT_EXCEPTION},
     ${KIND.error},
-    ${mobileColumn('eventName')} IS NULL AND ${mobileColumn(
-    'severityNumber'
-  )} >= ${OTEL_SEVERITY_WARN},
+    ${mobileColumn('eventName')} IS NULL AND ${isWarningOrWorse()},
     ${KIND.log},
     NULL
   )`;
@@ -88,6 +108,8 @@ const SPAN_KINDS: readonly MobileSessionEventKind[] = ['request', 'screen'];
  * The latest events of a mobile session before a time, newest first: requests, screens, taps,
  * handled errors and logs. A span sent twice is listed once, before the limit is applied: the
  * copy whose index and document id come first, as a document id is only unique within an index.
+ * Only the spans need that, so the other events are a `FORK` branch of their own, sorted and cut
+ * without grouping the session's documents first.
  */
 export const sessionEventsBefore = ({
   serviceName,
@@ -113,10 +135,14 @@ export const sessionEventsBefore = ({
   ).pipe`WHERE @timestamp < TO_DATETIME(${{
     before,
   }})`.pipe`EVAL ${eventKindColumn} = ${eventKind()}`.pipe`WHERE ${eventKindColumn} IS NOT NULL`
-    .pipe`EVAL ${documentKey} = CONCAT(_index, "/", _id)`
-    .pipe`INLINE STATS ${keptKey} = MIN(${documentKey}) BY ${traceId}, ${spanId}, ${eventKindColumn}`
-    .pipe`WHERE NOT ${isSpan} OR ${traceId} IS NULL OR ${spanId} IS NULL OR ${documentKey} == ${keptKey}`
-    .pipe`SORT @timestamp DESC`.pipe`LIMIT ${limit}`.pipe`EVAL
+    .pipe`FORK
+      (WHERE NOT ${isSpan} | SORT @timestamp DESC | LIMIT ${limit})
+      (WHERE ${isSpan}
+        | EVAL ${documentKey} = CONCAT(_index, "/", _id)
+        | INLINE STATS ${keptKey} = MIN(${documentKey}) BY ${traceId}, ${spanId}, ${eventKindColumn}
+        | WHERE ${traceId} IS NULL OR ${spanId} IS NULL OR ${documentKey} == ${keptKey}
+        | SORT @timestamp DESC
+        | LIMIT ${limit})`.pipe`SORT @timestamp DESC`.pipe`LIMIT ${limit}`.pipe`EVAL
       ${resultColumn('name')} = COALESCE(CASE(
         ${is(KIND.request)}, ${mobileColumn('httpMethod')},
         ${is(KIND.error)}, ${mobileColumn('exceptionType')},

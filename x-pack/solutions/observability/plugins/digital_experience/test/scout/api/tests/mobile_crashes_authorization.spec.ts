@@ -42,6 +42,13 @@ const OTEL_TRACES_ONLY_ROLE = {
   },
 };
 
+/** The seeded NullPointerException's group, whatever else the list has or its order. */
+const npeFingerprint = ({ crashGroups }: MobileCrashGroupsResponse): string => {
+  const npe = crashGroups.find(({ type }) => type === 'java.lang.NullPointerException');
+  expect(npe).toBeDefined();
+  return npe?.fingerprint ?? '';
+};
+
 apiTest.describe(
   'Digital Experience mobile crashes API authorization',
   { tag: DIGITAL_EXPERIENCE_TAGS },
@@ -56,11 +63,11 @@ apiTest.describe(
 
     // The detail returns stack traces and session events: both routes need both privileges.
     for (const [privilege, role] of [
-      ['Digital Experience', APM_ONLY_ROLE],
-      ['APM', DIGITAL_EXPERIENCE_ONLY_ROLE],
+      ['read_digital_experience', APM_ONLY_ROLE],
+      ['apm', DIGITAL_EXPERIENCE_ONLY_ROLE],
     ] as const) {
       apiTest(
-        `answers 403 to the crash routes without the ${privilege} privilege`,
+        `answers 403 to the crash routes naming the ${privilege} privilege, without it`,
         async ({ apiClient, samlAuth }) => {
           const { cookieHeader } = await samlAuth.asInteractiveUser(role);
           const paths = [
@@ -74,6 +81,11 @@ apiTest.describe(
               responseType: 'json',
             });
             expect(response).toHaveStatusCode(403);
+            // Kibana's own check, before the route reads any data, rather than an Elasticsearch
+            // access denial, which would be a 403 too
+            expect((response.body as { message: string }).message).toContain(
+              `is unauthorized for user, this action is granted by the Kibana privileges [${privilege}]`
+            );
           }
         }
       );
@@ -111,10 +123,11 @@ apiTest.describe(
           headers,
           responseType: 'json',
         });
-        const [npe] = (list.body as MobileCrashGroupsResponse).crashGroups;
+        expect(list).toHaveStatusCode(200);
+        const fingerprint = npeFingerprint(list.body as MobileCrashGroupsResponse);
 
         const response = await apiClient.get(
-          mobileCrashGroupsPath(CRASH_APPS.android, { fingerprint: npe.fingerprint }),
+          mobileCrashGroupsPath(CRASH_APPS.android, { fingerprint }),
           { headers, responseType: 'json' }
         );
 
@@ -139,7 +152,8 @@ apiTest.describe(
           headers: { ...COMMON_HEADERS, ...viewer.cookieHeader },
           responseType: 'json',
         });
-        const [npe] = (viewerList.body as MobileCrashGroupsResponse).crashGroups;
+        expect(viewerList).toHaveStatusCode(200);
+        const fingerprint = npeFingerprint(viewerList.body as MobileCrashGroupsResponse);
         const { cookieHeader } = await samlAuth.asInteractiveUser(OTEL_TRACES_ONLY_ROLE);
         const headers = { ...COMMON_HEADERS, ...cookieHeader };
 
@@ -148,12 +162,18 @@ apiTest.describe(
           responseType: 'json',
         });
         const detail = await apiClient.get(
-          mobileCrashGroupsPath(CRASH_APPS.android, { fingerprint: npe.fingerprint }),
+          mobileCrashGroupsPath(CRASH_APPS.android, { fingerprint }),
           { headers, responseType: 'json' }
         );
 
         expect(list).toHaveStatusCode(200);
-        expect(list.body).toStrictEqual({ crashGroups: [], releases: [], isPartial: true });
+        expect(list.body).toStrictEqual({
+          crashGroups: [],
+          releases: [],
+          osNames: [],
+          environments: [],
+          isPartial: true,
+        });
         expect(detail).toHaveStatusCode(200);
         expect(detail.body).toMatchObject({ latestCrash: null, beforeCrash: [], isPartial: true });
       }

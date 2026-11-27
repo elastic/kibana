@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { MOBILE_FIELDS } from '../../../../common/mobile/fields';
 import {
   createTracedEsClientMock,
   esqlResponse,
 } from '../../../lib/create_digital_experience_traced_es_client.test_helpers';
-import { getCrashGroups, getCrashReleases } from './get_crash_groups';
+import { getCrashFilterOptions, getCrashGroups, getCrashReleases } from './get_crash_groups';
 
 const DAY = 24 * 60 * 60 * 1000;
 const START = Date.parse('2021-01-18T12:00:00.000Z');
@@ -138,7 +139,28 @@ describe('getCrashGroups', () => {
     expect(historyRequest.params).toEqual(
       expect.arrayContaining([{ crash_start: new Date(END - 30 * DAY).toISOString() }])
     );
-    expect(latestRequest.params).toEqual([{ service_name: 'trailmap-android' }]);
+    expect(latestRequest.params).toEqual([
+      { service_name: 'trailmap-android' },
+      { release_end: new Date(END).toISOString() },
+    ]);
+    // As far as the crashes, so a release a late crash first shows can be the newest, but past the
+    // range only from crashes that happened in it, dated when they happened.
+    expect(latestRequest.query).toContain(
+      'WHERE @timestamp < release_end OR (event_name IN ("app.crash", "crash")) AND crash_time < release_end'
+    );
+    expect(latestRequest.query).toContain('STATS first_seen = MIN(release_seen_at)');
+    expect(latestRequest.filter).toEqual({
+      bool: {
+        filter: [
+          {
+            range: {
+              '@timestamp': { gte: END - 30 * DAY, lt: END + DAY, format: 'epoch_millis' },
+            },
+          },
+          expect.anything(),
+        ],
+      },
+    });
   });
 
   it('marks nothing new without a newest release', async () => {
@@ -288,6 +310,23 @@ describe('getCrashGroups, the newest release', () => {
     expect(client.esql.query).toHaveBeenCalledTimes(2);
   });
 
+  it('never marks new a group whose EDOT iOS reports are only in the lookback', async () => {
+    const { client, esClient } = createTracedEsClientMock();
+    client.esql.query
+      .mockResolvedValueOnce(esqlResponse([groupRow('sigkill', { exception_type: 'SIGKILL' })]))
+      .mockResolvedValueOnce(esqlResponse([historyRow('sigkill', { ios_reports: 1 })]));
+
+    const [group] = await getCrashGroups({
+      esClient,
+      filters: { serviceName: 'transit-companion' },
+      start: START,
+      end: END,
+    });
+
+    expect(group.newInRelease).toBeNull();
+    expect(client.esql.query).toHaveBeenCalledTimes(2);
+  });
+
   it('looks for the newest release only once a group crashed on one release alone', async () => {
     const { client, esClient } = createTracedEsClientMock();
     client.esql.query
@@ -347,6 +386,51 @@ describe('getCrashReleases', () => {
           expect.anything(),
         ],
       },
+    });
+  });
+});
+
+describe('getCrashFilterOptions', () => {
+  it('lists the OS names and environments that crashed, whatever their own filters', async () => {
+    const { client, esClient } = createTracedEsClientMock();
+    client.esql.query.mockImplementation(async ({ query }) =>
+      esqlResponse(
+        query.includes('BY os_name')
+          ? [{ os_name: 'iOS', platform: 'ios', sessions: 2 }]
+          : [
+              {
+                docs: 3,
+                [MOBILE_FIELDS.environment]: 'production',
+                [MOBILE_FIELDS.environmentName]: null,
+              },
+            ]
+      )
+    );
+
+    const options = await getCrashFilterOptions({
+      esClient,
+      filters: { serviceName: 'ride-ios', osName: 'iPadOS', release: '8.4.0' },
+      start: START,
+      end: END,
+      environment: 'staging',
+    });
+
+    expect(options).toEqual({ osNames: [{ key: 'iOS', count: 2 }], environments: ['production'] });
+    const [[osRequest], [environmentsRequest]] = client.esql.query.mock.calls;
+    // The crashes of the range, sent late ones included, on any OS and release.
+    [osRequest, environmentsRequest].forEach(({ query, params }) => {
+      expect(query).toContain('crash_time >= TO_DATETIME(?crash_start)');
+      expect(params).not.toEqual(expect.arrayContaining([{ os_name: 'iPadOS' }]));
+      expect(params).not.toEqual(expect.arrayContaining([{ release: '8.4.0' }]));
+    });
+    const timestampRange = { gte: START, lt: END + DAY, format: 'epoch_millis' };
+    expect(osRequest.filter).toEqual({
+      bool: { filter: [{ range: { '@timestamp': timestampRange } }, expect.anything()] },
+    });
+    expect(osRequest.filter).not.toEqual(environmentsRequest.filter);
+    // Every environment, so the picker lists the others too.
+    expect(environmentsRequest.filter).toEqual({
+      bool: { filter: [{ range: { '@timestamp': timestampRange } }, { match_all: {} }] },
     });
   });
 });

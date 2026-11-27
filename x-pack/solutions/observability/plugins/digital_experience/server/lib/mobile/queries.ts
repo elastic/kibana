@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { ComposerQuery } from '@elastic/esql';
+import { esql, type ComposerQuery } from '@elastic/esql';
+import type { ESQLAstExpression } from '@elastic/esql/types';
 import { mobileColumn, resultColumn } from '../../../common/mobile/fields';
 import { withRelease } from '../../../common/mobile/releases';
 import { MAX_ENVIRONMENTS } from '../constants';
@@ -47,10 +48,14 @@ export const RELEASE_VERSION_PATTERN = '(0|[1-9][0-9]*)([.](0|[1-9][0-9]*))*';
  * Each application's newest release on any platform, compared as versions so `2.10.0` is after
  * `2.9.0`, one row per application, so no cut on releases can leave one without. Without a
  * numeric release, the one that first showed up last, the highest as text among those that showed
- * up at the same time, so the same data always gives the same release.
+ * up at the same time, so the same data always gives the same release. A document shows up at
+ * `seenAt`, its `@timestamp` unless a query dates it otherwise.
  */
-export const withLatestReleases = (query: ComposerQuery): ComposerQuery =>
-  withRelease(query).pipe`STATS ${resultColumn('firstSeen')} = MIN(@timestamp)
+export const withLatestReleases = (
+  query: ComposerQuery,
+  seenAt: ESQLAstExpression = esql.exp`@timestamp`
+): ComposerQuery =>
+  withRelease(query).pipe`STATS ${resultColumn('firstSeen')} = MIN(${seenAt})
       BY ${mobileColumn('serviceName')}, ${mobileColumn('serviceVersion')}`
     .pipe`INLINE STATS ${resultColumn('lastFirstSeen')} = MAX(${resultColumn('firstSeen')})
       BY ${mobileColumn('serviceName')}`.pipe`EVAL ${resultColumn('numericRelease')} = CASE(

@@ -16,17 +16,28 @@ import {
   withCrashGroupStats,
   withCrashReleaseCounts,
   withCrashTypes,
+  withReleaseSightings,
   type CrashGroupHistoryRow,
   type CrashGroupRow,
   type CrashReleaseRow,
 } from '../../../../common/mobile/crash_groups';
-import { RESULT_COLUMNS } from '../../../../common/mobile/fields';
+import { RESULT_COLUMNS, resultColumn } from '../../../../common/mobile/fields';
 import { mobilePanelQuery, type MobilePanelFilters } from '../../../../common/mobile/filters';
 import type { FacetBucket } from '../../../../common/sessions';
-import type { MobileCrashGroup } from '../../../../common/types/mobile';
+import type { MobileCrashGroup, MobileCrashGroupsResponse } from '../../../../common/types/mobile';
 import { runEsql, timeFilter } from '../../../lib/esql';
-import { withLatestReleases } from '../../../lib/mobile/queries';
-import { toRelease } from '../../../lib/mobile/rows';
+import {
+  withEnvironmentCounts,
+  withLatestReleases,
+  withOsCounts,
+} from '../../../lib/mobile/queries';
+import {
+  toEnvironments,
+  toOsNames,
+  toRelease,
+  type EnvironmentRow,
+  type OsRow,
+} from '../../../lib/mobile/rows';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -124,19 +135,24 @@ export const getCrashGroups = async ({
     const history = historyByFingerprint.get(row[RESULT_COLUMNS.fingerprint]);
     const releases = castArray(history?.[RESULT_COLUMNS.releases] ?? []);
     return !row[RESULT_COLUMNS.iosReports] &&
+      !history?.[RESULT_COLUMNS.iosReports] &&
       !history?.[RESULT_COLUMNS.unversioned] &&
       releases.length === 1
       ? releases[0]
       : null;
   };
 
-  // The newest release reads 30 days of every document, so only when a group can be new.
+  // The newest release reads 30 days of every document, so only when a group can be new. A crash
+  // sent after the range can be on a release it first shows, the next day's sessions never.
   const [latest] = rows.some((row) => onlyReleaseOf(row) !== null)
     ? await runEsql<LatestReleaseRow>(
         esClient,
         'get_mobile_latest_release',
-        withLatestReleases(mobilePanelQuery(allReleases)),
-        timeFilter(lookbackStart, end, environment)
+        withLatestReleases(
+          withReleaseSightings(mobilePanelQuery(allReleases), end),
+          resultColumn('releaseSeenAt')
+        ),
+        timeFilter(lookbackStart, end + CRASH_DELAY_MS, environment)
       )
     : [];
   const latestRelease = latest?.[RESULT_COLUMNS.latestRelease] ?? null;
@@ -171,4 +187,34 @@ export const getCrashReleases = async ({
     const release = toRelease(row[RESULT_COLUMNS.release]);
     return release ? [{ key: release, count: row[RESULT_COLUMNS.events] }] : [];
   });
+};
+
+/**
+ * The OS names and environments that crashed in the range, as the KPIs list them: the OS names on
+ * any release, the environments whatever the environment filter. From the crashes, so a crash sent
+ * after the range, maybe the only telemetry of its OS or environment, can still be picked.
+ */
+export const getCrashFilterOptions = async ({
+  esClient,
+  filters,
+  start,
+  end,
+  environment,
+}: GetCrashGroupsParams): Promise<Pick<MobileCrashGroupsResponse, 'osNames' | 'environments'>> => {
+  const application = { serviceName: filters.serviceName, start, end };
+  const [osRows, environmentRows] = await Promise.all([
+    runEsql<OsRow>(
+      esClient,
+      'get_mobile_crash_os_names',
+      withOsCounts(crashEvents(application)),
+      timeFilter(start, end + CRASH_DELAY_MS, environment)
+    ),
+    runEsql<EnvironmentRow>(
+      esClient,
+      'get_mobile_crash_environments',
+      withEnvironmentCounts(crashEvents(application)),
+      timeFilter(start, end + CRASH_DELAY_MS, undefined)
+    ),
+  ]);
+  return { osNames: toOsNames(osRows), environments: toEnvironments(environmentRows) };
 };

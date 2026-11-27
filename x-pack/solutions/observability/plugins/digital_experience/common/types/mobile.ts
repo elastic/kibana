@@ -136,6 +136,10 @@ export interface MobileCrashGroupsResponse {
    * Crashes tab's release picker, which filters on the release that crashed.
    */
   releases: FacetBucket[];
+  /** The OS names that crashed in the range, whatever the OS and release filters. */
+  osNames: FacetBucket[];
+  /** The environments that crashed in the range, whatever the environment filter. */
+  environments: string[];
   /**
    * Whether the user can't read every OTel logs and traces index, so crashes may be missing and
    * the newest release, which marks groups new, may be wrong.
@@ -150,7 +154,10 @@ export interface CrashBreakdown {
 }
 
 export interface MobileCrash {
-  /** ISO 8601, when it happened rather than when the next launch sent it. */
+  /**
+   * ISO 8601, when it happened rather than when the next launch sent it. A crash sent more than a
+   * day later is counted when it was sent, so this can be before the range and its group's last seen.
+   */
   time: string;
   /** ISO 8601, when the SDK sent it: EDOT iOS sends a crash on the next launch. */
   reportedAt: string;

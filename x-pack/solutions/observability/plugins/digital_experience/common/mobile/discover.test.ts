@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { parseTimeFieldFromESQLQuery } from '@kbn/esql-utils';
 import {
   mobileCrashesDiscoverEsql,
   mobilePanelDiscoverEsql,
@@ -59,9 +60,11 @@ describe('mobileCrashesDiscoverEsql', () => {
   it("filters `observed_timestamp` as Discover's time field, over the tab's range", () => {
     // Discover filters the column first compared with `?_tstart` on its own range: when the SDK
     // observed the crash, which EDOT iOS sets to the crash's time, whenever it is sent.
+    // A crash whose observed time is unset or later counts at `@timestamp`, as in the tab.
     expect(esql).toContain(
-      'WHERE observed_timestamp >= ?_tstart AND observed_timestamp < ?_tend AND @timestamp >= ?_tstart AND @timestamp < TO_DATETIME(?_tend) + 24 hours AND crash_time >= ?_tstart AND crash_time < ?_tend'
+      'WHERE (observed_timestamp >= ?_tstart AND observed_timestamp < ?_tend OR crash_time == @timestamp) AND @timestamp >= ?_tstart AND @timestamp < TO_DATETIME(?_tend) + 24 hours AND crash_time >= ?_tstart AND crash_time < ?_tend'
     );
+    expect(parseTimeFieldFromESQLQuery(esql)).toBe('observed_timestamp');
     expect(esql).not.toContain('crash_start');
     expect(esql).toContain('SORT crash_time DESC');
   });

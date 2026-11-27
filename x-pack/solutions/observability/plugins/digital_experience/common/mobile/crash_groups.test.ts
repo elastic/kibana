@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { esql } from '@elastic/esql';
 import {
   CRASH_DELAY_MS,
   crashEvents,
@@ -15,6 +16,8 @@ import {
   withCrashGroupStats,
   withCrashTypes,
   withLatestCrash,
+  withReleaseSightings,
+  withStoredCrashGroup,
 } from './crash_groups';
 
 const START = Date.parse('2021-01-18T12:00:00.000Z');
@@ -36,6 +39,8 @@ describe('crashEvents', () => {
   });
 
   it('keeps the crashes that happened in the range, by the earlier of their two times', () => {
+    // An observed time is the crash's when it was sent at most as late as the range's crashes are
+    // fetched; a crash sent later, or without one, is dated when it was sent.
     expect(query).toContain(
       'EVAL crash_time = LEAST(@timestamp, CASE(TO_DATETIME(observed_timestamp) + 24 hours >= @timestamp, TO_DATETIME(observed_timestamp), @timestamp))'
     );
@@ -69,7 +74,9 @@ describe('withCrashFingerprint', () => {
       crashEvents({ serviceName: 'ride-ios', start: START, end: END })
     ).toRequest();
 
-    expect(query).toContain('| EVAL fingerprint = COALESCE(`attributes.exception.fingerprint`');
+    expect(query).toContain(
+      '| EVAL fingerprint = COALESCE(`attributes.elastic.error.grouping_key`'
+    );
   });
 });
 
@@ -97,7 +104,7 @@ describe('withCrashGroupStats', () => {
     expect(query).toContain('BY fingerprint');
     // Stored fingerprints, which can be of any type, so the group's type can't narrow its crashes.
     expect(query).toContain(
-      'stored_fingerprints = COUNT(*) WHERE `attributes.exception.fingerprint` IS NOT NULL'
+      'stored_fingerprints = COUNT(*) WHERE `attributes.elastic.error.grouping_key` IS NOT NULL'
     );
     // EDOT iOS reports, whose fingerprint changes with every build, so they are never marked new.
     expect(query).toContain(
@@ -119,8 +126,8 @@ describe('withCrashGroupHistory', () => {
 
     expect(query).toContain('| WHERE fingerprint IN ("abc", "d\\"e")');
     expect(query).toContain(
-      // The crashes without a release too, which `VALUES` leaves out.
-      '| STATS releases = VALUES(crash_release), unversioned = COUNT(*) WHERE crash_release IS NULL, first_seen = MIN(crash_time), first_release = FIRST(crash_release, crash_time) BY fingerprint | LIMIT 2'
+      // The crashes without a release too, which `VALUES` leaves out, and the lookback's iOS reports.
+      '| STATS releases = VALUES(crash_release), unversioned = COUNT(*) WHERE crash_release IS NULL, ios_reports = COUNT(*) WHERE `attributes.exception.stacktrace` LIKE "Incident Identifier:*", first_seen = MIN(crash_time), first_release = FIRST(crash_release, crash_time) BY fingerprint | LIMIT 2'
     );
   });
 });
@@ -130,7 +137,7 @@ describe('withCrashTypes', () => {
 
   it('keeps the crashes of the types, and those with a stored fingerprint, of any type', () => {
     expect(withCrashTypes(crashes(), ['SIGSEGV', 'SIGABRT', 'SIGSEGV']).print('basic')).toContain(
-      '| WHERE `attributes.exception.fingerprint` IS NOT NULL OR (`attributes.exception.type` IN ("SIGSEGV", "SIGABRT"))'
+      '| WHERE `attributes.elastic.error.grouping_key` IS NOT NULL OR (`attributes.exception.type` IN ("SIGSEGV", "SIGABRT"))'
     );
   });
 
@@ -160,9 +167,21 @@ describe('crash group detail', () => {
     expect(params).toEqual(expect.arrayContaining([{ fingerprint: 'abc' }]));
   });
 
-  it('reads the latest crash with its stack trace and session', () => {
+  it("keeps a stored group's crashes by their stored fingerprint, computing none", () => {
+    const { query, params } = withStoredCrashGroup(
+      crashEvents({ serviceName: 'ride-ios', start: START, end: END }),
+      'ingest-fingerprint'
+    ).toRequest();
+
+    expect(query).toContain('| WHERE `attributes.elastic.error.grouping_key` == ?fingerprint');
+    expect(query).not.toContain('SHA256');
+    expect(params).toEqual(expect.arrayContaining([{ fingerprint: 'ingest-fingerprint' }]));
+  });
+
+  it('reads the crash that happened last with its stack trace and session', () => {
+    // When it happened, however late the next launch sent it, unless its observed time is unset.
     expect(withLatestCrash(groupCrashes()).print('basic')).toContain(
-      '| SORT crash_time DESC | LIMIT 1 | EVAL exception_type = `attributes.exception.type`, message = `attributes.exception.message`, stacktrace = `attributes.exception.stacktrace`, release = crash_release, os_version = crash_os_version, device_model = COALESCE(CASE(`resource.attributes.device.model.name` != "", `resource.attributes.device.model.name`, NULL), CASE(`resource.attributes.device.model.identifier` != "", `resource.attributes.device.model.identifier`, NULL)), session_id = CASE(`attributes.session.id` != "", `attributes.session.id`, NULL), stored_fingerprint = `attributes.exception.fingerprint`, reported_at = @timestamp | KEEP crash_time, reported_at, exception_type, message, stacktrace, release, os_version, device_model, session_id, stored_fingerprint'
+      '| EVAL happened_at = LEAST(@timestamp, CASE(TO_DATETIME(observed_timestamp) + 30 days >= @timestamp, TO_DATETIME(observed_timestamp), @timestamp)) | SORT happened_at DESC | LIMIT 1 | EVAL exception_type = `attributes.exception.type`, message = `attributes.exception.message`, stacktrace = `attributes.exception.stacktrace`, release = crash_release, os_version = crash_os_version, device_model = COALESCE(CASE(`resource.attributes.device.model.name` != "", `resource.attributes.device.model.name`, NULL), CASE(`resource.attributes.device.model.identifier` != "", `resource.attributes.device.model.identifier`, NULL)), session_id = CASE(`attributes.session.id` != "", `attributes.session.id`, NULL), stored_fingerprint = `attributes.elastic.error.grouping_key`, reported_at = @timestamp | KEEP happened_at, reported_at, exception_type, message, stacktrace, release, os_version, device_model, session_id, stored_fingerprint'
     );
   });
 
@@ -176,6 +195,34 @@ describe('crash group detail', () => {
     );
     expect(withCrashBreakdown(groupCrashes(), 'deviceModels').print('basic')).toContain(
       'BY value = COALESCE(CASE(`resource.attributes.device.model.name` != "", `resource.attributes.device.model.name`, NULL), CASE(`resource.attributes.device.model.identifier` != "", `resource.attributes.device.model.identifier`, NULL))'
+    );
+  });
+});
+
+describe('withReleaseSightings', () => {
+  const { query, params } = withReleaseSightings(esql.from('logs-*'), END).toRequest();
+
+  it('keeps every document sent in the range, and the crashes sent after it that happened in it', () => {
+    expect(params).toEqual([{ release_end: '2021-01-18T13:00:00.000Z' }]);
+    expect(query).toContain(
+      '| EVAL release_end = TO_DATETIME(?release_end), crash_time = LEAST(@timestamp, CASE(TO_DATETIME(observed_timestamp) + 24 hours >= @timestamp, TO_DATETIME(observed_timestamp), @timestamp))'
+    );
+    expect(query).toContain(
+      '| WHERE @timestamp < release_end OR (event_name IN ("app.crash", "crash")) AND crash_time < release_end |'
+    );
+  });
+
+  it("reads a late iOS report's release from its report, and a crash without a stack trace as none", () => {
+    // `NULL LIKE` is `NULL`: a crash without a stack trace keeps its own release.
+    expect(query).toContain(
+      '`service.version` = CASE(@timestamp >= release_end AND COALESCE(`attributes.exception.stacktrace` LIKE "Incident Identifier:*", FALSE), CASE('
+    );
+    expect(query).toContain(', `service.version`)');
+  });
+
+  it('dates a crash sent after the range when it happened', () => {
+    expect(query).toContain(
+      'release_seen_at = CASE(@timestamp >= release_end, crash_time, @timestamp)'
     );
   });
 });

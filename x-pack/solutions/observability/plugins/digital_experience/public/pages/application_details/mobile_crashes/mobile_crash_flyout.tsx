@@ -209,16 +209,12 @@ function LatestCrashContext({ release, osVersion, deviceModel }: MobileCrash) {
 }
 
 /**
- * The latest crash's stack trace, or its message under a note when it has none. The header shows
- * the type and message already, and a JVM stack trace starts with them.
+ * The latest crash's stack trace, or a note when it has none. The header shows the type and
+ * message already, and a JVM stack trace starts with them.
  */
-function CrashStacktrace({ message, stacktrace }: MobileCrash) {
+function CrashStacktrace({ stacktrace }: MobileCrash) {
   if (!stacktrace) {
-    return (
-      <KbnInfoCallout size="s" title={NO_STACKTRACE_TITLE}>
-        {message}
-      </KbnInfoCallout>
-    );
+    return <KbnInfoCallout size="s" title={NO_STACKTRACE_TITLE} />;
   }
   // The code block alone: `PlaintextStacktrace` would add an empty heading without its title.
   return (
@@ -246,7 +242,7 @@ export function MobileCrashFlyout({
 }) {
   const { formatNumber, formatDate } = useFormatters();
   const titleId = useGeneratedHtmlId({ prefix: 'digitalExperienceMobileCrashFlyoutTitle' });
-  const { detail, error, refresh } = useMobileCrashGroup(serviceName, fingerprint);
+  const { detail, error, refresh } = useMobileCrashGroup(serviceName, fingerprint, group?.type);
   const latestCrash = detail?.latestCrash ?? null;
   // A neutral title until there is a crash to name, so a link to a missing group doesn't look like
   // a crash without a type.

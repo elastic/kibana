@@ -52,6 +52,11 @@ export const MOBILE_SESSIONS_RECONCILE_INTERVAL_MINUTES = 60;
 export const MOBILE_SESSIONS_RECONCILE_HOURS = 24;
 /** How late a crash may be sent after it happened, as the next launch sends it. */
 export const MOBILE_MAX_CRASH_DELAY_HOURS = 24;
+/**
+ * How much earlier than when it was sent a crash's observed time can be and still be its time: an
+ * older one is unset, e.g. the zero an exporter can leave, not a crash sent on a much later launch.
+ */
+export const MOBILE_MAX_OBSERVED_CRASH_AGE_DAYS = 30;
 
 /** How often the summaries task runs by default. */
 export const SESSIONS_DEFAULT_FREQUENCY = '1m';

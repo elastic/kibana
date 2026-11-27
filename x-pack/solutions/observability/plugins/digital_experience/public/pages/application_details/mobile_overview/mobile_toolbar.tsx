@@ -65,11 +65,13 @@ export const useMobileFilters = (): { isFiltered: boolean; clearFiltersButton?: 
 /**
  * The toolbar every mobile tab shares: the environment, OS and release filters, kept in the URL so
  * a reload or a shared link keeps them, and the date picker. The options come from the KPIs,
- * unless a tab gives its own release options.
+ * unless a tab gives its own.
  */
 export function MobileToolbar({
   kpis,
   releaseOptions,
+  osOptions,
+  environmentOptions,
   isLoading,
   onRefresh,
 }: {
@@ -79,11 +81,17 @@ export function MobileToolbar({
    * Crashes tab's, the releases that crashed, which its filter is on.
    */
   releaseOptions?: { buckets: FacetBucket[] | undefined };
+  /** The OS names to pick from instead of the KPIs', as `releaseOptions`. */
+  osOptions?: { buckets: FacetBucket[] | undefined };
+  /** The environments to pick from instead of the KPIs', `environments` undefined until they load. */
+  environmentOptions?: { environments: string[] | undefined };
   isLoading: boolean;
   onRefresh: () => void;
 }) {
-  // Never the KPIs' releases when the tab has its own, even before they load or when they fail.
+  // Never the KPIs' options when the tab has its own, even before they load or when they fail.
   const releaseBuckets = releaseOptions ? releaseOptions.buckets : kpis?.releases;
+  const osBuckets = osOptions ? osOptions.buckets : kpis?.osNames;
+  const environments = environmentOptions ? environmentOptions.environments : kpis?.environments;
   const formatters = useFormatters();
   const { value: release, setValue: setRelease } = useQueryParam('release');
   const { value: osName, setValue: setOsName } = useQueryParam('osName');
@@ -92,7 +100,7 @@ export function MobileToolbar({
     // The filters keep their width when one is picked, and the date picker its place, so the page
     // doesn't move.
     <ApplicationTabToolbar
-      environments={kpis?.environments}
+      environments={environments}
       isLoading={isLoading}
       onRefresh={onRefresh}
       filters={
@@ -101,11 +109,11 @@ export function MobileToolbar({
             data-test-subj="digitalExperienceMobileOsFilter"
             ebtElement={MOBILE_APPLICATION_EBT_ELEMENTS.OS_FILTER}
             label={OS_LABEL}
-            buckets={kpis?.osNames ?? []}
+            buckets={osBuckets ?? []}
             selected={osName}
             onChange={setOsName}
             formatters={formatters}
-            isLoading={isLoading && !kpis}
+            isLoading={isLoading && !osBuckets}
           />
           <FacetFilter
             data-test-subj="digitalExperienceMobileReleaseFilter"

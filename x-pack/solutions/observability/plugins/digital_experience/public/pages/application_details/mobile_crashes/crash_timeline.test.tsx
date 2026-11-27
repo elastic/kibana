@@ -86,6 +86,22 @@ describe('CrashTimeline', () => {
       'title',
       'Start recording'
     );
-    expect(widgetTapRow).toHaveTextContent('Map');
+    expect(
+      within(widgetTapRow).getByTestId('digitalExperienceMobileCrashTimelinePage')
+    ).toHaveAttribute('title', 'Map');
+  });
+
+  it("names the crash by its type, leaving its message to the flyout's header", () => {
+    render(<CrashTimeline events={[]} crash={CRASH} />, {
+      wrapper: ({ children }) => (
+        <I18nProvider>
+          <EuiProvider>{children}</EuiProvider>
+        </I18nProvider>
+      ),
+    });
+
+    const [crashRow] = rows();
+    expect(crashRow).toHaveTextContent('java.lang.NullPointerException');
+    expect(crashRow).not.toHaveTextContent('TrackRecorder is null');
   });
 });

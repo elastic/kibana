@@ -17,8 +17,9 @@ import { attributeColumn, changedSessionIdsQuery } from './summary_queries';
 const WINDOW = { changedFrom: '2026-11-10T10:00:00.000Z', changedTo: '2026-11-10T10:01:00.000Z' };
 const REBUILD = { changedTo: WINDOW.changedTo, rebuildFrom: '2026-11-09T10:00:00.000Z' };
 
+// A crash with an unset observed time, e.g. an exporter's zero, is not late: it counts when sent.
 const LATE_CRASH =
-  'NOT COALESCE(event_name IN ("app.crash", "crash") AND TO_DATETIME(observed_timestamp) < @timestamp - 24 hours, false)';
+  'NOT COALESCE(event_name IN ("app.crash", "crash") AND TO_DATETIME(observed_timestamp) < @timestamp - 24 hours\n  AND TO_DATETIME(observed_timestamp) + 30 days >= @timestamp, false)';
 
 describe('mobileSessionEvents', () => {
   it('reads the EDOT Android and EDOT iOS events by SDK name, as Android’s language is java', () => {
@@ -73,7 +74,7 @@ describe('mobileSessionSummaryQuery', () => {
 
   it('times a crash when it happened, the earlier of its two times', () => {
     expect(query).toContain(
-      'EVAL event_time = CASE(is_crash AND observed_time + 24 hours >= @timestamp, LEAST(@timestamp, observed_time), @timestamp)'
+      'EVAL event_time = CASE(is_crash AND observed_time + 30 days >= @timestamp, LEAST(@timestamp, observed_time), @timestamp)'
     );
     expect(query).toContain('start_time = MIN(event_time)');
     expect(query).toContain('end_time = MAX(event_time)');

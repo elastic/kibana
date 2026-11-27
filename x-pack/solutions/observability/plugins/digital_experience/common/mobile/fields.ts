@@ -59,8 +59,10 @@ export const MOBILE_FIELDS = {
   exceptionType: attributeField(EXCEPTION_TYPE),
   exceptionMessage: attributeField(EXCEPTION_MESSAGE),
   exceptionStacktrace: attributeField(EXCEPTION_STACKTRACE),
+  /** `javascript` on the crash records EDOT React Native sends for uncaught JavaScript errors. */
+  exceptionSource: attributeField('elastic.exception.source'),
   /** A crash's group, once ingest stores one; no SDK or pipeline writes it yet. */
-  exceptionFingerprint: attributeField('exception.fingerprint'),
+  exceptionFingerprint: attributeField('elastic.error.grouping_key'),
   eventName: OTEL_EVENT_NAME,
   /** When the SDK observed a log record: EDOT iOS sets only this one to a crash's time. */
   observedTimestamp: OTEL_OBSERVED_TIMESTAMP,
@@ -121,6 +123,9 @@ export const RESULT_COLUMNS = {
   environments: 'environments',
   environmentNames: 'environment_names',
   crashTime: 'crash_time',
+  happenedAt: 'happened_at',
+  releaseEnd: 'release_end',
+  releaseSeenAt: 'release_seen_at',
   crashRelease: 'crash_release',
   crashOsVersion: 'crash_os_version',
   reportedAt: 'reported_at',

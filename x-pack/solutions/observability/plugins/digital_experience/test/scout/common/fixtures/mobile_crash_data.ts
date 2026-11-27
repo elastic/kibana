@@ -8,8 +8,17 @@
 import type { EsClient } from '@kbn/scout-oblt';
 import { CRASH_FINGERPRINT_CASES } from '../../../../common/mobile/crash_fingerprint.test_helpers';
 
-const LOGS_INDEX = 'logs-generic.otel-default';
-const TRACES_INDEX = 'traces-generic.otel-default';
+type Stream = 'logs' | 'traces';
+
+/**
+ * The namespace of each Scout config's own data streams, so one config's teardown never deletes
+ * the data of another running on the same cluster.
+ */
+export const CRASH_DATA_NAMESPACES = { api: 'scoutcrashesapi', ui: 'scoutcrashesui' } as const;
+type CrashDataNamespace = (typeof CRASH_DATA_NAMESPACES)[keyof typeof CRASH_DATA_NAMESPACES];
+
+const dataStream = (stream: Stream, namespace: CrashDataNamespace): string =>
+  `${stream}-generic.otel-${namespace}`;
 
 /** Applications of their own, so the other mobile fixtures' counts stay as they are. */
 export const CRASH_APPS = {
@@ -54,9 +63,11 @@ interface Crash {
   type?: string;
   message?: string;
   stacktrace?: string;
+  source?: string;
   storedFingerprint?: string;
   /** Unset for a crash whose resource has no device model. */
   deviceModel?: string;
+  environment?: string;
   osVersion: string;
 }
 
@@ -68,6 +79,8 @@ const android = {
 /** The release and OS the delayed iOS crash happened on, before the updates that sent it. */
 export const IOS_CRASHED_RELEASE = '8.4.0';
 export const IOS_CRASHED_OS_VERSION = '17.5';
+/** The environment of the iOS crash sent after the range. */
+export const IOS_LATE_CRASH_ENVIRONMENT = 'production';
 
 const ios = {
   serviceName: CRASH_APPS.ios,
@@ -143,11 +156,13 @@ const CRASHES: Crash[] = [
     stacktrace: CRASH_FINGERPRINT_CASES.iosLaunchA.stacktrace,
   },
   // Crashed on the older release and OS, and sent after both were updated: its resource has the
-  // new ones, its report the ones that crashed.
+  // new ones, its report the ones that crashed. The only crash of its environment, sent after the
+  // range: the pickers still offer it.
   {
     ...ios,
     installationId: 'crash-ios-device-2',
     sessionId: 'CRASH-IOS-SESSION-2',
+    environment: IOS_LATE_CRASH_ENVIRONMENT,
     timestamp: at('13:20:00'),
     observedTimestamp: at('12:55:00'),
     stacktrace: CRASH_FINGERPRINT_CASES.iosLaunchB.stacktrace
@@ -237,7 +252,7 @@ const NPE_POST_ID = 'dx-mobile-crash-npe-post';
  * uppercase, as EDOT iOS writes its id, and in lowercase.
  */
 const SESSION_EVENTS: Array<{
-  index: string;
+  stream: Stream;
   resource: Record<string, string>;
   /** Set where a copy must keep the document id. */
   id?: string;
@@ -246,7 +261,7 @@ const SESSION_EVENTS: Array<{
   document: Record<string, unknown>;
 }> = [
   {
-    index: TRACES_INDEX,
+    stream: 'traces',
     resource: npeSession,
     document: {
       '@timestamp': at('12:39:50'),
@@ -258,12 +273,12 @@ const SESSION_EVENTS: Array<{
       attributes: { 'session.id': NPE_LATEST_SESSION, 'app.screen.name': 'Map' },
     },
   },
-  { index: TRACES_INDEX, resource: npeSession, id: NPE_POST_ID, document: NPE_POST },
+  { stream: 'traces', resource: npeSession, id: NPE_POST_ID, document: NPE_POST },
   // The same request span sent again, as an SDK retrying an export does: listed once, whether the
   // copy is another document of the same index, or has the same document id in another index.
-  { index: TRACES_INDEX, resource: npeSession, document: NPE_POST },
+  { stream: 'traces', resource: npeSession, document: NPE_POST },
   {
-    index: TRACES_INDEX,
+    stream: 'traces',
     resource: npeSession,
     id: NPE_POST_ID,
     afterRollover: true,
@@ -271,7 +286,7 @@ const SESSION_EVENTS: Array<{
   },
   // Another request, in another trace, whose span id happens to be the same: listed too.
   {
-    index: TRACES_INDEX,
+    stream: 'traces',
     resource: npeSession,
     document: {
       '@timestamp': at('12:39:57'),
@@ -290,7 +305,7 @@ const SESSION_EVENTS: Array<{
     },
   },
   {
-    index: LOGS_INDEX,
+    stream: 'logs',
     resource: npeSession,
     document: {
       '@timestamp': at('12:39:58'),
@@ -304,7 +319,7 @@ const SESSION_EVENTS: Array<{
   },
   // Another user's tap just before the crash, in the same app: never listed in this session.
   {
-    index: LOGS_INDEX,
+    stream: 'logs',
     resource: npeSession,
     document: {
       '@timestamp': at('12:39:59'),
@@ -314,7 +329,7 @@ const SESSION_EVENTS: Array<{
   },
   // After the crash: never listed before it.
   {
-    index: LOGS_INDEX,
+    stream: 'logs',
     resource: npeSession,
     document: {
       '@timestamp': at('12:41:00'),
@@ -323,7 +338,7 @@ const SESSION_EVENTS: Array<{
     },
   },
   {
-    index: TRACES_INDEX,
+    stream: 'traces',
     resource: { 'service.name': CRASH_APPS.ios, 'service.version': '8.5.0', 'os.name': 'iOS' },
     document: {
       '@timestamp': at('12:54:50'),
@@ -338,7 +353,7 @@ const SESSION_EVENTS: Array<{
   },
   // The same iOS session with its id in lowercase, as an SDK that doesn't uppercase it writes it.
   {
-    index: TRACES_INDEX,
+    stream: 'traces',
     resource: { 'service.name': CRASH_APPS.ios, 'service.version': '8.5.0', 'os.name': 'iOS' },
     document: {
       '@timestamp': at('12:54:40'),
@@ -363,7 +378,7 @@ const mobileResource = (attributes: Record<string, string>, osName: string) => (
 const documents = [
   ...CRASHES.map((crash, index) => ({
     id: `dx-mobile-crash-${index}`,
-    index: LOGS_INDEX,
+    stream: 'logs' as const,
     afterRollover: false,
     document: {
       '@timestamp': crash.timestamp,
@@ -378,6 +393,7 @@ const documents = [
             'os.name': crash.osName,
             'os.version': crash.osVersion,
             ...(crash.deviceModel ? { 'device.model.identifier': crash.deviceModel } : {}),
+            ...(crash.environment ? { 'deployment.environment.name': crash.environment } : {}),
             'app.installation.id': crash.installationId,
           },
           crash.osName
@@ -388,13 +404,16 @@ const documents = [
         ...(crash.type ? { 'exception.type': crash.type } : {}),
         ...(crash.message ? { 'exception.message': crash.message } : {}),
         ...(crash.stacktrace ? { 'exception.stacktrace': crash.stacktrace } : {}),
-        ...(crash.storedFingerprint ? { 'exception.fingerprint': crash.storedFingerprint } : {}),
+        ...(crash.source ? { 'elastic.exception.source': crash.source } : {}),
+        ...(crash.storedFingerprint
+          ? { 'elastic.error.grouping_key': crash.storedFingerprint }
+          : {}),
       },
     },
   })),
-  ...SESSION_EVENTS.map(({ index, resource, id, afterRollover = false, document }, position) => ({
+  ...SESSION_EVENTS.map(({ stream, resource, id, afterRollover = false, document }, position) => ({
     id: id ?? `dx-mobile-crash-session-${position}`,
-    index,
+    stream,
     afterRollover,
     document: {
       ...document,
@@ -404,24 +423,28 @@ const documents = [
 ];
 
 /**
- * Deletes every document of the fixture's applications, whose names no other fixture uses, so a
- * run that was interrupted, even with older document ids, leaves nothing behind.
+ * Deletes the namespace's data streams with their backing indices, so a run that was interrupted
+ * leaves nothing behind.
  */
-export const deleteMobileCrashData = async (esClient: EsClient): Promise<void> => {
-  await esClient.deleteByQuery({
-    index: ['logs-*.otel-*', 'traces-*.otel-*'],
-    query: { terms: { 'service.name': Object.values(CRASH_APPS) } },
-    refresh: true,
-    ignore_unavailable: true,
-    allow_no_indices: true,
-  });
+export const deleteMobileCrashData = async (
+  esClient: EsClient,
+  namespace: CrashDataNamespace
+): Promise<void> => {
+  await esClient.indices.deleteDataStream(
+    { name: [dataStream('logs', namespace), dataStream('traces', namespace)] },
+    { ignore: [404] }
+  );
 };
 
-const indexDocuments = async (esClient: EsClient, batch: typeof documents): Promise<void> => {
+const indexDocuments = async (
+  esClient: EsClient,
+  namespace: CrashDataNamespace,
+  batch: typeof documents
+): Promise<void> => {
   const { errors, items } = await esClient.bulk({
     refresh: 'wait_for',
-    operations: batch.flatMap(({ id, index, document }) => [
-      { create: { _index: index, _id: id } },
+    operations: batch.flatMap(({ id, stream, document }) => [
+      { create: { _index: dataStream(stream, namespace), _id: id } },
       document,
     ]),
   });
@@ -436,16 +459,21 @@ const indexDocuments = async (esClient: EsClient, batch: typeof documents): Prom
  * stream rolls over before the copy of a span is indexed, so the copy keeps its document id in
  * another backing index, as a retried export can.
  */
-export const ingestMobileCrashData = async (esClient: EsClient): Promise<void> => {
+export const ingestMobileCrashData = async (
+  esClient: EsClient,
+  namespace: CrashDataNamespace
+): Promise<void> => {
   // Data streams only accept `create`, which would keep a leftover document's old body.
-  await deleteMobileCrashData(esClient);
+  await deleteMobileCrashData(esClient, namespace);
   await indexDocuments(
     esClient,
+    namespace,
     documents.filter(({ afterRollover }) => !afterRollover)
   );
-  await esClient.indices.rollover({ alias: TRACES_INDEX });
+  await esClient.indices.rollover({ alias: dataStream('traces', namespace) });
   await indexDocuments(
     esClient,
+    namespace,
     documents.filter(({ afterRollover }) => afterRollover)
   );
 };

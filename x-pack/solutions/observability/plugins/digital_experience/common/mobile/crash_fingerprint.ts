@@ -43,6 +43,8 @@ export const CRASH_FRAME_RULES = {
     // A symbolicated frame has one address before its symbol, which also moves with every launch
     { pattern: '0x[0-9a-f]+ ', replacement: '' },
     { pattern: ' +', replacement: ' ' },
+    // A report without frames must not share a group with a crash of its type without a stack trace
+    { pattern: '^$', replacement: 'ios|' },
   ],
   // JVM traces: the first line repeats the message, a cause's message and how many frames it shares
   // vary per crash (ids, object hashes), and line numbers change with every build
@@ -63,8 +65,13 @@ export type CrashKind = keyof typeof CRASH_FRAME_RULES;
 /** Longest crash fingerprint a route or URL takes: a computed one is 64 characters. */
 export const MAX_CRASH_FINGERPRINT_LENGTH = 256;
 
-/** `exception.type` suffix of the JavaScript errors React Native reports as crashes. */
+/** Longest crash type a route takes, the `ignore_above` of a keyword attribute. */
+export const MAX_CRASH_TYPE_LENGTH = 1024;
+
+/** `exception.type` suffix of the JavaScript errors React Native reports through the native SDKs. */
 export const JAVASCRIPT_EXCEPTION_SUFFIX = 'JavascriptException';
+/** `elastic.exception.source` of the JavaScript errors EDOT React Native reports itself. */
+export const JAVASCRIPT_EXCEPTION_SOURCE = 'javascript';
 /**
  * The release in a PLCrashReporter report's `Version:` line, e.g. `8.4.0` of `8.4.0 (840)`, or an
  * empty string without one. EDOT iOS sends a crash on the next launch, with that launch's resource,
@@ -127,7 +134,8 @@ export const reportOsVersion = (): ESQLAstExpression => fromIosReport(IOS_REPORT
 /** The frames a crash is grouped on, as an ES|QL expression. */
 export const crashFrames = (): ESQLAstExpression =>
   esql.exp`CASE(
-    ${mobileColumn('exceptionType')} LIKE ${`*${JAVASCRIPT_EXCEPTION_SUFFIX}`},
+    ${mobileColumn('exceptionType')} LIKE ${`*${JAVASCRIPT_EXCEPTION_SUFFIX}`}
+      OR ${mobileColumn('exceptionSource')} == ${JAVASCRIPT_EXCEPTION_SOURCE},
     ${withRules(mobileColumn('exceptionMessage'), 'javascript')},
     ${isIosReport()},
     ${withRules(mobileColumn('exceptionStacktrace'), 'ios')},
@@ -146,3 +154,7 @@ export const crashFingerprint = (): ESQLAstExpression =>
       'exceptionType'
     )}, ""), "|", COALESCE(${crashFrames()}, "")))
   )`;
+
+/** Whether `fingerprint` can be a computed one, which ES|QL's SHA256 prints as lowercase hex. */
+export const canBeComputedFingerprint = (fingerprint: string): boolean =>
+  /^[0-9a-f]{64}$/.test(fingerprint);
