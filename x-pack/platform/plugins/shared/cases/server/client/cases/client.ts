@@ -29,6 +29,12 @@ import type {
   BulkAddObservablesRequest,
   BulkDeleteObservablesRequest,
   CasesPatchResponse,
+  MergeCasesPreviewRequest,
+  MergeCasesPreviewResponse,
+  MergeCasesRequest,
+  MergeCasesResponse,
+  MergeCasesResolveRequest,
+  MergeCasesResolveResponse,
 } from '../../../common/types/api';
 import type { CasesClient } from '../client';
 import type { CasesClientInternal } from '../client_internal';
@@ -72,6 +78,10 @@ import type { GetApplicableFieldsParams } from './applicable_fields';
 import { getApplicableFields } from './applicable_fields';
 import type { ApplicableFieldsResponse } from '../../../common/types/domain/template/applicable_field';
 import { withUsageCounter } from '../usage_counters';
+import { merge } from './merge/merge';
+import { mergePreview } from './merge/preview';
+import type { MergeResolveOptions } from './merge/resolve';
+import { mergeResolve } from './merge/resolve';
 
 /**
  * API for interacting with the cases entities.
@@ -188,6 +198,22 @@ export interface CasesSubClient {
    * applied template from an existing case, or `owner` (+ optional `templateId`) for a prospective case.
    */
   getApplicableFields(params: GetApplicableFieldsParams): Promise<ApplicableFieldsResponse>;
+  /**
+   * Computes field defaults, conflicts, and attachment counts for merging cases. Writes nothing.
+   */
+  mergePreview(params: MergeCasesPreviewRequest): Promise<MergeCasesPreviewResponse>;
+  /**
+   * Asks an LLM for a value for every field the cases disagree on, for the user to check before
+   * merging. Writes nothing.
+   */
+  mergeResolve(
+    params: MergeCasesResolveRequest,
+    options?: MergeResolveOptions
+  ): Promise<MergeCasesResolveResponse>;
+  /**
+   * Merges cases into a new case or into one of them, copying their attachments.
+   */
+  merge(params: MergeCasesRequest): Promise<MergeCasesResponse>;
 }
 
 // Keep this exhaustive so every new client method requires an explicit telemetry decision.
@@ -215,6 +241,9 @@ const usageCounterByMethod = {
   bulkAddObservables: 'bulk_add_observables',
   bulkDeleteObservables: 'bulk_delete_observables',
   getApplicableFields: null,
+  mergePreview: null,
+  mergeResolve: 'merge_cases_resolve_ai',
+  merge: 'merge_cases',
 } as const satisfies Record<keyof CasesSubClient, string | null>;
 
 /**
@@ -296,6 +325,17 @@ export const createCasesSubClient = (
     ),
     getApplicableFields: (params: GetApplicableFieldsParams) =>
       getApplicableFields(params, clientArgs),
+    mergePreview: (params: MergeCasesPreviewRequest) =>
+      mergePreview(params, clientArgs, casesClient),
+    mergeResolve: withUsageCounter(
+      usageCounterByMethod.mergeResolve,
+      clientArgs,
+      (params: MergeCasesResolveRequest, options?: MergeResolveOptions) =>
+        mergeResolve(params, clientArgs, casesClient, options)
+    ),
+    merge: withUsageCounter(usageCounterByMethod.merge, clientArgs, (params: MergeCasesRequest) =>
+      merge(params, clientArgs, casesClient)
+    ),
   };
 
   return Object.freeze(casesSubClient);

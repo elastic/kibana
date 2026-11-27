@@ -69,6 +69,10 @@ export interface CasePersistedAttributes {
    * a response, and only the write codec for new cases keeps it.
    */
   extract_observables_source?: string;
+  /** Whether a merge closed the case. Reopening the case clears it. */
+  closed_by_merge?: boolean;
+  /** Whether the case was merged into another case. It stays set once merged. */
+  merged?: boolean;
 }
 
 type CasePersistedCustomFields = Array<{

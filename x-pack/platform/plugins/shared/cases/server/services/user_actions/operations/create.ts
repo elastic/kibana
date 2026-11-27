@@ -850,6 +850,26 @@ export class UserActionPersister {
     }
   }
 
+  /**
+   * Records one audit event for a merge, on the destination, naming every source case.
+   */
+  public auditLogMerge({
+    destinationId,
+    sourceIds,
+  }: {
+    destinationId: string;
+    sourceIds: string[];
+  }): void {
+    this.auditLogger.log({
+      getMessage: () =>
+        `User merged cases [${sourceIds.join(', ')}] into case id: ${destinationId}`,
+      action: UserActionActions.update,
+      descriptiveAction: 'case_merge',
+      savedObjectId: destinationId,
+      savedObjectType: CASE_SAVED_OBJECT,
+    });
+  }
+
   private withActionSource(attributes: unknown): unknown {
     if (this.context.actionSource == null || attributes == null || typeof attributes !== 'object') {
       return attributes;

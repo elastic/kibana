@@ -29,6 +29,12 @@ import type {
   UpdateSummary,
   CasesPatchResponse,
   BulkDeleteAttachmentsRequest,
+  MergeCasesPreviewRequest,
+  MergeCasesPreviewResponse,
+  MergeCasesRequest,
+  MergeCasesResponse,
+  MergeCasesResolveRequest,
+  MergeCasesResolveResponse,
 } from '../../common/types/api';
 import type {
   CaseConnectors,
@@ -74,6 +80,9 @@ import {
   INTERNAL_GET_CASE_CATEGORIES_URL,
   CASES_INTERNAL_URL,
   INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL,
+  INTERNAL_MERGE_CASES_PREVIEW_URL,
+  INTERNAL_MERGE_CASES_RESOLVE_URL,
+  INTERNAL_MERGE_CASES_URL,
 } from '../../common/constants';
 import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
 
@@ -294,6 +303,12 @@ const removeOptionFromFilter = ({
   return resultingFilterOptions.length === 0 ? {} : { [filterKey]: resultingFilterOptions };
 };
 
+/** Sends the Merged filter only when exactly one of its options is picked. */
+const getMergedFilter = (
+  merged: FilterOptions['merged'] | undefined
+): { merged?: FilterOptions['merged'][number] } =>
+  merged?.length === 1 ? { merged: merged[0] } : {};
+
 export const getCases = async ({
   filterOptions = {
     search: '',
@@ -305,6 +320,7 @@ export const getCases = async ({
     tags: [],
     owner: [],
     category: [],
+    merged: [],
     customFields: {},
     extendedFieldFilters: [],
     from: DEFAULT_FROM_DATE,
@@ -336,6 +352,8 @@ export const getCases = async ({
     ...(filterOptions.searchFields.length > 0 ? { searchFields: filterOptions.searchFields } : {}),
     ...(filterOptions.owner.length > 0 ? { owner: filterOptions.owner } : {}),
     ...(filterOptions.category.length > 0 ? { category: filterOptions.category } : {}),
+    ...getMergedFilter(filterOptions.merged),
+    ...(filterOptions.closedByMerge != null ? { closedByMerge: filterOptions.closedByMerge } : {}),
     ...constructCustomFieldsFilter(filterOptions.customFields),
     ...(filterOptions.extendedFieldFilters && filterOptions.extendedFieldFilters.length > 0
       ? { extendedFieldFilters: filterOptions.extendedFieldFilters }
@@ -754,3 +772,45 @@ export const getSimilarCases = async ({
 
   return convertSimilarCasesToCamel(decodeCasesSimilarResponse(response));
 };
+
+/** The merge routes are versioned internal routes. */
+const MERGE_CASES_API_VERSION = '1';
+
+export const getMergeCasesPreview = async ({
+  request,
+  signal,
+}: {
+  request: MergeCasesPreviewRequest;
+  signal?: AbortSignal;
+}): Promise<MergeCasesPreviewResponse> =>
+  KibanaServices.get().http.fetch<MergeCasesPreviewResponse>(INTERNAL_MERGE_CASES_PREVIEW_URL, {
+    method: 'POST',
+    version: MERGE_CASES_API_VERSION,
+    body: JSON.stringify(request),
+    signal,
+  });
+
+export const resolveMergeConflicts = async ({
+  request,
+  signal,
+}: {
+  request: MergeCasesResolveRequest;
+  signal?: AbortSignal;
+}): Promise<MergeCasesResolveResponse> =>
+  KibanaServices.get().http.fetch<MergeCasesResolveResponse>(INTERNAL_MERGE_CASES_RESOLVE_URL, {
+    method: 'POST',
+    version: MERGE_CASES_API_VERSION,
+    body: JSON.stringify(request),
+    signal,
+  });
+
+export const mergeCases = async ({
+  request,
+}: {
+  request: MergeCasesRequest;
+}): Promise<MergeCasesResponse> =>
+  KibanaServices.get().http.fetch<MergeCasesResponse>(INTERNAL_MERGE_CASES_URL, {
+    method: 'POST',
+    version: MERGE_CASES_API_VERSION,
+    body: JSON.stringify(request),
+  });

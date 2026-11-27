@@ -12,6 +12,7 @@ import * as i18n from '../../../translations';
 import * as commonI18n from '../../../../../common/translations';
 import { ADD_TO_CHAT, SUMMARIZE_CASE } from '../../../../../agent_builder/translations';
 import * as workflowI18n from '../../../../workflows/translations';
+import { MERGE_WITH_OTHER_CASES } from '../../../../merge_cases/translations';
 
 interface ExternalIncident {
   externalUrl?: string | null;
@@ -34,6 +35,8 @@ interface GetMenuArgs {
   onOpenDeleteModal: () => void;
   /** When provided, adds a "Run workflow" item gated on `canRunWorkflow`. */
   runWorkflow?: { canRunWorkflow: boolean; onOpen: () => void };
+  /** When provided, adds a "Merge with other cases" item gated on `canMerge`. */
+  mergeCases?: { canMerge: boolean; onOpen: () => void };
 }
 
 export const getMenu = ({
@@ -47,6 +50,7 @@ export const getMenu = ({
   onCopyId,
   onOpenDeleteModal,
   runWorkflow,
+  mergeCases,
 }: GetMenuArgs): AppHeaderMenu => {
   const items = [
     {
@@ -94,6 +98,19 @@ export const getMenu = ({
       order: 300,
       overflow: true,
     },
+    ...(mergeCases?.canMerge
+      ? [
+          {
+            id: 'mergeCases',
+            label: MERGE_WITH_OTHER_CASES,
+            iconType: 'merge' as const,
+            run: () => mergeCases.onOpen(),
+            testId: 'case-action-merge',
+            order: 350,
+            overflow: true,
+          },
+        ]
+      : []),
     ...(currentExternalIncident?.externalUrl
       ? [
           {

@@ -7,7 +7,11 @@
 
 import type { z } from '@kbn/zod/v4';
 import { MAX_EXTENDED_FIELD_VALUE_BYTES } from '../../../constants';
-import { validateExtendedFields } from './validate_extended_fields';
+import {
+  getExtendedFieldIssue,
+  getExtendedFieldIssues,
+  validateExtendedFields,
+} from './validate_extended_fields';
 import type { FieldSchema, InlineField } from './fields';
 import { FieldType } from './fields';
 
@@ -880,4 +884,130 @@ describe('validateExtendedFields', () => {
       ).toEqual(['Field "Summary" is required']);
     });
   });
+});
+
+describe('getExtendedFieldIssues', () => {
+  const fields = [
+    {
+      name: 'verdict',
+      type: 'keyword',
+      control: FieldType.INPUT_TEXT,
+      validation: { required: true },
+    },
+    {
+      name: 'tier',
+      type: 'keyword',
+      control: FieldType.SELECT_BASIC,
+      metadata: { options: ['gold', 'silver'] },
+    },
+    {
+      name: 'reason',
+      type: 'keyword',
+      control: FieldType.INPUT_TEXT,
+      validation: {
+        required_when: { field: 'tier', operator: 'eq', value: 'gold' },
+      },
+    },
+    {
+      name: 'hidden',
+      type: 'keyword',
+      control: FieldType.INPUT_TEXT,
+      display: { show_when: { field: 'tier', operator: 'eq', value: 'silver' } },
+      validation: { required: true },
+    },
+  ] as unknown as InlineField[];
+
+  it('names each required field that is empty and each value the field does not accept', () => {
+    expect(getExtendedFieldIssues({ tier_as_keyword: 'bronze' }, fields)).toEqual([
+      { key: 'verdict_as_keyword', reason: 'required', message: 'Field "verdict" is required' },
+      { key: 'tier_as_keyword', reason: 'invalid', message: expect.any(String) },
+    ]);
+  });
+
+  it('applies required_when and skips hidden fields', () => {
+    expect(
+      getExtendedFieldIssues({ verdict_as_keyword: 'malicious', tier_as_keyword: 'gold' }, fields)
+    ).toEqual([
+      { key: 'reason_as_keyword', reason: 'required', message: 'Field "reason" is required' },
+    ]);
+  });
+});
+
+describe('getExtendedFieldIssue', () => {
+  const inline = (overrides: Partial<InlineField>) =>
+    ({
+      name: 'f',
+      label: 'F',
+      type: 'keyword',
+      control: FieldType.INPUT_TEXT,
+      ...overrides,
+    } as InlineField);
+
+  it('returns undefined for a value the field accepts', () => {
+    expect(
+      getExtendedFieldIssue(
+        inline({ control: FieldType.SELECT_BASIC, metadata: { options: ['a', 'b'] } }),
+        'a'
+      )
+    ).toBeUndefined();
+  });
+
+  it.each([
+    [
+      'notAnOption',
+      inline({ control: FieldType.SELECT_BASIC, metadata: { options: ['a', 'b'] } }),
+      'z',
+      'Field "F" must be one of: a, b',
+    ],
+    [
+      'notAnOption',
+      inline({ control: FieldType.CHECKBOX_GROUP, metadata: { options: ['a'] } }),
+      '["z"]',
+      'Field "F" contains invalid options: z',
+    ],
+    [
+      'belowMin',
+      inline({ control: FieldType.INPUT_NUMBER, type: 'long', validation: { min: 1 } }),
+      '0',
+      'Field "F" must be >= 1',
+    ],
+    [
+      'aboveMax',
+      inline({ control: FieldType.INPUT_NUMBER, type: 'long', validation: { max: 100 } }),
+      '120',
+      'Field "F" must be <= 100',
+    ],
+    [
+      'notNumber',
+      inline({ control: FieldType.INPUT_NUMBER, type: 'long' }),
+      'many',
+      'Field "F" must be a number',
+    ],
+    [
+      'tooShort',
+      inline({ validation: { min_length: 3 } }),
+      'ab',
+      'Field "F" must be at least 3 characters',
+    ],
+    [
+      'tooLong',
+      inline({ validation: { max_length: 2 } }),
+      'abc',
+      'Field "F" must be at most 2 characters',
+    ],
+    [
+      'pattern',
+      inline({ validation: { pattern: { regex: '^INC-', message: 'Use an INC- id' } } }),
+      'X-1',
+      'Use an INC- id',
+    ],
+  ])(
+    'returns %s with the same message the write validation uses',
+    (code, field, value, message) => {
+      expect(getExtendedFieldIssue(field, value)).toEqual({ code, message });
+      expect(
+        getExtendedFieldIssues({ [`${field.name}_as_${field.type}`]: value }, [field])
+      ).toEqual([{ key: `${field.name}_as_${field.type}`, reason: 'invalid', message }]);
+    }
+  );
 });

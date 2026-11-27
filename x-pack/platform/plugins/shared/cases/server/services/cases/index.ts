@@ -627,9 +627,20 @@ export class CasesService {
             order: { _key: 'asc' },
           },
         },
-        mttr: {
-          avg: {
-            field: `${CASE_SAVED_OBJECT}.duration`,
+        // Cases a merge closed are left out of MTTR; their investigation carries on in the
+        // destination. The status counts still see every case.
+        mttr_scope: {
+          filter: {
+            bool: {
+              must_not: [{ term: { [`${CASE_SAVED_OBJECT}.closed_by_merge`]: true } }],
+            },
+          },
+          aggs: {
+            mttr: {
+              avg: {
+                field: `${CASE_SAVED_OBJECT}.duration`,
+              },
+            },
           },
         },
       },
@@ -638,7 +649,7 @@ export class CasesService {
     const aggregations = response.aggregations as
       | {
           statuses?: { buckets: Array<{ key: string; doc_count: number }> };
-          mttr?: { value: number | null };
+          mttr_scope?: { mttr?: { value: number | null } };
         }
       | undefined;
 
@@ -650,7 +661,7 @@ export class CasesService {
         'in-progress': statusBuckets?.get(CasePersistedStatus.IN_PROGRESS) ?? 0,
         closed: statusBuckets?.get(CasePersistedStatus.CLOSED) ?? 0,
       },
-      mttr: aggregations?.mttr?.value ?? null,
+      mttr: aggregations?.mttr_scope?.mttr?.value ?? null,
     };
   }
 

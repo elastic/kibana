@@ -13,6 +13,7 @@ import type { CasesServerStartDependencies } from '../types';
 import type { UnifiedAttachmentTypeRegistry } from '../attachment_framework/unified_attachment_registry';
 import { searchCasesTool } from './tools/search_cases';
 import { manageCasesTool } from './tools/manage_cases';
+import { mergeCasesTool } from './tools/merge_cases_tool';
 import { getAttachmentsTool } from './tools/get_attachments_tool';
 import { manageAttachmentsTool } from './tools/manage_attachments_tool';
 import { observablesTool } from './tools/observable_tools';
@@ -60,6 +61,7 @@ export function registerCasesAgentBuilderTools(
     ...manageCasesTool(getCasesClient, templatesEnabled),
     availability,
   });
+  agentBuilder.tools.register({ ...mergeCasesTool(getCasesClient), availability });
   agentBuilder.tools.register({ ...getAttachmentsTool(getCasesClient), availability });
   agentBuilder.tools.register({
     ...manageAttachmentsTool(getCasesClient, unifiedAttachmentTypeRegistry, attachmentsEnabled),

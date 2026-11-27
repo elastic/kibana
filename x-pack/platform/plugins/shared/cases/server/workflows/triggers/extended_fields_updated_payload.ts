@@ -19,11 +19,13 @@ import type { ExtendedFieldsUpdatedPayload } from '../../../common/workflows/tri
 export const buildExtendedFieldsUpdatedPayload = ({
   owner,
   caseId,
+  merge,
   previousExtendedFields,
   extendedFields,
 }: {
   owner: string;
   caseId: string;
+  merge?: ExtendedFieldsUpdatedPayload['merge'];
   previousExtendedFields: Record<string, unknown> | null | undefined;
   extendedFields: Record<string, unknown> | null | undefined;
 }): ExtendedFieldsUpdatedPayload | undefined => {
@@ -37,5 +39,6 @@ export const buildExtendedFieldsUpdatedPayload = ({
     owner,
     caseId,
     changedFields,
+    ...(merge != null ? { merge } : {}),
   };
 };

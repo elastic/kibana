@@ -1958,7 +1958,7 @@ describe('CaseUserActionService', () => {
             unsecuredSavedObjectsClient.find.mockResolvedValue(findMockReturn);
 
             await expect(service.getAll('1')).rejects.toThrowErrorMatchingInlineSnapshot(
-              `"type: Invalid input: expected \\"create_case\\", payload: Invalid input: expected object, received undefined, type: Invalid input: expected \\"connector\\", payload: Invalid input: expected object, received undefined, type: Invalid input: expected \\"pushed\\", and 32 more"`
+              `"type: Invalid input: expected \\"create_case\\", payload: Invalid input: expected object, received undefined, type: Invalid input: expected \\"connector\\", payload: Invalid input: expected object, received undefined, type: Invalid input: expected \\"pushed\\", and 34 more"`
             );
           });
 
@@ -2252,6 +2252,22 @@ describe('CaseUserActionService', () => {
                       "function": "is",
                       "type": "function",
                     },
+                    Object {
+                      "arguments": Array [
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "cases-user-actions.attributes.type",
+                        },
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "merge",
+                        },
+                      ],
+                      "function": "is",
+                      "type": "function",
+                    },
                   ],
                   "function": "or",
                   "type": "function",
@@ -2323,6 +2339,22 @@ describe('CaseUserActionService', () => {
                           "isQuoted": false,
                           "type": "literal",
                           "value": "title",
+                        },
+                      ],
+                      "function": "is",
+                      "type": "function",
+                    },
+                    Object {
+                      "arguments": Array [
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "cases-user-actions.attributes.type",
+                        },
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "merge",
                         },
                       ],
                       "function": "is",

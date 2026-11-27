@@ -33,6 +33,7 @@ import { getCasesStepDefinition } from './steps/get_cases';
 import { setCustomFieldStepDefinition } from './steps/set_custom_field';
 import { removeTagsStepDefinition } from './steps/remove_tags';
 import { pushCasesStepDefinition } from './steps/push_cases';
+import { mergeCasesStepDefinition } from './steps/merge_cases';
 import {
   assignCaseStepDefinition,
   closeCaseStepDefinition,
@@ -82,4 +83,5 @@ export const casesStepRegistry: CasesStepFactory[] = [
   removeTagsStepDefinition,
   pushCasesStepDefinition,
   deleteAttachmentsStepDefinition,
+  mergeCasesStepDefinition,
 ];

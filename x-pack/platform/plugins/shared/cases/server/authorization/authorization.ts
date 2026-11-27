@@ -122,6 +122,21 @@ export class Authorization {
   }
 
   /**
+   * Whether the user may run the operation on cases of every owner. Unlike `ensureAuthorized` it
+   * doesn't throw or write audit events, so a read-only path can use it to decide what to offer.
+   */
+  public async isAuthorized({
+    owners,
+    operation,
+  }: {
+    owners: string[];
+    operation: OperationDetails;
+  }): Promise<boolean> {
+    const { authorizedOwners } = await this.getAuthorizedOwners([operation]);
+    return owners.every((owner) => authorizedOwners.includes(owner));
+  }
+
+  /**
    *
    * Returns all authorized entities for an operation. It throws error if the user is not authorized
    * to any of the owners

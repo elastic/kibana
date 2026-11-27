@@ -1861,3 +1861,93 @@ describe('updateAlertsStatus — event bus', () => {
     bus.removeAllListeners();
   });
 });
+
+describe('getAlertsMergeEligibility', () => {
+  const esClient = elasticsearchServiceMock.createElasticsearchClient();
+  const logger = loggingSystemMock.create().get('case');
+  const alertsClient = alertsClientMock.create();
+  const alertService = new AlertService(esClient, logger, alertsClient);
+
+  const doc = (id: string, caseIds: string[], ruleTypeId = 'siem.queryRule') => ({
+    _id: id,
+    _index: 'alerts-index',
+    found: true,
+    _source: {
+      'kibana.alert.case_ids': caseIds,
+      'kibana.alert.rule.rule_type_id': ruleTypeId,
+      'kibana.alert.rule.consumer': 'siem',
+    },
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('leaves out alerts already in the most cases and alerts that are not found', async () => {
+    esClient.mget.mockResolvedValue({
+      docs: [
+        doc('free', ['other-case']),
+        doc(
+          'full',
+          Array.from({ length: 10 }, (_, i) => `case-${i}`)
+        ),
+        { _id: 'gone', _index: 'alerts-index', found: false },
+      ],
+    } as unknown as Awaited<ReturnType<typeof esClient.mget>>);
+
+    const { ineligible } = await alertService.getAlertsMergeEligibility({
+      candidates: [
+        { id: 'free', index: 'alerts-index' },
+        { id: 'full', index: 'alerts-index' },
+        { id: 'gone', index: 'alerts-index' },
+      ],
+      linked: [],
+    });
+
+    expect(ineligible).toEqual(
+      new Map([
+        ['full', 'alertCaseLimit'],
+        ['gone', 'alertNotAuthorized'],
+      ])
+    );
+  });
+
+  it('leaves out the alerts of a rule type the user cannot read', async () => {
+    esClient.mget.mockResolvedValue({
+      docs: [doc('readable', [], 'siem.queryRule'), doc('hidden', [], 'apm.error_rate')],
+    } as unknown as Awaited<ReturnType<typeof esClient.mget>>);
+    alertsClient.ensureAllAlertsAuthorizedRead.mockImplementation(async ({ alerts }) => {
+      if (alerts.some(({ id }) => id === 'hidden')) {
+        throw new Error('Unauthorized');
+      }
+    });
+
+    const { ineligible } = await alertService.getAlertsMergeEligibility({
+      candidates: [
+        { id: 'readable', index: 'alerts-index' },
+        { id: 'hidden', index: 'alerts-index' },
+      ],
+      linked: [],
+    });
+
+    expect(ineligible).toEqual(new Map([['hidden', 'alertNotAuthorized']]));
+    expect(alertsClient.ensureAllAlertsAuthorizedRead).toHaveBeenCalledTimes(2);
+  });
+
+  it('finds the alerts in the destination that do not list it', async () => {
+    esClient.mget.mockResolvedValue({
+      docs: [doc('listed', ['destination']), doc('missing', ['other-case'])],
+    } as unknown as Awaited<ReturnType<typeof esClient.mget>>);
+
+    const { missingDestination } = await alertService.getAlertsMergeEligibility({
+      candidates: [],
+      linked: [
+        { id: 'listed', index: 'alerts-index' },
+        { id: 'missing', index: 'alerts-index' },
+      ],
+      destinationId: 'destination',
+    });
+
+    expect(missingDestination).toEqual([{ id: 'missing', index: 'alerts-index' }]);
+  });
+});

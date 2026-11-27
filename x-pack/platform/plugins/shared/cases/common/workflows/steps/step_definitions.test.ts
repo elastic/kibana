@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MAX_BULK_DELETE_ATTACHMENTS } from '../../constants';
+import { MAX_BULK_DELETE_ATTACHMENTS, MAX_CASES_TO_MERGE } from '../../constants';
 import { AddAlertsStepTypeId, addAlertsStepCommonDefinition } from './add_alerts';
 import { AddEventsStepTypeId, addEventsStepCommonDefinition } from './add_events';
 import { AddObservablesStepTypeId, addObservablesStepCommonDefinition } from './add_observables';
@@ -50,6 +50,7 @@ import {
 } from './bulk_delete_observables';
 import { GetCasesStepTypeId, getCasesStepCommonDefinition } from './get_cases';
 import { PushCasesStepTypeId, pushCasesStepCommonDefinition } from './push_cases';
+import { MergeCasesStepTypeId, mergeCasesStepCommonDefinition } from './merge_cases';
 import {
   addAlertsInputFixture,
   addCategoryInputFixture,
@@ -83,6 +84,8 @@ import {
   getCasesOutputFixture,
   pushCasesInputFixture,
   pushCasesOutputFixture,
+  mergeCasesInputFixture,
+  mergeCasesOutputFixture,
 } from './test_fixtures';
 
 const singleCaseOutput = { case: createCaseResponseFixture };
@@ -226,6 +229,12 @@ const stepDefinitions = [
     input: deleteAttachmentsInputFixture,
     output: deleteAttachmentsOutputFixture,
   },
+  {
+    typeId: MergeCasesStepTypeId,
+    definition: mergeCasesStepCommonDefinition,
+    input: mergeCasesInputFixture,
+    output: mergeCasesOutputFixture,
+  },
 ] as const;
 
 describe('cases common step definitions', () => {
@@ -239,6 +248,26 @@ describe('cases common step definitions', () => {
 
   it.each(stepDefinitions)('accepts valid output payload for $typeId', ({ definition, output }) => {
     expect(definition.outputSchema.safeParse(output).success).toBe(true);
+  });
+
+  it('bounds case ids and defaults close_sources for mergeCases', () => {
+    const { inputSchema } = mergeCasesStepCommonDefinition;
+
+    expect(inputSchema.safeParse({ case_ids: ['case-1'] }).success).toBe(false);
+    expect(
+      inputSchema.safeParse({
+        case_ids: Array.from({ length: MAX_CASES_TO_MERGE + 1 }, (_, i) => `case-${i}`),
+      }).success
+    ).toBe(false);
+
+    const parsed = inputSchema.parse({ case_ids: ['case-1', 'case-2'] });
+    expect(parsed.close_sources).toBe(true);
+    expect(
+      inputSchema.safeParse({
+        case_ids: ['case-1', 'case-2'],
+        attachments: { attacks: { mode: 'newest' } },
+      }).success
+    ).toBe(false);
   });
 
   it('bounds ids for deleteAttachments', () => {

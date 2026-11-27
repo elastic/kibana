@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { CaseStatuses } from '@kbn/cases-components/src/status/types';
 import { Settings } from '../../../bundled-types.gen';
 import {
@@ -136,24 +136,36 @@ const CaseBasicSchema = z.object({
   ...CaseBaseFields,
 });
 
-export const CaseAttributesSchema = CaseBasicSchema.extend({
-  duration: z.number().nullable(),
-  closed_at: z.string().nullable(),
-  closed_by: UserSchema.nullable(),
-  created_at: z.string(),
-  created_by: UserSchema,
-  external_service: ExternalServiceSchema.nullable(),
-  updated_at: z.string().nullable(),
-  updated_by: UserSchema.nullable(),
-  total_observables: z.number().nullable(),
-  incremental_id: z.number().nullable().optional(),
-  in_progress_at: z.string().nullable().optional(),
-  time_to_acknowledge: z.number().nullable().optional(),
-  time_to_investigate: z.number().nullable().optional(),
-  time_to_resolve: z.number().nullable().optional(),
-  template: CaseTemplateSchema.nullable().optional(),
-  [CASE_EXTENDED_FIELDS]: z.record(z.string(), z.string()).optional(),
-});
+export const CaseAttributesSchema = lazySchema(() =>
+  CaseBasicSchema.extend({
+    duration: z.number().nullable(),
+    closed_at: z.string().nullable(),
+    closed_by: UserSchema.nullable(),
+    created_at: z.string(),
+    created_by: UserSchema,
+    external_service: ExternalServiceSchema.nullable(),
+    updated_at: z.string().nullable(),
+    updated_by: UserSchema.nullable(),
+    total_observables: z.number().nullable(),
+    incremental_id: z.number().nullable().optional(),
+    in_progress_at: z.string().nullable().optional(),
+    time_to_acknowledge: z.number().nullable().optional(),
+    time_to_investigate: z.number().nullable().optional(),
+    time_to_resolve: z.number().nullable().optional(),
+    template: CaseTemplateSchema.nullable().optional(),
+    [CASE_EXTENDED_FIELDS]: z.record(z.string(), z.string()).optional(),
+    /**
+     * Whether a merge closed the case. Reopening the case clears it. Read-only: case update
+     * requests cannot set it.
+     */
+    closed_by_merge: z.boolean().optional(),
+    /**
+     * Whether the case was merged into another case. It stays set once merged. Read-only: case
+     * update requests cannot set it.
+     */
+    merged: z.boolean().optional(),
+  })
+);
 
 export const CaseSchema = CaseAttributesSchema.extend({
   // Populated at response time by enrichCasesWithFieldLabels — not persisted to the SO.

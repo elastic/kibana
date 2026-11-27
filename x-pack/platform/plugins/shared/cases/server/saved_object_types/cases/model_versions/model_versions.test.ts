@@ -16,7 +16,9 @@ import {
   modelVersion8,
   modelVersion9,
   modelVersion11,
+  modelVersion12,
 } from '.';
+import { basicESCaseFields } from '../../../services/test_utils';
 
 describe('Model versions', () => {
   describe('version 1', () => {
@@ -273,6 +275,39 @@ describe('Model versions', () => {
           },
         ]
       `);
+    });
+  });
+
+  describe('version 12', () => {
+    it('returns version 12 changes correctly', () => {
+      expect(modelVersion12.changes).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "addedMappings": Object {
+              "closed_by_merge": Object {
+                "type": "boolean",
+              },
+              "merged": Object {
+                "type": "boolean",
+              },
+            },
+            "type": "mappings_addition",
+          },
+        ]
+      `);
+    });
+
+    it('keeps closed_by_merge and merged on create', () => {
+      const createSchema = modelVersion12.schemas?.create;
+
+      expect(
+        createSchema?.validate({
+          ...basicESCaseFields,
+          total_observables: 0,
+          closed_by_merge: true,
+          merged: true,
+        })
+      ).toEqual(expect.objectContaining({ closed_by_merge: true, merged: true }));
     });
   });
 });

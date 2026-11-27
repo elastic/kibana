@@ -35,6 +35,9 @@ import type { ConfigType } from '../../config';
 import { getTemplateRoutes } from './templates';
 import { getFieldDefinitionRoutes } from './field_definitions';
 import { createRunWorkflowRoute } from './internal/run_workflow';
+import { mergeCasesRoute } from './cases/merge/merge_cases';
+import { mergeCasesPreviewRoute } from './cases/merge/merge_cases_preview';
+import { mergeCasesResolveRoute } from './cases/merge/merge_cases_resolve';
 
 export const getInternalRoutes = (
   userProfileService: UserProfileService,
@@ -67,6 +70,9 @@ export const getInternalRoutes = (
     similarCaseRoute,
     findUserActionsRoute,
     findCasesContainingAllDocumentsRoute,
+    mergeCasesPreviewRoute,
+    mergeCasesResolveRoute,
+    mergeCasesRoute,
     ...getTemplateRoutes(config),
     ...getFieldDefinitionRoutes(config),
     ...(workflowRun ? [createRunWorkflowRoute(workflowRun)] : []),

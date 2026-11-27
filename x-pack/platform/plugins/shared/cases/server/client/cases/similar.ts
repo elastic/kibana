@@ -21,6 +21,7 @@ import type { CasesClient, CasesClientArgs } from '..';
 import { flattenCaseSavedObject } from '../../common/utils';
 import {
   convertSortField,
+  buildClosedByMergeFilter,
   buildFilter,
   buildObservablesFieldsFilter,
   combineFilters,
@@ -130,7 +131,13 @@ export const similar = async (
       };
     }
 
-    const filters = combineFilters([similarCasesFilter, ownerFilter]);
+    // Cases closed by a merge are left out, so a related investigation shows once, through its
+    // destination.
+    const filters = combineFilters([
+      similarCasesFilter,
+      ownerFilter,
+      buildClosedByMergeFilter('exclude'),
+    ]);
 
     const finalCasesFilter = combineFilterWithAuthorizationFilter(filters, authorizationFilter);
 

@@ -30,6 +30,7 @@ describe('parseUrlParams', () => {
         "customFields": Object {},
         "extendedFieldFilters": Array [],
         "from": "now-30d",
+        "merged": Array [],
         "page": 1,
         "perPage": 10,
         "search": "",

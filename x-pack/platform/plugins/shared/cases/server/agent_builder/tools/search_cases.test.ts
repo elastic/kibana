@@ -316,6 +316,30 @@ describe('searchCasesTool handler — search mode', () => {
     expect(findCall.perPage).toBe(10);
   });
 
+  it('leaves out cases a merge closed by default and lets the agent ask for them', async () => {
+    const casesClient = createCasesClientMock();
+    casesClient.cases.find.mockResolvedValue({
+      cases: [],
+      total: 0,
+      page: 1,
+      per_page: 10,
+      count_open_cases: 0,
+      count_closed_cases: 0,
+      count_in_progress_cases: 0,
+    } as never);
+
+    const { tool } = buildTool(casesClient);
+    await tool.handler({ mode: 'search', owner: 'securitySolution' } as never, buildToolContext());
+    await tool.handler(
+      { mode: 'search', owner: 'securitySolution', closedByMerge: 'only' } as never,
+      buildToolContext()
+    );
+
+    const [[defaultCall], [explicitCall]] = (casesClient.cases.find as jest.Mock).mock.calls;
+    expect(defaultCall.closedByMerge).toBe('exclude');
+    expect(explicitCall.closedByMerge).toBe('only');
+  });
+
   it('includes pagination message when total exceeds page size', async () => {
     const casesClient = createCasesClientMock();
     const cases = [buildCase()];

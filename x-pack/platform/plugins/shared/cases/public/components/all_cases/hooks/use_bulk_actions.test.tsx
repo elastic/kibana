@@ -94,6 +94,21 @@ describe('useBulkActions', () => {
                   "key": "bulk-actions-separator",
                 },
                 Object {
+                  "data-test-subj": "cases-bulk-action-merge",
+                  "disabled": true,
+                  "icon": <EuiIcon
+                    aria-hidden={true}
+                    size="m"
+                    type="merge"
+                  />,
+                  "key": "cases-bulk-action-merge",
+                  "name": <EuiTextColor>
+                    Merge cases
+                  </EuiTextColor>,
+                  "onClick": [Function],
+                  "toolTipContent": "Select at least 2 cases to merge.",
+                },
+                Object {
                   "data-test-subj": "cases-bulk-action-tags",
                   "disabled": false,
                   "icon": <EuiIcon

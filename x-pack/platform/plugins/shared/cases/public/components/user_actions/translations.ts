@@ -159,6 +159,135 @@ export const WORKFLOW_RAN = i18n.translate('xpack.cases.caseView.userActions.wor
   defaultMessage: 'ran a workflow',
 });
 
+export const MERGED_CASES = i18n.translate('xpack.cases.caseView.userActions.mergedCases', {
+  defaultMessage: 'merged cases',
+});
+
+export const MERGE_DETAILS = i18n.translate('xpack.cases.caseView.userActions.mergeDetails', {
+  defaultMessage: 'Details',
+});
+
+export const MERGE_COPIED_ALERTS = (count: number) =>
+  i18n.translate('xpack.cases.caseView.userActions.merge.copiedAlerts', {
+    values: { count },
+    defaultMessage: '{count, plural, one {# alert} other {# alerts}}',
+  });
+
+export const MERGE_COPIED_EVENTS = (count: number) =>
+  i18n.translate('xpack.cases.caseView.userActions.merge.copiedEvents', {
+    values: { count },
+    defaultMessage: '{count, plural, one {# event} other {# events}}',
+  });
+
+export const MERGE_COPIED_OBSERVABLES = (count: number) =>
+  i18n.translate('xpack.cases.caseView.userActions.merge.copiedObservables', {
+    values: { count },
+    defaultMessage: '{count, plural, one {# observable} other {# observables}}',
+  });
+
+export const MERGE_COPIED_ATTACKS = (count: number) =>
+  i18n.translate('xpack.cases.caseView.userActions.merge.copiedAttacks', {
+    values: { count },
+    defaultMessage: '{count, plural, one {# attack} other {# attacks}}',
+  });
+
+export const MERGE_COPIED_OTHER = (count: number) =>
+  i18n.translate('xpack.cases.caseView.userActions.merge.copiedOther', {
+    values: { count },
+    defaultMessage: '{count, plural, one {# other attachment} other {# other attachments}}',
+  });
+
+export const MERGE_SOURCE_NEW = (items: string) =>
+  i18n.translate('xpack.cases.caseView.userActions.merge.sourceNew', {
+    values: { items },
+    defaultMessage: 'New: {items}',
+  });
+
+export const MERGE_SOURCE_NOTHING_NEW = i18n.translate(
+  'xpack.cases.caseView.userActions.merge.sourceNothingNew',
+  {
+    defaultMessage: 'New: none',
+  }
+);
+
+export const MERGE_SOURCE_ALREADY_IN_CASE = (items: string) =>
+  i18n.translate('xpack.cases.caseView.userActions.merge.sourceAlreadyInCase', {
+    values: { items },
+    defaultMessage: 'Already in this case: {items}',
+  });
+
+export const MERGE_SOURCE_LEFT_OUT = (items: string) =>
+  i18n.translate('xpack.cases.caseView.userActions.merge.sourceLeftOut', {
+    values: { items },
+    defaultMessage: 'Left out, still on the source case: {items}',
+  });
+
+export const MERGE_SOURCE_NOT_MERGED = i18n.translate(
+  'xpack.cases.caseView.userActions.merge.sourceNotMerged',
+  {
+    defaultMessage: 'Not merged: some items were not copied, so the case was not linked.',
+  }
+);
+
+export const MERGE_SOURCE_CLOSED = i18n.translate(
+  'xpack.cases.caseView.userActions.merge.sourceClosed',
+  {
+    defaultMessage: 'Closed by the merge',
+  }
+);
+
+export const MERGE_NOT_COPIED_FIELDS = (fields: string) =>
+  i18n.translate('xpack.cases.caseView.userActions.merge.notCopiedFields', {
+    values: { fields },
+    defaultMessage: 'Template fields not copied: {fields}',
+  });
+
+export const MERGE_UPDATED_FIELD_CONNECTOR = i18n.translate(
+  'xpack.cases.caseView.userActions.merge.updatedField.connector',
+  { defaultMessage: 'connector' }
+);
+
+export const MERGE_UPDATED_FIELD_TEMPLATE = i18n.translate(
+  'xpack.cases.caseView.userActions.merge.updatedField.template',
+  { defaultMessage: 'template' }
+);
+
+export const MERGE_UPDATED_FIELDS = (fields: string) =>
+  i18n.translate('xpack.cases.caseView.userActions.merge.updatedFields', {
+    values: { fields },
+    defaultMessage: 'Changed on this case: {fields}',
+  });
+
+export const MERGE_UPDATED_FIELD_TITLE = i18n.translate(
+  'xpack.cases.caseView.userActions.merge.updatedField.title',
+  { defaultMessage: 'title' }
+);
+
+export const MERGE_UPDATED_FIELD_DESCRIPTION = i18n.translate(
+  'xpack.cases.caseView.userActions.merge.updatedField.description',
+  { defaultMessage: 'description' }
+);
+
+export const MERGE_UPDATED_FIELD_SEVERITY = i18n.translate(
+  'xpack.cases.caseView.userActions.merge.updatedField.severity',
+  { defaultMessage: 'severity' }
+);
+
+export const MERGE_UPDATED_FIELD_CATEGORY = i18n.translate(
+  'xpack.cases.caseView.userActions.merge.updatedField.category',
+  { defaultMessage: 'category' }
+);
+
+export const MERGE_UPDATED_FIELD_TAGS = i18n.translate(
+  'xpack.cases.caseView.userActions.merge.updatedField.tags',
+  { defaultMessage: 'tags' }
+);
+
+export const MERGE_UPDATED_FIELD_ASSIGNEES = i18n.translate(
+  'xpack.cases.caseView.userActions.merge.updatedField.assignees',
+  { defaultMessage: 'assignees' }
+);
+
 export const ATTACHMENTS_REMOVED = i18n.translate(
   'xpack.cases.caseView.userActions.attachmentsRemoved',
   {

@@ -35,6 +35,7 @@
       "dataViews",
       "dashboard",
       "home",
+      "inference",
       "maps",
       "taskManager",
       "usageCollection",

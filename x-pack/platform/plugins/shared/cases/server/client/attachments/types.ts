@@ -41,6 +41,27 @@ export interface BulkCreateArgs {
 }
 
 /**
+ * Internal-only options: no HTTP route sets them.
+ */
+export interface BulkCreateAttachmentsOptions {
+  /**
+   * Skips the per-attachment user actions. The caller must record the change in its own user
+   * action.
+   */
+  skipUserActions?: boolean;
+  /**
+   * Links alerts and attacks to the case without syncing their status to the case's status.
+   * Used by merge: copied alerts keep the status they have.
+   */
+  skipAlertStatusSync?: boolean;
+  /**
+   * Skips extracting observables from the created attachments. Used by merge, which copies the
+   * source cases' observables as they are.
+   */
+  skipObservableExtraction?: boolean;
+}
+
+/**
  * Parameters for deleting all comments of a case.
  */
 export interface DeleteAllArgs {

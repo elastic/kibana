@@ -61,6 +61,7 @@ import {
   CREATE_CASE_WITH_TEMPLATE_COUNTER,
   incrementCasesClientCounter,
 } from '../usage_counters';
+import { getMergeEventPayload } from '../../events/merge_payload';
 
 /**
  * Creates a new case.
@@ -524,6 +525,7 @@ export const create = async (
     clientArgs.casesEventBus?.emitCaseCreated(clientArgs.request, {
       caseId: createdCase.id,
       owner: createdCase.owner as Owner,
+      ...getMergeEventPayload(clientArgs.mergeContext, createdCase.id),
     });
 
     return createdCase;

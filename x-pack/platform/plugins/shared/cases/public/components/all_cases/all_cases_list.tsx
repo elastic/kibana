@@ -76,8 +76,15 @@ export const AllCasesList = React.memo<AllCasesListProps>(
 
     const [selectedCases, setSelectedCases] = useState<CasesUI>([]);
 
+    // Pickers that add alerts, timelines or visualizations to a case don't offer cases a merge
+    // closed.
+    const casesFilterOptions = useMemo(
+      () =>
+        isSelectorView ? { ...filterOptions, closedByMerge: 'exclude' as const } : filterOptions,
+      [filterOptions, isSelectorView]
+    );
     const { data = initialData, isFetching: isLoadingCases } = useGetCases({
-      filterOptions,
+      filterOptions: casesFilterOptions,
       queryParams,
     });
 

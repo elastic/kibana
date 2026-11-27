@@ -107,6 +107,8 @@ export const find = async (
       assignees: paramArgs.assignees,
       category: paramArgs.category,
       customFields: paramArgs.customFields,
+      merged: paramArgs.merged,
+      closedByMerge: paramArgs.closedByMerge,
     };
 
     const statusStatsOptions = constructQueryOptions({

@@ -121,6 +121,56 @@ describe('authorization', () => {
     });
   });
 
+  describe('isAuthorized', () => {
+    const feature = { id: '1', cases: ['a', 'b'] };
+    let securityStart: ReturnType<typeof securityMock.createStart>;
+    let auth: Authorization;
+
+    beforeEach(async () => {
+      securityStart = securityMock.createStart();
+      securityStart.authz.mode.useRbacForRequest.mockReturnValue(true);
+      (securityStart.authz.actions.cases.get as jest.Mock).mockImplementation(
+        (owner, operation) => `${owner}/${operation}`
+      );
+      const featuresStart = featuresPluginMock.createStart();
+      featuresStart.getKibanaFeatures.mockReturnValue([feature] as unknown as KibanaFeature[]);
+
+      auth = await Authorization.create({
+        request,
+        securityAuth: securityStart.authz,
+        spaces: createSpacesDisabledFeaturesMock(),
+        features: featuresStart,
+        auditLogger: new AuthorizationAuditLogger(mockLogger),
+        logger: loggingSystemMock.createLogger(),
+      });
+    });
+
+    it('answers per owner without throwing or writing audit events', async () => {
+      securityStart.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(
+        jest.fn(async () => ({
+          hasAllRequested: false,
+          username: 'elastic',
+          privileges: {
+            kibana: [
+              { authorized: true, privilege: 'a/assignCase' },
+              { authorized: false, privilege: 'b/assignCase' },
+            ],
+          },
+        })) as unknown as ReturnType<
+          typeof securityStart.authz.checkPrivilegesDynamicallyWithRequest
+        >
+      );
+
+      await expect(
+        auth.isAuthorized({ owners: ['a'], operation: Operations.assignCase })
+      ).resolves.toBe(true);
+      await expect(
+        auth.isAuthorized({ owners: ['a', 'b'], operation: Operations.assignCase })
+      ).resolves.toBe(false);
+      expect(mockLogger.log).not.toHaveBeenCalled();
+    });
+  });
+
   describe('ensureAuthorized', () => {
     const feature = { id: '1', cases: ['a'] };
     const checkRequestReturningHasAllAsTrue = jest.fn(async () => ({ hasAllRequested: true }));

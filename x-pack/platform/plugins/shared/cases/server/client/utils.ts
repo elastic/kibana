@@ -13,7 +13,7 @@ import { validate as uuidValidate } from 'uuid';
 import type { ISavedObjectsSerializer } from '@kbn/core-saved-objects-server';
 import type { KueryNode } from '@kbn/es-query';
 
-import { nodeBuilder, fromKueryExpression, escapeKuery } from '@kbn/es-query';
+import { nodeBuilder, nodeTypes, fromKueryExpression, escapeKuery } from '@kbn/es-query';
 import { spaceIdToNamespace } from '@kbn/spaces-plugin/server/lib/utils/namespace';
 
 import { escapeQuotes } from '@kbn/es-query/src/kuery/utils/escape_kuery';
@@ -101,6 +101,33 @@ const buildCategoryFilter = (categories: CasesSearchParams['category']): KueryNo
 
   return nodeBuilder.or(categoryFilters);
 };
+
+const not = (node: KueryNode): KueryNode => nodeTypes.function.buildNode('not', node);
+const MERGED_FIELD = `${CASE_SAVED_OBJECT}.attributes.merged`;
+const CLOSED_BY_MERGE_FIELD = `${CASE_SAVED_OBJECT}.attributes.closed_by_merge`;
+
+/** `exclude` keeps cases that never had the flag. */
+const buildFlagFilter = (
+  field: string,
+  filter: 'only' | 'exclude' | undefined
+): KueryNode | undefined => {
+  if (filter == null) {
+    return;
+  }
+
+  const isSet = nodeBuilder.is(field, 'true');
+
+  return filter === 'only' ? isSet : not(isSet);
+};
+
+/** Filters on whether the case was merged into another case. */
+export const buildMergedFilter = (merged: CasesSearchParams['merged']): KueryNode | undefined =>
+  buildFlagFilter(MERGED_FIELD, merged);
+
+/** Filters on whether a merge closed the case. */
+export const buildClosedByMergeFilter = (
+  closedByMerge: CasesSearchParams['closedByMerge']
+): KueryNode | undefined => buildFlagFilter(CLOSED_BY_MERGE_FIELD, closedByMerge);
 
 export const NodeBuilderOperators = {
   and: 'and',
@@ -352,6 +379,8 @@ export const constructQueryOptions = ({
   assignees,
   category,
   customFields,
+  merged,
+  closedByMerge,
   customFieldsConfiguration,
   searchType = 'find',
 }: CasesSearchParams & {
@@ -368,6 +397,8 @@ export const constructQueryOptions = ({
   const assigneesFilter = buildAssigneesFilter({ assignees });
   const categoryFilter = buildCategoryFilter(category);
   const customFieldsFilter = buildCustomFieldsFilter({ customFields, customFieldsConfiguration });
+  const mergedFilter = buildMergedFilter(merged);
+  const closedByMergeFilter = buildClosedByMergeFilter(closedByMerge);
 
   const filters = combineFilters([
     statusFilter,
@@ -379,6 +410,8 @@ export const constructQueryOptions = ({
     assigneesFilter,
     categoryFilter,
     customFieldsFilter,
+    mergedFilter,
+    closedByMergeFilter,
   ]);
 
   const combinedFilter = combineFilterWithAuthorizationFilter(filters, authorizationFilter);

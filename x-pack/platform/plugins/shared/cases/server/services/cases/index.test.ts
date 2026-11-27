@@ -2453,6 +2453,8 @@ describe('CasesService', () => {
       'time_to_resolve',
       'time_to_investigate',
       'template',
+      'closed_by_merge',
+      'merged',
       CASE_EXTENDED_FIELDS,
       CASE_EXTENDED_FIELDS_LABELS,
       CASE_EXTENDED_FIELDS_CONTROLS
@@ -3941,7 +3943,7 @@ describe('CasesService', () => {
                 { key: '20', doc_count: 5 },
               ],
             },
-            mttr: { value: 360 },
+            mttr_scope: { mttr: { value: 360 } },
           },
         });
         // The SO mock doesn't include `search` by default, so wire it up here.
@@ -3982,7 +3984,12 @@ describe('CasesService', () => {
           statuses: {
             terms: { field: 'cases.status', size: 3, order: { _key: 'asc' } },
           },
-          mttr: { avg: { field: 'cases.duration' } },
+          mttr_scope: {
+            filter: {
+              bool: { must_not: [{ term: { 'cases.closed_by_merge': true } }] },
+            },
+            aggs: { mttr: { avg: { field: 'cases.duration' } } },
+          },
         });
         // The stats query carries the same free-text search clause as the list query.
         const listCall = searchMock.mock.calls.find(([args]) => args.size !== 0)?.[0];
@@ -3998,7 +4005,7 @@ describe('CasesService', () => {
         const searchMock = mockSearch();
         searchMock.mockResolvedValue({
           hits: { hits: [], total: { value: 0 } },
-          aggregations: { statuses: { buckets: [] }, mttr: { value: null } },
+          aggregations: { statuses: { buckets: [] }, mttr_scope: { mttr: { value: null } } },
         });
 
         const result = await service.searchCasesGroupedByID({

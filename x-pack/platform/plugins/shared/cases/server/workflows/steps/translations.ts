@@ -74,3 +74,45 @@ export const FIND_SIMILAR_CASES_FAILED_MESSAGE = (caseId: string) =>
     defaultMessage: 'Similar cases could not be found for case "{caseId}".',
     values: { caseId },
   });
+
+export const MERGE_CASES_FAILED_MESSAGE = (caseIds: string[], errorMessage: string) =>
+  i18n.translate('xpack.cases.workflowSteps.mergeCases.error.casesCouldNotBeMerged', {
+    defaultMessage: 'Cases {caseIds} could not be merged. Reason: {errorMessage}',
+    values: { caseIds: caseIds.join(', '), errorMessage },
+  });
+
+export const MERGE_CASES_BLOCKED_MESSAGE = (problems: string[]) =>
+  i18n.translate('xpack.cases.workflowSteps.mergeCases.error.mergeBlocked', {
+    defaultMessage:
+      'The cases were not merged and nothing changed. Give a value for each conflict and leave out items over a limit, then run the step again: {problems}',
+    values: { problems: problems.join('; ') },
+  });
+
+export const MERGE_CASES_CONFLICT_DIFFERENT_VALUES = (field: string) =>
+  i18n.translate('xpack.cases.workflowSteps.mergeCases.error.conflictDifferentValues', {
+    defaultMessage: '{field}: the cases hold different values, set fields.{field}',
+    values: { field },
+  });
+
+export const MERGE_CASES_CONFLICT_INVALID_VALUE = (field: string, message?: string) =>
+  i18n.translate('xpack.cases.workflowSteps.mergeCases.error.conflictInvalidValue', {
+    defaultMessage: '{field}: the value is not valid for the destination template{details}',
+    values: { field, details: message ? ` (${message})` : '' },
+  });
+
+export const MERGE_CASES_CONFLICT_REQUIRED = (field: string) =>
+  i18n.translate('xpack.cases.workflowSteps.mergeCases.error.conflictRequired', {
+    defaultMessage: '{field}: the destination template requires a value',
+    values: { field },
+  });
+
+export const MERGE_CASES_LIMIT_EXCEEDED = (
+  kind: string,
+  total: number,
+  max: number,
+  overBy: number
+) =>
+  i18n.translate('xpack.cases.workflowSteps.mergeCases.error.limitExceeded', {
+    defaultMessage: '{kind}: {total} is over the limit of {max}, leave out {overBy}',
+    values: { kind, total, max, overBy },
+  });

@@ -19,6 +19,7 @@ describe('getStepRisk', () => {
     ['workflow.execute', { safe: false, destructive: false }],
     ['cases.getCase', { safe: true, destructive: false }],
     ['cases.deleteCases', { safe: false, destructive: true }],
+    ['cases.mergeCases', { safe: false, destructive: false }],
     ['security.findEndpointArtifacts', { safe: true, destructive: false }],
     ['security.searchIntegrationKnowledge', { safe: true, destructive: false }],
     ['security.resolveEndpointHosts', { safe: true, destructive: false }],

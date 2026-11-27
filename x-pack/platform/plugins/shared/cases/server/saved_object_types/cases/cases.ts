@@ -29,6 +29,7 @@ import {
   modelVersion9,
   modelVersion10,
   modelVersion11,
+  modelVersion12,
 } from './model_versions';
 import { handleImport } from '../import_export/import';
 import type { ConfigType } from '../../config';
@@ -306,6 +307,12 @@ export const createCaseSavedObjectType = (
       [CASE_EXTENDED_FIELDS]: {
         type: 'flattened',
       },
+      closed_by_merge: {
+        type: 'boolean',
+      },
+      merged: {
+        type: 'boolean',
+      },
     },
   },
   migrations: caseMigrations,
@@ -321,6 +328,7 @@ export const createCaseSavedObjectType = (
     9: modelVersion9,
     10: modelVersion10,
     11: modelVersion11,
+    12: modelVersion12,
   },
   management: {
     importableAndExportable: true,
