@@ -52,9 +52,9 @@ export interface FullTimeRangeSelectorProps {
    */
   timefilter: TimefilterContract;
   /**
-   * Current data view.
+   * Current data view. The button is disabled while it is undefined.
    */
-  dataView: DataView;
+  dataView?: DataView;
   /**
    * Boolean flag to enable/disable the full time range button.
    */
@@ -109,6 +109,9 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
 
   // wrapper around setFullTimeRange to allow for the calling of the optional callBack prop
   const setRange = useCallback(async () => {
+    if (dataView === undefined) {
+      return;
+    }
     try {
       const projectRouting = projectRoutingProp ?? cps?.cpsManager?.getProjectRouting();
       const fullTimeRange = await setFullTimeRange(
@@ -239,7 +242,7 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
     <EuiFlexGroup responsive={false} gutterSize="s">
       <EuiToolTip content={buttonTooltip}>
         <EuiButton
-          isDisabled={disabled}
+          isDisabled={disabled || dataView === undefined}
           onClick={() => setRange()}
           data-test-subj="mlDatePickerButtonUseFullData"
         >

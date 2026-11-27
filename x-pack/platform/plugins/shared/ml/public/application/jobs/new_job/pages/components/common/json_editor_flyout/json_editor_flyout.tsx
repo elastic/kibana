@@ -30,7 +30,11 @@ import { useMlKibana } from '../../../../../../contexts/kibana';
 import { ML_EDITOR_MODE, MLJobEditor } from '../../../../../jobs_list/components/ml_job_editor';
 import { isValidJson } from '../../../../../../../../common/util/validation_utils';
 import { JobCreatorContext } from '../../job_creator_context';
-import { isAdvancedJobCreator } from '../../../../common/job_creator';
+import {
+  isAdvancedJobCreator,
+  isEsqlJobCreator,
+  type JobCreatorType,
+} from '../../../../common/job_creator';
 import { DatafeedPreview } from '../datafeed_preview_flyout';
 import { useToastNotificationService } from '../../../../../../services/toast_notification_service';
 
@@ -41,6 +45,13 @@ export enum EDITOR_MODE {
   READONLY,
   EDITABLE,
 }
+
+/**
+ * The datafeed editor mode for the advanced wizards. The ES|QL query is edited in the query step,
+ * which also reads the query's columns, so ES|QL datafeeds are read only.
+ */
+export const getAdvancedDatafeedEditorMode = (jobCreator: JobCreatorType): EDITOR_MODE =>
+  isEsqlJobCreator(jobCreator) ? EDITOR_MODE.READONLY : EDITOR_MODE.EDITABLE;
 const WARNING_CALLOUT_OFFSET = 100;
 
 function hasInvalidProjectRouting(

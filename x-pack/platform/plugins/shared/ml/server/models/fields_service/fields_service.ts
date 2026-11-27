@@ -22,12 +22,15 @@ import type {
 import { initCardinalityFieldsCache } from './fields_aggs_cache';
 import { isValidAggregationField } from '../../../common/util/validation_utils';
 import { getDatafeedAggregations, getIndicesOptions } from '../../../common/util/datafeed_utils';
+import { isEsqlDatafeed } from '../../../common/util/esql_metric_query';
+import { esqlMetricDataProvider } from '../results_service/esql_metric_data';
 
 /**
  * Service for carrying out queries to obtain data
  * specific to fields in Elasticsearch indices.
  */
-export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
+export function fieldsServiceProvider(client: IScopedClusterClient) {
+  const { asCurrentUser } = client;
   const fieldsAggsCache = initCardinalityFieldsCache();
 
   /**
@@ -110,6 +113,18 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
     latestMs: number,
     datafeedConfig?: Datafeed
   ): Promise<{ [key: string]: number }> {
+    if (isEsqlDatafeed(datafeedConfig)) {
+      // ES|QL datafeed fields are output columns of the query, not fields of the source index.
+      const { start, end } = getSafeTimeRange(earliestMs, latestMs);
+      return esqlMetricDataProvider(client).fetchEsqlCardinalityOfFields(
+        datafeedConfig,
+        timeFieldName,
+        fieldNames,
+        start,
+        end
+      );
+    }
+
     const aggregatableFields = await getAggregatableFields(index, fieldNames, datafeedConfig);
 
     // getAggregatableFields doesn't account for scripted or aggregated fields
@@ -340,6 +355,26 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
   ): Promise<{ [key: string]: number }> {
     if (!interval) {
       throw Boom.badRequest('Interval is required to retrieve max bucket cardinalities.');
+    }
+
+    if (isEsqlDatafeed(datafeedConfig)) {
+      // ES|QL datafeed fields are output columns of the query, not fields of the source index.
+      const intervalDuration = parseInterval(interval);
+      if (intervalDuration === null) {
+        throw Boom.badRequest('Interval is invalid');
+      }
+      const { start, end } = getSafeTimeRangeForInterval(
+        interval,
+        ...Object.values(getSafeTimeRange(earliestMs, latestMs))
+      );
+      return esqlMetricDataProvider(client).fetchEsqlMaxBucketCardinalities(
+        datafeedConfig,
+        timeFieldName,
+        fieldNames,
+        start,
+        end,
+        intervalDuration.asMilliseconds()
+      );
     }
 
     const aggregatableFields = await getAggregatableFields(index, fieldNames, datafeedConfig);

@@ -19,6 +19,7 @@ import { useMlKibana } from '../../../../contexts/kibana';
 import { WIZARD_STEPS } from '../components/step_types';
 
 import { TimeRangeStep } from '../components/time_range_step';
+import { EsqlQueryStep } from '../components/esql_query_step';
 
 import { PickFieldsStep } from '../components/pick_fields_step';
 import { JobDetailsStep } from '../components/job_details_step';
@@ -26,6 +27,7 @@ import { ValidationStep } from '../components/validation_step';
 import { SummaryStep } from '../components/summary_step';
 import { DatafeedStep } from '../components/datafeed_step';
 import { useDataSource } from '../../../../contexts/ml';
+import { isEsqlJobCreator } from '../../common/job_creator';
 
 interface Props {
   currentStep: WIZARD_STEPS;
@@ -72,6 +74,9 @@ export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
   const [advancedExpanded, setAdvancedExpanded] = useState(false);
   const [additionalExpanded, setAdditionalExpanded] = useState(false);
   function getSummaryStepTitle() {
+    if (isEsqlJobCreator(jobCreator)) {
+      return '';
+    }
     if (dataSourceContext.selectedSavedSearch) {
       return i18n.translate('xpack.ml.newJob.wizard.stepComponentWrapper.summaryTitleSavedSearch', {
         defaultMessage: 'New job from saved Discover session {title}',
@@ -86,8 +91,57 @@ export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
     return '';
   }
 
+  // ES|QL jobs have no data source context; their data view is created from the query.
+  const pickFieldsDataView = isEsqlJobCreator(jobCreator)
+    ? jobCreator.dataView
+    : dataSourceContext.selectedDataView;
+
+  // ES|QL fields are the query's output columns, which the source index does not have,
+  // so they are all treated as having data rather than looked up in the index.
+  // Text columns are only in the categorization fields, so both lists are needed.
+  const pickFieldsPopulatedFields = isEsqlJobCreator(jobCreator)
+    ? new Set(
+        [...jobCreator.newJobCapsService.fields, ...jobCreator.newJobCapsService.catFields].map(
+          ({ name }) => name
+        )
+      )
+    : undefined;
+
+  const pickFieldsStep = (
+    <>
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <Title data-test-subj="mlJobWizardStepTitlePickFields">
+            <FormattedMessage
+              id="xpack.ml.newJob.wizard.stepComponentWrapper.pickFieldsTitle"
+              defaultMessage="Choose fields"
+            />
+          </Title>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <PickFieldsStep
+        isCurrentStep={currentStep === WIZARD_STEPS.PICK_FIELDS}
+        setCurrentStep={setCurrentStep}
+      />
+    </>
+  );
+
   return (
     <Fragment>
+      {currentStep === WIZARD_STEPS.ESQL_QUERY && (
+        <Fragment>
+          <Title data-test-subj="mlJobWizardStepTitleEsqlQuery">
+            <FormattedMessage
+              id="xpack.ml.newJob.wizard.stepComponentWrapper.esqlQueryTitle"
+              defaultMessage="ES|QL Query"
+            />
+          </Title>
+          <EsqlQueryStep
+            isCurrentStep={currentStep === WIZARD_STEPS.ESQL_QUERY}
+            setCurrentStep={setCurrentStep}
+          />
+        </Fragment>
+      )}
       {currentStep === WIZARD_STEPS.TIME_RANGE && (
         <Fragment>
           <Title data-test-subj="mlJobWizardStepTitleTimeRange">
@@ -118,29 +172,21 @@ export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
       )}
       {currentStep === WIZARD_STEPS.PICK_FIELDS && (
         <Fragment>
-          <FieldStatsFlyoutProvider
-            dataView={dataSourceContext.selectedDataView}
-            fieldStatsServices={fieldStatsServices}
-            timeRangeMs={timeRangeMs}
-            dslQuery={jobCreator.query}
-          >
-            <>
-              <EuiFlexGroup gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <Title data-test-subj="mlJobWizardStepTitlePickFields">
-                    <FormattedMessage
-                      id="xpack.ml.newJob.wizard.stepComponentWrapper.pickFieldsTitle"
-                      defaultMessage="Choose fields"
-                    />
-                  </Title>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <PickFieldsStep
-                isCurrentStep={currentStep === WIZARD_STEPS.PICK_FIELDS}
-                setCurrentStep={setCurrentStep}
-              />
-            </>
-          </FieldStatsFlyoutProvider>
+          {pickFieldsDataView === null ? (
+            pickFieldsStep
+          ) : (
+            <FieldStatsFlyoutProvider
+              dataView={pickFieldsDataView}
+              fieldStatsServices={fieldStatsServices}
+              timeRangeMs={timeRangeMs}
+              dslQuery={jobCreator.query}
+              populatedFields={pickFieldsPopulatedFields}
+              // the field stats come from the source data view, which lacks the query's columns
+              hideFieldStatsButtons={isEsqlJobCreator(jobCreator)}
+            >
+              {pickFieldsStep}
+            </FieldStatsFlyoutProvider>
+          )}
         </Fragment>
       )}
       {currentStep === WIZARD_STEPS.JOB_DETAILS && (

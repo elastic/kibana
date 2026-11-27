@@ -13,12 +13,13 @@ import { SummaryCountField } from '../summary_count_field';
 import { CategorizationField } from '../categorization_field';
 import { CategorizationPerPartitionField } from '../categorization_partition_field';
 import { JobCreatorContext } from '../../../job_creator_context';
-import { isAdvancedJobCreator } from '../../../../../common/job_creator';
+import { isAdvancedJobCreator, isEsqlAdvancedJobCreator } from '../../../../../common/job_creator';
 
 export const ExtraSettings: FC = () => {
   const { jobCreator } = useContext(JobCreatorContext);
   const showCategorizationPerPartitionField =
-    isAdvancedJobCreator(jobCreator) && jobCreator.categorizationFieldName !== null;
+    (isAdvancedJobCreator(jobCreator) || isEsqlAdvancedJobCreator(jobCreator)) &&
+    jobCreator.categorizationFieldName !== null;
   return (
     <Fragment>
       <EuiFlexGroup gutterSize="xl">

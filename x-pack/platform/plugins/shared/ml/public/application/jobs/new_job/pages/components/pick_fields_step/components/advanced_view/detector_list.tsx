@@ -26,7 +26,7 @@ import { KbnInfoCallout } from '@kbn/ui-callout';
 
 import type { Detector } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import { JobCreatorContext } from '../../../job_creator_context';
-import type { AdvancedJobCreator } from '../../../../../common/job_creator';
+import type { AdvancedLikeJobCreator } from '../../../../../common/job_creator';
 import type { Validation } from '../../../../../common/job_validator';
 import { detectorToString } from '../../../../../../../util/string_utils';
 
@@ -43,7 +43,7 @@ export const DetectorList: FC<Props> = ({ isActive, onEditJob, onDeleteJob }) =>
     jobValidator,
     jobValidatorUpdated,
   } = useContext(JobCreatorContext);
-  const jobCreator = jc as AdvancedJobCreator;
+  const jobCreator = jc as AdvancedLikeJobCreator;
   const [detectors, setDetectors] = useState(jobCreator.detectors);
   const [validation, setValidation] = useState(jobValidator.duplicateDetectors);
 

@@ -10,7 +10,7 @@ import React, { Fragment, useContext, useEffect, useState } from 'react';
 
 import { useUiSettings } from '../../../../../../../contexts/kibana';
 import { JobCreatorContext } from '../../../job_creator_context';
-import type { MultiMetricJobCreator } from '../../../../../common/job_creator';
+import type { MultiMetricLikeJobCreator } from '../../../../../common/job_creator';
 import type { Results, ModelItem, Anomaly } from '../../../../../common/results_loader';
 import type { LineChartData } from '../../../../../common/chart_loader';
 import { getChartSettings, defaultChartSettings } from '../../../charts/common/settings';
@@ -25,7 +25,7 @@ export const MultiMetricDetectorsSummary: FC = () => {
     resultsLoader,
     chartInterval,
   } = useContext(JobCreatorContext);
-  const jobCreator = jc as MultiMetricJobCreator;
+  const jobCreator = jc as MultiMetricLikeJobCreator;
   const toastNotificationService = useToastNotificationService();
 
   const [lineChartsData, setLineChartsData] = useState<LineChartData>({});

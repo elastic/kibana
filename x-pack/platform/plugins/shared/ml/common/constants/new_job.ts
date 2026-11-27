@@ -13,6 +13,8 @@ export enum JOB_TYPE {
   CATEGORIZATION = 'categorization',
   RARE = 'rare',
   GEO = 'geo',
+  ESQL_BASIC = 'esql_basic',
+  ESQL_ADVANCED = 'esql_advanced',
 }
 
 export enum CREATED_BY_LABEL {
@@ -23,6 +25,8 @@ export enum CREATED_BY_LABEL {
   CATEGORIZATION = 'categorization-wizard',
   RARE = 'rare-wizard',
   GEO = 'geo-wizard',
+  ESQL_BASIC = 'esql-basic-wizard',
+  ESQL_ADVANCED = 'esql-advanced-wizard',
   GEO_FROM_LENS = 'geo-wizard-from-lens',
   APM_TRANSACTION = 'ml-module-apm-transaction',
   SINGLE_METRIC_FROM_LENS = 'single-metric-wizard-from-lens',

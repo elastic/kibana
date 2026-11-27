@@ -12,13 +12,13 @@ import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/dataf
 import type { Job, Detector } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { MlApi } from '../../../../services/ml_api_service';
 import type { NewJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
-import { JobCreator } from './job_creator';
+import { JobCreatorClassic } from './job_creator_classic';
 import { createBasicDetector } from './util/default_configs';
 import { JOB_TYPE, CREATED_BY_LABEL } from '../../../../../../common/constants/new_job';
 import { getRichDetectors } from './util/general';
 import { isSparseDataJob } from './util/general';
 
-export class GeoJobCreator extends JobCreator {
+export class GeoJobCreator extends JobCreatorClassic {
   private _geoField: Field | null = null;
   private _geoAgg: Aggregation | null = null;
   // set partitionField as the default split field for geo jobs

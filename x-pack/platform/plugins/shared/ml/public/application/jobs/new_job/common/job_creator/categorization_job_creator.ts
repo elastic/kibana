@@ -23,7 +23,7 @@ import {
 } from '@kbn/ml-category-validator';
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 import type { Job, Detector } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
-import { JobCreator } from './job_creator';
+import { JobCreatorClassic } from './job_creator_classic';
 import { createBasicDetector } from './util/default_configs';
 import {
   JOB_TYPE,
@@ -44,7 +44,7 @@ type DetectorType =
   | ML_JOB_AGGREGATION.HIGH_COUNT
   | ML_JOB_AGGREGATION.RARE;
 
-export class CategorizationJobCreator extends JobCreator {
+export class CategorizationJobCreator extends JobCreatorClassic {
   protected _type: JOB_TYPE = JOB_TYPE.CATEGORIZATION;
   private _createCountDetector: () => void = () => {};
   private _createHighCountDetector: () => void = () => {};

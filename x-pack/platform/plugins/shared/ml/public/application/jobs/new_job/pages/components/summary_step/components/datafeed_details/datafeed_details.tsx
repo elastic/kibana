@@ -10,7 +10,8 @@ import React, { useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiDescriptionList, EuiFormRow } from '@elastic/eui';
 import { JobCreatorContext } from '../../../job_creator_context';
-import { MLJobEditor } from '../../../../../../jobs_list/components/ml_job_editor';
+import { MLJobEditor, ML_EDITOR_MODE } from '../../../../../../jobs_list/components/ml_job_editor';
+import { isEsqlJobCreator } from '../../../../../common/job_creator';
 import { calculateDatafeedFrequencyDefaultSeconds } from '../../../../../../../../../common/util/job_utils';
 import { DEFAULT_QUERY_DELAY } from '../../../../../../../../../common/constants/new_job';
 import { getNewJobDefaults } from '../../../../../../../services/ml_server_info';
@@ -23,7 +24,8 @@ export const DatafeedDetails: FC = () => {
   const { jobCreator } = useContext(JobCreatorContext);
   const { datafeeds } = getNewJobDefaults();
 
-  const queryString = JSON.stringify(jobCreator.query, null, 2);
+  const isEsql = isEsqlJobCreator(jobCreator);
+  const queryString = isEsql ? jobCreator.esqlQuery : JSON.stringify(jobCreator.query, null, 2);
   const defaultFrequency = calculateDatafeedFrequencyDefaultSeconds(jobCreator.bucketSpanMs / 1000);
   const scrollSizeDefault = datafeeds.scroll_size || '';
 
@@ -69,18 +71,24 @@ export const DatafeedDetails: FC = () => {
     },
   ];
 
-  const queryTitle = i18n.translate(
-    'xpack.ml.newJob.wizard.summaryStep.datafeedDetails.query.title',
-    {
-      defaultMessage: 'Elasticsearch query',
-    }
-  );
+  const queryTitle = isEsql
+    ? i18n.translate('xpack.ml.newJob.wizard.summaryStep.datafeedDetails.esqlQuery.title', {
+        defaultMessage: 'ES|QL query',
+      })
+    : i18n.translate('xpack.ml.newJob.wizard.summaryStep.datafeedDetails.query.title', {
+        defaultMessage: 'Elasticsearch query',
+      });
 
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
         <EuiFormRow label={queryTitle} fullWidth={true}>
-          <MLJobEditor value={queryString} height={EDITOR_HEIGHT} readOnly={true} />
+          <MLJobEditor
+            value={queryString}
+            height={EDITOR_HEIGHT}
+            readOnly={true}
+            mode={isEsql ? ML_EDITOR_MODE.TEXT : ML_EDITOR_MODE.JSON}
+          />
         </EuiFormRow>
       </EuiFlexItem>
       <EuiFlexItem>

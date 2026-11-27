@@ -12,7 +12,8 @@ import type { BucketSpanEstimatorData } from '@kbn/ml-common-types/job_service';
 import { useMlApi } from '../../../../../../../contexts/kibana';
 import { JobCreatorContext } from '../../../job_creator_context';
 import {
-  isMultiMetricJobCreator,
+  isMultiMetricLikeJobCreator,
+  isEsqlJobCreator,
   isPopulationJobCreator,
   isAdvancedJobCreator,
   isRareJobCreator,
@@ -40,16 +41,21 @@ export function useEstimateBucketSpan() {
       end: jobCreator.end,
     },
     fields: jobCreator.fields.map((f) => (f.id === EVENT_RATE_FIELD_ID ? null : f.id)),
-    index: dataSourceContext.selectedDataView.title,
-    query: dataSourceContext.combinedQuery,
+    // ES|QL jobs are not given a data source context, so use the job creator's data view instead
+    index: isEsqlJobCreator(jobCreator) // !!!!!!!!! can this be made better?
+      ? jobCreator.indexPatternTitle
+      : dataSourceContext.selectedDataView.title,
+    query: isEsqlJobCreator(jobCreator) ? jobCreator.query : dataSourceContext.combinedQuery,
     splitField: undefined,
-    timeField: dataSourceContext.selectedDataView.timeFieldName,
+    timeField: isEsqlJobCreator(jobCreator)
+      ? jobCreator.timeFieldName
+      : dataSourceContext.selectedDataView.timeFieldName,
     runtimeMappings: jobCreator.runtimeMappings ?? undefined,
     indicesOptions: jobCreator.datafeedConfig.indices_options,
     projectRouting: jobCreator.projectRouting ?? undefined,
   };
 
-  if (isMultiMetricJobCreator(jobCreator) && jobCreator.splitField !== null) {
+  if (isMultiMetricLikeJobCreator(jobCreator) && jobCreator.splitField !== null) {
     data.splitField = jobCreator.splitField.id;
   } else if (isPopulationJobCreator(jobCreator) && jobCreator.populationField !== null) {
     data.splitField = jobCreator.populationField.id;

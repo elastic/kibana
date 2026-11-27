@@ -22,7 +22,7 @@ export class MapLoader extends ChartLoader {
 
   constructor(
     mlApi: MlApi,
-    indexPattern: DataView,
+    indexPattern: DataView | null,
     query: object,
     mapsPlugin: MapsStartApi | undefined
   ) {
@@ -40,7 +40,8 @@ export class MapLoader extends ChartLoader {
     savedSearchQuery?: Query
   ) {
     const layerList: LayerDescriptor[] = [];
-    if (this._dataView.id !== undefined && geoField) {
+    const dataViewId = this._dataView?.id;
+    if (dataViewId !== undefined && geoField) {
       const { query } = savedSearchQuery ?? {};
       const queryString =
         fieldValues.length && splitField
@@ -48,7 +49,7 @@ export class MapLoader extends ChartLoader {
           : `${query ? query : ''}`;
 
       const params: CreateLayerDescriptorParams = {
-        indexPatternId: this._dataView.id,
+        indexPatternId: dataViewId,
         geoFieldName: geoField.name,
         geoFieldType: geoField.type as unknown as ES_GEO_FIELD_TYPE,
         query: { query: queryString, language: 'kuery' },

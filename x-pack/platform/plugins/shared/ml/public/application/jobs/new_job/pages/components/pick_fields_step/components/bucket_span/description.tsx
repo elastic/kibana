@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren, ReactNode } from 'react';
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -16,10 +16,11 @@ interface Props {
   validation: Validation;
   titleId: string;
   errorId: string;
+  helpText?: ReactNode;
 }
 
 export const Description: FC<PropsWithChildren<Props>> = memo(
-  ({ children, validation, titleId, errorId }) => {
+  ({ children, validation, titleId, errorId, helpText }) => {
     const title = i18n.translate('xpack.ml.newJob.wizard.pickFieldsStep.bucketSpan.title', {
       defaultMessage: 'Bucket span',
     });
@@ -33,7 +34,7 @@ export const Description: FC<PropsWithChildren<Props>> = memo(
           />
         }
       >
-        <EuiFormRow isInvalid={validation.valid === false}>
+        <EuiFormRow isInvalid={validation.valid === false} helpText={helpText}>
           <>{children}</>
         </EuiFormRow>
         {validation.valid === false && validation.message && (

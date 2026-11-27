@@ -36,6 +36,8 @@ import { PopulatedFieldsCacheManager } from './populated_fields/populated_fields
  * @property [timeRangeMs] - Optional time range in milliseconds.
  * @property [dslQuery] - Optional DSL query for filtering field statistics.
  * @property [disablePopulatedFields] - Optional flag to disable populated fields.
+ * @property [populatedFields] - Optional fields known to have data, used instead of fetching them.
+ * @property [hideFieldStatsButtons] - Optional flag to hide the buttons that open the flyout.
  */
 export type FieldStatsFlyoutProviderProps = PropsWithChildren<{
   dataView: DataView;
@@ -43,6 +45,8 @@ export type FieldStatsFlyoutProviderProps = PropsWithChildren<{
   timeRangeMs?: TimeRangeMs;
   dslQuery?: FieldStatsProps['dslQuery'];
   disablePopulatedFields?: boolean;
+  populatedFields?: Set<string>;
+  hideFieldStatsButtons?: boolean;
 }>;
 
 /**
@@ -71,6 +75,8 @@ export const FieldStatsFlyoutProvider: FC<FieldStatsFlyoutProviderProps> = (prop
     timeRangeMs,
     dslQuery,
     disablePopulatedFields = false,
+    populatedFields: knownPopulatedFields,
+    hideFieldStatsButtons = false,
     children,
   } = props;
   const [isFieldStatsFlyoutVisible, setFieldStatsIsFlyoutVisible] = useState(false);
@@ -88,7 +94,7 @@ export const FieldStatsFlyoutProvider: FC<FieldStatsFlyoutProviderProps> = (prop
 
   useEffect(
     function fetchPopulatedFieldsEffect() {
-      if (disablePopulatedFields) return;
+      if (disablePopulatedFields || knownPopulatedFields !== undefined) return;
 
       if (abortController.current) {
         abortController.current.abort();
@@ -153,7 +159,8 @@ export const FieldStatsFlyoutProvider: FC<FieldStatsFlyoutProviderProps> = (prop
         setFieldValue,
         fieldValue,
         timeRangeMs,
-        populatedFields,
+        populatedFields: knownPopulatedFields ?? populatedFields,
+        hideFieldStatsButtons,
       }}
     >
       <FieldStatsFlyout

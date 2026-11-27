@@ -15,12 +15,12 @@ import { JobCreatorContext } from '../../../job_creator_context';
 import { filterCategoryFields } from '../../../../../../../../../common/util/fields_utils';
 import { useNewJobCapsService } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { Description } from './description';
-import type { MultiMetricJobCreator, RareJobCreator } from '../../../../../common/job_creator';
-import { isMultiMetricJobCreator } from '../../../../../common/job_creator';
+import type { MultiMetricLikeJobCreator, RareJobCreator } from '../../../../../common/job_creator';
+import { isMultiMetricLikeJobCreator } from '../../../../../common/job_creator';
 
 export const SplitFieldSelector: FC = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
-  const jobCreator = jc as MultiMetricJobCreator | RareJobCreator;
+  const jobCreator = jc as MultiMetricLikeJobCreator | RareJobCreator;
   const newJobCapsService = useNewJobCapsService();
   const titleId = useGeneratedHtmlId({
     prefix: 'splitFieldSelector',
@@ -74,13 +74,13 @@ export const SplitFieldSelector: FC = () => {
 // remove the rare (by) and population (over) fields from the by field options in the rare wizard
 function useFilteredCategoryFields(
   allCategoryFields: Field[],
-  jobCreator: MultiMetricJobCreator | RareJobCreator,
+  jobCreator: MultiMetricLikeJobCreator | RareJobCreator,
   jobCreatorUpdated: number
 ) {
   const [fields, setFields] = useState(allCategoryFields);
 
   useEffect(() => {
-    if (isMultiMetricJobCreator(jobCreator)) {
+    if (isMultiMetricLikeJobCreator(jobCreator)) {
       setFields(allCategoryFields);
     } else {
       const rf = jobCreator.rareField;

@@ -65,7 +65,11 @@ export const DatafeedPreview: FC<{
     setLoading(true);
     setCombinedJobString(JSON.stringify(combinedJob));
 
-    if (combinedJob.datafeed_config && combinedJob.datafeed_config.indices.length) {
+    if (
+      combinedJob.datafeed_config &&
+      ((combinedJob.datafeed_config.indices?.length ?? 0) > 0 ||
+        combinedJob.datafeed_config.esql_query !== undefined)
+    ) {
       try {
         const { datafeed_config: datafeed, ...job } = combinedJob;
         if (job.analysis_config.detectors.length === 0) {

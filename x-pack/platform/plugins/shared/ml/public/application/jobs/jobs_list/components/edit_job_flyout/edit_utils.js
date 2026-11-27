@@ -8,6 +8,7 @@
 import { difference } from 'lodash';
 import { getNewJobLimits } from '../../../../services/ml_server_info';
 import { processCreatedBy } from '../../../../../../common/util/job_utils';
+import { isEsqlDatafeed } from '../../../../../../common/util/esql_metric_query';
 
 export function saveJob(mlApi, job, newJobData, finish) {
   return new Promise((resolve, reject) => {
@@ -164,12 +165,16 @@ function extractCustomSettings(job, newJobData) {
 function extractDatafeed(job, newDatafeedData) {
   const datafeedData = {};
   if (job.datafeed_config !== undefined) {
-    const origQueryString = JSON.stringify(job.datafeed_config.query);
-    const newQuery = JSON.parse(newDatafeedData.datafeedQuery);
-    const newQueryString = JSON.stringify(newQuery);
+    // an ES|QL datafeed's query cannot be edited, and it has no scroll size
+    const isEsql = isEsqlDatafeed(job.datafeed_config);
+    if (isEsql === false) {
+      const origQueryString = JSON.stringify(job.datafeed_config.query);
+      const newQuery = JSON.parse(newDatafeedData.datafeedQuery);
+      const newQueryString = JSON.stringify(newQuery);
 
-    if (origQueryString !== newQueryString) {
-      datafeedData.query = newQuery;
+      if (origQueryString !== newQueryString) {
+        datafeedData.query = newQuery;
+      }
     }
 
     if (job.datafeed_config.query_delay !== newDatafeedData.datafeedQueryDelay) {
@@ -183,7 +188,10 @@ function extractDatafeed(job, newDatafeedData) {
       datafeedData.frequency = newDatafeedData.datafeedFrequency;
     }
 
-    if (job.datafeed_config.scroll_size !== newDatafeedData.datafeedScrollSize) {
+    if (
+      isEsql === false &&
+      job.datafeed_config.scroll_size !== newDatafeedData.datafeedScrollSize
+    ) {
       datafeedData.scroll_size = newDatafeedData.datafeedScrollSize;
     }
 

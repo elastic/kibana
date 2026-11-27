@@ -7,12 +7,14 @@
 
 import type { FC } from 'react';
 import React, { useContext, useEffect, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiCode, EuiFlexGroup, EuiFlexItem, useGeneratedHtmlId } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { BucketSpanInput } from './bucket_span_input';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { Description } from './description';
 import { BucketSpanEstimator } from '../bucket_span_estimator';
+import { isEsqlJobCreator } from '../../../../../common/job_creator';
 
 interface Props {
   setIsValid: (proceed: boolean) => void;
@@ -25,6 +27,8 @@ export const BucketSpan: FC<Props> = ({ setIsValid, hideEstimateButton = false }
   const [bucketSpan, setBucketSpan] = useState(jobCreator.bucketSpan);
   const [validation, setValidation] = useState(jobValidator.bucketSpan);
   const [estimating, setEstimating] = useState(false);
+  // an ES|QL job's buckets must match the BUCKET interval of its query
+  const isSetByQuery = isEsqlJobCreator(jobCreator) && jobCreator.isBucketSpanFromQuery;
   const titleId = useGeneratedHtmlId({
     prefix: 'bucketSpan',
   });
@@ -54,7 +58,20 @@ export const BucketSpan: FC<Props> = ({ setIsValid, hideEstimateButton = false }
   }, [estimating]);
 
   return (
-    <Description validation={validation} titleId={titleId} errorId={errorId}>
+    <Description
+      validation={validation}
+      titleId={titleId}
+      errorId={errorId}
+      helpText={
+        isSetByQuery ? (
+          <FormattedMessage
+            id="xpack.ml.newJob.wizard.pickFieldsStep.bucketSpan.setByQueryHelpText"
+            defaultMessage="Set by the {bucket} interval in the ES|QL query."
+            values={{ bucket: <EuiCode>BUCKET</EuiCode> }}
+          />
+        ) : undefined
+      }
+    >
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
           <BucketSpanInput
@@ -63,11 +80,11 @@ export const BucketSpan: FC<Props> = ({ setIsValid, hideEstimateButton = false }
             // @ts-expect-error bucketSpan is of type `estypes.Duration`
             bucketSpan={bucketSpan}
             isInvalid={validation.valid === false}
-            disabled={estimating}
+            disabled={estimating || isSetByQuery}
             errorId={errorId}
           />
         </EuiFlexItem>
-        {hideEstimateButton === false && (
+        {hideEstimateButton === false && isSetByQuery === false && (
           <EuiFlexItem>
             <BucketSpanEstimator setEstimating={setEstimating} />
           </EuiFlexItem>

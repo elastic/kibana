@@ -50,7 +50,8 @@
       "usageCollection",
       "cases",
       "cps",
-      "agentBuilder"
+      "agentBuilder",
+      "esql"
     ],
     "requiredBundles": [
       "cases",
@@ -65,7 +66,8 @@
       "savedObjectsFinder",
       "usageCollection",
       "alerting",
-      "presentationUtil"
+      "presentationUtil",
+      "esql"
     ],
     "extraPublicDirs": ["common"]
   }

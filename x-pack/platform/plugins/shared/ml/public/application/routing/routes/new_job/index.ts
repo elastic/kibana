@@ -6,6 +6,7 @@
  */
 
 export * from './index_or_search';
+export * from './select_data_source';
 export * from './job_type';
 export * from './new_job';
 export * from './wizard';

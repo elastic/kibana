@@ -21,6 +21,8 @@ interface MLJobWizardFieldStatsFlyoutProps {
   fieldValue?: string | number;
   timeRangeMs?: TimeRangeMs;
   populatedFields?: Set<string>;
+  /** Hides the buttons that open the field stats flyout, e.g. for fields not in the data view. */
+  hideFieldStatsButtons?: boolean;
 }
 
 /**

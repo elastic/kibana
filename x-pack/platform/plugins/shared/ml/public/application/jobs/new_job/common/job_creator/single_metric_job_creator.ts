@@ -20,14 +20,14 @@ import { parseInterval } from '@kbn/ml-parse-interval';
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 import type { Job, Detector, BucketSpan } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { MlApi } from '../../../../services/ml_api_service';
-import { JobCreator } from './job_creator';
+import { JobCreatorClassic } from './job_creator_classic';
 import { createBasicDetector } from './util/default_configs';
 import { JOB_TYPE, CREATED_BY_LABEL } from '../../../../../../common/constants/new_job';
 import { getRichDetectors } from './util/general';
 import { isSparseDataJob } from './util/general';
 import type { NewJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
 
-export class SingleMetricJobCreator extends JobCreator {
+export class SingleMetricJobCreator extends JobCreatorClassic {
   protected _type: JOB_TYPE = JOB_TYPE.SINGLE_METRIC;
 
   constructor(
