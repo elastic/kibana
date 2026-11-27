@@ -245,6 +245,7 @@ export function registerResponseActionRoutes(
       )
     );
 
+  const uploadTimeout = 10 * 60 * 1000; // 10 min
   router.versioned
     .post({
       access: 'public',
@@ -259,6 +260,10 @@ export function registerResponseActionRoutes(
           accepts: ['multipart/form-data'],
           output: 'stream',
           maxBytes: endpointContext.serverConfig.maxUploadResponseActionFileBytes,
+          timeout: {
+            payload: uploadTimeout,
+            idleSocket: uploadTimeout,
+          },
         },
       },
     })
