@@ -39,8 +39,10 @@ import {
 import { type PluginsService, createPluginsService } from './plugins';
 import { CallbackDeliveryService } from './execution/callback';
 import { createSpaceSettingsService } from './space_settings';
+import { PinnedBaselineService } from './eval_baselines/pinned_baseline_service';
 import { SurfacesServiceImpl } from './surfaces';
 import { ConversationTemplatesService } from './conversation/templates';
+import { createPrincipalKeyResolver } from './common/principal_key';
 
 interface ServiceInstances {
   tools: ToolsService;
@@ -129,6 +131,7 @@ export class ServiceManager {
     uiSettings,
     savedObjects,
     featureFlags,
+    dataStreams,
     actions,
     taskManager,
     securityPlugin,
@@ -139,6 +142,8 @@ export class ServiceManager {
     deploymentInfo,
     deductiveRegister,
     isomer,
+    getSmlTypeDefinition,
+    cloud,
     conversationEventBus,
   }: ServicesStartDeps & { conversationEventBus?: ConversationEventBus }): InternalStartServices {
     if (!this.services) {
@@ -174,6 +179,9 @@ export class ServiceManager {
 
     const conversationEvents = this.services.conversationEvents.start();
 
+    // Shared by the tool, skill and agent availability caches.
+    const getPrincipalKey = createPrincipalKeyResolver({ security });
+
     const tools = this.services.tools.start({
       getRunner,
       spaces,
@@ -182,6 +190,7 @@ export class ServiceManager {
       savedObjects,
       actions,
       securityPlugin,
+      getPrincipalKey,
     });
 
     const skillsServiceStart = this.services.skills.start({
@@ -191,6 +200,7 @@ export class ServiceManager {
       getToolRegistry: tools.getRegistry,
       uiSettings,
       savedObjects,
+      getPrincipalKey,
     });
 
     const agents = this.services.agents.start({
@@ -200,9 +210,10 @@ export class ServiceManager {
       uiSettings,
       savedObjects,
       toolsService: tools,
+      getPrincipalKey,
     });
 
-    const hooks = this.services.hooks.start();
+    const hooks = this.services.hooks.start({ security, spaces });
 
     const plugins = this.services.plugins.start({
       logger: logger.get('plugins'),
@@ -271,6 +282,8 @@ export class ServiceManager {
     const surfaces = new SurfacesServiceImpl({
       attachmentsService: attachments,
       isomer,
+      basePath: http.basePath,
+      cloud,
       logger: logger.get('surfaces'),
     });
 
@@ -291,6 +304,8 @@ export class ServiceManager {
       searchInferenceEndpoints,
       callbackDeliveryService: this.services.callbackDelivery,
       surfacesService: surfaces,
+      taskManager,
+      getExecutionService,
     });
 
     executionService = createAgentExecutionService({
@@ -304,6 +319,7 @@ export class ServiceManager {
       agentService: agents,
       runAgent: runner.runAgent,
       attachmentsService: attachments,
+      getSmlTypeDefinition,
       uiSettings,
       savedObjects,
       trackingService,
@@ -311,11 +327,14 @@ export class ServiceManager {
       meteringService: this.services.metering,
       searchInferenceEndpoints,
       callbackDeliveryService: this.services.callbackDelivery,
+      securityPlugin,
     });
 
     const consumption = this.services.consumption.start({ elasticsearch, spaces });
 
     const spaceSettings = createSpaceSettingsService({ savedObjects });
+
+    const evalBaselines = new PinnedBaselineService(logger.get('evalBaselines'), dataStreams);
 
     this.internalStart = {
       tools,
@@ -342,6 +361,7 @@ export class ServiceManager {
       callbackDeliveryService: this.services.callbackDelivery,
       spaceSettings,
       conversationTemplates: conversationTemplatesStart,
+      evalBaselines,
     };
 
     return this.internalStart;

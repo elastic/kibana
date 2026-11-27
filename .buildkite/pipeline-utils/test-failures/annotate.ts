@@ -30,7 +30,7 @@ export interface TestFailure {
   jobName: string;
   githubIssue?: string;
   failureCount?: number;
-  /** Set for Scout failures attributed to infrastructure; no GitHub issue is filed for these. */
+  /** Set for Scout and FTR failures attributed to infrastructure; no GitHub issue is filed for these. */
   infraReason?: {
     category: string;
     message: string;

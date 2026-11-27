@@ -37,7 +37,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
         // Required to load new platform plugins via `--plugin-path` flag.
         '--env.name=development',
-        ...findTestPluginPaths(path.resolve(__dirname, 'plugins')),
+        ...findTestPluginPaths(
+          path.resolve(__dirname, '../../test_plugins/interpreter_functional')
+        ),
       ],
     },
   };

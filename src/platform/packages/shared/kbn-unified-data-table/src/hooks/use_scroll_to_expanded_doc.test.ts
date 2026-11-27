@@ -175,6 +175,34 @@ describe('useScrollToExpandedDoc', () => {
     expect(scrollToItem).toHaveBeenCalledTimes(2);
   });
 
+  it('uses a custom scrollToCell instead of the EUI grid api when provided', () => {
+    const scrollToItem = jest.fn();
+    const scrollToCell = jest.fn();
+    const dataGridRef: RefObject<EuiDataGridRefProps> = {
+      current: {
+        setIsFullScreen: jest.fn(),
+        setFocusedCell: jest.fn(),
+        openCellPopover: jest.fn(),
+        closeCellPopover: jest.fn(),
+        scrollToItem,
+      },
+    };
+    const dataGridWrapper = document.createElement('div');
+    const props = { ...getProps({ dataGridRef, dataGridWrapper }), scrollToCell };
+    const { rerender } = renderHook(({ hookProps }) => useScrollToExpandedDoc(hookProps), {
+      initialProps: { hookProps: props },
+    });
+
+    runNextFrame();
+    expect(scrollToCell).toHaveBeenCalledWith({ rowIndex: 1, columnIndex: 0, align: 'center' });
+
+    // navigating to another document scrolls to its row
+    rerender({ hookProps: { ...props, expandedDoc: rows[0] } });
+    runNextFrame();
+    expect(scrollToCell).toHaveBeenLastCalledWith({ rowIndex: 0, columnIndex: 0, align: 'center' });
+    expect(scrollToItem).not.toHaveBeenCalled();
+  });
+
   it('stops retrying when the grid remains unavailable', () => {
     const dataGridRef: RefObject<EuiDataGridRefProps> = {
       current: {

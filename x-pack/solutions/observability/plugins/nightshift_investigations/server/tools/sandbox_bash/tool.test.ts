@@ -7,7 +7,7 @@
 
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { SandboxPluginStart, SandboxSession } from '@kbn/sandbox-plugin/server';
+import type { AuditedSandboxSession, NightshiftSandboxStart } from '../../sandbox_audit';
 import type { SandboxWorkspaceManager } from './sandbox_workspace_manager';
 import type { ResolveConnectorCredentials } from './connector_credentials';
 import {
@@ -17,18 +17,14 @@ import {
 } from './tool';
 
 const GITHUB_TOKEN = 'ghp_sandbox_secret_value';
-const CONNECTOR_TOKEN = 'connector-secret-token';
 
 const setup = ({
-  resolveForCommand = jest.fn().mockResolvedValue({
-    env: { GITHUB_TOKEN },
-    secretValues: [GITHUB_TOKEN],
-  }),
   resolveConnectorCredentials,
+  allowedHosts = [],
   stdout = '',
 }: {
-  resolveForCommand?: jest.Mock;
   resolveConnectorCredentials?: ResolveConnectorCredentials;
+  allowedHosts?: string[];
   stdout?: string;
 } = {}) => {
   const runCommand = jest.fn().mockResolvedValue({
@@ -39,20 +35,23 @@ const setup = ({
   });
   const mkdirs = jest.fn().mockResolvedValue([true]);
   const writeFiles = jest.fn().mockResolvedValue([{ success: true }]);
-  const session = { runCommand, mkdirs, writeFiles } as unknown as SandboxSession;
+  const session = { runCommand, mkdirs, writeFiles } as unknown as AuditedSandboxSession;
   const sandboxStart = {
     getSession: jest.fn(() => session),
-  } as unknown as SandboxPluginStart;
+  } as unknown as NightshiftSandboxStart;
   const sandboxWorkspaceManager = {
     ensureWorkspaceReady: jest.fn().mockResolvedValue(undefined),
   } as unknown as SandboxWorkspaceManager;
+  const sandboxAllowlistClient = {
+    getHostsForCommand: jest.fn().mockResolvedValue(allowedHosts),
+  };
   const logger = loggingSystemMock.createLogger();
 
   const tool = createSandboxBashTool({
     getSandboxStart: () => sandboxStart,
     sandboxWorkspaceManager,
     resolveConnectorCredentials,
-    sandboxSecretsClient: { resolveForCommand },
+    sandboxAllowlistClient,
     logger,
   });
 
@@ -60,6 +59,7 @@ const setup = ({
   const context = {
     request,
     runContext: { stack: [{ type: 'agent', agentId: 'agent', conversationId: 'conv-1' }] },
+    callContext: { toolId: 'nightshift_sandbox_bash', toolCallId: 'call-1', callSource: 'agent' },
     agentConfiguration: { connector_ids: ['connector-1'] },
   };
 
@@ -69,101 +69,287 @@ const setup = ({
       context
     );
 
-  return { tool, run, runCommand, writeFiles, resolveForCommand, request, logger, session };
+  return {
+    tool,
+    run,
+    runCommand,
+    writeFiles,
+    request,
+    logger,
+    session,
+    sandboxStart,
+    sandboxAllowlistClient,
+  };
 };
 
-describe('sandbox bash tool — sandbox secrets', () => {
-  it('does not resolve secrets when none are requested', async () => {
-    const { run, runCommand, resolveForCommand } = setup();
-
-    await run({});
-
-    expect(resolveForCommand).not.toHaveBeenCalled();
-    expect(runCommand.mock.calls[0][0].env).not.toHaveProperty('GITHUB_TOKEN');
-  });
-
-  it('injects requested secrets into the command environment only', async () => {
-    const { run, runCommand, resolveForCommand, request } = setup();
-
-    await run({ secret_keys: ['GITHUB_TOKEN'] });
-
-    expect(resolveForCommand).toHaveBeenCalledWith(request, ['GITHUB_TOKEN']);
-    expect(runCommand.mock.calls[0][0].env).toMatchObject({ GITHUB_TOKEN });
-  });
-
-  it('applies secrets over agent env and connector credentials over secrets', async () => {
-    const resolveForCommand = jest.fn().mockResolvedValue({
-      env: { GITHUB_TOKEN, SHARED: 'from-secret' },
-      secretValues: [GITHUB_TOKEN],
-    });
-    const resolveConnectorCredentials: ResolveConnectorCredentials = jest.fn().mockResolvedValue({
-      env: { SHARED: 'from-connector', CONNECTOR_HEADER_AUTHORIZATION: CONNECTOR_TOKEN },
-      secretValues: [CONNECTOR_TOKEN],
-    });
-    const { run, runCommand } = setup({ resolveForCommand, resolveConnectorCredentials });
-
-    await run({
-      env: { GITHUB_TOKEN: 'agent-override', SHARED: 'from-agent' },
-      connector_id: 'connector-1',
-      secret_keys: ['GITHUB_TOKEN', 'SHARED'],
-    });
-
-    expect(runCommand.mock.calls[0][0].env).toMatchObject({
-      GITHUB_TOKEN,
-      SHARED: 'from-connector',
-      CONNECTOR_HEADER_AUTHORIZATION: CONNECTOR_TOKEN,
-    });
-  });
-
-  it('redacts both connector credentials and sandbox secrets from output', async () => {
-    const resolveConnectorCredentials: ResolveConnectorCredentials = jest.fn().mockResolvedValue({
-      env: { CONNECTOR_HEADER_AUTHORIZATION: CONNECTOR_TOKEN },
-      secretValues: [CONNECTOR_TOKEN],
-    });
-    const { run } = setup({
-      resolveConnectorCredentials,
-      stdout: `${GITHUB_TOKEN} ${CONNECTOR_TOKEN}`,
-    });
-
-    const { results } = await run({ connector_id: 'connector-1', secret_keys: ['GITHUB_TOKEN'] });
-    const serialized = JSON.stringify(results);
-
-    expect(serialized).not.toContain(GITHUB_TOKEN);
-    expect(serialized).not.toContain(CONNECTOR_TOKEN);
-    expect(serialized).toContain('[REDACTED] [REDACTED]');
-  });
-
-  it('returns a tool error and does not run the command when a secret cannot be resolved', async () => {
-    const resolveForCommand = jest
-      .fn()
-      .mockResolvedValue({ errorMessage: 'Unknown sandbox secret(s): MISSING' });
-    const { run, runCommand } = setup({ resolveForCommand });
-
-    const { results } = await run({ secret_keys: ['MISSING'] });
-
-    expect(results).toEqual([
-      { type: ToolResultType.error, data: { message: 'Unknown sandbox secret(s): MISSING' } },
-    ]);
-    expect(runCommand).not.toHaveBeenCalled();
-  });
-
+describe('sandbox bash tool', () => {
   it('is not exposed over MCP', () => {
     const { tool } = setup();
 
     expect(tool.excludeFromMcp).toBe(true);
   });
 
+  it('names the tool and this call of it when it obtains the session, so its RPCs are audited', async () => {
+    const { run, request, sandboxStart } = setup();
+
+    await run({});
+
+    expect(sandboxStart.getSession).toHaveBeenCalledWith(request, 'conv-1', {
+      type: 'tool',
+      toolId: 'nightshift_sandbox_bash',
+      toolCallId: 'call-1',
+    });
+  });
+
   it('logs only the error type, never the error message, when the sandbox call throws', async () => {
     const { run, runCommand, logger } = setup({ stdout: '' });
     runCommand.mockRejectedValue(new Error(`boom while handling ${GITHUB_TOKEN}`));
 
-    await run({ secret_keys: ['GITHUB_TOKEN'] });
+    await run({});
 
     expect(logger.error).toHaveBeenCalledTimes(1);
     const [loggedMessage] = logger.error.mock.calls[0];
     expect(loggedMessage).not.toContain(GITHUB_TOKEN);
     expect(loggedMessage).not.toContain('boom while handling');
     expect(loggedMessage).toContain('Error');
+  });
+});
+
+describe('sandbox bash tool — connector credentials', () => {
+  const resolved = (): ResolveConnectorCredentials =>
+    jest.fn().mockResolvedValue({
+      env: { CONNECTOR_HEADER_AUTHORIZATION: GITHUB_TOKEN, CONNECTOR_CONFIG_URL: 'https://gh' },
+      secretValues: [GITHUB_TOKEN],
+      secretEnvKeys: [{ key: 'CONNECTOR_HEADER_AUTHORIZATION', allowed_hosts: ['api.github.com'] }],
+      allowedHosts: ['api.github.com'],
+    });
+
+  it('resolves the connector for the calling user and passes its credentials to the command', async () => {
+    const resolveConnectorCredentials = resolved();
+    const { run, runCommand, request } = setup({ resolveConnectorCredentials });
+
+    await run({ connector_id: 'connector-1' });
+
+    expect(resolveConnectorCredentials).toHaveBeenCalledWith(
+      'connector-1',
+      expect.objectContaining({ request, allowedConnectorIds: ['connector-1'] })
+    );
+    expect(runCommand.mock.calls[0][0].env).toEqual(
+      expect.objectContaining({
+        CONNECTOR_HEADER_AUTHORIZATION: GITHUB_TOKEN,
+        CONNECTOR_CONFIG_URL: 'https://gh',
+      })
+    );
+  });
+
+  it('does not let agent-supplied env shadow the credentials', async () => {
+    const { run, runCommand } = setup({ resolveConnectorCredentials: resolved() });
+
+    await run({
+      connector_id: 'connector-1',
+      env: { CONNECTOR_HEADER_AUTHORIZATION: 'agent-value', FOO: 'bar' },
+    });
+
+    const { env } = runCommand.mock.calls[0][0];
+    expect(env.CONNECTOR_HEADER_AUTHORIZATION).toBe(GITHUB_TOKEN);
+    expect(env.FOO).toBe('bar');
+  });
+
+  it('allows connector hosts while keeping header secrets bound only to those hosts', async () => {
+    const { run, runCommand } = setup({
+      resolveConnectorCredentials: resolved(),
+      allowedHosts: ['other.example.com'],
+    });
+
+    await run({ connector_id: 'connector-1' });
+
+    expect(runCommand.mock.calls[0][0].secret_env_keys).toEqual([
+      { key: 'CONNECTOR_HEADER_AUTHORIZATION', allowed_hosts: ['api.github.com'] },
+    ]);
+    expect(runCommand.mock.calls[0][0].allowed_hosts).toEqual([
+      'other.example.com',
+      'api.github.com',
+    ]);
+  });
+
+  it('allows connector hosts without auth headers', async () => {
+    const resolveConnectorCredentials: ResolveConnectorCredentials = async () => ({
+      env: { CONNECTOR_CONFIG_URL: 'https://api.example.com' },
+      secretValues: [],
+      secretEnvKeys: [],
+      allowedHosts: ['api.example.com'],
+    });
+    const { run, runCommand } = setup({ resolveConnectorCredentials });
+
+    await run({ connector_id: 'connector-1' });
+
+    expect(runCommand.mock.calls[0][0].allowed_hosts).toEqual(['api.example.com']);
+    expect(runCommand.mock.calls[0][0]).not.toHaveProperty('secret_env_keys');
+  });
+
+  it('deduplicates space and connector hosts while preserving space firewall rules', async () => {
+    const { run, runCommand } = setup({
+      resolveConnectorCredentials: resolved(),
+      allowedHosts: [
+        'allow * pypi.org GET,HEAD /simple/',
+        'deny * api.github.com POST /gists',
+        'api.github.com',
+      ],
+    });
+
+    await run({ connector_id: 'connector-1' });
+
+    expect(runCommand.mock.calls[0][0].allowed_hosts).toEqual([
+      'allow * pypi.org GET,HEAD /simple/',
+      'deny * api.github.com POST /gists',
+      'api.github.com',
+    ]);
+  });
+
+  it.each([
+    { rule: 'allow https api.github.com:8443 GET /repos', authenticated: true, append: false },
+    { rule: 'allow http api.github.com POST /gists', authenticated: false, append: false },
+    { rule: 'allow https *.github.com:443 GET /repos', authenticated: true, append: false },
+    { rule: 'allow * *.github.com:8443 * /repos', authenticated: false, append: false },
+    { rule: '*.github.com', authenticated: false, append: false },
+    { rule: 'allow https *.api.github.com:443 GET /repos', authenticated: false, append: true },
+    { rule: 'allow https *.notgithub.com GET /repos', authenticated: true, append: true },
+    { rule: 'deny https api.github.com:443 POST /gists', authenticated: true, append: true },
+    { rule: 'deny * *.github.com:8443 * /repos', authenticated: false, append: true },
+  ])(
+    'preserves host-level policy $rule (authenticated=$authenticated)',
+    async ({ rule, authenticated, append }) => {
+      const secretEnvKeys = authenticated
+        ? [{ key: 'CONNECTOR_HEADER_AUTHORIZATION', allowed_hosts: ['api.github.com'] }]
+        : [];
+      const env: Record<string, string> = authenticated
+        ? { CONNECTOR_HEADER_AUTHORIZATION: GITHUB_TOKEN }
+        : {};
+      const { run, runCommand } = setup({
+        allowedHosts: [rule],
+        resolveConnectorCredentials: async () => ({
+          env,
+          secretValues: authenticated ? [GITHUB_TOKEN] : [],
+          secretEnvKeys,
+          allowedHosts: ['api.github.com'],
+        }),
+      });
+
+      await run({ connector_id: 'connector-1' });
+
+      expect(runCommand.mock.calls[0][0].allowed_hosts).toEqual(
+        append ? [rule, 'api.github.com'] : [rule]
+      );
+      if (authenticated) {
+        expect(runCommand.mock.calls[0][0].secret_env_keys).toEqual(secretEnvKeys);
+      } else {
+        expect(runCommand.mock.calls[0][0]).not.toHaveProperty('secret_env_keys');
+      }
+    }
+  );
+
+  it('logs the error and returns a structured tool error without running the command when getHostsForCommand rejects', async () => {
+    const { run, runCommand, sandboxAllowlistClient, logger } = setup();
+    sandboxAllowlistClient.getHostsForCommand.mockRejectedValueOnce(new Error('corrupted policy'));
+
+    const res = await run({});
+
+    expect(res).toEqual({
+      results: [
+        {
+          type: ToolResultType.error,
+          data: { message: 'Space sandbox egress allowlist is invalid or unavailable.' },
+        },
+      ],
+    });
+    expect(logger.error).toHaveBeenCalledWith(
+      'Failed to load space sandbox egress allowlist: corrupted policy'
+    );
+    expect(runCommand).not.toHaveBeenCalled();
+  });
+  it.each([{ allowedHosts: [] }, { allowedHosts: ['allow * pypi.org GET,HEAD /simple/'] }])(
+    'retains space-only egress policy $allowedHosts without a connector_id',
+    async ({ allowedHosts }) => {
+      const resolveConnectorCredentials = resolved();
+      const { run, runCommand } = setup({ resolveConnectorCredentials, allowedHosts });
+
+      await run({});
+
+      expect(resolveConnectorCredentials).not.toHaveBeenCalled();
+      expect(runCommand.mock.calls[0][0].env).not.toHaveProperty('CONNECTOR_HEADER_AUTHORIZATION');
+      expect(runCommand.mock.calls[0][0]).not.toHaveProperty('secret_env_keys');
+      if (allowedHosts.length > 0) {
+        expect(runCommand.mock.calls[0][0].allowed_hosts).toEqual(allowedHosts);
+      } else {
+        expect(runCommand.mock.calls[0][0]).not.toHaveProperty('allowed_hosts');
+      }
+    }
+  );
+
+  it('redacts the secret from stdout and stderr of a successful command', async () => {
+    const { run, runCommand } = setup({ resolveConnectorCredentials: resolved() });
+    runCommand.mockResolvedValue({
+      exit_code: 0,
+      timed_out: false,
+      stdout: `token=${GITHUB_TOKEN}`,
+      stderr: `warn ${GITHUB_TOKEN}`,
+    });
+
+    const { results } = await run({ connector_id: 'connector-1' });
+
+    expect(results).toEqual([
+      {
+        type: ToolResultType.other,
+        data: { stdout: 'token=[REDACTED]', stderr: 'warn [REDACTED]', exit_code: 0 },
+      },
+    ]);
+  });
+
+  it('redacts the secret from the error message of a failed command', async () => {
+    const { run, runCommand } = setup({ resolveConnectorCredentials: resolved() });
+    runCommand.mockResolvedValue({
+      exit_code: 1,
+      timed_out: false,
+      stdout: '',
+      stderr: `401 for ${GITHUB_TOKEN}`,
+    });
+
+    const { results } = await run({ connector_id: 'connector-1' });
+
+    const { message } = (results[0] as { data: { message: string } }).data;
+    expect(message).not.toContain(GITHUB_TOKEN);
+    expect(message).toContain('401 for [REDACTED]');
+  });
+
+  it('returns the resolver error and runs nothing when the connector cannot be used', async () => {
+    const resolveConnectorCredentials: ResolveConnectorCredentials = jest.fn().mockResolvedValue({
+      errorMessage: 'Connector "connector-2" is not assigned to this agent.',
+    });
+    const { run, runCommand } = setup({ resolveConnectorCredentials });
+
+    const { results } = await run({ connector_id: 'connector-2' });
+
+    expect(results).toEqual([
+      {
+        type: ToolResultType.error,
+        data: { message: 'Connector "connector-2" is not assigned to this agent.' },
+      },
+    ]);
+    expect(runCommand).not.toHaveBeenCalled();
+  });
+
+  it('returns an error when connector credentials are not available in the deployment', async () => {
+    const { run, runCommand } = setup();
+
+    const { results } = await run({ connector_id: 'connector-1' });
+
+    expect(results).toEqual([
+      {
+        type: ToolResultType.error,
+        data: { message: 'Connector credentials are not available in this deployment.' },
+      },
+    ]);
+    expect(runCommand).not.toHaveBeenCalled();
   });
 });
 
@@ -199,9 +385,15 @@ describe('sandbox bash tool — output size', () => {
 
   it('saves long redacted output to a file and returns its head and tail', async () => {
     const stdout = `${GITHUB_TOKEN}${longOutput}`;
-    const { run, writeFiles } = setup({ stdout });
+    const resolveConnectorCredentials: ResolveConnectorCredentials = jest.fn().mockResolvedValue({
+      env: { CONNECTOR_HEADER_AUTHORIZATION: GITHUB_TOKEN },
+      secretValues: [GITHUB_TOKEN],
+      secretEnvKeys: [],
+      allowedHosts: [],
+    });
+    const { run, writeFiles } = setup({ stdout, resolveConnectorCredentials });
 
-    const { results } = await run({ secret_keys: ['GITHUB_TOKEN'] });
+    const { results } = await run({ connector_id: 'connector-1' });
 
     const [[{ path, content }]] = writeFiles.mock.calls[0];
     expect(path).toMatch(/^\/workspace\/\.tool-output\/.+\.stdout\.txt$/);

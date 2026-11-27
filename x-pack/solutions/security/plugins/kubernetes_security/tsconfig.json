@@ -28,7 +28,7 @@
     "@kbn/rule-registry-plugin",
     "@kbn/session-view-plugin",
     "@kbn/i18n",
-    "@kbn/timelines-plugin",
+    "@kbn/securitysolution-timeline-components",
     "@kbn/es-query",
     "@kbn/ui-theme",
     "@kbn/i18n-react",
@@ -36,6 +36,7 @@
     "@kbn/shared-ux-router",
     "@kbn/securitysolution-es-utils",
     "@kbn/react-query",
+    "@kbn/app-header",
   ],
   "exclude": [
     "target/**/*",

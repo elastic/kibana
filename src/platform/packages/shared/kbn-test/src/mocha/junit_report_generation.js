@@ -13,12 +13,11 @@ import { dirname, relative } from 'path';
 import { writeFileSync, mkdirSync } from 'fs';
 import { inspect } from 'util';
 
-import xmlBuilder from 'xmlbuilder';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getUniqueJunitReportPath } from '../report_path';
 
 import { getSnapshotOfRunnableLogs } from './log_cache';
-import { escapeCdata } from '../..';
+import { escapeCdata, XmlElement } from './xml';
 import { prettifyCommandLine } from '../prettify_command_line';
 import { isMochaTimeoutError } from './mocha_timeout';
 
@@ -30,6 +29,7 @@ export function setupJUnitReportGeneration(runner, options = {}) {
     rootDirectory = REPO_ROOT,
     getTestMetadata = () => ({}),
     metadata,
+    target,
     log = new ToolingLog({ level: 'error', writeTo: process.stderr }),
   } = options;
 
@@ -116,15 +116,11 @@ export function setupJUnitReportGeneration(runner, options = {}) {
 
     const commandLine = prettifyCommandLine(process.argv);
 
-    const root = xmlBuilder.create(
-      'testsuites',
-      { encoding: 'utf-8' },
-      {},
-      { skipNullAttributes: true }
-    );
+    const root = new XmlElement('testsuites');
 
     root.att({
       name: 'ftr',
+      target,
       time: getDuration(stats),
       tests: allTests.length + failedHooks.length,
       failures: failures.length,

@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { INSPECT_OVERLAY_ID } from '../constants';
+import { isInsideDeveloperToolbar } from './is_inside_developer_toolbar';
+import { isInsideOverlay } from './is_inside_overlay';
 
 /**
  * Get the topmost HTML element at the given mouse event's coordinates.
+ * The developer toolbar is not inspectable, nor is whatever it covers.
  * @param {MouseEvent} event The mouse event containing the coordinates.
  * @return {HTMLElement | null} The topmost inspectable HTML element at the event's coordinates, or null if none found.
  */
@@ -19,11 +21,11 @@ export const getElementFromPoint = (event: MouseEvent): HTMLElement | null => {
 
   for (const el of elements) {
     const isSvg = el instanceof SVGElement;
-    const isOverlay = el.id === INSPECT_OVERLAY_ID;
     const isPath = isSvg && el.tagName.toLowerCase() === 'path';
     const isNotInspectable = !(el instanceof HTMLElement) && !isSvg;
 
-    if (isNotInspectable || isOverlay || isPath) continue;
+    if (isNotInspectable || isInsideOverlay(el) || isPath) continue;
+    if (isInsideDeveloperToolbar(el)) return null;
 
     return isSvg ? el.parentElement : el;
   }

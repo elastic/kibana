@@ -32,6 +32,9 @@ export interface ToolUsageScore {
   explanation: string;
 }
 
+/** The deadline in seconds the grounding skill requires on every `execute_esql` call. */
+const ESQL_DEADLINE_SECONDS = 60;
+
 const isTool = isToolId;
 
 const calledCanonical = (calledTools: Set<string>, canonical: string): boolean =>
@@ -299,19 +302,37 @@ export const scoreToolUsage = ({
 
   const expected = [TOOL_ID_EXECUTE_ESQL, TOOL_ID_KI_SEARCH, TOOL_ID_EVENT_SEARCH];
   const missing = expected.filter((t) => !calledCanonical(calledTools, t));
-  const score = (expected.length - missing.length) / expected.length;
+  const coverageScore = (expected.length - missing.length) / expected.length;
+  const esqlCalls = orderedCalls.filter(({ toolId }) => isTool(toolId, TOOL_ID_EXECUTE_ESQL));
+  const withoutDeadline = esqlCalls.filter(
+    ({ params }) => params.timeout_seconds !== ESQL_DEADLINE_SECONDS
+  );
+  const deadlineShare =
+    esqlCalls.length === 0 ? 1 : (esqlCalls.length - withoutDeadline.length) / esqlCalls.length;
+  const score = coverageScore * deadlineShare;
+  const deadlineNote = `${withoutDeadline.length} of ${esqlCalls.length} ${TOOL_ID_EXECUTE_ESQL} calls did not pass timeout_seconds: ${ESQL_DEADLINE_SECONDS}`;
   const persistenceCalls = summarizePersistenceCalls(steps, TOOL_ID_EVENTS_WRITE);
+  if (missing.length > 0) {
+    return {
+      score,
+      label: `missing-${missing.join('-')}`,
+      explanation:
+        withoutDeadline.length > 0
+          ? `Missing tools: ${missing.join(', ')}; ${deadlineNote}`
+          : `Missing tools: ${missing.join(', ')}`,
+    };
+  }
+  if (withoutDeadline.length > 0) {
+    return { score, label: 'missing-esql-deadline', explanation: deadlineNote };
+  }
   return {
     score,
-    label: missing.length === 0 ? 'correct' : `missing-${missing.join('-')}`,
-    explanation:
-      score === 1
-        ? persistenceCalls.retriedPartialFailure
-          ? 'Correctly called all tools and retried only failed event items'
-          : persistenceCalls.retriedSchemaFailure
-          ? 'Correctly called all tools and retried after a schema or tool error'
-          : 'Correctly called all tools'
-        : `Missing tools: ${missing.join(', ')}`,
+    label: 'correct',
+    explanation: persistenceCalls.retriedPartialFailure
+      ? 'Correctly called all tools and retried only failed event items'
+      : persistenceCalls.retriedSchemaFailure
+      ? 'Correctly called all tools and retried after a schema or tool error'
+      : 'Correctly called all tools',
   };
 };
 

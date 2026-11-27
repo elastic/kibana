@@ -41,6 +41,7 @@ import {
 import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import type { SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plugin/common';
 import type { OperationMetadata, DatasourcePublicAPI, DatasourceLayers } from '@kbn/lens-common';
+import { LENS_XY_HIDE_ENDZONES_DEFAULT } from '@kbn/lens-common';
 import type {
   XYVisualizationState,
   YConfig,
@@ -211,9 +212,18 @@ export const buildXYExpression = (
     }));
 
   // sorting doesn't change anything so we don't sort reference layers (TODO: should we make it work?)
-  const validReferenceLayers = getReferenceLayers(state.layers).filter((layer) =>
-    Boolean(layer.accessors.length)
-  );
+  const validReferenceLayers = getReferenceLayers(state.layers)
+    .map((layer) => {
+      const datasource = datasourceLayers[layer.layerId];
+      if (!datasource?.isTextBasedLanguage()) return layer;
+      return {
+        ...layer,
+        accessors: layer.accessors.filter((accessor) =>
+          datasource.getOperationForColumnId(accessor)
+        ),
+      };
+    })
+    .filter((layer) => Boolean(layer.accessors.length));
 
   const uniqueLabels = getUniqueLabels(state.layers);
   const validAnnotationsLayers = getAnnotationsLayers(state.layers)
@@ -347,7 +357,7 @@ export const buildXYExpression = (
     pointVisibility: state.pointVisibility ?? PointVisibilityOptions.AUTO,
     areaFill: state.areaFill ?? defaultAreaFill,
     valueLabels: state.valueLabels ?? 'hide',
-    hideEndzones: state.hideEndzones ?? false,
+    hideEndzones: state.hideEndzones ?? LENS_XY_HIDE_ENDZONES_DEFAULT,
     addTimeMarker:
       (isTimeChart(validDataLayers, { datasourceLayers }) && state.showCurrentTimeMarker) ?? false,
     yAxisConfigs: [...yAxisConfigsToExpression(yAxisConfigs)],

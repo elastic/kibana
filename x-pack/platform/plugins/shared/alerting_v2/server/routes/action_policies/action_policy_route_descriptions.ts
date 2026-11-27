@@ -8,6 +8,9 @@
 export const ACTION_POLICY_NOT_FOUND_DESCRIPTION =
   'Indicates an action policy with the given ID does not exist.';
 
+export const ACTION_POLICY_ALREADY_EXISTS_DESCRIPTION =
+  'Indicates an action policy with the given ID already exists.';
+
 export const ACTION_POLICY_VERSION_CONFLICT_DESCRIPTION =
   'Indicates the action policy was concurrently updated by another caller.';
 

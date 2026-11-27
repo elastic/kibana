@@ -252,6 +252,94 @@ describe('buildFanoutMatrix - override / no-config parity', () => {
     ]);
   });
 
+  it("carries a shard's judge onto each of its steps, PR and weekly", () => {
+    const suiteInfo = {
+      shards: [
+        { id: 's1', specFiles: [DISCOVERY] },
+        { id: 's2', specFiles: [QUERY_GEN], judge: 'eis-c' },
+      ],
+      specModelGroups: [{ files: [QUERY_GEN], models: ['eis/a'] }],
+      weeklyEisModelGroups: ['eis/a', 'eis/b'],
+    };
+    const build = (perSpec) =>
+      buildFanoutMatrix({
+        connectors: CONNECTORS,
+        suiteInfo,
+        requestedModelGroups: ['eis/a', 'eis/b'],
+        perSpec,
+        grepOverride: false,
+      });
+
+    expect(build(false)).toEqual([
+      { connectorId: 'eis-a', shardId: 's1', specFiles: [DISCOVERY] },
+      { connectorId: 'eis-b', shardId: 's1', specFiles: [DISCOVERY] },
+      { connectorId: 'eis-a', shardId: 's2', specFiles: [QUERY_GEN], judge: 'eis-c' },
+      { connectorId: 'eis-b', shardId: 's2', specFiles: [QUERY_GEN], judge: 'eis-c' },
+    ]);
+    expect(build(true)).toEqual([
+      { connectorId: 'eis-a', shardId: 's1', specFiles: [DISCOVERY] },
+      { connectorId: 'eis-b', shardId: 's1', specFiles: [DISCOVERY] },
+      { connectorId: 'eis-a', shardId: 's2', specFiles: [QUERY_GEN], judge: 'eis-c' },
+    ]);
+  });
+
+  it("carries a shard's concurrency group onto each of its steps, PR and weekly", () => {
+    const suiteInfo = {
+      shards: [
+        { id: 's1', specFiles: [DISCOVERY], concurrencyGroup: 'heavy' },
+        { id: 's2', specFiles: [QUERY_GEN] },
+      ],
+      specModelGroups: [{ files: [DISCOVERY], models: ['eis/a'] }],
+      weeklyEisModelGroups: ['eis/a'],
+    };
+    const build = (perSpec) =>
+      buildFanoutMatrix({
+        connectors: CONNECTORS,
+        suiteInfo,
+        requestedModelGroups: ['eis/a'],
+        perSpec,
+        grepOverride: false,
+      });
+
+    const expected = [
+      { connectorId: 'eis-a', shardId: 's1', specFiles: [DISCOVERY], concurrencyGroup: 'heavy' },
+      { connectorId: 'eis-a', shardId: 's2', specFiles: [QUERY_GEN] },
+    ];
+    expect(build(false)).toEqual(expected);
+    expect(build(true)).toEqual(expected);
+    expect(
+      formatFanoutMatrix(expected)
+        .split('\n')
+        .map((line) => JSON.parse(line))
+    ).toEqual(expected);
+  });
+
+  it("puts a step that isn't one shard in the suite's tightest concurrency group", () => {
+    const suiteInfo = {
+      shards: [{ id: 's1', specFiles: [DISCOVERY], concurrencyGroup: 'heavy' }],
+      concurrencyGroups: { light: 6, heavy: 2 },
+    };
+
+    expect(
+      buildFanoutMatrix({
+        connectors: CONNECTORS,
+        suiteInfo,
+        requestedModelGroups: ['eis/a'],
+        perSpec: false,
+        grepOverride: true,
+      })
+    ).toEqual([{ connectorId: 'eis-a', shardId: '', specFiles: [], concurrencyGroup: 'heavy' }]);
+    expect(
+      buildFanoutMatrix({
+        connectors: CONNECTORS,
+        suiteInfo: {},
+        requestedModelGroups: ['eis/a'],
+        perSpec: false,
+        grepOverride: true,
+      })
+    ).toEqual([{ connectorId: 'eis-a', shardId: '', specFiles: [] }]);
+  });
+
   it('selects every provisioned connector for an "all" request', () => {
     const rows = buildFanoutMatrix({
       connectors: CONNECTORS,
@@ -282,5 +370,18 @@ describe('formatFanoutMatrix', () => {
     expect(line).toBe('{"connectorId":"eis-a","shardId":"","specFiles":[]}');
     // The JSONL round-trips through the same fields run_suite.sh reads with jq.
     expect(JSON.parse(line)).toEqual({ connectorId: 'eis-a', shardId: '', specFiles: [] });
+  });
+
+  it('writes judge only for a row that has one', () => {
+    const rows = [
+      { connectorId: 'eis-a', shardId: 's1', specFiles: [DISCOVERY], judge: 'eis-c' },
+      { connectorId: 'eis-b', shardId: 's2', specFiles: [QUERY_GEN] },
+    ];
+
+    expect(
+      formatFanoutMatrix(rows)
+        .split('\n')
+        .map((line) => JSON.parse(line))
+    ).toEqual(rows);
   });
 });

@@ -1,0 +1,17 @@
+You are evaluating the conclusion of an AI alert-investigation.
+
+You will see only the agent's final answer — not the tool call history.
+Score solely on whether a root cause was identified and how well it is supported
+by what the agent states in the answer itself.
+
+Scoring guide:
+  0 = Agent gave up or only explained why it could not investigate
+      (answer is setup instructions, apology, or "I need X to proceed").
+  1 = Agent investigated but could not reach a root cause conclusion
+      (answer is "likely X but I couldn't confirm", inconclusive, or blocked).
+  2 = Root cause identified but reasoning has gaps, evidence is thin,
+      or the answer is vague about what specifically caused the issue.
+  3 = Root cause clearly identified with specific supporting evidence cited
+      (timestamps, service names, metric values, log patterns, etc.).
+
+Write the reasoning as one short sentence in your own words. Summarise the conclusion; do not quote the answer.

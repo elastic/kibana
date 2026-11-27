@@ -11,7 +11,6 @@ import { getNewRule } from '../../objects/rule';
 import { getDataTestSubjectSelector } from '../../helpers/common';
 
 import { rootRequest, deleteAlertsAndRules } from '../../tasks/api_calls/common';
-import { disableNewFlyout } from '../../tasks/api_calls/kibana_advanced_settings';
 import { expandFirstAlertHostFlyout } from '../../tasks/asset_criticality/common';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { login } from '../../tasks/login';
@@ -139,7 +138,6 @@ const deleteDataStream = () => {
 
 describe('Alert Host details expandable flyout', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
-    disableNewFlyout();
     deleteAlertsAndRules();
     login();
     createRule(getNewRule());
@@ -195,7 +193,7 @@ describe('Alert Host details expandable flyout', { tags: ['@ess', '@serverless']
       cy.get(CSP_INSIGHT_VULNERABILITIES_TITLE).should('be.visible');
     });
 
-    it('should display insight tabs and findings table upon clicking on misconfiguration accordion', () => {
+    it('should display the findings table upon clicking on vulnerabilities accordion', () => {
       cy.get(CSP_INSIGHT_VULNERABILITIES_TITLE).click();
       cy.get(CSP_INSIGHT_VULNERABILITIES_TABLE).should('be.visible');
     });

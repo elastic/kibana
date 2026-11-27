@@ -10,6 +10,7 @@ import type { ActionsClientLlm } from '@kbn/langchain/server';
 import type { ZodType } from '@kbn/zod/v4';
 import { loggerMock } from '@kbn/logging-mocks';
 import { FakeLLM } from '@langchain/core/utils/testing';
+import { ModelRefusalError } from '@kbn/langchain/server';
 
 import {
   getParsedAttackDiscoveriesMock,
@@ -419,5 +420,30 @@ ${ATTACK_DISCOVERY_REFINE}
       generationAttempts: 10,
       refinements: ['refine1', response],
     });
+  });
+
+  it('stops on a model refusal, even with unrefined results, instead of retrying', async () => {
+    const mockInvoke = getChainWithFormatInstructions({ llm: mockLlm, generationSchema }).chain
+      .invoke as jest.Mock;
+    mockInvoke.mockRejectedValueOnce(
+      new ModelRefusalError({
+        connectorId: 'mock-connector',
+        partialContentLength: 0,
+        refusal:
+          'The response was stopped by the provider content filter (finish_reason: content_filter).',
+      })
+    );
+
+    const refineNode = getRefineNode({
+      llm: mockLlm,
+      logger: mockLogger,
+      responseIsHallucinated: mockResponseIsHallucinated,
+      generationSchema,
+    });
+
+    await expect(refineNode(initialGraphState)).rejects.toThrow(
+      'content filter (finish_reason: content_filter)'
+    );
+    expect(mockInvoke).toHaveBeenCalledTimes(1);
   });
 });

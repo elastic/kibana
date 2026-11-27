@@ -17,6 +17,7 @@ import { MessageRole } from '@kbn/inference-common';
 import { DEFAULT_TIMEOUT, getDefaultArguments } from './constants';
 
 import { getMessageContentAndRole } from './helpers';
+import { throwIfModelRefusal } from './model_refusal_error';
 import type { TraceOptions } from './types';
 
 const LLM_TYPE = 'ActionsClientLlm';
@@ -141,6 +142,9 @@ export class ActionsClientLlm extends LLM {
           temperature: this.temperature,
           modelName: this.model,
           timeout: this.#timeout,
+          ...(this.telemetryMetadata != null
+            ? { metadata: { connectorTelemetry: this.telemetryMetadata } }
+            : {}),
         });
 
         // raw response for .inference/EIS connectors (via the inference client's chatComplete):
@@ -148,6 +152,13 @@ export class ActionsClientLlm extends LLM {
           () =>
             `${LLM_TYPE}#_call response\ntraceId: ${this.#traceId}\nresponse:\n${result.content}`
         );
+
+        throwIfModelRefusal({
+          connectorId: this.#connectorId,
+          content: result.content,
+          model: this.model,
+          refusal: result.refusal,
+        });
 
         return result.content;
       } catch (error) {

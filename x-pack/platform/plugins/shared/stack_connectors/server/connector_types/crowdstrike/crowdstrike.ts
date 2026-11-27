@@ -36,8 +36,6 @@ import {
 import { CrowdStrikeSessionManager } from './rtr_session_manager';
 import { CrowdStrikeTokenManager } from './token_manager';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
-import type { NodeSystemError } from './types';
-import { isAggregateError } from './types';
 import { CrowdstrikeError } from './error';
 
 const SUPPORTED_RTR_COMMANDS = ['runscript'];
@@ -396,20 +394,6 @@ export class CrowdstrikeConnector extends SubActionConnector<
     const errorData = error.response?.data?.errors?.[0];
     if (errorData) {
       return errorData.message;
-    }
-
-    const cause: NodeSystemError = isAggregateError(error.cause)
-      ? error.cause.errors[0]
-      : error.cause;
-    if (cause) {
-      // ENOTFOUND is the error code for when the host is unreachable eg. api.crowdstrike.com111
-      if (cause.code === 'ENOTFOUND') {
-        return `URL not found: ${cause.hostname}`;
-      }
-      // ECONNREFUSED is the error code for when the host is unreachable eg. http://MacBook-Pro-Tomasz.local:55555
-      if (cause.code === 'ECONNREFUSED') {
-        return `Connection Refused: ${cause.address}:${cause.port}`;
-      }
     }
 
     if (!error.response?.status) {

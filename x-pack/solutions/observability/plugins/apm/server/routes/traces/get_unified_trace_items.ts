@@ -56,7 +56,8 @@ import { compactMap } from '../../utils/compact_map';
 import { createApmEventFieldsAccessor } from '../../utils/create_apm_event_fields_accessor';
 import { getSpanLinksCountById } from '../span_links/get_linked_children';
 import { getUnifiedTraceErrors, type UnifiedTraceErrors } from './get_unified_trace_errors';
-import { fields, getUnifiedTraceItemsPaginated } from './get_unified_trace_items_page';
+import { getUnifiedTraceItemsPaginated } from './get_unified_trace_items_page';
+import { fields } from './trace_constants';
 
 export function getErrorsByDocId(unifiedTraceErrors: UnifiedTraceErrors) {
   const groupedErrorsByDocId: Record<
@@ -95,6 +96,7 @@ export async function getUnifiedTraceItems({
   end,
   serviceName,
   ecsOnly = false,
+  focusedDocId,
 }: {
   apmEventClient: APMEventClient;
   logsClient: LogsClient;
@@ -105,6 +107,7 @@ export async function getUnifiedTraceItems({
   end: number;
   serviceName?: string;
   ecsOnly?: boolean;
+  focusedDocId?: string;
 }): Promise<{
   traceItems: TraceItem[];
   unifiedTraceErrors: UnifiedTraceErrors;
@@ -128,6 +131,7 @@ export async function getUnifiedTraceItems({
       end,
       serviceName,
       ecsOnly,
+      focusedDocId,
     }),
     getSpanLinksCountById({
       traceId,

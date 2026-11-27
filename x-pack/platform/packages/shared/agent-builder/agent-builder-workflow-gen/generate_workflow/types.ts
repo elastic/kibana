@@ -131,6 +131,11 @@ export interface ToolResultAction {
    */
   currentYaml?: string;
   /**
+   * Present when the tool changed the YAML. Unified diff of the change, so
+   * older tool results stay readable after their full YAML is dropped.
+   */
+  diff?: string;
+  /**
    * Present when the tool mutated the YAML and validation was run on the
    * new state. The agent uses this to self-correct mid-loop.
    */

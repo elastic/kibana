@@ -10,9 +10,6 @@ import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugi
 import { SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { createSyncWorkflowService } from './sync_workflow';
 
-// pollUntil waits 2s between polls; the waits themselves are not under test.
-jest.mock('timers/promises', () => ({ setTimeout: jest.fn().mockResolvedValue(undefined) }));
-
 const createLogger = (): Logger => {
   const logger = {
     get: jest.fn(),
@@ -113,60 +110,6 @@ describe('SyncWorkflowService', () => {
 
     expect(managedWorkflowsClient.install).toHaveBeenCalledTimes(1);
     expect(managementApi.updateWorkflow).not.toHaveBeenCalled();
-    expect(logger.warn).toHaveBeenCalled();
-  });
-
-  it('stops the legacy default-space sync document and uninstalls it once its runs finish', async () => {
-    const workflows: Record<string, { enabled: boolean }> = {
-      [`${SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID}-default`]: { enabled: false },
-      [SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID]: { enabled: true },
-    };
-    (managementApi.getWorkflow as jest.Mock).mockImplementation(
-      async (id: string) => workflows[id] ?? null
-    );
-    (managementApi.getWorkflowExecutions as jest.Mock)
-      .mockResolvedValueOnce({ results: [{ id: 'exec-1' }], total: 1 })
-      .mockResolvedValue({ results: [], total: 0 });
-
-    await createService().ensureEnabled({ request, spaceId: 'default' });
-
-    expect(managementApi.updateWorkflow).toHaveBeenCalledWith(
-      SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
-      { enabled: false },
-      'default',
-      request
-    );
-    expect(managementApi.cancelAllActiveWorkflowExecutions).toHaveBeenCalledWith(
-      SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
-      'default',
-      request
-    );
-    expect(managedWorkflowsClient.uninstall).toHaveBeenCalledWith(
-      SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
-      { spaceId: 'default' }
-    );
-    const [lastPollOrder] = (
-      managementApi.getWorkflowExecutions as jest.Mock
-    ).mock.invocationCallOrder.slice(-1);
-    const [uninstallOrder] = managedWorkflowsClient.uninstall.mock.invocationCallOrder;
-    expect(uninstallOrder).toBeGreaterThan(lastPollOrder);
-  });
-
-  it('does not uninstall the legacy document when enabling in a non-default space', async () => {
-    (managementApi.getWorkflow as jest.Mock).mockResolvedValue({ enabled: false });
-
-    await createService().ensureEnabled({ request, spaceId });
-
-    expect(managedWorkflowsClient.uninstall).not.toHaveBeenCalled();
-  });
-
-  it('logs a warning but does not throw when legacy uninstall fails', async () => {
-    (managementApi.getWorkflow as jest.Mock).mockResolvedValue({ enabled: false });
-    managedWorkflowsClient.uninstall.mockRejectedValue(new Error('uninstall failed'));
-
-    await expect(
-      createService().ensureEnabled({ request, spaceId: 'default' })
-    ).resolves.not.toThrow();
     expect(logger.warn).toHaveBeenCalled();
   });
 });

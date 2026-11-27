@@ -55,10 +55,7 @@ apiTest.describe(
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body.datasetUserPrivileges).toMatchObject({
-        datasetsPrivilages: { 'logs-*-*': { canRead: false, canMonitor: false } },
-        canViewIntegrations: false,
-      });
+      expect(response.body.canViewIntegrations).toBe(false);
       expect(response.body.dataStreamsStats).toStrictEqual([]);
     });
   }

@@ -40,7 +40,7 @@ const zeroKiStats = { active: zeroStats, expired: zeroStats, deleted: zeroStats 
 const countsResponse = (counts: Record<string, number>) => ({
   columns: [
     { name: 'count', type: 'long' },
-    { name: 'lifecycle', type: 'keyword' },
+    { name: 'ki_status', type: 'keyword' },
   ],
   values: Object.entries(counts).map(([lifecycle, count]) => [count, lifecycle]),
 });

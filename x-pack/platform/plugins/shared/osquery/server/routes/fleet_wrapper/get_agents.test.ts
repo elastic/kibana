@@ -30,8 +30,14 @@ describe('getAgentsRoute', () => {
   const mockAgentService = {
     asInternalScopedUser: jest.fn().mockReturnValue({ listAgents: mockListAgents }),
   };
-  const mockPackagePolicyService = { list: jest.fn() };
+  const mockPackagePolicyService = { fetchAllItems: jest.fn() };
   const mockAgentPolicyService = { getByIds: jest.fn() };
+
+  /** `fetchAllItems` resolves to an async iterable of pages, as Fleet's PIT-backed one does. */
+  const packagePolicyPages = (pages: Array<Array<Record<string, unknown>>>) =>
+    (async function* () {
+      yield* pages;
+    })();
 
   const createMockRequest = (kuery = '') =>
     httpServerMock.createKibanaRequest({
@@ -47,9 +53,9 @@ describe('getAgentsRoute', () => {
     jest.clearAllMocks();
 
     mockAgentService.asInternalScopedUser.mockReturnValue({ listAgents: mockListAgents });
-    mockPackagePolicyService.list.mockResolvedValue({
-      items: [{ package: { version: '1.0.0' }, policy_ids: ['policy-1'] }],
-    });
+    mockPackagePolicyService.fetchAllItems.mockResolvedValue(
+      packagePolicyPages([[{ package: { version: '1.0.0' }, policy_ids: ['policy-1'] }]])
+    );
     mockAgentPolicyService.getByIds.mockResolvedValue([
       { id: 'policy-1', name: 'Production Policy' },
     ]);
@@ -77,6 +83,12 @@ describe('getAgentsRoute', () => {
     }
 
     routeHandler = routeVersion.handler;
+  });
+
+  it('requires Osquery Read, not just run_saved_queries', () => {
+    const route = mockRouter.versioned.getRoute('get', '/internal/osquery/fleet_wrapper/agents');
+
+    expect(route.config.security?.authz).toEqual({ requiredPrivileges: ['osquery-read'] });
   });
 
   it('merges version-suffixed policy buckets and resolves the base policy name', async () => {
@@ -121,13 +133,52 @@ describe('getAgentsRoute', () => {
 
     // Top level must be the AND that binds the search clause to the policy scope.
     expect(receivedKueryNode().function).toBe('and');
+    expect(receivedEsQuery()).toContain('policy-1');
+    // Fleet rejects `policy_name`, which is not an agent field.
+    expect(receivedKueryString()).not.toContain('policy_name');
+  });
+
+  it('replaces the policy_name clause of a generated search with the resolved policy ids', async () => {
+    const mockResponse = httpServerMock.createResponseFactory();
+    await routeHandler(
+      {} as never,
+      createMockRequest(buildAgentSearchKuery('Production Policy')) as never,
+      mockResponse
+    );
+
+    expect(mockResponse.badRequest).not.toHaveBeenCalled();
+    expect(receivedKueryString()).not.toContain('policy_name');
+
+    const node = receivedKueryNode();
+    expect(node.function).toBe('and');
+    // The policy-id match for the name is an alternative to the host search terms.
+    const [searchNode] = node.arguments as KueryNode[];
+    expect(searchNode.function).toBe('or');
+    const searchEsQuery = JSON.stringify(toElasticsearchQuery(searchNode));
+    expect(searchEsQuery).toContain('Production Policy');
+    expect(searchEsQuery).toContain('policy-1');
+  });
+
+  it('replaces only the trailing policy_name clause when the search text contains one', async () => {
+    const mockResponse = httpServerMock.createResponseFactory();
+    await routeHandler(
+      {} as never,
+      createMockRequest(buildAgentSearchKuery('web or policy_name:Production')) as never,
+      mockResponse
+    );
+
+    expect(mockResponse.badRequest).not.toHaveBeenCalled();
+    expect(receivedKueryNode().function).toBe('and');
+
     const esQuery = receivedEsQuery();
-    expect(esQuery).toContain('policy-1');
-    expect(esQuery).toContain('prod');
+    // No clause filters on the `policy_name` field...
+    expect(esQuery).not.toContain('"policy_name"');
+    // ...and the quoted hostname clause keeps the raw search text intact.
+    expect(esQuery).toContain('"local_metadata.host.hostname":"web or policy_name:Production"');
   });
 
   it('returns empty result when no osquery policies exist', async () => {
-    mockPackagePolicyService.list.mockResolvedValue({ items: [] });
+    mockPackagePolicyService.fetchAllItems.mockResolvedValue(packagePolicyPages([[]]));
     const mockResponse = httpServerMock.createResponseFactory();
     await routeHandler({} as never, createMockRequest('') as never, mockResponse);
 
@@ -137,13 +188,40 @@ describe('getAgentsRoute', () => {
     });
   });
 
+  it('includes osquery package policies past the first page', async () => {
+    mockPackagePolicyService.fetchAllItems.mockResolvedValue(
+      packagePolicyPages([
+        [{ package: { version: '1.0.0' }, policy_ids: ['policy-1'] }],
+        [{ package: { version: '1.0.0' }, policy_ids: ['policy-2'] }],
+      ])
+    );
+    mockAgentPolicyService.getByIds.mockResolvedValue([
+      { id: 'policy-1', name: 'One' },
+      { id: 'policy-2', name: 'Two' },
+    ]);
+    const mockResponse = httpServerMock.createResponseFactory();
+    await routeHandler({} as never, createMockRequest('') as never, mockResponse);
+
+    const esQuery = receivedEsQuery();
+    // One PIT-backed iteration covers every page, however many there are.
+    expect(mockPackagePolicyService.fetchAllItems).toHaveBeenCalledTimes(1);
+    expect(mockPackagePolicyService.fetchAllItems).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ kuery: expect.stringContaining('osquery_manager') })
+    );
+    expect(esQuery).toContain('policy-1');
+    expect(esQuery).toContain('policy-2');
+  });
+
   it('excludes pre-0.6.0 package versions from the policy scope', async () => {
-    mockPackagePolicyService.list.mockResolvedValue({
-      items: [
-        { package: { version: '0.5.0' }, policy_ids: ['old-policy'] },
-        { package: { version: '1.0.0' }, policy_ids: ['new-policy'] },
-      ],
-    });
+    mockPackagePolicyService.fetchAllItems.mockResolvedValue(
+      packagePolicyPages([
+        [
+          { package: { version: '0.5.0' }, policy_ids: ['old-policy'] },
+          { package: { version: '1.0.0' }, policy_ids: ['new-policy'] },
+        ],
+      ])
+    );
     mockAgentPolicyService.getByIds.mockResolvedValue([{ id: 'new-policy', name: 'New' }]);
     const mockResponse = httpServerMock.createResponseFactory();
     await routeHandler({} as never, createMockRequest('') as never, mockResponse);
@@ -186,10 +264,13 @@ describe('getAgentsRoute', () => {
       mockResponse
     );
 
-    const esQuery = receivedEsQuery();
-    expect(esQuery).toContain('policy-1');
-    expect(esQuery).toContain('nonexistent');
-    expect(receivedKueryNode().function).toBe('and');
+    expect(receivedKueryString()).not.toContain('policy_name');
+    const node = receivedKueryNode();
+    expect(node.function).toBe('and');
+    // A name that matches no policy still matches no agent, rather than dropping the filter.
+    const [searchNode] = node.arguments as KueryNode[];
+    expect(JSON.stringify(toElasticsearchQuery(searchNode))).toContain('"policy_id":""');
+    expect(receivedEsQuery()).toContain('policy-1');
   });
   it('keeps the policy scope inescapable for an escaped hostile search term', async () => {
     // What the client sends for searchValue `a) or (b` after escapeKuery.
@@ -204,6 +285,7 @@ describe('getAgentsRoute', () => {
 
     // Fleet's `includeUnenrolled` calls `.toLowerCase()`, so this must be a string.
     expect(typeof receivedKueryString()).toBe('string');
+    expect(receivedKueryString()).not.toContain('policy_name');
 
     const node = receivedKueryNode();
     expect(node.function).toBe('and');

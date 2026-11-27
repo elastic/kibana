@@ -6,7 +6,7 @@
  */
 import { z } from '@kbn/zod';
 
-import type { sloTemplateSchema } from '../../schema/zod/slo_template';
+import type { sloTemplateSchema } from '../../schema/slo_template';
 
 const getSLOTemplateParamsSchema = z.object({
   path: z.object({

@@ -22,5 +22,6 @@
     "@kbn/std",
     "@kbn/some-dev-log",
     "@kbn/dev-proc-runner",
+    "@kbn/ts-type-check-cli",
   ]
 }

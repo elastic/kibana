@@ -102,7 +102,8 @@ interface ResolvedFeatureEndpoints {
  * 3. First non-empty recommendedEndpoints found in the chain
  * 4. Kibana default chat-completion endpoint
  *
- * Only recommendedEndpoints carry parameters; SO override endpoints are returned without them.
+ * SO override endpoints carry only their own stored parameters; they never inherit
+ * parameters declared in recommendedEndpoints.
  */
 export const resolveFeatureEndpoints = (
   registry: InferenceFeatureRegistry,
@@ -136,7 +137,7 @@ export const resolveFeatureEndpoints = (
   const initialSoEntry = soFeaturesMap.get(currentId);
   if (initialSoEntry && initialSoEntry.endpoints.length > 0) {
     return {
-      endpoints: initialSoEntry.endpoints.map(({ id }) => ({ id })),
+      endpoints: initialSoEntry.endpoints.map(({ id, parameters }) => ({ id, parameters })),
       warnings: [],
       soEntryFound: true,
     };
@@ -179,7 +180,7 @@ export const resolveFeatureEndpoints = (
       const soEntry = soFeaturesMap.get(currentId);
       if (soEntry && soEntry.endpoints.length > 0) {
         return {
-          endpoints: soEntry.endpoints.map(({ id }) => ({ id })),
+          endpoints: soEntry.endpoints.map(({ id, parameters }) => ({ id, parameters })),
           warnings: [],
           soEntryFound: true,
         };

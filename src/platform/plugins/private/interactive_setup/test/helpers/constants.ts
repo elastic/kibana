@@ -7,6 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/** Interactive setup routes are `internal`, so every request must identify as coming from Kibana. */
+export const INTERNAL_API_HEADERS = {
+  'kbn-xsrf': 'xxx',
+  'x-elastic-internal-origin': 'kibana',
+} as const;
+
 /** Shared by both manual-configuration suites (with and without TLS). */
 export const CONFIGURE_ROUTE = '/internal/interactive_setup/configure';
 

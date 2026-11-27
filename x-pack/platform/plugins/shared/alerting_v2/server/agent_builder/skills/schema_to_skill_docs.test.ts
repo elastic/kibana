@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import { parse } from 'yaml';
 import { z } from '@kbn/zod/v4';
+import { createWorkflowLiquidEngine } from '@kbn/workflows';
+import { ALERTING_TOOL_IDS } from '@kbn/alerting-v2-constants';
 import {
   groupingModeSchema,
   MATCHER_CONTEXT_FIELDS,
@@ -65,6 +68,7 @@ const alertKeyGuard: Record<keyof ActionPolicyWorkflowPayloadAlert, true> = {
   space_id: true,
   group_hash: true,
   alert_id: true,
+  alert_url: true,
   alert_status: true,
   severity: true,
   data: true,
@@ -786,14 +790,18 @@ describe('schema_to_skill_docs', () => {
       expect(generateSingleRuleActionPolicyDoc()).toMatchSnapshot();
     });
 
-    it('instructs the link-tag flow and defers shared policies to the multi-rule reference', () => {
+    it('instructs the link tool flow and defers shared policies to the multi-rule reference', () => {
       const doc = generateSingleRuleActionPolicyDoc();
       expect(doc).toContain('# Single-rule Action Policies');
       expect(doc).toContain('manage_rule');
       expect(doc).toContain('set_metadata');
       expect(doc).toContain('set_destinations');
-      expect(doc).toContain('set_matcher');
-      expect(doc).toContain('notify-');
+      expect(doc).toContain(ALERTING_TOOL_IDS.linkRuleAndActionPolicy);
+      expect(doc).toContain('Never set this tag by hand');
+      expect(doc).toContain('Do **not** set `matcher.tags` yourself');
+      expect(doc).toContain('Render after linking');
+      expect(doc).toContain('`actionPolicyAttachment.version`');
+      expect(doc).not.toContain('notify-');
       expect(doc).not.toContain('rule.id:');
       expect(doc).toContain('kind: signal');
       expect(doc).toContain('(./action-policy-multi-rule.md)');
@@ -806,6 +814,13 @@ describe('schema_to_skill_docs', () => {
       expect(doc).not.toContain('leave as catch-all');
       expect(doc).not.toContain('omit set_matcher');
       expect(doc).not.toContain('omit `set_matcher`');
+    });
+
+    it('warns that the policy is a catch-all until it is linked', () => {
+      const doc = generateSingleRuleActionPolicyDoc();
+
+      expect(doc).toContain('space-wide catch-all');
+      expect(doc).toContain('Never present the policy to the user before linking it');
     });
   });
 
@@ -877,6 +892,56 @@ describe('schema_to_skill_docs', () => {
       expect(doc).toContain('inputs.payload.rules[alert.rule_id].name');
       expect(doc).not.toContain('## Liquid Templates');
       expect(doc).not.toContain('./references/');
+    });
+
+    it('renders the example message in the standard alert layout', () => {
+      const doc = generateActionPolicyWorkflowPayloadDoc();
+      const [, exampleYaml = ''] = doc.match(/## Example[\s\S]*?```yaml\n([\s\S]*?)\n```/) ?? [];
+      const { steps } = parse(exampleYaml) as { steps: Array<{ with: { message: string } }> };
+
+      // Same options as the templating engine of the workflows execution engine.
+      const engine = createWorkflowLiquidEngine({ strictFilters: true, strictVariables: false });
+      const lastEventTimestamp = '2026-10-30T13:42:00.000Z';
+      const alertUrl = (alertId: string): string =>
+        `https://kibana.example.com/app/observability/alerting/alerts/${alertId}`;
+      const payload = {
+        alerts: [
+          {
+            alert_id: 'alert-1',
+            alert_url: alertUrl('alert-1'),
+            alert_status: 'active',
+            severity: 'high',
+            rule_id: 'rule-1',
+            last_event_timestamp: lastEventTimestamp,
+            data: { host: { name: 'prod-1' }, error_count: 12 },
+          },
+          {
+            alert_id: 'alert-2',
+            alert_url: alertUrl('alert-2'),
+            alert_status: 'recovering',
+            rule_id: null,
+            last_event_timestamp: lastEventTimestamp,
+          },
+        ],
+        rules: { 'rule-1': { name: 'High error count' } },
+      };
+
+      expect(engine.parseAndRenderSync(steps[0].with.message, { inputs: { payload } })).toBe(
+        [
+          '**2 alerts**',
+          '',
+          '**High error count** — Active · High\\',
+          `Last event 2026-10-30 13:42 UTC · [View in app](${alertUrl('alert-1')})\\`,
+          'Alert id: alert-1\\',
+          'Host: prod-1 · Errors: 12',
+          '',
+          '**Unnamed rule** — Recovering\\',
+          `Last event 2026-10-30 13:42 UTC · [View in app](${alertUrl('alert-2')})\\`,
+          'Alert id: alert-2\\',
+          'Host: unknown · Errors: n/a',
+          '',
+        ].join('\n')
+      );
     });
   });
 

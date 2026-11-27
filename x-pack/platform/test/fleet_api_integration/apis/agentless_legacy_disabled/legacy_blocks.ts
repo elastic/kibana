@@ -23,7 +23,8 @@ interface LegacyBlockResponse {
 }
 
 export default function (providerContext: FtrProviderContext) {
-  describe('Legacy policy API blocks for agentless', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/299687
+  describe.skip('Legacy policy API blocks for agentless', () => {
     const { getService } = providerContext;
     const es = getService('es');
     const supertest = getService('supertest');

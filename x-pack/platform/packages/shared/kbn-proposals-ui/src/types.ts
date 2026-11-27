@@ -21,6 +21,7 @@ export interface ApprovalAction {
   fill?: boolean;
   isDisabled?: boolean;
   isLoading?: boolean;
+  disabledReason?: string;
   'data-test-subj'?: string;
 }
 
@@ -71,6 +72,8 @@ export type ApprovalProposal = Pick<
   | 'category'
   | 'expiresAt'
   | 'actionWorkflowId'
+  | 'actionInput'
+  | 'actionExecutionId'
   | 'action'
   | 'decision'
   | 'decidedBy'

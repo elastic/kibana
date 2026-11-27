@@ -2194,6 +2194,44 @@ describe('EPM template', () => {
       });
     });
 
+    it('should URL-encode non-ASCII data stream names in the lifecycle update path', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.indices.getDataStream.mockResponse({
+        data_streams: [{ name: 'test-auß' }],
+      } as any);
+
+      esClient.indices.simulateTemplate.mockResponse({
+        template: {
+          settings: { index: {} },
+          mappings: { properties: {} },
+          lifecycle: {
+            data_retention: '7d',
+          },
+        },
+      } as any);
+
+      const logger = loggerMock.create();
+      await updateCurrentWriteIndices(esClient, logger, [
+        {
+          templateName: 'test',
+          indexTemplate: {
+            index_patterns: ['test-*'],
+            template: {
+              settings: { index: {} },
+              mappings: { properties: {} },
+            },
+          } as any,
+        },
+      ]);
+
+      expect(esClient.transport.request).toHaveBeenCalledWith(
+        expect.objectContaining({
+          method: 'PUT',
+          path: '_data_stream/test-au%C3%9F/_lifecycle',
+        })
+      );
+    });
+
     it('should fill constant keywords from previous mappings', async () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
 
@@ -2339,6 +2377,45 @@ describe('EPM template', () => {
       expect(esClient.transport.request).toHaveBeenCalledWith(
         expect.objectContaining({
           path: '/test.prefix1-default/_rollover',
+          querystring: {
+            lazy: true,
+          },
+        })
+      );
+    });
+
+    it('should URL-encode non-ASCII data stream names in the rollover path', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.indices.getDataStream.mockResponse({
+        data_streams: [{ name: 'test.prefix1-auß' }],
+      } as any);
+      esClient.indices.simulateTemplate.mockImplementation(() => {
+        throw new errors.ResponseError({
+          statusCode: 400,
+          body: {
+            error: {
+              type: 'illegal_argument_exception',
+            },
+          },
+        } as any);
+      });
+      const logger = loggerMock.create();
+      await updateCurrentWriteIndices(esClient, logger, [
+        {
+          templateName: 'test',
+          indexTemplate: {
+            index_patterns: ['test.*-*'],
+            template: {
+              settings: { index: {} },
+              mappings: { properties: {} },
+            },
+          } as any,
+        },
+      ]);
+
+      expect(esClient.transport.request).toHaveBeenCalledWith(
+        expect.objectContaining({
+          path: '/test.prefix1-au%C3%9F/_rollover',
           querystring: {
             lazy: true,
           },

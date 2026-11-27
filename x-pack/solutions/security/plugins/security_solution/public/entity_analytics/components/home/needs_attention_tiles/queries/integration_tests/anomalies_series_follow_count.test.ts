@@ -7,7 +7,7 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
-import type { TimeRange } from '../../../entities_grid/common';
+import type { TimeRange } from '../../../queries/time_range';
 import { buildEntitiesWithAnomaliesCountQuery } from '../entities_with_anomalies_query';
 import {
   anomaliesSeriesColumn,

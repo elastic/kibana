@@ -10,7 +10,6 @@ import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable
 import { i18n } from '@kbn/i18n';
 import type { CompositeSLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useState } from 'react';
-import useDebounce from 'react-use/lib/useDebounce';
 import { useDeleteCompositeSlo } from '../../../../hooks/use_delete_composite_slo';
 import {
   useFetchCompositeSloList,
@@ -33,18 +32,10 @@ export function CompositeSloList() {
   const [deleteConfirm, setDeleteConfirm] = useState<CompositeSLOItem | null>(null);
 
   const [search, setSearch] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [sortBy, setSortBy] = useState<CompositeSloSortBy>('createdAt');
   const [sortDirection, setSortDirection] = useState<CompositeSloSortDirection>('desc');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
-
-  useDebounce(() => setDebouncedSearch(search), 300, [search]);
-
-  const handleSearchChange = (value: string) => {
-    setSearch(value);
-    setPage(0);
-  };
 
   const handleTagSelection = (options: EuiSelectableOption[]) => {
     const newTags = options.filter((opt) => opt.checked === 'on').map((opt) => opt.label);
@@ -57,31 +48,28 @@ export function CompositeSloList() {
     setPage(0);
   };
 
-  const clearFilters = () => {
-    setSearch('');
-    setDebouncedSearch('');
-    setSortBy('createdAt');
-    setSortDirection('desc');
-    setSelectedTags([]);
-    setSelectedStatuses([]);
-    setPage(0);
-  };
-
-  const { data, isInitialLoading, isLoading, isError } = useFetchCompositeSloList({
-    page: page + 1,
-    perPage,
-    search: debouncedSearch || undefined,
-    tags: selectedTags,
-    status: selectedStatuses,
-    sortBy,
-    sortDirection,
-  });
+  const { data, isInitialLoading, isLoading, isRefetching, isError, refetch } =
+    useFetchCompositeSloList({
+      page: page + 1,
+      perPage,
+      search: search || undefined,
+      tags: selectedTags,
+      status: selectedStatuses,
+      sortBy,
+      sortDirection,
+    });
 
   const results = data?.results ?? [];
   const total = data?.total ?? 0;
 
-  const hasActiveFilters =
-    debouncedSearch !== '' || selectedTags.length > 0 || selectedStatuses.length > 0;
+  const handleSearchSubmit = (value: string) => {
+    if (value === search) {
+      refetch();
+      return;
+    }
+    setSearch(value);
+    setPage(0);
+  };
 
   const handleSortChange = (
     newSortBy: CompositeSloSortBy,
@@ -105,14 +93,12 @@ export function CompositeSloList() {
     <>
       <CompositeSloToolbar
         search={search}
-        isLoading={isLoading}
+        isLoading={isLoading || isRefetching}
         selectedTags={selectedTags}
         selectedStatuses={selectedStatuses}
-        hasActiveFilters={hasActiveFilters}
-        onSearchChange={handleSearchChange}
+        onSearchSubmit={handleSearchSubmit}
         onTagSelectionChange={handleTagSelection}
         onStatusChange={handleStatusChange}
-        onClearFilters={clearFilters}
       />
       <EuiSpacer size="m" />
       {isInitialLoading ? (

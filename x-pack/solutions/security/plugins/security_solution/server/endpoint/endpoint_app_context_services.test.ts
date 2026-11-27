@@ -18,6 +18,7 @@ import {
   createMockEndpointAppContextServiceStartContract,
 } from './mocks';
 import type { ResponseActionsClient } from './services';
+import { SavedObjectsClientFactory } from './services/saved_objects';
 
 // Keep the real `./services` module, but replace the response actions client factory so tests can
 // assert exactly what `getInternalResponseActionsClient()` hands it.
@@ -292,6 +293,101 @@ describe('test endpoint app context services', () => {
     });
   });
 
+  describe('getEndpointAuthz', () => {
+    let service: EndpointAppContextService;
+    let startContract: ReturnType<typeof createMockEndpointAppContextServiceStartContract>;
+    let fromRequest: jest.Mock;
+
+    const startService = () => {
+      startContract = createMockEndpointAppContextServiceStartContract();
+      service.setup(createMockEndpointAppContextServiceSetupContract());
+      service.start(startContract);
+      fromRequest = startContract.fleetStartServices.authz.fromRequest as jest.Mock;
+    };
+
+    beforeEach(() => {
+      service = new EndpointAppContextService();
+    });
+
+    afterEach(() => {
+      service.stop();
+    });
+
+    it('does not cache by default', async () => {
+      startService();
+      const request = httpServerMock.createKibanaRequest();
+
+      await service.getEndpointAuthz(request);
+      await service.getEndpointAuthz(request);
+
+      expect(fromRequest).toHaveBeenCalledTimes(2);
+    });
+
+    it('does not read from the cache when called without caching', async () => {
+      startService();
+      const request = httpServerMock.createKibanaRequest();
+
+      await service.getEndpointAuthz(request, { cache: true });
+      await service.getEndpointAuthz(request);
+
+      expect(fromRequest).toHaveBeenCalledTimes(2);
+    });
+
+    it('caches the privilege resolution for the same request', async () => {
+      startService();
+      const request = httpServerMock.createKibanaRequest();
+
+      await service.getEndpointAuthz(request, { cache: true });
+      await service.getEndpointAuthz(request, { cache: true });
+
+      expect(fromRequest).toHaveBeenCalledTimes(1);
+      expect(fromRequest).toHaveBeenCalledWith(request);
+    });
+
+    it('resolves once for concurrent cached calls on the same request', async () => {
+      startService();
+      const request = httpServerMock.createKibanaRequest();
+
+      await Promise.all([
+        service.getEndpointAuthz(request, { cache: true }),
+        service.getEndpointAuthz(request, { cache: true }),
+      ]);
+
+      expect(fromRequest).toHaveBeenCalledTimes(1);
+    });
+
+    it('freezes the cached result so callers cannot mutate it', async () => {
+      startService();
+      const request = httpServerMock.createKibanaRequest();
+
+      const cached = await service.getEndpointAuthz(request, { cache: true });
+      const uncached = await service.getEndpointAuthz(request);
+
+      expect(Object.isFrozen(cached)).toBe(true);
+      expect(Object.isFrozen(uncached)).toBe(false);
+    });
+
+    it('resolves privileges separately for different requests', async () => {
+      startService();
+
+      await service.getEndpointAuthz(httpServerMock.createKibanaRequest(), { cache: true });
+      await service.getEndpointAuthz(httpServerMock.createKibanaRequest(), { cache: true });
+
+      expect(fromRequest).toHaveBeenCalledTimes(2);
+    });
+
+    it('does not cache a rejected resolve and retries on the next call', async () => {
+      startService();
+      const request = httpServerMock.createKibanaRequest();
+      fromRequest.mockRejectedValueOnce(new Error('transient'));
+
+      await expect(service.getEndpointAuthz(request, { cache: true })).rejects.toThrow('transient');
+      await expect(service.getEndpointAuthz(request, { cache: true })).resolves.toBeDefined();
+
+      expect(fromRequest).toHaveBeenCalledTimes(2);
+    });
+  });
+
   describe('getInternalResponseActionsClient', () => {
     let service: EndpointAppContextService;
 
@@ -400,6 +496,27 @@ describe('test endpoint app context services', () => {
       expect(() => service.getTelemetryConfigProvider()).toThrow(
         EndpointAppContentServicesNotStartedError
       );
+    });
+  });
+
+  describe('after stop()', () => {
+    it('keeps serving the dependencies that rules and watchers still use while Kibana shuts down', async () => {
+      const service = new EndpointAppContextService();
+      const startContract = createMockEndpointAppContextServiceStartContract();
+      service.setup(createMockEndpointAppContextServiceSetupContract());
+      service.start({
+        ...startContract,
+        experimentalFeatures: {
+          ...startContract.experimentalFeatures,
+          endpointExceptionsMovedUnderManagement: false,
+        },
+      });
+
+      service.stop();
+
+      await expect(service.isEndpointExceptionsPerPolicyEnabled()).resolves.toBe(false);
+      expect(service.getInternalEsClient()).toBe(startContract.esClient);
+      expect(service.savedObjects).toBeInstanceOf(SavedObjectsClientFactory);
     });
   });
 });

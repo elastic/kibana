@@ -27,6 +27,8 @@ interface UseDataFieldsProps {
    * field-caps.
    */
   search?: ISearchGeneric;
+  /** CPS project routing to run the field lookup with. */
+  projectRouting?: string;
 }
 
 export const useDataFields = ({
@@ -35,19 +37,25 @@ export const useDataFields = ({
   dataViews,
   onSuccess,
   search,
+  projectRouting,
 }: UseDataFieldsProps) => {
   const onSuccessRef = useRef(onSuccess);
   onSuccessRef.current = onSuccess;
 
   const fieldsQuery = useQuery({
-    queryKey: [...ruleFormKeys.dataFields(query), { withSearch: Boolean(search) }],
+    queryKey: [...ruleFormKeys.dataFields(query), { withSearch: Boolean(search), projectRouting }],
     queryFn: async ({ signal }) => {
       // ES|QL column introspection path: avoids _field_caps, works for all FROM sources.
       // getESQLQueryColumnsRaw is used without dropNullColumns so that `columns` always
       // carries the full schema — some dataset types (e.g. Parquet, NDJSON) don't
       // populate `all_columns`, which dropNullColumns:true relies on for schema recovery.
       if (search) {
-        const rawColumns = await getESQLQueryColumnsRaw({ esqlQuery: query, search, signal });
+        const rawColumns = await getESQLQueryColumnsRaw({
+          esqlQuery: query,
+          search,
+          signal,
+          projectRouting,
+        });
         return Object.fromEntries(
           rawColumns.map((col) => [
             col.name,
@@ -62,6 +70,7 @@ export const useDataFields = ({
         dataViewsService: dataViews,
         query,
         http,
+        projectRouting,
       });
 
       if (!dataView) {

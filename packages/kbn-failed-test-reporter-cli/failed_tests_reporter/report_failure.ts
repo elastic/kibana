@@ -16,6 +16,7 @@ import {
   getConfigPathFromCommandLine,
 } from './failure_details';
 import { isScoutFailure } from './failure_identity';
+import { extractErrorMessage } from './failure_text';
 import type { JUnitTestType, TestFailure } from './get_failures';
 import { getLocationFromClassname, getReportNameFromClassname } from './get_failures';
 import type { ScoutTestFailureExtended } from './get_scout_failures';
@@ -64,21 +65,6 @@ function getCodeBlocksFromText(text: string): string[] {
     blocks.push(match[1].trim());
   }
   return blocks;
-}
-
-/**
- * JUnit failure text is a single blob combining the error message and the stack
- * trace. Extract just the message, i.e. everything before the first stack-frame
- * line, falling back to the full blob when the heuristic yields nothing.
- */
-export function extractErrorMessage(failureText: string): string {
-  const lines = failureText.split('\n');
-  const firstStackFrame = lines.findIndex((line) => /^\s+at /.test(line));
-  if (firstStackFrame === -1) {
-    return failureText.trim();
-  }
-  const message = lines.slice(0, firstStackFrame).join('\n').trim();
-  return message || failureText.trim();
 }
 
 interface ErrorMessageForComment {
@@ -478,19 +464,26 @@ export async function updateFailureIssue(
   }
 }
 
+/** The failure a suite issue gets a comment about, and the build it failed in. */
+export interface SuiteIssueFailureComment {
+  buildUrl: string;
+  branch: string;
+  pipeline: string;
+  failure: TestFailure | ScoutTestFailureExtended;
+}
+
 /**
- * Record a failure on the flaky suite issue tracking its test, as on a per-test issue: bump the
- * fail count, reopen the issue and comment with the build. The body text and the
- * `flaky-test-suite` metadata belong to `report_flaky_test_issues` and are left alone, so the
- * count lives in the `failed-test` metadata next to it.
+ * Count a failure on the suite issue tracking its test. Without `comment`, that's all: the daily
+ * flaky report comments on and reopens flaky suites, and the consistent failure check comments on
+ * breaks. With it, for a job that doesn't run that check on the issue's repository, the issue is
+ * also reopened and gets a comment naming the test and the build. The body text and the
+ * `flaky-test-suite` metadata are left alone, so the count lives in the `failed-test` metadata
+ * next to it.
  */
 export async function updateSuiteIssue(
-  buildUrl: string,
   issue: FlakySuiteIssue,
   api: GithubApi,
-  branch: string,
-  pipeline: string,
-  failure: TestFailure | ScoutTestFailureExtended
+  comment?: SuiteIssueFailureComment
 ) {
   const { number } = issue.github;
   // the daily report edits the body too, so count on what github has now rather than on the
@@ -499,8 +492,13 @@ export async function updateSuiteIssue(
   const newCount = getIssueMetadata(body, 'test.failCount', 0) + 1;
   const newBody = updateIssueMetadata(body, { 'test.failCount': newCount });
 
-  await api.editIssueBodyAndEnsureOpen(number, newBody);
+  if (!comment) {
+    await api.editIssue(number, { body: newBody });
+    return { newBody, newCount };
+  }
 
+  await api.editIssueBodyAndEnsureOpen(number, newBody);
+  const { buildUrl, branch, pipeline, failure } = comment;
   const comments = await api.getIssueComments(number);
   const scout = isScoutFailure(failure);
   const errorMessage = getErrorMessageForComment(

@@ -30,6 +30,8 @@ interface PolicyOption {
 interface AgentPolicyPanelProps {
   agentHostsMode: 'new' | 'existing';
   isEditMode: boolean;
+  /** Locks the "new" option when the resumed session already holds agent policies. */
+  isNewPolicyDisabled: boolean;
   isPolicyCreated: boolean;
   isCredentialReady: boolean;
   isPolicyNameLoading: boolean;
@@ -53,6 +55,7 @@ interface AgentPolicyPanelProps {
 export function AgentPolicyPanel({
   agentHostsMode,
   isEditMode,
+  isNewPolicyDisabled,
   isPolicyCreated,
   isCredentialReady,
   isPolicyNameLoading,
@@ -79,7 +82,7 @@ export function AgentPolicyPanel({
         'xpack.ingestHub.authenticateAndDeployStep.agentBasedSection.hosts.new.label',
         { defaultMessage: 'Create a new agent policy' }
       ),
-      disabled: isEditMode,
+      disabled: isNewPolicyDisabled,
     },
     {
       id: 'existing',

@@ -13,3 +13,7 @@ export {
   OTEL_NATIVE_JAVA_TEMPLATE_NAME,
 } from './synthtrace/metrics_services';
 export { awsLambda } from './synthtrace/aws_lambda';
+export {
+  enableServiceMapGrouping,
+  removeServiceMapGroupingOverride,
+} from './service_map_grouping_flag';

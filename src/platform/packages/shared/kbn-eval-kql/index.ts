@@ -8,3 +8,8 @@
  */
 
 export { evaluateKql } from './src/eval_kql';
+export {
+  decodeKqlTemplateValues,
+  encodeKqlTemplateValue,
+  parseKqlTemplate,
+} from './src/kql_template_values';

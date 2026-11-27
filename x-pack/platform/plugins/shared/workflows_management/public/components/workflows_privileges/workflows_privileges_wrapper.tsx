@@ -1,0 +1,56 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import React, { useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import { useTelemetry } from '../../hooks/use_telemetry';
+import { useWorkflowsBreadcrumbs } from '../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
+import { AccessDenied } from '../access_denied/access_denied';
+import { PrivilegesFooter } from '../workflows_required_priveleges_footer';
+
+export const WorkflowsPrivilegesWrapper: React.FC<React.PropsWithChildren> = ({ children }) => {
+  const { canReadWorkflow } = useWorkflowsCapabilities();
+
+  if (!canReadWorkflow) {
+    return <PrivilegesAccessDenied />;
+  }
+  return children;
+};
+
+const PrivilegesAccessDenied = () => {
+  useWorkflowsBreadcrumbs();
+  const telemetry = useTelemetry();
+
+  useEffect(() => {
+    telemetry.reportWorkflowAccessDeniedPrivileges();
+  }, [telemetry]);
+
+  return (
+    <AccessDenied
+      title={i18n.translate('workflows.ui.noReadAccess.title', {
+        defaultMessage: 'Contact your administrator for access',
+      })}
+      description={
+        <FormattedMessage
+          id="workflows.ui.noReadAccess.description"
+          defaultMessage="To view workflows in this space, you need additional privileges."
+        />
+      }
+      footer={
+        <PrivilegesFooter
+          permissions={[
+            {
+              id: 'workflows.readWorkflowPermissionText',
+              default: 'Workflows: Read',
+            },
+          ]}
+        />
+      }
+    />
+  );
+};

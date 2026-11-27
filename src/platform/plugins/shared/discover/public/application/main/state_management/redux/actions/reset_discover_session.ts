@@ -40,7 +40,7 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
           nextSelectedTabId?: string;
         }
       | undefined = {},
-    { dispatch, getState, extra: { services, runtimeStateManager } }
+    { dispatch, getState, extra: { services, runtimeStateManager, searchSessionManager } }
   ) => {
     const state = getState();
     const discoverSession = updatedDiscoverSession ?? state.persistedDiscoverSession;
@@ -56,6 +56,11 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
 
     const allTabs = await Promise.all(
       discoverSession.tabs.map(async (tab) => {
+        // On Revert, drop the cache of every unsaved tab, including tabs not selected since returning to Discover.
+        if (unsavedTabIds.includes(tab.id)) {
+          searchSessionManager.forgetTab(tab.id);
+        }
+
         dispatch(internalStateSlice.actions.resetOnSavedSearchChange({ tabId: tab.id }));
 
         const existingTab = selectTab(state, tab.id);

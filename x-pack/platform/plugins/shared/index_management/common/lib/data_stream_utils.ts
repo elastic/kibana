@@ -82,6 +82,27 @@ export const serializeAsESLifecycle = (lifecycle?: DataRetention): DataStream['l
   };
 };
 
+/**
+ * Serializes a component template lifecycle, keeping hot-only lifecycles only when the template already had one.
+ */
+export const serializeComponentTemplateLifecycle = (
+  lifecycle: DataRetention | undefined,
+  { hasExistingLifecycle }: { hasExistingLifecycle: boolean }
+): DataStream['lifecycle'] => {
+  if (hasExistingLifecycle) {
+    return serializeAsESLifecycle(
+      resolveLogisticsLifecycle(lifecycle, { isDataStreamTemplate: true })
+    );
+  }
+
+  const serializedLifecycle = serializeAsESLifecycle(lifecycle);
+  const hasOptionalPhase = Boolean(
+    serializedLifecycle?.data_retention || serializedLifecycle?.frozen_after
+  );
+
+  return hasOptionalPhase ? serializedLifecycle : undefined;
+};
+
 export const deserializeESLifecycle = (lifecycle?: DataStream['lifecycle']): DataRetention => {
   if (!lifecycle || !lifecycle?.enabled) {
     return { enabled: false };

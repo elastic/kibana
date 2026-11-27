@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
 import {
   EuiMarkdownFormat,
   EuiText,
   getDefaultEuiMarkdownParsingPlugins,
   getDefaultEuiMarkdownProcessingPlugins,
+  useEuiTheme,
 } from '@elastic/eui';
+import { splitAuthoredMarkdown } from '@elastic/isomer-sdk/markdown';
 import { type PluggableList } from 'unified';
 import type { ConversationRoundStep } from '@kbn/agent-builder-common';
 import type {
@@ -31,7 +34,6 @@ import {
   createVisualizationRenderer,
   loadingCursorPlugin,
   visualizationTagParser,
-  renderAttachmentTagParser,
   createRenderAttachmentRenderer,
   renderTagParser,
   createRenderRenderer,
@@ -51,6 +53,11 @@ interface Props {
   isStreaming?: boolean;
 }
 
+const { tagName, attributes } = renderAttachmentElement;
+
+/** A closed tag. An unfinished tag at the end of a stream stays in the markdown. */
+const COMPLETE_RENDER_ATTACHMENT_TAG = new RegExp(`<${tagName}\\b[^>]*\\/?>`, 'i');
+
 /**
  * Component handling markdown support to the assistant's responses.
  * Also handles "loading" state by appending the blinking cursor.
@@ -63,7 +70,16 @@ export function ChatMessageText({
   conversationId,
   isStreaming = false,
 }: Props) {
+  const { euiTheme } = useEuiTheme();
   const markdownContainerStyles = useMarkdownContainerStyles();
+  const splitMessageStyles = useMemo(
+    () => css`
+      display: flex;
+      flex-direction: column;
+      gap: ${euiTheme.size.s};
+    `,
+    [euiTheme.size.s]
+  );
 
   const { attachmentsService, renderersService, conversationsService, startDependencies } =
     useAgentBuilderServices();
@@ -136,7 +152,6 @@ export function ChatMessageText({
       ...createConversationMarkdownComponents({ onLinkClick: handleLinkClick }),
       cursor: Cursor,
       [visualizationElement.tagName]: visualizationRenderer,
-      [renderAttachmentElement.tagName]: renderAttachmentRenderer,
       [renderElement.tagName]: renderRenderer,
     };
 
@@ -145,25 +160,59 @@ export function ChatMessageText({
         loadingCursorPlugin,
         esqlLanguagePlugin,
         visualizationTagParser,
-        renderAttachmentTagParser,
         renderTagParser,
         ...parsingPlugins,
       ],
       processingPluginList: processingPlugins,
     };
-  }, [visualizationRenderer, renderAttachmentRenderer, renderRenderer, handleLinkClick]);
+  }, [visualizationRenderer, renderRenderer, handleLinkClick]);
+
+  // Skip the splitter until a closed tag appears. A tag it leaves in code stays in the
+  // original string, so that reply is not reprinted.
+  const messageSegments = useMemo(() => {
+    if (!COMPLETE_RENDER_ATTACHMENT_TAG.test(content)) {
+      return undefined;
+    }
+    const segments = splitAuthoredMarkdown(content, { elements: [tagName] });
+    return segments.some((segment) => segment.type === 'element') ? segments : undefined;
+  }, [content]);
+
+  const markdownMessage = (source: string, key: string) => (
+    <EuiText key={key} size="s" css={markdownContainerStyles}>
+      <EuiMarkdownFormat
+        textSize="s"
+        parsingPluginList={parsingPluginList}
+        processingPluginList={processingPluginList}
+      >
+        {source}
+      </EuiMarkdownFormat>
+    </EuiText>
+  );
+
+  // The column is always present, and markdown blocks are numbered on their own, so the
+  // first prose block keeps the key `markdown-0` when the first attachment tag arrives.
+  const messageChildren: React.ReactNode[] = [];
+  let markdownIndex = 0;
+  let attachmentIndex = 0;
+  for (const segment of messageSegments ?? [{ type: 'markdown' as const, source: content }]) {
+    if (segment.type === 'markdown') {
+      messageChildren.push(markdownMessage(segment.source, `markdown-${markdownIndex}`));
+      markdownIndex += 1;
+    } else {
+      messageChildren.push(
+        React.createElement(renderAttachmentRenderer, {
+          key: `attachment-${attachmentIndex}`,
+          attachmentId: segment.attributes[attributes.attachmentId],
+          version: segment.attributes[attributes.version],
+        })
+      );
+      attachmentIndex += 1;
+    }
+  }
 
   return (
     <>
-      <EuiText size="s" css={markdownContainerStyles}>
-        <EuiMarkdownFormat
-          textSize="s"
-          parsingPluginList={parsingPluginList}
-          processingPluginList={processingPluginList}
-        >
-          {content}
-        </EuiMarkdownFormat>
-      </EuiText>
+      <div css={splitMessageStyles}>{messageChildren}</div>
       {externalLinkModal}
     </>
   );

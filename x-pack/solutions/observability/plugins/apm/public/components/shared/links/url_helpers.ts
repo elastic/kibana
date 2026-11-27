@@ -83,6 +83,7 @@ export interface APMQueryParams {
   detailTab?: string;
   flyoutDetailTab?: string;
   waterfallItemId?: string;
+  sampleIndex?: string | number;
   spanId?: string;
   page?: string | number;
   pageSize?: string | number;

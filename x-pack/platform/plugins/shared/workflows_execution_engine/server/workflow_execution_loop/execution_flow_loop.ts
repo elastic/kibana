@@ -1,0 +1,37 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import apm from 'elastic-apm-node';
+import { yieldToEventLoop } from '@kbn/workflows/server';
+import { runNode } from './run_node';
+import type { WorkflowExecutionLoopParams } from './types';
+
+/**
+ * Runs nodes until the cursor stops (terminal, parked wait, or cancel).
+ */
+export async function executionFlowLoop(params: WorkflowExecutionLoopParams) {
+  while (params.workflowExecutionCursor.isExecuting) {
+    // Steps with no I/O resolve without a macrotask, so a long chain of them would never release the event loop.
+    await yieldToEventLoop();
+    await runNode(params);
+    // Parked wait: keep currentNode for resume. Committing a stale undefined
+    // nextNodeId would clear the cursor and persist a false COMPLETED.
+    if (!params.workflowExecutionCursor.isExecuting) {
+      const parkedSaveSpan = apm.startSpan('save state', 'workflow', 'persistence');
+      await params.workflowRuntime.saveState();
+      parkedSaveSpan?.end();
+      return;
+    }
+    params.workflowExecutionCursor.commitPendingNavigation();
+    const saveStateSpan = apm.startSpan('save state', 'workflow', 'persistence');
+    await params.workflowRuntime.saveState();
+    saveStateSpan?.end();
+    if (!params.workflowExecutionCursor.currentNode) {
+      params.workflowExecutionCursor.stop();
+    }
+  }
+}

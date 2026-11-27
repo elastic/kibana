@@ -8,8 +8,7 @@
  */
 
 import { globalSetupHook } from '@kbn/scout';
-
-export const VEGA_TEST_INDEX = 'vega-test-index';
+import { VEGA_TEST_INDEX } from '../fixtures/constants';
 
 globalSetupHook('Setup Vega tests data', async ({ esClient }) => {
   const exists = await esClient.indices.exists({ index: VEGA_TEST_INDEX });

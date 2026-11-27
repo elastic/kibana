@@ -1,0 +1,28 @@
+You are an expert SRE auditing whether an incident report classified SEVERITY correctly.
+
+You are given two things:
+1. The CONFIRMED outcome. It was established AFTER the alert resolved (reconciled against
+   what actually happened), so it is ground truth. It describes either:
+   - a BENIGN outcome: the alert was noise / self-resolved / a transient event that ended
+     on its own / an expected artifact, requiring no code or config remediation; or
+   - an ACTIONABLE outcome: a real regression or incident that required (or requires)
+     remediation such as a rollback, config change, or code fix.
+2. The AI agent's RCA REPORT, produced during the original investigation.
+
+Decide each of the following from the text alone.
+
+ground_truth_benign: Is the CONFIRMED outcome benign / self-resolved / no-action-needed?
+  True for transient self-recoveries, noise, expected artifacts; False for real
+  regressions/incidents that needed remediation.
+report_claims_benign: Does the REPORT conclude the alert is benign / self-resolved / no
+  action needed (as opposed to leaving it open or calling it a real problem)?
+report_escalates: Does the REPORT recommend escalation or remediation — e.g. paging or
+  escalating to a team, rolling back, applying a config/code fix, or otherwise treating it
+  as an actionable incident?
+
+A report can be neither benign nor escalating (e.g. it only restates symptoms); set both
+booleans False in that case. Base every answer only on the provided text.
+
+First decide ground_truth_severity_determined: true when the confirmed outcome establishes whether the alert was benign / self-resolved / no-action-needed or needed remediation. Set it false when the outcome says it is unresolved, unknown, or only contradicts the report without settling whether remediation was needed. When it is false, answer every other field with false or an empty string.
+
+Write every reasoning field as one short sentence in your own words. Summarise what you found; do not quote log lines, query results, or messages from the investigation.

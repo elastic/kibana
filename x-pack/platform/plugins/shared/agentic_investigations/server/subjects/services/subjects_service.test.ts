@@ -138,7 +138,10 @@ describe('SubjectsService', () => {
       hidden: true,
     });
     expect(manager.getActive()).toHaveLength(2);
-    expect(manager.drainChanges()).toEqual([]);
+    expect(manager.drainChanges().map(({ kind, hidden }) => [kind, hidden])).toEqual([
+      ['added', true],
+      ['added', true],
+    ]);
   });
 
   it('is hidden in the conversation and not rendered inline', async () => {
@@ -165,6 +168,17 @@ describe('SubjectsService', () => {
       summary: 'Why is checkout slow?',
       slack: { channel: 'C1', thread_ts: '1700000000.000100', status_message_ts: '1700.2' },
     });
+  });
+
+  it('records what a subject came through, and keeps it when a later write leaves it out', async () => {
+    const { storage, upsert } = setup();
+    const via = { label: 'Payments alerts', locator: { id: 'L', params: { a: '1' } } };
+    await upsert([{ ...alertSubject, via }]);
+
+    await upsert([{ type: alertSubject.type, id: alertSubject.id, summary: 'Renamed' }]);
+
+    const stored = storage.entries.get(subjectDocumentId(SPACE_ID, CONVERSATION_ID, alertSubject));
+    expect(stored?.source).toMatchObject({ via, summary: 'Renamed' });
   });
 
   it('does not re-stamp an unchanged subject', async () => {

@@ -1,0 +1,101 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { render, screen, within } from '@testing-library/react';
+import { EuiProvider } from '@elastic/eui';
+import { useKibanaServices } from '../hooks/use_kibana_services';
+import { createUiSettingsMock } from '../test_utils/ui_settings_mock';
+import { BarList } from './bar_list';
+
+jest.mock('../hooks/use_kibana_services');
+
+beforeEach(() => {
+  jest.mocked(useKibanaServices).mockReturnValue({
+    uiSettings: createUiSettingsMock(),
+  } as unknown as ReturnType<typeof useKibanaServices>);
+});
+
+describe('BarList', () => {
+  it('lists each row with its label, count, share and a bar against the total', () => {
+    render(
+      <BarList
+        aria-label="Browsers"
+        total={40}
+        items={[
+          { key: 'Chrome', value: 30, label: <a href="/chrome">Chrome</a> },
+          { key: 'Safari', value: 10 },
+        ]}
+      />,
+      { wrapper: EuiProvider }
+    );
+
+    const [chrome, safari] = within(screen.getByRole('list', { name: 'Browsers' })).getAllByRole(
+      'listitem'
+    );
+    expect(within(chrome).getByRole('link', { name: 'Chrome' })).toBeInTheDocument();
+    expect(chrome).toHaveTextContent('30 · 75%');
+    expect(within(chrome).getByRole('progressbar')).toHaveAttribute('max', '40');
+    expect(safari).toHaveTextContent('Safari');
+    expect(safari).toHaveTextContent('10 · 25%');
+  });
+
+  it('shows no share and a non-zero bar maximum without a total', () => {
+    render(<BarList aria-label="Clicks" total={0} items={[{ key: '#buy', value: 0 }]} />, {
+      wrapper: EuiProvider,
+    });
+
+    expect(screen.getByRole('listitem')).not.toHaveTextContent('%');
+    expect(screen.getByRole('progressbar')).toHaveAttribute('max', '1');
+  });
+
+  it('shows the shares as they are formatted in Kibana unless asked for whole percents', () => {
+    render(<BarList aria-label="Clicks" total={73} items={[{ key: '#buy', value: 22 }]} />, {
+      wrapper: EuiProvider,
+    });
+
+    expect(screen.getByRole('listitem')).toHaveTextContent('22 · 30.137%');
+  });
+
+  it('rounds the shares to whole percents when asked to', () => {
+    render(
+      <BarList
+        aria-label="Clicks"
+        total={73}
+        wholePercent
+        items={[
+          { key: '#buy', value: 22 },
+          { key: '#pay', value: 51 },
+        ]}
+      />,
+      { wrapper: EuiProvider }
+    );
+
+    const [buy, pay] = screen.getAllByRole('listitem');
+    expect(buy).toHaveTextContent('22 · 30%');
+    expect(pay).toHaveTextContent('51 · 70%');
+  });
+
+  it('shows a share under half a percent as under one percent, not as zero', () => {
+    render(
+      <BarList
+        aria-label="Clicks"
+        total={1000}
+        wholePercent
+        items={[
+          { key: '#buy', value: 4 },
+          { key: '#pay', value: 0 },
+        ]}
+      />,
+      { wrapper: EuiProvider }
+    );
+
+    const [buy, pay] = screen.getAllByRole('listitem');
+    expect(buy).toHaveTextContent('4 · <1%');
+    expect(pay).toHaveTextContent('0 · 0%');
+  });
+});

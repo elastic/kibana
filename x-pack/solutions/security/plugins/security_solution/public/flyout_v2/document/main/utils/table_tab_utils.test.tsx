@@ -6,7 +6,7 @@
  */
 
 import { getTableItems } from './table_tab_utils';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { TimelineEventsDetailsItem } from '@kbn/securitysolution-timeline-search-strategy';
 
 const testData = [
   {

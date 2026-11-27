@@ -15,6 +15,8 @@ import type {
   ExtractDiamondInput,
   ExtractDiamondResponse,
   RelevanceResponse,
+  ReviewIocsInput,
+  ReviewIocsResponse,
   TaxonomyResponse,
 } from '../types';
 
@@ -26,6 +28,8 @@ const ASSESS_RELEVANCE_URL = '/internal/threat_intel/assess_relevance';
 const CLASSIFY_SEVERITY_URL = '/internal/threat_intel/classify_severity';
 const ENRICH_TAXONOMY_URL = '/internal/threat_intel/enrich_taxonomy';
 const EXTRACT_DIAMOND_URL = '/internal/threat_intel/extract_diamond';
+const EXTRACT_IOCS_URL = '/internal/threat_intel/extract_iocs';
+const ENRICH_REPORT_CORE_URL = '/internal/threat_intel/enrich_report_core';
 
 const INTERNAL_API_HEADERS = {
   'elastic-api-version': '1',
@@ -33,7 +37,7 @@ const INTERNAL_API_HEADERS = {
 };
 
 /**
- * Thin wrapper over `kbnClient` for the four threat_intel LLM enrichment routes.
+ * Thin wrapper over `kbnClient` for the threat_intel LLM enrichment routes.
  * Each method POSTs the stage input and returns the route's parsed JSON body.
  */
 export class ThreatIntelClient {
@@ -81,5 +85,36 @@ export class ThreatIntelClient {
       body: input,
     });
     return response.data;
+  }
+
+  /**
+   * Runs the real extract then core-enrich routes, the way the enrich workflow does, and returns
+   * the IOCs as stored: deterministic tiers from extract, model verdicts from core.
+   */
+  async reviewIocs(input: ReviewIocsInput): Promise<ReviewIocsResponse> {
+    this.log.debug(`[ThreatIntelClient] POST ${EXTRACT_IOCS_URL}`);
+    const extracted = await this.kbnClient.request<{
+      iocs: ReviewIocsResponse['iocs'];
+      ioc_set_hash: string | null;
+    }>({
+      path: EXTRACT_IOCS_URL,
+      method: 'POST',
+      headers: INTERNAL_API_HEADERS,
+      body: { text: input.text },
+    });
+    this.log.debug(`[ThreatIntelClient] POST ${ENRICH_REPORT_CORE_URL}`);
+    const enriched = await this.kbnClient.request<{ iocs: ReviewIocsResponse['iocs'] }>({
+      path: ENRICH_REPORT_CORE_URL,
+      method: 'POST',
+      headers: INTERNAL_API_HEADERS,
+      body: {
+        text: input.text,
+        iocs: extracted.data.iocs,
+        ioc_set_hash: extracted.data.ioc_set_hash,
+        title: input.title,
+        article_url: input.article_url,
+      },
+    });
+    return { iocs: enriched.data.iocs };
   }
 }

@@ -162,6 +162,9 @@
               "_tier_preference": "",
               "_id": ""
             },
+            "require": {
+              "*": ""
+            },
             "initial_recovery": {
               "_id": ""
             },
@@ -267,6 +270,11 @@
             }
           }
         },
+        "requests": {
+          "cache": {
+            "enable": ""
+          }
+        },
         "similarity": {
           "*": {}
         },
@@ -356,7 +364,13 @@
         ]
       },
       "rename_pattern": "",
-      "rename_replacement": ""
+      "rename_replacement": "",
+      "restore_over_existing": {
+        "__one_of": [
+          true,
+          false
+        ]
+      }
     },
     "methods": [
       "POST"

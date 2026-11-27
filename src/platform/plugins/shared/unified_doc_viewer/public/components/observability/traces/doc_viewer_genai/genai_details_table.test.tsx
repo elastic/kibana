@@ -14,6 +14,7 @@ import React from 'react';
 import type { ContentFrameworkTableProps } from '../../../content_framework';
 import {
   GenAiDetailsTable,
+  getCachePercentage,
   getGenAiDetailFieldNames,
   hasGenAiDetailFields,
 } from './genai_details_table';
@@ -100,6 +101,59 @@ describe('summary fields in the details table', () => {
   });
 });
 
+describe('cache token fields in the details table', () => {
+  it('lists cache read and write right after the input and output tokens', () => {
+    expect(
+      getGenAiDetailFieldNames({
+        'attributes.gen_ai.response.model': ['claude'],
+        'attributes.gen_ai.usage.cache_write.input_tokens': [300],
+        'attributes.gen_ai.usage.cache_read.input_tokens': [2100],
+        'attributes.gen_ai.usage.output_tokens': [80],
+        'attributes.gen_ai.usage.input_tokens': [2800],
+      })
+    ).toEqual([
+      'attributes.gen_ai.usage.input_tokens',
+      'attributes.gen_ai.usage.output_tokens',
+      'attributes.gen_ai.usage.cache_read.input_tokens',
+      'attributes.gen_ai.usage.cache_write.input_tokens',
+      'attributes.gen_ai.response.model',
+    ]);
+  });
+
+  it('resolves the cache fields from the labels.* shape too', () => {
+    expect(
+      getGenAiDetailFieldNames({ 'labels.gen_ai_usage_cache_read_input_tokens': [10] })
+    ).toEqual(['labels.gen_ai_usage_cache_read_input_tokens']);
+  });
+});
+
+describe('getCachePercentage', () => {
+  it('returns the share of the input tokens as a whole percentage', () => {
+    expect(getCachePercentage(8517, 12775)).toBe(67);
+    expect(getCachePercentage([2100], [2800])).toBe(75);
+    expect(getCachePercentage('300', '2800')).toBe(11);
+    expect(getCachePercentage(2800, 2800)).toBe(100);
+  });
+
+  it('only returns 0 or 100 when the share is exactly that', () => {
+    expect(getCachePercentage(0, 1000)).toBe(0);
+    expect(getCachePercentage(1000, 1000)).toBe(100);
+    expect(getCachePercentage(1, 1000)).toBe(1);
+    expect(getCachePercentage(4, 1000)).toBe(1);
+    expect(getCachePercentage(999, 1000)).toBe(99);
+    expect(getCachePercentage(996, 1000)).toBe(99);
+  });
+
+  it('returns nothing when the share cannot be told', () => {
+    expect(getCachePercentage(10, undefined)).toBeUndefined();
+    expect(getCachePercentage(10, 0)).toBeUndefined();
+    expect(getCachePercentage(undefined, 100)).toBeUndefined();
+    expect(getCachePercentage('n/a', 100)).toBeUndefined();
+    // The provider reports cache tokens apart from the input tokens: no meaningful share.
+    expect(getCachePercentage(500, 100)).toBeUndefined();
+  });
+});
+
 describe('hasGenAiDetailFields', () => {
   it('returns true when a detail field is present in any shape', () => {
     expect(hasGenAiDetailFields({ 'attributes.gen_ai.response.model': ['gpt-4o'] })).toBe(true);
@@ -158,6 +212,22 @@ describe('GenAiDetailsTable', () => {
     );
   });
 
+  it.each([
+    { field: 'attributes.gen_ai.usage.reasoning.output_tokens', count: 12 },
+    { field: 'gen_ai.usage.reasoning.output_tokens', count: 0 },
+    { field: 'labels.gen_ai_usage_reasoning_output_tokens', count: 5 },
+    { field: 'numeric_labels.gen_ai_usage_reasoning_output_tokens', count: 7 },
+  ])('shows $field immediately after the output total', ({ field, count }) => {
+    const outputField = 'attributes.gen_ai.usage.output_tokens';
+    const hit = buildHit({ [field]: [count], [outputField]: [30] });
+
+    render(<GenAiDetailsTable hit={hit} dataView={dataView} />);
+
+    const { fieldNames, fieldConfigurations } = mockContentFrameworkTable.mock.calls[0][0];
+    expect(fieldNames).toEqual([outputField, field]);
+    expect(fieldConfigurations?.[field].title).toBe('Reasoning output tokens');
+  });
+
   it('works without the optional doc viewer callbacks (waterfall flyout context)', () => {
     const hit = buildHit({ 'gen_ai.response.id': ['resp-1'] });
 
@@ -184,5 +254,69 @@ describe('GenAiDetailsTable', () => {
       'attributes.gen_ai.response.model',
       'attributes.gen_ai.response.finish_reasons',
     ]);
+  });
+
+  describe('cache token rows', () => {
+    const renderFormatted = (
+      flattened: Record<string, unknown>,
+      fieldName: string,
+      value: number
+    ) => {
+      render(<GenAiDetailsTable hit={buildHit(flattened)} dataView={dataView} />);
+      const props = mockContentFrameworkTable.mock.calls[0][0];
+      const config = props.fieldConfigurations?.[fieldName];
+      return {
+        config,
+        rendered: render(<>{config?.formatter?.(value, value.toLocaleString('en-US'))}</>),
+      };
+    };
+
+    it('titles the rows and shows each value with its share of the input tokens', () => {
+      const flattened = {
+        'attributes.gen_ai.usage.input_tokens': [12775],
+        'attributes.gen_ai.usage.cache_read.input_tokens': [8517],
+        'attributes.gen_ai.usage.cache_write.input_tokens': [1000],
+      };
+
+      const read = renderFormatted(
+        flattened,
+        'attributes.gen_ai.usage.cache_read.input_tokens',
+        8517
+      );
+      expect(read.config?.title).toBe('Cache read tokens');
+      expect(read.rendered.container).toHaveTextContent('8,517 (67%)');
+
+      mockContentFrameworkTable.mockClear();
+      const write = renderFormatted(
+        flattened,
+        'attributes.gen_ai.usage.cache_write.input_tokens',
+        1000
+      );
+      expect(write.config?.title).toBe('Cache write tokens');
+      expect(write.rendered.container).toHaveTextContent('1,000 (8%)');
+    });
+
+    it('does not show 0% or 100% for a share that is not exactly that', () => {
+      const read = 'attributes.gen_ai.usage.cache_read.input_tokens';
+      const input = 'attributes.gen_ai.usage.input_tokens';
+
+      const low = renderFormatted({ [input]: [1000], [read]: [1] }, read, 1);
+      expect(low.rendered.container).toHaveTextContent('1 (1%)');
+
+      mockContentFrameworkTable.mockClear();
+      const high = renderFormatted({ [input]: [1000], [read]: [999] }, read, 999);
+      expect(high.rendered.container).toHaveTextContent('999 (99%)');
+    });
+
+    it('shows the plain value when the input tokens are not on the span', () => {
+      const { rendered } = renderFormatted(
+        { 'attributes.gen_ai.usage.cache_read.input_tokens': [8517] },
+        'attributes.gen_ai.usage.cache_read.input_tokens',
+        8517
+      );
+
+      expect(rendered.container).toHaveTextContent('8,517');
+      expect(rendered.container).not.toHaveTextContent('%');
+    });
   });
 });

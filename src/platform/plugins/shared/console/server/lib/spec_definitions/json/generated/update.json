@@ -19,7 +19,6 @@
       "require_alias": "__flag__",
       "retry_on_conflict": "",
       "routing": [],
-      "_slice": "",
       "timeout": [
         "1m",
         "-1",
@@ -98,7 +97,8 @@
       "POST"
     ],
     "patterns": [
-      "{index}/_update/{id}"
+      "{index}/_update/{id}",
+      "{index}/{_slice}/_update/{id}"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-update",
     "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-update",

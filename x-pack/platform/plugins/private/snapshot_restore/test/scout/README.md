@@ -13,7 +13,7 @@ Scout tests for the Snapshot and Restore management app.
 
 ## API tests
 
-- `api/tests/repositories.spec.ts` — `GET /api/snapshot_restore/repository_types` (module-only types `azure`/`gcs`/`s3`; the Scout stateful cluster runs cloud-enabled, so the on-prem `fs`/`url` types are not offered). The on-prem list is covered in `../scout_snapshot_restore_onprem/api/tests/repositories.spec.ts`.
+- `api/tests/repositories.spec.ts` — `GET /api/snapshot_restore/repository_types` (module-only types `azure`/`gcs`/`s3`; the Scout stateful cluster runs cloud-enabled, so the on-prem `fs`/`url` types are not offered). The on-prem list is covered in `../scout_onprem/api/tests/repositories.spec.ts`.
 - `api/tests/policies.spec.ts` — SLM policy create/update and SLM status (`POST`/`PUT /policies`, `GET /policies/slm_status`). Local + Cloud: registers an `fs` repository locally, reuses the managed `found-snapshots` repository on Cloud.
 - `api/tests/snapshots.spec.ts` — `GET /api/snapshot_restore/snapshots` pagination, sorting, and search, plus `POST /api/snapshot_restore/snapshots/bulk_delete`. Local only: relies on `fs` repositories.
 
@@ -42,12 +42,12 @@ Or run a full cycle (boots servers + runs tests) with:
 node scripts/scout run-tests --arch stateful --domain classic --config x-pack/platform/plugins/private/snapshot_restore/test/scout/api/playwright.config.ts
 ```
 
-The on-prem tests under `test/scout_snapshot_restore_onprem/` need the `snapshot_restore_onprem` server config set, which omits `xpack.cloud.id`. Start the servers with it, then run the config:
+The on-prem tests under `test/scout_onprem/` need the `onprem` server config set, which omits `xpack.cloud.id`. Start the servers with it, then run the config:
 
 ```bash
-node scripts/scout start-server --arch stateful --domain classic --serverConfigSet snapshot_restore_onprem
+node scripts/scout start-server --arch stateful --domain classic --serverConfigSet onprem
 ```
 
 ```bash
-node scripts/playwright test --config x-pack/platform/plugins/private/snapshot_restore/test/scout_snapshot_restore_onprem/api/playwright.config.ts --project local --grep @local-stateful-classic
+node scripts/playwright test --config x-pack/platform/plugins/private/snapshot_restore/test/scout_onprem/api/playwright.config.ts --project local --grep @local-stateful-classic
 ```

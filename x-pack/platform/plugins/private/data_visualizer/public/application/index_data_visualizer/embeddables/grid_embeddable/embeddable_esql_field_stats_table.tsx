@@ -41,6 +41,7 @@ const EmbeddableESQLFieldStatsTableWrapper = React.memo(
       configs,
       extendedColumns,
       progress,
+      cancelled,
       overallStatsProgress,
       setLastRefresh,
       getItemIdToExpandedRowMap,
@@ -83,7 +84,7 @@ const EmbeddableESQLFieldStatsTableWrapper = React.memo(
         extendedColumns={extendedColumns}
         showPreviewByDefault={props?.showPreviewByDefault}
         onChange={onTableUpdate}
-        loading={progress < 100}
+        loading={progress < 100 && !cancelled}
         overallStatsRunning={overallStatsProgress.isRunning}
         error={overallStatsProgress.error}
         isInteractive={props.isInteractive}

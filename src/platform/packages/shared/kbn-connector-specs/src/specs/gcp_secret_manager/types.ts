@@ -41,6 +41,8 @@ const MEMBER_PATTERN =
 const ROLE_NAME_PATTERN =
   /^(roles\/[a-zA-Z0-9_.]+|(projects|organizations)\/[a-z0-9-]+\/roles\/[a-zA-Z0-9_.-]+)$/;
 
+const MAX_PAYLOAD_BYTES = 65536;
+
 const projectId = () =>
   z
     .string()
@@ -180,7 +182,10 @@ export const AddSecretVersionInputSchema = lazySchema(() =>
     secretId: secretId(),
     payload: z
       .string()
-      .max(65536)
+      .max(MAX_PAYLOAD_BYTES)
+      .refine((value) => Buffer.byteLength(value, 'utf8') <= MAX_PAYLOAD_BYTES, {
+        message: 'payload must not exceed 64KiB when UTF-8 encoded',
+      })
       .describe(
         'The new secret value as plain UTF-8 text. The connector base64-encodes it for the API, so do not pre-encode. Maximum 64KiB.'
       ),

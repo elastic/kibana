@@ -7,15 +7,25 @@
 
 import { tags } from '@kbn/scout-security';
 import { evaluate } from '../../src/evaluate';
+import { deleteEntityEngines, installEntityStoreV2AndWait } from '../../src/setup_helpers';
 
 /**
- * Asset criticality prompts (P-AC1, P-AC2). Uses security.entity_analytics.asset_criticality tool.
- * For full grounding evals, seed asset criticality data; tool routing and criteria work without seeding.
+ * Asset criticality prompts (P-AC1, P-AC2). Uses security.search_entities.
+ * The tool is unavailable until the space has a latest-entities index, so the
+ * store is installed first. Seeding criticality data is only needed for grounding.
  */
 evaluate.describe(
   'SIEM Entity Analytics Skill - Asset Criticality',
   { tag: tags.serverless.security.complete },
   () => {
+    evaluate.beforeAll(async ({ log, supertest }) => {
+      await installEntityStoreV2AndWait({ supertest, log });
+    });
+
+    evaluate.afterAll(async ({ log, supertest }) => {
+      await deleteEntityEngines({ supertest, log });
+    });
+
     evaluate('entity analytics asset criticality questions', async ({ evaluateDataset }) => {
       await evaluateDataset({
         dataset: {
@@ -33,7 +43,7 @@ evaluate.describe(
                 ],
                 toolCalls: [
                   {
-                    id: 'security.entity_analytics.asset_criticality',
+                    id: 'security.search_entities',
                     criteria: [
                       'The response uses the asset criticality tool or clearly explains that the host was not found.',
                     ],
@@ -53,10 +63,9 @@ evaluate.describe(
                 ],
                 toolCalls: [
                   {
-                    id: 'security.entity_analytics.asset_criticality',
-                    acceptableAlternativeToolIds: ['security.entity_analytics.risk_score'],
+                    id: 'security.search_entities',
                     criteria: [
-                      'The response uses at least one of: asset_criticality or risk_score to surface business-critical or high-risk entities.',
+                      'The response uses entity search to surface business-critical or high-risk entities.',
                     ],
                   },
                 ],

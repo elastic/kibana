@@ -1,5 +1,5 @@
 {
-  "sha1": "4e481e0a75d80903cf041858fb3e85006170dec2",
+  "sha1": "19002ab703409748aff6b2cf086985ef05f5b66d",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -56,8 +56,22 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/workflows/api/tests/create_rule_step.spec.ts",
-        "line": 96,
-        "column": 55
+        "line": 124,
+        "column": 9
+      }
+    },
+    {
+      "id": "68c20e17ad478b8-0ab6d6a14822b92",
+      "title": "security.createRule workflow step creates an enabled rule when \"enabled\" is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/workflows/api/tests/create_rule_step.spec.ts",
+        "line": 150,
+        "column": 23
       }
     },
     {
@@ -70,8 +84,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/workflows/api/tests/create_rule_step.spec.ts",
-        "line": 122,
-        "column": 61
+        "line": 174,
+        "column": 39
       }
     },
     {

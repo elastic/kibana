@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiDataGridColumn } from '@elastic/eui';
+import type { EuiDataGridColumn, EuiDataGridColumnActions } from '@elastic/eui';
 import { alertCountQuerySpec, lastSeenAlertQuerySpec } from './queries/alerts';
 import { anomalyCountQuerySpec } from './queries/anomalies';
 import { riskScoreChangeQuerySpec } from './queries/risk_score_change';
@@ -22,24 +22,34 @@ import type { ColumnQuerySpec, PageEnricher, SortPageFetcher } from './queries/t
 // Ordered list of all grid columns; GridColumnId and the rows-mode lists derive from it.
 const COLUMNS = [
   { id: 'entity.name', displayAsText: 'Entity name', initialWidth: 200 },
-  { id: 'group_size', displayAsText: 'Records', initialWidth: 100 },
+  { id: 'group_size', displayAsText: 'Records', initialWidth: 100, schema: 'numeric' },
   {
     id: 'entity.relationships.resolution.resolved_to',
     displayAsText: 'Resolved to',
     initialWidth: 200,
   },
   { id: 'entity.EngineMetadata.Type', displayAsText: 'Entity type', initialWidth: 120 },
-  { id: 'entity.risk.calculated_score_norm', displayAsText: 'Risk score', initialWidth: 120 },
-  { id: 'risk_score_change', displayAsText: 'Risk score change', initialWidth: 140 },
+  {
+    id: 'entity.risk.calculated_score_norm',
+    displayAsText: 'Risk score',
+    initialWidth: 85,
+    schema: 'numeric',
+  },
+  {
+    id: 'risk_score_change',
+    displayAsText: 'Risk score change',
+    initialWidth: 160,
+    schema: 'numeric',
+  },
   { id: 'asset.criticality', displayAsText: 'Asset criticality', initialWidth: 160 },
-  { id: 'entity.source', displayAsText: 'Source', initialWidth: 140 },
-  { id: 'alert_count', displayAsText: 'Alerts', initialWidth: 140 },
-  { id: 'last_seen_alert', displayAsText: 'Last alert', initialWidth: 180 },
-  { id: 'anomaly_count', displayAsText: 'Anomalies', initialWidth: 120 },
-  { id: 'case_count', displayAsText: 'Cases', initialWidth: 100 },
+  { id: 'entity.source', displayAsText: 'Source', initialWidth: 170 },
+  { id: 'alert_count', displayAsText: 'Alerts', initialWidth: 180 },
+  { id: 'last_seen_alert', displayAsText: 'Last alert', initialWidth: 140 },
+  { id: 'anomaly_count', displayAsText: 'Anomalies', initialWidth: 110, schema: 'numeric' },
+  { id: 'case_count', displayAsText: 'Cases', initialWidth: 90, schema: 'numeric' },
   { id: 'entity.attributes.watchlists', displayAsText: 'Watchlists', initialWidth: 200 },
-  { id: 'entity.lifecycle.first_seen', displayAsText: 'First seen', initialWidth: 180 },
-  { id: '@timestamp', displayAsText: 'Last seen', initialWidth: 180 },
+  { id: 'entity.lifecycle.first_seen', displayAsText: 'First seen', initialWidth: 140 },
+  { id: '@timestamp', displayAsText: 'Last seen', initialWidth: 140 },
 ] as const satisfies readonly EuiDataGridColumn[];
 
 export type GridColumnId = (typeof COLUMNS)[number]['id'];
@@ -84,8 +94,22 @@ export const ENRICHED_FIELDS: ReadonlySet<string> = new Set(
   Object.values(QUERY_SPECS).flatMap((spec) => spec?.enricher?.fields ?? [])
 );
 
+/**
+ * EUI merges these into the header menu's built-in items and keeps their labels, so a click on one
+ * tells which action it was. It types each as a full `EuiListGroupItemProps`, which requires a
+ * `label` that would replace the built-in one, so only the test subjects are passed, cast.
+ */
+export const COLUMN_ACTIONS = {
+  showSortAsc: { 'data-test-subj': 'eaGridColumnSortAsc' },
+  showSortDesc: { 'data-test-subj': 'eaGridColumnSortDesc' },
+  showHide: { 'data-test-subj': 'eaGridColumnHide' },
+  showMoveLeft: { 'data-test-subj': 'eaGridColumnMoveLeft' },
+  showMoveRight: { 'data-test-subj': 'eaGridColumnMoveRight' },
+} as EuiDataGridColumnActions;
+
 const ALL_COLUMNS: readonly EuiDataGridColumn[] = COLUMNS.map((column) => ({
   ...column,
+  actions: COLUMN_ACTIONS,
   isSortable: QUERY_SPECS[column.id]?.fetchSortPage != null,
   isExpandable: false,
   isResizable: false,

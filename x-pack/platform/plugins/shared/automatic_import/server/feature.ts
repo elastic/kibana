@@ -24,7 +24,6 @@ export const AUTOMATIC_IMPORT_FEATURE: KibanaFeatureConfig = {
     defaultMessage: 'Automatic Import',
   }),
   category: DEFAULT_APP_CATEGORIES.management,
-  excludeFromBasePrivileges: true,
   app: [],
   privileges: {
     all: {

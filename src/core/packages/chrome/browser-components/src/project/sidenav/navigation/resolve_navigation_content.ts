@@ -120,7 +120,7 @@ export const resolveLinksContent = (
   ).pipe(map((resolved) => resolved.filter((placement) => placement.lists.length > 0)));
 };
 
-export const attachPopoverSections = (
+export const attachSupplementarySections = (
   navigationItems: NavigationItems,
   resolved: readonly ResolvedLinksPlacement[]
 ): NavigationItems => {
@@ -135,18 +135,22 @@ export const attachPopoverSections = (
 
   const attach = (item: MenuItem): MenuItem => {
     const placement = byNodeId.get(item.id);
-    // v1 skips nodes that already have `sections`. Intended later: tree children, then lists, then footer.
-    if (!placement || (item.sections?.length ?? 0) > 0) {
+    if (!placement) {
       return item;
     }
+
+    const resolvedSections = placement.lists.map((list) => ({
+      id: list.id,
+      label: list.title,
+      items: list.items,
+      isPaginated: true,
+    }));
+
+    // Keep supplementary content separate from structural sections so it can appear
+    // in the popover and side panel without appearing in More.
     return {
       ...item,
-      popoverSections: placement.lists.map((list) => ({
-        id: list.id,
-        label: list.title,
-        items: list.items,
-        isPaginated: true,
-      })),
+      supplementarySections: resolvedSections,
     };
   };
 
@@ -154,7 +158,7 @@ export const attachPopoverSections = (
     ...navigationItems,
     navItems: {
       primaryItems: navigationItems.navItems.primaryItems.map(attach),
-      // More stays a flat link. popoverSections would turn the parent into a submenu.
+      // More retains structural sections only. Supplementary sections are not rendered there.
       overflowItems: navigationItems.navItems.overflowItems,
       footerItems: navigationItems.navItems.footerItems.map(attach),
     },
@@ -171,7 +175,7 @@ export const joinNavigationContent = (
 ): Observable<NavigationItems & { solutionId: SolutionId }> =>
   combineLatest([navigationItems$, resolvedLinks$]).pipe(
     map(([nav, links]) => ({
-      ...attachPopoverSections(nav.items, nav.tree === links.tree ? links.resolved : []),
+      ...attachSupplementarySections(nav.items, nav.tree === links.tree ? links.resolved : []),
       solutionId: nav.solutionId,
     }))
   );

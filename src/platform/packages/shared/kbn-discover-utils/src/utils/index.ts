@@ -10,7 +10,6 @@
 export * from './build_data_record';
 export * from './calc_field_counts';
 export * from './contains_index_pattern';
-export * from './format_hit';
 export * from './format_value';
 export * from './get_doc_id';
 export * from './get_field_value_with_fallback';

@@ -7,6 +7,7 @@
 
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { createPageStepTimings } from '../instrumentation/page_step_timings';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EntityUpdateClient } from '@kbn/entity-store/server';
 import { EntityType } from '../../../../../../common/entity_analytics/types';
@@ -107,6 +108,7 @@ describe('score_resolution_entities', () => {
 
     await collectPages(
       calculateResolutionEntityScores({
+        pageTimings: createPageStepTimings(),
         esClient,
         crudClient,
         logger,
@@ -140,6 +142,7 @@ describe('score_resolution_entities', () => {
 
     await collectPages(
       calculateResolutionEntityScores({
+        pageTimings: createPageStepTimings(),
         esClient,
         crudClient,
         logger,
@@ -175,6 +178,7 @@ describe('score_resolution_entities', () => {
 
     await collectPages(
       calculateResolutionEntityScores({
+        pageTimings: createPageStepTimings(),
         esClient,
         crudClient,
         logger,
@@ -210,6 +214,7 @@ describe('score_resolution_entities', () => {
 
     await collectPages(
       calculateResolutionEntityScores({
+        pageTimings: createPageStepTimings(),
         esClient,
         crudClient,
         logger,
@@ -240,6 +245,7 @@ describe('score_resolution_entities', () => {
 
     await collectPages(
       calculateResolutionEntityScores({
+        pageTimings: createPageStepTimings(),
         esClient,
         crudClient,
         logger,
@@ -264,6 +270,7 @@ describe('score_resolution_entities', () => {
     const run = (targetEntityIds?: string[]) =>
       collectPages(
         calculateResolutionEntityScores({
+          pageTimings: createPageStepTimings(),
           esClient,
           crudClient,
           logger,

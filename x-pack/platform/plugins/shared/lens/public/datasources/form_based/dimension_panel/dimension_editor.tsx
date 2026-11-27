@@ -63,10 +63,10 @@ import { TimeShift } from './time_shift';
 import { DOCUMENT_FIELD_NAME } from '../../../../common/constants';
 import {
   quickFunctionsName,
-  staticValueOperationName,
   isQuickFunction,
   getParamEditor,
   formulaOperationName,
+  staticValueOperationName,
   DimensionEditorButtonGroups,
   CalloutWarning,
   isLayerChangingDueToDecimalsPercentile,

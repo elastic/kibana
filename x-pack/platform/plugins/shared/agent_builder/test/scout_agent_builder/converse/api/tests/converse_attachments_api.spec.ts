@@ -113,8 +113,9 @@ apiTest.describe(
         const allMessageContent = firstAgentRequest!.messages
           .map((m: { content?: unknown }) => String(m.content ?? ''))
           .join('\n');
-        expect(allMessageContent).toContain('<attachments count="1">');
-        expect(allMessageContent).toContain('<attachment');
+        expect(allMessageContent).toContain('<conversation_event type="attachment_added"');
+        expect(allMessageContent).toContain('attachment_type="text"');
+        expect(allMessageContent).toContain('source="chat_input"');
       });
 
       apiTest(`[${mode}] rejects attachment without data or origin`, async ({ asAdmin }) => {

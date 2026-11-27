@@ -21,7 +21,9 @@ import {
   featureCandidateSchema,
   searchFeaturesForCandidates,
 } from '../../../lib/significant_events/features/feature_similarity_search';
+import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
+import { reportToolFailure } from '../tool_failure';
 import {
   loadSourceCatalog,
   resolveSourcesBySlugOrId,
@@ -49,10 +51,12 @@ export const createFeatureSimilaritySearchTool = ({
   getScopedClients,
   server,
   logger,
+  telemetry,
 }: {
   getScopedClients: GetScopedClients;
   server: SignificantEventsServer;
   logger: Logger;
+  telemetry: EbtTelemetryClient;
 }): StaticToolRegistration<typeof featureSimilaritySearchSchema> => {
   const toolDefinition: BuiltinToolDefinition<typeof featureSimilaritySearchSchema> = {
     id: SIGNIFICANT_EVENTS_FEATURE_SIMILARITY_SEARCH_TOOL_ID,
@@ -103,7 +107,17 @@ export const createFeatureSimilaritySearchTool = ({
         };
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
-        logger.warn(`Feature similarity search failed: ${message}`);
+        reportToolFailure({
+          error,
+          toolId: SIGNIFICANT_EVENTS_FEATURE_SIMILARITY_SEARCH_TOOL_ID,
+          errorLogMessage: `Feature similarity search failed: ${message}`,
+          errorLogLevel: 'warn',
+          logger,
+          telemetry,
+          request: context.request,
+          runContext: context.runContext,
+          itemCount: candidates.length,
+        });
         return {
           results: [
             {

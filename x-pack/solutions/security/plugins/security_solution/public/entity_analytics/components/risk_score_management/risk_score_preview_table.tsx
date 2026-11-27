@@ -8,7 +8,6 @@
 import React, { useCallback } from 'react';
 import { EuiInMemoryTable, EuiLink } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EntityRiskScoreRecord } from '../../../../common/api/entity_analytics/common';
@@ -16,11 +15,6 @@ import type { RiskSeverity } from '../../../../common/search_strategy';
 import { RiskScoreLevel } from '../severity/common';
 import { EntityDetailsLink } from '../../../common/components/links';
 import type { EntityType } from '../../../../common/entity_analytics/types';
-import {
-  EntityPanelKeyByType,
-  EntityPanelParamByType,
-} from '../../../flyout/entity_details/shared/constants';
-import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
 import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
 import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry/events/flyout_v2/types';
 
@@ -39,50 +33,18 @@ const EntityFlyoutLink = ({
   displayName: string;
   entityType: EntityType;
 }) => {
-  const enableNewFlyout = useIsNewFlyoutEnabled();
-  const { openRightPanel } = useExpandableFlyoutApi();
   const { openEntityFlyout } = useFlyoutApi();
-  const panelKey = EntityPanelKeyByType[entityType];
-  const paramName = EntityPanelParamByType[entityType];
 
   const onClick = useCallback(() => {
-    if (enableNewFlyout) {
-      openEntityFlyout({
-        engineType: entityType,
-        entityId,
-        entityName: displayName,
-        contextID: PREVIEW_TABLE_SCOPE_ID,
-        scopeId: PREVIEW_TABLE_SCOPE_ID,
-        origin: FLYOUT_ORIGIN.RISK_SCORE_PREVIEW,
-      });
-      return;
-    }
-
-    if (panelKey && paramName) {
-      openRightPanel({
-        id: panelKey,
-        params: {
-          [paramName]: displayName,
-          contextID: PREVIEW_TABLE_SCOPE_ID,
-          scopeId: PREVIEW_TABLE_SCOPE_ID,
-          entityId,
-        },
-      });
-    }
-  }, [
-    displayName,
-    enableNewFlyout,
-    entityId,
-    entityType,
-    openEntityFlyout,
-    openRightPanel,
-    panelKey,
-    paramName,
-  ]);
-
-  if (!enableNewFlyout && !panelKey) {
-    return <>{displayName}</>;
-  }
+    openEntityFlyout({
+      engineType: entityType,
+      entityId,
+      entityName: displayName,
+      contextID: PREVIEW_TABLE_SCOPE_ID,
+      scopeId: PREVIEW_TABLE_SCOPE_ID,
+      origin: FLYOUT_ORIGIN.RISK_SCORE_PREVIEW,
+    });
+  }, [displayName, entityId, entityType, openEntityFlyout]);
 
   return <EuiLink onClick={onClick}>{displayName}</EuiLink>;
 };

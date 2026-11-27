@@ -36,8 +36,10 @@ describe('GetCompositeSLODefinition', () => {
       name: 'My Composite',
       description: 'desc',
       members: compositeSlo.members,
-      timeWindow: compositeSlo.timeWindow,
+      timeWindow: { duration: '30d', type: 'rolling' },
       objective: compositeSlo.objective,
+      createdAt: '2024-01-01T00:00:00.000Z',
+      updatedAt: '2024-01-01T00:00:00.000Z',
     });
     expect(result).not.toHaveProperty('summary');
   });

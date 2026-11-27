@@ -17,6 +17,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import type { IntegrationCategory } from '@kbn/custom-integrations-plugin/common';
+import type { CreateIntegrationSideCardButtonProps } from '@kbn/automatic-import-plugin/public';
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -94,7 +95,14 @@ const StickySidebar = styled(EuiFlexItem)`
 `;
 
 export interface SidebarProps extends Props {
-  CreateIntegrationCardButton?: React.ComponentType;
+  /** Whether the user may see created integrations at all (Automatic Import read or all). */
+  showCreatedIntegrations?: boolean;
+  /** Rendered when the user may create or upload integrations and has none yet. */
+  CreateIntegrationCardButton?: React.ComponentType<CreateIntegrationSideCardButtonProps>;
+  /** Whether the card offers the AI create action (Automatic Import all). */
+  canCreateIntegration?: boolean;
+  /** Whether the card offers the upload package link (Fleet upload packages privilege). */
+  canUploadIntegrationPackage?: boolean;
   hasCreatedIntegrations?: boolean;
   createdIntegrationsCount?: number;
   isLoadingCreatedIntegrations?: boolean;
@@ -107,7 +115,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
   categories,
   selectedCategories,
   onCategoryChange,
+  showCreatedIntegrations = false,
   CreateIntegrationCardButton,
+  canCreateIntegration = false,
+  canUploadIntegrationPackage = false,
   hasCreatedIntegrations,
   createdIntegrationsCount,
   isLoadingCreatedIntegrations,
@@ -118,7 +129,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <StickySidebar>
-      {CreateIntegrationCardButton && !isLoadingCreatedIntegrations && (
+      {showCreatedIntegrations && !isLoadingCreatedIntegrations && (
         <>
           {hasCreatedIntegrations ? (
             <EuiLink
@@ -158,10 +169,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </EuiNotificationBadge>
               ) : null}
             </EuiLink>
-          ) : (
-            <CreateIntegrationCardButton />
+          ) : CreateIntegrationCardButton ? (
+            <CreateIntegrationCardButton
+              canCreate={canCreateIntegration}
+              canUpload={canUploadIntegrationPackage}
+            />
+          ) : null}
+          {(hasCreatedIntegrations || CreateIntegrationCardButton) && (
+            <EuiHorizontalRule margin="m" />
           )}
-          <EuiHorizontalRule margin="m" />
         </>
       )}
       <CategoryFacets

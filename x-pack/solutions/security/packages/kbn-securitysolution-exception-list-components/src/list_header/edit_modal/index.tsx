@@ -25,10 +25,11 @@ import {
 import * as i18n from '../../translations';
 import type { ListDetails } from '../../types';
 import { useEditModal } from './use_edit_modal';
+import type { EditModalOnSave } from './use_edit_modal';
 
 interface EditModalProps {
   listDetails: ListDetails;
-  onSave: (newListDetails: ListDetails) => void;
+  onSave: EditModalOnSave;
   onCancel: () => void;
 }
 

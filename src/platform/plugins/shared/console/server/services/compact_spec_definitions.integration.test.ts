@@ -15,8 +15,8 @@ import { compactSpecDefinitions } from './compact_spec_definitions';
 import { SpecDefinitionsService } from './spec_definitions_service';
 
 const PAYLOAD_BUDGETS = {
-  stack: { decoded: 650_000, gzip: 75_000 },
-  serverless: { decoded: 450_000, gzip: 55_000 },
+  stack: { decoded: 700_000, gzip: 75_000 },
+  serverless: { decoded: 500_000, gzip: 55_000 },
 } as const;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>

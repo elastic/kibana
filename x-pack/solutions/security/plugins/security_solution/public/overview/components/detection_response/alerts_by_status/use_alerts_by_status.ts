@@ -22,7 +22,7 @@ import { useEntityFromStore } from '../../../../flyout/entity_details/shared/hoo
 import {
   combineEntityGroupFilters,
   getEntityGroupRecords,
-} from '../../../../flyout/entity_details/shared/entity_store_group_utils';
+} from '../../../../flyout_v2/entity/shared/utils/entity_store_group_utils';
 import type { AlertsByStatusAgg, AlertsByStatusResponse, ParsedAlertsData } from './types';
 import {
   STATUS_CRITICAL_LABEL,
@@ -46,12 +46,15 @@ export const ENTITY_ID_FIELD = 'entity.id';
 /** Stable empty map so callers passing inline `{}` do not invalidate query memoization every render. */
 const EMPTY_IDENTITY_FIELDS: Record<string, string> = {};
 
-const toStoreEntityType = (type: string | undefined): 'host' | 'user' | undefined => {
+const toStoreEntityType = (type: string | undefined): 'host' | 'user' | 'service' | undefined => {
   if (type === EntityType.host || type === 'host') {
     return 'host';
   }
   if (type === EntityType.user || type === 'user') {
     return 'user';
+  }
+  if (type === EntityType.service || type === 'service') {
+    return 'service';
   }
   return undefined;
 };

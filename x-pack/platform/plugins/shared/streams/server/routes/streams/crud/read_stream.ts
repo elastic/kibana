@@ -14,7 +14,7 @@ import {
   getRoot,
   LOGS_ECS_STREAM_NAME,
 } from '@kbn/streams-schema';
-import type { IScopedClusterClient, Logger } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
 import type {
   DataStreamWithFailureStore,
@@ -30,51 +30,22 @@ import {
   getUnmanagedElasticsearchAssets,
 } from '../../../lib/streams/stream_crud';
 import { addAliasesForNamespacedFields } from '../../../lib/streams/component_templates/logs_layer';
-import { getEsqlView } from '../../../lib/streams/esql_views/manage_esql_views';
 
 export async function readStream({
   name,
   attachmentClient,
   streamsClient,
   scopedClusterClient,
-  logger,
 }: {
   name: string;
   attachmentClient: AttachmentClient;
   streamsClient: StreamsClient;
   scopedClusterClient: IScopedClusterClient;
-  logger: Logger;
 }): Promise<Streams.all.GetResponse> {
   const [streamDefinition, { dashboards, rules }] = await Promise.all([
     streamsClient.getStream(name),
     getStreamAttachmentIds({ name, attachmentClient }),
   ]);
-
-  if (Streams.QueryStream.Definition.is(streamDefinition)) {
-    // Fetch the actual ES|QL from the view (source of truth)
-    const esqlView = await getEsqlView({
-      esClient: scopedClusterClient.asCurrentUser,
-      logger,
-      name: streamDefinition.query.view,
-    });
-
-    // Build response with both view reference and resolved esql
-    // query_streams is already part of the stream definition (from BaseStream.Definition)
-    const queryStreamResponse: Streams.QueryStream.GetResponse = {
-      stream: {
-        ...streamDefinition,
-        query: {
-          view: streamDefinition.query.view,
-          esql: esqlView.query,
-        },
-      },
-      dashboards,
-      rules,
-      inherited_fields: {},
-    };
-
-    return queryStreamResponse;
-  }
 
   const privileges = await streamsClient.getPrivileges(name);
 

@@ -1,12 +1,12 @@
 {
-  "sha1": "e45dd918de5f5532dac755d2d2d5e111b2521aa4",
+  "sha1": "e591db3d114b3dd868d53d899123de6e1704a568",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
     {
-      "id": "888be2654773a9b-f0ea416820b0dce",
-      "title": "Ingest APM metrics data for Scout API tests",
+      "id": "888be2654773a9b-bb4e657f847dda5",
+      "title": "Ingest APM data for Scout API tests",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -21,6 +21,222 @@
       }
     },
     {
+      "id": "dc68425b4c45805-6bc16f8f5169b27",
+      "title": "Service map grouping with service map grouping disabled does not group the map, however many services it has",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_map/service_map_grouping_flag_off.spec.ts",
+        "line": 32,
+        "column": 17
+      }
+    },
+    {
+      "id": "330bc4659d4e93d-aba0dd0a9d74aba",
+      "title": "Service map grouping by calls groups every service on the map by its calls, shown automatically",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_map/service_map_grouping.spec.ts",
+        "line": 66,
+        "column": 15
+      }
+    },
+    {
+      "id": "330bc4659d4e93d-0c269b5a201f596",
+      "title": "Service map grouping by calls finds each team, named after one of its services",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_map/service_map_grouping.spec.ts",
+        "line": 77,
+        "column": 66
+      }
+    },
+    {
+      "id": "330bc4659d4e93d-ea88b834645b1ac",
+      "title": "Service map grouping by calls puts the services every team calls in the shared group, and those cut off from the rest in the not connected group",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_map/service_map_grouping.spec.ts",
+        "line": 89,
+        "column": 13
+      }
+    },
+    {
+      "id": "330bc4659d4e93d-2c8e08928ab843b",
+      "title": "Service map grouping by calls does not group a map with fewer than 100 services",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_map/service_map_grouping.spec.ts",
+        "line": 95,
+        "column": 27
+      }
+    },
+    {
+      "id": "330bc4659d4e93d-0b3958bae714074",
+      "title": "Service map grouping by calls does not group the map of a single service",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_map/service_map_grouping.spec.ts",
+        "line": 111,
+        "column": 16
+      }
+    },
+    {
+      "id": "569f27decfa4346-76dffd7aa1dc58e",
+      "title": "Service map stats with service map grouping disabled returns the services without stats",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_map/service_map_stats_flag_off.spec.ts",
+        "line": 57,
+        "column": 55
+      }
+    },
+    {
+      "id": "569f27decfa4346-d608afbbad270bf",
+      "title": "Service map stats with service map grouping disabled ignores a data source sent anyway",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_map/service_map_stats_flag_off.spec.ts",
+        "line": 63,
+        "column": 14
+      }
+    },
+    {
+      "id": "a848ea53fc7d4c4-6ea47119135c465",
+      "title": "Service map stats with service map grouping enabled returns each service's stats from 1m service transaction metrics",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_map/service_map_stats.spec.ts",
+        "line": 79,
+        "column": 31
+      }
+    },
+    {
+      "id": "a848ea53fc7d4c4-1b9943734163dbd",
+      "title": "Service map stats with service map grouping enabled returns each service's stats from 10m service transaction metrics",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_map/service_map_stats.spec.ts",
+        "line": 79,
+        "column": 31
+      }
+    },
+    {
+      "id": "a848ea53fc7d4c4-51c9430d4946cf3",
+      "title": "Service map stats with service map grouping enabled returns each service's stats from 60m service transaction metrics",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_map/service_map_stats.spec.ts",
+        "line": 79,
+        "column": 31
+      }
+    },
+    {
+      "id": "a848ea53fc7d4c4-5b1732d6b0482b5",
+      "title": "Service map stats with service map grouping enabled returns the same stats from transactionMetric at 1m",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_map/service_map_stats.spec.ts",
+        "line": 117,
+        "column": 20
+      }
+    },
+    {
+      "id": "a848ea53fc7d4c4-4072be000fe0b7f",
+      "title": "Service map stats with service map grouping enabled returns the same stats from transactionEvent at none",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_map/service_map_stats.spec.ts",
+        "line": 117,
+        "column": 20
+      }
+    },
+    {
+      "id": "a848ea53fc7d4c4-998e8ab3113efae",
+      "title": "Service map stats with service map grouping enabled falls back to transaction metrics when the kuery filters on a transaction name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_map/service_map_stats.spec.ts",
+        "line": 131,
+        "column": 20
+      }
+    },
+    {
+      "id": "a848ea53fc7d4c4-5e15cc9c2aea995",
+      "title": "Service map stats with service map grouping enabled rejects a request without a data source",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_map/service_map_stats.spec.ts",
+        "line": 160,
+        "column": 13
+      }
+    },
+    {
       "id": "ba211266fd3591c-b332a6f97801043",
       "title": "APM Service Metrics API JRuby JVM nodes table values match the seeded metrics",
       "expectedStatus": "passed",
@@ -32,8 +248,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_overview/metrics.spec.ts",
-        "line": 38,
-        "column": 42
+        "line": 31,
+        "column": 28
       }
     },
     {
@@ -48,7 +264,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_overview/metrics.spec.ts",
-        "line": 69,
+        "line": 62,
         "column": 7
       }
     },
@@ -64,7 +280,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_overview/metrics.spec.ts",
-        "line": 99,
+        "line": 92,
         "column": 14
       }
     },

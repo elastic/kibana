@@ -65,7 +65,7 @@ exports[`GaugeComponent renders the chart 1`] = `
           "point": Object {
             "dimmed": Object {
               "fill": "#FFFFFF",
-              "stroke": "rgba(202, 211, 226, 0.15)",
+              "stroke": "rgba(202, 211, 226, 0.5)",
             },
             "fill": "#FFFFFF",
             "focused": Object {
@@ -482,7 +482,7 @@ exports[`GaugeComponent renders the chart 1`] = `
           "point": Object {
             "dimmed": Object {
               "fill": "#FFFFFF",
-              "stroke": "rgba(202, 211, 226, 0.15)",
+              "stroke": "rgba(202, 211, 226, 0.35)",
             },
             "fill": "#FFFFFF",
             "focused": Object {

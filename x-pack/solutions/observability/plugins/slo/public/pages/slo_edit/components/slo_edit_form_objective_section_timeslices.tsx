@@ -8,18 +8,22 @@
 import { EuiFieldNumber, EuiFlexItem, EuiFormRow, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { Controller, useFormContext } from 'react-hook-form';
+import { Controller, useFormContext, useFormState, useWatch } from 'react-hook-form';
 import type { CreateSLOForm } from '../types';
 
 export function SloEditFormObjectiveSectionTimeslices() {
-  const { control, getFieldState, watch } = useFormContext<CreateSLOForm>();
-  const indicator = watch('indicator.type');
+  const { control, getFieldState } = useFormContext<CreateSLOForm>();
+  const formState = useFormState({
+    control,
+    name: ['objective.timesliceTarget', 'objective.timesliceWindow'],
+  });
+  const indicator = useWatch({ control, name: 'indicator.type' });
 
   return (
     <>
       <EuiFlexItem>
         <EuiFormRow
-          isInvalid={getFieldState('objective.timesliceTarget').invalid}
+          isInvalid={getFieldState('objective.timesliceTarget', formState).invalid}
           label={
             <span>
               {i18n.translate('xpack.slo.sloEdit.timeSliceTarget.label', {
@@ -67,7 +71,7 @@ export function SloEditFormObjectiveSectionTimeslices() {
 
       <EuiFlexItem>
         <EuiFormRow
-          isInvalid={getFieldState('objective.timesliceWindow').invalid}
+          isInvalid={getFieldState('objective.timesliceWindow', formState).invalid}
           label={
             <span>
               {i18n.translate('xpack.slo.sloEdit.timesliceWindow.label', {

@@ -1,0 +1,27 @@
+{
+  "components": {
+    "schemas": {
+      "_types.Field": {
+        "type": "string"
+      },
+      "_types.Fields": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/_types.Field"
+          },
+          {
+            "items": {
+              "$ref": "#/components/schemas/_types.Field"
+            },
+            "type": "array"
+          }
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Elasticsearch Request & Response Specification"
+  },
+  "openapi": "3.0.3",
+  "paths": {}
+}

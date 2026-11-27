@@ -22,20 +22,23 @@ export class RecordOfType<K extends string, V> extends Type<Record<K, V>> {
   private readonly options: RecordOfOptions<K, V>;
 
   constructor(keyType: Type<K>, valueType: Type<V>, options: RecordOfOptions<K, V> = {}) {
-    let schema = internals
-      .record()
-      .entries(keyType.getSchema(), valueType.getSchema())
-      .meta({
-        [META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES]: () => valueType.getSchema(),
-      });
+    options = { ...options };
+    super(() => {
+      let schema = internals
+        .record()
+        .entries(keyType.getSchema(), valueType.getSchema())
+        .meta({
+          [META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES]: () => valueType.getSchema(),
+        });
 
-    // Only set stripUnknown if we have an explicit value of unknowns
-    const { unknowns } = options;
-    if (unknowns) {
-      schema = schema.options({ stripUnknown: { objects: unknowns === 'ignore' } });
-    }
+      // Only set stripUnknown if we have an explicit value of unknowns
+      const { unknowns } = options;
+      if (unknowns) {
+        schema = schema.options({ stripUnknown: { objects: unknowns === 'ignore' } });
+      }
 
-    super(schema, options);
+      return schema;
+    }, options);
     this.keyType = keyType;
     this.valueType = valueType;
     this.options = options;

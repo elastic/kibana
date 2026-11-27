@@ -31,6 +31,8 @@ export interface UseConnectorCreateFormParams {
   actionTypeId: string | undefined;
   /** Optional initial values merged onto the empty connector (name, config, …). */
   initialConnector?: Partial<Omit<ActionConnector, 'secrets'>>;
+  /** Skips the "Created '<name>'" success toast; see `useCreateConnector`. */
+  hideSuccessToast?: boolean;
 }
 
 /**
@@ -44,6 +46,7 @@ export const useConnectorCreateForm = ({
   actionTypeRegistry,
   actionTypeId,
   initialConnector,
+  hideSuccessToast,
 }: UseConnectorCreateFormParams) => {
   const services = useKibana().services;
   const connectorContext = useContext(ConnectorContext);
@@ -61,7 +64,10 @@ export const useConnectorCreateForm = ({
     isLoading: isSavingConnector,
     createConnector,
     createConnectorError,
-  } = useCreateConnector();
+  } = useCreateConnector({ hideSuccessToast });
+
+  const isCatalogEnabled =
+    connectorContext?.services.isCatalogEnabled ?? services.actions?.isCatalogEnabled;
 
   const isMounted = useRef(false);
   const canSave = hasSaveActionsCapability(capabilities);
@@ -82,7 +88,17 @@ export const useConnectorCreateForm = ({
     isLoading: isLoadingActionTypeModel,
     error: actionTypeModelError,
     refetch: refetchConnectorSpec,
-  } = useActionTypeModel({ actionTypeRegistry, actionTypeId, http, docLinks, uiSettings });
+  } = useActionTypeModel({
+    actionTypeRegistry,
+    actionTypeId,
+    http,
+    docLinks,
+    uiSettings,
+    // TODO this should be user input, out of scope for now
+    specVersion: isCatalogEnabled ? '1' : undefined,
+  });
+
+  const specVersion = isCatalogEnabled ? actionTypeModel?.specVersion : undefined;
 
   // Delay the spinner so quick spec loads don't flash a loading state.
   const [showLoadingSpinner, setShowLoadingSpinner] = useState(false);
@@ -135,6 +151,7 @@ export const useConnectorCreateForm = ({
         config: config ?? {},
         secrets: secrets ?? {},
         id: id ?? '',
+        ...(specVersion !== undefined ? { specVersion } : {}),
         ...isInboundEventsEnabledPayload(
           typeId,
           isInboundEventsEnabled,
@@ -145,7 +162,7 @@ export const useConnectorCreateForm = ({
 
     setShowFormErrors(true);
     return undefined;
-  }, [submit, preSubmitValidator, createConnector, isClusterInboundEventsEnabled]);
+  }, [submit, preSubmitValidator, createConnector, isClusterInboundEventsEnabled, specVersion]);
 
   useEffect(() => {
     isMounted.current = true;

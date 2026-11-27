@@ -16,14 +16,14 @@ import { composeHydrateNotificationsStepDefinition } from './compose_hydrate_not
 describe('composeHydrateNotificationContext', () => {
   const memory =
     'Potentially relevant memories retrieved this turn:\n- `/workspace/memories/checkout-redis-evictions.md` (updated 2026-09-29)';
-  const cortex =
-    'Cortex pages materialized this turn:\n- `/workspace/cortex/services/kibana-local-dev.md` — Kibana Local Development Instance';
+  const wiki =
+    'Wiki pages materialized this turn:\n- `/workspace/wiki/services/kibana-local-dev.md` — Kibana Local Development Instance';
 
-  it('wraps cortex then memory in one model-only system_update', () => {
+  it('wraps wiki then memory in one model-only system_update', () => {
     expect(
       composeHydrateNotificationContext({
         writers: [
-          { directory: '/workspace/cortex', notification: cortex, completed: true },
+          { directory: '/workspace/wiki', notification: wiki, completed: true },
           {
             directory: '/workspace/memories',
             notification: memory,
@@ -31,14 +31,14 @@ describe('composeHydrateNotificationContext', () => {
           },
         ],
       }).model_context
-    ).toBe(['<system_update>', cortex, '', memory, '</system_update>'].join('\n'));
+    ).toBe(['<system_update>', wiki, '', memory, '</system_update>'].join('\n'));
   });
 
   it('omits the wrap when every fragment is empty and every writer completed', () => {
     expect(
       composeHydrateNotificationContext({
         writers: [
-          { directory: '/workspace/cortex', notification: '', completed: true },
+          { directory: '/workspace/wiki', notification: '', completed: true },
           { directory: '/workspace/memories', notification: null, completed: true },
           {
             directory: '/workspace/decision-trees',
@@ -53,13 +53,13 @@ describe('composeHydrateNotificationContext', () => {
   it('keeps a single non-empty fragment', () => {
     const { model_context: modelContext } = composeHydrateNotificationContext({
       writers: [
-        { directory: '/workspace/cortex', notification: '', completed: true },
+        { directory: '/workspace/wiki', notification: '', completed: true },
         { directory: '/workspace/memories', notification: memory, completed: true },
       ],
     });
     expect(modelContext).toContain('<system_update>');
     expect(modelContext).toContain(memory);
-    expect(modelContext).not.toContain('Cortex pages');
+    expect(modelContext).not.toContain('Wiki pages');
     expect(modelContext?.match(/<system_update>/g)).toHaveLength(1);
   });
 
@@ -69,7 +69,7 @@ describe('composeHydrateNotificationContext', () => {
   it('reports an incomplete directory for a writer that produced no output', () => {
     const { model_context: modelContext } = composeHydrateNotificationContext({
       writers: [
-        { directory: '/workspace/cortex', notification: '', completed: true },
+        { directory: '/workspace/wiki', notification: '', completed: true },
         { directory: '/workspace/memories', completed: false },
       ],
     });
@@ -96,7 +96,7 @@ describe('composeHydrateNotificationContext', () => {
   it('reports every failed writer once, in workflow order', () => {
     const { model_context: modelContext } = composeHydrateNotificationContext({
       writers: [
-        { directory: '/workspace/cortex', notification: cortex, completed: true },
+        { directory: '/workspace/wiki', notification: wiki, completed: true },
         { directory: '/workspace/memories', completed: false },
         {
           directory: '/workspace/decision-trees',
@@ -108,7 +108,7 @@ describe('composeHydrateNotificationContext', () => {
     expect(modelContext).toBe(
       [
         '<system_update>',
-        cortex,
+        wiki,
         '',
         formatIncompleteMaterializationNotice('/workspace/memories'),
         '',
@@ -121,8 +121,8 @@ describe('composeHydrateNotificationContext', () => {
 
 describe('formatIncompleteMaterializationNotice', () => {
   it('names the directory with a single trailing slash', () => {
-    expect(formatIncompleteMaterializationNotice('/workspace/cortex')).toBe(
-      'Materialization of /workspace/cortex/ encountered an error; ' +
+    expect(formatIncompleteMaterializationNotice('/workspace/wiki')).toBe(
+      'Materialization of /workspace/wiki/ encountered an error; ' +
         'its contents may be incomplete or missing.'
     );
     expect(formatIncompleteMaterializationNotice('/workspace/memories/')).not.toContain('//');
@@ -173,7 +173,7 @@ describe('composeHydrateNotificationsStepDefinition', () => {
     } as never);
 
   const writer = (over: Record<string, unknown> = {}) => ({
-    directory: '/workspace/cortex',
+    directory: '/workspace/wiki',
     notification: '',
     completed: true,
     ...over,

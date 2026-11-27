@@ -180,10 +180,10 @@ const createClient = (apiClient: ApiClientFixture, sessions: IRoleSessions) => {
       });
       return response.statusCode === 200 ? response.body.enabled : undefined;
     },
-    /** Creates the source the rule-backed query is stored under. */
+    /** Creates the source the rule-backed query is stored under. Changing sources needs the engine admin, which holds configure. */
     async createSource(title: string) {
       const response = await apiClient.post('internal/nightshift/sources', {
-        headers: await internalHeaders(),
+        headers: { ...COMMON_API_HEADERS, ...(await cookieFor('engine')) },
         body: { title, esql: SOURCE_ESQL },
         responseType: 'json',
       });
@@ -192,7 +192,7 @@ const createClient = (apiClient: ApiClientFixture, sessions: IRoleSessions) => {
     },
     async deleteSource(sourceId: string) {
       const response = await apiClient.delete(`internal/nightshift/sources/${sourceId}`, {
-        headers: await internalHeaders(),
+        headers: { ...COMMON_API_HEADERS, ...(await cookieFor('engine')) },
         responseType: 'json',
       });
       expect(response).toHaveStatusCode(200);

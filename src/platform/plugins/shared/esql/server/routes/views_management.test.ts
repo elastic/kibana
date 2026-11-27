@@ -226,6 +226,70 @@ describe('ES|QL views routes', () => {
       });
     });
 
+    it('returns parsed validation warnings when requested', async () => {
+      const mocks = createMocks();
+      mocks.esql.putView.mockResolvedValue({
+        body: { acknowledged: true },
+        warnings: [
+          '299 Elasticsearch-9.7.0 "view [my-view] query is not valid: Unknown index [missing]"',
+        ],
+      });
+      registerViewsManagementRoutes(mocks.router, mocks.initializerContext);
+
+      await expect(
+        mocks.handlers.put(
+          mocks.requestHandlerContext,
+          {
+            params: { name: 'my-view' },
+            query: { validate: true },
+            body: { query: 'FROM missing' },
+          },
+          mocks.response
+        )
+      ).resolves.toEqual({
+        status: 200,
+        body: {
+          acknowledged: true,
+          warnings: ['view [my-view] query is not valid: Unknown index [missing]'],
+        },
+      });
+      expect(mocks.esql.putView).toHaveBeenCalledWith(
+        {
+          name: 'my-view',
+          query: 'FROM missing',
+          querystring: { validate: true },
+        },
+        { meta: true }
+      );
+    });
+
+    it('returns an empty warning list when validation finds no problems', async () => {
+      const mocks = createMocks();
+      mocks.esql.putView.mockResolvedValue({
+        body: { acknowledged: true },
+        warnings: null,
+      });
+      registerViewsManagementRoutes(mocks.router, mocks.initializerContext);
+
+      await expect(
+        mocks.handlers.put(
+          mocks.requestHandlerContext,
+          {
+            params: { name: 'my-view' },
+            query: { validate: true },
+            body: { query: 'FROM logs-*' },
+          },
+          mocks.response
+        )
+      ).resolves.toEqual({
+        status: 200,
+        body: {
+          acknowledged: true,
+          warnings: [],
+        },
+      });
+    });
+
     it('deletes one view', async () => {
       const mocks = createMocks();
       mocks.esql.deleteView.mockResolvedValue({ acknowledged: true });

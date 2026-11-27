@@ -10,9 +10,9 @@
 const findSum = (total, current) => total + current;
 
 /**
- * Calculates the sum of one or more numbers/arrays passed into the function. If at least one array is passed, the function will sum up one or more numbers/arrays of numbers and distinct values of an array. Sum accepts arrays of different lengths.
+ * Calculates the sum of one or more numbers/arrays passed into the function. If an argument is an array, the function adds all of its elements. The arrays can have different lengths.
  * @param {...(number|number[])} args one or more numbers or arrays of numbers
- * @return {number} The sum of one or more numbers/arrays of numbers including distinct values in arrays
+ * @return {number} The sum of all numbers and all elements of any arrays in `args`
  *
  * @example
  * sum(1, 2, 3) // returns 6

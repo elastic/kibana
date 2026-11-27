@@ -32,6 +32,8 @@ export {
   type ChatCompleteAPI,
   type ChatCompleteAPIResponse,
   type ChatCompleteOptions,
+  type FeatureChatCompleteAPI,
+  type FeatureChatCompleteOptions,
   type ChatCompleteTemplate,
   parseTemplateJson,
   type ChatCompleteCompositeResponse,
@@ -107,6 +109,21 @@ export {
   isOutputEvent,
   withoutOutputUpdateEvents,
 } from './src/output';
+export type {
+  DecideAPI,
+  DecideOptions,
+  DecisionAnswer,
+  DecisionAnswerFor,
+  DecisionAnswersFor,
+  DecisionChoiceAnswer,
+  DecisionChoiceQuestion,
+  DecisionPredicateAnswer,
+  DecisionPredicateQuestion,
+  DecisionQuestion,
+  DecisionScoreAnswer,
+  DecisionScoreQuestion,
+  DecisionType,
+} from './src/decide';
 export {
   InferenceTaskEventType,
   type InferenceTaskEvent,

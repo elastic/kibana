@@ -109,6 +109,30 @@ describe('createQueryKnowledgeIndicatorToolHandler', () => {
     expect(kiClient.upsertQuery).not.toHaveBeenCalled();
   });
 
+  it('rejects a cast inside a full-text predicate', async () => {
+    const kiClient = {
+      upsertQuery: jest.fn().mockResolvedValue(undefined),
+    };
+
+    await expect(
+      createQueryKnowledgeIndicatorToolHandler({
+        kiClient: kiClient as never,
+        source,
+        queryInput: {
+          title: 'Cast in MATCH_PHRASE',
+          description: 'Union-typed field',
+          esql: {
+            query:
+              'FROM logs.test, logs.test.* | WHERE MATCH_PHRASE(exception.message::keyword, "i/o timeout")',
+          },
+        },
+        logger,
+      })
+    ).rejects.toThrow('not a field from an index mapping');
+
+    expect(kiClient.upsertQuery).not.toHaveBeenCalled();
+  });
+
   it('throws when query upsert fails', async () => {
     const kiClient = {
       upsertQuery: jest.fn().mockRejectedValue(new Error('upsert failed')),

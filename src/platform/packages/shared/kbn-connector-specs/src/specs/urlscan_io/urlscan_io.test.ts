@@ -353,6 +353,52 @@ describe('URLScan.io connector', () => {
     });
   });
 
+  // Axios only drops the standard credential headers on a cross-host redirect.
+  describe('redirects', () => {
+    const keyDroppedOnRedirect = expect.objectContaining({ sensitiveHeaders: ['api-key'] });
+    const url = 'https://phish.example/login';
+
+    it.each([
+      ['searchScans', { q: 'x' }],
+      ['getResult', { uuid: UUID }],
+      ['getScreenshot', { uuid: UUID }],
+      ['getDom', { uuid: UUID }],
+      ['getQuota', {}],
+    ])('%s drops the api-key header on a cross-host redirect', async (name, input) => {
+      const { ctx, client } = createContext();
+      client.get.mockResolvedValue({ data: '', headers: {} });
+      await action(name).handler(ctx, input);
+      expect(client.get.mock.calls[0][1]).toEqual(keyDroppedOnRedirect);
+    });
+
+    it('scanUrl drops the api-key header on a cross-host redirect', async () => {
+      const { ctx, client } = createContext();
+      client.post.mockResolvedValue({ data: submissionResponse, headers: {} });
+      await action('scanUrl').handler(ctx, { url });
+      expect(client.post.mock.calls[0][2]).toEqual(keyDroppedOnRedirect);
+    });
+
+    it('scanUrlAndWait drops it on the submission and on the polls', async () => {
+      jest.useFakeTimers();
+      const { ctx, client } = createContext();
+      client.post.mockResolvedValue({ data: submissionResponse, headers: {} });
+      client.get.mockResolvedValue({ data: resultResponse, headers: {} });
+      const pending = action('scanUrlAndWait').handler(ctx, { url });
+      await jest.runAllTimersAsync();
+      await pending;
+      jest.useRealTimers();
+      expect(client.post.mock.calls[0][2]).toEqual(keyDroppedOnRedirect);
+      expect(client.get.mock.calls[0][1]).toEqual(keyDroppedOnRedirect);
+    });
+
+    it('the connectivity test drops it too', async () => {
+      const { ctx, client } = createContext();
+      client.get.mockResolvedValue({ data: { scope: 'user' }, headers: {} });
+      await UrlscanIo.test.handler(ctx);
+      expect(client.get.mock.calls[0][1]).toEqual(keyDroppedOnRedirect);
+    });
+  });
+
   describe('searchScans', () => {
     it('GETs the search endpoint with the query', async () => {
       const { ctx, client } = createContext();
@@ -457,6 +503,19 @@ describe('URLScan.io connector', () => {
       };
       expect(result.searchAfter).toBeUndefined();
       expect(result.hasMore).toBe(false);
+    });
+
+    // Anonymous and free callers only search recent history, so an empty page proves less.
+    it('reports how far back a limited search reached', async () => {
+      const { ctx, client } = createContext({ authType: 'none' });
+      client.get.mockResolvedValue({
+        data: { results: [], search_date_limit_days: 30 },
+        headers: {},
+      });
+      const result = (await action('searchScans').handler(ctx, { q: 'x' })) as {
+        searchDateLimitDays?: number;
+      };
+      expect(result.searchDateLimitDays).toBe(30);
     });
 
     it('surfaces the rate-limit budget from the response headers', async () => {
@@ -814,7 +873,7 @@ describe('URLScan.io connector', () => {
         referer: 'https://mail.example/',
         customagent: 'Mozilla/5.0 (iPhone)',
         country: 'de',
-        overrideSafety: true,
+        overrideSafety: 'true',
       });
       // No query params at all: the vendor's submission reference documents every option as a
       // member of the POST body.
@@ -826,6 +885,17 @@ describe('URLScan.io connector', () => {
       const { ctx, client } = createContext();
       client.post.mockResolvedValue({ data: submissionResponse, headers: {} });
       await action('scanUrl').handler(ctx, { url: 'https://phish.example/login' });
+      expect(client.post.mock.calls[0][1]).toEqual({ url: 'https://phish.example/login' });
+    });
+
+    // urlscan disables its PII protection when overrideSafety has any value, false included.
+    it('leaves overrideSafety out when it is false', async () => {
+      const { ctx, client } = createContext();
+      client.post.mockResolvedValue({ data: submissionResponse, headers: {} });
+      await action('scanUrl').handler(ctx, {
+        url: 'https://phish.example/login',
+        overrideSafety: false,
+      });
       expect(client.post.mock.calls[0][1]).toEqual({ url: 'https://phish.example/login' });
     });
 
@@ -1136,6 +1206,20 @@ describe('URLScan.io connector', () => {
     });
   });
 
+  describe('actions that need an API key', () => {
+    it.each([
+      ['getResult', { uuid: UUID }],
+      ['getDom', { uuid: UUID }],
+      ['scanUrl', { url: 'https://example.com' }],
+      ['scanUrlAndWait', { url: 'https://example.com' }],
+    ])('%s fails without sending a request when the connector has no key', async (name, input) => {
+      const { ctx, client } = createContext({ authType: 'none' });
+      await expect(action(name).handler(ctx, input)).rejects.toThrow(/requires an API key/);
+      expect(client.get).not.toHaveBeenCalled();
+      expect(client.post).not.toHaveBeenCalled();
+    });
+  });
+
   describe('getQuota', () => {
     it('GETs the quota endpoint outside /api/v1 and flattens the per-action windows', async () => {
       const { ctx, client } = createContext();
@@ -1158,7 +1242,7 @@ describe('URLScan.io connector', () => {
         maxSearchResults: unknown;
         queryableVisibility: unknown;
       };
-      expect(client.get.mock.calls[0][0]).toBe('https://urlscan.io/user/quotas/');
+      expect(client.get.mock.calls[0][0]).toBe('https://urlscan.io/api/v1/quotas');
       expect(result.scope).toBe('user');
       expect(result.limits).toEqual({
         search: { day: { limit: 500, used: 5, remaining: 495 } },
@@ -1196,11 +1280,36 @@ describe('URLScan.io connector', () => {
       expect((result as Record<string, unknown>).ok).toBeUndefined();
     });
 
+    // urlscan's spec shows a team scope for quotas, so only the anonymous scope means no key.
+    it('passes on a team-scoped quota response when a key is configured', async () => {
+      const { ctx, client } = createContext({ authType: 'api_key_header' });
+      client.get.mockResolvedValue({ data: { scope: 'team', limits: {} }, headers: {} });
+      await expect(UrlscanIo.test.handler(ctx)).resolves.toMatchObject({
+        scope: 'team',
+        authenticated: true,
+      });
+    });
+
     it('fails when a key is configured but the quota scope shows it was not applied', async () => {
       // A 200 alone does not prove the key worked: urlscan answers anonymous callers too.
       const { ctx, client } = createContext({ authType: 'api_key_header' });
       client.get.mockResolvedValue({ data: { scope: 'ip-address', limits: {} }, headers: {} });
       await expect(UrlscanIo.test.handler(ctx)).rejects.toThrow(/was not applied/);
+    });
+
+    it.each([null, '', 42])(
+      'fails when a key is configured but the quota scope is %p, which names no account',
+      async (scope) => {
+        const { ctx, client } = createContext({ authType: 'api_key_header' });
+        client.get.mockResolvedValue({ data: { scope, limits: {} }, headers: {} });
+        await expect(UrlscanIo.test.handler(ctx)).rejects.toThrow(/was not applied/);
+      }
+    );
+
+    it.each([null, ''])('does not report authenticated for a %p scope', async (scope) => {
+      const { ctx, client } = createContext({ authType: 'none' });
+      client.get.mockResolvedValue({ data: { scope, limits: {} }, headers: {} });
+      await expect(UrlscanIo.test.handler(ctx)).resolves.toMatchObject({ authenticated: false });
     });
 
     it('passes anonymously, and says which actions still need a key', async () => {
@@ -1300,7 +1409,8 @@ describe('URLScan.io connector', () => {
     it('bounds the search query and size', () => {
       expect(SearchScansInputSchema.safeParse({ q: 'ip:8.8.8.8' }).success).toBe(true);
       expect(SearchScansInputSchema.safeParse({ q: '' }).success).toBe(false);
-      expect(SearchScansInputSchema.safeParse({ q: 'x'.repeat(2001) }).success).toBe(false);
+      expect(SearchScansInputSchema.safeParse({ q: 'x'.repeat(8192) }).success).toBe(true);
+      expect(SearchScansInputSchema.safeParse({ q: 'x'.repeat(8193) }).success).toBe(false);
       expect(SearchScansInputSchema.safeParse({ q: 'x', size: 10_000 }).success).toBe(true);
       expect(SearchScansInputSchema.safeParse({ q: 'x', size: 10_001 }).success).toBe(false);
       expect(SearchScansInputSchema.safeParse({ q: 'x', size: 0 }).success).toBe(false);
@@ -1326,6 +1436,40 @@ describe('URLScan.io connector', () => {
       expect(GetDomInputSchema.safeParse({ uuid: UUID, maxLength: 500_000 }).success).toBe(true);
       expect(GetDomInputSchema.safeParse({ uuid: UUID, maxLength: 999 }).success).toBe(false);
       expect(GetDomInputSchema.safeParse({ uuid: UUID, maxLength: 500_001 }).success).toBe(false);
+    });
+  });
+
+  describe.each(['scanUrl', 'scanUrlAndWait'] as const)('%s tag length', (actionName) => {
+    it.each([
+      [30, true],
+      [31, false],
+    ])('%d characters valid=%s', (length, expected) => {
+      expect(
+        UrlscanIo.actions[actionName].input.safeParse({
+          url: 'https://example.com',
+          tags: ['t'.repeat(length)],
+        }).success
+      ).toBe(expected);
+    });
+  });
+
+  describe.each(['scanUrl', 'scanUrlAndWait'] as const)('%s url length', (actionName) => {
+    const prefix = 'https://example.com/';
+    const url = (length: number) => `${prefix}${'a'.repeat(length - prefix.length)}`;
+
+    it.each([
+      [2083, true],
+      [2084, false],
+    ])('%d characters valid=%s', (length, expected) => {
+      expect(UrlscanIo.actions[actionName].input.safeParse({ url: url(length) }).success).toBe(
+        expected
+      );
+      expect(
+        UrlscanIo.actions[actionName].input.safeParse({
+          url: 'https://example.com',
+          referer: url(length),
+        }).success
+      ).toBe(expected);
     });
   });
 });

@@ -355,6 +355,22 @@ export const uninstallEntityStoreSuiteWithKbnClient = async ({
   }
 };
 
+/**
+ * Reports whether a Task Manager task is still scheduled, via the FTR task route that answers
+ * 404 once the task is gone. `ignoreErrors` settles on that 404 from the first reply instead of
+ * letting KbnClient retry it five times and report only the last attempt's status, so a transient
+ * network error can neither be read as a missing task nor overwrite an answer already given.
+ */
+export const taskExists = async (kbnClient: KbnClientFixture, taskId: string): Promise<boolean> => {
+  const { status } = await kbnClient.request({
+    method: 'GET',
+    path: `/internal/ftr/task_manager/${encodeURIComponent(taskId)}`,
+    ignoreErrors: [404],
+  });
+
+  return status === 200;
+};
+
 export const searchDocById = async (esClient: EsClient, id: string) => {
   await esClient.indices.refresh({ index: LATEST_ALIAS });
   return await esClient.search({

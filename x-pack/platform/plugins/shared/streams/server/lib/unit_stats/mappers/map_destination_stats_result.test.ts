@@ -1,0 +1,236 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { streamsUnitStatsDestinationResultSchema } from '@kbn/streams-schema';
+import {
+  joinDestinationRows,
+  mapDestinationStatsRows,
+  withAuthFailures,
+} from './map_destination_stats_result';
+
+const bucketMs = 60_000;
+
+describe('mapDestinationStatsRows', () => {
+  const series = [
+    { bucket: '2026-10-20T10:00:00.000Z', sum_items: 270 },
+    { bucket: '2026-10-20T10:01:00.000Z', sum_items: 240 },
+  ];
+  const joined = { incoming_rate: 4.6, failed_rate: 0, avg_latency: 0.18, series };
+
+  it('places the joined rows into the result, with units', () => {
+    const result = mapDestinationStatsRows({ rows: { 'es-prod': joined }, bucketMs })['es-prod'];
+
+    expect(result).toEqual({
+      latency: { average: { value: 0.18, unit: 's' } },
+      events: {
+        incoming: {
+          total: { value: 510, unit: '{item}' },
+          rate: { value: 4.6, unit: '{item}', time_unit: 's' },
+          series: {
+            bucket_ms: bucketMs,
+            points: [
+              { start: '2026-10-20T10:00:00.000Z', value: 270 },
+              { start: '2026-10-20T10:01:00.000Z', value: 240 },
+            ],
+          },
+        },
+        failed: {
+          rate: { value: 0, unit: '{item}', time_unit: 's' },
+          percentage: { value: 0, unit: '%' },
+          authentication: {
+            rate: { value: null, unit: '{item}', time_unit: 's' },
+            percentage: { value: null, unit: '%' },
+          },
+          authorization: {
+            rate: { value: null, unit: '{item}', time_unit: 's' },
+            percentage: { value: null, unit: '%' },
+          },
+        },
+      },
+    });
+    expect(streamsUnitStatsDestinationResultSchema.parse(result)).toEqual(result);
+  });
+
+  it('has a result for every destination', () => {
+    const rows = { 'es-prod': joined, 'es-dev': { ...joined, incoming_rate: 4.2 } };
+
+    const results = mapDestinationStatsRows({ rows, bucketMs });
+
+    expect(Object.keys(results)).toEqual(['es-prod', 'es-dev']);
+    expect(results['es-dev'].events.incoming.rate.value).toBe(4.2);
+  });
+
+  it('leaves a column that ES|QL returned as null as no data, and keeps the series', () => {
+    const rows = {
+      'es-prod': { incoming_rate: null, failed_rate: null, avg_latency: null, series },
+    };
+
+    const result = mapDestinationStatsRows({ rows, bucketMs })['es-prod'];
+
+    expect(result.latency.average).toEqual({ value: null, unit: 's' });
+    expect(result.events.incoming.rate).toEqual({ value: null, unit: '{item}', time_unit: 's' });
+    expect(result.events.failed.rate).toEqual({ value: null, unit: '{item}', time_unit: 's' });
+    expect(result.events.failed.percentage).toEqual({ value: null, unit: '%' });
+    expect(result.events.incoming.total.value).toBe(510);
+  });
+
+  it('gives the share of the incoming items that failed, and none when nothing came in', () => {
+    const percentageOf = (incomingRate: number | null, failedRate: number | null) =>
+      mapDestinationStatsRows({
+        rows: { 'es-prod': { incoming_rate: incomingRate, failed_rate: failedRate, series } },
+        bucketMs,
+      })['es-prod'].events.failed.percentage;
+
+    expect(percentageOf(4, 1)).toEqual({ value: 25, unit: '%' });
+    expect(percentageOf(4, 0)).toEqual({ value: 0, unit: '%' });
+    expect(percentageOf(0, 0)).toEqual({ value: null, unit: '%' });
+    expect(percentageOf(null, 1)).toEqual({ value: null, unit: '%' });
+  });
+
+  it('leaves a destination with no rate row as no data for the rates', () => {
+    const result = mapDestinationStatsRows({ rows: { 'es-prod': { series } }, bucketMs })[
+      'es-prod'
+    ];
+
+    expect(result.events.incoming.rate.value).toBeNull();
+    expect(result.latency.average.value).toBeNull();
+    expect(result.events.incoming.series.points).toHaveLength(2);
+  });
+});
+
+describe('withAuthFailures', () => {
+  const rate = (value: number | null) => ({ value, unit: '{item}', time_unit: 's' });
+  const base = mapDestinationStatsRows({
+    rows: {
+      'es-prod': {
+        incoming_rate: 4.6,
+        failed_rate: 2.4,
+        avg_latency: 0.18,
+        series: [{ bucket: '2026-10-20T10:00:00.000Z', sum_items: 270 }],
+      },
+    },
+    bucketMs,
+  })['es-prod'];
+  const percentage = (value: number | null) => ({ value, unit: '%' });
+  const authFailures = {
+    authentication: { rate: rate(0.5), percentage: percentage(10) },
+    authorization: {
+      rate: rate(1.9),
+      percentage: percentage(40),
+      breakdown: [
+        {
+          collection: 'logs-a-default',
+          reason: 'security_exception',
+          rate: rate(1.9),
+          percentage: percentage(40),
+        },
+      ],
+    },
+  };
+
+  it('replaces the authentication and authorization failures', () => {
+    const result = withAuthFailures(base, authFailures);
+
+    expect(result.events.failed.authentication).toEqual(authFailures.authentication);
+    expect(result.events.failed.authorization).toEqual(authFailures.authorization);
+    expect(streamsUnitStatsDestinationResultSchema.parse(result)).toEqual(result);
+  });
+
+  it('replaces the total of failures too, when the destination type reports its own', () => {
+    const requestRate = { value: 3, unit: '{request}', time_unit: 's' };
+    const failed = { rate: requestRate, percentage: percentage(60) };
+
+    const result = withAuthFailures(base, { ...authFailures, failed });
+
+    expect(result.events.failed.rate).toEqual(requestRate);
+    expect(result.events.failed.percentage).toEqual(percentage(60));
+    expect(result.events.incoming).toEqual(base.events.incoming);
+    expect(streamsUnitStatsDestinationResultSchema.parse(result)).toEqual(result);
+  });
+
+  it('keeps everything else of the result', () => {
+    const result = withAuthFailures(base, authFailures);
+
+    expect(result.latency).toEqual(base.latency);
+    expect(result.events.incoming).toEqual(base.events.incoming);
+    expect(result.events.failed.rate).toEqual(base.events.failed.rate);
+  });
+
+  it('keeps the error of the result', () => {
+    const error = { code: 'unavailable', reason: 'Try again.' };
+
+    expect(withAuthFailures({ ...base, error }, authFailures).error).toEqual(error);
+  });
+
+  it('does not change the result it was given', () => {
+    const before = JSON.parse(JSON.stringify(base));
+
+    withAuthFailures(base, authFailures);
+
+    expect(base).toEqual(before);
+  });
+});
+
+const rateRows = [
+  { id: 'es-prod', incoming_rate: 4.6, failed_rate: 0, avg_latency: 0.18 },
+  { id: 'es-dev', incoming_rate: 4.2, failed_rate: 0.5, avg_latency: 0.17 },
+];
+
+const sumsRows = [
+  { id: 'es-prod', bucket: '2026-10-20T10:00:00.000Z', sum_items: 270 },
+  { id: 'es-prod', bucket: '2026-10-20T10:01:00.000Z', sum_items: 240 },
+  { id: 'es-dev', bucket: '2026-10-20T10:00:00.000Z', sum_items: 90 },
+];
+
+describe('joinDestinationRows', () => {
+  it('has one object per destination with its rates and series', () => {
+    expect(joinDestinationRows({ rateRows, sumsRows })).toEqual({
+      'es-prod': {
+        incoming_rate: 4.6,
+        failed_rate: 0,
+        avg_latency: 0.18,
+        series: [
+          { bucket: '2026-10-20T10:00:00.000Z', sum_items: 270 },
+          { bucket: '2026-10-20T10:01:00.000Z', sum_items: 240 },
+        ],
+      },
+      'es-dev': {
+        incoming_rate: 4.2,
+        failed_rate: 0.5,
+        avg_latency: 0.17,
+        series: [{ bucket: '2026-10-20T10:00:00.000Z', sum_items: 90 }],
+      },
+    });
+  });
+
+  it('keeps a destination that has rates but no items in the window, with an empty series', () => {
+    const shaped = joinDestinationRows({
+      rateRows,
+      sumsRows: sumsRows.filter(({ id }) => id === 'es-prod'),
+    });
+
+    expect(Object.keys(shaped)).toEqual(['es-prod', 'es-dev']);
+    expect(shaped['es-dev']).toEqual({
+      incoming_rate: 4.2,
+      failed_rate: 0.5,
+      avg_latency: 0.17,
+      series: [],
+    });
+  });
+
+  it('keeps the series of a destination that has no rate row', () => {
+    const shaped = joinDestinationRows({ rateRows: [], sumsRows });
+
+    expect(shaped['es-dev']).toEqual({
+      series: [{ bucket: '2026-10-20T10:00:00.000Z', sum_items: 90 }],
+    });
+  });
+
+  it('has no destinations for no rows', () => {
+    expect(joinDestinationRows({ rateRows: [], sumsRows: [] })).toEqual({});
+  });
+});

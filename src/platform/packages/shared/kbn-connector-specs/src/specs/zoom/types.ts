@@ -15,6 +15,12 @@ import { z, lazySchema } from '@kbn/zod/v4';
 
 export const ZOOM_DEFAULT_MAX_RECORDING_CONTENT_CHARS = 100_000;
 
+// GET /meetings/{meetingId} and /meetings/{meetingId}/registrants take the numeric (int64)
+// meeting ID, not a UUID; spaces, as Zoom displays the ID, are stripped before sending.
+const ZOOM_NUMERIC_MEETING_ID_PATTERN = /^\d[\d ]*$/;
+// `from` and `to` of GET /users/{userId}/recordings have format `date` (YYYY-MM-DD).
+const ZOOM_ISO_DATE_LENGTH = 10;
+
 // ---------------------------------------------------------------------------
 // Shared output schemas — reusable shapes for Zoom API objects
 // ---------------------------------------------------------------------------
@@ -137,7 +143,11 @@ export type ZoomListMeetingsInput = z.infer<typeof ZoomListMeetingsInputSchema>;
 
 export const ZoomGetMeetingDetailsInputSchema = lazySchema(() =>
   z.object({
-    meetingId: z.string().max(200).describe('Meeting ID or UUID'),
+    meetingId: z
+      .string()
+      .max(200)
+      .regex(ZOOM_NUMERIC_MEETING_ID_PATTERN)
+      .describe('Numeric meeting ID (not a UUID)'),
   })
 );
 export type ZoomGetMeetingDetailsInput = z.infer<typeof ZoomGetMeetingDetailsInputSchema>;
@@ -163,14 +173,14 @@ export const ZoomListUserRecordingsInputSchema = lazySchema(() =>
       .max(320)
       .default('me')
       .describe('User ID or email. Use "me" for the authenticated user.'),
-    from: z
-      .string()
-      .max(64)
+    from: z.iso
+      .date()
+      .max(ZOOM_ISO_DATE_LENGTH)
       .optional()
       .describe('Start date (YYYY-MM-DD). Defaults to current date.'),
-    to: z
-      .string()
-      .max(64)
+    to: z.iso
+      .date()
+      .max(ZOOM_ISO_DATE_LENGTH)
       .optional()
       .describe('End date (YYYY-MM-DD). Range cannot exceed 1 month.'),
     pageSize: z.number().min(1).max(300).optional().describe('Number of results per page (1-300)'),
@@ -219,7 +229,11 @@ export type ZoomGetMeetingParticipantsInput = z.infer<typeof ZoomGetMeetingParti
 
 export const ZoomGetMeetingRegistrantsInputSchema = lazySchema(() =>
   z.object({
-    meetingId: z.string().max(200).describe('Meeting ID or UUID'),
+    meetingId: z
+      .string()
+      .max(200)
+      .regex(ZOOM_NUMERIC_MEETING_ID_PATTERN)
+      .describe('Numeric meeting ID (not a UUID)'),
     status: z
       .enum(['pending', 'approved', 'denied'])
       .optional()

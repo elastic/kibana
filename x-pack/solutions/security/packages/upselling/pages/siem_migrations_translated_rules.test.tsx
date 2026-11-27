@@ -6,20 +6,33 @@
  */
 
 import React from 'react';
-import { SiemMigrationsTranslatedRulesUpsellPage } from './siem_migrations_translated_rules';
 import { render, screen } from '@testing-library/react';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
+import { SiemMigrationsTranslatedRulesUpsellPage } from './siem_migrations_translated_rules';
+import { SIEM_MIGRATION_UPSELLING_PAGE_TITLE } from './translations';
 
-describe('SiemMigrationsTranslatedRulesUpsellPage', () => {
-  it('should render the component with all sections correctly', () => {
-    render(
+const renderPage = (
+  props: Partial<React.ComponentProps<typeof SiemMigrationsTranslatedRulesUpsellPage>>
+) =>
+  render(
+    <MockAppHeaderProvider>
       <SiemMigrationsTranslatedRulesUpsellPage
         title="title"
         upgradeMessage="upgradeMessage"
-        upgradeHref="https://upgrade.Href"
+        {...props}
       />
-    );
+    </MockAppHeaderProvider>
+  );
 
-    expect(screen.getByTestId('siemMigrationTranslatedRulesUpsellButton')).toBeVisible();
+describe('SiemMigrationsTranslatedRulesUpsellPage', () => {
+  it('should render the component with all sections correctly', () => {
+    renderPage({ upgradeHref: 'https://upgrade.Href' });
+
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+      SIEM_MIGRATION_UPSELLING_PAGE_TITLE
+    );
 
     expect(screen.getByTestId('siemMigrationTranslatedRulesUpsellTitle')).toBeVisible();
     expect(screen.getByTestId('siemMigrationTranslatedRulesUpsellTitle')).toHaveTextContent(
@@ -39,12 +52,22 @@ describe('SiemMigrationsTranslatedRulesUpsellPage', () => {
   });
 
   it('should render the component without upgradeHref', () => {
-    render(
-      <SiemMigrationsTranslatedRulesUpsellPage title="title" upgradeMessage="upgradeMessage" />
-    );
+    renderPage({});
 
     expect(
       screen.queryByTestId('siemMigrationTranslatedRulesUpsellButton')
     ).not.toBeInTheDocument();
+  });
+
+  it('should render the documentation link in the app header menu', async () => {
+    const docLink = 'https://www.elastic.co/docs/siem-migrations';
+    renderPage({ docLink });
+
+    await openAppMenuOverflow();
+
+    expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation)).toHaveAttribute(
+      'href',
+      docLink
+    );
   });
 });

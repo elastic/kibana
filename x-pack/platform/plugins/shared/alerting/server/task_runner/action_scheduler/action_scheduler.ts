@@ -22,6 +22,7 @@ import type {
 } from '../../../common';
 import { getSummaryActionsFromTaskState } from './lib';
 import { createTaskRunnerLogger, withAlertingSpan } from '../lib';
+import { translations } from '../../constants/translations';
 import * as schedulers from './schedulers';
 
 const BULK_SCHEDULE_CHUNK_SIZE = 1000;
@@ -109,9 +110,7 @@ export class ActionScheduler<
       }
       if (enqueueResponse.errors) {
         bulkScheduleResponse = bulkScheduleResponse.concat(
-          enqueueResponse.items.filter(
-            (i) => i.response === ExecutionResponseType.QUEUED_ACTIONS_LIMIT_ERROR
-          )
+          enqueueResponse.items.filter((i) => i.response !== ExecutionResponseType.SUCCESS)
         );
       }
     }
@@ -129,7 +128,23 @@ export class ActionScheduler<
     });
 
     if (bulkScheduleResponse.length) {
+      const notFoundConnectorIds = new Set<string>();
       for (const r of bulkScheduleResponse) {
+        if (r.response === ExecutionResponseType.CONNECTOR_NOT_FOUND_ERROR) {
+          notFoundConnectorIds.add(r.id);
+          this.context.ruleRunMetricsStore.decrementNumberOfTriggeredActions();
+          this.context.ruleRunMetricsStore.decrementNumberOfTriggeredActionsByConnectorType(
+            r.actionTypeId
+          );
+
+          logger.debug(
+            `Rule "${this.context.rule.id}" skipped scheduling action "${r.id}" because the connector no longer exists.`
+          );
+
+          if (r.uuid) {
+            actionsToNotLog.push(r.uuid);
+          }
+        }
         if (r.response === ExecutionResponseType.QUEUED_ACTIONS_LIMIT_ERROR) {
           this.context.ruleRunMetricsStore.setHasReachedQueuedActionsLimit(true);
           this.context.ruleRunMetricsStore.decrementNumberOfTriggeredActions();
@@ -152,6 +167,14 @@ export class ActionScheduler<
             actionsToNotLog.push(uuid);
           }
         }
+      }
+
+      if (notFoundConnectorIds.size > 0) {
+        this.context.ruleResultService
+          .getLastRunSetters()
+          .addLastRunWarning(
+            translations.taskRunner.warning.connectorNotFound([...notFoundConnectorIds].join(', '))
+          );
       }
     }
 

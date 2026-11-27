@@ -13,6 +13,8 @@ export const HARDCODED_MODULE_PATHS: Record<string, string> = {
   '@kbn/core-test-helpers-kbn-server': 'src/core/test-helpers/kbn-server',
   '@kbn/core-test-helpers-model-versions': 'src/core/test-helpers/model-versions',
   '@kbn/test-suites-src': 'src/platform/test',
+  // temporary: force OSS → x-pack for workflowsManagement relocate (#306055)
+  '@kbn/workflows-management-plugin': 'x-pack/platform/plugins/shared/workflows_management',
 };
 
 type TransformFunction = (param: string) => string;

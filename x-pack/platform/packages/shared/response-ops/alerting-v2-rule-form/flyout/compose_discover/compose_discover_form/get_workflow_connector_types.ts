@@ -16,7 +16,6 @@ const STRUCTURAL_BASE_TYPES = new Set([
   'while',
   'parallel',
   'switch',
-  'merge',
   'wait',
   'waitForInput',
   'waitForApproval',

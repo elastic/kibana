@@ -17,6 +17,7 @@ interface NewIndexDetails {
 
 interface DeploymentStats {
   indicesCount: number | null;
+  dataStreamsCount: number | null;
   documentsCount: number | null;
   vectorCount: number | null;
   storeSizeBytes: number | null;
@@ -32,6 +33,7 @@ interface DeploymentStats {
  */
 const EMPTY_DEPLOYMENT_STATS: DeploymentStats = {
   indicesCount: 0,
+  dataStreamsCount: 0,
   documentsCount: 0,
   vectorCount: 0,
   storeSizeBytes: 0,

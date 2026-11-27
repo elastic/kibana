@@ -14,6 +14,7 @@ import {
   generateFieldDiscoveryData,
   indexAll,
 } from '@kbn/synthtrace';
+import { OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID } from '@kbn/management-settings-ids';
 import { OBSERVABILITY_GET_INDEX_INFO_TOOL_ID } from '@kbn/observability-agent-builder-plugin/server/tools';
 import type { IndexPatternsResult } from '@kbn/observability-agent-builder-plugin/server/tools/get_index_info/get_index_overview_handler';
 import type { IndexFieldsResult } from '@kbn/observability-agent-builder-plugin/server/tools/get_index_info/get_index_fields_handler';
@@ -24,6 +25,8 @@ import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   const synthtrace = getService('synthtrace');
+  const kibanaServer = getService('kibanaServer');
+  const spaces = getService('spaces');
 
   describe(`tool: ${OBSERVABILITY_GET_INDEX_INFO_TOOL_ID}`, function () {
     let agentBuilderApiClient: ReturnType<typeof createAgentBuilderApiClient>;
@@ -183,6 +186,59 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const allFields = Object.values(fieldsData.fieldsByType).flat();
         expect(allFields).to.contain('system.memory.total');
         expect(allFields).to.contain('system.memory.used.pct');
+      });
+    });
+
+    describe('operation: "get-index-patterns" in a non-default space', () => {
+      const spaceId = 'space1';
+      const space1LogSources = ['logs-space1-*'];
+      const space1ApmTransactionIndices = 'traces-space1-*';
+      const space1MetricIndices = 'metrics-space1-*';
+
+      before(async () => {
+        await spaces.create({ id: spaceId, name: spaceId });
+        await kibanaServer.uiSettings.update(
+          { [OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID]: space1LogSources },
+          { space: spaceId }
+        );
+        await kibanaServer.savedObjects.create({
+          type: 'apm-indices',
+          id: 'apm-indices',
+          attributes: { apmIndices: { transaction: space1ApmTransactionIndices } },
+          overwrite: true,
+          space: spaceId,
+        });
+        await kibanaServer.savedObjects.create({
+          type: 'metrics-data-source',
+          id: 'default',
+          attributes: { metricIndices: space1MetricIndices },
+          overwrite: true,
+          space: spaceId,
+        });
+        await kibanaServer.uiSettings.waitForEventualCacheRefresh();
+      });
+
+      after(async () => {
+        await spaces.delete(spaceId);
+      });
+
+      it('returns the data sources configured for the requested space', async () => {
+        const results = await agentBuilderApiClient.executeTool({
+          id: OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
+          params: { operation: 'get-index-patterns' },
+          spaceId,
+        });
+        const { indexPatterns } = results[0].data as unknown as IndexPatternsResult;
+
+        expect({
+          logs: indexPatterns.logs,
+          apmTransaction: indexPatterns.apm.transaction,
+          metrics: indexPatterns.metrics,
+        }).to.eql({
+          logs: space1LogSources,
+          apmTransaction: space1ApmTransactionIndices,
+          metrics: [space1MetricIndices],
+        });
       });
     });
 

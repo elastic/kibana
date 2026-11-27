@@ -6,7 +6,7 @@
  */
 
 import { bindLocatorToHost, bindLocatorsToHost } from './bind_locators_to_host';
-import { createAlertingV2HostApp, type AlertingV2RulesLocatorParams } from '../locators';
+import { createAlertingV2HostApp, type AlertingV2RulesLocatorParams } from '../../common/locators';
 import type { RawAlertingV2Locators } from './locator_context';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
 

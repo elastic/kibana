@@ -1,0 +1,9 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/pubsub-example-topic",
+  "owner": "@elastic/kibana-core",
+  "description": "Topic type for the pub/sub example. A producer and a consumer depend on this package instead of on each other.",
+  "group": "platform",
+  "visibility": "shared",
+  "devOnly": true
+}

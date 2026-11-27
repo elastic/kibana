@@ -15,6 +15,8 @@ export {
   createTextChunkEvent,
   createMessageEvent,
   createReasoningEvent,
+  createModelReasoningChunkEvent,
+  createModelReasoningEvent,
   createToolCallEvent,
   createBrowserToolCallEvent,
   createToolResultEvent,
@@ -25,8 +27,9 @@ export {
 } from './graph_events';
 export {
   extractTextContent,
+  extractReasoningContent,
   extractToolCalls,
-  extractToolCallsWithReasoning,
+  extractToolCallsWithIntent,
   extractToolReturn,
   createUserMessage,
   createAIMessage,
@@ -35,17 +38,17 @@ export {
   generateFakeToolCallId,
   wrapToolResultContent,
   type ToolCall,
-  type ToolCallWithReasoning,
+  type ToolCallWithIntent,
 } from './messages';
 export {
-  toolsToLangchain,
   toolToLangchain,
+  renderDynamicToolDefinition,
+  INTENT_PARAM,
   toolIdentifierFromToolCall,
   sanitizeToolId,
   createToolIdMappings,
   reverseMap,
   type ToolIdMapping,
-  type ToolsAndMappings,
   type BuildToolContentParams,
   type BuildToolContentFn,
 } from './tools';

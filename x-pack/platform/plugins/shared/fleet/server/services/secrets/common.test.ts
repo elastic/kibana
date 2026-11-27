@@ -8,7 +8,11 @@
 import { createAppContextStartContractMock } from '../../mocks';
 import { appContextService } from '../app_context';
 
-import { collectCompiledSecretRefIds, diffSOSecretPaths } from './common';
+import {
+  collectCompiledSecretRefIds,
+  diffSOSecretPaths,
+  withClearedSecretReferences,
+} from './common';
 
 describe('diffSOSecretPaths', () => {
   const paths1 = [
@@ -235,5 +239,46 @@ describe('collectCompiledSecretRefIds', () => {
   it('returns undefined for an unserializable input (BigInt) and logs a warning', () => {
     const result = collectCompiledSecretRefIds(BigInt(1));
     expect(result).toBeUndefined();
+  });
+});
+
+describe('withClearedSecretReferences', () => {
+  it('sets a null at the path of a deleted secret, so the reference is removed', () => {
+    expect(
+      withClearedSecretReferences({ name: 'renamed' }, [
+        { id: 'secret-1', path: 'secrets.ssl.key' },
+      ])
+    ).toEqual({ name: 'renamed', secrets: { ssl: { key: null } } });
+  });
+
+  it('clears every deleted secret', () => {
+    expect(
+      withClearedSecretReferences({}, [
+        { id: 'secret-1', path: 'secrets.ssl.key' },
+        { id: 'secret-2', path: 'secrets.service_token' },
+      ])
+    ).toEqual({ secrets: { ssl: { key: null }, service_token: null } });
+  });
+
+  it('keeps the new reference of a secret the update replaces', () => {
+    expect(
+      withClearedSecretReferences({ secrets: { ssl: { key: { id: 'secret-2' } } } }, [
+        { id: 'secret-1', path: 'secrets.ssl.key' },
+      ])
+    ).toEqual({ secrets: { ssl: { key: { id: 'secret-2' } } } });
+  });
+
+  it('returns the object as it is when nothing is deleted', () => {
+    const soObject = { name: 'renamed' };
+
+    expect(withClearedSecretReferences(soObject, [])).toBe(soObject);
+  });
+
+  it('does not modify the object it is given', () => {
+    const soObject = { name: 'renamed' };
+
+    withClearedSecretReferences(soObject, [{ id: 'secret-1', path: 'secrets.ssl.key' }]);
+
+    expect(soObject).toEqual({ name: 'renamed' });
   });
 });

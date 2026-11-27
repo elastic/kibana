@@ -15,25 +15,6 @@ export const useStyles = () => {
   const cached = useMemo(() => {
     const { size, font } = euiTheme;
 
-    const titleSection: CSSObject = {
-      marginBottom: size.l,
-    };
-
-    const titleText: CSSObject = {
-      display: 'flex',
-      alignItems: 'center',
-    };
-
-    const titleActions: CSSObject = {
-      marginLeft: 'auto',
-      flexDirection: 'row',
-      alignItems: 'center',
-    };
-
-    const updatedAt: CSSObject = {
-      marginRight: size.m,
-    };
-
     const widgetBadge: CSSObject = {
       position: 'absolute',
       bottom: size.base,
@@ -92,10 +73,6 @@ export const useStyles = () => {
     };
 
     return {
-      titleSection,
-      titleText,
-      titleActions,
-      updatedAt,
       widgetBadge,
       treeViewContainer,
       countWidgetsGroup,

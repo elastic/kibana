@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable @kbn/compat/typescript-naming-convention */
 
 import type { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { migrationMocks } from '@kbn/core/server/mocks';

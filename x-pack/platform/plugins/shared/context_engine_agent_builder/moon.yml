@@ -37,12 +37,14 @@ dependsOn:
   - '@kbn/search-inference-endpoints'
   - '@kbn/scout'
   - '@kbn/core-logging-server-mocks'
+  - '@kbn/core-http-browser'
 tags:
   - plugin
   - prod
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*

@@ -10,8 +10,10 @@ import { render, act, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
+import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { IntegrationFormProvider, useIntegrationForm } from './integration_form';
+import { INTEGRATION_DETAILS_REQUIRED_FIELDS } from './constants';
 import type { IntegrationFormData } from './types';
 
 const mockExistingPackageNames = ['existing_integration', 'my_custom_package', 'test_package'];
@@ -28,10 +30,13 @@ jest.mock('../../../common/lib/api', () => ({
 
 const mockServices = coreMock.createStart();
 
+let testForm: FormHook<IntegrationFormData>;
+
 const FormTestConsumer: React.FC<{ onSubmitResult?: (data: IntegrationFormData) => void }> = ({
   onSubmitResult,
 }) => {
-  const { isValid, isFormModified, submit } = useIntegrationForm();
+  const { form, isValid, isFormModified, submit } = useIntegrationForm();
+  testForm = form;
 
   const handleSubmit = async () => {
     const result = await submit();
@@ -181,6 +186,31 @@ const fillAllRequiredFields = async (getByTestId: (id: string) => HTMLElement) =
   await advancePastDebounce();
 };
 
+const validateIntegrationDetails = async (initialValue: Partial<IntegrationFormData>) => {
+  renderForm({ initialValue });
+  await advancePastDebounce();
+
+  let areFieldsValid = false;
+  await act(async () => {
+    ({ areFieldsValid } = await testForm.validateFields(INTEGRATION_DETAILS_REQUIRED_FIELDS));
+  });
+
+  const fields = testForm.getFields();
+  const errors = Object.fromEntries(
+    INTEGRATION_DETAILS_REQUIRED_FIELDS.map((path) => [
+      path,
+      fields[path].errors.map(({ message }) => message),
+    ])
+  );
+  return { areFieldsValid, errors };
+};
+
+const validIntegrationDetails = {
+  title: 'My Integration',
+  description: 'My Description',
+  connectorId: 'connector-123',
+};
+
 describe('IntegrationFormProvider', () => {
   beforeEach(() => {
     jest.useFakeTimers();
@@ -231,6 +261,65 @@ describe('IntegrationFormProvider', () => {
       await advancePastDebounce();
 
       expect(getByTestId('isValid').textContent).toBe('false');
+    });
+  });
+
+  describe('integration details validation', () => {
+    it('passes when the name, description, and connector are valid', async () => {
+      const { areFieldsValid, errors } = await validateIntegrationDetails(validIntegrationDetails);
+
+      expect(areFieldsValid).toBe(true);
+      expect(errors).toEqual({ title: [], description: [], connectorId: [] });
+    });
+
+    it('requires the integration name', async () => {
+      const { areFieldsValid, errors } = await validateIntegrationDetails({
+        ...validIntegrationDetails,
+        title: '',
+      });
+
+      expect(areFieldsValid).toBe(false);
+      expect(errors.title).toEqual(['Integration name is required']);
+    });
+
+    it('requires a description that is not only whitespace', async () => {
+      const { areFieldsValid, errors } = await validateIntegrationDetails({
+        ...validIntegrationDetails,
+        description: '   ',
+      });
+
+      expect(areFieldsValid).toBe(false);
+      expect(errors.description).toEqual(['Description is required']);
+    });
+
+    it('requires a connector', async () => {
+      const { areFieldsValid, errors } = await validateIntegrationDetails({
+        ...validIntegrationDetails,
+        connectorId: '',
+      });
+
+      expect(areFieldsValid).toBe(false);
+      expect(errors.connectorId).toEqual(['Please select a connector']);
+    });
+
+    it('rejects an integration name with only one character', async () => {
+      const { areFieldsValid, errors } = await validateIntegrationDetails({
+        ...validIntegrationDetails,
+        title: 'A',
+      });
+
+      expect(areFieldsValid).toBe(false);
+      expect(errors.title).toEqual(['Name must be at least 2 characters long']);
+    });
+
+    it('rejects an integration name that already exists', async () => {
+      const { areFieldsValid, errors } = await validateIntegrationDetails({
+        ...validIntegrationDetails,
+        title: 'Existing Integration',
+      });
+
+      expect(areFieldsValid).toBe(false);
+      expect(errors.title).toEqual(['An integration with this name already exists']);
     });
   });
 

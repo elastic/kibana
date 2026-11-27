@@ -22,7 +22,7 @@ export const LOOKBACK_DAYS_HELP = i18n.translate(
   'xpack.alertzero.watches.settings.lookbackDays.help',
   {
     defaultMessage:
-      'How many days back each run looks for pending coverage gaps. Older gaps are not reviewed. Between {min} and {max}.',
+      'How many days back each run looks for unreviewed coverage gaps. Older gaps are skipped. Between {min} and {max}.',
     values: { min: LOOKBACK_DAYS_MIN, max: LOOKBACK_DAYS_MAX },
   }
 );
@@ -40,7 +40,7 @@ export const MAX_GAPS_PER_RUN_LABEL = i18n.translate(
 export const MAX_GAPS_PER_RUN_HELP = i18n.translate(
   'xpack.alertzero.watches.settings.maxGapsPerRun.help',
   {
-    defaultMessage: 'How many coverage gap reviews each run starts. Between {min} and {max}.',
+    defaultMessage: 'How many coverage gaps each run reviews. Between {min} and {max}.',
     values: { min: MAX_GAPS_PER_RUN_MIN, max: MAX_GAPS_PER_RUN_MAX },
   }
 );

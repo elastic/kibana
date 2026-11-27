@@ -12,16 +12,24 @@ import {
   SIEM_MIGRATIONS_FEATURE_ID,
 } from '@kbn/security-solution-features/constants';
 import {
+  WORKFLOWS_MANAGEMENT_FEATURE_ID,
+  WORKFLOWS_UI_SETTING_ID,
+  WorkflowsManagementUiActions,
+} from '@kbn/workflows';
+import {
   SIEM_MIGRATIONS_DASHBOARDS_PATH,
   SIEM_MIGRATIONS_LANDING_PATH,
   SIEM_MIGRATIONS_RULES_PATH,
   SIEM_MIGRATIONS_MANAGE_PATH,
+  SIEM_MIGRATIONS_WORKFLOWS_PATH,
   SecurityPageName,
 } from '../../common/constants';
 import type { LinkItem } from '../common/links/types';
 import { IconDashboards } from '../common/icons/dashboards';
 import { IconRules } from '../common/icons/rules';
 import { IconAgent } from '../common/icons/agent';
+
+const WORKFLOWS_READ_CAPABILITY = `${WORKFLOWS_MANAGEMENT_FEATURE_ID}.${WorkflowsManagementUiActions.read}`;
 
 const subLinks: LinkItem[] = [
   {
@@ -37,6 +45,7 @@ const subLinks: LinkItem[] = [
     capabilities: [
       [`dashboard_v2.show`, `${SIEM_MIGRATIONS_FEATURE_ID}.all`],
       [RULES_UI_READ_PRIVILEGE, `${SIEM_MIGRATIONS_FEATURE_ID}.all`],
+      [WORKFLOWS_READ_CAPABILITY, `${SIEM_MIGRATIONS_FEATURE_ID}.all`],
     ],
     skipUrlState: true,
     hideTimeline: true,
@@ -76,6 +85,30 @@ const subLinks: LinkItem[] = [
     hideWhenExperimentalKey: 'siemMigrationsDisabled',
     experimentalKey: 'automaticDashboardsMigration',
   },
+  {
+    id: SecurityPageName.siemMigrationsWorkflows,
+    title: i18n.translate('xpack.securitySolution.appLinks.automaticMigrationWorkflows.title', {
+      defaultMessage: 'Translated workflows',
+    }),
+    description: i18n.translate(
+      'xpack.securitySolution.appLinks.siemMigrationsWorkflows.description',
+      {
+        defaultMessage:
+          'Migrate your workflows to Elastic Workflows using AI powered Automatic migration.',
+      }
+    ),
+    landingIcon: 'workflow',
+    path: SIEM_MIGRATIONS_WORKFLOWS_PATH,
+    // Same requirements as the `minimum` capabilities level of the workflow migrations service
+    capabilities: [
+      [WORKFLOWS_READ_CAPABILITY, 'actions.execute', `${SIEM_MIGRATIONS_FEATURE_ID}.all`],
+    ],
+    uiSettingRequired: WORKFLOWS_UI_SETTING_ID,
+    skipUrlState: true,
+    hideTimeline: true,
+    hideWhenExperimentalKey: 'siemMigrationsDisabled',
+    experimentalKey: 'tinesWorkflowsMigration',
+  },
 ];
 
 export const links: LinkItem = {
@@ -107,6 +140,7 @@ export const links: LinkItem = {
         SecurityPageName.siemMigrationsManage,
         SecurityPageName.siemMigrationsRules,
         SecurityPageName.siemMigrationsDashboards,
+        SecurityPageName.siemMigrationsWorkflows,
       ],
     },
   ],

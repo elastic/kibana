@@ -11,10 +11,13 @@ import React, { Suspense, lazy } from 'react';
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal-types';
+import type { InternalFeatureFlagsStart } from '@kbn/core-feature-flags-browser';
 import type { InternalThemeServiceStart } from '@kbn/core-theme-browser-internal-types';
 
 import { BehaviorSubject } from 'rxjs';
 import { type DeveloperToolbarItemProps } from '@kbn/developer-toolbar';
+
+const FEATURE_FLAGS_HELPER_ITEM_ID = 'Feature flags helper';
 
 export type UnregisterItemFn = () => void;
 export interface DeveloperToolbarItemRegistry {
@@ -36,9 +39,21 @@ const LazyMeasureButton = lazy(() =>
   }))
 );
 
+const LazyFontInspectButton = lazy(() =>
+  import('@kbn/design-tools').then(({ FontInspectButton }) => ({
+    default: FontInspectButton,
+  }))
+);
+
 const LazyDesignToolsButton = lazy(() =>
   import('@kbn/design-tools').then(({ DesignToolsButton }) => ({
     default: DesignToolsButton,
+  }))
+);
+
+const LazyFeatureFlagsHelperBadge = lazy(() =>
+  import('./feature_flags_helper_badge').then(({ FeatureFlagsHelperBadge }) => ({
+    default: FeatureFlagsHelperBadge,
   }))
 );
 
@@ -56,6 +71,8 @@ export class DeveloperToolbarPlugin
   }
 
   public start(core: CoreStart): DeveloperToolbarStart {
+    const { helper } = core.featureFlags as InternalFeatureFlagsStart;
+
     const LazyToolbar = React.lazy(() => import('./toolbar'));
     (core.chrome as InternalChromeStart).setGlobalFooter(
       <Suspense>
@@ -73,10 +90,28 @@ export class DeveloperToolbarPlugin
     });
 
     this.registerItem({
+      id: FEATURE_FLAGS_HELPER_ITEM_ID,
+      children: (
+        <Suspense fallback={null}>
+          <LazyFeatureFlagsHelperBadge onClick={helper.open} />
+        </Suspense>
+      ),
+    });
+
+    this.registerItem({
       id: 'Measure Component',
       children: (
         <Suspense fallback={null}>
           <LazyMeasureButton />
+        </Suspense>
+      ),
+    });
+
+    this.registerItem({
+      id: 'Inspect Font',
+      children: (
+        <Suspense fallback={null}>
+          <LazyFontInspectButton />
         </Suspense>
       ),
     });
@@ -94,8 +129,6 @@ export class DeveloperToolbarPlugin
       registerItem: this.registerItem.bind(this),
     };
   }
-
-  public stop() {}
 
   private registerItem = (item: DeveloperToolbarItemProps) => {
     const currentItems = this.items$.value;

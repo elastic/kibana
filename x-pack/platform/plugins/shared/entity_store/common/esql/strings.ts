@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { castField } from './cast';
+import { castField, referenceField } from './cast';
+import type { CastFieldOptions } from './cast';
 
-export function esqlIsNotNullOrEmpty(field: string) {
-  const ref = castField(field);
+export function esqlIsNotNullOrEmpty(field: string, options?: CastFieldOptions) {
+  const ref = referenceField(field, options);
   return `${ref} IS NOT NULL AND ${ref} != ""`;
 }
 

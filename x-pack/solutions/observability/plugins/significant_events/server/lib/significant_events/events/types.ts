@@ -23,7 +23,16 @@ export interface EventsFilterOptions {
   ruleUuids?: string[];
   topologyFeatureIds?: string[];
   unassignedEntityIds?: string[];
-  investigationStates?: SignificantEventInvestigationState[];
+  investigation?: {
+    states: SignificantEventInvestigationState[];
+    episodes: InvestigationEpisodes;
+  };
+}
+
+/** Episode ids (`alert.id`) by investigation state; any other episode is `not_started`. */
+export interface InvestigationEpisodes {
+  inProgress: string[];
+  completed: string[];
 }
 
 export type EventsPaginatedSearchOptions = PaginatedSearchOptions &

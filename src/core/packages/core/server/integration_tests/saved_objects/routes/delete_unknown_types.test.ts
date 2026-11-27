@@ -8,6 +8,7 @@
  */
 
 import supertest from 'supertest';
+import { ReservedPrivilegesSet, type IRouter } from '@kbn/core-http-server';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import type { SetupServerReturn } from '@kbn/core-test-helpers-test-utils';
@@ -26,6 +27,7 @@ describe('POST /internal/saved_objects/deprecations/_delete_unknown_types', () =
   let handlerContext: SetupServerReturn['handlerContext'];
   let typeRegistry: ReturnType<typeof typeRegistryMock.create>;
   let elasticsearchClient: ReturnType<typeof elasticsearchServiceMock.createScopedClusterClient>;
+  let router: IRouter<InternalSavedObjectsRequestHandlerContext>;
 
   beforeEach(async () => {
     ({ server, createRouter, handlerContext } = await setupServer());
@@ -39,9 +41,7 @@ describe('POST /internal/saved_objects/deprecations/_delete_unknown_types', () =
     handlerContext.elasticsearch.client.asCurrentUser = elasticsearchClient.asCurrentUser;
     handlerContext.elasticsearch.client.asInternalUser = elasticsearchClient.asInternalUser;
 
-    const router = createRouter<InternalSavedObjectsRequestHandlerContext>(
-      '/internal/saved_objects/'
-    );
+    router = createRouter<InternalSavedObjectsRequestHandlerContext>('/internal/saved_objects/');
     registerDeleteUnknownTypesRoute(router, {
       kibanaVersion,
     });
@@ -51,6 +51,13 @@ describe('POST /internal/saved_objects/deprecations/_delete_unknown_types', () =
 
   afterEach(async () => {
     await server.stop();
+  });
+
+  it('requires superuser privileges', () => {
+    const [route] = router.getRoutes();
+    expect(route.security).toEqual({
+      authz: { requiredPrivileges: [ReservedPrivilegesSet.superuser] },
+    });
   });
 
   it('formats successful response', async () => {

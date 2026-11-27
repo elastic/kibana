@@ -97,9 +97,10 @@ export default function ({ getService }: FtrProviderContext) {
         'manage_agents',
         'manage_tools',
         'manage_skills',
+        'invoke_bound_agents',
       ],
       agentBuilderSml: ['all', 'read', 'minimal_all', 'minimal_read'],
-      contextEngine: ['all', 'read', 'minimal_all', 'minimal_read'],
+      contextEngine: ['all', 'read', 'minimal_all', 'minimal_read', 'manage_memory'],
       automatic_import: ['all', 'read', 'minimal_all', 'minimal_read'],
       slo: ['all', 'read', 'minimal_all', 'minimal_read'],
       searchSynonyms: ['all', 'read', 'minimal_all', 'minimal_read'],
@@ -417,6 +418,14 @@ export default function ({ getService }: FtrProviderContext) {
       dataQuality: ['all', 'read', 'minimal_all', 'minimal_read', 'manage_rules', 'manage_alerts'],
       manageReporting: ['all', 'read', 'minimal_all', 'minimal_read'],
       apm: ['all', 'read', 'minimal_all', 'minimal_read', 'settings_save'],
+      digital_experience: [
+        'all',
+        'read',
+        'minimal_all',
+        'minimal_read',
+        'manage_sessions',
+        'url_create',
+      ],
       discover: [
         'all',
         'read',
@@ -494,6 +503,17 @@ export default function ({ getService }: FtrProviderContext) {
       queryActivity: ['all', 'read', 'minimal_all', 'minimal_read'],
       streams: ['all', 'read', 'minimal_all', 'minimal_read'],
       nightshift: ['all', 'read', 'minimal_all', 'minimal_read', 'manage-engines'],
+      proposals: ['all', 'read', 'minimal_all', 'minimal_read'],
+      agenticInvestigations: [
+        'all',
+        'read',
+        'minimal_all',
+        'minimal_read',
+        'investigations_all',
+        'escalations_all',
+        'escalations_read',
+      ],
+      alertzero: ['all', 'read', 'minimal_all', 'minimal_read'],
       alerting_v2_rules: ['all', 'read', 'minimal_all', 'minimal_read'],
       alerting_v2_alerts: ['all', 'read', 'minimal_all', 'minimal_read'],
       alerting_v2_action_policies: ['all', 'read', 'minimal_all', 'minimal_read'],
@@ -620,6 +640,21 @@ export default function ({ getService }: FtrProviderContext) {
               });
             });
           });
+      });
+
+      it('grants the Context Engine manage memory API privilege only through its sub-feature', async () => {
+        const manageMemoryAction = 'api:contextEngine:manage_memory';
+
+        const { body } = await supertest
+          .get('/api/security/privileges?includeActions=true')
+          .set('kbn-xsrf', 'xxx')
+          .send()
+          .expect(200);
+        const { contextEngine } = (body as RawKibanaPrivileges).features;
+
+        expect(contextEngine.manage_memory).to.contain(manageMemoryAction);
+        expect(contextEngine.all).not.to.contain(manageMemoryAction);
+        expect(contextEngine.read).not.to.contain(manageMemoryAction);
       });
     });
 

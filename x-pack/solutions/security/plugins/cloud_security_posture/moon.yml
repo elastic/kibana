@@ -70,7 +70,6 @@ dependsOn:
   - '@kbn/cloud-security-posture'
   - '@kbn/analytics'
   - '@kbn/management-settings-ids'
-  - '@kbn/expandable-flyout'
   - '@kbn/code-editor-mock'
   - '@kbn/core-saved-objects-utils-server'
   - '@kbn/licensing-types'
@@ -92,6 +91,7 @@ tags:
   - group-security
   - private
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*

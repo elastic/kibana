@@ -7,29 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { jsonDefaults } from '../monaco_imports';
-import { ID as XJSON_LANG_ID } from './definitions/xjson/constants';
-import { ID as PAINLESS_LANG_ID } from './definitions/painless/constants';
-import { CONSOLE_LANG_ID } from './definitions/console/constants';
-import { ID as YAML_LANG_ID } from './definitions/yaml/constants';
+import { DEFAULT_WORKER_ID, LANG_SPECIFIC_WORKER_IDS } from '../worker_entries';
 
-export const DEFAULT_WORKER_ID = 'editorWorkerService' as const;
-
-const langSpecificWorkerIds = [
-  jsonDefaults.languageId as 'json',
-  XJSON_LANG_ID,
-  PAINLESS_LANG_ID,
-  YAML_LANG_ID,
-  CONSOLE_LANG_ID,
-] as const;
-
-// exported for use in webpack config to build workers
-export type LangSpecificWorkerIds = [typeof DEFAULT_WORKER_ID, ...typeof langSpecificWorkerIds];
+export { DEFAULT_WORKER_ID };
+export type { LangSpecificWorkerIds } from '../worker_entries';
 
 const isLangSpecificWorkerId = (
   languageId: string
-): languageId is (typeof langSpecificWorkerIds)[number] =>
-  langSpecificWorkerIds.some((id) => id === languageId);
+): languageId is (typeof LANG_SPECIFIC_WORKER_IDS)[number] =>
+  LANG_SPECIFIC_WORKER_IDS.some((id) => id === languageId);
 
 const monacoBundleDir = (window as any).__kbnPublicPath__?.['kbn-monaco'];
 

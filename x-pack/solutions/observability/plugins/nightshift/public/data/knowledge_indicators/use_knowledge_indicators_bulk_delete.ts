@@ -12,7 +12,11 @@ import { DISCOVERY_QUERIES_QUERY_KEY, FEATURES_QUERY_KEY } from '../query_keys';
 import { BULK_WRITE_CONFLICT_MESSAGE } from '../../common/errors';
 import { useKibana } from '../../hooks/use_kibana';
 import type { BulkOperationResult } from './use_discovery_features_api';
-import { EMPTY_BULK_OPERATION_RESULT, useDiscoveryFeaturesApi } from './use_discovery_features_api';
+import {
+  EMPTY_BULK_OPERATION_RESULT,
+  getInstanceUuids,
+  useDiscoveryFeaturesApi,
+} from './use_discovery_features_api';
 
 interface BulkDeleteResult {
   succeeded: number;
@@ -65,6 +69,8 @@ export function useKnowledgeIndicatorsBulkDelete({
                 succeededCount: succeeded,
                 failedCount: failed,
                 conflictCount: 0,
+                failedIds: [],
+                conflictIds: [],
               }))
           : Promise.resolve(EMPTY_BULK_OPERATION_RESULT);
 
@@ -78,9 +84,21 @@ export function useKnowledgeIndicatorsBulkDelete({
       let conflicts = 0;
 
       if (featuresSettled.status === 'fulfilled') {
-        succeeded += featuresSettled.value.succeededCount;
-        failed += featuresSettled.value.failedCount;
-        conflicts += featuresSettled.value.conflictCount;
+        // The route counts copies; the toast counts rows, and a row with a surviving copy is still
+        // on screen.
+        const { failedIds, conflictIds } = featuresSettled.value;
+        const failedUuids = new Set(failedIds);
+        const conflictUuids = new Set(conflictIds);
+        for (const feature of features) {
+          const uuids = getInstanceUuids(feature);
+          if (uuids.some((uuid) => failedUuids.has(uuid))) {
+            failed += 1;
+          } else if (uuids.some((uuid) => conflictUuids.has(uuid))) {
+            conflicts += 1;
+          } else {
+            succeeded += 1;
+          }
+        }
       } else {
         failed += features.length;
       }

@@ -48,7 +48,11 @@ import { initializeFetch, isEsqlMode } from './initialize_fetch';
 import { initializeInlineEditingApi } from './initialize_inline_editing_api';
 import { initializeSearchEmbeddableApi } from './initialize_search_embeddable_api';
 import type { SearchEmbeddableApi, SearchEmbeddablePanelApiState } from './types';
-import { deserializeState, serializeState } from './utils/serialization_utils';
+import {
+  deserializeState,
+  getPanelTableSettings,
+  serializeState,
+} from './utils/serialization_utils';
 import { createInMemoryContextAwarenessToolkit } from '../context_awareness';
 import { ScopedServicesProvider } from '../components/scoped_services_provider';
 import { isFieldStatsMode } from './utils/is_field_stats_mode';
@@ -87,6 +91,8 @@ export const getSearchEmbeddableFactory = ({
         serializedState: initialState,
         discoverServices,
       });
+      // The last state the dashboard applied, which the panel's table settings are serialized against
+      let latestRuntimeState = runtimeState;
 
       /** One Discover context awareness */
       const solutionNavId =
@@ -105,9 +111,9 @@ export const getSearchEmbeddableFactory = ({
       );
       const selectedTabId$ = new BehaviorSubject<string | undefined>(runtimeState.selectedTabId);
 
-      const tabs = runtimeState.tabs ?? [];
+      const tabs = [...(runtimeState.tabs ?? [])];
 
-      const defaultState = { selected_tab_id: tabs[0]?.id };
+      const defaultState: { selected_tab_id?: string } = { selected_tab_id: tabs[0]?.id };
 
       /** All other state */
       const searchError$ = new BehaviorSubject<Error | undefined>(undefined);
@@ -130,9 +136,8 @@ export const getSearchEmbeddableFactory = ({
 
       const serialize = (savedObjectId?: string) =>
         serializeState({
-          uuid,
-          initialState: runtimeState,
-          savedSearch: searchEmbeddable.api.savedSearch$.getValue(),
+          runtimeState: latestRuntimeState,
+          tableSettings: getPanelTableSettings(searchEmbeddable.stateManager),
           serializeTitles: titleManager.getLatestState,
           serializeTimeRange: timeRangeManager.getLatestState,
           serializeDynamicActions: drilldownsManager.getLatestState,
@@ -178,14 +183,22 @@ export const getSearchEmbeddableFactory = ({
         ),
         getComparators: () => {
           const isByValue = !savedObjectId$.getValue();
+          const selectedTabId = selectedTabId$.getValue();
           const shouldSkipTabComparators =
-            isTabDeleted(selectedTabId$.getValue(), tabs) || inlineEditingApi.isEditing();
+            isTabDeleted(selectedTabId, tabs) || inlineEditingApi.isEditing();
+          const selectedSessionTab = latestRuntimeState.tabs?.find(
+            ({ id }) => id === selectedTabId
+          )?.tab;
 
           return {
             ...drilldownsManager.comparators,
             ...titleComparators,
             ...timeRangeComparators,
-            ...getDiscoverSessionEmbeddableComparators(isByValue, shouldSkipTabComparators),
+            ...getDiscoverSessionEmbeddableComparators(
+              isByValue,
+              shouldSkipTabComparators,
+              selectedSessionTab
+            ),
             nonPersistedDisplayOptions: 'skip',
           };
         },
@@ -199,6 +212,9 @@ export const getSearchEmbeddableFactory = ({
             discoverServices,
           });
 
+          latestRuntimeState = nextRuntimeState;
+          tabs.splice(0, tabs.length, ...(nextRuntimeState.tabs ?? []));
+          defaultState.selected_tab_id = tabs[0]?.id;
           selectedTabId$.next(nextRuntimeState.selectedTabId);
           await searchEmbeddable.reinitializeState(nextRuntimeState);
           inlineEditingApi.stopInlineEditing();
@@ -259,7 +275,12 @@ export const getSearchEmbeddableFactory = ({
             discoverServices.capabilities.discover_v2.save && !Boolean(savedObjectId$.getValue())
           );
         },
-        canUnlinkFromLibrary: async () => Boolean(savedObjectId$.getValue()),
+        // A deleted tab or one without a Data View has no tab to turn into a by-value panel
+        canUnlinkFromLibrary: async () =>
+          Boolean(
+            savedObjectId$.getValue() &&
+              latestRuntimeState.tabs?.find(({ id }) => id === selectedTabId$.getValue())?.tab
+          ),
         saveToLibrary: async (title: string) => {
           const description = titleManager.api.description$.getValue();
           const savedObjectId = await save({
@@ -275,6 +296,7 @@ export const getSearchEmbeddableFactory = ({
         getSerializedStateByValue: () => serialize(undefined),
         getSerializedStateByReference: (newId: string) => serialize(newId),
         getInspectorAdapters: () => searchEmbeddable.stateManager.inspectorAdapters.getValue(),
+        supportsJsonExport: true,
         supportedTriggers: () => {
           return [ON_OPEN_PANEL_MENU];
         },
@@ -282,7 +304,7 @@ export const getSearchEmbeddableFactory = ({
       });
 
       const addFilter: DocViewFilterFn = async (mapping, values, operation) => {
-        const dataView = api.dataViews$.getValue()?.[0];
+        const dataView = api.dataSources$.getValue()?.[0];
         if (!dataView || !mapping) {
           return;
         }
@@ -345,7 +367,11 @@ export const getSearchEmbeddableFactory = ({
         toolkit,
       });
 
-      const { cleanup: cleanupFetch, cancelRequests: _cancelRequests } = initializeFetch({
+      const {
+        cleanup: cleanupFetch,
+        cancelRequests: _cancelRequests,
+        fetchMore,
+      } = initializeFetch({
         api: {
           ...api,
           parentApi,
@@ -353,7 +379,7 @@ export const getSearchEmbeddableFactory = ({
           ...timeRangeManager.api,
           defaultTitle$,
           savedSearch$: searchEmbeddable.api.savedSearch$,
-          dataViews$: searchEmbeddable.api.dataViews$,
+          dataSources$: searchEmbeddable.api.dataSources$,
           savedObjectId$,
           dataLoading$,
           fetchContext$,
@@ -385,7 +411,7 @@ export const getSearchEmbeddableFactory = ({
             disableTriggers,
           ] = useBatchedPublishingSubjects(
             api.savedSearch$,
-            api.dataViews$,
+            api.dataSources$,
             inlineEditingApi.isInlineEditing$,
             inlineEditingApi.draftSelectedTabId$,
             selectedTabId$,
@@ -522,6 +548,7 @@ export const getSearchEmbeddableFactory = ({
                         api={{ ...api, fetchWarnings$, fetchContext$, abortSignal$, viewMode$ }}
                         dataView={dataView!}
                         esqlSource$={searchEmbeddable.esqlSource$}
+                        onFetchMoreRecords={fetchMore}
                         onAddFilter={enableFilters && !disableTriggers ? addFilter : undefined}
                         enableDocumentViewer={enableDocumentViewer && !disableTriggers}
                         expandedDoc={

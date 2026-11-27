@@ -8,14 +8,13 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { ALERTING_RULE_EXECUTOR_TASK_TYPE } from '../../rule_executor/constants';
 import { DISPATCHER_TASK_TYPE } from '../../dispatcher/constants';
-import { bucketsToRecord } from './constants';
+import { EVENT_LOG_INDEX, bucketsToRecord } from './constants';
 import type { ExecutionStatsAggregations, ExecutionStatsResults } from './types';
 
 const NS_PER_MS = 1000000;
 export const nanosToMillis = (nanos?: number | null): number | null =>
   nanos != null ? Math.round(nanos / NS_PER_MS) : null;
 
-const EVENT_LOG_INDEX = '.kibana-event-log-*';
 const EVENT_LOG_PROVIDER = 'taskManager';
 const EVENT_LOG_ACTION_TASK_RUN = 'task-run';
 

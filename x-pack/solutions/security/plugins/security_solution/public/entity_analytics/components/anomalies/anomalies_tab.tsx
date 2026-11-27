@@ -26,7 +26,11 @@ import {
 import type { SeverityOption } from '@kbn/ml-plugin/public';
 import type { EntityType } from '@kbn/entity-store/common';
 import type { DateRangePickerSettings, TimeRangeBoundsOption } from '@kbn/date-range-picker/types';
-import { DateRangePicker, type DateRangePickerOnChangeProps } from '@kbn/date-range-picker';
+import {
+  DateRangePicker,
+  type DateRangePickerOnChangeProps,
+  type FirstDayOfWeek,
+} from '@kbn/date-range-picker';
 import type { EntityViewMode } from '../../../../common/entity_analytics/entity_store/resolution_group';
 import type { AnomalyScoreRange } from '../../../../common/api/entity_analytics';
 import { parseDateWithDefault } from '../../../common/utils/default_date_settings';
@@ -293,8 +297,16 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({
   const hasError = (anomalyOverview.isError || anomalySummary.isError) && !isDateRangeTooOld;
 
   const {
-    services: { ml },
+    services: { ml, uiSettings },
   } = useKibana();
+  const timeZone: string = uiSettings.get('dateFormat:tz');
+  const dayOfWeekSetting: string = uiSettings.get('dateFormat:dow');
+  const calendarOptions = useMemo(
+    () => ({
+      firstDayOfWeek: moment.weekdays().indexOf(dayOfWeekSetting) as FirstDayOfWeek,
+    }),
+    [dayOfWeekSetting]
+  );
   const manageJobsHref = useMlManagementHref(ml, {
     page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
   });
@@ -319,6 +331,8 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({
                 recent={recentTimeRanges}
                 width="auto"
                 compressed
+                calendarOptions={calendarOptions}
+                timeZone={timeZone}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>

@@ -19,12 +19,6 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { GroupStatsItem, RawBucket } from '@kbn/grouping';
 import { capitalize } from 'lodash';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import {
-  EntityPanelKeyByType,
-  EntityPanelParamByType,
-} from '../../../../../flyout/entity_details/shared/constants';
-import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
 import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { ENTITY_ANALYTICS_TABLE_ID } from '../../constants';
@@ -45,10 +39,18 @@ const riskScoreLabel = i18n.translate(
   { defaultMessage: 'Risk score:' }
 );
 
-const openEntityFlyoutLabel = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.entitiesTable.group.openEntityFlyout',
-  { defaultMessage: 'Open entity details' }
-);
+const getOpenEntityFlyoutLabel = (entityName: string) =>
+  i18n.translate('xpack.securitySolution.entityAnalytics.entitiesTable.group.openEntityFlyout', {
+    defaultMessage: 'View details for {entityName}',
+    values: { entityName },
+  });
+
+/** Accessible name for the group's expand/collapse toggle, distinct from the flyout button nested in it. */
+export const getResolutionGroupToggleLabel = (entityName: string) =>
+  i18n.translate('xpack.securitySolution.entityAnalytics.entitiesTable.group.expandEntityRow', {
+    defaultMessage: 'Expand entity row for {entityName}',
+    values: { entityName },
+  });
 
 const ResolutionGroupPanel = ({
   bucket,
@@ -59,8 +61,6 @@ const ResolutionGroupPanel = ({
   targetMetadata: TargetMetadataMap;
   tableId: string;
 }) => {
-  const enableNewFlyout = useIsNewFlyoutEnabled();
-  const { openFlyout } = useExpandableFlyoutApi();
   const { openEntityFlyout } = useFlyoutApi();
 
   const entityId = String(bucket.key_as_string ?? bucket.key);
@@ -71,33 +71,23 @@ const ResolutionGroupPanel = ({
   const entityType = metadata?.type;
 
   const canOpenFlyout = Boolean(targetEntityName && entityType);
+  const openEntityFlyoutLabel = getOpenEntityFlyoutLabel(displayName);
 
   const handleOpenFlyout = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
       if (!targetEntityName || !entityType) return;
 
-      const sharedParams = { entityId, contextID: tableId, scopeId: tableId };
-
-      if (enableNewFlyout) {
-        openEntityFlyout({
-          engineType: entityType,
-          entityName: targetEntityName,
-          origin: FLYOUT_ORIGIN.ENTITIES_TABLE,
-          ...sharedParams,
-        });
-        return;
-      }
-
-      const panelKey = EntityPanelKeyByType[entityType];
-      const paramName = EntityPanelParamByType[entityType];
-      if (panelKey && paramName) {
-        openFlyout({
-          right: { id: panelKey, params: { [paramName]: targetEntityName, ...sharedParams } },
-        });
-      }
+      openEntityFlyout({
+        engineType: entityType,
+        entityName: targetEntityName,
+        origin: FLYOUT_ORIGIN.ENTITIES_TABLE,
+        entityId,
+        contextID: tableId,
+        scopeId: tableId,
+      });
     },
-    [enableNewFlyout, openFlyout, openEntityFlyout, targetEntityName, entityType, entityId, tableId]
+    [openEntityFlyout, targetEntityName, entityType, entityId, tableId]
   );
 
   return (
@@ -129,6 +119,25 @@ const ResolutionGroupPanel = ({
     </EuiFlexGroup>
   );
 };
+
+const getGroupToggleLabel = (groupValue: string) =>
+  i18n.translate('xpack.securitySolution.entityAnalytics.entitiesTable.group.expandGroup', {
+    defaultMessage: 'Expand group {groupValue}',
+    values: { groupValue },
+  });
+
+export const createGroupToggleAriaLabelGetter =
+  (targetMetadata: TargetMetadataMap) =>
+  (selectedGroup: string, bucket: RawBucket<EntitiesGroupingAggregation>): string | undefined => {
+    const groupValue = String(bucket.key_as_string ?? bucket.key);
+
+    if (selectedGroup === ENTITY_GROUPING_OPTIONS.RESOLUTION) {
+      return getResolutionGroupToggleLabel(targetMetadata.get(groupValue)?.name ?? groupValue);
+    }
+
+    // Entity type and custom-field groups: name the toggle by the group value
+    return getGroupToggleLabel(groupValue);
+  };
 
 export const createGroupPanelRenderer = (
   targetMetadata: TargetMetadataMap,

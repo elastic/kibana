@@ -12,7 +12,12 @@ import type {
   GetInfoResponse,
   BulkGetAgentPoliciesResponse,
 } from '@kbn/fleet-plugin/common';
-import { epmRouteService, API_VERSIONS, agentPolicyRouteService } from '@kbn/fleet-plugin/common';
+import {
+  epmRouteService,
+  API_VERSIONS,
+  agentPolicyRouteService,
+  packagePolicyRouteService,
+} from '@kbn/fleet-plugin/common';
 
 import type { BulkGetAgentPoliciesRequestSchema } from '@kbn/fleet-plugin/server/types';
 import type { TypeOf } from '@kbn/config-schema';
@@ -37,7 +42,7 @@ export const sendGetPackagePolicy = (
   packagePolicyId: string,
   options?: HttpFetchOptions
 ) => {
-  return http.get<GetPolicyResponse>(`${INGEST_API_PACKAGE_POLICIES}/${packagePolicyId}`, {
+  return http.get<GetPolicyResponse>(packagePolicyRouteService.getInfoPath(packagePolicyId), {
     ...options,
     version: API_VERSIONS.public.v1,
   });
@@ -78,7 +83,7 @@ export const sendPutPackagePolicy = (
   packagePolicy: NewPolicyData,
   options: Exclude<HttpFetchOptions, 'body'> = {}
 ): Promise<UpdatePolicyResponse> => {
-  return http.put(`${INGEST_API_PACKAGE_POLICIES}/${packagePolicyId}`, {
+  return http.put(packagePolicyRouteService.getUpdatePath(packagePolicyId), {
     ...options,
     version: API_VERSIONS.public.v1,
     body: JSON.stringify(packagePolicy),

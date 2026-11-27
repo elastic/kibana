@@ -6,7 +6,7 @@ There is no in-tree consumer of this package yet. Discover will be the first.
 
 ## The problem
 
-`DataView` does three jobs: identity, index schema (`_field_caps`), and result-column metadata. ES|QL does not use `_field_caps` for schema; it uses a LIMIT 0 / `source_info` request against the query. Today that mismatch is papered over with adhoc DataViews, a parallel `columnsMeta` structure, and scattered `if (isEsqlMode)` branches across the codebase.
+`DataView` does three jobs: identity, index schema (`_field_caps`), and result-column metadata. ES|QL does not use `_field_caps` for schema; it uses a LIMIT 0 / `source_info` request against the query. That mismatch used to be papered over with adhoc DataViews, a parallel result-column structure, and scattered `if (isEsqlMode)` branches across the codebase.
 
 ## The abstraction
 

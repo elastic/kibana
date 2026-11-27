@@ -39,7 +39,13 @@ export function CspDashboardPageProvider({ getService, getPageObjects }: FtrProv
     });
 
   const index = {
-    remove: () => es.indices.delete({ index: LATEST_FINDINGS_INDEX, ignore_unavailable: true }),
+    remove: () =>
+      es.deleteByQuery({
+        index: LATEST_FINDINGS_INDEX,
+        query: { match_all: {} },
+        ignore_unavailable: true,
+        refresh: true,
+      }),
     add: async <T>(findingsMock: T[]) => {
       await Promise.all(
         findingsMock.map((finding) =>

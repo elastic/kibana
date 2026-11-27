@@ -13,10 +13,7 @@ import type {
   WorkflowExecutionSortField,
   WorkflowExecutionSortOrder,
 } from '@kbn/workflows';
-import type {
-  WorkflowsManagementClient,
-  WorkflowsServerPluginSetup,
-} from '@kbn/workflows-management-plugin/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import {
   SignificantEventsWorkflowStatus,
   type SignificantEventsWorkflowStatusResult,
@@ -35,7 +32,10 @@ interface WorkflowExecutionGetParams {
   request: KibanaRequest;
   id: string;
   spaceId: string;
-  options?: Parameters<WorkflowsManagementClient['getWorkflowExecution']>[2];
+  options?: Omit<
+    Parameters<WorkflowsServerPluginSetup['management']['getWorkflowExecution']>[2],
+    'request'
+  >;
 }
 
 interface WorkflowExecutionCancelParams {
@@ -197,7 +197,25 @@ export class WorkflowExecutionService<TInput extends object = {}> {
   }
 
   /** Cancels all active executions, including runs hidden behind newer skipped duplicates. */
-  async cancelActive({
+  async cancelActive(args: {
+    spaceId: string;
+    request: KibanaRequest;
+    concurrencyGroupKey: string;
+  }): Promise<string | null> {
+    const { executions, failures } = await this.cancelActiveExecutions(args);
+    if (failures.length > 0) {
+      throw failures[0];
+    }
+    return executions[0]?.id ?? null;
+  }
+
+  /**
+   * Like {@link cancelActive}, and returns the executions it asked to stop together with the cancel
+   * failures instead of throwing. A cancel can throw after the engine already marked the run (the
+   * wake task of a run that is mid-step is busy, say), so the caller needs the executions to act on
+   * them before it rethrows.
+   */
+  async cancelActiveExecutions({
     spaceId,
     request,
     concurrencyGroupKey,
@@ -205,7 +223,7 @@ export class WorkflowExecutionService<TInput extends object = {}> {
     spaceId: string;
     request: KibanaRequest;
     concurrencyGroupKey: string;
-  }): Promise<string | null> {
+  }): Promise<{ executions: WorkflowExecutionListItemDto[]; failures: unknown[] }> {
     const { results } = await this.getExecutions(
       {
         concurrencyGroupKey,
@@ -216,8 +234,15 @@ export class WorkflowExecutionService<TInput extends object = {}> {
       request
     );
     const active = results.filter((execution) => !isTerminalStatus(execution.status));
-    await Promise.all(active.map(({ id }) => this.cancelExecution({ id, spaceId, request })));
-    return active[0]?.id ?? null;
+    const outcomes = await Promise.allSettled(
+      active.map(({ id }) => this.cancelExecution({ id, spaceId, request }))
+    );
+    return {
+      executions: active,
+      failures: outcomes.flatMap((outcome) =>
+        outcome.status === 'rejected' ? [outcome.reason] : []
+      ),
+    };
   }
 
   async cancelLatest({
@@ -267,7 +292,7 @@ export class WorkflowExecutionService<TInput extends object = {}> {
   }
 
   async getExecution({ id, spaceId, options, request }: WorkflowExecutionGetParams) {
-    return this.managementApi.getClient(request).getWorkflowExecution(id, spaceId, options);
+    return this.managementApi.getWorkflowExecution(id, spaceId, { ...options, request });
   }
 
   async cancelExecution({ id, spaceId, request }: WorkflowExecutionCancelParams): Promise<void> {

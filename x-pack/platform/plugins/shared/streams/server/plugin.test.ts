@@ -91,6 +91,51 @@ function createPluginsSetup(): jest.Mocked<StreamsPluginSetupDependencies> {
   } as unknown as jest.Mocked<StreamsPluginSetupDependencies>;
 }
 
+describe('StreamsPlugin V2 feature registration', () => {
+  const registeredFeatureIds = (pluginsSetup: jest.Mocked<StreamsPluginSetupDependencies>) =>
+    jest.mocked(pluginsSetup.features.registerKibanaFeature).mock.calls.map(([{ id }]) => id);
+
+  it('registers the V2 feature, included in base privileges, when the canvas is enabled', () => {
+    const pluginsSetup = createPluginsSetup();
+    new StreamsPlugin(
+      coreMock.createPluginInitializerContext(
+        getConfig({ canvas: { enabled: true } } as Partial<StreamsConfig>)
+      )
+    ).setup(coreMock.createSetup(), pluginsSetup);
+
+    const [[feature]] = jest
+      .mocked(pluginsSetup.features.registerKibanaFeature)
+      .mock.calls.filter(([{ id }]) => id === 'streamsV2');
+    expect(feature).toMatchObject({
+      app: ['streams'],
+      privileges: {
+        all: {
+          api: ['read_streams_v2', 'manage_streams_v2'],
+          ui: ['show', 'manage'],
+          savedObject: { all: [], read: [] },
+        },
+        read: {
+          api: ['read_streams_v2'],
+          ui: ['show'],
+          savedObject: { all: [], read: [] },
+        },
+      },
+    });
+    expect(feature.privileges?.all).not.toHaveProperty('excludeFromBasePrivileges');
+    expect(feature.privileges?.read).not.toHaveProperty('excludeFromBasePrivileges');
+  });
+
+  it('does not register the V2 feature when the canvas is disabled', () => {
+    const pluginsSetup = createPluginsSetup();
+    new StreamsPlugin(coreMock.createPluginInitializerContext(getConfig())).setup(
+      coreMock.createSetup(),
+      pluginsSetup
+    );
+
+    expect(registeredFeatureIds(pluginsSetup)).toEqual(['streams']);
+  });
+});
+
 describe('StreamsPlugin agent builder registration gating', () => {
   let context: PluginInitializerContext<StreamsConfig>;
   let plugin: StreamsPlugin;
@@ -306,7 +351,12 @@ describe('StreamsPlugin unit republish task', () => {
       type: 'streams-configuration',
       version: 'v1',
       references: [],
-      attributes: { unit_id: 'default', unit: {}, secrets: {}, sealed_credentials: [] },
+      attributes: {
+        unit_id: 'default',
+        unit: { sources: [{ id: 'nop-input', type: 'nop' }], destinations: [], pipelines: [] },
+        secrets: {},
+        sealed_credentials: [],
+      },
     };
     const encryptedSavedObjectsClient = {
       getDecryptedAsInternalUser: jest.fn().mockResolvedValue(storedConfiguration),

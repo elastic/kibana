@@ -11,6 +11,7 @@ import type { Logger } from '@kbn/core/server';
 import { getEarsEndpointsForProvider, resolveEarsUrl } from './url';
 import { request } from '../axios_utils';
 import type { ActionsConfigurationUtilities } from '../../actions_config';
+import { EarsRequestError, getEarsRequestId } from './ears_request_error';
 
 export interface EarsRevokeTokenRequestParams {
   token: string;
@@ -28,7 +29,7 @@ export async function requestEarsRevoke(
   logger: Logger,
   params: EarsRevokeTokenRequestParams,
   configurationUtilities: ActionsConfigurationUtilities
-): Promise<void> {
+): Promise<{ earsRequestId?: string }> {
   const axiosInstance = axios.create();
   const { revokeEndpoint: earsRevokePath } = getEarsEndpointsForProvider(provider);
   const revokeUrl = resolveEarsUrl(earsRevokePath, configurationUtilities.getEarsUrl());
@@ -49,9 +50,17 @@ export async function requestEarsRevoke(
     validateStatus: () => true,
   });
 
+  const earsRequestId = getEarsRequestId(res.headers);
+
   if (res.status !== 200) {
     const errString = stableStringify(res.data);
     logger.debug(`error thrown revoking a token from EARS ${revokeUrl}: ${errString}`);
-    throw new Error('Failed to revoke token via auth redirect service');
+    throw new EarsRequestError({
+      message: 'Failed to revoke token via auth redirect service',
+      status: res.status,
+      earsRequestId,
+    });
   }
+
+  return { earsRequestId };
 }

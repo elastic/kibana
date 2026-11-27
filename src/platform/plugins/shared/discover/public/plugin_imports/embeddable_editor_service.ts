@@ -6,20 +6,26 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type {
-  DiscoverSessionTab,
-  SavedSearchByValueAttributes,
-} from '@kbn/saved-search-plugin/common';
+import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
+import type { DiscoverSessionApiEmbeddableTab } from '@kbn/as-code-discover-schema';
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 import type { EmbeddableEditorState, EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import type { ApplicationStart } from '@kbn/core/public';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { ControlPanelState, ControlPanelsState } from '@kbn/control-group-renderer';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
-import type { SearchEmbeddableByReferenceState } from '../../common/embeddable/types';
+import type {
+  DiscoverSessionEmbeddableByValueState,
+  SearchEmbeddableByReferenceState,
+} from '../../common/embeddable/types';
 import type { SearchEmbeddablePanelApiState } from '../embeddable/types';
 
-export interface DiscoverSessionByValueInput {
+/**
+ * State the originating dashboard hands to the Discover editor. `discoverSessionTab` is only set
+ * for by-value panels; `dashboardControlGroupState` is set for both by-value and by-reference
+ * panels so controls created in Discover can be reconciled with the dashboard's existing ones.
+ */
+export interface DiscoverSessionEditorInput {
   discoverSessionTab: DiscoverSessionTab | undefined;
   dashboardControlGroupState: ControlPanelsState<OptionsListESQLControlState> | undefined;
 }
@@ -33,11 +39,12 @@ export enum TransferAction {
    */
   Cancel,
   /**
-   * A Save Session operation. Updates the saved session and doesn't pass back any serialised state.
+   * A Save Session operation. Updates the saved session and doesn't pass back any serialised state,
+   * only the controls the originating dashboard is missing.
    */
   SaveSession,
   /**
-   * A Save By Value operation. Sends the serialised embeddable attributes to the editor.
+   * A Save By Value operation. Sends the public by-value panel state to the editor.
    */
   SaveByValue,
   /**
@@ -54,16 +61,31 @@ interface TransferOptionsBase {
 
 interface ByValueTransferOptions extends TransferOptionsBase {
   state: {
-    byValueState: SavedSearchByValueAttributes;
+    tab: DiscoverSessionApiEmbeddableTab;
+    /** Omit to keep the title of the panel being edited. */
+    title?: string;
+    /** Omit to keep the description of the panel being edited. */
+    description?: string;
     controlGroupState: ControlPanelsState<OptionsListESQLControlState> | undefined;
   };
 }
 
 interface ByReferenceTransferOptions extends TransferOptionsBase {
-  state: SearchEmbeddableByReferenceState;
+  state: SearchEmbeddableByReferenceState & {
+    controlGroupState?: ControlPanelsState<OptionsListESQLControlState>;
+  };
 }
 
-type CombinedTransferOptions = ByValueTransferOptions | ByReferenceTransferOptions;
+interface SaveSessionTransferOptions extends TransferOptionsBase {
+  state?: {
+    controlGroupState?: ControlPanelsState<OptionsListESQLControlState>;
+  };
+}
+
+type CombinedTransferOptions =
+  | ByValueTransferOptions
+  | ByReferenceTransferOptions
+  | SaveSessionTransferOptions;
 
 type DiscoverTransferSerializedState =
   | ControlPanelState<OptionsListESQLControlState>
@@ -90,7 +112,7 @@ export class EmbeddableEditorService {
     Boolean(this.application.capabilities.dashboard_v2.show) &&
     Boolean(this.application.capabilities.dashboard_v2.createNew);
 
-  public isByValueEditor = (): boolean => Boolean(this.embeddableState?.valueInput);
+  public isByValueEditor = (): boolean => Boolean(this.getEditorInput().discoverSessionTab);
 
   public isEmbeddedEditor = (): boolean => Boolean(this.embeddableState);
 
@@ -99,7 +121,7 @@ export class EmbeddableEditorService {
   public getOriginatingPath = (): string | undefined => this.embeddableState?.originatingPath;
 
   public getByValueTab = (): DiscoverSessionTab | undefined =>
-    this.getByValueInput().discoverSessionTab;
+    this.getEditorInput().discoverSessionTab;
 
   /**
    * Resets the embeddable transfer state, ensuring it is cleared in storage and then dropped in memory.
@@ -111,7 +133,11 @@ export class EmbeddableEditorService {
     }
   };
 
-  public transferBackToEditor(action: TransferAction.Cancel | TransferAction.SaveSession): void;
+  public transferBackToEditor(action: TransferAction.Cancel): void;
+  public transferBackToEditor(
+    action: TransferAction.SaveSession,
+    options?: SaveSessionTransferOptions
+  ): void;
   public transferBackToEditor(
     action: TransferAction.SaveByValue,
     options: ByValueTransferOptions
@@ -129,12 +155,21 @@ export class EmbeddableEditorService {
   public transferBackToEditor(action: TransferAction, options?: CombinedTransferOptions) {
     const app = options?.app || this.embeddableState?.originatingApp;
     const path = options?.path || this.embeddableState?.originatingPath;
-    const { serializedState, controlGroupState } = this.getSerializedState(action, options);
+    // The dashboard's control state is only known for the dashboard the editor was opened from
+    const targetsOriginatingEditor =
+      Boolean(this.embeddableState) &&
+      app === this.embeddableState?.originatingApp &&
+      path === this.embeddableState?.originatingPath;
+    const { serializedState, controlGroupState } = this.getSerializedState(
+      action,
+      options,
+      targetsOriginatingEditor
+    );
     const controlPackages = Object.entries(controlGroupState).map(
       ([embeddableId, controlPanelState]) => ({
         type: ESQL_CONTROL,
         serializedState: controlPanelState,
-        embeddableId,
+        embeddableId: targetsOriginatingEditor ? embeddableId : undefined,
       })
     );
 
@@ -164,36 +199,88 @@ export class EmbeddableEditorService {
 
   private getSerializedState(
     action: TransferAction,
-    options?: CombinedTransferOptions
+    options: CombinedTransferOptions | undefined,
+    targetsOriginatingEditor: boolean
   ): GetSerializedStateResult {
     if (action === TransferAction.SaveByValue) {
-      const { state } = options as ByValueTransferOptions;
+      const { tab, title, description, controlGroupState } = (options as ByValueTransferOptions)
+        .state;
+      // Dashboard merges the package into the panel state, so omitted panel settings are kept
+      const serializedState: DiscoverSessionEmbeddableByValueState = {
+        ...(title !== undefined && { title }),
+        ...(description !== undefined && { description }),
+        tabs: [tab],
+      };
       return {
-        serializedState: { attributes: state.byValueState },
+        serializedState,
         controlGroupState: reconcileControlGroupState({
-          controlGroupState: state.controlGroupState ?? {},
-          dashboardControlGroupState: this.getByValueInput().dashboardControlGroupState,
+          controlGroupState: controlGroupState ?? {},
+          dashboardControlGroupState: this.getEditorInput().dashboardControlGroupState,
         }),
       };
     }
+
+    const dashboardControlGroupState = targetsOriginatingEditor
+      ? this.getEditorInput().dashboardControlGroupState
+      : undefined;
 
     if (action === TransferAction.SaveByReference) {
       const { state } = options as ByReferenceTransferOptions;
       return {
         serializedState: { ref_id: state.savedObjectId, overrides: {} },
-        controlGroupState: {},
+        controlGroupState: getControlsMissingFromDashboard({
+          controlGroupState: state.controlGroupState ?? {},
+          dashboardControlGroupState,
+        }),
+      };
+    }
+
+    if (action === TransferAction.SaveSession) {
+      const { state } = (options as SaveSessionTransferOptions | undefined) ?? {};
+      return {
+        serializedState: {},
+        controlGroupState: getControlsMissingFromDashboard({
+          controlGroupState: state?.controlGroupState ?? {},
+          dashboardControlGroupState,
+        }),
       };
     }
 
     return { serializedState: {}, controlGroupState: {} };
   }
 
-  private getByValueInput(): DiscoverSessionByValueInput {
+  private getEditorInput(): DiscoverSessionEditorInput {
     return this.embeddableState?.valueInput
-      ? (this.embeddableState.valueInput as DiscoverSessionByValueInput)
+      ? (this.embeddableState.valueInput as DiscoverSessionEditorInput)
       : { discoverSessionTab: undefined, dashboardControlGroupState: undefined };
   }
 }
+
+/**
+ * Keeps only the controls whose variable has no control on the dashboard yet, so the existing
+ * dashboard controls and their current selections are left untouched.
+ */
+const getControlsMissingFromDashboard = ({
+  controlGroupState,
+  dashboardControlGroupState,
+}: {
+  controlGroupState: ControlPanelsState<OptionsListESQLControlState>;
+  dashboardControlGroupState: ControlPanelsState<OptionsListESQLControlState> | undefined;
+}): ControlPanelsState<OptionsListESQLControlState> => {
+  if (!dashboardControlGroupState) {
+    return controlGroupState;
+  }
+
+  const dashboardVariableNames = new Set(
+    Object.values(dashboardControlGroupState).map((panelState) => panelState.variable_name)
+  );
+
+  return Object.fromEntries(
+    Object.entries(controlGroupState).filter(
+      ([, panelState]) => !dashboardVariableNames.has(panelState.variable_name)
+    )
+  );
+};
 
 const reconcileControlGroupState = ({
   controlGroupState,

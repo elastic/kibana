@@ -27,8 +27,6 @@ import {
   ADD_FILTER,
   ADD_NOTE_BUTTON,
   ATTACH_TIMELINE_TO_CASE_BUTTON,
-  ATTACH_TIMELINE_TO_EXISTING_CASE_ICON,
-  ATTACH_TIMELINE_TO_NEW_CASE_ICON,
   BOTTOM_BAR_CREATE_NEW_TIMELINE,
   BOTTOM_BAR_CREATE_NEW_TIMELINE_TEMPLATE,
   BOTTOM_BAR_TIMELINE_PLUS_ICON,
@@ -286,14 +284,8 @@ export const addNewCase = () => {
   cy.get(ALL_CASES_CREATE_NEW_CASE_TABLE_BTN).click();
 };
 
-export const attachTimelineToNewCase = () => {
+export const attachTimelineToCase = () => {
   cy.get(ATTACH_TIMELINE_TO_CASE_BUTTON).click();
-  cy.get(ATTACH_TIMELINE_TO_NEW_CASE_ICON).click();
-};
-
-export const attachTimelineToExistingCase = () => {
-  cy.get(ATTACH_TIMELINE_TO_CASE_BUTTON).click();
-  cy.get(ATTACH_TIMELINE_TO_EXISTING_CASE_ICON).click();
 };
 
 /**

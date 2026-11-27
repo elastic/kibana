@@ -11,7 +11,7 @@ import { YARA_LANG_ID } from './constants';
 import { languageConfiguration, lexerRules } from './language';
 import { buildYaraTheme } from './theme';
 
-export { YARA_LANG_ID, YARA_THEME_ID } from './constants';
+export { YARA_LANG_ID } from './constants';
 
 /** Registers the YARA language, its theme and autocomplete in Monaco, it is safe to call it multiple times. */
 export const registerYaraLanguage = (): void => {

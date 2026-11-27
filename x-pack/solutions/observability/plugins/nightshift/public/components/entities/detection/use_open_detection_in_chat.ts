@@ -38,7 +38,7 @@ export const useOpenDetectionInChat = (
           id: detection.detection_id,
           type: SIGNIFICANT_EVENT_DETECTION_ATTACHMENT_TYPE,
           origin: detection.detection_id,
-          description: formatChatAttachmentDescription('Detection', title),
+          description: formatChatAttachmentDescription('detection', title),
           data: attachment,
         },
       ],

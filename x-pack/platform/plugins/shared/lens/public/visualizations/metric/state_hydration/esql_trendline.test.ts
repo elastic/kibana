@@ -451,10 +451,11 @@ describe('hydrateEsqlMetricTrendlineAfterSuggestion', () => {
       esqlQuery: 'FROM untime-* | STATS avg_bytes = AVG(bytes)',
     });
 
-    expect(result).toBeUndefined();
+    expect(result?.visualizationState.trendlineLayerId).toBeUndefined();
+    expect(result?.textBasedState.layers.layer_0_trendline).toBeUndefined();
   });
 
-  it('keeps the previous trendline layer when the new query cannot be rebuilt', () => {
+  it('disables the previous trendline when a changed filter also loses time identity', () => {
     const previousTrendlineLayer = {
       index: 'esql-logs',
       query: {
@@ -479,7 +480,13 @@ describe('hydrateEsqlMetricTrendlineAfterSuggestion', () => {
       },
       textBasedState: {
         layers: {
-          layer_0: { ...mainLayer, columns: [] },
+          layer_0: {
+            ...mainLayer,
+            query: {
+              esql: 'FROM logs-* | WHERE bytes > 1000 | STATS avg_bytes = AVG(bytes) BY b = BUCKET(@timestamp, 1 hour) | EVAL b = "asdf"',
+            },
+          },
+          layer_0_trendline: previousTrendlineLayer,
         },
       },
       previousVisualizationState,
@@ -489,17 +496,20 @@ describe('hydrateEsqlMetricTrendlineAfterSuggestion', () => {
           layer_0_trendline: previousTrendlineLayer,
         },
       },
-      esqlQuery: 'FROM logs-* | STATS avg_bytes = AVG(bytes)',
+      esqlQuery:
+        'FROM logs-* | WHERE bytes > 1000 | STATS avg_bytes = AVG(bytes) BY b = BUCKET(@timestamp, 1 hour) | EVAL b = "asdf"',
     });
 
-    expect(result?.visualizationState).toEqual(
-      expect.objectContaining({
-        trendlineLayerId: 'layer_0_trendline',
-        trendlineMetricAccessor: 'metric_accessor_trendline',
-        trendlineTimeAccessor: 'x_date_histogram',
-      })
-    );
-    expect(result?.textBasedState.layers.layer_0_trendline).toEqual(previousTrendlineLayer);
+    expect(result?.visualizationState).toMatchObject({
+      metricAccessor: 'metric_accessor_metric',
+      trendlineLayerId: undefined,
+      trendlineMetricAccessor: undefined,
+      trendlineTimeAccessor: undefined,
+      trendlineSecondaryMetricAccessor: undefined,
+      trendlineBreakdownByAccessor: undefined,
+    });
+    expect(result?.textBasedState.layers.layer_0.query?.esql).toContain('WHERE bytes > 1000');
+    expect(result?.textBasedState.layers.layer_0_trendline).toBeUndefined();
   });
 
   it('does not keep the previous trendline layer when rebuild fails on a different index', () => {
@@ -540,6 +550,7 @@ describe('hydrateEsqlMetricTrendlineAfterSuggestion', () => {
       esqlQuery: 'FROM other-* | STATS avg_bytes = AVG(bytes)',
     });
 
-    expect(result).toBeUndefined();
+    expect(result?.visualizationState.trendlineLayerId).toBeUndefined();
+    expect(result?.textBasedState.layers.layer_0_trendline).toBeUndefined();
   });
 });

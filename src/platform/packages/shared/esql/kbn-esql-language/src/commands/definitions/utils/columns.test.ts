@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { escapeEsqlColumnName } from './columns';
+import { synth } from '@elastic/esql';
+import { columnsAfter as columnsAfterDrop } from '../../registry/drop/columns_after';
+import type { ESQLColumnData } from '../../registry/types';
+import { columnsWithFlattenedKeys, escapeEsqlColumnName, getFlattenedKeyColumn } from './columns';
 
 describe('escapeEsqlColumnName', () => {
   it.each([
@@ -42,5 +45,69 @@ describe('escapeEsqlColumnName', () => {
 
   it('does not double existing backticks', () => {
     expect(escapeEsqlColumnName('system.cpu.load_average.`1`')).toBe('system.cpu.load_average.`1`');
+  });
+});
+
+describe('getFlattenedKeyColumn', () => {
+  const columns = new Map<string, ESQLColumnData>([
+    ['labels', { name: 'labels', type: 'flattened', userDefined: false }],
+    ['labels.env', { name: 'labels.env', type: 'double', userDefined: false }],
+    ['keywordField', { name: 'keywordField', type: 'keyword', userDefined: false }],
+  ]);
+
+  it('types an unmapped key under a flattened field as keyword', () => {
+    expect(getFlattenedKeyColumn('labels.team', columns)).toEqual({
+      name: 'labels.team',
+      type: 'keyword',
+      userDefined: false,
+    });
+    expect(getFlattenedKeyColumn('labels.nested.region', columns)).toEqual({
+      name: 'labels.nested.region',
+      type: 'keyword',
+      userDefined: false,
+    });
+  });
+
+  it('leaves an exactly mapped field to its mapped type', () => {
+    expect(getFlattenedKeyColumn('labels.env', columns)).toBeUndefined();
+  });
+
+  it('stops at a closer mapped field instead of the flattened parent', () => {
+    expect(getFlattenedKeyColumn('labels.env.region', columns)).toBeUndefined();
+  });
+
+  it('ignores a parent that is not flattened', () => {
+    expect(getFlattenedKeyColumn('keywordField.env', columns)).toBeUndefined();
+  });
+
+  it('ignores wildcard names', () => {
+    expect(getFlattenedKeyColumn('labels.*', columns)).toBeUndefined();
+  });
+});
+
+describe('columnsWithFlattenedKeys', () => {
+  const previousColumns: ESQLColumnData[] = [
+    { name: 'flattenedField', type: 'flattened', userDefined: false },
+    { name: 'keywordField', type: 'keyword', userDefined: false },
+  ];
+
+  it('does not leak a flattened key named only inside an IN subquery', () => {
+    const afterWhere = columnsWithFlattenedKeys(
+      synth.cmd`WHERE keywordField IN (FROM other_index | KEEP flattenedField.env)`,
+      previousColumns
+    );
+    const afterDrop = columnsAfterDrop(synth.cmd`DROP flattenedField`, afterWhere);
+
+    expect(afterDrop.map((column) => column.name)).toEqual(['keywordField']);
+  });
+
+  it('keeps a flattened key named beside an IN subquery', () => {
+    const afterWhere = columnsWithFlattenedKeys(
+      synth.cmd`WHERE keywordField IN (FROM other_index | KEEP flattenedField.env) AND flattenedField.team == "prod"`,
+      previousColumns
+    );
+
+    expect(afterWhere.map((column) => column.name)).toContain('flattenedField.team');
+    expect(afterWhere.map((column) => column.name)).not.toContain('flattenedField.env');
   });
 });

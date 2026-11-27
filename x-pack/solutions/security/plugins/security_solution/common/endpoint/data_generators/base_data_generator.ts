@@ -213,9 +213,9 @@ const toEsSearchResponse = <T extends object = object>(
  */
 export class BaseDataGenerator<GeneratedDoc extends {} = {}> {
   /** A javascript seeded random number (float between 0 and 1). Don't use `Math.random()` */
-  protected random: seedrandom.prng;
+  protected random: seedrandom.PRNG;
 
-  constructor(seed: string | seedrandom.prng = Math.random().toString()) {
+  constructor(seed: string | seedrandom.PRNG = Math.random().toString()) {
     if (typeof seed === 'string') {
       this.random = seedrandom(seed);
     } else {

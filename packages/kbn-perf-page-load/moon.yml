@@ -29,6 +29,7 @@ tags:
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - '**/*.ts'

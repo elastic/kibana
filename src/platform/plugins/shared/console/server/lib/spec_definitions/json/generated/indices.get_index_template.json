@@ -12,7 +12,8 @@
         "-1",
         "0"
       ],
-      "include_defaults": "__flag__"
+      "include_defaults": "__flag__",
+      "include_managed_fields": "__flag__"
     },
     "methods": [
       "GET"

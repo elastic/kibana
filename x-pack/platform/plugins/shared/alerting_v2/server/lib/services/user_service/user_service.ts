@@ -5,11 +5,45 @@
  * 2.0.
  */
 
+import type { z } from '@kbn/zod/v4';
+import type { suggestUserProfilesResponseSchema } from '@kbn/alerting-v2-schemas';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
-import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
+import type { UserProfile } from '@kbn/core-user-profile-common';
+import type {
+  UserProfileServiceStart,
+  UserProfileSuggestParams,
+} from '@kbn/core-user-profile-server';
 import { inject, injectable } from 'inversify';
 import { CoreStart, Request } from '@kbn/core-di-server';
+
+/**
+ * Standardized user-suggestion response shared with the API contract: safe user
+ * fields plus an optional avatar (with Core's `imageUrl` renamed to `image_url`).
+ */
+export type SuggestUsersResponse = z.infer<typeof suggestUserProfilesResponseSchema>;
+
+/**
+ * Maps Core user profiles to the standardized suggestion response: picks the
+ * safe user fields and, when present, the avatar — renaming Core's `imageUrl`
+ * to the API contract's `image_url`.
+ */
+export const toSuggestUsersResponse = (profiles: UserProfile[]): SuggestUsersResponse =>
+  profiles.map(({ uid, user, data }) => ({
+    uid,
+    user: {
+      username: user.username,
+      full_name: user.full_name,
+      email: user.email,
+    },
+    ...(data?.avatar && {
+      avatar: {
+        initials: data.avatar.initials,
+        color: data.avatar.color,
+        image_url: data.avatar.imageUrl,
+      },
+    }),
+  }));
 
 /**
  * Identity performing a write, persisted in the `createdBy` / `updatedBy`
@@ -24,6 +58,7 @@ export interface Actor {
 export interface UserServiceContract {
   getCurrentUserProfileUid(): Promise<string | null>;
   getCurrentActor(): Promise<Actor | null>;
+  suggestUsers(params: UserProfileSuggestParams): Promise<SuggestUsersResponse>;
 }
 
 @injectable()
@@ -54,5 +89,14 @@ export class UserService implements UserServiceContract {
     }
 
     return this.security.authc.getCurrentUser(this.request) ? { profile_uid: null } : null;
+  }
+
+  /**
+   * Suggests user profiles by search criteria via Core's user-profile service,
+   * returning the standardized suggestion response.
+   */
+  public async suggestUsers(params: UserProfileSuggestParams): Promise<SuggestUsersResponse> {
+    const profiles = await this.userProfile.suggest(params);
+    return toSuggestUsersResponse(profiles);
   }
 }

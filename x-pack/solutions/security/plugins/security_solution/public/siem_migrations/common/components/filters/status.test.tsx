@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 import { StatusFilterButton } from './status';
 
 describe('StatusFilterButton', () => {
@@ -36,7 +36,7 @@ describe('StatusFilterButton', () => {
     expect(getByTestId('statusFilterButton')).toBeInTheDocument();
   });
 
-  it('opens the popover when the button is clicked', async () => {
+  it('opens the popover when the button is clicked', () => {
     const { getByTestId } = render(
       <StatusFilterButton
         onStatusChanged={onStatusChanged}
@@ -46,12 +46,10 @@ describe('StatusFilterButton', () => {
 
     fireEvent.click(getByTestId('statusFilterButton'));
 
-    await waitFor(() => {
-      expect(getByTestId('statusFilterSelectableList')).toBeInTheDocument();
-    });
+    expect(getByTestId('statusFilterSelectableList')).toBeInTheDocument();
   });
 
-  it('calls onStatusChanged when an option is selected', async () => {
+  it('calls onStatusChanged when an option is selected', () => {
     const { getByTestId, getByText } = render(
       <StatusFilterButton
         onStatusChanged={onStatusChanged}
@@ -62,8 +60,6 @@ describe('StatusFilterButton', () => {
     fireEvent.click(getByTestId('statusFilterButton'));
     fireEvent.click(getByText('Active'));
 
-    await waitFor(() => {
-      expect(onStatusChanged).toHaveBeenCalledWith('active');
-    });
+    expect(onStatusChanged).toHaveBeenCalledWith('active');
   });
 });

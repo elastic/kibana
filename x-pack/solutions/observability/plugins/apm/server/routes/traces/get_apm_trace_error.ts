@@ -6,11 +6,12 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import type { Logger } from '@kbn/core/server';
 import { type Error } from '@kbn/apm-types';
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { compactMap } from '../../utils/compact_map';
+import { createApmEventFieldsAccessor } from '../../utils/create_apm_event_fields_accessor';
 import {
   ID,
   ERROR_CULPRIT,
@@ -36,24 +37,36 @@ import { RollupInterval } from '../../../common/rollup';
 
 export async function getApmTraceError(params: {
   apmEventClient: APMEventClient;
+  logger: Logger;
   traceId: string;
   docId?: string;
   start: number;
   end: number;
 }) {
+  const { logger } = params;
   const response = await getApmTraceErrorQuery(params);
+
+  // Error documents can be OTel-native or partial/legacy APM docs that do not always populate
+  // every required field. Skipping a malformed hit keeps the whole request from failing with a
+  // 500.
+  const accessor = createApmEventFieldsAccessor({ logger, operation: 'get_apm_trace_error' });
 
   return compactMap(response.hits.hits, (hit): Error | undefined => {
     const errorSource = 'error' in hit._source ? hit._source : undefined;
-    const event = hit.fields
-      ? accessKnownApmEventFields(hit.fields).requireFields(requiredFields)
-      : undefined;
+    const event = accessor.tryAccess(hit, requiredFields);
 
     if (!event) {
       return undefined;
     }
 
     const { _id: id, parent, error, ...unflattened } = event.unflatten();
+
+    // `error.id` is not guaranteed to be present on every error document in the error index
+    // (e.g. OTel-native exception/error events). Skip such documents instead of throwing so a
+    // single error doc without `error.id` cannot fail the entire trace request with a 500.
+    if (!error?.id) {
+      return undefined;
+    }
 
     return {
       id,
@@ -85,17 +98,19 @@ const requiredFields = asMutableArray([
   TIMESTAMP_US,
   TRACE_ID,
   SERVICE_NAME,
-  ERROR_ID,
   ERROR_GROUP_ID,
   PROCESSOR_EVENT,
   ID,
 ] as const);
 
+// `ERROR_ID` is optional: OTel-native exception/error events are not guaranteed to carry
+// `error.id`. Documents without it are skipped in the mapping above rather than throwing.
 const optionalFields = asMutableArray([
   PARENT_ID,
   TRANSACTION_ID,
   SPAN_ID,
   SPAN_DESTINATION_SERVICE_RESOURCE,
+  ERROR_ID,
   ERROR_CULPRIT,
   ERROR_LOG_MESSAGE,
   ERROR_EXC_MESSAGE,

@@ -200,6 +200,58 @@ describe('CasesService', () => {
 
   describe('execution', () => {
     describe('bulkCreateCases', () => {
+      describe('extract_observables_source', () => {
+        it('writes the server-owned attribute per case and leaves unset cases without it', async () => {
+          unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+            saved_objects: [
+              createCaseSavedObjectResponse({ caseId: '1' }),
+              createCaseSavedObjectResponse({ caseId: '2' }),
+            ],
+          });
+
+          await service.bulkCreateCases({
+            cases: [
+              {
+                ...createCasePostParams({ connector: getNoneCaseConnector() }),
+                id: '1',
+                extract_observables_source: 'rule',
+              },
+              { ...createCasePostParams({ connector: getNoneCaseConnector() }), id: '2' },
+            ],
+          });
+
+          const [requests] = unsecuredSavedObjectsClient.bulkCreate.mock.calls[0];
+          const [first, second] = requests.map(
+            ({ attributes }) => attributes as CasePersistedAttributes
+          );
+          expect(first.extract_observables_source).toBe('rule');
+          expect(second).not.toHaveProperty('extract_observables_source');
+        });
+
+        it('does not return the attribute in the created cases', async () => {
+          unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+            saved_objects: [
+              createCaseSavedObjectResponse({
+                caseId: '1',
+                overrides: { extract_observables_source: 'rule' },
+              }),
+            ],
+          });
+
+          const res = await service.bulkCreateCases({
+            cases: [
+              {
+                ...createCasePostParams({ connector: getNoneCaseConnector() }),
+                id: '1',
+                extract_observables_source: 'rule',
+              },
+            ],
+          });
+
+          expect(res.saved_objects[0]).not.toHaveProperty('attributes.extract_observables_source');
+        });
+      });
+
       it('return cases with the SO errors correctly', async () => {
         unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
           // @ts-expect-error: SO client types are not correct
@@ -858,6 +910,84 @@ describe('CasesService', () => {
     });
 
     describe('createCase', () => {
+      describe('extract_observables_source', () => {
+        it('writes the server-owned extract_observables_source as a top-level attribute', async () => {
+          unsecuredSavedObjectsClient.create.mockResolvedValue(createCaseSavedObjectResponse());
+
+          await service.createCase({
+            attributes: {
+              ...createCasePostParams({ connector: getNoneCaseConnector() }),
+              extract_observables_source: 'rule',
+            },
+            id: '1',
+          });
+
+          const creationAttributes = unsecuredSavedObjectsClient.create.mock
+            .calls[0][1] as CasePersistedAttributes;
+          expect(creationAttributes.extract_observables_source).toBe('rule');
+        });
+
+        it('does not write the attribute when the caller did not set it', async () => {
+          unsecuredSavedObjectsClient.create.mockResolvedValue(createCaseSavedObjectResponse());
+
+          await service.createCase({
+            attributes: createCasePostParams({ connector: getNoneCaseConnector() }),
+            id: '1',
+          });
+
+          const creationAttributes = unsecuredSavedObjectsClient.create.mock
+            .calls[0][1] as CasePersistedAttributes;
+          expect(creationAttributes).not.toHaveProperty('extract_observables_source');
+        });
+
+        it('still drops other unknown top-level attributes', async () => {
+          unsecuredSavedObjectsClient.create.mockResolvedValue(createCaseSavedObjectResponse());
+
+          await service.createCase({
+            attributes: {
+              ...createCasePostParams({ connector: getNoneCaseConnector() }),
+              extract_observables_source: 'rule',
+              unknown_attribute: 'value',
+            } as CaseTransformedAttributes,
+            id: '1',
+          });
+
+          const creationAttributes = unsecuredSavedObjectsClient.create.mock
+            .calls[0][1] as CasePersistedAttributes;
+          expect(creationAttributes).not.toHaveProperty('unknown_attribute');
+        });
+
+        it('rejects a source value outside the allowed values', async () => {
+          unsecuredSavedObjectsClient.create.mockResolvedValue(createCaseSavedObjectResponse());
+
+          await expect(
+            service.createCase({
+              attributes: {
+                ...createCasePostParams({ connector: getNoneCaseConnector() }),
+                extract_observables_source: 'not-a-source',
+              } as unknown as CaseTransformedAttributes,
+              id: '1',
+            })
+          ).rejects.toThrow('extract_observables_source');
+        });
+
+        it('does not return the attribute in the created case', async () => {
+          unsecuredSavedObjectsClient.create.mockResolvedValue(
+            createCaseSavedObjectResponse({ overrides: { extract_observables_source: 'rule' } })
+          );
+
+          const res = await service.createCase({
+            attributes: {
+              ...createCasePostParams({ connector: getNoneCaseConnector() }),
+              extract_observables_source: 'rule',
+            },
+            id: '1',
+          });
+
+          expect(res.attributes).not.toHaveProperty('extract_observables_source');
+        });
+      });
+
       it('creates a null external_service field when the attribute was null in the creation parameters', async () => {
         unsecuredSavedObjectsClient.create.mockResolvedValue(createCaseSavedObjectResponse());
 
@@ -2420,6 +2550,16 @@ describe('CasesService', () => {
         await expect(service.getCase({ id: 'a' })).resolves.not.toThrow();
       });
 
+      it('does not return the server-owned extract_observables_source attribute', async () => {
+        unsecuredSavedObjectsClient.get.mockResolvedValue(
+          createCaseSavedObjectResponse({ overrides: { extract_observables_source: 'rule' } })
+        );
+
+        const res = await service.getCase({ id: 'a' });
+
+        expect(res.attributes).not.toHaveProperty('extract_observables_source');
+      });
+
       it.each(Object.keys(attributesToValidateIfMissing))(
         'throws if %s is omitted',
         async (key) => {
@@ -2837,6 +2977,18 @@ describe('CasesService', () => {
         unsecuredSavedObjectsClient.find.mockResolvedValue(findMockReturn);
 
         await expect(service.findCases()).resolves.not.toThrow();
+      });
+
+      it('does not return the server-owned extract_observables_source attribute', async () => {
+        unsecuredSavedObjectsClient.find.mockResolvedValue(
+          createSOFindResponse([
+            createFindSO({ caseId: '1', overrides: { extract_observables_source: 'rule' } }),
+          ])
+        );
+
+        const res = await service.findCases();
+
+        expect(res.saved_objects[0].attributes).not.toHaveProperty('extract_observables_source');
       });
 
       it.each(Object.keys(attributesToValidateIfMissing))(
@@ -3631,6 +3783,31 @@ describe('CasesService', () => {
       const namespaces = ['default'];
       const search = 'awesome case';
 
+      const unifiedCommentClause = {
+        bool: {
+          filter: [{ terms: { 'cases-attachments.type': ['comment'] } }],
+          must: [{ match_phrase: { 'cases-attachments.data.content': search } }],
+        },
+      };
+      const unifiedAlertClause = {
+        bool: {
+          filter: [
+            {
+              terms: {
+                'cases-attachments.type': ['security.alert', 'observability.alert', 'stack.alert'],
+              },
+            },
+          ],
+          must: [{ match: { 'cases-attachments.attachmentId': search } }],
+        },
+      };
+      const unifiedEventClause = {
+        bool: {
+          filter: [{ terms: { 'cases-attachments.type': ['security.event'] } }],
+          must: [{ match: { 'cases-attachments.attachmentId': search } }],
+        },
+      };
+
       const mockEmptySearchResponse = () => {
         // The SO mock doesn't include `search` by default, so wire it up here.
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -3648,6 +3825,7 @@ describe('CasesService', () => {
         const searchCall = (unsecuredSavedObjectsClient as any).search.mock.calls[0][0];
         expect(searchCall.query.bool.should).toEqual([
           { match_phrase: { 'cases-comments.comment': search } },
+          unifiedCommentClause,
         ]);
       });
 
@@ -3663,7 +3841,9 @@ describe('CasesService', () => {
         const searchCall = (unsecuredSavedObjectsClient as any).search.mock.calls[0][0];
         expect(searchCall.query.bool.should).toEqual([
           { match: { 'cases-comments.alertId': search } },
+          unifiedAlertClause,
           { match: { 'cases-comments.eventId': search } },
+          unifiedEventClause,
         ]);
       });
 
@@ -3679,8 +3859,71 @@ describe('CasesService', () => {
         const searchCall = (unsecuredSavedObjectsClient as any).search.mock.calls[0][0];
         expect(searchCall.query.bool.should).toEqual([
           { match: { 'cases-comments.alertId': search } },
+          unifiedAlertClause,
           { match_phrase: { 'cases-comments.comment': search } },
+          unifiedCommentClause,
         ]);
+      });
+
+      it('searches both the legacy and the unified attachment saved object types', async () => {
+        mockEmptySearchResponse();
+
+        await service.getCaseIdsByAttachmentSearch(namespaces, search, ['cases-comments.comment']);
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const searchCall = (unsecuredSavedObjectsClient as any).search.mock.calls[0][0];
+        expect(searchCall.type).toEqual(['cases-comments', 'cases-attachments']);
+      });
+
+      it('aggregates case ids over all matching attachments instead of reading one page of hits', async () => {
+        mockEmptySearchResponse();
+
+        await service.getCaseIdsByAttachmentSearch(namespaces, search, ['cases-comments.comment']);
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const searchCall = (unsecuredSavedObjectsClient as any).search.mock.calls[0][0];
+        expect(searchCall.size).toBe(0);
+        expect(searchCall.aggs).toEqual({
+          references: {
+            nested: { path: 'references' },
+            aggs: {
+              cases: {
+                filter: { term: { 'references.type': 'cases' } },
+                aggs: { caseIds: { terms: { field: 'references.id', size: 10000 } } },
+              },
+            },
+          },
+        });
+      });
+
+      it('returns the case ids from the aggregation buckets', async () => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (unsecuredSavedObjectsClient as any).search = jest.fn().mockResolvedValue({
+          hits: { hits: [] },
+          aggregations: {
+            references: {
+              cases: { caseIds: { buckets: [{ key: 'case-1' }, { key: 'case-2' }] } },
+            },
+          },
+        });
+
+        const caseIds = await service.getCaseIdsByAttachmentSearch(namespaces, 'alert-1', [
+          'cases-comments.alertId',
+        ]);
+
+        expect(caseIds).toEqual(['case-1', 'case-2']);
+      });
+
+      it('ignores search fields that are not attachment fields', async () => {
+        mockEmptySearchResponse();
+
+        const caseIds = await service.getCaseIdsByAttachmentSearch(namespaces, search, [
+          'cases.title',
+        ]);
+
+        expect(caseIds).toEqual([]);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        expect((unsecuredSavedObjectsClient as any).search).not.toHaveBeenCalled();
       });
     });
 

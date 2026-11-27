@@ -1,5 +1,5 @@
 {
-  "sha1": "ba1d8f69f0f1c663d657ce40b823c688e01e9d07",
+  "sha1": "0ef4db14a77c75d5e42e5477cb7e51c934b85c44",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -78,7 +78,7 @@
     {
       "id": "3645667f9344597-81036eae32087b8",
       "title": "Lens chart style settings creates a multi-axis bar chart, enables value labels, and overrides the left axis",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -91,14 +91,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel_tests/chart_style_settings.spec.ts",
-        "line": 17,
-        "column": 13
+        "line": 16,
+        "column": 84
       }
     },
     {
       "id": "3645667f9344597-70bd3b624f04ce3",
       "title": "Lens chart style settings filters an XY chart by clicking a legend item",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -111,14 +111,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel_tests/chart_style_settings.spec.ts",
-        "line": 73,
-        "column": 91
+        "line": 74,
+        "column": 13
       }
     },
     {
       "id": "3645667f9344597-202124e515e5fcb",
       "title": "Lens chart style settings filters a pie chart by clicking a legend item",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -132,13 +132,13 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel_tests/chart_style_settings.spec.ts",
         "line": 98,
-        "column": 16
+        "column": 7
       }
     },
     {
       "id": "3645667f9344597-98e48ea5cbb5057",
       "title": "Lens chart style settings toggles point visibility on a line chart",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -152,7 +152,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel_tests/chart_style_settings.spec.ts",
         "line": 119,
-        "column": 16
+        "column": 63
       }
     },
     {

@@ -39,7 +39,6 @@ export const getRemoveFromCaseActions = ({
       icon: 'trash',
       groupId: 'caseRemoval',
       'data-test-subj': key,
-      // "Select all" also matches alerts that the table's time range hides.
       disableOnQuery: true,
       onClick: (alerts, _isAllSelected, _setIsBulkActionsLoading, clearSelection) =>
         onRemove({ attachmentIds: alerts.map(({ _id }) => _id) }, { onSuccess: clearSelection }),

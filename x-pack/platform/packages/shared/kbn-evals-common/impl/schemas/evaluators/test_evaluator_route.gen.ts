@@ -17,7 +17,11 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 
 import { UserDefinedEvaluatorDraft, EvaluationSubject, Model } from '../common_attributes.gen';
-import { EvaluateResultScore, EvaluateResultError } from './evaluate_route.gen';
+import {
+  EvaluateResultScore,
+  EvaluateResultError,
+  EvaluateResultUsage,
+} from './evaluate_route.gen';
 
 export const TestEvaluatorRequestBody = lazySchema(() =>
   z.object({
@@ -48,6 +52,7 @@ export const TestEvaluatorResponse = lazySchema(() =>
       }),
       scores: z.array(EvaluateResultScore).optional(),
       error: EvaluateResultError.optional(),
+      usage: EvaluateResultUsage.optional(),
     }),
   })
 );

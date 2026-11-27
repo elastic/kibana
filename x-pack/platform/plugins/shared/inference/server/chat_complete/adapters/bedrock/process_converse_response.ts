@@ -61,6 +61,7 @@ export function processConverseResponse(model?: string) {
               prompt,
               total: prompt + outputTokens,
               ...(cacheReadInputTokens !== undefined ? { cached: cacheReadInputTokens } : {}),
+              ...(cacheWriteInputTokens !== undefined ? { cacheWrite: cacheWriteInputTokens } : {}),
             },
             ...(model ? { model } : {}),
           });

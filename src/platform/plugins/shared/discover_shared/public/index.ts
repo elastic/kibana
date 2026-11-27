@@ -26,6 +26,8 @@ export type {
   ObservabilityServiceFlyoutFeature,
   SecuritySolutionCellRendererFeature,
   SecuritySolutionAlertFlyoutOverviewTabFeature,
+  SecuritySolutionAttackFlyoutOverviewTabFeature,
+  SecuritySolutionIOCFlyoutOverviewTabFeature,
   DiscoverFeature,
   DiscoverFeaturesServiceSetup,
   DiscoverFeaturesServiceStart,

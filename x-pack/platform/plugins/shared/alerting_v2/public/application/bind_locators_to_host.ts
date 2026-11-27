@@ -22,7 +22,7 @@ import type {
   AlertingV2HostApp,
   AlertingV2RuleLibraryLocatorParams,
   AlertingV2RulesLocatorParams,
-} from '../locators';
+} from '../../common/locators';
 import type { AlertingV2Locators, RawAlertingV2Locators } from './locator_context';
 
 interface HostParams extends SerializableRecord {

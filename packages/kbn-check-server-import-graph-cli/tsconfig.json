@@ -1,0 +1,26 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+  ],
+  "exclude": [
+    "target/**/*",
+    "src/__fixtures__/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/dev-cli-runner",
+    "@kbn/dev-cli-errors",
+    "@kbn/import-locator",
+    "@kbn/import-resolver",
+    "@kbn/repo-info",
+    "@kbn/repo-packages",
+    "@kbn/tooling-log",
+  ]
+}

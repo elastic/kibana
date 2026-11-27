@@ -73,15 +73,14 @@ describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
     expect(result.ioc_set_hash).toMatch(/^[a-f0-9]{64}$/);
   });
 
-  it('preserves deterministic non-URL indicators without semantic review', () => {
-    const hash = 'a'.repeat(64);
+  it('preserves deterministic non-candidate indicators without semantic review', () => {
     const prepared = prepareIocAdjudication({
       iocs: [
-        candidate(hash, {
-          type: 'hash',
+        candidate('203.0.113.5', {
+          type: 'ip',
           tier: 'discriminating',
           tier_heuristic: 'discriminating',
-          tier_basis: 'hash_high_entropy',
+          tier_basis: 'defanged_source',
           context: undefined,
         }),
       ],
@@ -91,6 +90,132 @@ describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
     expect(result.iocs[0].tier).toBe('discriminating');
     expect(result.promotable_count).toBe(1);
     expect(prepared.reviewable).toHaveLength(0);
+  });
+
+  it.each(['ioc_section', 'defanged_source'])(
+    'keeps a %s hash deterministic: never reviewed, never deferred, still an anchor',
+    (basis) => {
+      const hash = 'b'.repeat(64);
+      const prepared = prepareIocAdjudication({
+        iocs: [
+          candidate(hash, {
+            type: 'hash',
+            tier: 'discriminating',
+            tier_heuristic: 'discriminating',
+            tier_basis: basis,
+            context: `${hash} listed under Indicators.`,
+          }),
+        ],
+      });
+      const result = reconcileIocAdjudication(prepared, new Set());
+
+      expect(prepared.reviewable).toHaveLength(0);
+      expect(prepared.deferredUnreviewed).toBe(0);
+      expect(result.iocs[0]).toEqual(
+        expect.objectContaining({ tier: 'discriminating', tier_basis: basis })
+      );
+      expect(result.iocs[0].deferred_unreviewed).toBeUndefined();
+      expect(result.anchor_iocs.some((ioc) => ioc.value === hash)).toBe(true);
+      expect(result.promotable_count).toBe(1);
+    }
+  );
+
+  it('includes a hash with non-empty context in reviewable candidates', () => {
+    const hash = 'a'.repeat(64);
+    const prepared = prepareIocAdjudication({
+      iocs: [
+        candidate(hash, {
+          type: 'hash',
+          tier: 'discriminating',
+          tier_heuristic: 'discriminating',
+          tier_basis: 'hash_high_entropy',
+          context: `Payload hash ${hash}.`,
+        }),
+      ],
+    });
+
+    expect(prepared.reviewable).toHaveLength(1);
+    expect(prepared.reviewable[0].ioc.type).toBe('hash');
+  });
+
+  it('downgrades an unapproved hash to reference and excludes it from anchors', () => {
+    const hash = 'a'.repeat(64);
+    const prepared = prepareIocAdjudication({
+      iocs: [
+        candidate(hash, {
+          type: 'hash',
+          tier: 'discriminating',
+          tier_heuristic: 'discriminating',
+          tier_basis: 'hash_high_entropy',
+          context: `Payload hash ${hash}.`,
+        }),
+      ],
+    });
+    const result = reconcileIocAdjudication(prepared, new Set());
+
+    expect(result.iocs[0].tier).toBe('reference');
+    expect(result.iocs[0].tier_basis).toBe('semantic_reference');
+    expect(result.anchor_iocs.some((ioc) => ioc.value === hash)).toBe(false);
+  });
+
+  it('keeps an approved hash discriminating and includes it in anchors', () => {
+    const hash = 'a'.repeat(64);
+    const prepared = prepareIocAdjudication({
+      iocs: [
+        candidate(hash, {
+          type: 'hash',
+          tier: 'discriminating',
+          tier_heuristic: 'discriminating',
+          tier_basis: 'hash_high_entropy',
+          context: `Payload hash ${hash}.`,
+        }),
+      ],
+    });
+    const result = reconcileIocAdjudication(prepared, new Set([0]));
+
+    expect(result.iocs[0].tier).toBe('discriminating');
+    expect(result.iocs[0].tier_basis).toBe('semantic_indicator:hash_high_entropy');
+    expect(result.anchor_iocs.some((ioc) => ioc.value === hash)).toBe(true);
+  });
+
+  it('defers a hash with empty context and excludes it from anchors', () => {
+    const hash = 'a'.repeat(64);
+    const prepared = prepareIocAdjudication({
+      iocs: [
+        candidate(hash, {
+          type: 'hash',
+          tier: 'discriminating',
+          tier_heuristic: 'discriminating',
+          tier_basis: 'hash_high_entropy',
+          context: '',
+        }),
+      ],
+    });
+    const result = reconcileIocAdjudication(prepared, new Set());
+
+    expect(prepared.reviewable).toHaveLength(0);
+    expect(result.iocs[0].deferred_unreviewed).toBe(true);
+    expect(result.anchor_iocs.some((ioc) => ioc.value === hash)).toBe(false);
+  });
+
+  it('downgrades an unapproved SHA-1 commit hash the same way as a SHA-256 sample', () => {
+    const hash = '31c0ea7d7ff1d1fccb6492e52dab544011628065';
+    const prepared = prepareIocAdjudication({
+      iocs: [
+        candidate(hash, {
+          type: 'hash',
+          tier: 'discriminating',
+          tier_heuristic: 'discriminating',
+          tier_basis: 'hash_high_entropy',
+          context: `The commit that patched the vulnerabilities is ${hash}.`,
+        }),
+      ],
+    });
+    const result = reconcileIocAdjudication(prepared, new Set());
+
+    expect(result.iocs[0].tier).toBe('reference');
+    expect(result.iocs[0].tier_basis).toBe('semantic_reference');
+    expect(result.anchor_iocs.some((ioc) => ioc.value === hash)).toBe(false);
   });
 
   it('defers a candidate with an empty context instead of sending it', () => {
@@ -367,19 +492,18 @@ describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
       tier: 'discriminating',
       tier_heuristic: 'discriminating',
       tier_basis: 'hash_high_entropy',
-      context: undefined,
+      context: `Payload hash ${'a'.repeat(64)}.`,
     });
-    const all = [...iocs, hash];
+    // Hash first so it sits inside capacity and is reviewed while 6 URLs overflow.
+    const all = [hash, ...iocs];
     const prepared = prepareIocAdjudication({ iocs: all });
     const approved = new Set(prepared.reviewable.map((entry) => entry.id));
     const result = reconcileIocAdjudication(prepared, approved);
 
-    expect(prepared.deferredUnreviewed).toBe(5);
-    expect(result.iocs[capacity].tier).toBe('discriminating');
-    expect(result.iocs[capacity].deferred_unreviewed).toBe(true);
-    expect(result.anchor_iocs.some((ioc) => ioc.value === iocs[capacity].value)).toBe(false);
+    expect(prepared.deferredUnreviewed).toBe(6);
+    expect(result.iocs[capacity + 1].deferred_unreviewed).toBe(true);
     expect(result.anchor_iocs.some((ioc) => ioc.type === 'hash')).toBe(true);
-    expect(result.promotable_count).toBe(capacity + 1);
+    expect(result.promotable_count).toBe(capacity);
   });
 
   it('keeps ioc_set_hash independent of deferred anchors', () => {
@@ -400,5 +524,143 @@ describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
     expect(result.ioc_set_hash).toBe(hashIocSet(iocs));
     expect(result.adjudication.deferred_unreviewed).toBe(5);
     expect(result.anchor_iocs).toHaveLength(capacity);
+  });
+});
+
+describe('prose email candidates', () => {
+  const email = (value: string, overrides: Partial<ExtractedIoc> = {}): ExtractedIoc =>
+    candidate(value, {
+      type: 'email',
+      context: `The phishing sender was ${value} in this campaign.`,
+      ...overrides,
+    });
+
+  it('sends a prose email with context to review', () => {
+    const prepared = prepareIocAdjudication({ iocs: [email('actor@evil-corp.com')] });
+
+    expect(prepared.reviewable).toHaveLength(1);
+    expect(prepared.reviewable[0].ioc.type).toBe('email');
+  });
+
+  it.each([
+    ['defanged_source', 'discriminating'],
+    ['ioc_section', 'discriminating'],
+  ] as const)('keeps a %s email out of review and at its tier', (basis, tier) => {
+    const prepared = prepareIocAdjudication({
+      iocs: [email('actor@evil-corp.com', { tier, tier_heuristic: tier, tier_basis: basis })],
+    });
+    const result = reconcileIocAdjudication(prepared, new Set());
+
+    expect(prepared.reviewable).toHaveLength(0);
+    expect(prepared.deferredUnreviewed).toBe(0);
+    expect(result.iocs[0]).toEqual(expect.objectContaining({ tier, tier_basis: basis }));
+    expect(result.iocs[0].deferred_unreviewed).toBeUndefined();
+  });
+
+  it('keeps a placeholder email out of review at reference', () => {
+    const prepared = prepareIocAdjudication({
+      iocs: [
+        email('test@test.com', {
+          tier: 'reference',
+          tier_heuristic: 'reference',
+          tier_basis: 'placeholder_email',
+        }),
+      ],
+    });
+    const result = reconcileIocAdjudication(prepared, new Set());
+
+    expect(prepared.reviewable).toHaveLength(0);
+    expect(result.iocs[0]).toEqual(
+      expect.objectContaining({ tier: 'reference', tier_basis: 'placeholder_email' })
+    );
+  });
+
+  it('keeps an approved email uncertain with the prefixed basis and anchors it', () => {
+    const prepared = prepareIocAdjudication({ iocs: [email('actor@evil-corp.com')] });
+    const result = reconcileIocAdjudication(prepared, new Set([0]));
+
+    expect(result.iocs[0].tier).toBe('uncertain');
+    expect(result.iocs[0].tier_basis).toBe('semantic_indicator:uncertain_default');
+    expect(result.anchor_iocs.some((ioc) => ioc.value === 'actor@evil-corp.com')).toBe(true);
+  });
+
+  it('downgrades a rejected email to reference / semantic_reference and drops it from anchors', () => {
+    const prepared = prepareIocAdjudication({ iocs: [email('contact@cisa.dhs.gov')] });
+    const result = reconcileIocAdjudication(prepared, new Set());
+
+    expect(result.iocs[0].tier).toBe('reference');
+    expect(result.iocs[0].tier_basis).toBe('semantic_reference');
+    expect(result.anchor_iocs.some((ioc) => ioc.value === 'contact@cisa.dhs.gov')).toBe(false);
+  });
+
+  it('marks a degraded overflow rejection semantic_reference_degraded', () => {
+    const iocs = Array.from({ length: OVERFLOW_MAX_SEMANTIC_CANDIDATES }, (_, index) =>
+      email(`actor${index}@evil-corp.com`)
+    );
+    const second = boundIocAdjudicationForPayload(
+      boundIocAdjudicationForOverflow(prepareIocAdjudication({ iocs }))
+    );
+    const adjudicated = reconcileIocAdjudication(second, new Set());
+
+    expect(second.reviewable.length).toBeGreaterThan(0);
+    for (const entry of second.reviewable) {
+      expect(adjudicated.iocs[entry.originalIndex].tier_basis).toBe('semantic_reference_degraded');
+    }
+  });
+
+  it('reviews urls before emails of the same tier, whatever their extract order', () => {
+    const capacity = MAX_SEMANTIC_CANDIDATES_PER_BATCH * MAX_SEMANTIC_REVIEW_BATCHES;
+    const emails = Array.from({ length: capacity }, (_, index) =>
+      email(`victim${index}@riverton-hospital.org`)
+    );
+    const url = candidate('https://evil-corp.com/payload.bin');
+    const prepared = prepareIocAdjudication({ iocs: [...emails, url] });
+    const result = reconcileIocAdjudication(prepared, new Set());
+
+    expect(prepared.reviewable[0].ioc.value).toBe(url.value);
+    expect(prepared.deferredUnreviewed).toBe(1);
+    expect(result.iocs[capacity].deferred_unreviewed).toBeUndefined();
+    expect(result.iocs[capacity - 1].deferred_unreviewed).toBe(true);
+  });
+
+  it('keeps urls in the first overflow retry ahead of emails', () => {
+    const emails = Array.from({ length: OVERFLOW_MAX_SEMANTIC_CANDIDATES }, (_, index) =>
+      email(`victim${index}@riverton-hospital.org`)
+    );
+    const url = candidate('https://evil-corp.com/payload.bin');
+    const bounded = boundIocAdjudicationForOverflow(
+      prepareIocAdjudication({ iocs: [...emails, url] })
+    );
+
+    expect(bounded.reviewable).toHaveLength(OVERFLOW_MAX_SEMANTIC_CANDIDATES);
+    expect(bounded.reviewable[0].ioc.value).toBe(url.value);
+  });
+
+  it('keeps tier ahead of type when ordering candidates', () => {
+    const prepared = prepareIocAdjudication({
+      iocs: [
+        candidate('https://evil-corp.com/a', { tier: 'contextual', tier_heuristic: 'contextual' }),
+        email('actor@evil-corp.com', {
+          tier: 'discriminating',
+          tier_heuristic: 'discriminating',
+        }),
+      ],
+    });
+
+    expect(prepared.reviewable.map((entry) => entry.ioc.type)).toEqual(['email', 'url']);
+  });
+
+  it('defers an email past the batch budget and keeps it out of anchors', () => {
+    const capacity = MAX_SEMANTIC_CANDIDATES_PER_BATCH * MAX_SEMANTIC_REVIEW_BATCHES;
+    const iocs = Array.from({ length: capacity + 1 }, (_, index) =>
+      email(`actor${index}@evil-corp.com`)
+    );
+    const prepared = prepareIocAdjudication({ iocs });
+    const result = reconcileIocAdjudication(prepared, new Set());
+    const last = `actor${capacity}@evil-corp.com`;
+
+    expect(prepared.deferredUnreviewed).toBe(1);
+    expect(result.iocs[capacity].deferred_unreviewed).toBe(true);
+    expect(result.anchor_iocs.some((ioc) => ioc.value === last)).toBe(false);
   });
 });

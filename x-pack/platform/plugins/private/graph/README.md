@@ -4,6 +4,8 @@ This is the main source folder of the Graph plugin. It contains all of the Kiban
 
 Graph shows only up in the side bar if your server is running on a platinum or trial license. You can activate a trial license in `Management > License Management`.
 
+Set `xpack.graph.enabled: false` in `kibana.yml` to disable the plugin in a stateful deployment.
+
 ## Common commands
 
 * Run tests `pnpm test:jest x-pack/platform/plugins/private/graph --watch`

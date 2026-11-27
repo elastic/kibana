@@ -45,6 +45,7 @@ const COLUMN_SORT_ORDER = {
   geo_point: 9,
   geo_shape: 10,
   murmur3: 11,
+  number_range: 12,
 };
 
 /**
@@ -703,6 +704,13 @@ function buildSuggestion({
   };
 
   const isIncomplete = yValues.length === 0;
+  const bucketTypes = [xValue, ...(splitBy ?? [])].map((col) => col?.operation.dataType);
+  // the heatmap suggestion takes tables with one metric and two buckets
+  const isRangeOverTime =
+    yValues.length === 1 &&
+    bucketTypes.length === 2 &&
+    bucketTypes.includes('date') &&
+    bucketTypes.includes('number_range');
 
   return {
     title,
@@ -716,7 +724,9 @@ function buildSuggestion({
         // Don't advertise charts without y axis
         isIncomplete ||
         // Don't advertise charts without at least one split
-        (!xValue && !splitBy)),
+        (!xValue && !splitBy) ||
+        // Don't advertise a range bucket over time, a heatmap fits better
+        isRangeOverTime),
     state,
     incomplete: isIncomplete,
     previewIcon: getIconForSeries(seriesType),

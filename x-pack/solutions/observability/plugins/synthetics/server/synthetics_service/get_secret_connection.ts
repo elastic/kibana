@@ -30,6 +30,8 @@ export interface HeartbeatVaultConfig {
   kv_mount?: string;
   auth: { token: string } | { approle: { role_id: string; secret_id: string } };
   ssl?: { verification_mode: 'none' };
+  // When set, only monitors whose targets are all on this list can use the connection.
+  allowed_hosts?: string[];
   // Opaque version (the connection's refreshedAt). Heartbeat shares one store (and
   // its 5 minute secret cache) per distinct entry, so bumping this on save forces
   // fresh reads.
@@ -52,6 +54,8 @@ const toHeartbeatConfig = (attributes: SyntheticsSecretConnection): HeartbeatVau
         ? { approle: { role_id: config.roleId ?? '', secret_id: secrets?.secretId ?? '' } }
         : { token: secrets?.token ?? '' },
     ...(config.tlsSkipVerify ? { ssl: { verification_mode: 'none' as const } } : {}),
+    // Heartbeat treats a missing list as "any host", so an empty list is omitted.
+    ...(config.allowedMonitorHosts?.length ? { allowed_hosts: config.allowedMonitorHosts } : {}),
     version: attributes.refreshedAt,
   };
 };

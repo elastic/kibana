@@ -8,6 +8,7 @@
 import type { IClusterClient } from '@kbn/core/server';
 import type { SiemRuleMigrationsClient } from './rules/siem_rule_migrations_service';
 import type { SiemDashboardMigrationsClient } from './dashboards/siem_dashboard_migration_service';
+import type { SiemWorkflowMigrationsClient } from './workflows/siem_workflow_migrations_service';
 
 export interface SiemMigrationsSetupParams {
   esClusterClient: IClusterClient;
@@ -17,6 +18,7 @@ export interface SiemMigrationsSetupParams {
 export interface SiemMigrationClients {
   getRulesClient: () => SiemRuleMigrationsClient;
   getDashboardsClient: () => SiemDashboardMigrationsClient;
+  getWorkflowsClient: () => SiemWorkflowMigrationsClient;
 }
 
 export type Stored<T extends object> = T & { id: string };

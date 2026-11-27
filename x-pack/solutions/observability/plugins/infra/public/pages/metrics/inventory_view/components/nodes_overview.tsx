@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { usePerformanceContext } from '@kbn/ebt-tools';
+import { usePerformanceContext } from '@kbn/ebt-tools/react';
 import React, { useCallback, useMemo } from 'react';
 import { EuiLink, EuiPanel, useCurrentEuiBreakpoint } from '@elastic/eui';
 import styled from '@emotion/styled';

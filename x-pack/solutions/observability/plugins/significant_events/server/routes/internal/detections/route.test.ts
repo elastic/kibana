@@ -55,7 +55,7 @@ const createSearchResources = (links: ReturnType<typeof queryLink>[]) => {
     assertReadable: jest.fn().mockResolvedValue(undefined),
   };
   const resources = {
-    request: {},
+    request: { spaceId: 'default' },
     server: {},
     getScopedClients: jest.fn().mockResolvedValue({
       licensing: {},
@@ -70,7 +70,7 @@ const createSearchResources = (links: ReturnType<typeof queryLink>[]) => {
 const createDetectionByIdResources = (hits: Array<typeof detection>) => {
   const findById = jest.fn().mockResolvedValue({ hits });
   const resources = {
-    request: {},
+    request: { spaceId: 'default' },
     server: {},
     getScopedClients: jest.fn().mockResolvedValue({
       licensing: {},
@@ -342,6 +342,40 @@ describe('detection marker routes', () => {
     );
     expect(bodySchema.safeParse({ rule_uuids: [], scanned_by: 'exec-1' }).success).toBe(false);
   });
+
+  it.each([
+    ['stationary', { observed_change_point_type: 'stationary' }],
+    ['', {}],
+  ])(
+    'stores the observed type %p on a scan marker without making it a detection',
+    async (observed, expectedObservation) => {
+      const bulkCreate = jest.fn().mockResolvedValue(undefined);
+      await markScannedRoute.handler({
+        request: { spaceId: 'default' },
+        server: {},
+        getScopedClients: jest.fn().mockResolvedValue({
+          licensing: {},
+          getDetectionClient: jest.fn().mockResolvedValue({ bulkCreate }),
+        }),
+        maintenanceService: { getState: jest.fn().mockResolvedValue('enabled') },
+        params: {
+          body: markScannedRoute.params.shape.body.parse({
+            rule_uuids: ['rule-1'],
+            scanned_by: 'exec-1',
+            observed_change_point_type: observed,
+          }),
+        },
+      } as unknown as Parameters<typeof markScannedRoute.handler>[0]);
+
+      const [[[marker]]] = bulkCreate.mock.calls;
+      expect(marker).toEqual({
+        '@timestamp': expect.any(String),
+        rule_uuid: 'rule-1',
+        scanned_by: 'exec-1',
+        ...expectedObservation,
+      });
+    }
+  );
 });
 
 describe('while Significant Events is paused', () => {
@@ -349,7 +383,7 @@ describe('while Significant Events is paused', () => {
   const createResources = (state: string) => {
     const bulkCreate = jest.fn().mockResolvedValue(undefined);
     const resources = {
-      request: {},
+      request: { spaceId: 'default' },
       server: {},
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},

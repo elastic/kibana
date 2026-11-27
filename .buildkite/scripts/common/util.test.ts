@@ -219,9 +219,9 @@ describe('tmp artifact helpers', () => {
 
   it('skips GCS when the build recorded no checksum', () => {
     const { run, putGcsObject } = sandbox;
-    putGcsObject(BUILD_ID, sha256('anything'), 'moon-cache.tar.zst', 'anything');
+    putGcsObject(BUILD_ID, sha256('anything'), 'optional.tar.zst', 'anything');
 
-    const result = run(`download_tmp_artifact moon-cache.tar.zst . "${BUILD_ID}" false`);
+    const result = run(`download_tmp_artifact optional.tar.zst . "${BUILD_ID}" false`);
 
     expect(result.status).not.toBe(0);
     expect(result.calls.some((call) => call.startsWith('gcloud storage cp'))).toBe(false);
@@ -292,64 +292,5 @@ describe('tmp artifact helpers', () => {
 
     expect(result.status).not.toBe(0);
     expect(result.calls.some((call) => call.startsWith('gcloud storage cp'))).toBe(false);
-  });
-});
-
-describe('extract_moon_cache', () => {
-  let sandbox: ReturnType<typeof setupSandbox>;
-  let source: string;
-
-  const createArchive = (entries: string[]) => {
-    const archive = Path.join(sandbox.dirs.root, 'moon-cache.tar.zst');
-    const result = spawnSync('tar', ['-cf', archive, '--zstd', ...entries], {
-      cwd: source,
-      encoding: 'utf-8',
-    });
-    expect(result.status).toBe(0);
-    return archive;
-  };
-
-  beforeEach(() => {
-    sandbox = setupSandbox();
-    source = Path.join(sandbox.dirs.root, 'source');
-    Fs.mkdirSync(Path.join(source, '.moon/cache/hashes'), { recursive: true });
-    Fs.writeFileSync(Path.join(source, '.moon/cache/hashes/abc.json'), '{}');
-    Fs.writeFileSync(Path.join(source, 'package.json'), 'replaced');
-  });
-
-  afterEach(() => {
-    sandbox.cleanup();
-  });
-
-  it('restores .moon/cache', () => {
-    const archive = createArchive(['.moon/cache']);
-
-    const result = sandbox.run(`extract_moon_cache "${archive}"`);
-
-    expect(result.status).toBe(0);
-    expect(
-      Fs.readFileSync(Path.join(sandbox.dirs.checkout, '.moon/cache/hashes/abc.json'), 'utf-8')
-    ).toBe('{}');
-    expect(Fs.readdirSync(Path.join(sandbox.dirs.checkout, '.moon'))).toEqual(['cache']);
-  });
-
-  it('refuses archives with entries outside .moon/cache', () => {
-    const archive = createArchive(['.moon/cache', 'package.json']);
-
-    const result = sandbox.run(`extract_moon_cache "${archive}"`);
-
-    expect(result.status).not.toBe(0);
-    expect(Fs.existsSync(Path.join(sandbox.dirs.checkout, 'package.json'))).toBe(false);
-    expect(Fs.existsSync(Path.join(sandbox.dirs.checkout, '.moon/cache'))).toBe(false);
-  });
-
-  it('refuses archives containing links', () => {
-    Fs.symlinkSync(sandbox.dirs.root, Path.join(source, '.moon/cache/linked'));
-    const archive = createArchive(['.moon/cache']);
-
-    const result = sandbox.run(`extract_moon_cache "${archive}"`);
-
-    expect(result.status).not.toBe(0);
-    expect(Fs.existsSync(Path.join(sandbox.dirs.checkout, '.moon/cache'))).toBe(false);
   });
 });

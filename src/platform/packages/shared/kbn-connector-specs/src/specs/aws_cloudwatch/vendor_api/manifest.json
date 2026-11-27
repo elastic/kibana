@@ -1,0 +1,216 @@
+{
+  "operations": {
+    "disableAlarmActions": [
+      {
+        "method": "post",
+        "path": "/DisableAlarmActions",
+        "source": "metrics"
+      }
+    ],
+    "enableAlarmActions": [
+      {
+        "method": "post",
+        "path": "/EnableAlarmActions",
+        "source": "metrics"
+      }
+    ],
+    "filterLogEvents": [
+      {
+        "method": "post",
+        "pagination": {
+          "end": "missing",
+          "request": {
+            "cursorParam": "nextToken",
+            "in": "body",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "events",
+            "nextPath": "nextToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/FilterLogEvents",
+        "source": "logs"
+      }
+    ],
+    "getAlarmHistory": [
+      {
+        "method": "post",
+        "pagination": {
+          "end": "missing",
+          "request": {
+            "cursorParam": "NextToken",
+            "in": "body"
+          },
+          "response": {
+            "itemsPath": "AlarmHistoryItems",
+            "nextPath": "NextToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/DescribeAlarmHistory",
+        "source": "metrics"
+      }
+    ],
+    "getLogsQueryResults": [
+      {
+        "method": "post",
+        "pagination": {
+          "end": "missing",
+          "request": {
+            "cursorParam": "nextToken",
+            "in": "body"
+          },
+          "response": {
+            "itemsPath": "results",
+            "nextPath": "nextToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/GetQueryResults",
+        "source": "logs"
+      }
+    ],
+    "getMetricData": [
+      {
+        "method": "post",
+        "pagination": {
+          "end": "missing",
+          "request": {
+            "cursorParam": "NextToken",
+            "in": "body"
+          },
+          "response": {
+            "itemsPath": "MetricDataResults",
+            "nextPath": "NextToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/GetMetricData",
+        "source": "metrics"
+      }
+    ],
+    "getMetricWidgetImage": [
+      {
+        "method": "post",
+        "path": "/GetMetricWidgetImage",
+        "source": "metrics"
+      }
+    ],
+    "listAlarms": [
+      {
+        "method": "post",
+        "pagination": {
+          "end": "missing",
+          "request": {
+            "cursorParam": "NextToken",
+            "in": "body",
+            "sizeParam": "MaxRecords"
+          },
+          "response": {
+            "itemsPath": "MetricAlarms",
+            "nextPath": "NextToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/DescribeAlarms",
+        "source": "metrics"
+      }
+    ],
+    "listLogAnomalies": [
+      {
+        "method": "post",
+        "pagination": {
+          "end": "missing",
+          "request": {
+            "cursorParam": "nextToken",
+            "in": "body",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "anomalies",
+            "nextPath": "nextToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/ListAnomalies",
+        "source": "logs"
+      }
+    ],
+    "listLogGroups": [
+      {
+        "method": "post",
+        "pagination": {
+          "end": "missing",
+          "request": {
+            "cursorParam": "nextToken",
+            "in": "body",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "logGroups",
+            "nextPath": "nextToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/DescribeLogGroups",
+        "source": "logs"
+      }
+    ],
+    "listMetrics": [
+      {
+        "method": "post",
+        "pagination": {
+          "end": "missing",
+          "request": {
+            "cursorParam": "NextToken",
+            "in": "body"
+          },
+          "response": {
+            "itemsPath": "Metrics",
+            "nextPath": "NextToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/ListMetrics",
+        "source": "metrics"
+      }
+    ],
+    "putMetricAlarm": [
+      {
+        "method": "post",
+        "path": "/PutMetricAlarm",
+        "source": "metrics"
+      }
+    ],
+    "setAlarmState": [
+      {
+        "method": "post",
+        "path": "/SetAlarmState",
+        "source": "metrics"
+      }
+    ],
+    "startLogsQuery": [
+      {
+        "method": "post",
+        "path": "/StartQuery",
+        "source": "logs"
+      }
+    ]
+  },
+  "sources": {
+    "logs": {
+      "apiVersion": "2014-03-28",
+      "fetchedAt": "2026-11-01T19:45:14.934Z",
+      "format": "smithy",
+      "url": "https://raw.githubusercontent.com/aws/api-models-aws/1b9ff13fe6c28ea9774a527e53cda6a3b91369dc/models/cloudwatch-logs/service/2014-03-28/cloudwatch-logs-2014-03-28.json"
+    },
+    "metrics": {
+      "apiVersion": "2010-08-01",
+      "fetchedAt": "2026-11-01T19:45:15.166Z",
+      "format": "smithy",
+      "url": "https://raw.githubusercontent.com/aws/api-models-aws/1b9ff13fe6c28ea9774a527e53cda6a3b91369dc/models/cloudwatch/service/2010-08-01/cloudwatch-2010-08-01.json"
+    }
+  }
+}

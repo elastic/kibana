@@ -1,0 +1,1559 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React from 'react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import type { ESQLSearchResponse } from '@kbn/es-types';
+import type { LatencyMapSelection, TraceSource } from '../types';
+import { durationToRow } from '../query/duration_rows';
+import { getTimeGrid } from '../query/time_grid';
+import { LAYOUT, getTimeBinsForWidth } from '../geometry/layout';
+import { createMapGeometry } from '../geometry/map_geometry';
+import { GRID_ORIGIN } from '../geometry/plot_calibration';
+import type { PlotArea } from '../geometry/map_geometry';
+import { rangeToHighlight } from '../chart/brush';
+import { clearLatencyGridCaches } from '../hooks/latency_grid_cache';
+import { LatencyMap } from './latency_map';
+import type { LatencyMapProps } from './latency_map';
+
+// jsdom cannot draw a chart. The mock records what the map gives the chart, and the test plays
+// the chart: its brush, its hover, its click.
+const mockChart: {
+  settings?: any;
+  heatmap?: any;
+  tooltip?: any;
+  /** How often the chart was given its props: a render the map could have spared. */
+  heatmapRenders: number;
+} = { heatmapRenders: 0 };
+jest.mock('@elastic/charts', () => ({
+  Chart: ({ children }: { children: React.ReactNode }) =>
+    jest.requireActual('react').createElement('div', { 'data-test-subj': 'mockChart' }, children),
+  Settings: (props: unknown) => {
+    mockChart.settings = props;
+    return null;
+  },
+  Heatmap: (props: unknown) => {
+    mockChart.heatmap = props;
+    mockChart.heatmapRenders += 1;
+    return null;
+  },
+  Tooltip: (props: unknown) => {
+    mockChart.tooltip = props;
+    return null;
+  },
+  ScaleType: { Time: 'time' },
+  TooltipStickTo: { Bottom: 'bottom' },
+}));
+jest.mock('@kbn/charts-theme', () => ({ useElasticChartsTheme: () => ({}) }));
+// The width jsdom cannot measure: 320 is the narrowest map, which gets the same 40 columns.
+let mockWidth = 320;
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  useResizeObserver: () => ({ width: mockWidth, height: 0 }),
+  // The loading line's grace delay is the shared convention, not behavior under test.
+  EuiDelayRender: ({ children }: { children: unknown }) => children,
+}));
+
+const source: TraceSource = {
+  timeRange: { from: '2026-10-26T10:00:00.000Z', to: '2026-10-26T11:00:00.000Z' },
+};
+const stats = {
+  min: 100_000,
+  p90: 5_000_000,
+  p95: 8_000_000,
+  p99: 10_000_000,
+  max: 2_000_000_000,
+  spans: 100,
+};
+const statsTable: ESQLSearchResponse = {
+  columns: Object.keys(stats).map((name) => ({ name, type: 'long' })),
+  values: [Object.values(stats)],
+};
+const gridTable = (values: number[][]): ESQLSearchResponse => ({
+  columns: ['xi', 'yi', 'spans', 'failed'].map((name) => ({ name, type: 'long' })),
+  values,
+});
+// A busy cell with failures, a quiet one beside it, and one far away.
+const CELLS = [
+  [3, 5, 40, 10],
+  [4, 5, 20, 0],
+  [30, 20, 3, 3],
+];
+
+// jsdom measures nothing: the map is as narrow as it can be, and has 40 columns of 90 s.
+const timeGrid = getTimeGrid(source.timeRange.from, source.timeRange.to, getTimeBinsForWidth(0));
+// Where the chart put its cells: 40 columns of 6 px and 24 rows of 8 px, from the grid origin the
+// theme pins.
+const plot: PlotArea = { ...GRID_ORIGIN, colWidth: 6, rowHeight: 8 };
+const geometry = createMapGeometry({ plot, timeGrid, stats });
+const timeAt = (column: number) => timeGrid.fromMs + column * timeGrid.binMs;
+
+/** A cell as the chart reports it: its pixels are on the grid, a gap smaller than its slot. */
+const chartCell = (xi: number, yi: number) => ({
+  x: xi * plot.colWidth + LAYOUT.cellGap / 2,
+  y: (23 - yi) * plot.rowHeight + LAYOUT.cellGap / 2,
+  width: plot.colWidth - LAYOUT.cellGap,
+  height: plot.rowHeight - LAYOUT.cellGap,
+  yIndex: 23 - yi,
+  datum: { x: timeAt(xi), y: yi },
+});
+// jsdom truncates the coordinates of a pointer, so the tests hand it whole pixels.
+const centerOf = (xi: number, yi: number) => ({
+  clientX: Math.round(geometry.edgeToX(xi + 0.5)),
+  clientY: Math.round(geometry.edgeToY(yi + 0.5)),
+});
+const edgeOf = (xi: number, yi: number) => ({
+  clientX: Math.round(geometry.edgeToX(xi)),
+  clientY: Math.round(geometry.edgeToY(yi)),
+});
+
+beforeAll(() => {
+  // jsdom has no PointerEvent.
+  if (!('PointerEvent' in window)) {
+    class PointerEventPolyfill extends MouseEvent {
+      pointerId: number;
+      constructor(type: string, init: PointerEventInit = {}) {
+        super(type, init);
+        this.pointerId = init.pointerId ?? 0;
+      }
+    }
+    Object.defineProperty(window, 'PointerEvent', { value: PointerEventPolyfill });
+  }
+});
+
+function renderMap(
+  props: Partial<LatencyMapProps> = {},
+  table: ESQLSearchResponse = gridTable(CELLS),
+  operationsTable?: ESQLSearchResponse
+) {
+  const runEsql = jest.fn(async (query: string) => {
+    if (query.includes('PERCENTILE')) return statsTable;
+    if (operationsTable && query.includes('BY service.name, operation, yi')) {
+      return operationsTable;
+    }
+    return table;
+  });
+  const onSelectionCommit = jest.fn();
+  const mapProps = { source, runEsql, onSelectionCommit, timeZone: 'UTC', ...props };
+  const view = render(<LatencyMap {...mapProps} />);
+  return {
+    ...view,
+    runEsql,
+    onSelectionCommit,
+    /** Renders again, picking up a changed `mockWidth` or, as the host would, new props. */
+    rerenderMap: (overrides: Partial<LatencyMapProps> = {}) =>
+      view.rerender(<LatencyMap {...mapProps} {...overrides} />),
+  };
+}
+
+const waitForChart = async () => screen.findByTestId('mockChart');
+
+/** Flips the failed-only filter with its switch. */
+const toggleFailedOnly = () => fireEvent.click(screen.getByTestId('traceLatencyMapFailedOnly'));
+const errorsSwitch = () => screen.getByTestId('traceLatencyMapFailedOnly');
+/** The chart tells of a cell: its hover, which is how the map learns where the plot is. */
+const hover = (xi: number, yi: number) =>
+  act(() => mockChart.settings.onElementOver([[chartCell(xi, yi), {}]]));
+const brush = (xs: [number, number], rows: number[]) =>
+  act(() =>
+    mockChart.settings.onBrushEnd({
+      cells: [chartCell(xs[0], rows[0])],
+      x: [timeAt(xs[0]), timeAt(xs[1])],
+      y: rows,
+    })
+  );
+
+describe('LatencyMap', () => {
+  beforeEach(() => {
+    // Not carried between tests: a test must not read the chart of the one before it, nor
+    // the map it loaded.
+    mockChart.settings = mockChart.heatmap = mockChart.tooltip = undefined;
+    mockChart.heatmapRenders = 0;
+    clearLatencyGridCaches();
+  });
+
+  it('loads nothing until the map is measured', async () => {
+    mockWidth = 0;
+    try {
+      const { runEsql } = renderMap();
+      expect(await screen.findByTestId('traceLatencyMapLoading')).toBeInTheDocument();
+      expect(runEsql).not.toHaveBeenCalled();
+    } finally {
+      mockWidth = 320;
+    }
+  });
+
+  it('reloads only when a resize crosses a tier of time columns', async () => {
+    try {
+      const { runEsql, rerenderMap } = renderMap();
+      await waitForChart();
+      const initialCalls = runEsql.mock.calls.length;
+
+      // A resize inside the tier: the cells stretch, nothing reloads.
+      mockWidth = 321;
+      rerenderMap();
+      await act(() => new Promise((resolve) => setTimeout(resolve, 300)));
+      expect(runEsql.mock.calls.length).toBe(initialCalls);
+
+      // Across tiers: the grid loads again, with the statistics it already has.
+      mockWidth = 2000;
+      rerenderMap();
+      await waitFor(() => expect(runEsql.mock.calls.length).toBeGreaterThan(initialCalls));
+      const newQueries = runEsql.mock.calls.slice(initialCalls).map(([query]) => query);
+      expect(newQueries.some((query) => query.includes('PERCENTILE'))).toBe(false);
+
+      // Hidden (width 0) and shown again: the width is kept, nothing reloads.
+      const total = runEsql.mock.calls.length;
+      mockWidth = 0;
+      rerenderMap();
+      mockWidth = 2000;
+      rerenderMap();
+      await act(() => new Promise((resolve) => setTimeout(resolve, 300)));
+      expect(runEsql.mock.calls.length).toBe(total);
+    } finally {
+      mockWidth = 320;
+    }
+  });
+
+  it('shows the map at once, without the loading chart, when its source was loaded before', async () => {
+    const first = renderMap();
+    await waitForChart();
+    first.unmount();
+
+    // The view switched away and back, say: the same source in a new mount.
+    const { runEsql } = renderMap();
+    expect(screen.queryByTestId('traceLatencyMapLoading')).not.toBeInTheDocument();
+    expect(screen.getByTestId('mockChart')).toBeInTheDocument();
+    expect(runEsql).not.toHaveBeenCalled();
+  });
+
+  it('keeps the handles when the width changes inside a tier', async () => {
+    try {
+      const selection = geometry.rangeToSelection({ x0: 3, x1: 5, y0: 5, y1: 6 });
+      const { rerenderMap } = renderMap({ selection });
+      await waitForChart();
+      hover(4, 5);
+      expect(screen.getByTestId('traceLatencyMapHandle-r')).toBeInTheDocument();
+
+      // A flyout opened beside the map: narrower by a few pixels, the same columns.
+      mockWidth = 321;
+      rerenderMap();
+      expect(screen.getByTestId('traceLatencyMapHandle-r')).toBeInTheDocument();
+    } finally {
+      mockWidth = 320;
+    }
+  });
+
+  it('does not redraw the chart when the host renders again with an equal selection', async () => {
+    const selection = geometry.rangeToSelection({ x0: 3, x1: 5, y0: 5, y1: 6 });
+    const { rerenderMap } = renderMap({ selection });
+    await screen.findByTestId('traceLatencyMapSelectionBar');
+    const renders = mockChart.heatmapRenders;
+    // The host parses the selection from its query every render: a new object, same cells.
+    rerenderMap({ selection: { ...selection } });
+    rerenderMap({ selection: { ...selection } });
+    expect(mockChart.heatmapRenders).toBe(renders);
+  });
+
+  it('shows a loading chart, then the heatmap with a legend and a summary', async () => {
+    const onStats = jest.fn();
+    const onLoad = jest.fn();
+    renderMap({ onStats, onLoad });
+    expect(screen.getByTestId('traceLatencyMapLoading')).toBeInTheDocument();
+
+    await waitForChart();
+    expect(mockChart.settings.ariaLabel).toMatch(/Latency map of 100 spans, from 100µs to 2s/);
+    expect(mockChart.settings.showLegend).toBe(false);
+    expect(screen.getByTestId('traceLatencyMapLegend')).toBeInTheDocument();
+    expect(onStats).toHaveBeenCalledWith({ ...stats, sampled: false });
+    expect(onLoad).toHaveBeenCalledWith(source);
+    // The header reads the range's statistics.
+    expect(screen.getByTestId('traceLatencyMapStats')).toHaveTextContent('2s max · 10ms p99');
+  });
+
+  it('runs the loading line while its own queries load, and rests once they land', async () => {
+    renderMap();
+    // The initial load: the line runs along the top while the spinner holds the body.
+    expect(screen.getByTestId('traceLatencyMapProgressBar')).toBeInTheDocument();
+    await waitForChart();
+    expect(screen.queryByTestId('traceLatencyMapProgressBar')).not.toBeInTheDocument();
+  });
+
+  it('runs the loading line while the host refetches what follows the query', async () => {
+    renderMap({ isUpdating: true });
+    await waitForChart();
+    expect(screen.getByTestId('traceLatencyMapProgressBar')).toBeInTheDocument();
+  });
+
+  it('gives the chart a time scale of the columns, the rows as categories, one colour scale', async () => {
+    renderMap();
+    await waitForChart();
+    const { heatmap } = mockChart;
+    expect(heatmap.xScale).toEqual({
+      type: 'time',
+      interval: { type: 'fixed', unit: 'ms', value: timeGrid.binMs },
+    });
+    expect(heatmap.ySortPredicate).toBe('numDesc');
+    expect(heatmap.colorScale.type).toBe('bands');
+    const real = heatmap.data.filter((datum: { spans: number }) => datum.spans > 0);
+    expect(real).toHaveLength(CELLS.length);
+    expect(real[0]).toMatchObject({ x: timeAt(3), y: 5, spans: 40, failed: 10 });
+    // Every row exists on the chart, though only three have spans.
+    expect(new Set(heatmap.data.map((datum: { y: number }) => datum.y)).size).toBe(24);
+  });
+
+  it("gives the chart a time zone it knows, where the host has the browser's", async () => {
+    renderMap({ timeZone: 'Browser' });
+    await waitForChart();
+    expect(mockChart.heatmap.timeZone).not.toBe('Browser');
+    expect(typeof mockChart.heatmap.timeZone).toBe('string');
+  });
+
+  it('labels the durations sparsely and every column with its time', async () => {
+    renderMap();
+    await waitForChart();
+    const { yAxisLabelFormatter, xAxisLabelFormatter } = mockChart.heatmap;
+    const yLabels = Array.from({ length: 24 }, (_, row) => yAxisLabelFormatter(row));
+    expect(yLabels.filter(Boolean).length).toBeGreaterThan(2);
+    expect(yLabels.filter(Boolean).length).toBeLessThan(12);
+    expect(yAxisLabelFormatter(23)).toBe('≥10ms');
+    const xLabels = Array.from({ length: 40 }, (_, column) => xAxisLabelFormatter(timeAt(column)));
+    // The chart thins the columns' labels to the ones that fit.
+    // Columns that do not span whole minutes read with seconds, so that no two read alike.
+    expect(xLabels.every((label) => /^\d\d:\d\d(:\d\d)?$/.test(label))).toBe(true);
+    expect(new Set(xLabels).size).toBe(40);
+  });
+
+  it('says so when the range has no spans, and reports it loaded', async () => {
+    const onLoad = jest.fn();
+    const runEsql = jest.fn(async () => ({ ...statsTable, values: [[0, 0, 0, 0, 0, 0]] }));
+    renderMap({ runEsql, onLoad });
+    expect(await screen.findByTestId('traceLatencyMapEmpty')).toBeInTheDocument();
+    expect(onLoad).toHaveBeenCalledWith(source);
+    expect(screen.queryByTestId('mockChart')).not.toBeInTheDocument();
+  });
+
+  it('shows the error of a query', async () => {
+    renderMap({ runEsql: jest.fn().mockRejectedValue(new Error('index_not_found')) });
+    expect(await screen.findByTestId('traceLatencyMapError')).toHaveTextContent('index_not_found');
+  });
+
+  it('disables the errors switch, with the reason, while the map has no failed span', async () => {
+    renderMap({}, gridTable([[3, 5, 40, 0]]));
+    await waitForChart();
+    expect(errorsSwitch()).toBeDisabled();
+    expect(errorsSwitch()).not.toBeChecked();
+    fireEvent.mouseOver(errorsSwitch());
+    expect(await screen.findByText('No errors in this result set')).toBeInTheDocument();
+  });
+
+  it('keeps the failed spans only with the errors filter on', async () => {
+    renderMap();
+    await waitForChart();
+    expect(errorsSwitch()).toBeEnabled();
+    toggleFailedOnly();
+    await waitFor(() =>
+      expect(
+        mockChart.heatmap.data.filter((datum: { spans: number }) => datum.spans > 0)
+      ).toHaveLength(2)
+    );
+    expect(
+      mockChart.heatmap.data.find((datum: { spans: number }) => datum.spans === 10)
+    ).toMatchObject({ failed: 10 });
+  });
+
+  describe('the tooltip', () => {
+    it('sits below the cell it is about, so that the cell stays in view', async () => {
+      renderMap();
+      await waitForChart();
+      expect(mockChart.tooltip).toMatchObject({ stickTo: 'bottom', placement: 'bottom' });
+    });
+
+    it('shows the window, durations and counts of a cell, and nothing for an empty one', async () => {
+      renderMap();
+      await waitForChart();
+      const Tooltip = mockChart.tooltip.customTooltip;
+      const { unmount } = render(
+        <Tooltip values={[{}, {}, { datum: { x: timeAt(3), y: 5, spans: 40, failed: 10 } }]} />
+      );
+      const details = screen.getByTestId('traceLatencyMapCellDetails');
+      expect(details).toHaveTextContent('40 spans');
+      expect(details).toHaveTextContent('10 failed (25%)');
+      unmount();
+
+      const empty = render(
+        <Tooltip values={[{}, {}, { datum: { x: 0, y: 0, spans: 0, failed: 0 } }]} />
+      );
+      expect(empty.container).toBeEmptyDOMElement();
+    });
+  });
+
+  describe('the cell under the pointer', () => {
+    it('is outlined where the chart put it, and not once the pointer leaves', async () => {
+      renderMap();
+      await waitForChart();
+      // Nothing to outline before the chart tells where its cells are.
+      expect(screen.queryByTestId('traceLatencyMapHover')).not.toBeInTheDocument();
+
+      hover(3, 5);
+      const outline = screen.getByTestId('traceLatencyMapHover');
+      const expected = geometry.rangeToRect({ x0: 3, x1: 4, y0: 5, y1: 6 });
+      expect(Number(outline.getAttribute('x'))).toBeCloseTo(expected.x0);
+      expect(Number(outline.getAttribute('y'))).toBeCloseTo(expected.y0);
+      expect(Number(outline.getAttribute('width'))).toBeCloseTo(expected.x1 - expected.x0);
+      expect(Number(outline.getAttribute('height'))).toBeCloseTo(expected.y1 - expected.y0);
+
+      act(() => mockChart.settings.onElementOut());
+      expect(screen.queryByTestId('traceLatencyMapHover')).not.toBeInTheDocument();
+    });
+
+    it('is not outlined when it has no spans, as it has no tooltip', async () => {
+      renderMap();
+      await waitForChart();
+      hover(10, 10);
+      expect(screen.queryByTestId('traceLatencyMapHover')).not.toBeInTheDocument();
+    });
+
+    it('comes without a grip or handles when nothing is selected', async () => {
+      renderMap();
+      await waitForChart();
+      hover(3, 5);
+      expect(screen.queryByTestId('traceLatencyMapGrip')).not.toBeInTheDocument();
+      expect(screen.queryByTestId(/^traceLatencyMapHandle-/)).not.toBeInTheDocument();
+    });
+  });
+
+  describe('selecting', () => {
+    it('takes the brush of the chart, snapped to its cells, with the ES|QL condition', async () => {
+      const { onSelectionCommit } = renderMap();
+      await waitForChart();
+      brush([3, 7], [2, 3, 4, 5]);
+
+      expect(onSelectionCommit).toHaveBeenCalledTimes(1);
+      const [selection, condition] = onSelectionCommit.mock.calls[0];
+      expect(selection).toEqual(geometry.rangeToSelection({ x0: 3, x1: 7, y0: 2, y1: 6 }));
+      expect(selection.from).toBe('2026-10-26T10:04:30.000Z');
+      expect(selection.to).toBe('2026-10-26T10:10:30.000Z');
+      expect(condition).toContain('@timestamp >= TO_DATETIME("2026-10-26T10:04:30.000Z")');
+      expect(condition).toContain('transaction.duration.us >=');
+    });
+
+    it('scopes the condition of a map of traces', async () => {
+      const { onSelectionCommit } = renderMap({
+        unit: 'traces',
+        selectionCondition: 'service.name == "cart"',
+      });
+      await waitForChart();
+      brush([3, 5], [5, 6]);
+      expect(onSelectionCommit.mock.calls[0][1]).toMatch(
+        /AND \(parent\.id IS NULL AND parent_span_id IS NULL\) AND \(service\.name == "cart"\)$/
+      );
+    });
+
+    it('does not commit a brush over the region that is already selected', async () => {
+      const selection = geometry.rangeToSelection({ x0: 3, x1: 7, y0: 2, y1: 6 });
+      const { onSelectionCommit } = renderMap({ selection });
+      await waitForChart();
+      brush([3, 7], [2, 3, 4, 5]);
+      expect(onSelectionCommit).not.toHaveBeenCalled();
+    });
+
+    it('has the chart draw the selection', async () => {
+      const selection = geometry.rangeToSelection({ x0: 3, x1: 7, y0: 2, y1: 6 });
+      renderMap({ selection });
+      await waitForChart();
+      expect(mockChart.heatmap.highlightedData).toEqual(
+        rangeToHighlight({ x0: 3, x1: 7, y0: 2, y1: 6 }, timeGrid)
+      );
+    });
+
+    it('reports a click on a cell with spans, and ignores one without', async () => {
+      const onCellClick = jest.fn();
+      const { onSelectionCommit } = renderMap({ onCellClick });
+      await waitForChart();
+      act(() => mockChart.settings.onElementClick([[chartCell(3, 5), {}]]));
+      expect(onCellClick).toHaveBeenCalledWith(
+        expect.objectContaining({ spans: 40, failed: 10, from: '2026-10-26T10:04:30.000Z' })
+      );
+      act(() => mockChart.settings.onElementClick([[chartCell(10, 10), {}]]));
+      expect(onCellClick).toHaveBeenCalledTimes(1);
+      expect(onSelectionCommit).not.toHaveBeenCalled();
+    });
+
+    it('treats a click in "failed only" mode as a click on the failed spans', async () => {
+      const onCellClick = jest.fn();
+      renderMap({ onCellClick });
+      await waitForChart();
+      toggleFailedOnly();
+      await waitFor(() =>
+        expect(mockChart.heatmap.data.some((datum: { spans: number }) => datum.spans === 10)).toBe(
+          true
+        )
+      );
+
+      act(() => mockChart.settings.onElementClick([[chartCell(3, 5), {}]]));
+      // 10 of the 40 spans failed: the cell is those 10, and the selection is about failures.
+      expect(onCellClick).toHaveBeenCalledWith(
+        expect.objectContaining({ spans: 10, failed: 10, failedOnly: true })
+      );
+
+      // A cell without failures is empty in this mode.
+      onCellClick.mockClear();
+      act(() => mockChart.settings.onElementClick([[chartCell(4, 5), {}]]));
+      expect(onCellClick).not.toHaveBeenCalled();
+    });
+
+    it('marks a region where failures concentrate as failed only on its own', async () => {
+      // The far cell is all failures: 100% against 17% on the rest of the map.
+      const { onSelectionCommit } = renderMap();
+      await waitForChart();
+      brush([30, 31], [20]);
+      const [selection, condition] = onSelectionCommit.mock.calls[0];
+      expect(selection.failedOnly).toBe(true);
+      expect(condition).toContain('event.outcome == "failure"');
+    });
+
+    it('does not infer failures over a region that merely has some', async () => {
+      // 10 of the busy region's 60 spans failed: a sixth, not a concentration.
+      const { onSelectionCommit } = renderMap();
+      await waitForChart();
+      brush([3, 5], [5]);
+      expect(onSelectionCommit.mock.calls[0][0].failedOnly).toBeUndefined();
+    });
+
+    it('leaves the outcome alone once the user chose one with the errors filter', async () => {
+      const { onSelectionCommit } = renderMap();
+      await waitForChart();
+      toggleFailedOnly();
+      toggleFailedOnly();
+      brush([30, 31], [20]);
+      expect(onSelectionCommit.mock.calls[0][0].failedOnly).toBeUndefined();
+    });
+
+    it('selects the slowest spans across the whole range, labelled, from the menu', async () => {
+      const { onSelectionCommit } = renderMap();
+      await waitForChart();
+      fireEvent.click(screen.getByTestId('traceLatencyMapSelectSlowest'));
+      // The menu names the percentiles with their durations.
+      expect(screen.getByTestId('traceLatencyMapSlowest99')).toHaveTextContent(/^Above p99 \(/);
+      fireEvent.click(screen.getByTestId('traceLatencyMapSlowest99'));
+      const [selection] = onSelectionCommit.mock.calls[0];
+      expect(selection.from).toBe(source.timeRange.from);
+      expect(selection.minDuration).toBeCloseTo(stats.p99);
+      expect(selection.maxDuration).toBeGreaterThan(stats.max);
+      expect(selection.label).toBe('Slowest spans (> p99)');
+
+      fireEvent.click(screen.getByTestId('traceLatencyMapSelectSlowest'));
+      fireEvent.click(screen.getByTestId('traceLatencyMapSlowest95'));
+      expect(onSelectionCommit.mock.calls[1][0].minDuration).toBeLessThan(stats.p99);
+
+      fireEvent.click(screen.getByTestId('traceLatencyMapSelectSlowest'));
+      fireEvent.click(screen.getByTestId('traceLatencyMapSlowest90'));
+      // Snapped to the row edge at or below the p90.
+      const p90Selection = onSelectionCommit.mock.calls[2][0];
+      expect(p90Selection.minDuration).toBeLessThanOrEqual(stats.p90);
+      expect(p90Selection.minDuration).toBeLessThan(onSelectionCommit.mock.calls[1][0].minDuration);
+    });
+
+    it('draws a region with the pointer once the plot is known, in either direction', async () => {
+      const { onSelectionCommit } = renderMap();
+      await waitForChart();
+      hover(4, 5);
+      const layer = screen.getByTestId('traceLatencyMapLayer');
+
+      fireEvent.pointerDown(layer, { ...centerOf(3, 2), button: 0, pointerId: 1 });
+      fireEvent.pointerMove(window, { ...centerOf(6, 5), pointerId: 1 });
+      // The chart draws the region as it grows.
+      expect(mockChart.heatmap.highlightedData).toEqual(
+        rangeToHighlight({ x0: 3, x1: 7, y0: 2, y1: 6 }, timeGrid)
+      );
+      fireEvent.pointerUp(window, { ...centerOf(6, 5), pointerId: 1 });
+      expect(onSelectionCommit.mock.calls[0][0]).toEqual(
+        geometry.rangeToSelection({ x0: 3, x1: 7, y0: 2, y1: 6 })
+      );
+
+      // A drag from the slow corner down commits the same normalized region. A different
+      // region than the first: the committed one is already shown, and drawing it again
+      // commits nothing.
+      fireEvent.pointerDown(layer, { ...centerOf(9, 8), button: 0, pointerId: 1 });
+      fireEvent.pointerMove(window, { ...centerOf(5, 4), pointerId: 1 });
+      fireEvent.pointerUp(window, { ...centerOf(5, 4), pointerId: 1 });
+      expect(onSelectionCommit.mock.calls[1][0]).toEqual(
+        geometry.rangeToSelection({ x0: 5, x1: 10, y0: 4, y1: 9 })
+      );
+    });
+
+    it('lets no second pointer move or end the drawing', async () => {
+      const { onSelectionCommit } = renderMap();
+      await waitForChart();
+      hover(4, 5);
+      const layer = screen.getByTestId('traceLatencyMapLayer');
+
+      fireEvent.pointerDown(layer, { ...centerOf(3, 2), button: 0, pointerId: 1 });
+      // A second finger, anywhere: the region does not follow it, and its release does not
+      // commit.
+      fireEvent.pointerMove(window, { ...centerOf(9, 9), pointerId: 2 });
+      expect(mockChart.heatmap.highlightedData).toBeUndefined();
+      fireEvent.pointerUp(window, { ...centerOf(9, 9), pointerId: 2 });
+      expect(onSelectionCommit).not.toHaveBeenCalled();
+
+      fireEvent.pointerMove(window, { ...centerOf(6, 5), pointerId: 1 });
+      fireEvent.pointerUp(window, { ...centerOf(6, 5), pointerId: 1 });
+      expect(onSelectionCommit.mock.calls[0][0]).toEqual(
+        geometry.rangeToSelection({ x0: 3, x1: 7, y0: 2, y1: 6 })
+      );
+    });
+
+    it('draws from above the plot, clamped to the top row', async () => {
+      const { onSelectionCommit } = renderMap();
+      await waitForChart();
+      hover(4, 5);
+      const layer = screen.getByTestId('traceLatencyMapLayer');
+
+      // The press lands in the gap above the chart, aiming at the slowest row.
+      fireEvent.pointerDown(layer, {
+        clientX: centerOf(3, 0).clientX,
+        clientY: -4,
+        button: 0,
+        pointerId: 1,
+      });
+      fireEvent.pointerMove(window, { ...centerOf(6, 20), pointerId: 1 });
+      fireEvent.pointerUp(window, { ...centerOf(6, 20), pointerId: 1 });
+      expect(onSelectionCommit.mock.calls[0][0]).toEqual(
+        geometry.rangeToSelection({ x0: 3, x1: 7, y0: 20, y1: 24 })
+      );
+    });
+
+    it('treats a pointer press that does not travel as a click on the cell', async () => {
+      const onCellClick = jest.fn();
+      const { onSelectionCommit } = renderMap({ onCellClick });
+      await waitForChart();
+      hover(4, 5);
+      const layer = screen.getByTestId('traceLatencyMapLayer');
+      fireEvent.pointerDown(layer, { ...centerOf(3, 5), button: 0, pointerId: 1 });
+      fireEvent.pointerUp(window, { ...centerOf(3, 5), pointerId: 1 });
+      expect(onCellClick).toHaveBeenCalledWith(
+        expect.objectContaining({ spans: 40, failed: 10, from: '2026-10-26T10:04:30.000Z' })
+      );
+      expect(onSelectionCommit).not.toHaveBeenCalled();
+    });
+
+    it('outlines the cell the host has open, apart from the cell under the pointer', async () => {
+      const activeCell = geometry.rangeToSelection({ x0: 3, x1: 4, y0: 5, y1: 6 });
+      const { rerenderMap } = renderMap({ activeCell });
+      await waitForChart();
+      hover(4, 5);
+      const active = screen.getByTestId('traceLatencyMapActiveCell');
+      const rect = geometry.rangeToRect({ x0: 3, x1: 4, y0: 5, y1: 6 });
+      expect(active).toHaveAttribute('x', String(rect.x0));
+      expect(active).toHaveAttribute('y', String(rect.y0));
+      expect(screen.getByTestId('traceLatencyMapHover')).toBeInTheDocument();
+
+      // The host took it back: the flyout closed.
+      rerenderMap({ activeCell: undefined });
+      expect(screen.queryByTestId('traceLatencyMapActiveCell')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('with operations', () => {
+    const operationsColumns = [
+      { name: 'service.name', type: 'keyword' },
+      { name: 'operation', type: 'keyword' },
+      ...['yi', 'spans', 'failed'].map((name) => ({ name, type: 'long' })),
+    ];
+    /** Two bimodal operations, neither dominant: the picker offers both. */
+    const mixedOperations = {
+      columns: operationsColumns,
+      values: [
+        ['cart', 'GET /cart', 5, 200, 0],
+        ['cart', 'GET /cart', 15, 150, 30],
+        ['checkout', 'POST /checkout', 6, 180, 0],
+        ['checkout', 'POST /checkout', 16, 120, 0],
+      ],
+    } as ESQLSearchResponse;
+    /** One operation holds every span: the map focuses on it and draws its bands. */
+    const focusedOperations = {
+      columns: operationsColumns,
+      values: [
+        ['cart', 'GET /cart', 5, 200, 0],
+        ['cart', 'GET /cart', 15, 150, 30],
+      ],
+    } as ESQLSearchResponse;
+
+    it('offers the operations with duration groups in a dropdown, which focuses one', async () => {
+      const onFocusOperation = jest.fn();
+      renderMap({ onFocusOperation }, gridTable(CELLS), mixedOperations);
+      fireEvent.click(await screen.findByTestId('traceLatencyMapDurationGroups'));
+      expect(screen.getByTestId('traceLatencyMapDurationGroup-1')).toHaveTextContent('cart');
+      fireEvent.click(screen.getByTestId('traceLatencyMapDurationGroup-1'));
+      expect(onFocusOperation).toHaveBeenCalledWith(
+        { service: 'cart', name: 'GET /cart' },
+        'service.name == "cart" AND (transaction.name == "GET /cart" OR span.name == "GET /cart" OR name == "GET /cart")'
+      );
+    });
+
+    it('keeps the dropdown while a selection exists, as the slowest shortcuts do', async () => {
+      const selection = geometry.rangeToSelection({ x0: 3, x1: 5, y0: 5, y1: 6 });
+      renderMap({ onFocusOperation: jest.fn(), selection }, gridTable(CELLS), mixedOperations);
+      await screen.findByTestId('traceLatencyMapSelectionBar');
+      expect(await screen.findByTestId('traceLatencyMapDurationGroups')).toBeInTheDocument();
+    });
+
+    it('draws the bands of a dominant operation, and a click selects the band', async () => {
+      const { onSelectionCommit } = renderMap(
+        { onFocusOperation: jest.fn() },
+        gridTable(CELLS),
+        focusedOperations
+      );
+      await waitForChart();
+      hover(4, 5);
+      const band = await screen.findByTestId('traceLatencyMapBand-1');
+      fireEvent.click(band);
+      const [selection] = onSelectionCommit.mock.calls[0];
+      // The whole range, over the band's rows.
+      expect(selection.from).toBe(source.timeRange.from);
+      expect(selection.to).toBe(source.timeRange.to);
+      expect(selection.label).toBe('Fast group');
+    });
+
+    it('draws the bands with the map, before the pointer has been over a cell', async () => {
+      renderMap({ onFocusOperation: jest.fn() }, gridTable(CELLS), focusedOperations);
+      await waitForChart();
+      // The chart has told of no cell: the bands go by its layout, left of the label gutter.
+      const band = await screen.findByTestId('traceLatencyMapBand-1');
+      const estimatedRight = mockWidth - LAYOUT.bandLabelsWidth - LAYOUT.cellGap / 2;
+      expect(band.querySelector('path')).toHaveAttribute(
+        'd',
+        expect.stringMatching(new RegExp(`^M ${estimatedRight + 4} `))
+      );
+
+      // Once it tells of one, the bands are where the chart has its plot.
+      hover(4, 5);
+      expect(screen.getByTestId('traceLatencyMapBand-1').querySelector('path')).toHaveAttribute(
+        'd',
+        expect.stringMatching(new RegExp(`^M ${geometry.plotRight + 4} `))
+      );
+    });
+
+    it('reserves no label gutter for a dominant operation without duration groups', async () => {
+      /** One operation holds every span, in one group: nothing to mark. */
+      const singleGroup = {
+        columns: operationsColumns,
+        values: [['cart', 'GET /cart', 5, 350, 30]],
+      } as ESQLSearchResponse;
+      renderMap({ onFocusOperation: jest.fn() }, gridTable(CELLS), singleGroup);
+      await waitForChart();
+      hover(4, 5);
+      await waitFor(() => expect(mockChart.settings.theme.chartMargins.right).toBe(0));
+      expect(screen.queryByTestId('traceLatencyMapBand-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('traceLatencyMapDurationGroups')).not.toBeInTheDocument();
+    });
+
+    it('selects a band with the keyboard, as a click does', async () => {
+      const { onSelectionCommit } = renderMap(
+        { onFocusOperation: jest.fn() },
+        gridTable(CELLS),
+        focusedOperations
+      );
+      await waitForChart();
+      hover(4, 5);
+      const band = await screen.findByTestId('traceLatencyMapBand-1');
+      expect(band).toHaveAttribute('role', 'button');
+      fireEvent.keyDown(band, { key: 'Enter' });
+      expect(onSelectionCommit.mock.calls[0][0].label).toBe('Fast group');
+    });
+
+    it('shows the focused operation as a badge whose cross clears it', async () => {
+      const onClearOperation = jest.fn();
+      renderMap(
+        {
+          onFocusOperation: jest.fn(),
+          focusedOperation: { service: 'cart', name: 'GET /cart' },
+          onClearOperation,
+        },
+        gridTable(CELLS),
+        focusedOperations
+      );
+      const badge = await screen.findByTestId('traceLatencyMapOperationBadge');
+      expect(badge).toHaveTextContent(/^cart GET \/cart$/);
+      fireEvent.click(screen.getByLabelText('Show all transactions'));
+      expect(onClearOperation).toHaveBeenCalled();
+    });
+  });
+
+  describe('moving and resizing', () => {
+    const range = { x0: 3, x1: 6, y0: 4, y1: 8 };
+    const selection = geometry.rangeToSelection(range);
+
+    it('has no handles until the chart has told where its cells are', async () => {
+      renderMap({ selection });
+      await waitForChart();
+      expect(screen.queryByTestId('traceLatencyMapOverlay')).not.toBeInTheDocument();
+      hover(4, 5);
+      expect(screen.getByTestId('traceLatencyMapOverlay')).toBeInTheDocument();
+      expect(screen.getAllByTestId(/^traceLatencyMapHandle-/)).toHaveLength(8);
+    });
+
+    it('learns the plot from a brush or a click as well', async () => {
+      renderMap({ selection });
+      await waitForChart();
+      act(() => mockChart.settings.onElementClick([[chartCell(3, 5), {}]]));
+      expect(screen.getByTestId('traceLatencyMapOverlay')).toBeInTheDocument();
+    });
+
+    it('veils the plot around the selection with four rectangles around it', async () => {
+      renderMap({ selection });
+      await waitForChart();
+      hover(4, 5);
+      const mask = screen.getByTestId('traceLatencyMapOutsideMask');
+      expect(mask.querySelectorAll('rect')).toHaveLength(4);
+    });
+
+    it('forgets the plot when the columns change', async () => {
+      const view = renderMap({ selection });
+      await waitForChart();
+      hover(4, 5);
+      view.rerender(
+        <LatencyMap
+          source={{
+            ...source,
+            timeRange: { from: source.timeRange.from, to: '2026-10-26T12:00:00.000Z' },
+          }}
+          runEsql={view.runEsql}
+          selection={selection}
+          onSelectionCommit={view.onSelectionCommit}
+        />
+      );
+      await waitFor(() =>
+        expect(screen.queryByTestId('traceLatencyMapOverlay')).not.toBeInTheDocument()
+      );
+    });
+
+    it('moves the region by whole cells, drawn by the chart as it goes', async () => {
+      const { onSelectionCommit } = renderMap({ selection });
+      await waitForChart();
+      hover(4, 5);
+      const overlay = screen.getByTestId('traceLatencyMapOverlay');
+      const grip = screen.getByTestId('traceLatencyMapGrip');
+      fireEvent.pointerDown(grip, { ...centerOf(4, 5), button: 0, pointerId: 1 });
+      fireEvent.pointerMove(overlay, { ...centerOf(7, 6), pointerId: 1 });
+      expect(mockChart.heatmap.highlightedData).toEqual(
+        rangeToHighlight({ x0: 6, x1: 9, y0: 5, y1: 9 }, timeGrid)
+      );
+      fireEvent.pointerUp(overlay, { ...centerOf(7, 6), pointerId: 1 });
+      expect(onSelectionCommit.mock.calls[0][0]).toEqual(
+        geometry.rangeToSelection({ x0: 6, x1: 9, y0: 5, y1: 9 })
+      );
+    });
+
+    it('keeps a moved region in place while the host round-trips it, then follows the prop', async () => {
+      const { rerenderMap } = renderMap({ selection });
+      await waitForChart();
+      hover(4, 5);
+      const overlay = screen.getByTestId('traceLatencyMapOverlay');
+      fireEvent.pointerDown(screen.getByTestId('traceLatencyMapGrip'), {
+        ...centerOf(4, 5),
+        button: 0,
+        pointerId: 1,
+      });
+      fireEvent.pointerMove(overlay, { ...centerOf(7, 6), pointerId: 1 });
+      fireEvent.pointerUp(overlay, { ...centerOf(7, 6), pointerId: 1 });
+      const moved = { x0: 6, x1: 9, y0: 5, y1: 9 };
+      // The prop still says the old place: the map keeps the committed one - no snap-back.
+      expect(mockChart.heatmap.highlightedData).toEqual(rangeToHighlight(moved, timeGrid));
+      // The commit lands in the prop: nothing jumps.
+      rerenderMap({ selection: geometry.rangeToSelection(moved) });
+      expect(mockChart.heatmap.highlightedData).toEqual(rangeToHighlight(moved, timeGrid));
+    });
+
+    it('lets the prop overrule a commit it answers with something else', async () => {
+      const { rerenderMap } = renderMap({ selection });
+      await waitForChart();
+      hover(4, 5);
+      const overlay = screen.getByTestId('traceLatencyMapOverlay');
+      fireEvent.pointerDown(screen.getByTestId('traceLatencyMapGrip'), {
+        ...centerOf(4, 5),
+        button: 0,
+        pointerId: 1,
+      });
+      fireEvent.pointerMove(overlay, { ...centerOf(7, 6), pointerId: 1 });
+      fireEvent.pointerUp(overlay, { ...centerOf(7, 6), pointerId: 1 });
+      // The host went another way, as when a range change clears the selection: it wins.
+      rerenderMap({ selection: undefined });
+      expect(mockChart.heatmap.highlightedData).toBeUndefined();
+      expect(screen.queryByTestId('traceLatencyMapSelectionBar')).not.toBeInTheDocument();
+    });
+
+    it('resizes the region from a handle', async () => {
+      const { onSelectionCommit } = renderMap({ selection });
+      await waitForChart();
+      hover(4, 5);
+      const overlay = screen.getByTestId('traceLatencyMapOverlay');
+      // The top right corner.
+      fireEvent.pointerDown(screen.getByTestId('traceLatencyMapHandle-tr'), {
+        ...edgeOf(6, 8),
+        button: 0,
+        pointerId: 1,
+      });
+      fireEvent.pointerMove(overlay, { ...edgeOf(10, 12), pointerId: 1 });
+      fireEvent.pointerUp(overlay, { ...edgeOf(10, 12), pointerId: 1 });
+      expect(onSelectionCommit.mock.calls[0][0]).toEqual(
+        geometry.rangeToSelection({ x0: 3, x1: 10, y0: 4, y1: 12 })
+      );
+    });
+
+    it('lets go of the handles while a new region is brushed, and shows them again after', async () => {
+      renderMap({ selection });
+      await waitForChart();
+      hover(4, 5);
+      expect(screen.getAllByTestId(/^traceLatencyMapHandle-/)).toHaveLength(8);
+      fireEvent.pointerDown(screen.getByTestId('traceLatencyMapLayer'), {
+        button: 0,
+        pointerId: 1,
+      });
+      expect(screen.queryByTestId(/^traceLatencyMapHandle-/)).not.toBeInTheDocument();
+      fireEvent.pointerUp(window, { pointerId: 1 });
+      expect(screen.getAllByTestId(/^traceLatencyMapHandle-/)).toHaveLength(8);
+    });
+
+    it('keeps the handles when a press lands on them', async () => {
+      renderMap({ selection });
+      await waitForChart();
+      hover(4, 5);
+      fireEvent.pointerDown(screen.getByTestId('traceLatencyMapHandle-tr'), {
+        button: 0,
+        pointerId: 1,
+      });
+      expect(screen.getAllByTestId(/^traceLatencyMapHandle-/)).toHaveLength(8);
+    });
+
+    it('grabs the region, and the hover outline gives way while it is moved', async () => {
+      renderMap({ selection });
+      await waitForChart();
+      hover(4, 5);
+      const grip = screen.getByTestId('traceLatencyMapGrip');
+      expect(grip).toHaveStyle({ cursor: 'grab' });
+      expect(screen.getByTestId('traceLatencyMapHover')).toBeInTheDocument();
+      fireEvent.pointerDown(grip, { ...centerOf(4, 5), button: 0, pointerId: 1 });
+      expect(screen.getByTestId('traceLatencyMapGrip')).toHaveStyle({ cursor: 'grabbing' });
+      expect(screen.queryByTestId('traceLatencyMapHover')).not.toBeInTheDocument();
+    });
+
+    it('reads a press on the region that does not travel as a click on the cell', async () => {
+      const onCellClick = jest.fn();
+      const { onSelectionCommit } = renderMap({ selection, onCellClick });
+      await waitForChart();
+      hover(4, 5);
+      const overlay = screen.getByTestId('traceLatencyMapOverlay');
+      fireEvent.pointerDown(screen.getByTestId('traceLatencyMapGrip'), {
+        ...centerOf(4, 5),
+        button: 0,
+        pointerId: 1,
+      });
+      fireEvent.pointerUp(overlay, { ...centerOf(4, 5), pointerId: 1 });
+      expect(onCellClick).toHaveBeenCalledWith(expect.objectContaining({ spans: 20 }));
+      expect(onSelectionCommit).not.toHaveBeenCalled();
+    });
+
+    it('leaves the selection as it was when the gesture is cancelled', async () => {
+      const { onSelectionCommit } = renderMap({ selection });
+      await waitForChart();
+      hover(4, 5);
+      const overlay = screen.getByTestId('traceLatencyMapOverlay');
+      fireEvent.pointerDown(screen.getByTestId('traceLatencyMapGrip'), {
+        ...centerOf(4, 5),
+        button: 0,
+        pointerId: 1,
+      });
+      fireEvent.pointerMove(overlay, { ...centerOf(9, 9), pointerId: 1 });
+      fireEvent.pointerCancel(overlay);
+      expect(onSelectionCommit).not.toHaveBeenCalled();
+      expect(mockChart.heatmap.highlightedData).toEqual(rangeToHighlight(range, timeGrid));
+    });
+
+    it('leaves the selection as it was when Escape ends the gesture', async () => {
+      const { onSelectionCommit } = renderMap({ selection });
+      await waitForChart();
+      hover(4, 5);
+      const overlay = screen.getByTestId('traceLatencyMapOverlay');
+      fireEvent.pointerDown(screen.getByTestId('traceLatencyMapGrip'), {
+        ...centerOf(4, 5),
+        button: 0,
+        pointerId: 1,
+      });
+      fireEvent.pointerMove(overlay, { ...centerOf(9, 9), pointerId: 1 });
+      fireEvent.keyDown(screen.getByTestId('traceLatencyMapLayer'), { key: 'Escape' });
+      expect(onSelectionCommit).not.toHaveBeenCalled();
+      expect(mockChart.heatmap.highlightedData).toEqual(rangeToHighlight(range, timeGrid));
+    });
+  });
+
+  describe('with a selection', () => {
+    const selection: LatencyMapSelection = geometry.rangeToSelection({
+      x0: 3,
+      x1: 5,
+      y0: 5,
+      y1: 6,
+    });
+
+    it('shows its bounds and the counts of its cells, and the host actions', async () => {
+      renderMap({
+        selection,
+        renderSelectionActions: (_, condition) => <button>Filter ({condition.length})</button>,
+      });
+      const summary = await screen.findByTestId('traceLatencyMapSelectionSummary');
+      // The busy cell and the quiet one: 60 spans, 10 of them failed (17%).
+      expect(summary).toHaveTextContent('60 spans');
+      expect(summary).toHaveTextContent('10 failed (17%)');
+      expect(screen.getByRole('button', { name: /^Filter \(\d+\)$/ })).toBeInTheDocument();
+    });
+
+    it('keeps the slowest shortcuts while a selection exists, naming the active one', async () => {
+      renderMap({ selection });
+      await screen.findByTestId('traceLatencyMapSelectionBar');
+      // The menus never make way; a hand-drawn selection names no shortcut.
+      expect(screen.getByTestId('traceLatencyMapSelectSlowest')).toHaveTextContent(
+        /^Select slowest$/
+      );
+    });
+
+    it('names the active shortcut on the menu button, with a check on its entry', async () => {
+      // The selection the p95 shortcut writes: full width, from the p95 row to the top.
+      const p95Row = Math.floor(durationToRow(stats.p95, stats));
+      const slowest = geometry.rangeToSelection({
+        x0: 0,
+        x1: geometry.bins,
+        y0: p95Row,
+        y1: geometry.rows,
+      });
+      renderMap({ selection: slowest });
+      await screen.findByTestId('traceLatencyMapSelectionBar');
+      const button = screen.getByTestId('traceLatencyMapSelectSlowest');
+      expect(button).toHaveTextContent('Select slowest (p95)');
+      fireEvent.click(button);
+      const active = screen.getByTestId('traceLatencyMapSlowest95');
+      expect(active.querySelector('[data-euiicon-type="check"]')).toBeInTheDocument();
+    });
+
+    it('names the clicked percentile when several coincide on the same rows', async () => {
+      // Nearly every span at one duration: p90, p95 and p99 are equal, their selections too.
+      const spiked = { ...stats, p90: stats.p99, p95: stats.p99 };
+      const spikedGeometry = createMapGeometry({ plot, timeGrid, stats: spiked });
+      const slowest = spikedGeometry.rangeToSelection({
+        x0: 0,
+        x1: spikedGeometry.bins,
+        y0: 23,
+        y1: spikedGeometry.rows,
+      });
+      renderMap({
+        selection: slowest,
+        runEsql: async (query: string) =>
+          query.includes('PERCENTILE')
+            ? { ...statsTable, values: [Object.values(spiked)] }
+            : gridTable(CELLS),
+      });
+      await screen.findByTestId('traceLatencyMapSelectionBar');
+      const button = screen.getByTestId('traceLatencyMapSelectSlowest');
+      // Without a pick the committed rows cannot tell the percentiles apart: the highest is named.
+      expect(button).toHaveTextContent('Select slowest (p99)');
+      fireEvent.click(button);
+      fireEvent.click(screen.getByTestId('traceLatencyMapSlowest95'));
+      // The click commits an identical query, but the menu still answers with the picked one.
+      expect(button).toHaveTextContent('Select slowest (p95)');
+      fireEvent.click(button);
+      const active = screen.getByTestId('traceLatencyMapSlowest95');
+      expect(active.querySelector('[data-euiicon-type="check"]')).toBeInTheDocument();
+    });
+
+    it('leads with the label of a selection that has one', async () => {
+      renderMap({ selection: { ...selection, label: 'Slowest spans (> p95)' } });
+      const summary = await screen.findByTestId('traceLatencyMapSelectionSummary');
+      expect(summary).toHaveTextContent(/^Slowest spans \(> p95\) · /);
+    });
+
+    it('counts a selection that does not follow the cells over its own bounds, as an estimate', async () => {
+      // The map was resized after the selection was made: its start is in the middle of column 3.
+      const shifted = {
+        ...selection,
+        from: new Date(timeAt(3) + timeGrid.binMs / 2).toISOString(),
+      };
+      renderMap({ selection: shifted });
+      const summary = await screen.findByTestId('traceLatencyMapSelectionSummary');
+      // Half of the 40 spans of column 3, and the 20 of column 4.
+      expect(summary).toHaveTextContent('~40 spans');
+    });
+
+    it('does not call the count of a selection on the cell edges an estimate', async () => {
+      renderMap({ selection });
+      const summary = await screen.findByTestId('traceLatencyMapSelectionSummary');
+      expect(summary).toHaveTextContent('60 spans');
+      expect(summary).not.toHaveTextContent('~60');
+    });
+
+    it('narrows to the failed spans when the errors filter goes on, keeping the region', async () => {
+      const { onSelectionCommit } = renderMap({ selection });
+      await screen.findByTestId('traceLatencyMapSelectionBar');
+      toggleFailedOnly();
+      expect(onSelectionCommit).toHaveBeenCalledWith(
+        { ...selection, failedOnly: true },
+        expect.stringContaining('event.outcome == "failure"')
+      );
+    });
+
+    it('follows the filter of a selection about failures, counting its failed spans', async () => {
+      renderMap({ selection: { ...selection, failedOnly: true } });
+      const summary = await screen.findByTestId('traceLatencyMapSelectionSummary');
+      expect(errorsSwitch()).toBeChecked();
+      expect(summary).toHaveTextContent('10 spans');
+      expect(summary).toHaveTextContent('failed only');
+    });
+
+    it('clears the selection, at once, before the host answers', async () => {
+      const { onSelectionCommit } = renderMap({ selection });
+      fireEvent.click(await screen.findByTestId('traceLatencyMapClearSelection'));
+      expect(onSelectionCommit).toHaveBeenCalledWith(undefined, undefined);
+      // The prop still carries the selection; the map already shows it gone.
+      expect(screen.queryByTestId('traceLatencyMapSelectionBar')).not.toBeInTheDocument();
+    });
+
+    it('keeps the way to clear a selection when the map itself fails', async () => {
+      // The selection still filters the host's documents; Clear must not go down with the map.
+      const onSelectionCommit = jest.fn();
+      render(
+        <LatencyMap
+          source={source}
+          runEsql={jest.fn().mockRejectedValue(new Error('boom'))}
+          selection={selection}
+          onSelectionCommit={onSelectionCommit}
+        />
+      );
+      await screen.findByTestId('traceLatencyMapError');
+      // Without counts the badge claims nothing it cannot know.
+      expect(screen.getByTestId('traceLatencyMapSelectionSummary')).not.toHaveTextContent('spans');
+      fireEvent.click(screen.getByTestId('traceLatencyMapClearSelection'));
+      expect(onSelectionCommit).toHaveBeenCalledWith(undefined, undefined);
+    });
+  });
+
+  describe('with a host failure filter', () => {
+    it('asks the host to change the filter instead of flipping its own', async () => {
+      const onFailedOnlyChange = jest.fn();
+      const { onSelectionCommit } = renderMap({ failedOnly: false, onFailedOnlyChange });
+      await waitForChart();
+      toggleFailedOnly();
+      expect(onFailedOnlyChange).toHaveBeenCalledWith(true);
+      expect(onSelectionCommit).not.toHaveBeenCalled();
+      // The switch shows the host's filter, which has not come back yet.
+      expect(errorsSwitch()).not.toBeChecked();
+    });
+
+    it('paints the failed spans alone while the filter is on', async () => {
+      renderMap({ failedOnly: true, onFailedOnlyChange: jest.fn() });
+      await waitForChart();
+      expect(errorsSwitch()).toBeChecked();
+      expect(
+        mockChart.heatmap.data.filter((datum: { spans: number }) => datum.spans > 0)
+      ).toHaveLength(2);
+    });
+
+    it('commits a selection without the failure clause: the host filter carries it', async () => {
+      const { onSelectionCommit } = renderMap({
+        failedOnly: true,
+        onFailedOnlyChange: jest.fn(),
+      });
+      await waitForChart();
+      brush([3, 5], [5]);
+      const [selection, condition] = onSelectionCommit.mock.calls[0];
+      expect(selection.failedOnly).toBeUndefined();
+      expect(condition).not.toContain('event.outcome');
+    });
+
+    it('keeps the inferred failure filter on the selection, not on the host filter', async () => {
+      // Clearing the region must take the inference with it; a host filter turned on in
+      // passing would outlive it.
+      const onFailedOnlyChange = jest.fn();
+      const { onSelectionCommit } = renderMap({ failedOnly: false, onFailedOnlyChange });
+      await waitForChart();
+      brush([30, 31], [20]);
+      expect(onFailedOnlyChange).not.toHaveBeenCalled();
+      const [selection, condition] = onSelectionCommit.mock.calls[0];
+      expect(selection.failedOnly).toBe(true);
+      expect(condition).toContain('event.outcome == "failure"');
+    });
+
+    it('keeps the failure clause of a moved selection that carries its own', async () => {
+      // An inferred errors-only region (or one from a shared URL) under a host filter that
+      // is off: moving it must not widen it to every span.
+      const selection = {
+        ...geometry.rangeToSelection({ x0: 3, x1: 5, y0: 5, y1: 6 }),
+        failedOnly: true,
+      };
+      const { onSelectionCommit } = renderMap({
+        selection,
+        failedOnly: false,
+        onFailedOnlyChange: jest.fn(),
+      });
+      await waitForChart();
+      hover(4, 5);
+      const grip = screen.getByTestId('traceLatencyMapGrip');
+      const overlay = screen.getByTestId('traceLatencyMapOverlay');
+      fireEvent.pointerDown(grip, { ...centerOf(4, 5), button: 0, pointerId: 1 });
+      fireEvent.pointerMove(overlay, { ...centerOf(7, 6), pointerId: 1 });
+      fireEvent.pointerUp(overlay, { ...centerOf(7, 6), pointerId: 1 });
+      const [moved, condition] = onSelectionCommit.mock.calls[0];
+      expect(moved.failedOnly).toBe(true);
+      expect(condition).toContain('event.outcome == "failure"');
+    });
+
+    it('starts a new region afresh beside an errors-only selection', async () => {
+      // The old region's failure clause is its own: a region drawn elsewhere, with no
+      // failures of its own, must not inherit it and hide its successful spans.
+      const selection = {
+        ...geometry.rangeToSelection({ x0: 30, x1: 31, y0: 20, y1: 21 }),
+        failedOnly: true,
+      };
+      const { onSelectionCommit } = renderMap({
+        selection,
+        failedOnly: false,
+        onFailedOnlyChange: jest.fn(),
+      });
+      await waitForChart();
+      brush([4, 5], [5]);
+      const [drawn, condition] = onSelectionCommit.mock.calls[0];
+      expect(drawn.failedOnly).toBeUndefined();
+      expect(condition).not.toContain('event.outcome');
+      // A new region where failures concentrate is still read as about them.
+      brush([30, 31], [20]);
+      expect(onSelectionCommit.mock.calls[1][0].failedOnly).toBe(true);
+    });
+
+    it('leaves a resize that lands where it started alone, whatever the cells would be read as', async () => {
+      // A restored all-spans selection over the cell where every span failed: pressing and
+      // releasing a handle without moving must not rewrite the query about failures.
+      const selection = geometry.rangeToSelection({ x0: 30, x1: 31, y0: 20, y1: 21 });
+      const { onSelectionCommit } = renderMap({
+        selection,
+        failedOnly: false,
+        onFailedOnlyChange: jest.fn(),
+      });
+      await waitForChart();
+      hover(4, 5);
+      const handle = screen.getByTestId('traceLatencyMapHandle-r');
+      const overlay = screen.getByTestId('traceLatencyMapOverlay');
+      const at = { clientX: edgeOf(31, 20).clientX, clientY: centerOf(30, 20).clientY };
+      fireEvent.pointerDown(handle, { ...at, button: 0, pointerId: 1 });
+      fireEvent.pointerUp(overlay, { ...at, pointerId: 1 });
+      expect(onSelectionCommit).not.toHaveBeenCalled();
+    });
+
+    it('keeps the errors switch usable while the filter is on, whatever it left to show', async () => {
+      // The host's filter emptied the map: the switch is the way back to the spans.
+      renderMap({ failedOnly: true, onFailedOnlyChange: jest.fn() }, gridTable([]));
+      await screen.findByTestId('traceLatencyMapEmpty');
+      expect(errorsSwitch()).toBeEnabled();
+    });
+
+    it('counts the failed spans of a selection under the filter and says failed only', async () => {
+      const selection = geometry.rangeToSelection({ x0: 3, x1: 5, y0: 5, y1: 6 });
+      renderMap({ selection, failedOnly: true, onFailedOnlyChange: jest.fn() });
+      const summary = await screen.findByTestId('traceLatencyMapSelectionSummary');
+      expect(summary).toHaveTextContent('10 spans');
+      expect(summary).toHaveTextContent('failed only');
+    });
+
+    it('normalizes a selection that carries its own failure clause when the filter changes', async () => {
+      // A selection from before the host filter (a shared URL): its condition says failed.
+      const selection = {
+        ...geometry.rangeToSelection({ x0: 3, x1: 5, y0: 5, y1: 6 }),
+        failedOnly: true,
+      };
+      const onFailedOnlyChange = jest.fn();
+      const { onSelectionCommit } = renderMap({ selection, failedOnly: false, onFailedOnlyChange });
+      await screen.findByTestId('traceLatencyMapSelectionBar');
+      // The legacy clause shows as failed even though the host filter is off.
+      expect(errorsSwitch()).toBeChecked();
+      toggleFailedOnly();
+      expect(onFailedOnlyChange).toHaveBeenCalledWith(false);
+      const [next, condition] = onSelectionCommit.mock.calls[0];
+      expect(next.failedOnly).toBeUndefined();
+      expect(condition).not.toContain('event.outcome');
+    });
+  });
+
+  describe('with the keyboard', () => {
+    const press = (layer: HTMLElement, key: string, shiftKey = false) =>
+      fireEvent.keyDown(layer, { key, shiftKey });
+    const getLayer = async () => {
+      await waitForChart();
+      return screen.getByTestId('traceLatencyMapLayer');
+    };
+
+    it('selects a region with Shift and the arrows, and Enter, the chart drawing it as it grows', async () => {
+      const { onSelectionCommit } = renderMap();
+      const layer = await getLayer();
+      act(() => layer.focus());
+      // Focus alone shows nothing. The first key starts in the middle: column 20, row 11.
+      expect(mockChart.heatmap.highlightedData).toBeUndefined();
+      press(layer, 'ArrowRight', true);
+      press(layer, 'ArrowRight', true);
+      press(layer, 'ArrowUp', true);
+      // From the cell it started in, column 20, to the one it reached, column 22.
+      expect(mockChart.heatmap.highlightedData).toEqual(
+        rangeToHighlight({ x0: 20, x1: 23, y0: 11, y1: 13 }, timeGrid)
+      );
+      press(layer, 'Enter');
+      expect(onSelectionCommit.mock.calls[0][0]).toEqual(
+        geometry.rangeToSelection({ x0: 20, x1: 23, y0: 11, y1: 13 })
+      );
+      // Done selecting: the cursor and its readout close, instead of hiding the
+      // fresh selection behind a one-cell highlight.
+      expect(screen.queryByTestId('traceLatencyMapCellDetails')).not.toBeInTheDocument();
+    });
+
+    it('drops the cursor when focus leaves the map', async () => {
+      const selection = geometry.rangeToSelection({ x0: 3, x1: 5, y0: 5, y1: 6 });
+      renderMap({ selection });
+      const layer = await getLayer();
+      act(() => layer.focus());
+      press(layer, 'ArrowRight');
+      expect(screen.getByTestId('traceLatencyMapCellDetails')).toBeInTheDocument();
+
+      fireEvent.focusOut(layer, { relatedTarget: document.body });
+      expect(screen.queryByTestId('traceLatencyMapCellDetails')).not.toBeInTheDocument();
+      expect(mockChart.heatmap.highlightedData).toEqual(
+        rangeToHighlight({ x0: 3, x1: 5, y0: 5, y1: 6 }, timeGrid)
+      );
+    });
+
+    it('reads out the cell under the cursor', async () => {
+      renderMap({ selection: geometry.rangeToSelection({ x0: 3, x1: 5, y0: 5, y1: 6 }) });
+      const layer = await getLayer();
+      act(() => layer.focus());
+      // Starts at the selection's first cell, column 3 row 5, and moves to the quiet one beside it.
+      press(layer, 'ArrowRight');
+      expect(screen.getByTestId('traceLatencyMapCellDetails')).toHaveTextContent('20 spans');
+      expect(screen.getByTestId('traceLatencyMapAnnouncement')).toHaveTextContent(/20 spans/);
+    });
+
+    it('reads out under the legend, which stays where it is', async () => {
+      renderMap({ selection: geometry.rangeToSelection({ x0: 3, x1: 5, y0: 5, y1: 6 }) });
+      const layer = await getLayer();
+      act(() => layer.focus());
+      press(layer, 'ArrowRight');
+      const legend = screen.getByTestId('traceLatencyMapLegend');
+      const details = screen.getByTestId('traceLatencyMapCellDetails');
+      // The readout is the legend's following sibling, so its coming and going moves
+      // nothing above it.
+      expect(legend.compareDocumentPosition(details)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    });
+
+    it('reads out the whole region while Shift extends it: what Enter would commit', async () => {
+      renderMap({ selection: geometry.rangeToSelection({ x0: 3, x1: 5, y0: 5, y1: 6 }) });
+      const layer = await getLayer();
+      act(() => layer.focus());
+      // From the selection's first cell, Shift+Right covers both busy cells.
+      press(layer, 'ArrowRight', true);
+      expect(screen.getByTestId('traceLatencyMapCellDetails')).toHaveTextContent('60 spans');
+      expect(screen.getByTestId('traceLatencyMapCellDetails')).toHaveTextContent('10 failed');
+    });
+
+    it("reads out a new region with the outcome Enter would commit, not the old selection's", async () => {
+      // An errors-only selection under a host filter that is off: a region extended from
+      // it is a new one, about every span, and so is its readout.
+      const { onSelectionCommit } = renderMap({
+        selection: {
+          ...geometry.rangeToSelection({ x0: 3, x1: 4, y0: 5, y1: 6 }),
+          failedOnly: true,
+        },
+        failedOnly: false,
+        onFailedOnlyChange: jest.fn(),
+      });
+      const layer = await getLayer();
+      act(() => layer.focus());
+      // From the selection's cell, Shift+Right takes in the quiet cell beside it too.
+      press(layer, 'ArrowRight', true);
+      expect(screen.getByTestId('traceLatencyMapCellDetails')).toHaveTextContent('60 spans');
+      press(layer, 'Enter');
+      const [committed, condition] = onSelectionCommit.mock.calls[0];
+      expect(committed.failedOnly).toBeUndefined();
+      expect(condition).not.toContain('event.outcome');
+    });
+
+    it('commits the same cells about every span when the selection was about failures', async () => {
+      // A one-cell errors-only selection, host filter off: extended and brought back, the
+      // draft covers the same cell, but about every span - which Enter must commit.
+      const { onSelectionCommit } = renderMap({
+        selection: {
+          ...geometry.rangeToSelection({ x0: 3, x1: 4, y0: 5, y1: 6 }),
+          failedOnly: true,
+        },
+        failedOnly: false,
+        onFailedOnlyChange: jest.fn(),
+      });
+      const layer = await getLayer();
+      act(() => layer.focus());
+      press(layer, 'ArrowRight', true);
+      press(layer, 'ArrowLeft', true);
+      expect(screen.getByTestId('traceLatencyMapCellDetails')).toHaveTextContent('40 spans');
+      expect(screen.getByTestId('traceLatencyMapCellDetails')).not.toHaveTextContent('failed only');
+      press(layer, 'Enter');
+      expect(onSelectionCommit.mock.calls[0][0]).toEqual(
+        geometry.rangeToSelection({ x0: 3, x1: 4, y0: 5, y1: 6 })
+      );
+    });
+
+    it('says when a region is read as failed only, in the readout and its announcement', async () => {
+      // The far cell is all failures: a region over it is inferred to be about them.
+      renderMap();
+      const layer = await getLayer();
+      act(() => layer.focus());
+      // The cursor starts mid-map; walk it to column 30, row 20, then anchor a region there.
+      for (let i = 0; i < 10; i += 1) press(layer, 'ArrowRight');
+      for (let i = 0; i < 9; i += 1) press(layer, 'ArrowUp');
+      press(layer, 'ArrowRight', true);
+      const details = screen.getByTestId('traceLatencyMapCellDetails');
+      expect(details).toHaveTextContent('3 spans');
+      expect(details).toHaveTextContent('failed only');
+      expect(screen.getByTestId('traceLatencyMapAnnouncement')).toHaveTextContent(/failed only/);
+    });
+
+    it('opens the cell under the cursor with Enter, as the pointer click does', async () => {
+      const onCellClick = jest.fn();
+      renderMap({
+        selection: geometry.rangeToSelection({ x0: 3, x1: 5, y0: 5, y1: 6 }),
+        onCellClick,
+      });
+      const layer = await getLayer();
+      act(() => layer.focus());
+      press(layer, 'ArrowRight');
+      press(layer, 'Enter');
+      expect(onCellClick).toHaveBeenCalledWith(expect.objectContaining({ spans: 20, failed: 0 }));
+      // A cell with nothing in it opens nothing, as with the pointer.
+      onCellClick.mockClear();
+      press(layer, 'ArrowRight');
+      press(layer, 'Enter');
+      expect(onCellClick).not.toHaveBeenCalled();
+    });
+
+    it('does not hide the selection when the map is clicked into focus', async () => {
+      const selection = geometry.rangeToSelection({ x0: 3, x1: 5, y0: 5, y1: 6 });
+      renderMap({ selection });
+      const layer = await getLayer();
+      act(() => layer.focus());
+      expect(mockChart.heatmap.highlightedData).toEqual(
+        rangeToHighlight({ x0: 3, x1: 5, y0: 5, y1: 6 }, timeGrid)
+      );
+    });
+
+    it('goes back to the selection when the pointer takes over', async () => {
+      const selection = geometry.rangeToSelection({ x0: 3, x1: 5, y0: 5, y1: 6 });
+      renderMap({ selection });
+      const layer = await getLayer();
+      act(() => layer.focus());
+      press(layer, 'ArrowRight');
+      fireEvent.pointerDown(layer, { pointerId: 1 });
+      expect(screen.queryByTestId('traceLatencyMapCellDetails')).not.toBeInTheDocument();
+      expect(mockChart.heatmap.highlightedData).toEqual(
+        rangeToHighlight({ x0: 3, x1: 5, y0: 5, y1: 6 }, timeGrid)
+      );
+    });
+
+    it('drops the cursor when the map gets other columns, so that it cannot point past the new edge', async () => {
+      const view = renderMap();
+      const layer = await getLayer();
+      act(() => layer.focus());
+      press(layer, 'ArrowRight');
+      expect(screen.getByTestId('traceLatencyMapCellDetails')).toBeInTheDocument();
+
+      // A longer range: other columns.
+      view.rerender(
+        <LatencyMap
+          source={{ timeRange: { from: source.timeRange.from, to: '2026-10-26T14:00:00.000Z' } }}
+          runEsql={view.runEsql}
+          onSelectionCommit={view.onSelectionCommit}
+          timeZone="UTC"
+        />
+      );
+      await waitFor(() =>
+        expect(screen.queryByTestId('traceLatencyMapCellDetails')).not.toBeInTheDocument()
+      );
+      // Enter then has no cursor to commit.
+      press(await getLayer(), 'Enter');
+      expect(view.onSelectionCommit).not.toHaveBeenCalled();
+    });
+
+    it('reads out nothing of a region once the same range has no spans left to count', async () => {
+      // The same range keeps its columns, so the region being extended is not reset as it is
+      // for a new grid - and an empty range has a geometry but no cells to count.
+      const idle = 'service.name == "idle"';
+      const runEsql = jest.fn(async (query: string) => {
+        if (query.includes(idle)) return { ...statsTable, values: [[0, 0, 0, 0, 0, 0]] };
+        return query.includes('PERCENTILE') ? statsTable : gridTable(CELLS);
+      });
+      const { rerenderMap } = renderMap({ runEsql });
+      const layer = await getLayer();
+      act(() => layer.focus());
+      press(layer, 'ArrowRight', true);
+      expect(screen.getByTestId('traceLatencyMapCellDetails')).toBeInTheDocument();
+
+      rerenderMap({ source: { ...source, filters: [idle] } });
+      expect(await screen.findByTestId('traceLatencyMapEmpty')).toBeInTheDocument();
+      expect(screen.queryByTestId('traceLatencyMapCellDetails')).not.toBeInTheDocument();
+    });
+
+    it('clears the selection on Escape, only when there is one', async () => {
+      const first = renderMap();
+      let layer = await getLayer();
+      act(() => layer.focus());
+      press(layer, 'Escape');
+      expect(first.onSelectionCommit).not.toHaveBeenCalled();
+      first.unmount();
+
+      const second = renderMap({
+        selection: geometry.rangeToSelection({ x0: 3, x1: 5, y0: 5, y1: 6 }),
+      });
+      layer = await getLayer();
+      act(() => layer.focus());
+      press(layer, 'Escape');
+      expect(second.onSelectionCommit).toHaveBeenCalledWith(undefined, undefined);
+    });
+
+    it('does nothing on Enter with a cursor and no region, so the selection stays', async () => {
+      const { onSelectionCommit } = renderMap({
+        selection: geometry.rangeToSelection({ x0: 3, x1: 5, y0: 5, y1: 6 }),
+      });
+      const layer = await getLayer();
+      act(() => layer.focus());
+      press(layer, 'ArrowRight');
+      press(layer, 'Enter');
+      expect(onSelectionCommit).not.toHaveBeenCalled();
+    });
+
+    it('ignores Enter before the cursor is shown', async () => {
+      const { onSelectionCommit } = renderMap();
+      const layer = await getLayer();
+      act(() => layer.focus());
+      press(layer, 'Enter');
+      expect(onSelectionCommit).not.toHaveBeenCalled();
+    });
+  });
+
+  it('notes a sampled map and marks its counts as estimates', async () => {
+    const big = { ...statsTable, values: [[100, 5000, 8000, 10_000, 2_000_000, 2_000_000]] };
+    const runEsql = jest.fn(async (query: string) =>
+      query.includes('PERCENTILE') ? big : gridTable([[3, 5, 40, 10]])
+    );
+    renderMap({ runEsql });
+    expect(await screen.findByTestId('traceLatencyMapSamplingNote')).toBeInTheDocument();
+    await waitForChart();
+    const Tooltip = mockChart.tooltip.customTooltip;
+    render(<Tooltip values={[{}, {}, { datum: { x: timeAt(3), y: 5, spans: 40, failed: 10 } }]} />);
+    expect(screen.getByTestId('traceLatencyMapCellDetails')).toHaveTextContent(/~\d+ spans/);
+  });
+});

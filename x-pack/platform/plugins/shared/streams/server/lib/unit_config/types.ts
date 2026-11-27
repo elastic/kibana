@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { StreamsUnit } from '@kbn/streams-schema';
+import type {
+  ComponentCatalogue,
+  ComponentValidationRequest,
+  ComponentValidationResult,
+  StreamsUnit,
+} from '@kbn/streams-schema';
 
 /**
  * One credential as the config-distributor `credentials[]` sidecar expects: the name a
@@ -92,7 +97,42 @@ export interface UnitConfigHooks {
    * `credentials[]` sidecar. Kibana at-rest protection is Encrypted Saved Objects on `secrets`.
    */
   prepareCredentials?: PrepareUnitCredentials;
+  /** Checks a new or changed remote Elasticsearch destination before the unit is stored. */
+  probeRemoteDestination?: ProbeRemoteDestination;
 }
+
+export type RemoteProbeUnverifiedReason = 'unexpected_status' | 'timeout' | 'unreachable';
+
+export type RemoteProbeResult =
+  | { outcome: 'ok' }
+  | { outcome: 'rejected'; message: string; status?: number }
+  | { outcome: 'unverified'; reason: RemoteProbeUnverifiedReason; status?: number };
+
+export interface RemoteDestinationUnverified {
+  destination_id: string;
+  host: string;
+  reason: RemoteProbeUnverifiedReason;
+  status?: number;
+}
+
+export type ProbeRemoteDestination = (params: {
+  endpoint: string;
+  apiKey: string | undefined;
+}) => Promise<RemoteProbeResult>;
+
+export type ComponentCatalogueFetchResult =
+  | { notModified: true }
+  | { notModified: false; catalogue: ComponentCatalogue; etag?: string };
+
+export type FetchComponentCatalogue = (params: {
+  /** ETag of the catalogue the caller holds, sent as `If-None-Match`. */
+  etag?: string;
+  signal?: AbortSignal;
+}) => Promise<ComponentCatalogueFetchResult>;
+
+export type ValidateComponent = (
+  params: ComponentValidationRequest & { signal?: AbortSignal }
+) => Promise<ComponentValidationResult>;
 
 export type RepublishUnitOutcome =
   | 'republished'

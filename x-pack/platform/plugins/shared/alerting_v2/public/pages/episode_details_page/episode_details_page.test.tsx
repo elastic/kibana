@@ -207,12 +207,12 @@ const fetchRuleResult = {
 
 const episodeId = 'ep-1';
 
-const renderPage = () =>
+const renderPage = (props: React.ComponentProps<typeof EpisodeDetailsPage> = {}) =>
   render(
     <MockChromeContextProvider>
       <TestProviders locators={mockLocators}>
         <MemoryRouter>
-          <EpisodeDetailsPage />
+          <EpisodeDetailsPage {...props} />
         </MemoryRouter>
       </TestProviders>
     </MockChromeContextProvider>
@@ -268,6 +268,7 @@ beforeEach(() => {
       order: 10,
       displayName: 'Acknowledge',
       iconType: 'checkCircle',
+      enforcesOwnPrivileges: false,
       isCompatible: () => true,
       execute: jest.fn(async () => {}),
     },
@@ -276,6 +277,7 @@ beforeEach(() => {
       order: 40,
       displayName: 'Edit tags',
       iconType: 'tag',
+      enforcesOwnPrivileges: false,
       isCompatible: () => true,
       execute: jest.fn(async () => {}),
     },
@@ -492,6 +494,46 @@ describe('EpisodeDetailsPage', () => {
     ).toBeInTheDocument();
   });
 
+  it('hosts dynamic solution actions before the platform actions and keeps overflow actions in the menu', async () => {
+    const startInvestigation = jest.fn();
+    const useHeaderMenuItems = jest.fn(() => [
+      {
+        id: 'investigate',
+        label: 'Investigate',
+        iconType: 'inspect',
+        order: -1,
+        overflow: false,
+        run: startInvestigation,
+        testId: 'hostInvestigate',
+      },
+      {
+        id: 'reinvestigate',
+        label: 'Re-investigate',
+        iconType: 'inspect',
+        overflow: true,
+        run: jest.fn(),
+        testId: 'hostReinvestigate',
+      },
+    ]);
+    renderPage({ useAdditionalEpisodeDetailsHeaderMenuItems: useHeaderMenuItems });
+
+    expect(useHeaderMenuItems).toHaveBeenCalledWith(
+      expect.objectContaining({ 'episode.id': episodeId })
+    );
+    expect(screen.queryByTestId('hostReinvestigate')).not.toBeInTheDocument();
+    await openAppMenuOverflow();
+    const investigate = await screen.findByTestId('hostInvestigate');
+    expect(
+      investigate.compareDocumentPosition(
+        screen.getByTestId('episodeActionsBar-primary-ALERTING_V2_ACK_EPISODE')
+      )
+    ).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    await userEvent.click(investigate);
+    expect(startInvestigation).toHaveBeenCalledTimes(1);
+    await openAppMenuOverflow();
+    expect(screen.getByTestId('hostReinvestigate')).toBeInTheDocument();
+  });
+
   it('holds back the app header menu actions until the action state loads', async () => {
     mockUseFetchEpisodeActions.mockReturnValue({
       data: undefined,
@@ -530,6 +572,7 @@ describe('EpisodeDetailsPage', () => {
         order: 10,
         displayName: 'Acknowledge',
         iconType: 'checkCircle',
+        enforcesOwnPrivileges: false,
         isCompatible: () => true,
         execute,
       },
@@ -555,6 +598,7 @@ describe('EpisodeDetailsPage', () => {
       order: 10,
       displayName: 'Acknowledge',
       iconType: 'checkCircle',
+      enforcesOwnPrivileges: false,
       isCompatible: () => true,
       execute: jest.fn(async () => {}),
     };
@@ -576,6 +620,9 @@ describe('EpisodeDetailsPage', () => {
 
       await openAppMenuOverflow();
 
+      expect(mockCreateEpisodeActions).toHaveBeenCalledWith(
+        expect.objectContaining({ canWriteNativeEpisodes: true })
+      );
       expect(
         await screen.findByTestId('episodeActionsBar-primary-ALERTING_V2_ACK_EPISODE')
       ).toBeInTheDocument();
@@ -584,9 +631,9 @@ describe('EpisodeDetailsPage', () => {
       ).toBeInTheDocument();
     });
 
-    it('hides mutating actions and keeps Open in Discover when the user only has read privilege', async () => {
+    it('builds the actions without write privilege when the user only has read privilege', async () => {
       mockCapabilities = READ_ONLY_CAPABILITIES;
-      mockCreateEpisodeActions.mockReturnValue([ackAction, discoverAction]);
+      mockCreateEpisodeActions.mockReturnValue([discoverAction]);
 
       renderPage();
 
@@ -595,9 +642,9 @@ describe('EpisodeDetailsPage', () => {
           `episodeActionsBar-primaryAction-${OPEN_IN_DISCOVER_EPISODE_ACTION_ID}`
         )
       ).toBeInTheDocument();
-      expect(
-        screen.queryByTestId('episodeActionsBar-primary-ALERTING_V2_ACK_EPISODE')
-      ).not.toBeInTheDocument();
+      expect(mockCreateEpisodeActions).toHaveBeenCalledWith(
+        expect.objectContaining({ canWriteNativeEpisodes: false })
+      );
     });
   });
 

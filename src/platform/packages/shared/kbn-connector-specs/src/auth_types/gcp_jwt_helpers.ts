@@ -135,13 +135,16 @@ export function parseServiceAccountKey(json: string): GcpServiceAccountKey {
   return parsed as unknown as GcpServiceAccountKey;
 }
 
-async function exchangeJwtForToken(jwt: string): Promise<Record<string, unknown>> {
+async function exchangeJwtForToken(
+  jwt: string,
+  fetchImpl: typeof fetch
+): Promise<Record<string, unknown>> {
   const body = new URLSearchParams({
     grant_type: JWT_GRANT_TYPE,
     assertion: jwt,
   });
 
-  const response = await fetch(GCP_TOKEN_URL, {
+  const response = await fetchImpl(GCP_TOKEN_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: body.toString(),
@@ -168,11 +171,12 @@ async function exchangeJwtForToken(jwt: string): Promise<Record<string, unknown>
 export async function getGcpAccessToken(
   clientEmail: string,
   privateKey: string,
-  scope: string
+  scope: string,
+  fetchImpl: typeof fetch = fetch
 ): Promise<GcpAccessToken> {
   const claims = buildJwtClaims(clientEmail, { scope });
   const jwt = await signJwt(privateKey, claims);
-  const data = await exchangeJwtForToken(jwt);
+  const data = await exchangeJwtForToken(jwt, fetchImpl);
 
   const accessToken = data.access_token;
   if (typeof accessToken !== 'string') {
@@ -204,11 +208,12 @@ export async function getGcpAccessToken(
 export async function getGcpIdToken(
   clientEmail: string,
   privateKey: string,
-  targetAudience: string
+  targetAudience: string,
+  fetchImpl: typeof fetch = fetch
 ): Promise<string> {
   const claims = buildJwtClaims(clientEmail, { targetAudience });
   const jwt = await signJwt(privateKey, claims);
-  const data = await exchangeJwtForToken(jwt);
+  const data = await exchangeJwtForToken(jwt, fetchImpl);
 
   const idToken = data.id_token as string | undefined;
   if (!idToken) {

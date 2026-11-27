@@ -88,9 +88,9 @@ async function createServer(protocol, port, auth) {
   if (auth) {
     authLabel = `${Auth}@`;
     // @ts-ignore
-    proxyServer.authenticate = (req, callback) => {
+    proxyServer.authenticate = (req) => {
       const auth = req.headers['proxy-authorization'];
-      callback(null, auth === `Basic ${AuthB64}`);
+      return auth === `Basic ${AuthB64}`;
     };
   }
 

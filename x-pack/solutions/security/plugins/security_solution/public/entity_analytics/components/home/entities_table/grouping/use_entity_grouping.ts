@@ -28,6 +28,7 @@ import {
   ENTITY_FIELDS,
   ENTITY_GROUPING_OPTIONS,
   ENTITY_TYPE_FILTER,
+  MAX_GROUPING_LEVELS,
 } from '../constants';
 import { hasActiveTopLevelBoolClauses } from '../utils';
 import {
@@ -38,10 +39,12 @@ import {
   useFetchGroupedData,
   useFetchUnfilteredResolutionGroupData,
 } from './use_fetch_grouped_data';
-import { createGroupPanelRenderer, createGroupStatsRenderer } from './entity_group_renderer';
+import {
+  createGroupPanelRenderer,
+  createGroupStatsRenderer,
+  createGroupToggleAriaLabelGetter,
+} from './entity_group_renderer';
 import { useHasEntityResolutionLicense } from '../../../../../common/hooks/use_has_entity_resolution_license';
-
-const MAX_GROUPING_LEVELS = 3;
 
 const EMPTY_TARGET_METADATA: TargetMetadataMap = new Map();
 
@@ -338,6 +341,11 @@ export const useEntityGrouping = ({
     [targetMetadata, tableId]
   );
 
+  const getGroupToggleAriaLabel = useMemo(
+    () => createGroupToggleAriaLabelGetter(targetMetadata),
+    [targetMetadata]
+  );
+
   const groupStatsRenderer = useMemo(
     () => createGroupStatsRenderer(targetMetadata),
     [targetMetadata]
@@ -348,6 +356,7 @@ export const useEntityGrouping = ({
       unit: entitiesUnit,
       groupPanelRenderer,
       getGroupStats: groupStatsRenderer,
+      getGroupToggleAriaLabel,
       groupsUnit: entitiesGroupsUnit,
     },
     defaultGroupingOptions,

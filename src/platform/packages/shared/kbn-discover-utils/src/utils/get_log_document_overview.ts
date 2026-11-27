@@ -9,8 +9,9 @@
 
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { DataTableRecord, LogDocumentOverview } from '../..';
-import { fieldConstants, formatFieldValueText } from '../..';
+import type { DataTableRecord, LogDocumentOverview } from '../types';
+import * as fieldConstants from '../field_constants';
+import { formatFieldValueText } from './format_value';
 import { getFieldValueWithFallback } from './get_field_value_with_fallback';
 
 export function getLogDocumentOverview(

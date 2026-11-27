@@ -16,7 +16,6 @@ import { AiIndexCard } from './ai_index_card';
 const buildAiIndex = (overrides: Partial<AiIndexHttpItem> = {}): AiIndexHttpItem => ({
   id: 'my-ai-index',
   managed: false,
-  memory_enabled: false,
   dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
   automations: [],
   sources: [],

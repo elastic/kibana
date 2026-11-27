@@ -20,6 +20,7 @@ import { deleteAlertsAndRules, postDataView } from '../../../../../../tasks/api_
 import { login } from '../../../../../../tasks/login';
 import {
   clickDisableRuleSwitch,
+  expectRuleEnabledOnDetailsPage,
   visitRuleDetailsPage,
   openEditException,
   goToExceptionsTab,
@@ -28,7 +29,6 @@ import {
 import { createRule } from '../../../../../../tasks/api_calls/rules';
 import { getNewRule } from '../../../../../../objects/rule';
 import { getExceptionList } from '../../../../../../objects/exception';
-import { RULE_SWITCH } from '../../../../../../screens/rule_details';
 import { ALERTS_COUNT, ALERT_EMBEDDABLE_EMPTY_PROMPT } from '../../../../../../screens/alerts';
 import {
   addExceptionEntryFieldValue,
@@ -72,7 +72,7 @@ describe('Close matching Alerts ', { tags: ['@ess', '@serverless'] }, () => {
     waitForAlertsToPopulate();
     // Disables enabled rule
     clickDisableRuleSwitch();
-    cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'false');
+    expectRuleEnabledOnDetailsPage(false);
   });
   after(() => {
     cy.task('esArchiverUnload', { archiveName: 'exceptions' });

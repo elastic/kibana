@@ -7,5 +7,11 @@
 
 // copied from x-pack/plugins/fleet/public/applications/fleet/layouts/index.tsx
 
-export { containerCss, fullWidthContentCss, fullWidthFormContentCss, wrapperCss } from './default';
+export {
+  containerCss,
+  fullWidthContentCss,
+  fullWidthFormContentCss,
+  resultsContentCss,
+  wrapperCss,
+} from './default';
 export { WithoutHeaderLayout } from './without_header';

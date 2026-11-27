@@ -70,14 +70,18 @@ const pipelineUuid = () =>
 const page = () =>
   z.number().int().min(1).optional().describe('Page number for pagination (min 1, default 1).');
 
-const pageSize = () =>
+const MAX_PAGELEN = 100;
+// The pullrequests collection rejects pagelen above 50 with "Invalid pagelen": https://jira.atlassian.com/browse/BCLOUD-21394
+const MAX_PULL_REQUESTS_PAGELEN = 50;
+
+const pageSize = (max: number = MAX_PAGELEN) =>
   z
     .number()
     .int()
     .min(1)
-    .max(100)
+    .max(max)
     .optional()
-    .describe('Results per page (min 1, max 100, default 10).');
+    .describe(`Results per page (min 1, max ${max}, default 10).`);
 
 const sort = () =>
   z
@@ -184,7 +188,7 @@ export const ListPullRequestsInputSchema = lazySchema(() =>
       ),
     sort: sort(),
     page: page(),
-    pageSize: pageSize(),
+    pageSize: pageSize(MAX_PULL_REQUESTS_PAGELEN),
   })
 );
 export type ListPullRequestsInput = z.infer<typeof ListPullRequestsInputSchema>;

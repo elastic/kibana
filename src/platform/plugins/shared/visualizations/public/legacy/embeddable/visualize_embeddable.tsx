@@ -37,12 +37,12 @@ import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
 import { isChartSizeEvent } from '@kbn/chart-expressions-common';
 import type { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { css } from '@emotion/react';
+import { VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
 import {
-  VISUALIZE_EMBEDDABLE_TYPE,
   VisualizationError,
   visContainerStyle,
   visualizeClassName,
-} from '@kbn/visualizations-common';
+} from '@kbn/visualizations-components';
 import { isFallbackDataView } from '../../visualize_app/utils';
 import { VisualizationMissedSavedObjectError } from '../../components/visualization_missed_saved_object_error';
 import type { SerializedVis, Vis } from '../../vis';

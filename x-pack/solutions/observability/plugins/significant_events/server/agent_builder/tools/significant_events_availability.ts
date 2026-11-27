@@ -7,27 +7,44 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { ToolAvailabilityConfig, ToolAvailabilityResult } from '@kbn/agent-builder-server';
+import {
+  isNightshiftSupportedSpace,
+  NIGHTSHIFT_UNSUPPORTED_SPACE_MESSAGE,
+} from '@kbn/nightshift-shared';
 import type { SignificantEventsServer } from '../../types';
 import { assertSignificantEventsAccess } from '../../routes/utils/assert_significant_events_access';
-import { assertCanManageSignificantEvents } from '../../routes/utils/assert_can_manage_significant_events';
+import {
+  assertCanChangeSources,
+  assertCanManageSignificantEvents,
+} from '../../routes/utils/assert_can_manage_significant_events';
 
 /**
  * Hides a tool while significant events are not accessible. With `requireManagePrivilege`, it is
  * also hidden from users without the Nightshift manage privilege, so they are never asked to
- * confirm a change that would fail.
+ * confirm a change that would fail. `requireSourceChangePrivilege` does the same for the manage and
+ * configure pair that gates changing sources.
+ *
+ * Outside the space Nightshift runs in, every tool and skill using this is hidden: agent-builder
+ * tools do not go through the route factory, so this is the only place that keeps a chat agent in
+ * another space from reading or writing Nightshift state there.
  */
 export const createSignificantEventsAvailability = ({
   server,
   logger,
   requireManagePrivilege = false,
+  requireSourceChangePrivilege = false,
 }: {
   server: SignificantEventsServer;
   logger: Logger;
   requireManagePrivilege?: boolean;
+  requireSourceChangePrivilege?: boolean;
 }): ToolAvailabilityConfig => ({
   // The privilege check depends on the user, so its result cannot be cached per space.
-  cacheMode: requireManagePrivilege ? 'none' : 'space',
-  handler: async ({ request }): Promise<ToolAvailabilityResult> => {
+  cacheMode: requireManagePrivilege || requireSourceChangePrivilege ? 'none' : 'space',
+  handler: async ({ request, spaceId }): Promise<ToolAvailabilityResult> => {
+    if (!isNightshiftSupportedSpace(spaceId)) {
+      return { status: 'unavailable', reason: NIGHTSHIFT_UNSUPPORTED_SPACE_MESSAGE };
+    }
     try {
       await assertSignificantEventsAccess({
         server,
@@ -35,6 +52,9 @@ export const createSignificantEventsAvailability = ({
       });
       if (requireManagePrivilege) {
         await assertCanManageSignificantEvents({ request, server });
+      }
+      if (requireSourceChangePrivilege) {
+        await assertCanChangeSources({ request, server });
       }
       return { status: 'available' };
     } catch (error) {

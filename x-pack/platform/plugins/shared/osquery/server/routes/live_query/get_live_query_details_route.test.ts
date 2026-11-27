@@ -64,7 +64,7 @@ describe('getLiveQueryDetailsRoute', () => {
     jest.clearAllMocks();
   });
 
-  it('returns action details with completed status', async () => {
+  it('returns action details with completed status and the workflow origin', async () => {
     const mockSearchFn = jest.fn().mockReturnValue(
       of({
         actionDetails: {
@@ -72,6 +72,7 @@ describe('getLiveQueryDetailsRoute', () => {
             action_id: 'action-1',
             user_id: 'test-user',
             user_profile_uid: 'u_test-profile-uid',
+            origin: { type: 'workflow', run_id: 'run-1', verified: false },
             queries: [
               {
                 action_id: 'query-1',
@@ -132,6 +133,7 @@ describe('getLiveQueryDetailsRoute', () => {
           action_id: 'action-1',
           user_id: 'test-user',
           user_profile_uid: 'u_test-profile-uid',
+          origin: { type: 'workflow', run_id: 'run-1', verified: false },
           status: 'completed',
           queries: [
             expect.objectContaining({

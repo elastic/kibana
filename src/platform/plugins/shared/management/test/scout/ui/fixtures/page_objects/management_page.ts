@@ -31,13 +31,11 @@ export class ManagementPage {
 
   // Serverless projects replace the sidebar landing with a cards landing page.
   async gotoCardsLanding(): Promise<void> {
-    await this.page.gotoApp('management');
-    await this.cardsNavigationPage.waitFor({ state: 'visible' });
+    await this.page.gotoApp('management', { readyWhen: this.cardsNavigationPage });
   }
 
   async goto(): Promise<void> {
-    await this.page.gotoApp('management');
-    await this.sidebar.waitFor({ state: 'visible' });
+    await this.page.gotoApp('management', { readyWhen: this.sidebar });
   }
 
   /**
@@ -45,8 +43,7 @@ export class ManagementPage {
    * tests that expect the app to be inaccessible (no management privileges).
    */
   async gotoExpectAppNotFound(): Promise<void> {
-    await this.page.gotoApp('management');
-    await this.appNotFoundContent.waitFor({ state: 'visible' });
+    await this.page.gotoApp('management', { readyWhen: this.appNotFoundContent });
   }
 
   /**

@@ -276,7 +276,8 @@ export class InvestigationAttachmentDocService<TStored extends StoredInvestigati
       const response = await this.search({
         track_total_hits: false,
         size: MAX_INVESTIGATION_ATTACHMENT_CONVERSATION_IDS,
-        _source: false,
+        // The storage adapter rejects hits without a source.
+        _source: ['spaceId'],
         query: { bool: { filter } },
       });
       const ids = response.hits.hits.flatMap((hit) => (hit._id !== undefined ? [hit._id] : []));

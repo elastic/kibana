@@ -20,7 +20,7 @@ export class PolicyDetailsPage {
     this.pageContainer = this.page.testSubj.locator('policyDetailsPage');
     this.loading = this.page.testSubj.locator('policyDetailsLoading');
     this.settingsTab = this.page.testSubj.locator('policySettingsTab');
-    this.backToOrigin = this.page.testSubj.locator('backToOrigin');
+    this.backToOrigin = this.page.testSubj.locator('appHeaderBack');
   }
 
   artifactTab(tabTestSubj: string): Locator {

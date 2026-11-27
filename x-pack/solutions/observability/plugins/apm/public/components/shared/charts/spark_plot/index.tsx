@@ -17,19 +17,27 @@ import {
   Tooltip,
 } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useChartThemes } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { unit } from '@kbn/apm-common';
 import type { Coordinate } from '../../../../../typings/timeseries';
 import { getComparisonChartTheme } from '../../time_comparison/get_comparison_chart_theme';
-import { APM_DOTTED_LINE_STYLE, splitSeriesAtNullGaps } from '../utils/timeseries_gap_handling';
+import {
+  APM_DOTTED_LINE_STYLE,
+  splitSeriesAtNullGaps,
+  trimPartialTrailingBucket,
+} from '../utils/timeseries_gap_handling';
 
 function hasValidTimeseries(series?: Coordinate[] | null): series is Coordinate[] {
   return !!series?.some((point) => point.y !== null);
 }
 
 const flexGroupStyle = { overflow: 'hidden' };
+
+// Stable default so the trimming memo in SparkPlotItem is not invalidated by a
+// fresh array on every render.
+const EMPTY_COMPARISON_SERIES: Coordinate[] = [];
 
 type SparkPlotType = 'line' | 'bar';
 
@@ -38,10 +46,11 @@ export function SparkPlot({
   color,
   isLoading,
   series,
-  comparisonSeries = [],
+  comparisonSeries = EMPTY_COMPARISON_SERIES,
   valueLabel,
   compact,
   comparisonSeriesColor,
+  end,
 }: {
   type?: SparkPlotType;
   color: string;
@@ -51,6 +60,9 @@ export function SparkPlot({
   compact?: boolean;
   comparisonSeries?: Coordinate[];
   comparisonSeriesColor?: string;
+  // Range end (epoch ms). When set, the partial trailing bucket is trimmed; when
+  // undefined nothing is trimmed, so callers that do not pass it are unaffected.
+  end?: number;
 }) {
   return (
     <EuiFlexGroup
@@ -70,6 +82,7 @@ export function SparkPlot({
           comparisonSeries={comparisonSeries}
           comparisonSeriesColor={comparisonSeriesColor}
           compact={compact}
+          end={end}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -84,6 +97,7 @@ export function SparkPlotItem({
   comparisonSeries,
   comparisonSeriesColor,
   compact,
+  end,
 }: {
   type?: SparkPlotType;
   color: string;
@@ -92,11 +106,34 @@ export function SparkPlotItem({
   compact?: boolean;
   comparisonSeries?: Coordinate[];
   comparisonSeriesColor?: string;
+  end?: number;
 }) {
   const { euiTheme } = useEuiTheme();
   const defaultChartThemes = useChartThemes();
   const comparisonChartTheme = getComparisonChartTheme();
-  const hasComparisonSeries = !!comparisonSeries?.length;
+
+  // Trim the partial trailing bucket from each series using the same range end
+  // (comparison x values are pre-shifted onto the current period), falling back
+  // to the untrimmed series so a service with a single recent bucket still
+  // renders.
+  const { trimmedSeries, trimmedComparisonSeries } = useMemo(() => {
+    const trimOne = (input?: Coordinate[] | null) => {
+      if (end === undefined || !input) {
+        return input;
+      }
+      const trimmed = trimPartialTrailingBucket(input, end);
+      if (trimmed.length === input.length || !hasValidTimeseries(trimmed)) {
+        return input;
+      }
+      return trimmed;
+    };
+    return {
+      trimmedSeries: trimOne(series),
+      trimmedComparisonSeries: trimOne(comparisonSeries),
+    };
+  }, [series, comparisonSeries, end]);
+
+  const hasComparisonSeries = !!trimmedComparisonSeries?.length;
 
   const sparkplotChartTheme: PartialTheme = {
     chartMargins: { left: 0, right: 0, top: 0, bottom: 0 },
@@ -129,11 +166,13 @@ export function SparkPlotItem({
     );
   }
 
-  if (hasValidTimeseries(series)) {
+  if (hasValidTimeseries(trimmedSeries)) {
     const { mainSegments, leadingEdge, trailingEdge, interiorEdges } =
-      splitSeriesAtNullGaps(series);
+      splitSeriesAtNullGaps(trimmedSeries);
 
-    const comparisonSplit = hasComparisonSeries ? splitSeriesAtNullGaps(comparisonSeries) : null;
+    const comparisonSplit = trimmedComparisonSeries?.length
+      ? splitSeriesAtNullGaps(trimmedComparisonSeries)
+      : null;
 
     return (
       <Chart size={chartSize}>
@@ -152,7 +191,7 @@ export function SparkPlotItem({
               yScaleType={ScaleType.Linear}
               xAccessor="x"
               yAccessors={['y']}
-              data={series}
+              data={trimmedSeries}
               color={color}
             />
             {hasComparisonSeries && (
@@ -162,7 +201,7 @@ export function SparkPlotItem({
                 yScaleType={ScaleType.Linear}
                 xAccessor={'x'}
                 yAccessors={['y']}
-                data={comparisonSeries}
+                data={trimmedComparisonSeries}
                 color={comparisonSeriesColor}
               />
             )}

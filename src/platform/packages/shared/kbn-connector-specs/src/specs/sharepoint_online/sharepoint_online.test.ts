@@ -233,7 +233,7 @@ describe('SharepointOnline', () => {
       )) as SharePointListResponse<SharePointSite>;
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://graph.microsoft.com/v1.0/sites/getAllSites/',
+        'https://graph.microsoft.com/v1.0/sites/getAllSites',
         {
           params: {
             $select: 'id,displayName,webUrl,siteCollection',
@@ -259,7 +259,7 @@ describe('SharepointOnline', () => {
       await SharepointOnline.actions.getAllSites.handler(certContext, {});
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://graph.microsoft.com/v1.0/sites/getAllSites/',
+        'https://graph.microsoft.com/v1.0/sites/getAllSites',
         {
           params: {
             $select: 'id,displayName,webUrl,siteCollection',
@@ -347,7 +347,7 @@ describe('SharepointOnline', () => {
       )) as SharePointListResponse<SharePointSite>;
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://graph.microsoft.com/v1.0/sites/getAllSites/',
+        'https://graph.microsoft.com/v1.0/sites/getAllSites',
         {
           params: {
             $select: 'id,displayName,webUrl,siteCollection',
@@ -391,7 +391,7 @@ describe('SharepointOnline', () => {
       })) as SharePointListResponse<SharePointPage>;
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://graph.microsoft.com/v1.0/sites/site-123/pages/',
+        'https://graph.microsoft.com/v1.0/sites/site-123/pages',
         {
           params: {
             $select: 'id,title,description,webUrl,createdDateTime,lastModifiedDateTime',
@@ -432,7 +432,7 @@ describe('SharepointOnline', () => {
       })) as SharePointListResponse<SharePointPage>;
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://graph.microsoft.com/v1.0/sites/contoso.sharepoint.com,abc-123,def-456/pages/',
+        'https://graph.microsoft.com/v1.0/sites/contoso.sharepoint.com,abc-123,def-456/pages',
         {
           params: {
             $select: 'id,title,description,webUrl,createdDateTime,lastModifiedDateTime',
@@ -550,7 +550,7 @@ describe('SharepointOnline', () => {
       })) as SharePointListResponse<SharePointDrive>;
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://graph.microsoft.com/v1.0/sites/site-123/drives/',
+        'https://graph.microsoft.com/v1.0/sites/site-123/drives',
         {
           params: {
             $select:
@@ -592,7 +592,7 @@ describe('SharepointOnline', () => {
       })) as SharePointListResponse<SharePointDrive>;
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://graph.microsoft.com/v1.0/sites/contoso.sharepoint.com,abc-123,def-456/drives/',
+        'https://graph.microsoft.com/v1.0/sites/contoso.sharepoint.com,abc-123,def-456/drives',
         {
           params: {
             $select:
@@ -647,7 +647,7 @@ describe('SharepointOnline', () => {
       })) as SharePointListResponse<SharePointList>;
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://graph.microsoft.com/v1.0/sites/site-123/lists/',
+        'https://graph.microsoft.com/v1.0/sites/site-123/lists',
         {
           params: {
             $select: 'id,displayName,name,webUrl,description,createdDateTime,lastModifiedDateTime',
@@ -688,7 +688,7 @@ describe('SharepointOnline', () => {
       })) as SharePointListResponse<SharePointList>;
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://graph.microsoft.com/v1.0/sites/contoso.sharepoint.com,abc-123,def-456/lists/',
+        'https://graph.microsoft.com/v1.0/sites/contoso.sharepoint.com,abc-123,def-456/lists',
         {
           params: {
             $select: 'id,displayName,name,webUrl,description,createdDateTime,lastModifiedDateTime',
@@ -748,7 +748,7 @@ describe('SharepointOnline', () => {
       })) as SharePointListResponse<SharePointListItem>;
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://graph.microsoft.com/v1.0/sites/site-123/lists/list-456/items/',
+        'https://graph.microsoft.com/v1.0/sites/site-123/lists/list-456/items',
         {
           params: {
             $select: 'id,webUrl,createdDateTime,lastModifiedDateTime,createdBy,lastModifiedBy',
@@ -791,7 +791,7 @@ describe('SharepointOnline', () => {
       })) as SharePointListResponse<SharePointListItem>;
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://graph.microsoft.com/v1.0/sites/contoso.sharepoint.com,abc-123,def-456/lists/b!xyz-789/items/',
+        'https://graph.microsoft.com/v1.0/sites/contoso.sharepoint.com,abc-123,def-456/lists/b!xyz-789/items',
         {
           params: {
             $select: 'id,webUrl,createdDateTime,lastModifiedDateTime,createdBy,lastModifiedBy',

@@ -54,9 +54,19 @@ describe('AlertEpisodesSeverityFilter', () => {
     renderFilter({}, true);
     fireEvent.click(screen.getByTestId('test-severity-filter-button'));
 
-    expect(screen.getByText('Warning')).toBeInTheDocument();
-    expect(screen.getByText('Minor')).toBeInTheDocument();
-    expect(screen.getByText('Major')).toBeInTheDocument();
+    expect(screen.getByTestId('test-severity-filter-popover-option-warning')).toBeInTheDocument();
+    expect(screen.getByTestId('test-severity-filter-popover-option-minor')).toBeInTheDocument();
+    expect(screen.getByTestId('test-severity-filter-popover-option-major')).toBeInTheDocument();
+  });
+
+  it('renders severity options as soft badges', () => {
+    renderFilter();
+    fireEvent.click(screen.getByTestId('test-severity-filter-button'));
+
+    expect(screen.getByTestId('alertingV2EpisodeSeverityBadge-critical')).toHaveTextContent(
+      'Critical'
+    );
+    expect(screen.getByTestId('alertingV2EpisodeSeverityBadge-high')).toHaveTextContent('High');
   });
 
   it('emits extension severity values when selected', () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useEffect } from 'react';
-import { usePerformanceContext } from '@kbn/ebt-tools';
+import { usePerformanceContext } from '@kbn/ebt-tools/react';
 import { i18n } from '@kbn/i18n';
 import { groupSamplesByCategory } from '../../../common/topn';
 import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';

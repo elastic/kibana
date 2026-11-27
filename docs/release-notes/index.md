@@ -24,6 +24,206 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % FEATURES, ENHANCEMENTS, FIXES
 % Paste in index.md
 
+## 9.5.7 [kibana-9.5.7-release-notes]
+
+### Fixes [kibana-9.5.7-fixes]
+
+**Elastic Agent Builder**:
+* Fix Agent Builder running tools with empty arguments when a model provider, such as Amazon Bedrock, returns several tool calls in one response [#301775]({{kib-pull}}301775).
+* Fix the Agent Builder anomaly detection jobs tool failing with `Insufficient privileges to access feature` for every user, including superusers, when an agent runs it in an `ai.agent` workflow step or in Agent Builder chat [#301983]({{kib-pull}}301983).
+
+**Alerting and cases**:
+* Fix bulk untracking of alerts also untracking alerts for rule types you aren't authorized for [#304048]({{kib-pull}}304048).
+* Fix repeated connection failures to an unreachable MCP server exhausting {{kib}} memory. The MCP connector now stops retrying for a cooling period [#303996]({{kib-pull}}303996).
+* Fix the MCP connector keeping connections to an unreachable MCP server open after each request [#303987]({{kib-pull}}303987).
+% !!DEFERRED!! Not on the 9.5 branch (backport failed with merge conflicts, as of 2026-11-13). Re-verify against the next BC.
+% * Fix the MCP connector reusing a pooled connection after a timeout or a `5xx` error, and retrying after repeated failures. The `.mcp` connector now stops retrying an action after 3 consecutive connection failures within 5 minutes [#303531]({{kib-pull}}303531).
+* Fix rules that you created with your own API key failing with an `api key has been invalidated` error after a workflow edits them [#300667]({{kib-pull}}300667).
+* Fix the rules list failing to load when one or more rules can't be loaded correctly. The list now leaves those rules out and shows a warning [#300110]({{kib-pull}}300110).
+* Fix IBM Resilient additional fields on case templates showing the connector's default value instead of the value you saved [#303132]({{kib-pull}}303132).
+* Fix searching cases by comment text, alert ID, or event ID returning no cases [#304470]({{kib-pull}}304470).
+* Fix closing a case that reached the limit of 10,000 user actions [#301378]({{kib-pull}}301378).
+% !!DEFERRED!! Not on the 9.5 branch (backport failed with merge conflicts, as of 2026-11-13). Re-verify against the next BC.
+% * Fix the **Read only** badge appearing on case template pages when you have Cases **Read** access and the privilege to manage case templates [#291719]({{kib-pull}}291719).
+
+**Dashboards and Visualizations**:
+* Fix {{esql}} metric visualization background trendlines failing when `EVAL` copies or overwrites the time-bucket column [#299104]({{kib-pull}}299104).
+% !!DEFERRED!! Not on the 9.5 branch (no backport as of 2026-11-13). Re-verify against the next BC.
+% * Fix the **Try {{esql}}** button on the dashboard empty state doing nothing when you select it before the visualization editor finishes loading. The button is now disabled until it's ready [#297237]({{kib-pull}}297237).
+% !!DEFERRED!! Not on the 9.5 branch (backport PR #303659 still open as of 2026-11-13). Re-verify against the next BC.
+% * Fix saving a dashboard through the API with a tag that doesn't exist, which could crash {{kib}} [#303299]({{kib-pull}}303299).
+
+**Data ingestion and {{fleet}}**:
+* Fix the collectors of deleted managed integrations appearing in the {{fleet}} **Agents** list even when you hide managed integration resources [#304146]({{kib-pull}}304146).
+* Fix the **Add Elastic Agent to your hosts** button in the dialog that opens after you add an integration not opening the **Add agent** flyout [#303762]({{kib-pull}}303762).
+* Return a `400` error when the `id` in the body of `PUT /api/fleet/agent_policies/{agentPolicyId}` differs from the ID in the path [#303513]({{kib-pull}}303513).
+* Fix agent policies failing to apply when an integration policy ID contains characters that {{es}} rejects in role descriptor names, such as IDs generated for Synthetics project monitors [#303384]({{kib-pull}}303384).
+* Fix editing an integration from the **Installed integrations** page showing the add title and instructions. It now shows the edit title, description, and agent policy [#303069]({{kib-pull}}303069).
+* Fix copying an integration policy dropping the integration's condition [#303053]({{kib-pull}}303053).
+* Fix an invalid dataset name disabling the save button of an integration policy without showing its validation error [#303036]({{kib-pull}}303036).
+* Fix automatic unenrollments of inactive agents showing as **Unenrolling** and **unenrolled** in the agent activity. They now show as **Automatic unenrolling** and **automatically unenrolled** [#302879]({{kib-pull}}302879).
+* Reject integration policy input and stream IDs that contain path-traversal sequences, such as `../`, with a `400` error [#302459]({{kib-pull}}302459).
+* Reject {{fleet}} API requests that upgrade an integration or an integration policy across breaking changes with a `400` error, unless the request sets `acknowledge_breaking_changes: true` [#301973]({{kib-pull}}301973).
+* Require the **Integrations** read privilege for the full agent policy APIs, and disable **View policy**, **View agent policy**, and the **Run standalone** option when you can't read integration policies [#301951]({{kib-pull}}301951).
+* Fix updating an output or a {{fleet-server}} host through the API deleting stored secrets, such as an output's `ssl.key` or a Kafka password, when the request omits them or sends them as plain text. {{fleet}} now keeps the secrets that a request omits and stores plain-text values as secrets [#299235]({{kib-pull}}299235).
+* Fix the {{es}} output on a {{fleet-server}} agent policy being replaced when the {{fleet-server}} host has SSL settings [#301068]({{kib-pull}}301068).
+* Fix integration upgrades failing with a `400` error from a proxy in front of {{es}} when the data stream namespace contains non-ASCII characters [#301496]({{kib-pull}}301496).
+* Fix {{fleet-server}} ignoring the certificate authorities that you set with the `ssl.certificate_authorities` key in an output's **Advanced YAML configuration** when the output uses a proxy that has a certificate authority and the {{fleet-server}} host has {{es}} SSL settings. {{fleet}} now combines them with the proxy's certificate authority [#301626]({{kib-pull}}301626).
+* Fix the **Error patterns** panel on the OpenTelemetry collector details page loading indefinitely when its request fails [#301922]({{kib-pull}}301922).
+% !!DEFERRED!! Not in the latest BC (9.5.7-f2560f72, built from ec86614e); the backport merged after the BC was cut. Re-verify against the next BC.
+% * Fix {{fleet}} not reporting agents assigned to a version-specific agent policy as inactive once they stop checking in. This broke inactivity-based unenrollment and the inactive agent filter and counts for those agents [#303898]({{kib-pull}}303898).
+
+**Data management**:
+* Fix the component template wizard adding a data lifecycle when no lifecycle phase is configured, which made {{es}} reject index templates without a data stream that use the component template [#304426]({{kib-pull}}304426).
+* Fix `400` errors when you create or fetch {{data-sources}} with `allowNoIndex: true` whose title targets a remote cluster that doesn't exist. The create request returned the error even though {{kib}} saved the data view [#299790]({{kib-pull}}299790).
+% !!DEFERRED!! Not in the latest BC (9.5.7-f2560f72, built from ec86614e); the backport merged after the BC was cut. Re-verify against the next BC.
+% * Fix the **Auto-follow patterns** page failing with "Error loading auto-follow patterns" when a pattern created through the {{es}} API has no `follow_index_pattern` [#303787]({{kib-pull}}303787).
+
+**Discover**:
+* Fix the **Surrounding documents** and **Single document** views failing with "No matching data view" for default ad hoc data views such as **All logs**, for example after you change the theme and reload the page [#304432]({{kib-pull}}304432).
+* Fix SQL and EQL async searches sending too many requests to check for results when {{kib}} is accessed over HTTP/2 [#302641]({{kib-pull}}302641).
+* Fix {{esql}} controls that you add while editing a Discover session panel from the library not appearing on the dashboard after you select **Save and return** [#301047]({{kib-pull}}301047).
+* Fix the Metrics charts in Discover failing with an `Unknown column` error when an {{esql}} `TS` query filters on a metadata field such as `_ignored` [#302705]({{kib-pull}}302705).
+% !!DEFERRED!! Not on the 9.5 branch (backport PR #304968 still open as of 2026-11-13). Re-verify against the next BC.
+% * Fix an error in Discover when you switch the background chart of an {{esql}} metric from bar to line while a maximum value is configured [#301106]({{kib-pull}}301106).
+
+**{{product.observability}} solution**:
+For the {{product.observability}} 9.5.7 release information, refer to [{{product.observability}} Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**{{elastic-sec}} solution**:
+For the {{elastic-sec}} 9.5.7 release information, refer to [{{elastic-sec}} Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**{{kib}} platform**:
+* Fix saving your user profile settings failing with a `400` error when your display language isn't enabled for the deployment [#302172]({{kib-pull}}302172).
+* Fix `bin/kibana-plugin install` finishing before the last file in the plugin archive is fully written, which could leave the installed plugin directory with that file missing or empty [#301845]({{kib-pull}}301845).
+
+**Machine learning and {{infer}}**:
+* Fix AI features failing with Claude models that reject forced tool use, such as Claude Sonnet 5.5 and Opus 5.5. {{kib}} now sends `tool_choice: auto` to these models, so the model decides whether to call a tool [#301398]({{kib-pull}}301398).
+* Fix {{kib}} logging an unhandled error when it can't read the anonymization settings for an AI request [#304251]({{kib-pull}}304251).
+% !!DEFERRED!! Not in the latest BC (9.5.7-f2560f72, built from ec86614e); the backport merged after the BC was cut. Re-verify against the next BC.
+% * Fix the data drift setup page hiding the **Analyze data drift without saving** button and the **Data view name** field while you type a comparison index pattern [#304648]({{kib-pull}}304648).
+
+**Workflows**:
+* Fix workflows that the AI agent generates writing `{{ now }}` as unformatted text in {{es}} documents, which {{es}} mapped as `text` instead of `date`. The generator now uses `{{ now | date_to_xmlschema }}` [#291211]({{kib-pull}}291211).
+* Fix the email step showing a broken-image placeholder instead of its icon in the actions menu and the workflow list [#287419]({{kib-pull}}287419).
+* Fix the `generate_workflow` tool timing out when it edits large workflows, and fix edits to steps nested in `if` or `foreach` steps failing [#299949]({{kib-pull}}299949).
+% !!DEFERRED!! Not on the 9.5 branch (no backport as of 2026-11-13). Re-verify against the next BC.
+% * Fix the resume API accepting a step that belongs to a different execution than the one in the request. The API now returns a `409` error [#299264]({{kib-pull}}299264).
+% !!DEFERRED!! Not on the 9.5 branch (no backport as of 2026-11-13). Re-verify against the next BC.
+% * Return a generic `404` error from all workflow operations when you request a workflow ID that you can't access, so the response doesn't reveal whether the ID exists [#299475]({{kib-pull}}299475).
+% !!DEFERRED!! Not on the 9.5 branch (no backport as of 2026-11-13). Re-verify against the next BC.
+% * Fix the workflow execution view repeatedly checking for an execution that doesn't exist and showing repeated error messages. The view now stops after a `404` response and waits longer between checks after `500` and network errors [#299548]({{kib-pull}}299548).
+% !!DEFERRED!! Not on the 9.5 branch (no backport as of 2026-11-13). Re-verify against the next BC.
+% * Fix values that you insert with `{{ }}` into `if`, `while`, `retry`, `continue`, `data.filter`, and `data.find` conditions being read as KQL syntax. {{kib}} now compares inserted values as literal text, so `*` no longer acts as a wildcard and leading and trailing spaces are no longer trimmed [#299558]({{kib-pull}}299558).
+% !!DEFERRED!! Not on the 9.5 branch (no backport as of 2026-11-13). Re-verify against the next BC.
+% * Fix unsaved workflow test runs appearing in the execution history of a saved workflow with the same ID [#293652]({{kib-pull}}293652).
+
+## 9.5.6 [kibana-9.5.6-release-notes]
+
+:::{important}
+The 9.5.6 release contains fixes for potential security vulnerabilities. Check our [security advisory](https://discuss.elastic.co/c/announcements/security-announcements/31) for more details.
+:::
+
+### Features and enhancements [kibana-9.5.6-features-enhancements]
+
+**Elastic Agent Builder**:
+* Add options to include frozen tier data in Agent Builder tools. Frozen tier data stays excluded unless you opt in [#297481]({{kib-pull}}297481), [#299437]({{kib-pull}}299437).
+
+**Data ingestion and {{fleet}}**:
+* Sort agent policies alphabetically in the **Assign new policy to agent** modal [#296067]({{kib-pull}}296067).
+
+**{{es}} solution**:
+* Clarify in the Salesforce connector's document-level security tooltip that access applies per object type, not per record [#297728]({{kib-pull}}297728).
+
+**{{kib}} platform**:
+* Add the `i18n.detectBrowserLocale` setting. Set it to `false` to stop {{kib}} from choosing the interface language from the browser's language preferences, while still letting you pick your own language [#295756]({{kib-pull}}295756).
+
+### Fixes [kibana-9.5.6-fixes]
+
+**Elastic Agent Builder**:
+* Fix Agent Builder agents refusing to run {{esql}} queries with `execute_esql` when the queries don't come from `generate_esql`, such as queries written in custom instructions or skills [#300045]({{kib-pull}}300045).
+* Fix {{esql}} queries in Agent Builder failing on clusters that lack the remote cluster privilege, even when no remote clusters are requested [#295560]({{kib-pull}}295560).
+* Fix the Agent Builder natural language search tool querying indices that aren't allowed to the tool. The tool now returns an error when no allowed indices are available [#295885]({{kib-pull}}295885).
+* Fix bulk import not letting you select MCP tools that have no description [#300886]({{kib-pull}}300886).
+
+**Alerting and cases**:
+* Fix rules creating duplicate alerts, and leaving the original alerts active, when a rule run stops before it saves its state [#293521]({{kib-pull}}293521).
+* Fix rules and background tasks silently stopping for several minutes when a concurrent update prevents their completed run from being recorded [#295415]({{kib-pull}}295415).
+* Fix recurring tasks with rrule schedules running the same occurrence twice, or getting stuck after a timeout [#297486]({{kib-pull}}297486).
+
+**Dashboards and Visualizations**:
+* Fix the dashboard top menu and **Edit** button not appearing in embedded dashboards when `show-top-menu=true` is set [#299599]({{kib-pull}}299599).
+* Fix Lens metric panels failing to render when filters return no results and dynamic coloring uses a maximum dimension [#297429]({{kib-pull}}297429).
+* Fix an invalid-column error when you add a **Maximum value** dimension to an {{esql}} metric visualization in Lens [#296545]({{kib-pull}}296545).
+* Fix Lens {{esql}} metric background trendlines failing for queries with multiple piped `STATS` commands [#294577]({{kib-pull}}294577).
+* Fix Lens {{esql}} metric background trendlines failing when the time field is renamed before aggregation [#297591]({{kib-pull}}297591).
+* Fix Lens as code `range` columns dropping open bounds, including ranges with no lower bound, no upper bound, or neither [#300099]({{kib-pull}}300099).
+* Fix Lens as code terms columns ranked by a custom `last_value` metric losing the sort field in the API round trip. The API now accepts an optional `time_field` on the custom rank-by [#292378]({{kib-pull}}292378).
+* Fix the dashboard API dropping {{esql}} Lens panels whose color mapping assigns colors to `boolean`, `null`, multi-value, or open-ended range values [#298850]({{kib-pull}}298850).
+* Fix the **Save and return** button appearing instead of **Save** when you create a visualization [#296261]({{kib-pull}}296261).
+
+**Data ingestion and {{fleet}}**:
+* Fix an agent policy showing an outdated minimum {{agent}} version after you upgrade several integration policies at once [#294439]({{kib-pull}}294439).
+* Fix integration policy edits not reaching {{agent}} for packages that declare their {{agent}} version requirement in the package manifest [#296354]({{kib-pull}}296354).
+* Fix agents enrolled by an older {{fleet-server}} being left on a deleted version-specific agent policy [#295107]({{kib-pull}}295107).
+* Fix automatic integration policy upgrades redeploying the agent policy once for each integration policy, which slowed upgrades and could make them time out when the Elastic Package Registry is unreachable [#294411]({{kib-pull}}294411).
+* Fix integrations whose default deployment option is **Elastic Managed Integration** saving an agent-based policy when they also have a cloud connector option [#299039]({{kib-pull}}299039).
+* Fix deleting an agent policy silently leaving its ID in shared integration policies. The delete now fails with an error that explains the cause [#300189]({{kib-pull}}300189).
+* Fix {{fleet}} bulk agent action APIs not validating the `agents` input consistently. Invalid input now returns a `400` error instead of running the action [#299837]({{kib-pull}}299837).
+* Fix the managed integration enrollment flyout not showing component health details, and the **Details** action being unavailable for managed integration policies [#294970]({{kib-pull}}294970).
+* Fix the **Agent policies** page taking tens of seconds, or failing with an `HTTP 500` error, when agent policies contain thousands of integration policies [#297979]({{kib-pull}}297979).
+* Fix agent policies for managed integrations appearing in agent policy searches and filters when **Show agentless agents and policies in {{fleet}}** is turned off [#296087]({{kib-pull}}296087).
+* Fix {{fleet}} rejecting integration policies whose `data_stream.dataset` uses an agent variable placeholder such as `${env.NAME}` [#295496]({{kib-pull}}295496).
+* Fix {{fleet}} running {{es}} transforms from uploaded integration packages with {{kib}}'s internal system identity. Transforms in uploaded packages now run as the user who installed the package [#297771]({{kib-pull}}297771).
+* Fix scheduled unenrollment not deactivating inactive agents that have a stale `unenrolled_at` value [#300148]({{kib-pull}}300148).
+* Fix {{fleet}} setup tripping the {{es}} request circuit breaker on deployments with large agent policy documents [#300777]({{kib-pull}}300777).
+* Fix {{fleet}} hanging when the Elastic product versions API stops responding. The lookup of available {{agent}} versions now honors its timeout and falls back to the versions bundled with {{kib}} [#292736]({{kib-pull}}292736).
+* Fix installed integration icons rendering as black shapes [#293176]({{kib-pull}}293176).
+
+**Data management**:
+* Fix the runtime field editor ignoring **Save** when you edit a field's script while the preview is still updating [#294753]({{kib-pull}}294753).
+* Fix the runtime field editor discarding the script when you change the field type to or from `composite` [#299025]({{kib-pull}}299025).
+* Fix the runtime field preview not showing a field's custom label, and the preview row disappearing while documents load [#299810]({{kib-pull}}299810).
+* Fix saved object labels showing "index patterns" instead of "data views" when you copy a dashboard that references data views in another space [#297621]({{kib-pull}}297621).
+
+**Discover**:
+* Fix Discover showing an invalid time range from the URL instead of falling back to the default time range [#290358]({{kib-pull}}290358).
+* Fix field type icons staying stale in the field list when you recreate an index with a different mapping type for an existing field [#301198]({{kib-pull}}301198).
+* Fix the histogram **Breakdown by** button showing a breakdown field that can't be used for the chart [#298832]({{kib-pull}}298832).
+* Fix the sparkline filling the whole popover when you view patterns in ungrouped mode in Discover [#295734]({{kib-pull}}295734).
+* Fix renaming a background search, or extending a search session's expiration, being reverted when the session status updates at the same time [#296401]({{kib-pull}}296401).
+* Fix Discover session panels on dashboards getting stuck in inline editing mode when the search returns an error [#289918]({{kib-pull}}289918).
+* Fix the **Url** field formatter adding an extra `/app` segment to relative URLs that start with a slash when {{kib}} runs behind a base path or in a custom space [#299116]({{kib-pull}}299116).
+
+**{{es}} solution**:
+* Fix content connector indexes created from {{kib}} failing to ingest documents with large numeric IDs by mapping the document `id` field as `keyword` [#297711]({{kib-pull}}297711).
+* Fix the **Connectors** page rejecting long connector configuration values, such as SSL certificate chains [#297832]({{kib-pull}}297832).
+* Fix the **Rule ID**, **Metadata field**, and **Values** tooltips on the query rules **Create rule** page not being announced by screen readers in Chrome with VoiceOver [#295021]({{kib-pull}}295021).
+
+**{{product.observability}} solution**:
+For the {{product.observability}} 9.5.6 release information, refer to [{{product.observability}} Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**{{elastic-sec}} solution**:
+For the {{elastic-sec}} 9.5.6 release information, refer to [{{elastic-sec}} Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**{{kib}} platform**:
+* Fix tag filters in listing pages, such as the dashboards list, returning no results when a tag name contains an ampersand (`&`) [#297231]({{kib-pull}}297231).
+* Fix the date range picker applying calendar selections in the browser time zone instead of the time zone set in `dateFormat:tz`, and ignoring the first day of the week set in `dateFormat:dow` [#299851]({{kib-pull}}299851).
+* Fix Permissions-Policy violation reports reaching the configured reporting endpoint only for the last directive. Reports for every directive now reach it [#299786]({{kib-pull}}299786).
+* Fix the Analytics overview page showing the **Ingest your data** section when you can't add data or upload files [#297717]({{kib-pull}}297717).
+* Fix paging through the API keys list showing the same API key on more than one page, or leaving a key out [#296117]({{kib-pull}}296117).
+* Fix {{kib}}'s OpenTelemetry process resource exposing command-line arguments. {{kib}} now records the number of arguments instead [#295796]({{kib-pull}}295796).
+
+**Machine learning and {{infer}}**:
+* Fix the data frame analytics audit messages API returning messages for jobs that don't exist in the current {{kib}} space [#297821]({{kib-pull}}297821).
+* Fix the {{esql}} field statistics table being left empty when you change the query or time range while statistics are still loading [#298642]({{kib-pull}}298642).
+* Fix legacy AI connectors failing the default LLM check when their underlying {{infer}} endpoint matches the requested LLM [#293855]({{kib-pull}}293855).
+* Fix tool calls failing on Gemini when a tool's input schema reuses a shared sub-schema [#295880]({{kib-pull}}295880).
+* Fix tool schemas sent through the Gemini connector being rejected by Google Vertex AI [#300040]({{kib-pull}}300040).
+
+**Workflows**:
+* Fix workflow manual trigger inputs ignoring falsy default values, such as `false` or `0` [#299064]({{kib-pull}}299064).
+
 ## 9.5.5 [kibana-9.5.5-release-notes]
 
 :::{important}
@@ -44,8 +244,6 @@ The 9.5.5 release contains fixes for potential security vulnerabilities. Check o
 * Fix Jira Service Management and Opsgenie connector actions failing when the rendered alert message exceeds 130 characters. The connectors now truncate the message instead [#291698]({{kib-pull}}291698).
 * Fix the email connector HTTP test sending caller-supplied subject and message content. The test now sends fixed content [#288664]({{kib-pull}}288664).
 * Fix the **Auto-push case to connected external system** option missing from the Cases rule action when case templates are enabled [#292187]({{kib-pull}}292187).
-% !!DEFERRED!! Not on the 9.5 branch (backport failed with merge conflicts, as of 2026-10-01). Re-verify against the next BC before publishing.
-% * Fix the **Read only** badge appearing on case template pages when you have Cases **Read** access and the privilege to manage case templates [#291719]({{kib-pull}}291719).
 
 **Dashboards and Visualizations**:
 * Increase the TinyMath expression length limit so longer visualization formulas don't fail [#290314]({{kib-pull}}290314).
@@ -67,8 +265,6 @@ The 9.5.5 release contains fixes for potential security vulnerabilities. Check o
 * Fix integration policy upgrades and edits failing when a package policy condition is stored as a boolean [#290497]({{kib-pull}}290497).
 * Fix {{fleet}} showing an error when you delete an OpenTelemetry input integration policy that shares a dataset with another policy [#291679]({{kib-pull}}291679).
 * Fix the **Edit pipeline** button in the ingest pipeline details flyout moving off-screen when a processor contains a long value [#291000]({{kib-pull}}291000).
-% !!DEFERRED!! Not yet confirmed in build candidate 9.5.5-9aaf1433 (backport merged after BC cutoff). Re-verify against the next BC before publishing.
-% * Fix installed integration icons rendering as black shapes [#293176]({{kib-pull}}293176).
 
 **Data management**:
 * Fix Index Management moving component templates listed in `ignore_missing_component_templates` to the end of `composed_of` when you edit or clone an index template [#290171]({{kib-pull}}290171).
@@ -80,8 +276,6 @@ The 9.5.5 release contains fixes for potential security vulnerabilities. Check o
 
 **Discover**:
 * Fix Discover {{esql}} breakdowns failing when a second `STATS` groups by an aggregate from the first `STATS` [#290259]({{kib-pull}}290259).
-% !!DEFERRED!! Not on the 9.5 branch (backport missing as of 2026-10-01). Re-verify against the next BC before publishing.
-% * Fix Discover showing an invalid time range from the URL instead of falling back to the default time range [#290358]({{kib-pull}}290358).
 % * Fix Discover session panels on dashboards getting stuck in inline editing mode when the search returns an error [#289918]({{kib-pull}}289918).
 % * Fix the Base64 Decode transform failing to decode on the server and mangling multi-byte UTF-8 characters in the browser [#281366]({{kib-pull}}281366).
 
@@ -111,13 +305,9 @@ For the {{elastic-sec}} 9.5.5 release information, refer to [{{elastic-sec}} Sol
 * Add support for list fields, such as OAuth2 scopes for OpenAI and Azure OpenAI, when you create an {{infer}} endpoint [#290352]({{kib-pull}}290352).
 * Fix the anomaly detection bucket span estimation API accepting an unlimited number of detectors, which could exhaust {{kib}} server resources [#291203]({{kib-pull}}291203).
 * Fix the field statistics flyout in the anomaly detection job wizard closing on its own while the wizard validates the job [#292297]({{kib-pull}}292297).
-% !!DEFERRED!! Not on the 9.5 branch (backport PR #294550 still open as of 2026-10-01). Re-verify against the next BC before publishing.
-% * Fix legacy AI connectors failing the default LLM check when their underlying {{infer}} endpoint matches the requested LLM [#293855]({{kib-pull}}293855).
 
 **Workflows**:
 * Fix the `elasticsearch.indices.exists` workflow step crashing the workflow or returning an output you can't use in conditions [#289580]({{kib-pull}}289580).
-% !!DEFERRED!! Not on the 9.5 branch (backport missing as of 2026-10-01). Re-verify against the next BC before publishing.
-% * Fix unsaved workflow test runs appearing in the execution history of a saved workflow with the same ID [#293652]({{kib-pull}}293652).
 % * Add a `cases.extendedFieldsUpdated` workflow trigger that fires when extended-field values change on a case, including changes from a linked custom-field patch [#287043]({{kib-pull}}287043).
 % * Fix workflow custom steps failing with HTTP 404 when Kibana is configured with a base path [#283101]({{kib-pull}}283101).
 % * Fix a crash when opening the trigger tab in workflow step execution details [#282920]({{kib-pull}}282920).
@@ -491,6 +681,7 @@ For the {{elastic-sec}} 9.5.1 release information, refer to [{{elastic-sec}} Sol
 * Add a display-only Markdown field type to case templates [#278329]({{kib-pull}}278329).
 * Add public Cases APIs to discover applicable `extended_fields` and apply template defaults when creating a case [#279684]({{kib-pull}}279684) [#280143]({{kib-pull}}280143).
 * Add `xpack.alerting.alertsService.totalFieldsLimit` (default `2800`, range `2500`–`5000`) to control {{es}} `index.mapping.total_fields.limit` on `.alerts-*` indices and templates [#274024]({{kib-pull}}274024).
+* Add a `cases-analytics` skill to Agent Builder so agents can answer aggregate and reporting questions about cases and build visualizations and dashboards from the cases analytics indices [#277580]({{kib-pull}}277580).
 
 **Connectivity**:
 * Add a **OneDrive** connector to search files, browse drives, and read file content in Agent Builder and Workflows [#275244]({{kib-pull}}275244).
@@ -688,6 +879,7 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Fix alerts-as-data index template updates failing when system-managed template metadata is present [#262534]({{kib-pull}}262534).
 * Fix the alerts-as-data setup overriding an index's total fields limit that was already set to a higher value [#277402]({{kib-pull}}277402).
 * Fix the public **Find rules** and **Get rule** APIs so documented response fields are returned as specified in the OpenAPI spec [#247279]({{kib-pull}}247279).
+* Fix the message that confirms removing a custom field from the case configuration. It now says that existing cases keep their values, because removing the field doesn't delete case data [#280506]({{kib-pull}}280506).
 
 **Connectivity**:
 * Fix the email connector to reject malformed email addresses before attempting SMTP delivery [#268496]({{kib-pull}}268496).
@@ -936,7 +1128,106 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Fix swapped summary and description text for registered workflow steps such as `data.*` steps in autocomplete and Agent Builder tools [#267290]({{kib-pull}}267290).
 * Fix slow workflow template rendering for workflows with large step outputs [#265027]({{kib-pull}}265027).
 * Fix connector and step icons in the workflows list showing the generic plugs fallback [#263880]({{kib-pull}}263880).
+* Fix the `max-step-size` setting of the `ai.agent` workflow step being ignored for streamed completions, which could fail large responses with a maximum content length error [#275842]({{kib-pull}}275842).
 
+## 9.4.10 [kibana-9.4.10-release-notes]
+
+### Fixes [kibana-9.4.10-fixes]
+
+**Alerting and cases**:
+* Fix the rules list failing to load when one or more rules can't be loaded correctly. The list now leaves those rules out and shows a warning [#300110]({{kib-pull}}300110).
+
+**Data management**:
+* Fix `400` errors when you create or fetch {{data-sources}} with `allowNoIndex: true` whose title targets a remote cluster that doesn't exist. The create request returned the error even though {{kib}} saved the data view [#299790]({{kib-pull}}299790).
+
+**{{product.observability}} solution**:
+For the {{product.observability}} 9.4.10 release information, refer to [{{product.observability}} Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**{{elastic-sec}} solution**:
+For the {{elastic-sec}} 9.4.10 release information, refer to [{{elastic-sec}} Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**{{kib}} platform**:
+* Fix `bin/kibana-plugin install` finishing before the last file in the plugin archive is fully written, which could leave the installed plugin directory with that file missing or empty [#301845]({{kib-pull}}301845).
+
+% !!DEFERRED!! Elastic Agent Builder. Not on the 9.4 branch (backport PR #304224 was closed without merging, as of 2026-11-19). Re-verify against the next BC.
+% * Fix Agent Builder running tools with empty arguments when a model provider, such as Amazon Bedrock, returns several tool calls in one response [#301775]({{kib-pull}}301775).
+% !!DEFERRED!! Data ingestion and {{fleet}}. Not in the latest BC (9.4.10-513dc4d8, built from 72893353); the backport merged after the BC was cut. Re-verify against the next BC.
+% * Fix {{fleet}} running {{es}} transforms from uploaded integration packages with {{kib}}'s internal system identity. Transforms in uploaded packages now run as the user who installed the package [#297771]({{kib-pull}}297771).
+% !!DEFERRED!! Workflows. Not in the latest BC (9.4.10-513dc4d8, built from 72893353); the backport merged after the BC was cut. Re-verify against the next BC.
+% * Fix workflows that you overwrite in bulk, for example when you import over existing workflows, continuing to run on their previous schedule when the new version has no scheduled trigger or is disabled [#302861]({{kib-pull}}302861).
+
+## 9.4.9 [kibana-9.4.9-release-notes]
+
+:::{important}
+The 9.4.9 release contains fixes for potential security vulnerabilities. Check our [security advisory](https://discuss.elastic.co/c/announcements/security-announcements/31) for more details.
+:::
+
+### Features and enhancements [kibana-9.4.9-features-enhancements]
+
+**Elastic Agent Builder**:
+* Add options to include frozen tier data in Agent Builder tools. Frozen tier data stays excluded unless you opt in [#297481]({{kib-pull}}297481), [#299437]({{kib-pull}}299437).
+
+**Data ingestion and {{fleet}}**:
+* Sort agent policies alphabetically in the **Assign new policy to agent** modal [#296067]({{kib-pull}}296067).
+
+**{{es}} solution**:
+* Clarify in the Salesforce connector's document-level security tooltip that access applies per object type, not per record [#297728]({{kib-pull}}297728).
+
+### Fixes [kibana-9.4.9-fixes]
+
+**Elastic Agent Builder**:
+* Fix bulk import not letting you select MCP tools that have no description [#300886]({{kib-pull}}300886).
+
+**Alerting and cases**:
+* Fix rules creating duplicate alerts, and leaving the original alerts active, when a rule run stops before it saves its state [#293521]({{kib-pull}}293521).
+* Fix rules and background tasks silently stopping for several minutes when a concurrent update prevents their completed run from being recorded [#295415]({{kib-pull}}295415).
+* Fix recurring tasks with rrule schedules running the same occurrence twice, or getting stuck after a timeout [#297486]({{kib-pull}}297486).
+
+**Dashboards and Visualizations**:
+* Fix the dashboard top menu and **Edit** button not appearing in embedded dashboards when `show-top-menu=true` is set [#299599]({{kib-pull}}299599).
+* Fix Lens metric panels failing to render when filters return no results and dynamic coloring uses a maximum dimension [#297429]({{kib-pull}}297429).
+
+**Data ingestion and {{fleet}}**:
+* Fix an agent policy showing an outdated minimum {{agent}} version after you upgrade several integration policies at once [#294439]({{kib-pull}}294439).
+* Fix integration policy edits not reaching {{agent}} for packages that declare their {{agent}} version requirement in the package manifest [#296354]({{kib-pull}}296354).
+* Fix agents enrolled by an older {{fleet-server}} being left on a deleted version-specific agent policy [#295107]({{kib-pull}}295107).
+* Fix managed integration policy upgrades redeploying the agent policy once per integration policy, which slowed upgrades and could stall them when the Elastic Package Registry is unreachable [#294411]({{kib-pull}}294411).
+* Fix integrations that default to agentless deployment saving an agent-based policy when the integration also has a cloud connector option [#299039]({{kib-pull}}299039).
+* Fix deleting an agent policy silently leaving its ID in shared integration policies. The delete now fails with an error that explains the cause [#300189]({{kib-pull}}300189).
+* Fix {{fleet}} bulk agent action APIs not validating the `agents` input consistently. Invalid input now returns a `400` error instead of running the action [#299837]({{kib-pull}}299837).
+
+**Data management**:
+* Fix the runtime field editor ignoring **Save** when you edit a field's script while the preview is still updating [#294753]({{kib-pull}}294753).
+* Fix the runtime field editor discarding the script when you change the field type to or from `composite` [#299025]({{kib-pull}}299025).
+* Fix saved object labels showing "index patterns" instead of "data views" when you copy a dashboard that references data views in another space [#297621]({{kib-pull}}297621).
+
+**Discover**:
+* Fix Discover showing an invalid time range from the URL instead of falling back to the default time range [#290358]({{kib-pull}}290358).
+* Fix field type icons staying stale in the field list when you recreate an index with a different mapping type for an existing field [#301198]({{kib-pull}}301198).
+* Fix the histogram **Breakdown by** button showing a breakdown field that can't be used for the chart [#298832]({{kib-pull}}298832).
+* Fix renaming a background search, or extending a search session's expiration, being reverted when the session status updates at the same time [#296401]({{kib-pull}}296401).
+* Fix the **Url** field formatter adding an extra `/app` segment to relative URLs that start with a slash when {{kib}} runs behind a base path or in a custom space [#299116]({{kib-pull}}299116).
+
+**{{es}} solution**:
+* Fix content connector indexes created from {{kib}} failing to ingest documents with large numeric IDs by mapping the document `id` field as `keyword` [#297711]({{kib-pull}}297711).
+* Fix the **Rule ID**, **Metadata field**, and **Values** tooltips on the query rules **Create rule** page not being announced by screen readers in Chrome with VoiceOver [#295021]({{kib-pull}}295021).
+
+**{{product.observability}} solution**:
+For the {{product.observability}} 9.4.9 release information, refer to [{{product.observability}} Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**{{elastic-sec}} solution**:
+For the {{elastic-sec}} 9.4.9 release information, refer to [{{elastic-sec}} Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**{{kib}} platform**:
+* Fix tag filters in listing pages, such as the dashboards list, returning no results when a tag name contains an ampersand (`&`) [#297231]({{kib-pull}}297231).
+* Fix the Analytics overview page showing the **Ingest your data** section when you can't add data or upload files [#297717]({{kib-pull}}297717).
+* Fix paging through the API keys list showing the same API key on more than one page, or leaving a key out [#296117]({{kib-pull}}296117).
+* Fix Permissions-Policy violation reports reaching the configured reporting endpoint only for the last directive. Reports for every directive now reach it [#299786]({{kib-pull}}299786).
+* Fix {{kib}}'s OpenTelemetry process resource exposing command-line arguments. {{kib}} now records the number of arguments instead [#299043]({{kib-pull}}299043).
+
+**Machine learning and {{infer}}**:
+* Fix the data frame analytics audit messages API returning messages for jobs that don't exist in the current {{kib}} space [#297821]({{kib-pull}}297821).
+* Fix the {{esql}} field statistics table being left empty when you change the query or time range while statistics are still loading [#298642]({{kib-pull}}298642).
 
 ## 9.4.8 [kibana-9.4.8-release-notes]
 

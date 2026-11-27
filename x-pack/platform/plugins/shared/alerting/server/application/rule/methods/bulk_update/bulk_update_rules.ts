@@ -27,7 +27,10 @@ import {
   RetryForConflictsDelay,
 } from '../../../../lib/retry_if_conflicts';
 import { bulkCreateRulesSo } from '../../../../data/rule';
-import { bulkMigrateLegacyActions } from '../../../../rules_client/lib';
+import {
+  bulkMigrateLegacyActions,
+  deleteLegacyActionsForRules,
+} from '../../../../rules_client/lib';
 import type { RawRule } from '../../../../types';
 import type { BulkOperationError, RulesClientContext } from '../../../../rules_client/types';
 import type { RuleParams } from '../../types';
@@ -216,8 +219,9 @@ async function runBatch<Params extends RuleParams>({
     }
   }
 
+  let migratedRuleIds: string[] = [];
   try {
-    await withSpan(
+    migratedRuleIds = await withSpan(
       { name: 'bulkUpdateRules.runBatch.bulkMigrateLegacyActions', type: 'rules' },
       () =>
         bulkMigrateLegacyActions({
@@ -242,6 +246,13 @@ async function runBatch<Params extends RuleParams>({
     allowMissingConnectorSecrets,
     strict,
   });
+
+  // Legacy actions are deleted only once the rules carrying them are saved, so a conflict can be retried
+  const savedIds = new Set(written.successfulIds);
+  await deleteLegacyActionsForRules(
+    context,
+    migratedRuleIds.filter((id) => savedIds.has(id))
+  );
 
   return { successfulIds: written.successfulIds, errors: [...errors, ...written.errors] };
 }

@@ -34,6 +34,8 @@
  *   gen_ai.request.{model, temperature, top_p, top_k, max_tokens, seed}
  *   gen_ai.response.{model, id, finish_reasons}
  *   gen_ai.usage.{input_tokens, output_tokens}
+ *   gen_ai.usage.cache_read.input_tokens / gen_ai.usage.cache_write.input_tokens
+ *     (chat: 75% read + ~11% written; tool: zero read/write, the row must still show)
  *   gen_ai.provider.name (EDOT extension)
  *   gen_ai.input.messages / gen_ai.output.messages (EDOT extension)
  *   gen_ai.system_instructions / gen_ai.conversation.id (EDOT extension)
@@ -600,6 +602,8 @@ const scenario: Scenario<ApmOtelFields> = async () => {
               'attributes.gen_ai.response.model': 'gpt-4o-2024-08-06',
               'attributes.gen_ai.usage.input_tokens': 2800,
               'attributes.gen_ai.usage.output_tokens': 950,
+              'attributes.gen_ai.usage.cache_read.input_tokens': 2100,
+              'attributes.gen_ai.usage.cache_write.input_tokens': 300,
               'attributes.gen_ai.request.temperature': 0.7,
               'attributes.gen_ai.request.top_p': 1,
               'attributes.gen_ai.request.max_tokens': 2048,
@@ -647,6 +651,8 @@ const scenario: Scenario<ApmOtelFields> = async () => {
               'attributes.gen_ai.request.model': 'claude-3-5-sonnet-20241022',
               'attributes.gen_ai.usage.input_tokens': 95,
               'attributes.gen_ai.usage.output_tokens': 62,
+              'attributes.gen_ai.usage.cache_read.input_tokens': 0,
+              'attributes.gen_ai.usage.cache_write.input_tokens': 0,
               'attributes.gen_ai.request.max_tokens': 1024,
               'attributes.gen_ai.request.temperature': 0.5,
               'attributes.gen_ai.request.top_k': 40,

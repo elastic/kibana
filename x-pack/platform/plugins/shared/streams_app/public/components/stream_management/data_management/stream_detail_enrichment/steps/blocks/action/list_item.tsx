@@ -32,13 +32,11 @@ import {
 import { selectValidationErrors } from '../../../state_management/stream_enrichment_state_machine/selectors';
 import { ConditionDisplay } from '../../../../shared';
 import { getStepPanelColour } from '../../../utils';
-import { BlockDisableOverlay } from '../block_disable_overlay';
+import { BlockDisableOverlay, DragHandle } from '../../../../../../draggable_steps';
 import { StepContextMenu } from '../context_menu';
 import { ProcessorMetricBadges } from './processor_metrics';
 import { ProcessorStatusIndicator } from './processor_status_indicator';
 import { getStepDescription } from './utils';
-import { DragHandle } from '../../draggable_step_wrapper';
-
 export const ActionBlockListItem = (props: ActionBlockProps) => {
   const { euiTheme } = useEuiTheme();
   const { stepRef, level, processorMetrics, readOnly = false } = props;

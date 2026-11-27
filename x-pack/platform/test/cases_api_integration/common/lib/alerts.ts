@@ -10,6 +10,7 @@ import type SuperTest from 'supertest';
 import type { Case } from '@kbn/cases-plugin/common';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import { ALERT_CASE_IDS } from '@kbn/rule-data-utils';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { superUser } from './authentication/users';
 import type { User } from './authentication/types';
 import { getSpaceUrlPrefix } from './api/helpers';
@@ -38,6 +39,7 @@ export const getAlertById = async ({
     .get(`${getSpaceUrlPrefix(auth?.space)}/internal/rac/alerts?id=${id}&index=${index}`)
     .auth(auth.user.username, auth.user.password)
     .set('kbn-xsrf', 'true')
+    .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
     .expect(expectedHttpCode);
 
   return alert;

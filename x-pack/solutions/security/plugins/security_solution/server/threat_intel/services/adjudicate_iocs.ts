@@ -7,6 +7,7 @@
 
 import { createHash } from 'node:crypto';
 import { MAX_IOC_TIER_BASIS_LENGTH } from '../../../common/threat_intel/contracts/enrichment';
+import type { IocType } from '../../../common/threat_intel';
 import type { ExtractedIoc, ExtractIocsResult, IocTier } from './extract_iocs';
 
 const SEMANTIC_INDICATOR_PREFIX = 'semantic_indicator:';
@@ -130,14 +131,46 @@ const isSameOrigin = (ioc: ExtractedIoc, articleUrl?: string): boolean => {
   return ioc.type === 'domain' && ioc.value.toLowerCase() === articleHost;
 };
 
+const SEMANTIC_CANDIDATE_TYPES: ReadonlySet<IocType> = new Set(['url', 'domain', 'hash', 'email']);
+const isSemanticCandidateType = (type: IocType): boolean => SEMANTIC_CANDIDATE_TYPES.has(type);
+
+/**
+ * Hash tier bases the extractor assigns from prose alone. A hash under an IOC heading
+ * (`ioc_section`) or written defanged (`defanged_source`) is attributed by its placement and
+ * stays deterministic: the model would judge it from a window holding only neighbouring hashes,
+ * and a rejection is stored as `reference` with nothing to re-review it. Only a bare high-entropy
+ * hash in prose, the commit-SHA case, goes to review.
+ */
+const PROSE_HASH_BASES: ReadonlySet<string> = new Set(['hash_high_entropy']);
+
+/**
+ * Email tier bases the extractor assigns from prose alone. A placeholder host
+ * (`placeholder_email`), an email written defanged (`defanged_source`) and one under an IOC
+ * heading (`ioc_section`) are decided by the value or its placement and keep their tier. Only a
+ * plain-prose address on a real domain goes to review: the same address is a phishing sender in
+ * one paragraph and a publisher's contact line in another, and only the text around it says which.
+ */
+const PROSE_EMAIL_BASES: ReadonlySet<string> = new Set(['uncertain_default']);
+
+/** Whether this IOC, at its extract-time tier and basis, is one the model pass judges. */
 const isSemanticCandidate = (ioc: ExtractedIoc): boolean =>
-  (ioc.type === 'url' || ioc.type === 'domain') && PROMOTABLE_TIERS.has(ioc.tier);
+  isSemanticCandidateType(ioc.type) &&
+  PROMOTABLE_TIERS.has(ioc.tier) &&
+  (ioc.type !== 'hash' || PROSE_HASH_BASES.has(ioc.tier_basis)) &&
+  (ioc.type !== 'email' || PROSE_EMAIL_BASES.has(ioc.tier_basis));
 
 const tierPriority = (tier: IocTier): number => {
   if (tier === 'discriminating') return 0;
   if (tier === 'contextual') return 1;
   return 2;
 };
+
+/**
+ * Within a tier, emails go after urls, domains and hashes. extract_iocs emits emails first, so
+ * ordering by index alone would let a long address list (a recipient list, a breach notice) fill
+ * the full-source first batch and the batch budget ahead of every url, domain and hash.
+ */
+const typePriority = (type: IocType): number => (type === 'email' ? 1 : 0);
 
 const downgrade = (ioc: ExtractedIoc, basis: string): ExtractedIoc => ({
   ...ioc,
@@ -183,6 +216,7 @@ export const prepareIocAdjudication = (
     .sort(
       (left, right) =>
         tierPriority(left.ioc.tier) - tierPriority(right.ioc.tier) ||
+        typePriority(left.ioc.type) - typePriority(right.ioc.type) ||
         left.originalIndex - right.originalIndex
     );
 
@@ -394,12 +428,17 @@ export const reconcileIocAdjudication = (
         );
   }
 
-  // Deferred URL/domain candidates keep heuristic tiers in `iocs`, but stay out
-  // of anchors / promotion until a model pass reviews them. Correlation hash is separate.
+  // Deferred URL/domain/prose-hash/prose-email candidates keep heuristic tiers in `iocs`, but
+  // stay out of anchors / promotion until a model pass reviews them. Candidacy is
+  // read off the pre-verdict output, since a verdict rewrites the basis. Correlation
+  // hash is separate.
+  const candidateIndexes = new Set(
+    prepared.output.flatMap((ioc, index) => (isSemanticCandidate(ioc) ? [index] : []))
+  );
   for (let index = 0; index < output.length; index++) {
     const ioc = output[index];
     if (
-      (ioc.type === 'url' || ioc.type === 'domain') &&
+      candidateIndexes.has(index) &&
       PROMOTABLE_TIERS.has(ioc.tier) &&
       !reviewedIndexes.has(index)
     ) {
@@ -414,7 +453,7 @@ export const reconcileIocAdjudication = (
 
   const anchorIocs = strippedOutput.filter((ioc, index) => {
     if (!PROMOTABLE_TIERS.has(ioc.tier)) return false;
-    if ((ioc.type === 'url' || ioc.type === 'domain') && !reviewedIndexes.has(index)) {
+    if (candidateIndexes.has(index) && !reviewedIndexes.has(index)) {
       return false;
     }
     return true;

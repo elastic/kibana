@@ -23,6 +23,7 @@ export const transformGetConnectorSpecResponse = (
     ...(spec.metadata.isTechnicalPreview !== undefined
       ? { is_technical_preview: spec.metadata.isTechnicalPreview }
       : {}),
+    ...(spec.metadata.specVersion !== undefined ? { spec_version: spec.metadata.specVersion } : {}),
   },
   schema: spec.schema,
   is_testable: spec.isTestable,

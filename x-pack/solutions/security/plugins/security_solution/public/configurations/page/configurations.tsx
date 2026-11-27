@@ -7,14 +7,14 @@
 
 import React from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { ConfigurationsTabs } from './configuration_tabs';
+import { ConfigurationsHeader } from './configurations_header';
 import { ConfigurationsRouter } from './configuration_router';
 
 export const Configurations: React.FC = () => {
   return (
     <KibanaPageTemplate restrictWidth={false} contentBorder={true}>
       <KibanaPageTemplate.Section grow={true} bottomBorder="extended">
-        <ConfigurationsTabs />
+        <ConfigurationsHeader />
         <ConfigurationsRouter />
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>

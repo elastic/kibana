@@ -38,7 +38,10 @@ describe('mergeConnectors', () => {
     });
 
     it('keeps declared parameters on SO-configured connectors', () => {
-      const soA = { ...inferenceConnector('so-a'), parameters: { temperature: 0 } };
+      const soA = {
+        ...inferenceConnector('so-a'),
+        parameters: { reasoning: { effort: 'low' as const } },
+      };
 
       const result = mergeConnectors([soA], [inferenceConnector('so-a')], true);
 
@@ -71,7 +74,7 @@ describe('mergeConnectors', () => {
     });
 
     it('keeps declared parameters on recommended endpoints', () => {
-      const parameters = { reasoning: { effort: 'low' as const }, temperature: 0.5 };
+      const parameters = { reasoning: { effort: 'low' as const } };
       const recommended = { ...inferenceConnector('rec'), parameters };
       const other = inferenceConnector('other');
 

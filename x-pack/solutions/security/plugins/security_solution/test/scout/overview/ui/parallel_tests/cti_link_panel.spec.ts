@@ -6,12 +6,21 @@
  */
 
 import type { EsClient } from '@kbn/scout-security';
+import { DATA_LOAD_TIMEOUT_MS } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 import { spaceTest, tags } from '../fixtures';
 
 const THREAT_INDEX_SETTING = 'securitySolution:defaultThreatIndex';
 const FEED_NAME = 'AbuseCH malware';
+// Flashpoint labels its raw copies with `labels.is_transform_source`, not `labels.is_ioc_transform_source`.
+const ALT_LABEL_FEED_NAME = 'Flashpoint';
+const PREVIOUS_INDICATOR_TIMESTAMP = '2021-03-09T10:00:00.000Z';
 const INDICATOR_TIMESTAMP = '2021-03-10T14:51:05.766Z';
+const UNLABELED_INDICATOR = {
+  feedName: FEED_NAME,
+  dataset: 'ti_abusech.malware',
+  timestamp: INDICATOR_TIMESTAMP,
+} as const;
 const RANGE_WITH_INDICATOR = {
   from: '2021-03-01T00:00:00.000Z',
   to: '2021-03-31T23:59:59.999Z',
@@ -27,6 +36,10 @@ const indexNames = (spaceId: string) => {
   return {
     events: `endgame-scout-cti-events-${suffix}`,
     threat: `endgame-scout-cti-threat-${suffix}`,
+    threatRaw: `endgame-scout-cti-threat-raw-${suffix}`,
+    threatLatest: `endgame-scout-cti-threat-latest-${suffix}`,
+    threatAltLabelRaw: `endgame-scout-cti-threat-alt-raw-${suffix}`,
+    threatAltLabelLatest: `endgame-scout-cti-threat-alt-latest-${suffix}`,
   } as const;
 };
 
@@ -41,22 +54,6 @@ const createIndexWithDocument = async (
   await esClient.index({ index, document, refresh: 'wait_for' });
 };
 
-const createThreatIndex = (esClient: EsClient, spaceId: string): Promise<void> =>
-  createIndexWithDocument(
-    esClient,
-    indexNames(spaceId).threat,
-    {
-      '@timestamp': { type: 'date' },
-      event: { properties: { dataset: { type: 'keyword' } } },
-      threat: { properties: { feed: { properties: { name: { type: 'keyword' } } } } },
-    },
-    {
-      '@timestamp': INDICATOR_TIMESTAMP,
-      event: { dataset: 'ti_abusech.malware' },
-      threat: { feed: { name: FEED_NAME } },
-    }
-  );
-
 spaceTest.describe(
   'Overview threat intelligence panel',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
@@ -67,8 +64,16 @@ spaceTest.describe(
         await scoutSpace.setSolutionView('security');
       }
       // A per-space threat index keeps parallel workers from reading each other's indicators.
+      const { threat, threatRaw, threatLatest, threatAltLabelRaw, threatAltLabelLatest } =
+        indexNames(scoutSpace.id);
       await scoutSpace.uiSettings.set({
-        [THREAT_INDEX_SETTING]: [indexNames(scoutSpace.id).threat],
+        [THREAT_INDEX_SETTING]: [
+          threat,
+          threatRaw,
+          threatLatest,
+          threatAltLabelRaw,
+          threatAltLabelLatest,
+        ],
       });
     });
 
@@ -77,8 +82,12 @@ spaceTest.describe(
     });
 
     spaceTest.afterEach(async ({ esClient, scoutSpace }) => {
-      const { events, threat } = indexNames(scoutSpace.id);
-      await esClient.indices.delete({ index: [events, threat], ignore_unavailable: true });
+      const { events, threat, threatRaw, threatLatest, threatAltLabelRaw, threatAltLabelLatest } =
+        indexNames(scoutSpace.id);
+      await esClient.indices.delete({
+        index: [events, threat, threatRaw, threatLatest, threatAltLabelRaw, threatAltLabelLatest],
+        ignore_unavailable: true,
+      });
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {
@@ -112,14 +121,18 @@ spaceTest.describe(
 
     spaceTest(
       'shows zero indicators when the time range has no events',
-      async ({ esClient, scoutSpace, pageObjects }) => {
-        await createThreatIndex(esClient, scoutSpace.id);
+      async ({ apiServices, scoutSpace, pageObjects }) => {
+        await apiServices.threatIntelligence.createIndicators(indexNames(scoutSpace.id).threat, [
+          UNLABELED_INDICATOR,
+        ]);
 
         const { securityOverviewPage } = pageObjects;
         await securityOverviewPage.navigate(RANGE_WITHOUT_INDICATOR);
 
         await expect(securityOverviewPage.threatIntelDisabledCallout).toBeHidden();
-        await expect(securityOverviewPage.threatIntelPanel).toContainText(FEED_NAME);
+        await expect(securityOverviewPage.threatIntelPanel).toContainText(FEED_NAME, {
+          timeout: DATA_LOAD_TIMEOUT_MS,
+        });
         await expect(securityOverviewPage.threatIntelIndicatorCount).toHaveText(
           'Showing: 0 indicators'
         );
@@ -128,17 +141,63 @@ spaceTest.describe(
 
     spaceTest(
       'lists the feed and counts indicators in the time range',
-      async ({ esClient, scoutSpace, pageObjects }) => {
-        await createThreatIndex(esClient, scoutSpace.id);
+      async ({ apiServices, scoutSpace, pageObjects }) => {
+        await apiServices.threatIntelligence.createIndicators(indexNames(scoutSpace.id).threat, [
+          UNLABELED_INDICATOR,
+        ]);
 
         const { securityOverviewPage } = pageObjects;
         await securityOverviewPage.navigate(RANGE_WITH_INDICATOR);
 
-        await expect(securityOverviewPage.threatIntelPanel).toContainText(FEED_NAME);
+        await expect(securityOverviewPage.threatIntelPanel).toContainText(FEED_NAME, {
+          timeout: DATA_LOAD_TIMEOUT_MS,
+        });
         await expect(securityOverviewPage.threatIntelPanel).not.toContainText('Anomali');
         await expect(securityOverviewPage.threatIntelIndicatorCount).toHaveText(
           'Showing: 1 indicator'
         );
+      }
+    );
+
+    spaceTest(
+      'counts each transform indicator once alongside indicators without the transform label',
+      async ({ apiServices, scoutSpace, pageObjects }) => {
+        const { threat, threatRaw, threatLatest, threatAltLabelRaw, threatAltLabelLatest } =
+          indexNames(scoutSpace.id);
+        const { threatIntelligence } = apiServices;
+        await threatIntelligence.createTransformIndicators({
+          label: 'is_ioc_transform_source',
+          feedName: FEED_NAME,
+          dataset: 'ti_abusech.malware',
+          rawIndex: threatRaw,
+          latestIndex: threatLatest,
+          previousTimestamp: PREVIOUS_INDICATOR_TIMESTAMP,
+          latestTimestamp: INDICATOR_TIMESTAMP,
+        });
+        await threatIntelligence.createTransformIndicators({
+          label: 'is_transform_source',
+          feedName: ALT_LABEL_FEED_NAME,
+          dataset: 'ti_flashpoint.indicator',
+          rawIndex: threatAltLabelRaw,
+          latestIndex: threatAltLabelLatest,
+          previousTimestamp: PREVIOUS_INDICATOR_TIMESTAMP,
+          latestTimestamp: INDICATOR_TIMESTAMP,
+        });
+        await threatIntelligence.createIndicators(threat, [UNLABELED_INDICATOR]);
+
+        const { securityOverviewPage } = pageObjects;
+        await securityOverviewPage.navigate(RANGE_WITH_INDICATOR);
+
+        await expect(securityOverviewPage.threatIntelPanel).toContainText(ALT_LABEL_FEED_NAME, {
+          timeout: DATA_LOAD_TIMEOUT_MS,
+        });
+        await expect(securityOverviewPage.threatIntelIndicatorCount).toHaveText(
+          'Showing: 3 indicators'
+        );
+        await expect(securityOverviewPage.threatIntelFeedIndicatorCount(FEED_NAME)).toHaveText('2');
+        await expect(
+          securityOverviewPage.threatIntelFeedIndicatorCount(ALT_LABEL_FEED_NAME)
+        ).toHaveText('1');
       }
     );
   }

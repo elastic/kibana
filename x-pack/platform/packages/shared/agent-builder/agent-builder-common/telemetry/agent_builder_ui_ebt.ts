@@ -37,6 +37,9 @@ const ebtAction = {
     PIN_CONVERSATION: 'pin_conversation',
     UNPIN_CONVERSATION: 'unpin_conversation',
   },
+  conversationStarters: {
+    CONVERSATION_STARTER_CLICK: 'conversation_starter_click',
+  },
   agentCustomization: {
     ENTITY_ADD_FROM_LIBRARY: 'entity_add_from_library',
     ENTITY_CREATE_NEW: 'entity_create_new',
@@ -213,6 +216,7 @@ const ebtAction = {
     FEEDBACK_INVITE_DISMISSED: 'feedback_invite_dismissed',
     DOWNLOAD_CONVERSATION: 'download_conversation',
     LOAD_TRACE_FROM_FILE: 'load_trace_from_file',
+    OPEN_ACTIVITY_LOG: 'open_activity_log',
   },
   libraryPanel: {
     MANAGE_ALL: 'manage_all',

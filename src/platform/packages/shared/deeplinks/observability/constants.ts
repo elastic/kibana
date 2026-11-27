@@ -40,13 +40,13 @@ export const INVENTORY_APP_ID = 'inventory';
 
 export const STREAMS_APP_ID = 'streams';
 
-export const SIGNIFICANT_EVENTS_APP_ID = 'significantEvents';
-
 export const INGEST_HUB_APP_ID = 'ingestHub';
 
 export const ONBOARDING_APP_ID = 'onboarding';
 
 export const NIGHTSHIFT_APP_ID = 'nightshift';
+
+export const ENTITY_INVENTORY_APP_ID = 'entityInventoryApp';
 
 export const OBSERVABILITY_ALERTING_APP_ID = 'observabilityAlerting';
 export const OBSERVABILITY_ALERTING_APP_ROUTE = 'observability/alerting';
@@ -60,3 +60,4 @@ export const OBSERVABILITY_ALERTING_RULES_V2_PATH = '/rules/universal';
 export const OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH = '/rule-library';
 export const OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH = '/action-policies';
 export const OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH = '/execution-history';
+export const OBSERVABILITY_ALERTING_IMPORTS_PATH = '/imports';

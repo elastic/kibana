@@ -6,10 +6,11 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { CreateCaseModal } from './create_case_modal';
-import { TestProviders } from '../../common/mock';
+import { renderWithTestingProviders } from '../../common/mock';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { CreateCase } from '../create';
 
@@ -35,42 +36,26 @@ describe('CreateCaseModal', () => {
   });
 
   it('renders', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <CreateCaseModal {...defaultProps} />
-      </TestProviders>
-    );
+    renderWithTestingProviders(<CreateCaseModal {...defaultProps} />);
 
-    expect(wrapper.find(`[data-test-subj='create-case-modal']`).exists()).toBeTruthy();
+    expect(screen.getByTestId('create-case-modal')).toBeInTheDocument();
   });
 
   it('it does not render the modal isModalOpen=false ', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <CreateCaseModal {...defaultProps} isModalOpen={false} />
-      </TestProviders>
-    );
+    renderWithTestingProviders(<CreateCaseModal {...defaultProps} isModalOpen={false} />);
 
-    expect(wrapper.find(`[data-test-subj='create-case-modal']`).exists()).toBeFalsy();
+    expect(screen.queryByTestId('create-case-modal')).not.toBeInTheDocument();
   });
 
-  it('Closing modal calls onCloseCaseModal', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <CreateCaseModal {...defaultProps} />
-      </TestProviders>
-    );
+  it('Closing modal calls onCloseCaseModal', async () => {
+    renderWithTestingProviders(<CreateCaseModal {...defaultProps} />);
 
-    wrapper.find('button.euiModal__closeIcon').first().simulate('click');
+    await userEvent.click(screen.getByRole('button', { name: 'Closes this modal window' }));
     expect(onCloseCaseModal).toHaveBeenCalled();
   });
 
   it('pass the correct props to getCreateCase method', () => {
-    mount(
-      <TestProviders>
-        <CreateCaseModal {...defaultProps} />
-      </TestProviders>
-    );
+    renderWithTestingProviders(<CreateCaseModal {...defaultProps} />);
 
     expect(CreateCaseMock.mock.calls[0][0]).toEqual(
       expect.objectContaining({

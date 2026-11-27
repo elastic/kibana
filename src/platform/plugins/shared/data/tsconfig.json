@@ -55,6 +55,7 @@
     "@kbn/search-types",
     "@kbn/safer-lodash-set",
     "@kbn/esql-utils",
+    "@kbn/esql-types",
     "@kbn/data-source",
     "@kbn/shared-ux-table-persist",
     "@kbn/core-execution-context-common",
@@ -72,6 +73,7 @@
     "@kbn/date-range-picker-presets-common",
     "@kbn/zod",
     "@kbn/licensing-plugin",
+    "@kbn/ui-callout",
   ],
   "exclude": ["target/**/*"]
 }

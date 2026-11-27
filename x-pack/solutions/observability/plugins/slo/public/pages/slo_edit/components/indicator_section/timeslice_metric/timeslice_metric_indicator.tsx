@@ -17,33 +17,27 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, useWatch } from 'react-hook-form';
 import { IndexAndTimestampField } from '../custom_common/index_and_timestamp_field';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { GroupByField } from '../../common/group_by_field';
 import type { CreateSLOForm } from '../../../types';
 import { DataPreviewChart } from '../../common/data_preview_chart';
 import { QueryBuilder } from '../../common/query_builder';
-import { DATA_VIEW_FIELD } from '../custom_common/index_selection';
+import { useIndicatorDataView } from '../custom_common/use_indicator_data_view';
 import { MetricIndicator } from './metric_indicator';
 import { COMPARATOR_MAPPING } from '../../../constants';
-import { useCreateDataView } from '../../../../../hooks/use_create_data_view';
 
 export { NEW_TIMESLICE_METRIC } from './metric_indicator';
 
 export function TimesliceMetricIndicatorTypeForm() {
-  const { watch } = useFormContext<CreateSLOForm>();
-  const index = watch('indicator.params.index');
-  const dataViewId = watch(DATA_VIEW_FIELD);
+  const { control } = useFormContext<CreateSLOForm>();
 
-  const { dataView, loading: isIndexFieldsLoading } = useCreateDataView({
-    indexPatternString: index,
-    dataViewId,
-  });
+  const { dataView, loading: isIndexFieldsLoading } = useIndicatorDataView();
 
   const { uiSettings } = useKibana().services;
-  const threshold = watch('indicator.params.metric.threshold');
-  const comparator = watch('indicator.params.metric.comparator');
+  const threshold = useWatch({ control, name: 'indicator.params.metric.threshold' });
+  const comparator = useWatch({ control, name: 'indicator.params.metric.comparator' });
   const { euiTheme } = useEuiTheme();
 
   return (

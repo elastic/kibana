@@ -29,9 +29,12 @@ import type {
 } from '@kbn/core/server';
 import { registerContentInsights } from '@kbn/content-management-content-insights-server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { ChangeHistoryClient } from '@kbn/change-history';
+import type { SpacesPluginStartApi } from '@kbn/spaces-plugin/server/plugin';
 
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { registerAccessControl } from '@kbn/content-management-access-control-server';
 import { once } from 'lodash';
 import { schema } from '@kbn/config-schema';
@@ -48,10 +51,13 @@ import { registerDashboardUsageCollector } from './usage/register_collector';
 import { dashboardPersistableStateServiceFactory } from './dashboard_container/dashboard_container_embeddable_factory';
 import { registerRoutes, read } from './api';
 import { DashboardAppLocatorDefinition } from '../common/locator/locator';
+import { areEqual } from '../common/dashboard_state';
 import { setKibanaServices } from './kibana_services';
 import { scanDashboards } from './scan_dashboards';
 import { registerDashboardDrilldown } from './dashboard_drilldown/register_dashboard_drilldown';
 import { getDashboardStateSchema } from './api/dashboard_state_schemas';
+import { startChangeHistoryClient } from './change_history/change_history_service';
+import { createDashboardWriteClient } from './dashboard_write_client';
 
 export const DEFER_BELOW_FOLD = `labs:dashboard:deferBelowFold` as const;
 
@@ -69,6 +75,7 @@ export interface StartDeps {
   savedObjectsTagging?: SavedObjectTaggingStart;
   share?: SharePluginStart;
   security?: SecurityPluginStart;
+  spaces?: SpacesPluginStartApi;
 }
 
 export class DashboardPlugin
@@ -76,9 +83,12 @@ export class DashboardPlugin
 {
   private readonly logger: Logger;
   private apiUsageCounter?: UsageCounter;
+  private readonly currentKibanaVersion: string;
+  private changeHistoryClient: ChangeHistoryClient | undefined;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
+    this.currentKibanaVersion = initializerContext.env.packageInfo.version;
   }
 
   public setup(core: CoreSetup<StartDeps, DashboardPluginStart>, plugins: SetupDeps) {
@@ -147,8 +157,7 @@ export class DashboardPlugin
       },
     };
     core.uiSettings.register(dashboardUiSettings);
-
-    registerRoutes(core.http, this.apiUsageCounter, this.logger);
+    registerRoutes(core, this.apiUsageCounter, this.logger);
 
     void registerAccessControl({
       http: core.http,
@@ -160,6 +169,13 @@ export class DashboardPlugin
     });
 
     registerDashboardDrilldown(plugins.embeddable);
+
+    this.changeHistoryClient = new ChangeHistoryClient({
+      module: 'dashboard',
+      dataset: 'dashboards',
+      logger: this.logger,
+      kibanaVersion: this.currentKibanaVersion,
+    });
 
     return {};
   }
@@ -199,7 +215,15 @@ export class DashboardPlugin
       return getDashboardStateSchema(false);
     });
 
+    if (this.changeHistoryClient) {
+      startChangeHistoryClient(this.changeHistoryClient, core, this.logger);
+    }
+
     return {
+      areEqual: (a: DashboardState, b: DashboardState) =>
+        areEqual(a, b, (type, embeddableState) =>
+          plugins.embeddable.getComparators(type, embeddableState)
+        ),
       scanDashboards: (
         savedObjectsClient: SavedObjectsClientContract,
         page: number,
@@ -221,9 +245,8 @@ export class DashboardPlugin
             )
           ).body;
         },
+        ...createDashboardWriteClient(getCachedDashboardStateSchema),
       },
     };
   }
-
-  public stop() {}
 }

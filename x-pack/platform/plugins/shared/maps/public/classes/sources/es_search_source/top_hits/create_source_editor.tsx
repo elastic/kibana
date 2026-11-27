@@ -83,7 +83,7 @@ export class CreateSourceEditor extends Component<Props, State> {
     this.setState({ geoFieldName: geoFieldName ? geoFieldName : null }, this._previewLayer);
   };
 
-  _onTopHitsPropChange = ({ propName, value }: OnSourceChangeArgs) => {
+  _onTopHitsPropChange = ({ propName, value }: OnSourceChangeArgs<ESSearchSourceDescriptor>) => {
     this.setState(
       // @ts-expect-error
       { [propName]: value },

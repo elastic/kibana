@@ -7,7 +7,7 @@
 
 import { CHROME_HEADER_TEST_SUBJECTS } from '@kbn/core-chrome-browser-components';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import type { ScoutPage } from '@kbn/scout';
+import type { KibanaUrl, ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 export type SpaceSolution = 'es' | 'oblt' | 'security' | 'classic';
@@ -21,7 +21,7 @@ export type SpaceSolution = 'es' | 'oblt' | 'security' | 'classic';
  * specs, per Scout convention.
  */
 export class SpacesPage {
-  constructor(private readonly page: ScoutPage) {}
+  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
 
   async isProjectHeaderVisible() {
     return await this.page.testSubj.locator(CHROME_HEADER_TEST_SUBJECTS.root).isVisible();
@@ -197,8 +197,10 @@ export class SpacesPage {
   }
 
   async gotoEditSpace(spaceId: string) {
-    await this.page.gotoApp(`management/kibana/spaces/edit/${spaceId}`);
-    await this.viewPageLocator().waitFor({ state: 'visible' });
+    await this.page.goto(this.kbnUrl.app(`management/kibana/spaces/edit/${spaceId}`), {
+      waitUntil: 'commit',
+    });
+    await this.viewPageLocator().waitFor({ state: 'visible', timeout: 30_000 });
   }
 
   async gotoCreateSpace() {
@@ -339,8 +341,13 @@ export class SpacesPage {
     await this.page.testSubj.click('save-space-button');
   }
 
-  async confirmModal() {
-    await this.page.testSubj.click('confirmModalConfirmButton');
+  async confirmSaveAndWaitForReload() {
+    // Only the reload's load event distinguishes the grid; settle the current load first.
+    await this.page.waitForLoadState('load', { timeout: 30_000 });
+    await Promise.all([
+      this.page.waitForEvent('load', { timeout: 30_000 }),
+      this.page.testSubj.click('confirmModalConfirmButton'),
+    ]);
   }
 
   /** Opens the solution-view dropdown (idempotent) and selects the given solution. */

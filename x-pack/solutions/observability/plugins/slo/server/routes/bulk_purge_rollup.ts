@@ -5,19 +5,31 @@
  * 2.0.
  */
 
-import { bulkPurgeRollupSchema } from '@kbn/slo-schema';
+import path from 'path';
+import { bulkPurgeRollupSchema, bulkPurgeRollupResponseSchema } from '@kbn/slo-schema';
 import { createSloServerRoute } from './utils/create_slo_server_route';
 import { assertPlatinumLicense } from './utils/assert_platinum_license';
 import { BulkPurgeRollupData } from '../services/bulk_purge_rollup_data';
 
 export const bulkPurgeRollupRoute = createSloServerRoute({
   endpoint: 'POST /api/observability/slos/_bulk_purge_rollup 2023-10-31',
+  options: {
+    access: 'public',
+    summary: 'Batch delete rollup and summary data',
+    description:
+      'The deletion occurs for the specified list of `sloId`. You must have `all` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.',
+    operationId: 'deleteRollupDataOp',
+    oasOperationObject: () => path.join(__dirname, 'examples/bulk_purge_rollup.yaml'),
+  },
   security: {
     authz: {
       requiredPrivileges: ['slo_write'],
     },
   },
   params: bulkPurgeRollupSchema,
+  responses: {
+    200: { description: 'Successful request', body: () => bulkPurgeRollupResponseSchema },
+  },
   handler: async ({ request, context, params, logger, plugins, getScopedClients }) => {
     await assertPlatinumLicense(plugins);
 

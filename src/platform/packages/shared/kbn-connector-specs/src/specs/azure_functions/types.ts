@@ -41,16 +41,16 @@ const ROUTE_PATTERN =
 
 /**
  * Azure resource-group names allow letters, digits, periods, underscores,
- * hyphens and parentheses, up to 90 characters. Every action interpolates this
- * value into an ARM URL path, so it is constrained here as well as escaped in
- * the handler.
+ * hyphens and parentheses, up to 90 characters, and can't end with a period.
+ * Every action interpolates this value into an ARM URL path, so it is
+ * constrained here as well as escaped in the handler.
  */
 const ResourceGroupNameSchema = lazySchema(() =>
   z
     .string()
     .min(1)
     .max(90)
-    .regex(/^[A-Za-z0-9._()-]+$/, 'Must be a valid Azure resource group name.')
+    .regex(/^[A-Za-z0-9._()-]*[A-Za-z0-9_()-]$/, 'Must be a valid Azure resource group name.')
     .describe(
       'Name of the resource group that contains the function app. Example: "rg-payments-prod". Returned in the "id" field of listFunctionApps results.'
     )

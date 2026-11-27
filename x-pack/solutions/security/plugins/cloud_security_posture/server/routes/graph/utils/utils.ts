@@ -5,51 +5,34 @@
  * 2.0.
  */
 
-import type { EntityNodeDataModel } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import { entityTypeMappings } from '../entity_type_constants';
 
 /**
- * Interface for visual properties returned by the transform function
+ * Returns the icon for an entity type, matched case-insensitively, or `undefined` when the type
+ * has no mapping.
  */
-export interface EntityVisualProps {
-  icon?: string;
-  shape?: EntityNodeDataModel['shape'];
-}
-
-/**
- * Transforms entity type to standardized icon and shape values
- * This helps normalize different entity type representations to consistent visual properties
- *
- * @param entityGroupType The type of the entity group
- * @returns Object containing the icon and shape for the entity
- */
-export const transformEntityTypeToIconAndShape = (entityGroupType: string): EntityVisualProps => {
+export const getEntityTypeIcon = (entityGroupType: string): string | undefined => {
   if (!entityGroupType) {
-    return {};
+    return undefined;
   }
 
-  const entityGroupTypeLower = entityGroupType.toLowerCase();
-
-  return {
-    icon: entityTypeMappings.icons[entityGroupTypeLower],
-    shape: entityTypeMappings.shapes[entityGroupTypeLower],
-  };
+  return entityTypeMappings.icons[entityGroupType.toLowerCase()];
 };
 
 /**
- * Comparator for sorting connector nodes: relationship nodes first, then label nodes,
+ * Comparator for sorting connector nodes: relationship nodes first, then event nodes,
  * then alphabetically by label within each group.
- * Accepts objects with at least { shape?: string; label?: string }.
+ * Accepts objects with at least { kind?: string; label?: string }.
  */
 export const compareConnectorNodes = (
-  a?: { shape?: string; label?: string },
-  b?: { shape?: string; label?: string }
+  a?: { kind?: string; label?: string },
+  b?: { kind?: string; label?: string }
 ): number => {
-  const shapeA = a?.shape;
-  const shapeB = b?.shape;
+  const kindA = a?.kind;
+  const kindB = b?.kind;
 
-  if (shapeA === 'relationship' && shapeB === 'label') return -1;
-  if (shapeA === 'label' && shapeB === 'relationship') return 1;
+  if (kindA === 'relationship' && kindB === 'event') return -1;
+  if (kindA === 'event' && kindB === 'relationship') return 1;
 
   const labelA = a?.label ?? '';
   const labelB = b?.label ?? '';

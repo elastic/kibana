@@ -11,6 +11,7 @@ import type {
   ChatCompleteCompositeResponse,
   ChatCompleteResponse,
   ChatCompleteStreamResponse,
+  FeatureChatCompleteAPI,
 } from '../api';
 import type { Message } from '../messages';
 import { MessageRole } from '../messages';
@@ -18,6 +19,7 @@ import type { ToolDefinition } from '../tools';
 import { ToolChoiceType } from '../tools';
 
 declare const mockApi: ChatCompleteAPI;
+declare const mockFeatureApi: ChatCompleteAPI & FeatureChatCompleteAPI;
 const minimalMessages: Message[] = [{ role: MessageRole.User, content: 'hello' }];
 
 const getWeatherToolDefinition = {
@@ -223,3 +225,44 @@ resToolChoiceSpecific.then((r) => {
     >(r.toolCalls);
   }
 });
+
+/**
+ * featureId instead of connectorId = same response types
+ */
+const resConnectorOnFeatureApi = mockFeatureApi({
+  connectorId: 'c1',
+  messages: minimalMessages,
+});
+
+expectType<Promise<ChatCompleteResponse<{ tools: {}; toolChoice: ToolChoiceType.auto }>>>(
+  resConnectorOnFeatureApi
+);
+
+const resFeature = mockFeatureApi({
+  featureId: 'my_feature',
+  messages: minimalMessages,
+  tools: { get_weather: getWeatherToolDefinition },
+});
+
+expectType<
+  Promise<
+    ChatCompleteResponse<{
+      tools: { get_weather: typeof getWeatherToolDefinition };
+      toolChoice: ToolChoiceType.auto;
+    }>
+  >
+>(resFeature);
+
+const resFeatureStream = mockFeatureApi({
+  featureId: 'my_feature',
+  messages: minimalMessages,
+  stream: true,
+  tools: { get_weather: getWeatherToolDefinition },
+});
+
+expectType<
+  ChatCompleteStreamResponse<{
+    tools: { get_weather: typeof getWeatherToolDefinition };
+    toolChoice: ToolChoiceType.auto;
+  }>
+>(resFeatureStream);

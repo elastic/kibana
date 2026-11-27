@@ -109,3 +109,34 @@ describe('createVisualizationAttachmentType resolve()', () => {
     expect(result).toBeUndefined();
   });
 });
+
+describe('createVisualizationAttachmentType format()', () => {
+  const describeAttachment = async (data: Record<string, unknown>): Promise<string> => {
+    const definition = createVisualizationAttachmentType();
+    const formatted = await definition.format(
+      { id: 'att-1', type: 'visualization', data } as never,
+      { request: {}, spaceId: 'default' } as never
+    );
+    const representation = await formatted.getRepresentation!();
+    return (representation as { type: 'text'; value: string }).value;
+  };
+
+  const customContent = { renderer: 'custom_content', query: 'a board', visualization: {} };
+
+  it('says a panel without queries is static', async () => {
+    expect(await describeAttachment(customContent)).toContain('ES|QL: none (static content)');
+  });
+
+  it('names each query of a panel with several by the way the template reads it', async () => {
+    const value = await describeAttachment({ ...customContent, esql: ['FROM a', 'FROM b'] });
+
+    expect(value).toContain('ES|QL, read by the template as rows: FROM a');
+    expect(value).toContain('ES|QL, read by the template as queries[1].rows: FROM b');
+  });
+
+  it('reads a query saved as a single string, as before a panel could have several', async () => {
+    expect(await describeAttachment({ ...customContent, esql: 'FROM legacy' })).toContain(
+      'ES|QL: FROM legacy'
+    );
+  });
+});

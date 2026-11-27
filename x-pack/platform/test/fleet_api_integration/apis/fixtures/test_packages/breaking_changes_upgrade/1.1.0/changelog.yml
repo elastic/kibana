@@ -1,0 +1,10 @@
+- version: "1.1.0"
+  changes:
+    - description: Add a non breaking enhancement.
+      type: enhancement
+      link: https://github.com/elastic/kibana/issues/299863
+- version: "1.0.0"
+  changes:
+    - description: Initial release.
+      type: enhancement
+      link: https://github.com/elastic/kibana/issues/299863

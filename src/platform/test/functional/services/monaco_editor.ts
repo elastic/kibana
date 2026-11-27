@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// eslint-disable-next-line @kbn/imports/no_direct_monaco_import -- we need to import monaco directly for this service
+// eslint-disable-next-line @kbn/kbn-monaco/no_direct_monaco_import -- we need to import monaco directly for this service
 import type { monaco } from '@kbn/monaco';
 import expect from '@kbn/expect';
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';

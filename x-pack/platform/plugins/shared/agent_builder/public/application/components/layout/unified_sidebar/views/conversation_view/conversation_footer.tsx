@@ -7,6 +7,7 @@
 
 import React from 'react';
 
+import type { UseEuiTheme } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -16,6 +17,10 @@ import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { appPaths } from '../../../../../utils/app_paths';
 import { useNavigation } from '../../../../../hooks/use_navigation';
 import { SidebarLink } from './sidebar_link';
+
+const ruleInsetStyles = ({ euiTheme }: UseEuiTheme) => css`
+  padding-inline: ${euiTheme.size.m};
+`;
 
 export const ConversationFooter: React.FC = () => {
   const { navigateToAgentBuilderUrl } = useNavigation();
@@ -28,7 +33,7 @@ export const ConversationFooter: React.FC = () => {
         flex-grow: 0;
       `}
     >
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} css={ruleInsetStyles}>
         <EuiHorizontalRule margin="none" />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

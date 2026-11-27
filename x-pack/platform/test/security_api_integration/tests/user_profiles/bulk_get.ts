@@ -7,6 +7,7 @@
 
 import type { Cookie } from 'tough-cookie';
 
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import expect from '@kbn/expect';
 import { findSessionCookie } from '@kbn/security-api-integration-helpers';
 
@@ -39,6 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
         ['one', 'two', 'three'].map(async (userPrefix) => {
           const response = await supertestWithoutAuth
             .post('/internal/security/login')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .set('kbn-xsrf', 'xxx')
             .send({
               providerType: 'basic',
@@ -106,7 +108,7 @@ export default function ({ getService }: FtrProviderContext) {
             .set('Cookie', usersSessions.get(`user_${userPrefix}`)!.cookie.cookieString())
             .send({
               avatar: {
-                initials: `some-initials-${userPrefix}`,
+                initials: userPrefix.slice(0, 2),
                 color: `#f3f3f3`,
               },
               userSettings: { darkMode: `dark`, contrastMode: `high` },
@@ -164,7 +166,7 @@ export default function ({ getService }: FtrProviderContext) {
               "avatar": Object {
                 "color": "#f3f3f3",
                 "imageUrl": null,
-                "initials": "some-initials-one",
+                "initials": "on",
               },
             },
             "user": Object {
@@ -178,7 +180,7 @@ export default function ({ getService }: FtrProviderContext) {
               "avatar": Object {
                 "color": "#f3f3f3",
                 "imageUrl": null,
-                "initials": "some-initials-two",
+                "initials": "tw",
               },
             },
             "user": Object {

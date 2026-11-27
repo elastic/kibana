@@ -18,13 +18,11 @@ const MARGIN_CLICK_TIMEOUT_MS = 3_000;
 // `autocomplete_entities` fans out cluster-wide on a real Cloud project, so it outlasts the
 // default expect timeout. Kept well under the 60s per-test budget, which this shares.
 const AUTOCOMPLETE_ENTITIES_TIMEOUT_MS = 30_000;
-// Each test's browser context refetches Kibana's whole bundle graph, which on a Cloud
-// deployment regularly outlasts the default timeouts.
-const APP_BOOTSTRAP_TIMEOUT_MS = 30_000;
 
 export class ConsolePage {
   public readonly inputEditor: Locator;
   public readonly inputEditorContainer: Locator;
+  public readonly appContainer: Locator;
   public readonly outputEditor: Locator;
   public readonly inputEditorLines: Locator;
   public readonly outputEditorContent: Locator;
@@ -101,6 +99,7 @@ export class ConsolePage {
   constructor(private readonly page: ScoutPage) {
     this.inputEditor = this.page.getByTestId('consoleMonacoEditor');
     this.inputEditorContainer = this.page.getByTestId('consoleMonacoEditorContainer');
+    this.appContainer = this.page.getByTestId('console');
     this.outputEditor = this.page.getByTestId('consoleMonacoOutput');
     this.inputEditorLines = this.inputEditor.locator('.view-lines');
     this.outputEditorContent = this.outputEditor.locator('.monaco-scrollable-element');
@@ -200,10 +199,19 @@ export class ConsolePage {
     return this.page.getByRole('dialog', { name: title });
   }
 
+  /**
+   * Console resolves autocomplete and every API reference link from the Elasticsearch spec
+   * definitions it fetches before mounting, and renders an editor that looks fully working
+   * without them. Gate on this so a definition-less Console fails here, rather than later as
+   * a missing suggestion or a documentation tab that never opens.
+   */
+  async waitForActiveApiLoaded() {
+    await expect(this.appContainer).toHaveAttribute('data-console-active-api-status', 'complete');
+  }
+
   async goto() {
-    // 'commit' instead of the default `load`, which also waits for every bootstrap subresource.
-    await this.page.gotoApp('dev_tools', { hash: 'console' }, { waitUntil: 'commit' });
-    await this.inputEditor.waitFor({ state: 'visible', timeout: APP_BOOTSTRAP_TIMEOUT_MS });
+    await this.page.gotoApp('dev_tools', { hash: 'console', readyWhen: this.inputEditor });
+    await this.waitForActiveApiLoaded();
   }
 
   /**
@@ -212,13 +220,12 @@ export class ConsolePage {
    */
   async gotoWithRequestLoaded(request: string) {
     const encoded = compressToEncodedURIComponent(request);
-    await this.page.gotoApp(
-      'dev_tools',
-      { hash: `console/shell?load_from=data:text/plain,${encoded}` },
-      { waitUntil: 'commit' }
-    );
-    await this.inputEditor.waitFor({ state: 'visible', timeout: APP_BOOTSTRAP_TIMEOUT_MS });
+    await this.page.gotoApp('dev_tools', {
+      hash: `console/shell?load_from=data:text/plain,${encoded}`,
+      readyWhen: this.inputEditor,
+    });
     await this.sendRequestButton.waitFor({ state: 'visible' });
+    await this.waitForActiveApiLoaded();
   }
 
   /**

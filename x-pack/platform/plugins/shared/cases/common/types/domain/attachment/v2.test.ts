@@ -17,6 +17,7 @@ import {
   SECURITY_ALERT_ATTACHMENT_TYPE,
   SECURITY_EVENT_ATTACHMENT_TYPE,
   SECURITY_ENTITY_ATTACHMENT_TYPE,
+  SECURITY_ATTACK_ATTACHMENT_TYPE,
 } from '../../../constants/attachments';
 
 describe('Unified Attachments', () => {
@@ -503,6 +504,27 @@ describe('Unified Attachments', () => {
       };
 
       expect(DocumentAttachmentAttributesSchemaV2.safeParse(unifiedEntity).success).toBe(true);
+    });
+
+    it('accepts unified security.attack attributes so attacks participate in the "already attached" check', () => {
+      const unifiedAttack = {
+        type: SECURITY_ATTACK_ATTACHMENT_TYPE,
+        attachmentId: 'attack-1',
+        metadata: {
+          index: '.alerts-security.attack.discovery.alerts-default',
+          title: 'Attack title',
+          alertCount: 2,
+        },
+        owner: 'securitySolution',
+        created_at: '2019-11-25T22:32:30.608Z',
+        created_by: { full_name: 'elastic', email: 'testemail@elastic.co', username: 'elastic' },
+        updated_at: null,
+        updated_by: null,
+        pushed_at: null,
+        pushed_by: null,
+      };
+
+      expect(DocumentAttachmentAttributesSchemaV2.safeParse(unifiedAttack).success).toBe(true);
     });
   });
 });

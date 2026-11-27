@@ -10,7 +10,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import {
   SECURITY_ALERTS_TOOL_ID,
-  SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
+  SECURITY_GET_ENTITY_TOOL_ID,
   SECURITY_LABS_SEARCH_TOOL_ID,
 } from '../../tools';
 import { DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
@@ -43,7 +43,8 @@ Use this skill when:
 ## Alert Analysis Process
 
 ### 1. Initial Alert Assessment
-- Fetch the alert using 'security.alerts' to retrieve core details
+- If the alert is already attached to the conversation or its details are already in context, use that data and do NOT fetch it again
+- Only if the alert is not available, fetch it using 'security.alerts' with a simple query on its alert ID
 - Review: severity, timestamp, rule name, description, MITRE ATT&CK technique
 - Identify key entities: users (user.name), hosts (host.name), IPs (source.ip, destination.ip), file hashes
 - Note the alert's workflow status and any existing assignments
@@ -61,10 +62,10 @@ Use this skill when:
   - IOC context for IPs, domains, or file hashes found in the alert
 
 ### 4. Assess Entity Risk
-- Check entity risk scores using 'security.entity_risk_score' for involved hosts and users
+- If 'security.get_entity' is available, use it to look up the involved hosts and users, including their risk scores
+- If it is not available, skip this step and state that entity risk was not checked. Do not load another skill or search for another tool to replace it
 - High risk scores (>80) on involved entities increase alert priority
 - Compare current risk level with historical baseline
-- For deeper entity profiling (asset criticality, behavioral history, entity store lookups), reference the entity-analytics skill
 
 ### 5. Determine Disposition
 - **True Positive** → Escalate: Create a case, attach the alert, recommend containment actions
@@ -76,17 +77,18 @@ Use this skill when:
 - Compile a comprehensive analysis with supporting evidence
 - Provide clear threat assessment: severity, confidence level, affected scope
 - Recommend specific next steps based on disposition
-- Reference the entity-analytics skill for deeper entity profiling or asset criticality review
+- Suggest the entity-analytics skill to the user for deeper entity profiling or asset criticality review. Do not load it unless the user asks
 
 ## Tool Selection Guardrails
 - For list/prioritization/count questions about security alerts (e.g. "how many alerts", "high/critical alerts in last 24h"), use only 'security.alerts' unless explicit correlation by alertId is requested.
 - For Security Labs intel questions (e.g. "Lazarus Group techniques"), use only 'security.security_labs_search'.
-- For risk score questions (e.g. "risk score for host DC01"), use only 'security.entity_risk_score'.
+- For risk score questions (e.g. "risk score for host DC01"), use only 'security.get_entity'. If it is not available, say that risk scores are not available and do not load another skill or search for another tool.
+- For a plain list of alerts (the user only wants to see them), call 'security.alerts' with detail 'summary' to list more alerts with their key fields. Keep the default detail when you need to analyze alert content.
 - For correlation requests that include an alertId, call 'security.alert-analysis.get-related-alerts' directly.
 - Do NOT use platform.core.generate_esql, platform.core.execute_esql, platform.core.search, or workflow tools for alert inventory, count, or related-alert correlation. Those platform tools can cross Kibana spaces; 'security.alerts' stays scoped to the current space.
 
 ## Best Practices
-- Always start with the alert details before expanding investigation scope
+- Always start with the alert details (from the attachment or context when present) before expanding investigation scope
 - Use entity relationships to efficiently find related security data
 - Maintain chronological context when analyzing events and alerts
 - Prioritize high-severity alerts and entities with critical asset criticality
@@ -95,7 +97,7 @@ Use this skill when:
   getRegistryTools: () => [
     SECURITY_ALERTS_TOOL_ID,
     SECURITY_LABS_SEARCH_TOOL_ID,
-    SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
+    SECURITY_GET_ENTITY_TOOL_ID,
   ],
   getInlineTools: () => [
     {

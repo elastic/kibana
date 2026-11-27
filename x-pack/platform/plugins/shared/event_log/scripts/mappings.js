@@ -515,6 +515,14 @@ exports.EcsCustomPropertyMappings = {
                 type: 'keyword',
                 ignore_above: 1024,
               },
+              grouping_mode: {
+                type: 'keyword',
+                ignore_above: 1024,
+              },
+              throttle_strategy: {
+                type: 'keyword',
+                ignore_above: 1024,
+              },
               execution: {
                 properties: {
                   uuid: {

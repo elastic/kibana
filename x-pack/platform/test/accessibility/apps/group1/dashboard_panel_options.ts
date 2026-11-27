@@ -11,28 +11,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const a11y = getService('a11y');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'header', 'home']);
+  const PageObjects = getPageObjects(['common']);
+  const sampleData = getService('sampleData');
   const toasts = getService('toasts');
   const inspector = getService('inspector');
+  const listingTable = getService('listingTable');
 
   describe('Dashboard panel options a11y tests', () => {
     const title = '[Flights] Flight count';
     before(async () => {
-      await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
-        useActualUrl: true,
-      });
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.home.addSampleDataSet('flights');
+      await sampleData.testResources.installKibanaSampleData('flights');
 
       await PageObjects.common.navigateToApp('dashboard');
-      await testSubjects.click('dashboardListingTitleLink-[Flights]-Global-Flight-Dashboard');
+      await listingTable.clickItemLink('dashboard', '[Flights] Global Flight Dashboard');
     });
 
     after(async () => {
-      await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
-        useActualUrl: true,
-      });
-      await PageObjects.home.removeSampleDataSet('flights');
+      await sampleData.testResources.removeKibanaSampleData('flights');
     });
 
     // dashboard panel options in view mode

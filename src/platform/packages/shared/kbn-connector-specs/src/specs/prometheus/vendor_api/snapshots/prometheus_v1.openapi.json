@@ -1,0 +1,1440 @@
+{
+  "components": {
+    "schemas": {
+      "Alert": {
+        "additionalProperties": false,
+        "properties": {
+          "activeAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "annotations": {
+            "$ref": "#/components/schemas/Labels"
+          },
+          "keepFiringSince": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "labels": {
+            "$ref": "#/components/schemas/Labels"
+          },
+          "state": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "labels",
+          "annotations",
+          "state",
+          "value"
+        ],
+        "type": "object"
+      },
+      "AlertDiscovery": {
+        "additionalProperties": false,
+        "properties": {
+          "alerts": {
+            "items": {
+              "$ref": "#/components/schemas/Alert"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "alerts"
+        ],
+        "type": "object"
+      },
+      "AlertsOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/AlertDiscovery"
+          },
+          "infos": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "status": {
+            "enum": [
+              "success",
+              "error"
+            ],
+            "type": "string"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "status",
+          "data"
+        ],
+        "type": "object"
+      },
+      "DroppedTarget": {
+        "additionalProperties": false,
+        "properties": {
+          "discoveredLabels": {
+            "$ref": "#/components/schemas/Labels"
+          },
+          "scrapePool": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "discoveredLabels",
+          "scrapePool"
+        ],
+        "type": "object"
+      },
+      "Error": {
+        "additionalProperties": false,
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "errorType": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "success",
+              "error"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "errorType",
+          "error"
+        ],
+        "type": "object"
+      },
+      "FloatSample": {
+        "additionalProperties": false,
+        "properties": {
+          "metric": {
+            "$ref": "#/components/schemas/Labels"
+          },
+          "value": {
+            "items": {
+              "oneOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "maxItems": 2,
+            "minItems": 2,
+            "type": "array"
+          }
+        },
+        "required": [
+          "metric",
+          "value"
+        ],
+        "type": "object"
+      },
+      "FloatSeries": {
+        "additionalProperties": false,
+        "properties": {
+          "metric": {
+            "$ref": "#/components/schemas/Labels"
+          },
+          "values": {
+            "items": {
+              "items": {
+                "oneOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
+              },
+              "maxItems": 2,
+              "minItems": 2,
+              "type": "array"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "metric",
+          "values"
+        ],
+        "type": "object"
+      },
+      "HistogramSample": {
+        "additionalProperties": false,
+        "properties": {
+          "histogram": {
+            "items": {
+              "oneOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "$ref": "#/components/schemas/HistogramValue"
+                }
+              ]
+            },
+            "maxItems": 2,
+            "minItems": 2,
+            "type": "array"
+          },
+          "metric": {
+            "$ref": "#/components/schemas/Labels"
+          }
+        },
+        "required": [
+          "metric",
+          "histogram"
+        ],
+        "type": "object"
+      },
+      "HistogramSeries": {
+        "additionalProperties": false,
+        "properties": {
+          "histograms": {
+            "items": {
+              "items": {
+                "oneOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "$ref": "#/components/schemas/HistogramValue"
+                  }
+                ]
+              },
+              "maxItems": 2,
+              "minItems": 2,
+              "type": "array"
+            },
+            "type": "array"
+          },
+          "metric": {
+            "$ref": "#/components/schemas/Labels"
+          }
+        },
+        "required": [
+          "metric",
+          "histograms"
+        ],
+        "type": "object"
+      },
+      "HistogramValue": {
+        "additionalProperties": false,
+        "properties": {
+          "buckets": {
+            "items": {
+              "items": {
+                "oneOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
+              },
+              "type": "array"
+            },
+            "type": "array"
+          },
+          "count": {
+            "type": "string"
+          },
+          "sum": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "count",
+          "sum"
+        ],
+        "type": "object"
+      },
+      "LabelValuesOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "infos": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "status": {
+            "enum": [
+              "success",
+              "error"
+            ],
+            "type": "string"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "status",
+          "data"
+        ],
+        "type": "object"
+      },
+      "Labels": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "QueryData": {
+        "anyOf": [
+          {
+            "additionalProperties": false,
+            "properties": {
+              "result": {
+                "items": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/FloatSample"
+                    },
+                    {
+                      "$ref": "#/components/schemas/HistogramSample"
+                    }
+                  ]
+                },
+                "type": "array"
+              },
+              "resultType": {
+                "enum": [
+                  "vector"
+                ],
+                "type": "string"
+              },
+              "stats": {
+                "$ref": "#/components/schemas/QueryStats"
+              }
+            },
+            "required": [
+              "resultType",
+              "result"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "result": {
+                "items": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/FloatSeries"
+                    },
+                    {
+                      "$ref": "#/components/schemas/HistogramSeries"
+                    }
+                  ]
+                },
+                "type": "array"
+              },
+              "resultType": {
+                "enum": [
+                  "matrix"
+                ],
+                "type": "string"
+              },
+              "stats": {
+                "$ref": "#/components/schemas/QueryStats"
+              }
+            },
+            "required": [
+              "resultType",
+              "result"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "result": {
+                "items": {
+                  "oneOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                },
+                "maxItems": 2,
+                "minItems": 2,
+                "type": "array"
+              },
+              "resultType": {
+                "enum": [
+                  "scalar"
+                ],
+                "type": "string"
+              },
+              "stats": {
+                "$ref": "#/components/schemas/QueryStats"
+              }
+            },
+            "required": [
+              "resultType",
+              "result"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "result": {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 2,
+                "minItems": 2,
+                "type": "array"
+              },
+              "resultType": {
+                "enum": [
+                  "string"
+                ],
+                "type": "string"
+              },
+              "stats": {
+                "$ref": "#/components/schemas/QueryStats"
+              }
+            },
+            "required": [
+              "resultType",
+              "result"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "QueryOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/QueryData"
+          },
+          "infos": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "status": {
+            "enum": [
+              "success",
+              "error"
+            ],
+            "type": "string"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "status",
+          "data"
+        ],
+        "type": "object"
+      },
+      "QueryRangeOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/QueryData"
+          },
+          "infos": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "status": {
+            "enum": [
+              "success",
+              "error"
+            ],
+            "type": "string"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "status",
+          "data"
+        ],
+        "type": "object"
+      },
+      "QueryStats": {
+        "properties": {
+          "samples": {
+            "properties": {
+              "peakSamples": {
+                "type": "integer"
+              },
+              "samplesRead": {
+                "type": "integer"
+              },
+              "samplesReadPerStep": {
+                "items": {
+                  "items": {
+                    "type": "number"
+                  },
+                  "maxItems": 2,
+                  "minItems": 2,
+                  "type": "array"
+                },
+                "type": "array"
+              },
+              "totalQueryableSamples": {
+                "type": "integer"
+              },
+              "totalQueryableSamplesPerStep": {
+                "items": {
+                  "items": {
+                    "type": "number"
+                  },
+                  "maxItems": 2,
+                  "minItems": 2,
+                  "type": "array"
+                },
+                "type": "array"
+              }
+            },
+            "type": "object"
+          },
+          "timings": {
+            "properties": {
+              "evalTotalTime": {
+                "type": "number"
+              },
+              "execQueueTime": {
+                "type": "number"
+              },
+              "execTotalTime": {
+                "type": "number"
+              },
+              "innerEvalTime": {
+                "type": "number"
+              },
+              "queryPreparationTime": {
+                "type": "number"
+              },
+              "resultSortTime": {
+                "type": "number"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "RuleDiscovery": {
+        "additionalProperties": false,
+        "properties": {
+          "groupNextToken": {
+            "type": "string"
+          },
+          "groups": {
+            "items": {
+              "$ref": "#/components/schemas/RuleGroup"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "groups"
+        ],
+        "type": "object"
+      },
+      "RuleGroup": {
+        "additionalProperties": false,
+        "properties": {
+          "evaluationTime": {
+            "format": "double",
+            "type": "number"
+          },
+          "file": {
+            "type": "string"
+          },
+          "interval": {
+            "format": "double",
+            "type": "number"
+          },
+          "lastEvaluation": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "limit": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "rules": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "name",
+          "file",
+          "rules",
+          "interval",
+          "limit",
+          "evaluationTime",
+          "lastEvaluation"
+        ],
+        "type": "object"
+      },
+      "RulesOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/RuleDiscovery"
+          },
+          "infos": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "status": {
+            "enum": [
+              "success",
+              "error"
+            ],
+            "type": "string"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "status",
+          "data"
+        ],
+        "type": "object"
+      },
+      "SeriesOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/Labels"
+            },
+            "type": "array"
+          },
+          "infos": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "status": {
+            "enum": [
+              "success",
+              "error"
+            ],
+            "type": "string"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "status",
+          "data"
+        ],
+        "type": "object"
+      },
+      "Target": {
+        "additionalProperties": false,
+        "properties": {
+          "discoveredLabels": {
+            "$ref": "#/components/schemas/Labels"
+          },
+          "globalUrl": {
+            "type": "string"
+          },
+          "health": {
+            "type": "string"
+          },
+          "labels": {
+            "$ref": "#/components/schemas/Labels"
+          },
+          "lastError": {
+            "type": "string"
+          },
+          "lastScrape": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "lastScrapeDuration": {
+            "format": "double",
+            "type": "number"
+          },
+          "scrapeInterval": {
+            "type": "string"
+          },
+          "scrapePool": {
+            "type": "string"
+          },
+          "scrapeTimeout": {
+            "type": "string"
+          },
+          "scrapeUrl": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "discoveredLabels",
+          "labels",
+          "scrapePool",
+          "scrapeUrl",
+          "globalUrl",
+          "lastError",
+          "lastScrape",
+          "lastScrapeDuration",
+          "health",
+          "scrapeInterval",
+          "scrapeTimeout"
+        ],
+        "type": "object"
+      },
+      "TargetDiscovery": {
+        "additionalProperties": false,
+        "properties": {
+          "activeTargets": {
+            "items": {
+              "$ref": "#/components/schemas/Target"
+            },
+            "type": "array"
+          },
+          "droppedTargetCounts": {
+            "additionalProperties": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": "object"
+          },
+          "droppedTargets": {
+            "items": {
+              "$ref": "#/components/schemas/DroppedTarget"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "activeTargets",
+          "droppedTargets",
+          "droppedTargetCounts"
+        ],
+        "type": "object"
+      },
+      "TargetsOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/TargetDiscovery"
+          },
+          "infos": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "status": {
+            "enum": [
+              "success",
+              "error"
+            ],
+            "type": "string"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "status",
+          "data"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "Prometheus API"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/alerts": {
+      "get": {
+        "operationId": "alerts",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlertsOutputBody"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/label/{name}/values": {
+      "get": {
+        "operationId": "label-values",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "start",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "format": "unixtime",
+                  "type": "number"
+                }
+              ]
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "end",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "format": "unixtime",
+                  "type": "number"
+                }
+              ]
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "match[]",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LabelValuesOutputBody"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/query": {
+      "get": {
+        "operationId": "query",
+        "parameters": [
+          {
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "time",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "format": "unixtime",
+                  "type": "number"
+                }
+              ]
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "timeout",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "format": "duration",
+                  "type": "string"
+                },
+                {
+                  "format": "float",
+                  "type": "number"
+                }
+              ]
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "lookback_delta",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "format": "duration",
+                  "type": "string"
+                },
+                {
+                  "format": "float",
+                  "type": "number"
+                }
+              ]
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "stats",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueryOutputBody"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/query_range": {
+      "get": {
+        "operationId": "query-range",
+        "parameters": [
+          {
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "start",
+            "required": true,
+            "schema": {
+              "oneOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "format": "unixtime",
+                  "type": "number"
+                }
+              ]
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "end",
+            "required": true,
+            "schema": {
+              "oneOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "format": "unixtime",
+                  "type": "number"
+                }
+              ]
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "step",
+            "required": true,
+            "schema": {
+              "oneOf": [
+                {
+                  "format": "duration",
+                  "type": "string"
+                },
+                {
+                  "format": "float",
+                  "type": "number"
+                }
+              ]
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "timeout",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "format": "duration",
+                  "type": "string"
+                },
+                {
+                  "format": "float",
+                  "type": "number"
+                }
+              ]
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "lookback_delta",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "format": "duration",
+                  "type": "string"
+                },
+                {
+                  "format": "float",
+                  "type": "number"
+                }
+              ]
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "stats",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueryRangeOutputBody"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rules": {
+      "get": {
+        "operationId": "rules",
+        "parameters": [
+          {
+            "explode": false,
+            "in": "query",
+            "name": "type",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "rule_name[]",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "rule_group[]",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "file[]",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "match[]",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "exclude_alerts",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "group_limit",
+            "required": false,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "group_next_token",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RulesOutputBody"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/series": {
+      "get": {
+        "operationId": "series",
+        "parameters": [
+          {
+            "explode": false,
+            "in": "query",
+            "name": "start",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "format": "unixtime",
+                  "type": "number"
+                }
+              ]
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "end",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "format": "unixtime",
+                  "type": "number"
+                }
+              ]
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "match[]",
+            "required": true,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SeriesOutputBody"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/targets": {
+      "get": {
+        "operationId": "get-targets",
+        "parameters": [
+          {
+            "explode": false,
+            "in": "query",
+            "name": "scrapePool",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "state",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TargetsOutputBody"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "/api/v1"
+    }
+  ]
+}

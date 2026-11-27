@@ -11,6 +11,11 @@ import {
   type SourceWriteConflictReason,
 } from '@kbn/significant-events-schema';
 
+export const UNKNOWN_ERROR_MESSAGE = i18n.translate(
+  'xpack.nightshift.common.errors.unknownErrorMessage',
+  { defaultMessage: 'Unknown error' }
+);
+
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null;
 
@@ -70,7 +75,7 @@ export const getFormattedError = (error: unknown): Error => {
     return new Error(error);
   }
 
-  return new Error('Unknown error');
+  return new Error(UNKNOWN_ERROR_MESSAGE);
 };
 
 const LEASE_HELD_MESSAGE = i18n.translate('xpack.nightshift.common.errors.leaseHeldErrorMessage', {

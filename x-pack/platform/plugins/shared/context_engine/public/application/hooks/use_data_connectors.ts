@@ -19,6 +19,7 @@ export interface DataConnector {
   id: string;
   name: string;
   actionTypeId: string;
+  actionTypeName: string;
 }
 
 export interface UseDataConnectorsOptions {
@@ -29,6 +30,7 @@ export interface UseDataConnectorsResult {
   connectors: DataConnector[];
   connectorNameById: Map<string, string>;
   connectorActionTypeById: Map<string, string>;
+  connectorTypeNameById: Map<string, string>;
   isLoading: boolean;
   isError: boolean;
   error: Error | undefined;
@@ -60,7 +62,10 @@ export const useDataConnectors = ({
     enabled,
   });
 
-  const supportedTypeIds = useMemo(() => new Set((types ?? []).map((type) => type.id)), [types]);
+  const typeNameById = useMemo(
+    () => new Map((types ?? []).map((type) => [type.id, type.name])),
+    [types]
+  );
 
   const {
     data: connectorsResponse,
@@ -78,13 +83,15 @@ export const useDataConnectors = ({
   const connectors = useMemo<DataConnector[]>(
     () =>
       (connectorsResponse ?? [])
-        .filter((connector) => supportedTypeIds.has(connector.connector_type_id))
+        .filter((connector) => typeNameById.has(connector.connector_type_id))
         .map((connector) => ({
           id: connector.id,
           name: connector.name || connector.id,
           actionTypeId: connector.connector_type_id,
+          actionTypeName:
+            typeNameById.get(connector.connector_type_id) ?? connector.connector_type_id,
         })),
-    [connectorsResponse, supportedTypeIds]
+    [connectorsResponse, typeNameById]
   );
 
   const connectorNameById = useMemo(
@@ -97,6 +104,11 @@ export const useDataConnectors = ({
     [connectors]
   );
 
+  const connectorTypeNameById = useMemo(
+    () => new Map(connectors.map((connector) => [connector.id, connector.actionTypeName])),
+    [connectors]
+  );
+
   const isLoading = enabled && (isTypesLoading || isConnectorsLoading);
   const isError = enabled && (isTypesError || isConnectorsError);
   const error = enabled ? typesError ?? connectorsError ?? undefined : undefined;
@@ -105,6 +117,7 @@ export const useDataConnectors = ({
     connectors,
     connectorNameById,
     connectorActionTypeById,
+    connectorTypeNameById,
     isLoading,
     isError,
     error,

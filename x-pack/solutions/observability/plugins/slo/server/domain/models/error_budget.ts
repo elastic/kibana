@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type * as t from 'io-ts';
+import type { z } from '@kbn/zod';
 import type { errorBudgetSchema } from '@kbn/slo-schema';
 
-type ErrorBudget = t.TypeOf<typeof errorBudgetSchema>;
+type ErrorBudget = z.output<typeof errorBudgetSchema>;
 
 export type { ErrorBudget };

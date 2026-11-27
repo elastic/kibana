@@ -1,0 +1,163 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { GROUPED_PROPOSAL_MAX_ALERTS, GROUPED_PROPOSAL_MAX_REVISIONS } from './constants';
+import { groupFpCandidates, type GroupingHead } from './group_proposals';
+import {
+  REPLAY_PARITY_SCENARIOS,
+  type ReplayParityScenario,
+} from './grouping_replay_parity_fixture';
+import { hashKey } from './key_tags';
+import { buildPatternKeys } from './pattern_key';
+
+const SPACE = 'default';
+const HOUR_MS = 60 * 60 * 1000;
+const OPEN_HOURS = 72;
+const START = Date.parse('2026-10-01T00:00:00Z');
+
+/**
+ * The batches of a scenario, run through the planner over an in-memory proposal store: a proposal
+ * is created for each mint, open for 72 hours, and every join is a revise of its head.
+ */
+const replay = async ({ docs, batches }: Pick<ReplayParityScenario, 'docs' | 'batches'>) => {
+  const heads = new Map<string, GroupingHead>();
+  const created: Array<{ root: string; hours: number }> = [];
+  let joined = 0;
+  let ids = 0;
+
+  for (const { hours, ids: alertIds } of batches) {
+    const now = START + hours * HOUR_MS;
+    const groups = new Map<string, string[]>();
+    for (const id of alertIds) {
+      const keyHash = hashKey(SPACE, buildPatternKeys(docs[id]).wide);
+      groups.set(keyHash, [...(groups.get(keyHash) ?? []), id]);
+    }
+    const plan = await groupFpCandidates({
+      keys: [...groups].map(([keyHash, members]) => ({ keyHash, alertIds: members })),
+      spaceId: SPACE,
+      now,
+      pool: true,
+      deps: {
+        listHeads: async (rootIds) =>
+          [...heads.values()].filter(({ rootProposalId }) => rootIds.includes(rootProposalId)),
+        canJoin: async () => true,
+        revise: async (head, union) => {
+          const revision = head.revision + 1;
+          heads.set(head.rootProposalId, { ...head, revision, alertIds: union });
+          return { proposalId: head.proposalId, revision };
+        },
+        newId: () => `random-${(ids += 1)}`,
+      },
+    });
+    joined += plan.joins.reduce((sum, { alertIds: added }) => sum + added.length, 0);
+    for (const { proposalId, alertIds: members } of plan.mints) {
+      heads.set(proposalId, {
+        proposalId,
+        rootProposalId: proposalId,
+        revision: 1,
+        status: 'pending',
+        expiresAt: new Date(now + OPEN_HOURS * HOUR_MS).toISOString(),
+        conversationId: `conv-${proposalId}`,
+        alertIds: members,
+      });
+      created.push({ root: proposalId, hours });
+    }
+  }
+
+  return {
+    joined,
+    proposals: created.map(({ root, hours }) => ({
+      hours,
+      size: heads.get(root)?.alertIds.length ?? 0,
+      revisions: heads.get(root)?.revision ?? 0,
+    })),
+  };
+};
+
+// The fixture holds the output of an offline replay (see the fixture header). The planner has
+// to make the proposals the investigation's numbers were computed with, so the replay's prediction
+// (-81% proposals) is what this code does on the same batches. The scenarios' parameters are the
+// ones the plan ships, and the constants below fail the test if either side changes them alone.
+describe('the grouping planner matches the offline replay', () => {
+  it('uses the caps the fixture was generated with', () => {
+    expect(GROUPED_PROPOSAL_MAX_ALERTS).toBe(1000);
+    expect(GROUPED_PROPOSAL_MAX_REVISIONS).toBe(20);
+  });
+
+  it.each(REPLAY_PARITY_SCENARIOS.map((scenario) => [scenario.name, scenario] as const))(
+    '%s',
+    async (_name, scenario) => {
+      expect(await replay(scenario)).toEqual(scenario.expected);
+    }
+  );
+});
+
+// Written by hand, not part of the generated fixture. These two rules only depend on the constants.
+describe('the caps on one proposal', () => {
+  const doc = {
+    'kibana.alert.rule.uuid': 'rule-1',
+    'kibana.alert.rule.revision': 1,
+    host: { os: { type: 'windows' } },
+    process: { executable: 'C:\\a\\run.exe', code_signature: { subject_name: 'Acme' } },
+  };
+  const run = (batchCount: number, perBatch: number) => {
+    const batches = Array.from({ length: batchCount }, (_, i) => ({
+      hours: i,
+      ids: Array.from({ length: perBatch }, (__, j) => `b${i}-${j}`),
+    }));
+    const docs = Object.fromEntries(batches.flatMap(({ ids }) => ids.map((id) => [id, doc])));
+    return replay({ docs, batches });
+  };
+
+  it('holds at most 1,000 alerts', async () => {
+    const { proposals, joined } = await run(12, 100);
+    expect(proposals).toEqual([
+      { hours: 0, size: 1000, revisions: 10 },
+      { hours: 10, size: 200, revisions: 2 },
+    ]);
+    expect(joined).toBe(1000);
+  });
+
+  it('takes at most 19 joins, 20 revisions with the first', async () => {
+    const { proposals, joined } = await run(23, 2);
+    expect(proposals).toEqual([
+      { hours: 0, size: 40, revisions: 20 },
+      { hours: 20, size: 6, revisions: 3 },
+    ]);
+    expect(joined).toBe(42);
+  });
+});
+
+// Written by hand, not part of the generated fixture. A pattern that comes back every 15 minutes
+// fills a proposal (20 revisions) in 5 hours. When proposal ids were numbered 0 to 199 for good, a
+// pattern like this used them all in 42 days and went back to one proposal per batch. The ids now
+// restart each UTC day, so 44 days of batches still make full proposals, and none of them is a
+// lone batch.
+describe('a pattern that returns every sweep', () => {
+  const SWEEPS = 4200; // 43.75 days of 15-minute sweeps: past the old 200 ids, 210 full proposals
+  const doc = {
+    'kibana.alert.rule.uuid': 'rule-1',
+    'kibana.alert.rule.revision': 1,
+    host: { os: { type: 'windows' } },
+    process: { executable: 'C:\\a\\run.exe', code_signature: { subject_name: 'Acme' } },
+  };
+
+  it('keeps joining past the 42 days the old numbering lasted', async () => {
+    const batches = Array.from({ length: SWEEPS }, (_, i) => ({
+      hours: i / 4,
+      ids: [`b${i}-1`, `b${i}-2`],
+    }));
+    const docs = Object.fromEntries(batches.flatMap(({ ids }) => ids.map((id) => [id, doc])));
+
+    const { proposals, joined } = await replay({ docs, batches });
+
+    // A proposal holds its first batch and 19 joins, 40 alerts, and the next batch starts another.
+    expect(proposals).toHaveLength(SWEEPS / GROUPED_PROPOSAL_MAX_REVISIONS);
+    expect(proposals.every(({ size, revisions }) => size === 40 && revisions === 20)).toBe(true);
+    expect(joined).toBe(SWEEPS * 2 - proposals.length * 2);
+  });
+});

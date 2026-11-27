@@ -1,0 +1,57 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { i18n } from '@kbn/i18n';
+import type { SlackTriggerKind } from '../flyouts/form/automation_form_values';
+import type { Automation } from '../../../data/automations/use_automations';
+
+export const triggerTypeLabels = {
+  alertTriggered: i18n.translate('xpack.nightshift.automations.flyout.alertTriggered', {
+    defaultMessage: 'Alert triggered',
+  }),
+  scheduled: i18n.translate('xpack.nightshift.automations.flyout.scheduledGroup', {
+    defaultMessage: 'Scheduled',
+  }),
+};
+
+export const slackTriggerLabels: Record<SlackTriggerKind, string> = {
+  slack_message: i18n.translate('xpack.nightshift.automations.flyout.slackMessageTrigger', {
+    defaultMessage: 'New message in channel',
+  }),
+};
+
+const alertTriggerLabel = i18n.translate('xpack.nightshift.automations.alertTriggerLabel', {
+  defaultMessage: 'Alert',
+});
+
+const slackTriggerLabel = i18n.translate('xpack.nightshift.automations.slackMessageTriggerLabel', {
+  defaultMessage: 'Slack',
+});
+
+export const TRIGGER_LABEL_ORDER = [
+  alertTriggerLabel,
+  slackTriggerLabel,
+  triggerTypeLabels.scheduled,
+];
+
+export const getTriggerDisplay = (
+  row: Automation['trigger']['rows'][number]
+): { label: string; icon: string } => {
+  if (row.kind === 'slack') {
+    return { label: slackTriggerLabel, icon: 'logoSlack' };
+  }
+  if (row.kind === 'schedule') {
+    return { label: triggerTypeLabels.scheduled, icon: 'calendar' };
+  }
+  return { label: alertTriggerLabel, icon: 'logoElastic' };
+};
+
+export const getTriggerIcon = (label: string): string => {
+  if (label === alertTriggerLabel) return 'logoElastic';
+  if (label === triggerTypeLabels.scheduled) return 'calendar';
+  return 'logoSlack';
+};
