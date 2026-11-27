@@ -28,7 +28,7 @@ serverless: preview
 stack: preview 9.6
 ```
 
-Elastic's managed OAuth flow for SharePoint Online. No app registration is required. Select this option and authorize access through Elastic. Provides delegated access (the connector acts as the authenticated user) with read-only access to sites and files. An administrator might need to approve the Elastic app and grant it access to specific sites. Refer to [Quick Connect OAuth 2.0](/reference/connectors-kibana/quick-connect-oauth.md).
+Elastic's managed OAuth flow for SharePoint Online. The picker lists this option first and shows a **Recommended** badge. On self-managed {{kib}}, it requires `xpack.actions.auth.ears.enabled` (default `true`) and `xpack.actions.auth.ears.url`. No app registration is required. Select this option and authorize access through Elastic. Provides delegated access (the connector acts as the authenticated user) with read-only access to sites and files. An administrator might need to approve the Elastic app and grant it access to specific sites. Refer to [Quick Connect OAuth 2.0](/reference/connectors-kibana/quick-connect-oauth.md).
 
 #### OAuth client credentials (app-only auth)
 
@@ -38,27 +38,32 @@ Token URL
 Client ID
 :   The application (client) ID from your Microsoft Entra app registration.
 
-Client Secret
+Client secret
 :   The client secret generated for your Microsoft Entra application.
 
-#### OAuth Client Certificate (Microsoft Entra) — app-only auth [sharepoint-online-connector-cert-config]
+#### OAuth Client Credentials (Private Key JWT) [sharepoint-online-connector-cert-config]
+
+```{applies_to}
+stack: preview 9.5
+serverless: preview
+```
 
 Token URL
-:   The OAuth 2.0 token endpoint URL. Use the format: `https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token`.
+:   `https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token`.
 
 Client ID
 :   The application (client) ID from your Microsoft Entra app registration.
 
-Certificate
-:   The PEM-encoded public X.509 certificate uploaded to the app registration. Must begin with `-----BEGIN CERTIFICATE-----`.
+Certificate (PEM)
+:   The PEM-encoded public certificate uploaded to the app registration. Upload the `.pem` file.
 
-Private Key
-:   The PEM-encoded RSA private key matching the uploaded certificate. Must begin with `-----BEGIN PRIVATE KEY-----` (PKCS#8), `-----BEGIN RSA PRIVATE KEY-----` (PKCS#1), or `-----BEGIN ENCRYPTED PRIVATE KEY-----` (encrypted PKCS#8). Stored encrypted at rest.
+Private key (PEM)
+:   The PEM-encoded private key that matches the certificate. Upload the `.pem` file.
 
-Passphrase
-:   (Optional) Only required if the private key is encrypted.
+Private key passphrase
+:   Optional. Set this only when the private key is encrypted.
 
-#### OAuth authorization code (delegated auth)
+#### OAuth 2.0 Authorization Code (delegated auth)
 
 Authorization URL
 :   The Microsoft Entra ID authorization endpoint. Use the format: `https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/authorize`. Replace `{tenant-id}` with your Azure AD tenant ID.
@@ -170,9 +175,14 @@ To use app-only authentication, register an application in Microsoft Entra (form
 16. Enter the following values when configuring the connector in {{kib}}:
     - **Token URL**: `https://login.microsoftonline.com/{your-tenant-id}/oauth2/v2.0/token` (find your tenant ID in the **Overview** section of your app registration).
     - **Client ID**: Found in the **Overview** section (also called Application ID).
-    - **Client Secret**: The value you copied in step 15.
+    - **Client secret**: The value you copied in step 15.
 
-### OAuth Client Certificate (Microsoft Entra) — recommended for production app-only access [sharepoint-online-cert-credentials]
+### OAuth Client Credentials (Private Key JWT) [sharepoint-online-cert-credentials]
+
+```{applies_to}
+stack: preview 9.5
+serverless: preview
+```
 
 To use certificate-based app-only authentication, register an application in Microsoft Entra:
 
@@ -201,11 +211,11 @@ To use certificate-based app-only authentication, register an application in Mic
 14. Enter the following values when configuring the connector in {{kib}}:
     - **Token URL**: `https://login.microsoftonline.com/{your-tenant-id}/oauth2/v2.0/token`
     - **Client ID**: Found in the **Overview** section (also called Application ID).
-    - **Certificate**: paste the full contents of `certificate.pem` (including the `-----BEGIN CERTIFICATE-----` / `-----END CERTIFICATE-----` markers).
-    - **Private Key**: paste the full contents of `private_key.pem` (including the BEGIN/END markers).
-    - **Passphrase**: only if you generated an encrypted private key.
+    - **Certificate (PEM)**: upload `certificate.pem`.
+    - **Private key (PEM)**: upload `private_key.pem`.
+    - **Private key passphrase**: only if you generated an encrypted private key.
 
-### OAuth authorization code (delegated auth)
+### OAuth 2.0 Authorization Code (delegated auth)
 
 To use delegated (per-user) authentication, register an application and configure the Authorization Code flow:
 
@@ -231,7 +241,7 @@ To use delegated (per-user) authentication, register an application and configur
     - **Authorization URL**: `https://login.microsoftonline.com/{your-tenant-id}/oauth2/v2.0/authorize`
     - **Token URL**: `https://login.microsoftonline.com/{your-tenant-id}/oauth2/v2.0/token`
     - **Client ID**: Found in the **Overview** section (also called Application ID).
-    - **Client Secret**: The value you copied in step 15.
+    - **Client secret**: The value you copied in step 15.
 
 ::::{note}
 With delegated auth, the connector operates on behalf of the user who completes the authorization flow. The `getAllSites` action uses a search-based fallback (instead of `/sites/getAllSites`) and the `search` action does not support the `region` parameter.
