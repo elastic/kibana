@@ -56,7 +56,7 @@ template + esqlQuery
 
 All paths bypass the LLM entirely at render time. Template generation happens once at creation or edit time, not on every render.
 
-The resulting HTML is rendered in an `<iframe sandbox="" srcDoc={...}>`. "Run Preview" from the flyout pushes HTML through a separate `previewHtml$` subject that takes precedence over the saved template, so users can see a draft without saving it; it is cleared when the flyout closes or when a non-reload fetch arrives.
+The resulting HTML is rendered in an `<iframe srcDoc={...}>` whose `sandbox` is `CUSTOM_CONTENT_IFRAME_SANDBOX_TOP_NAV_ONLY` (user-initiated top navigation, never scripts), with `allow-same-origin` added (`CUSTOM_CONTENT_IFRAME_SANDBOX_WITH_SAME_ORIGIN`) only for a host that listens to clicks, which is the dashboard panel and not the chat card. The preview, and a panel in a non-interactive view, use `sandbox=""`. "Run Preview" from the flyout pushes HTML through a separate `previewHtml$` subject that takes precedence over the saved template, so users can see a draft without saving it; it is cleared when the flyout closes or when a non-reload fetch arrives.
 
 ### Unified search
 
@@ -97,6 +97,31 @@ Templates use [LiquidJS](https://liquidjs.com/) syntax. `fill_template.ts` expos
 Aggregation and sorting are not available in the template — it receives `rows` as the ES|QL query returned them, so grouping belongs in `STATS ... BY ...` upstream.
 
 JavaScript is explicitly blocked — the iframe sandbox, a strict CSP, and `DOMPurify` all independently prevent script execution.
+
+### Click to filter
+
+An element of the template can add a filter to the dashboard when it is clicked. The template only declares what it wants, with inert attributes on a `<button>`. Only a button is read: a `<div>` or `<span>` cannot be used with the keyboard, and an `<a>` loses the attributes:
+
+```html
+<button data-cc-action="filter" data-cc-field="host" data-cc-value="{{ row["host"].value }}">
+  {{ row["host"].value }}
+</button>
+```
+
+- `data-cc-action` is `filter`, the only action there is.
+- `data-cc-field` is a column the panel's queries returned, and it has to be a plain, filterable field of the data the panel reads (a column that is renamed, computed or aggregated is not one, and the click does nothing).
+- `data-cc-value` is the value, written from the row. For a number field it must be a plain number, in any notation Liquid prints (`12.5`, `1e-7`), and for a boolean field `true` or `false`. The platform's own conversion (`getConvertedValueForField`) types it, so that clicking a value that already has a filter changes that filter instead of adding another.
+- `data-cc-op` is `is` (the default) or `is_not`. Clicking a value that already has a filter sets that filter to the operator of the button (and turns it on again if it was off) instead of adding another one: an `is_not` button after an `is` one changes the pill, and clicking the same button twice changes nothing. It is not a toggle.
+
+Write every attribute value that holds data in double quotes, as in the example. Escaping cannot protect an unquoted value, which ends at its first space: `data-cc-value={{ x }}` would filter on `New` for `New York`. That is true of `{{ }}` in any attribute, not only of these.
+
+Kibana does the rest: the renderer's click listener (`readInteraction`, in `@kbn/custom-content-renderer`) validates the request, and the plugin (`runInteraction`) builds the filter with `generateFilters`, as Discover does, and applies it through the `ON_APPLY_FILTER` trigger, so it shows as an ordinary filter pill that the viewer can remove. It is an app filter like any other: clicking does not save anything, but if someone with edit rights saves the dashboard while it is there, it is saved with the dashboard.
+
+A request that is not valid is dropped without a message: an unknown action, a column the queries did not return, an empty or oversized value, an unknown operator, or a click that did not come from the user.
+
+An action is a new member of `CustomContentInteraction`, a parser in `PARSERS` (`interactions.ts`) and a case in `runInteraction` (`run_interaction.ts`); the compiler refuses to build until all three exist. A host lists the actions it runs in `interactionActions`.
+
+The template generator is told to add this only when the request asks for it (`INTERACTION_GUIDANCE` in `custom_content_resolver.ts`).
 
 ## Edit flyout
 
@@ -202,6 +227,14 @@ Callers already surface this: the dashboard generation tool records a failure an
 
 ## Security
 
-Templates are rendered inside a sandboxed `<iframe sandbox="">` with a strict CSP meta tag (`default-src 'none'; style-src 'unsafe-inline'`). JavaScript cannot execute inside a rendered panel regardless of template content, and the CSP blocks all outbound network requests, so external scripts, fonts, and images cannot load either. `DOMPurify` sanitizes the HTML before injection as an additional layer and strips `<a>` tags.
+Templates are rendered inside a sandboxed `<iframe>` with a strict CSP meta tag (`default-src 'none'; style-src 'unsafe-inline'`). JavaScript cannot execute inside a rendered panel regardless of template content, and the CSP blocks all outbound network requests, so external scripts, fonts, and images cannot load either. `DOMPurify` sanitizes the HTML before injection as an additional layer, and links are rewritten to point only at the Dashboards and Discover apps.
+
+The sandbox is `allow-top-navigation-by-user-activation`, with `allow-same-origin` added only for a host that listens to clicks (click to filter). The chat card renders model output and listens to nothing, so it does not get the origin of Kibana. `allow-same-origin` is safe only because `allow-scripts` is absent, which the browser enforces whatever the content holds. Never add `allow-scripts` next to it: together they let the content remove its own sandbox. The host is the only code that touches the frame's document, and it reads attributes as text through prototype methods, so the content cannot replace what it calls.
+
+The sanitizer removes form controls (`<form>`, `<input>`, `<textarea>`, `<select>`, `<label>`), keeping their text. A browser clicks a button for the user when they click a `<label>` that points at it, or press Enter in a form, and those clicks are trusted, so `isTrusted` alone cannot tell them from a click on the button. For an expandable section use `<details>` with a `<summary>`. The host is the only code that touches the frame's document, and it reads attributes as text through prototype methods, so the content cannot replace what it calls.
+
+Only `{{ }}` HTML-escapes a value in liquidjs. The `raw` filter and the `echo` and `cycle` tags write one as markup, so a generated template that uses them is rejected when it is validated server-side. The renderer covers a panel saved through the API or made before: the filter returns the value for `{{ }}` to escape, and `echo` (also inside a `liquid` block) and `cycle` are wrapped (`registerEscapedTags`) so that whatever they write, or return for the renderer to write, is escaped with the same filter `{{ }}` uses. A saved panel that uses `cycle` for alternating rows keeps rendering. The wrapper relies on how liquidjs writes and escapes, so the tests compare each form with `{{ }}` for the same values: a liquidjs upgrade that changed either would fail them.
+
+Even so, data cannot create an interaction: the renderer renames `data-cc-action`, `-field`, `-value` and `-op` to `data-cc-<token>-action` and so on in the author's template (nothing else that starts with `data-cc-`, such as a column called that), before the data is filled in, with a random token made once for each panel that is shown, and the reader accepts only the renamed attributes. A value that reached the page as markup, by whatever path, carries the plain name and is ignored. The token stays the same across refetches, so the frame does not reload on every refresh.
 
 LLM-generated templates are validated server-side before storage — any output matching `CUSTOM_CONTENT_SCRIPT_PATTERN` or exceeding `CUSTOM_CONTENT_MAX_TEMPLATE_BYTES` is rejected. Prompt, query, and template lengths are bounded by the schemas in `@kbn/custom-content-common`, and the LiquidJS renderer is configured with render, parse, and memory limits.

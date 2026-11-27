@@ -18,6 +18,7 @@ import { fillTemplateDatasets } from './fill_template';
 import { sanitizeHtml, applyHtmlTheme } from './prepare_html';
 import type { CustomContentRendererServices } from './types';
 import { getLinkBasePath } from './internal_link';
+import { createInteractionNonce, scopeInteractionAttributes } from './interactions';
 
 const RENDER_ERROR_MESSAGE = i18n.translate('xpack.customContent.renderError', {
   defaultMessage: 'Failed to render panel. Try refreshing or rephrasing the request.',
@@ -46,10 +47,16 @@ export interface UseCustomContentHtmlParams {
 
 export interface UseCustomContentHtmlResult {
   html: string;
+  /** The names of the columns the panel's queries returned, for hosts that validate interactions. */
+  columns: ReadonlySet<string>;
+  /** What the template's interaction attributes were scoped with, to read clicks with. */
+  interactionNonce: string;
   isLoading: boolean;
   error: string | undefined;
   noContent: boolean;
 }
+
+const NO_COLUMNS: ReadonlySet<string> = new Set();
 
 /** Keeps the same array while its items are the same, for callers that build the list inline. */
 const useStableList = (list: readonly string[]): readonly string[] => {
@@ -80,6 +87,10 @@ export function useCustomContentHtml({
   setApproximationApplied,
 }: UseCustomContentHtmlParams): UseCustomContentHtmlResult {
   const [filledHtml, setFilledHtml] = useState('');
+  const [columns, setColumns] = useState<ReadonlySet<string>>(NO_COLUMNS);
+  // Once for each panel that is shown: a new one on every fetch would reload the frame on every
+  // refresh, and gains nothing, as the data cannot see the page.
+  const [interactionNonce] = useState(createInteractionNonce);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
 
@@ -90,7 +101,10 @@ export function useCustomContentHtml({
 
   useEffect(() => {
     if (trimmedTemplate && stableEsqlQueries.length === 0) {
-      setFilledHtml(stripMarkdownFences(trimmedTemplate));
+      setFilledHtml(
+        scopeInteractionAttributes(stripMarkdownFences(trimmedTemplate), interactionNonce)
+      );
+      setColumns(NO_COLUMNS);
       setIsLoading(false);
       setError(undefined);
       return;
@@ -98,7 +112,10 @@ export function useCustomContentHtml({
 
     if (trimmedTemplate) {
       const controller = new AbortController();
-      const template = stripMarkdownFences(trimmedTemplate);
+      const template = scopeInteractionAttributes(
+        stripMarkdownFences(trimmedTemplate),
+        interactionNonce
+      );
 
       setIsLoading(true);
       setError(undefined);
@@ -112,7 +129,12 @@ export function useCustomContentHtml({
         requestAdapter,
       })
         .then(({ datasets, approximationApplied }) => {
-          if (!controller.signal.aborted) setApproximationApplied?.(approximationApplied);
+          if (!controller.signal.aborted) {
+            setApproximationApplied?.(approximationApplied);
+            setColumns(
+              new Set(datasets.flatMap((dataset) => dataset.columns.map(({ name }) => name)))
+            );
+          }
           return fillTemplateDatasets(template, datasets);
         })
         .then((rawHtml) => {
@@ -134,6 +156,7 @@ export function useCustomContentHtml({
 
     setApproximationApplied?.(undefined);
     setFilledHtml('');
+    setColumns(NO_COLUMNS);
     setError(undefined);
     setIsLoading(false);
   }, [
@@ -148,6 +171,7 @@ export function useCustomContentHtml({
     filters,
     esqlVariables,
     requestAdapter,
+    interactionNonce,
     http,
     uiSettings,
     search,
@@ -166,5 +190,5 @@ export function useCustomContentHtml({
     [filledHtml, http, isInteractive, colorMode, euiTheme]
   );
 
-  return { html, isLoading, error, noContent: !trimmedTemplate };
+  return { html, columns, interactionNonce, isLoading, error, noContent: !trimmedTemplate };
 }

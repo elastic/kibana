@@ -36,8 +36,17 @@ let capturedComponentProps:
       requestAdapter?: unknown;
       onGenerateWithChat?: () => void;
       onLoadingChange?: (isLoading: boolean) => void;
+      interactionActions?: readonly string[];
+      onInteraction?: (interaction: {
+        action: 'filter';
+        field: string;
+        value: string;
+        negate: boolean;
+      }) => void;
     }
   | undefined;
+
+const mockExecuteTriggerActions = jest.fn();
 
 jest.mock('@kbn/custom-content-renderer', () => ({
   CustomContentComponent: (props: {
@@ -141,6 +150,8 @@ jest.mock('./services', () => ({
     agentBuilder: mockAgentBuilder,
     core: { http: { post: (...args: unknown[]) => mockHttpPost(...args) } },
     search: jest.fn(),
+    uiActions: { executeTriggerActions: mockExecuteTriggerActions },
+    filterManager: { getAppFilters: () => [] },
   }),
 }));
 
@@ -597,6 +608,62 @@ describe('customContentEmbeddableFactory', () => {
         'data-is-interactive',
         expected
       );
+    });
+  });
+
+  describe('interactions', () => {
+    let mockForDataset: jest.SpyInstance;
+
+    beforeEach(() => {
+      // The dataset of `FROM logs`, with a field a click can filter on.
+      const hostField = { name: 'host.name', type: 'string', filterable: true };
+      mockForDataset = jest.spyOn(EsqlSource, 'forDataset').mockResolvedValue({
+        kind: 'esql',
+        toFilterableSource: async () => ({
+          kind: 'esql',
+          id: 'logs',
+          title: 'logs',
+          fields: [hostField],
+          getFieldByName: (name: string) => (name === hostField.name ? hostField : undefined),
+          isTimeBased: () => false,
+        }),
+      } as unknown as EsqlSource);
+    });
+
+    afterEach(() => {
+      mockForDataset.mockRestore();
+    });
+
+    it('offers the renderer the actions the host runs', async () => {
+      const { embeddable } = await buildEmbeddable(baseState);
+      await act(async () => render(<embeddable.Component />));
+
+      expect(capturedComponentProps?.interactionActions).toEqual(['filter']);
+    });
+
+    it('applies a filter built from the panel data sources', async () => {
+      const { embeddable } = await buildEmbeddable(baseState);
+      await waitFor(() => expect(embeddable.api.dataSources$.getValue()).toBeDefined());
+      await act(async () => render(<embeddable.Component />));
+
+      await act(async () =>
+        capturedComponentProps?.onInteraction?.({
+          action: 'filter',
+          field: 'host.name',
+          value: 'a',
+          negate: false,
+        })
+      );
+
+      expect(mockExecuteTriggerActions).toHaveBeenCalledWith('on_apply_filter', {
+        filters: [
+          expect.objectContaining({
+            meta: expect.objectContaining({ index: 'logs' }),
+            query: { match_phrase: { 'host.name': 'a' } },
+          }),
+        ],
+        embeddable: expect.objectContaining({ uuid: 'test-uuid' }),
+      });
     });
   });
 

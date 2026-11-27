@@ -68,6 +68,7 @@ const FRAME_FILL_GUIDANCE = `FRAME FILL — the dashboard layout decides the fin
 const SANDBOX_GUIDANCE = `ABSOLUTE, NON-NEGOTIABLE RULE: the template renders inside a sandboxed iframe with scripting disabled. ANY JavaScript you write — a <script> tag, an inline event handler (onclick, onmouseover, ...), or building any part of the markup at runtime via document.getElementById/innerHTML/addEventListener/JSON.parse/fetch — will NEVER RUN. It is completely dead code and will render as a BLANK PANEL.
 - Write every element directly as static HTML/SVG — never assemble markup as a string in JavaScript and inject it via innerHTML.
 - If the prompt asks for hover interactivity (e.g. tooltips), this IS possible with CSS :hover alone — do NOT reach for JavaScript. Use a nested element that is invisible by default (\`opacity: 0\`) and reveal it with a \`:hover\` rule.
+- Form controls (<form>, <input>, <textarea>, <select>, <label>) are removed at render time, so do not write them. For an expandable section use <details> with a <summary>.
 - Links are only allowed to Dashboards and Discover, as <a href="/app/dashboards..."> or <a href="/app/discover..."> (for example /app/dashboards#/view/<id> or /app/discover). Never include a host, a protocol, or a base path. Any other href, including links to other apps and external URLs, is removed at render time, so do not write one. Use no other attribute on <a>.
 - Do NOT load any external resources. No CDN scripts, no Google Fonts, no image URLs.
 - Do NOT use <img> tags with an external \`src\` — the panel's CSP blocks all outbound network requests. For images, icons, or illustrations draw them with inline SVG, pure CSS shapes, or a Unicode emoji/symbol instead.
@@ -84,7 +85,9 @@ LIQUID SYNTAX:
 - Conditionals:  {% if row["revenue"].value >= 10000 %}...{% elsif row["revenue"].value >= 5000 %}...{% else %}...{% endif %}
 - Output value:  {{ row["column name"].value }}
 - Bar width:     <div style="width: {{ row["column name"].pct }}%; ..."></div>
-- Filters:       {{ row["column name"].value | round: 2 }}`;
+- Filters:       {{ row["column name"].value | round: 2 }}
+- Write values with {{ }}, which HTML-escapes them. The "raw" filter and the "echo" and "cycle" tags are rejected. For alternating rows use CSS (:nth-child).
+- Always put an attribute value that comes from data in double quotes, as in data-cc-value="{{ row["host"].value }}". Escaping does not protect an unquoted value: it ends at its first space, so New York would be read as New.`;
 import { sanitizeCellValue } from './sanitize_cell_value';
 
 const SAMPLE_ROW_COUNT = 3;
@@ -133,6 +136,17 @@ function formatSampleTable(columns: Array<{ name: string }>, rows: unknown[][]):
   return `${header}\n${separator}\n${dataRows}`;
 }
 
+const INTERACTION_GUIDANCE = `CLICK TO FILTER — add this ONLY when the request asks for it (for example "click a host to filter the dashboard"). Never add it on your own.
+An element can filter the whole dashboard when it is clicked. Declare it with data attributes on a <button>, never on a <div>, a <span> or an <a>: only a button can be used with the keyboard, and an <a> loses the attributes:
+  <button data-cc-action="filter" data-cc-field="host" data-cc-value="{{ row["host"].value }}">{{ row["host"].value }}</button>
+- data-cc-action is always "filter".
+- data-cc-field is the exact name of a column that a query returns UNCHANGED from a field of the index: a plain field in the BY clause (\`BY host\`) or read as it is. Never a column that is renamed (\`BY h = host\`, RENAME), computed (EVAL) or aggregated (COUNT, SUM, AVG, ...): those are not fields of the index, so the click would do nothing. When no column fits what the user wants to filter on, do not add a filter element.
+- data-cc-value is the value of that same column in the same row, written as {{ row["host"].value }}. Never type a value into the template. For a numeric field it must be a plain number.
+- data-cc-op is "is" (the default) or "is_not" to exclude the value.
+- One action per element, and nothing else is supported: no other action, attribute or value.
+- Keep it honest and visible: the element has a visible label that says what it is, \`cursor: pointer\` and a hover state. Never make the whole panel, an empty element or a transparent one clickable.
+- When refining a template, keep every existing data-cc-* element unless the user asks to remove it.`;
+
 const MULTI_QUERY_DATA_MODEL_GUIDANCE = `MULTIPLE QUERIES — this panel has more than one ES|QL query:
 - \`rows\` and \`max\` are the results of the FIRST query, exactly as above; they are the same as queries[0].
 - The other queries are read by position: queries[1] is the second query, queries[2] the third, and so on. Each one has its own \`rows\` and \`max\`, in the same shape as above, e.g. {% for row in queries[1].rows %}...{% endfor %} and queries[1].max["column name"]. A column's .pct is relative to that query's own max.
@@ -179,6 +193,8 @@ function buildSystemPromptTemplate(hasAdditionalQueries: boolean): string {
 Generate a reusable HTML template using Liquid template syntax. The template is filled with real ES|QL query results at render time — do NOT embed literal data values.
 
 ${LIQUID_DATA_MODEL_GUIDANCE}${hasAdditionalQueries ? `\n\n${MULTI_QUERY_DATA_MODEL_GUIDANCE}` : ''}
+
+${INTERACTION_GUIDANCE}
 
 OUTPUT RULES:
 - Output ONLY the HTML template. No markdown fences, no explanation.
@@ -254,13 +270,16 @@ function describeData({ columns, values }: SampledData): string {
   return `Data schema:\n${schemaLines}${sampleSection}`;
 }
 
+/** The text of a query, as long as the model is shown it. */
+const truncateQuery = (query: string): string =>
+  query.length > MAX_QUERY_TEXT_LENGTH
+    ? `${query.slice(0, MAX_QUERY_TEXT_LENGTH)}… (truncated)`
+    : query;
+
 /** A query after the first: its text always, and its data when it is new or changing. */
 function describeOtherQuery(query: string, position: number, data: SampledData | undefined) {
   const name = queryName(position);
-  const text =
-    query.length > MAX_QUERY_TEXT_LENGTH
-      ? `${query.slice(0, MAX_QUERY_TEXT_LENGTH)}… (truncated)`
-      : query;
+  const text = truncateQuery(query);
   const header = `${name} — the template reads this query's rows as ${name}.rows${
     data ? '' : ' (not changing)'
   }:\n\`\`\`esql\n${text}\n\`\`\``;
@@ -328,7 +347,11 @@ export const createCustomContentTemplateResolver = ({
       const { columns } = sampledFirst;
       let schemaSection: string;
       if (columns.length > 0) {
-        schemaSection = `${describeData(
+        // The text comes with the schema: a column that is a field of the index and one that is
+        // computed can look the same in a schema, and only the query tells them apart.
+        schemaSection = `ES|QL query:\n\`\`\`esql\n${truncateQuery(
+          esqlQuery
+        )}\n\`\`\`\n\n${describeData(
           sampledFirst
         )}\n\nGenerate an HTML template that accesses each column via bracket notation using its exact name, e.g. row["${sanitizeCellValue(
           columns[0].name

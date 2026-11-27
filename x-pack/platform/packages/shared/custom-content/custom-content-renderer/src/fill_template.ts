@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import { CUSTOM_CONTENT_LIQUID_OPTIONS } from '@kbn/custom-content-common';
+import {
+  CUSTOM_CONTENT_FORBIDDEN_FILTERS,
+  CUSTOM_CONTENT_UNESCAPED_TAGS,
+  CUSTOM_CONTENT_LIQUID_OPTIONS,
+} from '@kbn/custom-content-common';
 import type { ESQLColumn } from '@kbn/es-types';
+import { registerEscapedTags } from './escaped_tags';
 
 /**
  * Loaded on demand so liquidjs ships in its own chunk instead of being embedded in every
@@ -14,8 +19,15 @@ import type { ESQLColumn } from '@kbn/es-types';
  * chunk once three chunks use it, which is far wider than this feature.
  */
 const getEngine = async () => {
-  const { Liquid } = await import('liquidjs');
-  return new Liquid(CUSTOM_CONTENT_LIQUID_OPTIONS);
+  const { Liquid, Tag } = await import('liquidjs');
+  const liquid = new Liquid(CUSTOM_CONTENT_LIQUID_OPTIONS);
+  // A panel saved through the API never met the server's check, so the engine itself must keep
+  // escaping: a forbidden filter becomes the identity, and the output is escaped as for any value.
+  CUSTOM_CONTENT_FORBIDDEN_FILTERS.forEach((name) => liquid.registerFilter(name, (value) => value));
+  // Only `{{ }}` escapes. `echo` (also inside `liquid`) and `cycle` would write a value as markup, so
+  // they are made to escape it too, and a panel that already uses one keeps rendering.
+  registerEscapedTags(liquid, Tag, CUSTOM_CONTENT_UNESCAPED_TAGS);
+  return liquid;
 };
 
 function isFiniteNumber(value: unknown): value is number {

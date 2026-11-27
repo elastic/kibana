@@ -23,6 +23,7 @@ dependsOn:
   - '@kbn/presentation-publishing-schemas'
   - '@kbn/i18n'
   - '@kbn/data-plugin'
+  - '@kbn/std'
   - '@kbn/esql-utils'
   - '@kbn/data-source'
   - '@kbn/es-query'

@@ -85,6 +85,54 @@ describe('createCustomContentTemplateResolver — system prompt selection', () =
     expect(systemArg).not.toContain('Liquid template syntax');
   });
 
+  it('teaches click-to-filter only in the prompt of a panel with data', async () => {
+    mockChatComplete.mockResolvedValue({ content: '<div>ok</div>' });
+
+    await resolve({ prompt: 'Restyle', esqlQueries: ['FROM logs'] });
+    await resolve({ prompt: 'A banner' });
+
+    const [withData, withoutData] = mockChatComplete.mock.calls.map(([{ system }]) => system);
+    expect(withData).toContain('CLICK TO FILTER');
+    expect(withData).toContain('data-cc-action="filter"');
+    expect(withData).toContain('ONLY when the request asks for it');
+    expect(withData).toContain('UNCHANGED from a field of the index');
+    // A <div> or <span> cannot take the keyboard, so only a button is offered.
+    expect(withData).toContain('on a <button>, never on a <div>, a <span> or an <a>');
+    expect(withoutData).not.toContain('CLICK TO FILTER');
+  });
+
+  it('tells the model to quote an attribute value that comes from data, and why', async () => {
+    mockChatComplete.mockResolvedValue({ content: '<div>ok</div>' });
+
+    await resolve({ prompt: 'Restyle', esqlQueries: ['FROM logs'] });
+
+    const systemArg: string = mockChatComplete.mock.calls[0][0].system;
+    expect(systemArg).toContain(
+      'Always put an attribute value that comes from data in double quotes'
+    );
+    expect(systemArg).toContain('it ends at its first space');
+  });
+
+  it('tells the model which ways of writing a value are rejected', async () => {
+    mockChatComplete.mockResolvedValue({ content: '<div>ok</div>' });
+
+    await resolve({ prompt: 'Restyle', esqlQueries: ['FROM logs'] });
+
+    const systemArg: string = mockChatComplete.mock.calls[0][0].system;
+    expect(systemArg).toContain('Write values with {{ }}');
+    expect(systemArg).toContain('"raw" filter and the "echo" and "cycle" tags');
+  });
+
+  it('tells the model that form controls are removed, and what to use instead', async () => {
+    mockChatComplete.mockResolvedValue({ content: '<div>hello</div>' });
+
+    await resolve({ prompt: 'Show a KPI card' });
+
+    const systemArg: string = mockChatComplete.mock.calls[0][0].system;
+    expect(systemArg).toContain('Form controls (<form>, <input>, <textarea>, <select>, <label>)');
+    expect(systemArg).toContain('<details> with a <summary>');
+  });
+
   it('tells the model that links are only allowed to Dashboards and Discover', async () => {
     mockChatComplete.mockResolvedValue({ content: '<div>hello</div>' });
 
@@ -347,6 +395,34 @@ describe('createCustomContentTemplateResolver — several queries', () => {
 
   beforeEach(() => {
     mockChatComplete.mockResolvedValue({ content: '<div>ok</div>' });
+  });
+
+  // A column that is a field of the index and one that is computed can look the same in a schema;
+  // only the text of the query tells them apart.
+  it('gives the model the text of a first query that is new or changing, before its schema', async () => {
+    mockEsqlQuery.mockResolvedValue(columnsFor('host'));
+
+    await resolve({
+      prompt: 'A list of hosts',
+      esqlQueries: ['FROM logs | EVAL host = UPPER(host)'],
+      changedQueries: [true],
+    });
+
+    const content = contentOf();
+    expect(content).toContain('FROM logs | EVAL host = UPPER(host)');
+    expect(content.indexOf('FROM logs')).toBeLessThan(content.indexOf('Data schema:'));
+  });
+
+  it('cuts the text of a first query that is very long', async () => {
+    mockEsqlQuery.mockResolvedValue(columnsFor('host'));
+
+    await resolve({
+      prompt: 'A list of hosts',
+      esqlQueries: [`FROM logs | WHERE host == "${'x'.repeat(5000)}"`],
+      changedQueries: [true],
+    });
+
+    expect(contentOf()).toContain('(truncated)');
   });
 
   it('runs none of the queries when refining a template whose queries are not changing', async () => {

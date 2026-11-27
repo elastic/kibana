@@ -41,4 +41,8 @@ export {
 } from './esql_queries_total_length';
 
 export { stripMarkdownFences } from './strip_markdown_fences';
-export { CUSTOM_CONTENT_LIQUID_OPTIONS } from './liquid_options';
+export {
+  CUSTOM_CONTENT_LIQUID_OPTIONS,
+  CUSTOM_CONTENT_FORBIDDEN_FILTERS,
+  CUSTOM_CONTENT_UNESCAPED_TAGS,
+} from './liquid_options';

@@ -29,3 +29,8 @@ export {
 } from './src/prepare_html';
 export { CUSTOM_CONTENT_CSP_META } from './src/constants';
 export { getLinkBasePath } from './src/internal_link';
+export type {
+  CustomContentInteraction,
+  CustomContentInteractionAction,
+  FilterInteraction,
+} from './src/interactions';

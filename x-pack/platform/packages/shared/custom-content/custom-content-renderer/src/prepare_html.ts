@@ -170,6 +170,12 @@ const hardenLinks = (node: Element, basePath: LinkBasePath, linksEnabled: boolea
   node.setAttribute('rel', 'noopener noreferrer');
 };
 
+// `area` and `map` make a click land on a link that is not one. The form controls make the browser
+// click for the user: a click on a `label` is passed on to its control, and Enter in a form clicks its
+// default button. Both clicks are trusted, so an element that acts on a click could be triggered by
+// something that looks like text or a search box. The tags go and their text stays.
+const FORBIDDEN_TAGS = ['area', 'map', 'form', 'input', 'textarea', 'select', 'label'];
+
 export function sanitizeHtml(
   html: string,
   basePath: LinkBasePath = { requestBasePath: '', serverBasePath: '' },
@@ -180,7 +186,7 @@ export function sanitizeHtml(
   DOMPurify.addHook('afterSanitizeAttributes', hook);
   try {
     return DOMPurify.sanitize(html, {
-      FORBID_TAGS: ['area', 'map'],
+      FORBID_TAGS: FORBIDDEN_TAGS,
       WHOLE_DOCUMENT: true,
       FORCE_BODY: false,
     });

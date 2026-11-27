@@ -76,6 +76,16 @@ describe('fillTemplateDatasets with one query', () => {
     expect(result).toContain('&lt;script&gt;');
   });
 
+  it('keeps escaping when a template applies the raw filter', async () => {
+    const result = await fillTemplateDatasets(
+      '<p data-x="{{ rows[0]["label"].value | raw }}">{{ rows[0]["label"].value | raw }}</p>',
+      [{ columns: [{ name: 'label', type: 'keyword' }], rows: [['a" onmouseover="x <b>']] }]
+    );
+    expect(result).not.toContain('<b>');
+    expect(result).not.toContain('" onmouseover');
+    expect(result).toContain('&#34;');
+  });
+
   it('rejects when a template exceeds the render limit (DoS guard)', async () => {
     const template = '{% for a in (1..5000) %}{% for b in (1..5000) %}x{% endfor %}{% endfor %}';
     await expect(fillTemplateDatasets(template, [])).rejects.toThrow();
@@ -146,5 +156,71 @@ describe('fillTemplateDatasets', () => {
       datasets
     );
     expect(result).toBe('none');
+  });
+});
+
+// liquidjs escapes only `{{ }}`. `echo` (also inside a `liquid` block) and `cycle` write a value as
+// markup, so the renderer wraps them. Each form is compared with `{{ }}` itself.
+describe('fillTemplateDatasets — echo and cycle escape like {{ }}', () => {
+  const fill = (template: string, ...values: unknown[]) =>
+    fillTemplateDatasets(template, [
+      { columns: [{ name: 'label', type: 'keyword' }], rows: values.map((value) => [value]) },
+    ]);
+
+  const VALUE = 'rows[0]["label"].value';
+
+  const NASTY_VALUES: Array<[string, unknown]> = [
+    ['markup', '<b data-cc-action="filter" data-cc-field="host" data-cc-value="x">z</b>'],
+    ['quotes and an ampersand', `a & b "q" 'x' <i>`],
+    ['several values', ['<i>', 'ok & ok']],
+    ['a number', 5],
+    ['null', null],
+  ];
+
+  const FORMS: Array<[string, string]> = [
+    ['echo', `{% echo ${VALUE} %}`],
+    ['echo inside a liquid block', `{% liquid\n echo ${VALUE}\n%}`],
+    ['echo with a filter', `{% echo ${VALUE} | upcase %}`],
+    ['cycle', `{% cycle ${VALUE}, "b" %}`],
+    ['cycle in a group', `{% cycle "g": ${VALUE}, "b" %}`],
+  ];
+
+  describe.each(FORMS)('%s', (_, form) => {
+    it.each(NASTY_VALUES)('writes %s exactly as {{ }} does', async (__, value) => {
+      const asOutput = form.includes('| upcase') ? `{{ ${VALUE} | upcase }}` : `{{ ${VALUE} }}`;
+
+      const written = await fill(`<p>${form}</p>`, value);
+
+      expect(written).toBe(await fill(`<p>${asOutput}</p>`, value));
+    });
+  });
+
+  it('does not escape twice', async () => {
+    expect(await fill(`<p>{% echo ${VALUE} %}</p>`, 'a & b')).toBe('<p>a &amp; b</p>');
+  });
+
+  it('still writes a literal as it is', async () => {
+    expect(await fill('<p>{% echo "fine" %}</p>', 'x')).toBe('<p>fine</p>');
+  });
+
+  it('keeps cycling through its values, for the alternating rows it is used for', async () => {
+    const result = await fill(
+      '{% for row in rows %}<i class="{% cycle "odd", "even" %}"></i>{% endfor %}',
+      'a',
+      'b',
+      'c',
+      'd'
+    );
+    expect(result).toBe(
+      '<i class="odd"></i><i class="even"></i><i class="odd"></i><i class="even"></i>'
+    );
+  });
+
+  it('keeps the cycles of different groups apart', async () => {
+    const result = await fill(
+      '{% cycle "a": "x", "y" %}{% cycle "b": "p", "q" %}{% cycle "a": "x", "y" %}',
+      'unused'
+    );
+    expect(result).toBe('xpy');
   });
 });

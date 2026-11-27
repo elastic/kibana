@@ -68,6 +68,7 @@ import {
 } from '@kbn/custom-content-common';
 import {
   CustomContentComponent,
+  type CustomContentInteraction,
   type CustomContentRendererServices,
 } from '@kbn/custom-content-renderer';
 import { EsqlSource } from '@kbn/data-source';
@@ -75,6 +76,7 @@ import type { FilterableSource } from '@kbn/data-source';
 import { getSourceCommandQueryFromESQLQuery } from '@kbn/esql-utils';
 import { css } from '@emotion/react';
 import { compact, uniqBy } from 'lodash';
+import { SUPPORTED_INTERACTION_ACTIONS, runInteraction } from './run_interaction';
 import { getServices } from './services';
 import { readContextQueries } from '../common/panel_context_queries';
 import { getTelemetry } from './telemetry';
@@ -154,7 +156,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
 > = {
   type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
-    const { core, search, agentBuilder } = getServices();
+    const { core, search, agentBuilder, uiActions, filterManager } = getServices();
     const rendererServices: CustomContentRendererServices = {
       http: core.http,
       uiSettings: core.uiSettings,
@@ -544,6 +546,16 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           return () => sub.unsubscribe();
         }, []);
 
+        // What a click on the panel's content may do is a closed list (see `run_interaction.ts`).
+        const handleInteraction = useCallback((interaction: CustomContentInteraction) => {
+          runInteraction(interaction, {
+            dataSources: dataSources$.getValue(),
+            filterManager,
+            uiActions,
+            embeddable: api,
+          });
+        }, []);
+
         const handleLoadingChange = useCallback((isLoading: boolean) => {
           dataLoading$.next(isLoading);
         }, []);
@@ -602,6 +614,8 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               isInteractive={viewMode !== 'non-interactive'}
               minHeight={0}
               requestAdapter={requestAdapter}
+              onInteraction={handleInteraction}
+              interactionActions={SUPPORTED_INTERACTION_ACTIONS}
               onLoadingChange={handleLoadingChange}
               setApproximationApplied={setApproximationApplied}
               onGenerateWithChat={handleGenerateWithChat}
