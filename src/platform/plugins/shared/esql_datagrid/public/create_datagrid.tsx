@@ -18,6 +18,7 @@ import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { untilPluginStartServicesReady } from './kibana_services';
+import type { ESQLDataGridState } from './types';
 
 interface ESQLDataGridProps {
   rows: ESQLRow[];
@@ -34,6 +35,10 @@ interface ESQLDataGridProps {
   initialRowHeight?: number;
   controlColumnIds?: string[]; // default: ['openDetails', 'select']
   isApproximate?: boolean;
+  showColumnTokens?: boolean;
+  showOpenInDiscoverLink?: boolean; // default: true
+  initialState?: ESQLDataGridState;
+  onStateChange?: (state: ESQLDataGridState) => void;
 }
 
 const DataGridLazy = withSuspense(lazy(() => import('./data_grid')));

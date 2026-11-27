@@ -7,9 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import { zipObject, isEqual } from 'lodash';
-import type { UnifiedDataTableRenderCustomToolbarProps } from '@kbn/unified-data-table';
+import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
+import { zipObject, isEqual, isUndefined, omit, omitBy } from 'lodash';
+import type {
+  UnifiedDataTableRenderCustomToolbarProps,
+  UnifiedDataTableRestorableState,
+} from '@kbn/unified-data-table';
 import {
   UnifiedDataTable,
   DataLoadingState,
@@ -32,6 +35,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { RowViewer } from './row_viewer_lazy';
+import type { ESQLDataGridState } from './types';
 
 interface ESQLDataGridProps {
   core: CoreStart;
@@ -49,6 +53,10 @@ interface ESQLDataGridProps {
   initialRowHeight?: number;
   controlColumnIds?: string[];
   isApproximate: boolean;
+  showColumnTokens?: boolean;
+  showOpenInDiscoverLink?: boolean;
+  initialState?: ESQLDataGridState;
+  onStateChange?: (state: ESQLDataGridState) => void;
 }
 
 const sortOrder: SortOrder[] = [];
@@ -63,19 +71,77 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     [props.initialColumns, props.isTableView, props.columns]
   );
   const [prevColumnsIdentity, setPrevColumnsIdentity] = useState(columnsIdentity);
-  const [activeColumns, setActiveColumns] = useState<string[]>(columnsIdentity);
+  const [activeColumns, setActiveColumns] = useState<string[]>(() => {
+    const availableColumns = new Set(props.columns.map(({ name }) => name));
+    const restoredColumns = props.initialState?.columns?.filter((name) =>
+      availableColumns.has(name)
+    );
+    return restoredColumns?.length ? restoredColumns : columnsIdentity;
+  });
   if (!isEqual(columnsIdentity, prevColumnsIdentity)) {
     setPrevColumnsIdentity(columnsIdentity);
     setActiveColumns(columnsIdentity);
   }
   const [rowHeight, setRowHeight] = useState<number>(
-    props.initialRowHeight ?? DEFAULT_INITIAL_ROW_HEIGHT
+    props.initialState?.rowHeight ?? props.initialRowHeight ?? DEFAULT_INITIAL_ROW_HEIGHT
   );
-  const [rowsPerPage, setRowsPerPage] = useState(DEFAULT_ROWS_PER_PAGE);
+  const [rowsPerPage, setRowsPerPage] = useState(
+    props.initialState?.rowsPerPage ?? DEFAULT_ROWS_PER_PAGE
+  );
+  const [columnWidths, setColumnWidths] = useState<Record<string, number>>(
+    props.initialState?.columnWidths ?? {}
+  );
 
   const onSetColumns = useCallback((columns: string[]) => {
     setActiveColumns(columns);
   }, []);
+
+  const onResize = useCallback(
+    ({ columnId, width }: { columnId: string; width: number | undefined }) => {
+      setColumnWidths((widths) =>
+        width === undefined ? omit(widths, columnId) : { ...widths, [columnId]: width }
+      );
+    },
+    []
+  );
+
+  const settings = useMemo(
+    () => ({
+      columns: Object.fromEntries(
+        Object.entries(columnWidths).map(([columnId, width]) => [columnId, { width }])
+      ),
+    }),
+    [columnWidths]
+  );
+
+  const { onStateChange } = props;
+  const latestStateRef = useRef<ESQLDataGridState>(props.initialState ?? {});
+  const reportStateChange = useCallback(
+    (changes: ESQLDataGridState) => {
+      latestStateRef.current = { ...latestStateRef.current, ...changes };
+      onStateChange?.(latestStateRef.current);
+    },
+    [onStateChange]
+  );
+
+  useEffect(() => {
+    reportStateChange({ columns: activeColumns, columnWidths, rowHeight, rowsPerPage });
+  }, [reportStateChange, activeColumns, columnWidths, rowHeight, rowsPerPage]);
+
+  // Page and horizontal scroll position live in the table's restorable state; scroll is only
+  // reported when the table unmounts.
+  const [tableInitialState] = useState<Partial<UnifiedDataTableRestorableState>>(() =>
+    omitBy(
+      { pageIndex: props.initialState?.pageIndex, scrollLeft: props.initialState?.scrollLeft },
+      isUndefined
+    )
+  );
+  const onTableInitialStateChange = useCallback(
+    ({ pageIndex, scrollLeft }: Partial<UnifiedDataTableRestorableState>) => {
+      reportStateChange(omitBy({ pageIndex, scrollLeft }, isUndefined));
+    },
+    [reportStateChange]
+  );
 
   const [esqlSource, setEsqlSource] = useState<EsqlSource>();
   useEffect(() => {
@@ -159,9 +225,13 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     props.uiActions,
   ]);
 
+  const showOpenInDiscoverLink = props.showOpenInDiscoverLink ?? true;
   const discoverLocator = useMemo(() => {
+    if (!showOpenInDiscoverLink) {
+      return undefined;
+    }
     return props.share?.url.locators.get('DISCOVER_APP_LOCATOR');
-  }, [props.share?.url.locators]);
+  }, [props.share?.url.locators, showOpenInDiscoverLink]);
 
   const renderToolbar = useCallback(
     (customToolbarProps: UnifiedDataTableRenderCustomToolbarProps) => {
@@ -257,7 +327,12 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       configRowHeight={DEFAULT_INITIAL_ROW_HEIGHT}
       rowHeightState={rowHeight}
       onUpdateRowHeight={setRowHeight}
+      settings={settings}
+      onResize={onResize}
+      initialState={tableInitialState}
+      onInitialStateChange={onTableInitialStateChange}
       controlColumnIds={props.controlColumnIds}
+      showColumnTokens={props.showColumnTokens}
       renderCustomToolbar={discoverLocator ? renderToolbar : undefined}
     />
   );

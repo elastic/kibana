@@ -100,6 +100,43 @@ export const createDatasetWizardStrings = {
   disabledLabel: i18n.translate('xpack.dataFederation.createDatasetWizard.disabledLabel', {
     defaultMessage: 'Disabled',
   }),
+  previewStepLabel: i18n.translate('xpack.dataFederation.createDatasetWizard.previewStepLabel', {
+    defaultMessage: 'Preview results',
+  }),
+  previewStepDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.previewStepDescription',
+    {
+      defaultMessage:
+        'Shows the first 10 rows read from your dataset using the current configuration.',
+    }
+  ),
+  previewRefreshButton: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.previewRefreshButton',
+    {
+      defaultMessage: 'Refresh',
+    }
+  ),
+  previewLoadingTitle: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.previewLoadingTitle',
+    {
+      defaultMessage: 'Loading preview results',
+    }
+  ),
+  previewErrorTitle: i18n.translate('xpack.dataFederation.createDatasetWizard.previewErrorTitle', {
+    defaultMessage: 'Unable to load preview',
+  }),
+  previewNoResultsTitle: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.previewNoResultsTitle',
+    {
+      defaultMessage: 'No results found',
+    }
+  ),
+  previewNoResultsDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.previewNoResultsDescription',
+    {
+      defaultMessage: 'The query ran successfully but returned no results.',
+    }
+  ),
   reviewStepLabel: i18n.translate('xpack.dataFederation.createDatasetWizard.reviewStepLabel', {
     defaultMessage: 'Review',
   }),

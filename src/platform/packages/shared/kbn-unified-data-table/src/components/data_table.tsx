@@ -1628,6 +1628,47 @@ const InternalUnifiedDataTable = React.forwardRef<
 
     const { run: throttledHandleOnScroll } = useThrottleFn(handleOnScroll, { wait: 200 });
 
+    const scrollLeftRef = useRestorableRef('scrollLeft', 0);
+    const pendingScrollLeftRef = useRef(scrollLeftRef.current);
+    const restoreScrollFrameRef = useRef<number>();
+    const handleGridScroll = useCallback(
+      (event: { scrollTop: number; scrollLeft: number }) => {
+        if (!pendingScrollLeftRef.current) {
+          scrollLeftRef.current = event.scrollLeft;
+        }
+        if (paginationMode !== 'multiPage') {
+          throttledHandleOnScroll(event);
+        }
+      },
+      [paginationMode, scrollLeftRef, throttledHandleOnScroll]
+    );
+
+    // EuiDataGrid measures line-count row heights only from cells in the first column, and only in
+    // a ResizeObserver callback after they mount. Mounting already scrolled past that column leaves
+    // rows at EUI's default height, so the restored position is applied once those cells measured.
+    const handleItemsRendered = useCallback(() => {
+      const pendingScrollLeft = pendingScrollLeftRef.current;
+      if (!pendingScrollLeft || restoreScrollFrameRef.current !== undefined) {
+        return;
+      }
+      restoreScrollFrameRef.current = requestAnimationFrame(() => {
+        restoreScrollFrameRef.current = requestAnimationFrame(() => {
+          restoreScrollFrameRef.current = undefined;
+          pendingScrollLeftRef.current = 0;
+          dataGridRef.current?.scrollTo?.({ scrollLeft: pendingScrollLeft });
+        });
+      });
+    }, []);
+
+    useEffect(
+      () => () => {
+        if (restoreScrollFrameRef.current !== undefined) {
+          cancelAnimationFrame(restoreScrollFrameRef.current);
+        }
+      },
+      []
+    );
+
     useEffect(() => {
       if (loadingState === DataLoadingState.loadingMore) {
         setHasScrolledToBottom(false);
@@ -1636,7 +1677,8 @@ const InternalUnifiedDataTable = React.forwardRef<
 
     const virtualizationOptions = useMemo(() => {
       const options = {
-        onScroll: paginationMode === 'multiPage' ? undefined : throttledHandleOnScroll,
+        onScroll: handleGridScroll,
+        onItemsRendered: handleItemsRendered,
       };
 
       // Don't use row "overscan" when showing Summary column since
@@ -1649,7 +1691,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         ...VIRTUALIZATION_OPTIONS,
         ...options,
       };
-    }, [showSummaryColumn, paginationMode, throttledHandleOnScroll]);
+    }, [showSummaryColumn, handleGridScroll, handleItemsRendered]);
 
     const isLoaded = loadingState === DataLoadingState.loaded;
 
