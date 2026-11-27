@@ -220,18 +220,22 @@ export const setExpandedDocByQuery: InternalStateThunkActionCreator<
       return undefined;
     }
 
-    const { query } = selectTab(getState(), tabId).appState;
+    const { query: queryToVerify } = selectTab(getState(), tabId).appState;
     const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
     const dataView = getTabDataView(tabRuntimeState);
     // Links are restored through the current query, so only a document it finds again gets one.
-    const restorableRecord = dataView
-      ? await refetchThroughQuery({ record, query, dataView, data, abortSignal })
+    const refetchedRecord = dataView
+      ? await refetchThroughQuery({ record, query: queryToVerify, dataView, data, abortSignal })
       : undefined;
 
     if (abortSignal?.aborted) {
       return undefined;
     }
 
+    // A reference is only valid for the query that verified it. If the query changed while the
+    // refetch was in flight, keep the document local instead of writing a stale URL reference.
+    const currentQuery = selectTab(getState(), tabId).appState.query;
+    const restorableRecord = isEqual(currentQuery, queryToVerify) ? refetchedRecord : undefined;
     const resolvedDoc = tabRuntimeState.scopedProfilesManager$
       .getValue()
       .resolveDocumentProfile({ record: restorableRecord ?? record });
