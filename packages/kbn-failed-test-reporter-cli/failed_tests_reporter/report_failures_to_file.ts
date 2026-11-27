@@ -345,9 +345,7 @@ export async function reportFailuresToFile(
     const abortedRunnables = failure === rootCause ? cascading.map(({ name }) => name) : [];
     const sameError = sameErrorByFailure.get(failure) ?? [];
     const hash = createHash('sha256').update(failure.name).digest('hex');
-    const filenameBase = `${
-      process.env.BUILDKITE_JOB_ID ? process.env.BUILDKITE_JOB_ID + '_' : ''
-    }${hash}`;
+    const filenameBase = `${bkMeta.jobId ? bkMeta.jobId + '_' : ''}${hash}`;
     const dir = Path.join('target', 'test_failures');
 
     const failureLog = [

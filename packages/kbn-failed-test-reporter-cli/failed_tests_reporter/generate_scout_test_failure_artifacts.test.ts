@@ -97,6 +97,36 @@ describe('generateScoutTestFailureArtifacts', () => {
     expect(artifact).not.toHaveProperty('infraReason');
   });
 
+  it('reads reports from the originating attempt and keeps retry artifacts separate', async () => {
+    const attemptDirectory = Path.join(tempDir, 'attempts', 'a1');
+    fs.mkdirSync(attemptDirectory, { recursive: true });
+    fs.renameSync(Path.join(tempDir, '.scout'), Path.join(attemptDirectory, '.scout'));
+
+    for (const jobId of ['a1', 'a2']) {
+      await generateScoutTestFailureArtifacts({
+        log,
+        cwd: attemptDirectory,
+        bkMeta: { jobId, jobUrl: `https://buildkite.com/builds/1#${jobId}` },
+      });
+    }
+
+    const artifacts = fs
+      .readdirSync(Path.join('target', 'test_failures'))
+      .filter((file) => file.endsWith('.json'));
+    expect(artifacts).toHaveLength(4);
+    for (const jobId of ['a1', 'a2']) {
+      const files = artifacts.filter((file) => file.startsWith(`${jobId}_`));
+      expect(files).toHaveLength(2);
+      for (const file of files) {
+        expect(
+          JSON.parse(fs.readFileSync(Path.join('target', 'test_failures', file), 'utf8'))
+        ).toEqual(
+          expect.objectContaining({ jobId, jobUrl: `https://buildkite.com/builds/1#${jobId}` })
+        );
+      }
+    }
+  });
+
   it('carries the infra failure reason into the artifact', async () => {
     const infraReason = { category: 'cdn', message: 'Kibana bundles failed to load from the CDN.' };
     fs.writeFileSync(
