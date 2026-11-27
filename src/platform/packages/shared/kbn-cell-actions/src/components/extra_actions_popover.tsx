@@ -12,7 +12,6 @@ import {
   EuiContextMenuPanel,
   EuiPopover,
   EuiScreenReaderOnly,
-  EuiWrappingPopover,
   type EuiButtonIconProps,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
@@ -70,45 +69,58 @@ export const ExtraActionsPopOver: React.FC<ActionsPopOverProps> = ({
   </EuiPopover>
 );
 
-interface ExtraActionsPopOverWithAnchorProps extends Pick<
+type ExtraActionsPopOverWithAnchorProps = Pick<
   ActionsPopOverProps,
   'anchorPosition' | 'actionContext' | 'closePopOver' | 'isOpen' | 'actions' | 'extraActionsColor'
-> {
-  anchorRef: React.RefObject<HTMLElement>;
-}
+>;
 
+/**
+ * Makes the popover root cover its (positioned) parent, so the popover opens relative to the parent's
+ * box. The anchor is an empty element that is stacked on top of the content it stands for: the content
+ * itself is never moved or re-parented, so it keeps its DOM node, state and focus.
+ */
+export const OVERLAY_ANCHOR_STYLE = {
+  position: 'absolute',
+  inset: 0,
+  pointerEvents: 'none',
+} as const;
+
+const OVERLAY_ANCHOR_BUTTON = <span />;
+
+/**
+ * Extra actions popover that opens relative to the box of its positioned parent element.
+ * Must be rendered inside an element with `position: relative` (or any other positioned element).
+ */
 export const ExtraActionsPopOverWithAnchor = ({
   anchorPosition,
-  anchorRef,
   actionContext,
   isOpen,
   closePopOver,
   actions,
   extraActionsColor,
-}: ExtraActionsPopOverWithAnchorProps) => {
-  return anchorRef.current ? (
-    <EuiWrappingPopover
-      aria-label={EXTRA_ACTIONS_ARIA_LABEL}
-      button={anchorRef.current}
-      isOpen={isOpen}
-      closePopover={closePopOver}
-      panelPaddingSize="xs"
-      anchorPosition={anchorPosition}
-      hasArrow={false}
-      repositionOnScroll
-      ownFocus
-      attachToAnchor={false}
-      data-test-subj="extraActionsPopOverWithAnchor"
-    >
-      <ExtraActionsPopOverContent
-        actions={actions}
-        actionContext={actionContext}
-        closePopOver={closePopOver}
-        extraActionsColor={extraActionsColor}
-      />
-    </EuiWrappingPopover>
-  ) : null;
-};
+}: ExtraActionsPopOverWithAnchorProps) => (
+  <EuiPopover
+    aria-label={EXTRA_ACTIONS_ARIA_LABEL}
+    display="block"
+    style={OVERLAY_ANCHOR_STYLE}
+    button={OVERLAY_ANCHOR_BUTTON}
+    isOpen={isOpen}
+    closePopover={closePopOver}
+    panelPaddingSize="xs"
+    anchorPosition={anchorPosition}
+    hasArrow={false}
+    repositionOnScroll
+    ownFocus
+    data-test-subj="extraActionsPopOverWithAnchor"
+  >
+    <ExtraActionsPopOverContent
+      actions={actions}
+      actionContext={actionContext}
+      closePopOver={closePopOver}
+      extraActionsColor={extraActionsColor}
+    />
+  </EuiPopover>
+);
 
 type ExtraActionsPopOverContentProps = Pick<
   ActionsPopOverProps,

@@ -325,7 +325,7 @@ exports[`Users Table Component Rendering it renders the default Users table 1`] 
                 >
                   <div>
                     <div
-                      class="euiPopover emotion-euiPopover-inline-block"
+                      style="position: relative; display: inline-block; vertical-align: middle; max-width: 100%;"
                     >
                       <div>
                         _apt
@@ -390,7 +390,7 @@ exports[`Users Table Component Rendering it renders the default Users table 1`] 
                 >
                   <div>
                     <div
-                      class="euiPopover emotion-euiPopover-inline-block"
+                      style="position: relative; display: inline-block; vertical-align: middle; max-width: 100%;"
                     >
                       <div>
                         root
@@ -457,7 +457,7 @@ exports[`Users Table Component Rendering it renders the default Users table 1`] 
                 >
                   <div>
                     <div
-                      class="euiPopover emotion-euiPopover-inline-block"
+                      style="position: relative; display: inline-block; vertical-align: middle; max-width: 100%;"
                     >
                       <div>
                         systemd-resolve

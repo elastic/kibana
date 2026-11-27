@@ -86,7 +86,7 @@ exports[`IP Overview Component rendering it renders the default IP Overview 1`] 
               >
                 <div>
                   <div
-                    class="euiPopover emotion-euiPopover-inline-block"
+                    style="position: relative; display: inline-block; vertical-align: middle; max-width: 100%;"
                   >
                     <div>
                       <div
@@ -118,7 +118,7 @@ exports[`IP Overview Component rendering it renders the default IP Overview 1`] 
               >
                 <div>
                   <div
-                    class="euiPopover emotion-euiPopover-inline-block"
+                    style="position: relative; display: inline-block; vertical-align: middle; max-width: 100%;"
                   >
                     <div>
                       <div
@@ -162,7 +162,7 @@ exports[`IP Overview Component rendering it renders the default IP Overview 1`] 
               >
                 <div>
                   <div
-                    class="euiPopover emotion-euiPopover-inline-block"
+                    style="position: relative; display: inline-block; vertical-align: middle; max-width: 100%;"
                   >
                     <div>
                       <div
@@ -198,7 +198,7 @@ exports[`IP Overview Component rendering it renders the default IP Overview 1`] 
               >
                 <div>
                   <div
-                    class="euiPopover emotion-euiPopover-inline-block"
+                    style="position: relative; display: inline-block; vertical-align: middle; max-width: 100%;"
                   >
                     <div>
                       <div
@@ -294,7 +294,7 @@ exports[`IP Overview Component rendering it renders the default IP Overview 1`] 
                 >
                   <div>
                     <div
-                      class="euiPopover emotion-euiPopover-inline-block"
+                      style="position: relative; display: inline-block; vertical-align: middle; max-width: 100%;"
                     >
                       <div>
                         <div
@@ -347,7 +347,7 @@ exports[`IP Overview Component rendering it renders the default IP Overview 1`] 
           >
             <div>
               <div
-                class="euiPopover emotion-euiPopover-inline-block"
+                style="position: relative; display: inline-block; vertical-align: middle; max-width: 100%;"
               >
                 <div>
                   <div
@@ -499,7 +499,7 @@ exports[`IP Overview Component rendering it renders the side panel IP overview 1
               >
                 <div>
                   <div
-                    class="euiPopover emotion-euiPopover-inline-block"
+                    style="position: relative; display: inline-block; vertical-align: middle; max-width: 100%;"
                   >
                     <div>
                       <div
@@ -531,7 +531,7 @@ exports[`IP Overview Component rendering it renders the side panel IP overview 1
               >
                 <div>
                   <div
-                    class="euiPopover emotion-euiPopover-inline-block"
+                    style="position: relative; display: inline-block; vertical-align: middle; max-width: 100%;"
                   >
                     <div>
                       <div
@@ -575,7 +575,7 @@ exports[`IP Overview Component rendering it renders the side panel IP overview 1
               >
                 <div>
                   <div
-                    class="euiPopover emotion-euiPopover-inline-block"
+                    style="position: relative; display: inline-block; vertical-align: middle; max-width: 100%;"
                   >
                     <div>
                       <div
@@ -611,7 +611,7 @@ exports[`IP Overview Component rendering it renders the side panel IP overview 1
               >
                 <div>
                   <div
-                    class="euiPopover emotion-euiPopover-inline-block"
+                    style="position: relative; display: inline-block; vertical-align: middle; max-width: 100%;"
                   >
                     <div>
                       <div
@@ -707,7 +707,7 @@ exports[`IP Overview Component rendering it renders the side panel IP overview 1
                 >
                   <div>
                     <div
-                      class="euiPopover emotion-euiPopover-inline-block"
+                      style="position: relative; display: inline-block; vertical-align: middle; max-width: 100%;"
                     >
                       <div>
                         <div
@@ -760,7 +760,7 @@ exports[`IP Overview Component rendering it renders the side panel IP overview 1
           >
             <div>
               <div
-                class="euiPopover emotion-euiPopover-inline-block"
+                style="position: relative; display: inline-block; vertical-align: middle; max-width: 100%;"
               >
                 <div>
                   <div
