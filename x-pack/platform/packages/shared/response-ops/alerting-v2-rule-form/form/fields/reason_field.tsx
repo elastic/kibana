@@ -38,6 +38,8 @@ const EDITOR_OPTIONS = {
   automaticLayout: true,
   renderLineHighlight: 'none',
   tabSize: 2,
+  // The suggestion list renders outside the editor, so the frame can clip the editor's corners.
+  fixedOverflowWidgets: true,
 } as const;
 
 export const validateReasonTemplate = (value: string | undefined): string | true => {
@@ -84,12 +86,14 @@ export const ReasonField = () => {
     editor.onDidDispose(() => provider.dispose());
   };
 
-  // The editor is transparent, so the frame gives it the look of the other form controls. It must
-  // not clip its content (`overflow: hidden`): the suggestion list opens below the short editor.
+  // The editor is transparent, so the frame gives it the look of the other form controls. It clips
+  // the editor to the rounded corners, which is safe because `fixedOverflowWidgets` renders the
+  // suggestion list outside the frame.
   const frameCss = css`
     background-color: ${euiTheme.components.forms.background};
     border: ${euiTheme.border.width.thin} solid ${euiTheme.components.forms.border};
     border-radius: ${euiTheme.border.radius.medium};
+    overflow: hidden;
     padding-top: ${euiTheme.size.s};
 
     &:focus-within {
