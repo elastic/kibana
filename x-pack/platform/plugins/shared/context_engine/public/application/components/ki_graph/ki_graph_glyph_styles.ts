@@ -6,6 +6,7 @@
  */
 
 import { shade, tint, transparentize, type UseEuiTheme } from '@elastic/eui';
+import { getKiGraphNodeIcon } from './ki_graph_node_icon';
 import type { KiGraphNodeKind } from './types';
 
 const ICON_PIXEL_SIZE = 16;
@@ -18,7 +19,7 @@ const LIGHT_FILL_TINT_BUSY = 0.55;
 const DARK_FILL_ALPHA = 0.3;
 const DARK_FILL_ALPHA_BUSY = 0.48;
 
-/** Scales the glyph icon so it stays inside the circle or hexagon body. */
+/** Scales the glyph icon so it stays inside the node body shape. */
 export const getKiGraphGlyphIconScale = (nodeSize: number): number =>
   Math.min(1, (nodeSize * 0.46) / ICON_PIXEL_SIZE);
 
@@ -55,9 +56,9 @@ export const getKiGraphVisPalette = (
   ];
 };
 
-export const getKiGraphSubtypeAccentColor = (
+const getFactEntitySubtypeAccentColor = (
   euiTheme: UseEuiTheme['euiTheme'],
-  kind: KiGraphNodeKind,
+  kind: 'fact' | 'entity',
   subtype?: string
 ): string => {
   const key = normalizeSubtypeKey(subtype);
@@ -72,11 +73,66 @@ export const getKiGraphSubtypeAccentColor = (
   return palette[index];
 };
 
+const getFixedKindAccentColor = (
+  euiTheme: UseEuiTheme['euiTheme'],
+  kind: 'memory' | 'document' | 'workflow' | 'crawler'
+): string => {
+  switch (kind) {
+    case 'memory':
+      return euiTheme.colors.vis.euiColorVis4;
+    case 'document':
+      return euiTheme.colors.vis.euiColorVis7;
+    case 'workflow':
+      return euiTheme.colors.accent;
+    case 'crawler':
+      return euiTheme.colors.vis.euiColorVis2;
+    default: {
+      const exhaustiveKind: never = kind;
+      return exhaustiveKind;
+    }
+  }
+};
+
+export const getKiGraphSubtypeAccentColor = (
+  euiTheme: UseEuiTheme['euiTheme'],
+  kind: KiGraphNodeKind,
+  subtype?: string
+): string => {
+  switch (kind) {
+    case 'memory':
+    case 'document':
+    case 'workflow':
+    case 'crawler':
+      return getFixedKindAccentColor(euiTheme, kind);
+    case 'fact':
+    case 'entity':
+      return getFactEntitySubtypeAccentColor(euiTheme, kind, subtype);
+    default: {
+      const exhaustiveKind: never = kind;
+      return exhaustiveKind;
+    }
+  }
+};
+
 export const getKiGraphNodeMinimapColor = (
   euiTheme: UseEuiTheme['euiTheme'],
   kind: KiGraphNodeKind,
   subtype?: string
 ): string => getKiGraphSubtypeAccentColor(euiTheme, kind, subtype);
+
+export interface KiGraphKindGlyphAppearance {
+  icon: string;
+  accentColor: string;
+}
+
+export const getKiGraphKindGlyphAppearance = (
+  euiTheme: UseEuiTheme['euiTheme'],
+  kind: KiGraphNodeKind,
+  subtype: string
+): KiGraphKindGlyphAppearance => ({
+  icon: getKiGraphNodeIcon(kind, subtype),
+  accentColor: getKiGraphSubtypeAccentColor(euiTheme, kind, subtype),
+});
 
 interface NodeGlyphColors {
   fill: string;

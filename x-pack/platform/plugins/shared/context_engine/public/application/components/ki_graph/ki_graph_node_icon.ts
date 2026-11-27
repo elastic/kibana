@@ -45,6 +45,11 @@ const ENTITY_ICONS: readonly SubtypeIcon[] = [
 const DEFAULT_ENTITY_ICON = 'cluster';
 const FACT_ICON = 'document';
 
+export const KI_GRAPH_MEMORY_ICON = 'compute';
+export const KI_GRAPH_DOCUMENT_KIND_ICON = 'documents';
+export const KI_GRAPH_WORKFLOW_ICON = 'workflow';
+export const KI_GRAPH_CRAWLER_ICON = 'globe';
+
 /** Rows for the graph symbol table; `subtype` drives colors and labels. */
 export interface KiGraphSymbolLegendItem {
   kind: KiGraphNodeKind;
@@ -107,14 +112,32 @@ export const isPersonLikeEntitySubtype = (subtype: string): boolean => {
   return tokens.some((token) => PERSON_USER_ENTITY_SUBTYPES.has(token));
 };
 
-export const getKiGraphNodeIcon = (kind: KiGraphNodeKind, subtype: string): string => {
-  if (kind === 'fact') {
-    return FACT_ICON;
-  }
+const getEntitySubtypeIcon = (subtype: string): string => {
   if (isPersonLikeEntitySubtype(subtype)) {
     return 'user';
   }
   const tokens = subtypeTokens(subtype);
   const match = ENTITY_ICONS.find(({ keywords }) => subtypeMatchesIcons(tokens, keywords));
   return match?.icon ?? DEFAULT_ENTITY_ICON;
+};
+
+export const getKiGraphNodeIcon = (kind: KiGraphNodeKind, subtype: string): string => {
+  switch (kind) {
+    case 'fact':
+      return FACT_ICON;
+    case 'memory':
+      return KI_GRAPH_MEMORY_ICON;
+    case 'document':
+      return KI_GRAPH_DOCUMENT_KIND_ICON;
+    case 'workflow':
+      return KI_GRAPH_WORKFLOW_ICON;
+    case 'crawler':
+      return KI_GRAPH_CRAWLER_ICON;
+    case 'entity':
+      return getEntitySubtypeIcon(subtype);
+    default: {
+      const exhaustiveKind: never = kind;
+      return exhaustiveKind;
+    }
+  }
 };

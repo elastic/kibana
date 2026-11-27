@@ -6,11 +6,6 @@
  */
 
 import { MAX_AI_INDEX_QUERY_LIMIT } from '../../../../common/constants';
-import {
-  ENTITY_TYPE_PREFIX,
-  FACT_TYPE_PREFIX,
-  RELATIONSHIP_KI_TYPE,
-} from '../../../../common/dreaming';
 
 export const KI_GRAPH_MAX_ROWS = MAX_AI_INDEX_QUERY_LIMIT;
 
@@ -18,7 +13,7 @@ export const buildKiGraphQuery = (dest: string): string =>
   [
     `FROM ${JSON.stringify(dest)} METADATA _id, _index`,
     'EVAL id = COALESCE(id, _id)',
-    `WHERE type LIKE "${FACT_TYPE_PREFIX}*" OR type LIKE "${ENTITY_TYPE_PREFIX}*" OR type == "${RELATIONSHIP_KI_TYPE}"`,
-    'KEEP id, _index, type, title, attributes, references.uri',
+    'KEEP id, _index, type, title, attributes, references.uri, references.relation, governance.provenance.created_by.uri, governance.lifecycle.status, updated_at',
+    'SORT updated_at DESC',
     `LIMIT ${KI_GRAPH_MAX_ROWS}`,
   ].join('\n| ');

@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-export type KiGraphNodeKind = 'fact' | 'entity';
+/** `document` is any KI type that is not a fact, entity or memory. */
+export type KiGraphNodeKind = 'fact' | 'entity' | 'memory' | 'document' | 'workflow' | 'crawler';
+
+export const isKiGraphDocumentViewerTarget = (node: Pick<KiGraphNodeData, 'kind'>): boolean =>
+  node.kind !== 'crawler';
+
+export const DERIVED_FROM_RELATION = 'derived_from';
+export const CREATED_BY_RELATION = 'created_by';
 
 export interface KiGraphViewerTarget {
   kiId: string;
@@ -13,16 +20,15 @@ export interface KiGraphViewerTarget {
 }
 
 export interface KiGraphNodeData {
+  /** KI id, or `workflow:<id>` / `crawler:<name>` for synthetic provenance nodes. */
   kiId: string;
   index: string;
   kind: KiGraphNodeKind;
-  /** The KI type without its `fact.` / `entity.` prefix. */
+  /** The KI type without its `fact.` / `entity.` / `memory.` prefix. Empty for workflow and crawler nodes. */
   subtype: string;
   title: string;
   occurrences?: number;
   lastSeenAt?: string;
-  /** Memory KI ids from `ki://` reference URIs on this document. */
-  derivedFromIds?: readonly string[];
 }
 
 export interface KiGraphEdgeData {

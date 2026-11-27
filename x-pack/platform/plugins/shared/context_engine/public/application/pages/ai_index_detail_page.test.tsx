@@ -487,6 +487,17 @@ describe('AiIndexDetailPage', () => {
     expect(screen.getByTestId('contextAiIndexDetailTab-settings')).toBeInTheDocument();
   });
 
+  it('shows the Graph tab when memory is globally disabled', async () => {
+    mockUseMemoryEnabled.mockReturnValue(false);
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+
+    renderWithProviders(services);
+    await waitForAiIndexDetailLoaded();
+
+    expect(screen.getByTestId('contextAiIndexDetailTab-graph')).toBeInTheDocument();
+  });
+
   it('shows the Advanced settings section with backing index and delete panels', async () => {
     const services = createServices();
     services.http.get.mockResolvedValue(aiIndex);

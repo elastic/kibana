@@ -20,7 +20,6 @@ import { DEFAULT_KI_GRAPH_NODE_SIZE_PARAMS, getKiGraphNodeSize } from './ki_grap
 import type { KiGraph, KiGraphEdge, KiGraphEdgeData, KiGraphNodeData } from './types';
 import type { KiGraphLabelPlacementNode } from './use_visible_label_ids';
 
-const DIMMED_OPACITY = 0.15;
 export const DEFAULT_EDGE_STROKE_WIDTH = 0.5;
 const EDGE_ARROW_PIXELS = 5;
 
@@ -30,12 +29,6 @@ type Plain<T> = { [K in keyof T]: T[K] };
 export type KiGraphFlowNodeData = Plain<KiGraphNodeData> & {
   size: number;
   degree: number;
-  isSelected: boolean;
-  isHovered: boolean;
-  isHighlighted: boolean;
-  isDimmed: boolean;
-  isLabelForced: boolean;
-  showLabel: boolean;
 };
 
 export type KiGraphFlowNode = Node<KiGraphFlowNodeData, 'kiNode'>;
@@ -52,35 +45,6 @@ export const DEFAULT_KI_GRAPH_LAYOUT_TUNING_PARAMS: KiGraphLayoutTuningParams = 
   force: DEFAULT_FORCE_LAYOUT_PARAMS,
   nodeSize: DEFAULT_KI_GRAPH_NODE_SIZE_PARAMS,
   center: DEFAULT_KI_GRAPH_CENTER_PARAMS,
-};
-
-interface KiGraphLayoutState {
-  selectedId?: string;
-  hoveredId?: string;
-}
-
-const getHighlightIds = (
-  edges: readonly KiGraphEdge[],
-  hoveredId: string | undefined,
-  selectedId: string | undefined
-): ReadonlySet<string> | undefined => {
-  if (hoveredId !== undefined) {
-    return getNeighborIds(edges, hoveredId);
-  }
-  if (selectedId !== undefined) {
-    return getNeighborIds(edges, selectedId);
-  }
-  return undefined;
-};
-
-const getEdgeFocusId = (
-  hoveredId: string | undefined,
-  selectedId: string | undefined
-): string | undefined => {
-  if (hoveredId !== undefined) {
-    return hoveredId;
-  }
-  return selectedId;
 };
 
 interface KiGraphLayoutResult {
@@ -134,12 +98,10 @@ export const getDegreeById = (graph: KiGraph): ReadonlyMap<string, number> => {
 
 export const useKiGraphLayout = (
   graph: KiGraph,
-  state: KiGraphLayoutState,
   layoutParams: KiGraphLayoutTuningParams = DEFAULT_KI_GRAPH_LAYOUT_TUNING_PARAMS
 ): KiGraphLayoutResult => {
   const { force: forceParams, nodeSize: nodeSizeParams, center: centerParams } = layoutParams;
   const { euiTheme } = useEuiTheme();
-  const { selectedId, hoveredId } = state;
 
   const degreeById = useMemo(() => getDegreeById(graph), [graph]);
 
@@ -189,25 +151,12 @@ export const useKiGraphLayout = (
   );
 
   return useMemo(() => {
-    const highlightIds = getHighlightIds(graph.edges, hoveredId, selectedId);
-    const focusId = getEdgeFocusId(hoveredId, selectedId);
-
     const nodes: KiGraphFlowNode[] = graph.nodes.map((nodeData) => {
       const degree = degreeById.get(nodeData.kiId) ?? 0;
       const size = getKiGraphNodeSize(nodeData, degree, nodeSizeParams);
       const center = centers.get(nodeData.kiId);
       const x = (center?.x ?? 0) - size / 2;
       const y = (center?.y ?? 0) - size / 2;
-      const inHighlight = highlightIds?.has(nodeData.kiId) ?? false;
-      const isSelected = selectedId === nodeData.kiId;
-      const isHovered = hoveredId === nodeData.kiId;
-
-      let zIndex = 0;
-      if (isHovered) {
-        zIndex = 2;
-      } else if (isSelected) {
-        zIndex = 1;
-      }
 
       return {
         id: nodeData.kiId,
@@ -221,63 +170,40 @@ export const useKiGraphLayout = (
           { type: 'target', position: Position.Top, x: size / 2, y: size / 2, width: 1, height: 1 },
           { type: 'source', position: Position.Top, x: size / 2, y: size / 2, width: 1, height: 1 },
         ],
-        zIndex,
+        zIndex: 0,
         targetPosition: Position.Top,
         sourcePosition: Position.Top,
         data: {
           ...nodeData,
           size,
           degree,
-          isSelected,
-          isHovered,
-          isHighlighted: highlightIds !== undefined && inHighlight,
-          isDimmed: highlightIds !== undefined && !inHighlight,
-          isLabelForced: highlightIds !== undefined && inHighlight,
-          showLabel: false,
         },
       };
     });
 
     const defaultStroke = euiTheme.colors.mediumShade;
-    const highlightStroke = euiTheme.colors.primary;
     const defaultStrokeWidth = DEFAULT_EDGE_STROKE_WIDTH;
 
-    // Marker units follow the stroke width, so the size is divided out to keep arrows constant.
     const arrowMarker = (stroke: string, strokeWidth: number) => ({
       type: MarkerType.ArrowClosed,
       width: EDGE_ARROW_PIXELS / strokeWidth,
       height: EDGE_ARROW_PIXELS / strokeWidth,
       color: stroke,
     });
-    const hasFocus = focusId !== undefined;
 
-    const edges: KiGraphFlowEdge[] = graph.edges.map((edge) => {
-      const isConnectedToFocus = edge.source === focusId || edge.target === focusId;
-      const isDimmed = hasFocus && !isConnectedToFocus;
-
-      let style: { stroke: string; strokeWidth: number; opacity?: number } = {
+    const edges: KiGraphFlowEdge[] = graph.edges.map((edge) => ({
+      id: edge.id,
+      source: edge.source,
+      target: edge.target,
+      type: 'kiEdge',
+      data: { relation: edge.relation },
+      style: {
         stroke: defaultStroke,
         strokeWidth: defaultStrokeWidth,
-      };
-
-      if (isConnectedToFocus) {
-        const focusStrokeWidth = hoveredId !== undefined && hasFocus ? 1.25 : 1;
-        style = { stroke: highlightStroke, strokeWidth: focusStrokeWidth };
-      } else if (isDimmed) {
-        style = { stroke: defaultStroke, strokeWidth: defaultStrokeWidth, opacity: DIMMED_OPACITY };
-      }
-
-      return {
-        id: edge.id,
-        source: edge.source,
-        target: edge.target,
-        type: 'kiEdge',
-        data: { relation: edge.relation },
-        style,
-        markerEnd: arrowMarker(style.stroke, style.strokeWidth),
-        zIndex: isConnectedToFocus ? 1 : 0,
-      };
-    });
+      },
+      markerEnd: arrowMarker(defaultStroke, defaultStrokeWidth),
+      zIndex: 0,
+    }));
 
     return { nodes, edges, labelNodes, layoutDurationMs };
   }, [
@@ -287,9 +213,6 @@ export const useKiGraphLayout = (
     degreeById,
     nodeSizeParams,
     euiTheme.colors.mediumShade,
-    euiTheme.colors.primary,
     graph,
-    hoveredId,
-    selectedId,
   ]);
 };

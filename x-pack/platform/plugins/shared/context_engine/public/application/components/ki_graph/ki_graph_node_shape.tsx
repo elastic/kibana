@@ -12,7 +12,10 @@ const SELECTION_RING_GAP = 3;
 
 export const KI_GRAPH_NODE_STROKE_WIDTH = 1;
 export const KI_GRAPH_NODE_STROKE_WIDTH_SELECTED = 2;
-const KI_GRAPH_NODE_STROKE_WIDTH_HOVER = 1.5;
+export const KI_GRAPH_NODE_STROKE_WIDTH_HOVER = 1.5;
+
+const MEMORY_RECT_INSET = 0.88;
+const MEMORY_CORNER_RADIUS_RATIO = 0.22;
 
 const polygonAtRadius = (cx: number, cy: number, radius: number): string => {
   const points: string[] = [];
@@ -23,6 +26,111 @@ const polygonAtRadius = (cx: number, cy: number, radius: number): string => {
   return points.join(' ');
 };
 
+const diamondAtRadius = (cx: number, cy: number, radius: number): string =>
+  `${cx},${cy - radius} ${cx + radius},${cy} ${cx},${cy + radius} ${cx - radius},${cy}`;
+
+const rectMetrics = (cx: number, cy: number, radius: number) => {
+  const half = radius * MEMORY_RECT_INSET;
+  const size = half * 2;
+  return {
+    x: cx - half,
+    y: cy - half,
+    width: size,
+    height: size,
+    rx: size * MEMORY_CORNER_RADIUS_RATIO,
+  };
+};
+
+interface RingShapeProps {
+  cx: number;
+  cy: number;
+  radius: number;
+  stroke: string;
+  strokeWidth: number;
+}
+
+interface BodyShapeProps extends RingShapeProps {
+  fill: string;
+}
+
+const HexagonRing = ({ cx, cy, radius, stroke, strokeWidth }: RingShapeProps) => (
+  <polygon
+    points={polygonAtRadius(cx, cy, radius)}
+    fill="none"
+    stroke={stroke}
+    strokeWidth={strokeWidth}
+  />
+);
+
+const CircleRing = ({ cx, cy, radius, stroke, strokeWidth }: RingShapeProps) => (
+  <circle cx={cx} cy={cy} r={radius} fill="none" stroke={stroke} strokeWidth={strokeWidth} />
+);
+
+const MemoryRing = ({ cx, cy, radius, stroke, strokeWidth }: RingShapeProps) => {
+  const { x, y, width, height, rx } = rectMetrics(cx, cy, radius);
+  return (
+    <rect
+      x={x}
+      y={y}
+      width={width}
+      height={height}
+      rx={rx}
+      ry={rx}
+      fill="none"
+      stroke={stroke}
+      strokeWidth={strokeWidth}
+    />
+  );
+};
+
+const WorkflowRing = ({ cx, cy, radius, stroke, strokeWidth }: RingShapeProps) => (
+  <polygon
+    points={diamondAtRadius(cx, cy, radius)}
+    fill="none"
+    stroke={stroke}
+    strokeWidth={strokeWidth}
+  />
+);
+
+const HexagonBody = ({ cx, cy, radius, fill, stroke, strokeWidth }: BodyShapeProps) => (
+  <polygon
+    points={polygonAtRadius(cx, cy, radius)}
+    fill={fill}
+    stroke={stroke}
+    strokeWidth={strokeWidth}
+  />
+);
+
+const CircleBody = ({ cx, cy, radius, fill, stroke, strokeWidth }: BodyShapeProps) => (
+  <circle cx={cx} cy={cy} r={radius} fill={fill} stroke={stroke} strokeWidth={strokeWidth} />
+);
+
+const MemoryBody = ({ cx, cy, radius, fill, stroke, strokeWidth }: BodyShapeProps) => {
+  const { x, y, width, height, rx } = rectMetrics(cx, cy, radius);
+  return (
+    <rect
+      x={x}
+      y={y}
+      width={width}
+      height={height}
+      rx={rx}
+      ry={rx}
+      fill={fill}
+      stroke={stroke}
+      strokeWidth={strokeWidth}
+    />
+  );
+};
+
+const WorkflowBody = ({ cx, cy, radius, fill, stroke, strokeWidth }: BodyShapeProps) => (
+  <polygon
+    points={diamondAtRadius(cx, cy, radius)}
+    fill={fill}
+    stroke={stroke}
+    strokeWidth={strokeWidth}
+  />
+);
+
 const renderOuterRing = (
   kind: KiGraphNodeKind,
   cx: number,
@@ -31,19 +139,23 @@ const renderOuterRing = (
   stroke: string,
   strokeWidth: number
 ) => {
-  if (kind === 'entity') {
-    return (
-      <polygon
-        points={polygonAtRadius(cx, cy, ringRadius)}
-        fill="none"
-        stroke={stroke}
-        strokeWidth={strokeWidth}
-      />
-    );
+  const props = { cx, cy, radius: ringRadius, stroke, strokeWidth };
+  switch (kind) {
+    case 'entity':
+      return <HexagonRing {...props} />;
+    case 'fact':
+    case 'document':
+    case 'crawler':
+      return <CircleRing {...props} />;
+    case 'memory':
+      return <MemoryRing {...props} />;
+    case 'workflow':
+      return <WorkflowRing {...props} />;
+    default: {
+      const exhaustiveKind: never = kind;
+      return exhaustiveKind;
+    }
   }
-  return (
-    <circle cx={cx} cy={cy} r={ringRadius} fill="none" stroke={stroke} strokeWidth={strokeWidth} />
-  );
 };
 
 const renderBody = (
@@ -55,19 +167,23 @@ const renderBody = (
   stroke: string,
   strokeWidth: number
 ) => {
-  if (kind === 'entity') {
-    return (
-      <polygon
-        points={polygonAtRadius(cx, cy, radius)}
-        fill={fill}
-        stroke={stroke}
-        strokeWidth={strokeWidth}
-      />
-    );
+  const props = { cx, cy, radius, fill, stroke, strokeWidth };
+  switch (kind) {
+    case 'entity':
+      return <HexagonBody {...props} />;
+    case 'fact':
+    case 'document':
+    case 'crawler':
+      return <CircleBody {...props} />;
+    case 'memory':
+      return <MemoryBody {...props} />;
+    case 'workflow':
+      return <WorkflowBody {...props} />;
+    default: {
+      const exhaustiveKind: never = kind;
+      return exhaustiveKind;
+    }
   }
-  return (
-    <circle cx={cx} cy={cy} r={radius} fill={fill} stroke={stroke} strokeWidth={strokeWidth} />
-  );
 };
 
 export interface KiGraphNodeShapeProps {

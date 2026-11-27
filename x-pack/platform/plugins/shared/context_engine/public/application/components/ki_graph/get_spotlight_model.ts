@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { KiGraph, KiGraphNodeData } from './types';
+import {
+  CREATED_BY_RELATION,
+  DERIVED_FROM_RELATION,
+  type KiGraph,
+  type KiGraphNodeData,
+  type KiGraphNodeKind,
+} from './types';
 
 export interface SpotlightNeighbor {
   node: KiGraphNodeData;
@@ -16,15 +22,27 @@ export interface SpotlightGroup {
   relation: string;
   count: number;
   neighbors: readonly SpotlightNeighbor[];
+  /** Neighbors hidden because the selected node is a hub and the group was capped. */
+  moreCount: number;
 }
 
 export interface SpotlightModel {
   node: KiGraphNodeData;
+  cameFrom: readonly SpotlightGroup[];
   incoming: readonly SpotlightGroup[];
   outgoing: readonly SpotlightGroup[];
+  cameFromCount: number;
   incomingCount: number;
   outgoingCount: number;
 }
+
+export const SPOTLIGHT_HUB_NEIGHBOR_LIMIT = 8;
+
+const isCameFromRelation = (relation: string): boolean =>
+  relation === DERIVED_FROM_RELATION || relation === CREATED_BY_RELATION;
+
+const isHubKind = (kind: KiGraphNodeKind): boolean =>
+  kind === 'memory' || kind === 'workflow' || kind === 'crawler';
 
 export const compareSpotlightNeighbors = (
   left: KiGraphNodeData,
@@ -71,17 +89,36 @@ const addNeighbor = (
   byNeighbor.set(neighbor.node.kiId, neighbor);
 };
 
-const bucketsToGroups = (buckets: RelationBuckets): SpotlightGroup[] => {
+const applyHubCap = (
+  neighbors: readonly SpotlightNeighbor[],
+  selectedKind: KiGraphNodeKind
+): { neighbors: readonly SpotlightNeighbor[]; moreCount: number } => {
+  const count = neighbors.length;
+  if (!isHubKind(selectedKind) || count <= SPOTLIGHT_HUB_NEIGHBOR_LIMIT) {
+    return { neighbors, moreCount: 0 };
+  }
+  return {
+    neighbors: neighbors.slice(0, SPOTLIGHT_HUB_NEIGHBOR_LIMIT),
+    moreCount: count - SPOTLIGHT_HUB_NEIGHBOR_LIMIT,
+  };
+};
+
+const bucketsToGroups = (
+  buckets: RelationBuckets,
+  selectedKind: KiGraphNodeKind
+): SpotlightGroup[] => {
   const groups: SpotlightGroup[] = [];
 
   for (const [relation, byNeighbor] of buckets) {
-    const neighbors = [...byNeighbor.values()].sort((left, right) =>
+    const sorted = [...byNeighbor.values()].sort((left, right) =>
       compareSpotlightNeighbors(left.node, right.node)
     );
+    const { neighbors, moreCount } = applyHubCap(sorted, selectedKind);
     groups.push({
       relation,
-      count: neighbors.length,
+      count: sorted.length,
       neighbors,
+      moreCount,
     });
   }
 
@@ -111,6 +148,7 @@ export const getSpotlightModel = (
     return undefined;
   }
 
+  const cameFromBuckets: RelationBuckets = new Map();
   const incomingBuckets: RelationBuckets = new Map();
   const outgoingBuckets: RelationBuckets = new Map();
 
@@ -124,15 +162,29 @@ export const getSpotlightModel = (
       if (neighbor === undefined) {
         continue;
       }
-      // Links between two entities have no meaningful direction, so they always go on the right.
       const isEntityLink = selected.kind === 'entity' && neighbor.kind === 'entity';
-      const buckets = isEntityLink ? outgoingBuckets : incomingBuckets;
-      addNeighbor(buckets, edge.relation, { node: neighbor, edgeId: edge.id });
+      if (isEntityLink) {
+        addNeighbor(outgoingBuckets, edge.relation, { node: neighbor, edgeId: edge.id });
+        continue;
+      }
+      if (isCameFromRelation(edge.relation) && isHubKind(selected.kind)) {
+        addNeighbor(outgoingBuckets, edge.relation, { node: neighbor, edgeId: edge.id });
+        continue;
+      }
+      if (isCameFromRelation(edge.relation)) {
+        addNeighbor(cameFromBuckets, edge.relation, { node: neighbor, edgeId: edge.id });
+        continue;
+      }
+      addNeighbor(incomingBuckets, edge.relation, { node: neighbor, edgeId: edge.id });
     }
 
     if (edge.source === selectedId) {
       const neighbor = nodeById.get(edge.target);
       if (neighbor === undefined) {
+        continue;
+      }
+      if (isCameFromRelation(edge.relation)) {
+        addNeighbor(cameFromBuckets, edge.relation, { node: neighbor, edgeId: edge.id });
         continue;
       }
       addNeighbor(outgoingBuckets, edge.relation, { node: neighbor, edgeId: edge.id });
@@ -141,8 +193,10 @@ export const getSpotlightModel = (
 
   return {
     node: selected,
-    incoming: bucketsToGroups(incomingBuckets),
-    outgoing: bucketsToGroups(outgoingBuckets),
+    cameFrom: bucketsToGroups(cameFromBuckets, selected.kind),
+    incoming: bucketsToGroups(incomingBuckets, selected.kind),
+    outgoing: bucketsToGroups(outgoingBuckets, selected.kind),
+    cameFromCount: countKeptNeighbors(cameFromBuckets),
     incomingCount: countKeptNeighbors(incomingBuckets),
     outgoingCount: countKeptNeighbors(outgoingBuckets),
   };

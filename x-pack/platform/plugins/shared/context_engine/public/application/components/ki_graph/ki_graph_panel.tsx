@@ -16,10 +16,13 @@ import { getAiIndexSettingsPath } from '../../paths';
 import { AiIndexDetailPanelEmptyState } from '../ai_index_detail/ai_index_detail_panel_empty_prompt';
 import { KiGraphCanvas } from './ki_graph_canvas';
 import { KI_GRAPH_MAX_ROWS } from './build_ki_graph_query';
-import type { KiGraphSource } from './ki_graph_source';
 import { useKiGraphStyles } from './ki_graph_styles';
 import { KiGraphViewerFlyout } from './ki_graph_viewer_flyout';
-import type { KiGraphNodeData, KiGraphViewerTarget } from './types';
+import {
+  isKiGraphDocumentViewerTarget,
+  type KiGraphNodeData,
+  type KiGraphViewerTarget,
+} from './types';
 
 const errorTitle = i18n.translate('xpack.contextEngine.kiGraph.errorTitle', {
   defaultMessage: 'Unable to load the graph',
@@ -30,12 +33,12 @@ const retryLabel = i18n.translate('xpack.contextEngine.kiGraph.retry', {
 });
 
 const emptyTitle = i18n.translate('xpack.contextEngine.kiGraph.emptyTitle', {
-  defaultMessage: 'No facts or entities yet',
+  defaultMessage: 'No graph to show yet',
 });
 
 const emptyBody = i18n.translate('xpack.contextEngine.kiGraph.emptyBody', {
   defaultMessage:
-    'Dreaming builds facts and entities from your Knowledge documents. They show up here after it runs. You can set it up in Settings.',
+    'Knowledge documents, memories, and workflows appear here once they are linked in this index. You can configure ingestion in Settings.',
 });
 
 const emptySettingsAction = i18n.translate('xpack.contextEngine.kiGraph.emptySettingsAction', {
@@ -43,8 +46,7 @@ const emptySettingsAction = i18n.translate('xpack.contextEngine.kiGraph.emptySet
 });
 
 const truncatedMessage = i18n.translate('xpack.contextEngine.kiGraph.truncated', {
-  defaultMessage:
-    'Showing the first {count} Knowledge documents, so parts of the graph may be missing.',
+  defaultMessage: 'Showing the first {count} rows, so parts of the graph may be missing.',
   values: { count: KI_GRAPH_MAX_ROWS },
 });
 
@@ -68,11 +70,10 @@ export const KiGraphPanel = ({ aiIndex }: KiGraphPanelProps) => {
   }, []);
 
   const handleViewDocument = useCallback((node: KiGraphNodeData) => {
+    if (!isKiGraphDocumentViewerTarget(node)) {
+      return;
+    }
     setViewerNode({ kiId: node.kiId, index: node.index });
-  }, []);
-
-  const handleViewSource = useCallback((source: KiGraphSource) => {
-    setViewerNode({ kiId: source.id, index: source.index });
   }, []);
 
   const handleCloseViewer = useCallback(() => {
@@ -153,12 +154,10 @@ export const KiGraphPanel = ({ aiIndex }: KiGraphPanelProps) => {
       <div css={styles.canvasShell}>
         <div css={styles.canvasInner}>
           <KiGraphCanvas
-            aiIndexId={aiIndex.id}
             graph={graph}
             selectedId={selectedNode?.kiId}
             onSelect={handleSelect}
             onViewDocument={handleViewDocument}
-            onViewSource={handleViewSource}
             isViewerOpen={viewerNode !== undefined}
           />
         </div>

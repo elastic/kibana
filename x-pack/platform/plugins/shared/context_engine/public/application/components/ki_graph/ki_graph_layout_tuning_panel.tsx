@@ -37,11 +37,15 @@ interface KiGraphLayoutTuningPanelProps {
   onChange: (next: KiGraphLayoutTuningParams) => void;
 }
 
-const panelShellCss = {
+const panelShellCss = css({
   maxWidth: 340,
+});
+
+// Scroll inside the panel: EUI draws the panel border on a positioned layer that would scroll away.
+const panelScrollCss = css({
   maxHeight: 'min(70vh, 520px)',
-  overflowY: 'auto' as const,
-};
+  overflowY: 'auto',
+});
 
 const labelHintCss = css({
   textDecoration: 'underline dotted',
@@ -266,350 +270,352 @@ export const KiGraphLayoutTuningPanel = ({
       </EuiButtonEmpty>
       {isOpen ? (
         <EuiPanel paddingSize="s" hasShadow css={panelShellCss}>
-          <EuiText size="xs" color="subdued">
-            Last layout: {durationLabel}
-          </EuiText>
-          <EuiSpacer size="s" />
-          <EuiForm component="div">
-            <TuningSection
-              id="ki-graph-tuning-spread"
-              title="Spread"
-              summary="Repulsion between nodes and pull toward the origin."
-              initialIsOpen
-            >
-              <ParamRange
-                paramKey="manyBodyStrength"
-                label="Repulsion strength"
-                value={draft.force.manyBodyStrength}
-                min={-400}
-                max={0}
-                step={5}
-                onChange={(manyBodyStrength) => updateForce({ manyBodyStrength })}
-              />
-              <ParamRange
-                paramKey="manyBodyDistanceMax"
-                label="Repulsion reach"
-                value={draft.force.manyBodyDistanceMax}
-                min={50}
-                max={2000}
-                step={10}
-                onChange={(manyBodyDistanceMax) => updateForce({ manyBodyDistanceMax })}
-              />
-              <ParamRange
-                paramKey="gravity"
-                label="Center gravity"
-                value={draft.force.gravity}
-                min={0}
-                max={0.2}
-                step={0.002}
-                onChange={(gravity) => updateForce({ gravity })}
-              />
-            </TuningSection>
-
-            <EuiHorizontalRule margin="s" />
-
-            <TuningSection
-              id="ki-graph-tuning-edges"
-              title="Edges"
-              summary="Spring forces along links between nodes."
-            >
-              <ParamRange
-                paramKey="linkStrength"
-                label="Link spring strength"
-                value={draft.force.linkStrength}
-                min={0}
-                max={1}
-                step={0.01}
-                onChange={(linkStrength) => updateForce({ linkStrength })}
-              />
-              <ParamRange
-                paramKey="linkRestBase"
-                label="Link rest length base"
-                value={draft.force.linkRestBase}
-                min={10}
-                max={300}
-                step={1}
-                onChange={(linkRestBase) => updateForce({ linkRestBase })}
-              />
-              <ParamRange
-                paramKey="linkRestPerDegree"
-                label="Link rest per degree"
-                value={draft.force.linkRestPerDegree}
-                min={0}
-                max={30}
-                step={1}
-                onChange={(linkRestPerDegree) => updateForce({ linkRestPerDegree })}
-              />
-            </TuningSection>
-
-            <EuiHorizontalRule margin="s" />
-
-            <TuningSection
-              id="ki-graph-tuning-overlap"
-              title="Overlap"
-              summary="Collision padding and how hard overlaps are resolved."
-            >
-              <ParamRange
-                paramKey="collisionGap"
-                label="Collision gap"
-                value={draft.force.collisionGap}
-                min={0}
-                max={40}
-                step={1}
-                onChange={(collisionGap) => updateForce({ collisionGap })}
-              />
-              <ParamRange
-                paramKey="collisionStrength"
-                label="Collision strength"
-                value={draft.force.collisionStrength}
-                min={0}
-                max={1}
-                step={0.05}
-                onChange={(collisionStrength) => updateForce({ collisionStrength })}
-              />
-              <ParamRange
-                paramKey="collisionIterations"
-                label="Collision solver passes"
-                value={draft.force.collisionIterations}
-                min={1}
-                max={10}
-                step={1}
-                onChange={(collisionIterations) => updateForce({ collisionIterations })}
-              />
-            </TuningSection>
-
-            <EuiHorizontalRule margin="s" />
-
-            <TuningSection
-              id="ki-graph-tuning-node-size"
-              title="Node size"
-              summary="How node diameter is chosen from metrics."
-            >
-              <EuiFormRow
-                label={<TooltipFieldLabel name="mode" text="Size mode" />}
-                display="columnCompressed"
-                fullWidth
+          <div css={panelScrollCss}>
+            <EuiText size="xs" color="subdued">
+              Last layout: {durationLabel}
+            </EuiText>
+            <EuiSpacer size="s" />
+            <EuiForm component="div">
+              <TuningSection
+                id="ki-graph-tuning-spread"
+                title="Spread"
+                summary="Repulsion between nodes and pull toward the origin."
+                initialIsOpen
               >
-                <EuiSelect
-                  compressed
-                  options={NODE_SIZE_MODE_OPTIONS}
-                  value={draft.nodeSize.mode}
-                  onChange={(e) => {
-                    const { value: next } = e.target;
-                    if (isKiGraphNodeSizeMode(next)) {
-                      updateNodeSize({ mode: next });
-                    }
-                  }}
+                <ParamRange
+                  paramKey="manyBodyStrength"
+                  label="Repulsion strength"
+                  value={draft.force.manyBodyStrength}
+                  min={-400}
+                  max={0}
+                  step={5}
+                  onChange={(manyBodyStrength) => updateForce({ manyBodyStrength })}
                 />
-              </EuiFormRow>
-              <ParamRange
-                paramKey="baseSize"
-                label="Base size"
-                value={draft.nodeSize.baseSize}
-                min={8}
-                max={60}
-                step={1}
-                onChange={(baseSize) => updateNodeSize({ baseSize })}
-              />
-              <ParamRange
-                paramKey="minSize"
-                label="Minimum size"
-                value={draft.nodeSize.minSize}
-                min={8}
-                max={40}
-                step={1}
-                onChange={(minSize) => updateNodeSize({ minSize })}
-              />
-              <ParamRange
-                paramKey="maxSize"
-                label="Maximum size"
-                value={draft.nodeSize.maxSize}
-                min={20}
-                max={120}
-                step={1}
-                onChange={(maxSize) => updateNodeSize({ maxSize })}
-              />
-              {isUniformSize ? null : (
-                <>
-                  <ParamRange
-                    paramKey="scaleMin"
-                    label="Scale floor"
-                    value={draft.nodeSize.scaleMin}
-                    min={0}
-                    max={3}
-                    step={0.05}
-                    onChange={(scaleMin) => updateNodeSize({ scaleMin })}
-                  />
-                  <ParamRange
-                    paramKey="scaleRange"
-                    label="Scale range"
-                    value={draft.nodeSize.scaleRange}
-                    min={0}
-                    max={3}
-                    step={0.05}
-                    onChange={(scaleRange) => updateNodeSize({ scaleRange })}
-                  />
-                  <ParamRange
-                    paramKey="degreeMax"
-                    label="Degree for full scale"
-                    value={draft.nodeSize.degreeMax}
-                    min={1}
-                    max={50}
-                    step={1}
-                    onChange={(degreeMax) => updateNodeSize({ degreeMax })}
-                  />
-                  <ParamRange
-                    paramKey="occurrencesMax"
-                    label="Occurrences for full scale"
-                    value={draft.nodeSize.occurrencesMax}
-                    min={1}
-                    max={200}
-                    step={1}
-                    onChange={(occurrencesMax) => updateNodeSize({ occurrencesMax })}
-                  />
-                </>
-              )}
-            </TuningSection>
-
-            <EuiHorizontalRule margin="s" />
-
-            <TuningSection
-              id="ki-graph-tuning-center"
-              title="Center"
-              summary="Which node anchors the layout and optional radial rings."
-              initialIsOpen
-            >
-              <EuiFormRow
-                label={<TooltipFieldLabel name="centerBy" text="Center ranking" />}
-                display="columnCompressed"
-                fullWidth
-              >
-                <EuiSelect
-                  compressed
-                  options={CENTER_BY_OPTIONS}
-                  value={draft.center.centerBy}
-                  onChange={(e) => {
-                    const { value: next } = e.target;
-                    if (isKiGraphCenterBy(next)) {
-                      updateCenter({ centerBy: next });
-                    }
-                  }}
+                <ParamRange
+                  paramKey="manyBodyDistanceMax"
+                  label="Repulsion reach"
+                  value={draft.force.manyBodyDistanceMax}
+                  min={50}
+                  max={2000}
+                  step={10}
+                  onChange={(manyBodyDistanceMax) => updateForce({ manyBodyDistanceMax })}
                 />
-              </EuiFormRow>
-              <EuiFormRow
-                label={<TooltipFieldLabel name="pinCenterNode" text="Pin center node" />}
-                display="columnCompressed"
-                fullWidth
-              >
-                <EuiSwitch
-                  label="Fix top-ranked node at origin"
-                  checked={draft.center.pinCenterNode}
-                  onChange={(e) => updateCenter({ pinCenterNode: e.target.checked })}
+                <ParamRange
+                  paramKey="gravity"
+                  label="Center gravity"
+                  value={draft.force.gravity}
+                  min={0}
+                  max={0.2}
+                  step={0.002}
+                  onChange={(gravity) => updateForce({ gravity })}
                 />
-              </EuiFormRow>
-              <ParamRange
-                paramKey="radialStrength"
-                label="Radial pull"
-                value={draft.center.radialStrength}
-                min={0}
-                max={1}
-                step={0.01}
-                onChange={(radialStrength) => updateCenter({ radialStrength })}
-              />
-              <ParamRange
-                paramKey="radialSpacing"
-                label="Radial spacing"
-                value={draft.center.radialSpacing}
-                min={10}
-                max={200}
-                step={1}
-                onChange={(radialSpacing) => updateCenter({ radialSpacing })}
-              />
-            </TuningSection>
+              </TuningSection>
 
-            <EuiHorizontalRule margin="s" />
+              <EuiHorizontalRule margin="s" />
 
-            <TuningSection
-              id="ki-graph-tuning-simulation"
-              title="Simulation"
-              summary="Tick count, cooling, and repulsion accuracy."
-            >
-              <EuiFormRow
-                label={<TooltipFieldLabel name="simulationTicks" text="Simulation ticks" />}
-                display="columnCompressed"
-                fullWidth
+              <TuningSection
+                id="ki-graph-tuning-edges"
+                title="Edges"
+                summary="Spring forces along links between nodes."
               >
-                <>
-                  <EuiSwitch
-                    label="Auto ticks"
-                    checked={ticksIsAuto}
+                <ParamRange
+                  paramKey="linkStrength"
+                  label="Link spring strength"
+                  value={draft.force.linkStrength}
+                  min={0}
+                  max={1}
+                  step={0.01}
+                  onChange={(linkStrength) => updateForce({ linkStrength })}
+                />
+                <ParamRange
+                  paramKey="linkRestBase"
+                  label="Link rest length base"
+                  value={draft.force.linkRestBase}
+                  min={10}
+                  max={300}
+                  step={1}
+                  onChange={(linkRestBase) => updateForce({ linkRestBase })}
+                />
+                <ParamRange
+                  paramKey="linkRestPerDegree"
+                  label="Link rest per degree"
+                  value={draft.force.linkRestPerDegree}
+                  min={0}
+                  max={30}
+                  step={1}
+                  onChange={(linkRestPerDegree) => updateForce({ linkRestPerDegree })}
+                />
+              </TuningSection>
+
+              <EuiHorizontalRule margin="s" />
+
+              <TuningSection
+                id="ki-graph-tuning-overlap"
+                title="Overlap"
+                summary="Collision padding and how hard overlaps are resolved."
+              >
+                <ParamRange
+                  paramKey="collisionGap"
+                  label="Collision gap"
+                  value={draft.force.collisionGap}
+                  min={0}
+                  max={40}
+                  step={1}
+                  onChange={(collisionGap) => updateForce({ collisionGap })}
+                />
+                <ParamRange
+                  paramKey="collisionStrength"
+                  label="Collision strength"
+                  value={draft.force.collisionStrength}
+                  min={0}
+                  max={1}
+                  step={0.05}
+                  onChange={(collisionStrength) => updateForce({ collisionStrength })}
+                />
+                <ParamRange
+                  paramKey="collisionIterations"
+                  label="Collision solver passes"
+                  value={draft.force.collisionIterations}
+                  min={1}
+                  max={10}
+                  step={1}
+                  onChange={(collisionIterations) => updateForce({ collisionIterations })}
+                />
+              </TuningSection>
+
+              <EuiHorizontalRule margin="s" />
+
+              <TuningSection
+                id="ki-graph-tuning-node-size"
+                title="Node size"
+                summary="How node diameter is chosen from metrics."
+              >
+                <EuiFormRow
+                  label={<TooltipFieldLabel name="mode" text="Size mode" />}
+                  display="columnCompressed"
+                  fullWidth
+                >
+                  <EuiSelect
+                    compressed
+                    options={NODE_SIZE_MODE_OPTIONS}
+                    value={draft.nodeSize.mode}
                     onChange={(e) => {
-                      if (e.target.checked) {
-                        updateForce({ ticks: 'auto' });
-                      } else {
-                        updateForce({ ticks: manualTicks });
+                      const { value: next } = e.target;
+                      if (isKiGraphNodeSizeMode(next)) {
+                        updateNodeSize({ mode: next });
                       }
                     }}
                   />
-                  {ticksIsAuto ? null : (
-                    <>
-                      <EuiSpacer size="s" />
-                      <EuiRange
-                        fullWidth
-                        compressed
-                        showInput
-                        min={10}
-                        max={1000}
-                        step={10}
-                        value={manualTicks}
-                        onChange={(e) => updateForce({ ticks: Number(e.currentTarget.value) })}
-                      />
-                    </>
-                  )}
-                </>
-              </EuiFormRow>
-              <ParamRange
-                paramKey="alphaDecay"
-                label="Alpha decay"
-                value={draft.force.alphaDecay}
-                min={0.001}
-                max={0.1}
-                step={0.001}
-                onChange={(alphaDecay) => updateForce({ alphaDecay })}
-              />
-              <ParamRange
-                paramKey="velocityDecay"
-                label="Velocity decay"
-                value={draft.force.velocityDecay}
-                min={0.05}
-                max={0.9}
-                step={0.01}
-                onChange={(velocityDecay) => updateForce({ velocityDecay })}
-              />
-              <ParamRange
-                paramKey="manyBodyTheta"
-                label="Repulsion accuracy (theta)"
-                value={draft.force.manyBodyTheta}
-                min={0.3}
-                max={1.5}
-                step={0.05}
-                onChange={(manyBodyTheta) => updateForce({ manyBodyTheta })}
-              />
-            </TuningSection>
-          </EuiForm>
-          <EuiSpacer size="m" />
-          <EuiFlexGroup gutterSize="s" responsive={false} wrap>
-            <EuiFlexItem grow={false}>
-              <EuiButton size="s" onClick={handleReset}>
-                Reset to defaults
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty size="s" iconType="copy" onClick={handleCopy}>
-                Copy values
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+                </EuiFormRow>
+                <ParamRange
+                  paramKey="baseSize"
+                  label="Base size"
+                  value={draft.nodeSize.baseSize}
+                  min={8}
+                  max={60}
+                  step={1}
+                  onChange={(baseSize) => updateNodeSize({ baseSize })}
+                />
+                <ParamRange
+                  paramKey="minSize"
+                  label="Minimum size"
+                  value={draft.nodeSize.minSize}
+                  min={8}
+                  max={40}
+                  step={1}
+                  onChange={(minSize) => updateNodeSize({ minSize })}
+                />
+                <ParamRange
+                  paramKey="maxSize"
+                  label="Maximum size"
+                  value={draft.nodeSize.maxSize}
+                  min={20}
+                  max={120}
+                  step={1}
+                  onChange={(maxSize) => updateNodeSize({ maxSize })}
+                />
+                {isUniformSize ? null : (
+                  <>
+                    <ParamRange
+                      paramKey="scaleMin"
+                      label="Scale floor"
+                      value={draft.nodeSize.scaleMin}
+                      min={0}
+                      max={3}
+                      step={0.05}
+                      onChange={(scaleMin) => updateNodeSize({ scaleMin })}
+                    />
+                    <ParamRange
+                      paramKey="scaleRange"
+                      label="Scale range"
+                      value={draft.nodeSize.scaleRange}
+                      min={0}
+                      max={3}
+                      step={0.05}
+                      onChange={(scaleRange) => updateNodeSize({ scaleRange })}
+                    />
+                    <ParamRange
+                      paramKey="degreeMax"
+                      label="Degree for full scale"
+                      value={draft.nodeSize.degreeMax}
+                      min={1}
+                      max={50}
+                      step={1}
+                      onChange={(degreeMax) => updateNodeSize({ degreeMax })}
+                    />
+                    <ParamRange
+                      paramKey="occurrencesMax"
+                      label="Occurrences for full scale"
+                      value={draft.nodeSize.occurrencesMax}
+                      min={1}
+                      max={200}
+                      step={1}
+                      onChange={(occurrencesMax) => updateNodeSize({ occurrencesMax })}
+                    />
+                  </>
+                )}
+              </TuningSection>
+
+              <EuiHorizontalRule margin="s" />
+
+              <TuningSection
+                id="ki-graph-tuning-center"
+                title="Center"
+                summary="Which node anchors the layout and optional radial rings."
+                initialIsOpen
+              >
+                <EuiFormRow
+                  label={<TooltipFieldLabel name="centerBy" text="Center ranking" />}
+                  display="columnCompressed"
+                  fullWidth
+                >
+                  <EuiSelect
+                    compressed
+                    options={CENTER_BY_OPTIONS}
+                    value={draft.center.centerBy}
+                    onChange={(e) => {
+                      const { value: next } = e.target;
+                      if (isKiGraphCenterBy(next)) {
+                        updateCenter({ centerBy: next });
+                      }
+                    }}
+                  />
+                </EuiFormRow>
+                <EuiFormRow
+                  label={<TooltipFieldLabel name="pinCenterNode" text="Pin center node" />}
+                  display="columnCompressed"
+                  fullWidth
+                >
+                  <EuiSwitch
+                    label="Fix top-ranked node at origin"
+                    checked={draft.center.pinCenterNode}
+                    onChange={(e) => updateCenter({ pinCenterNode: e.target.checked })}
+                  />
+                </EuiFormRow>
+                <ParamRange
+                  paramKey="radialStrength"
+                  label="Radial pull"
+                  value={draft.center.radialStrength}
+                  min={0}
+                  max={1}
+                  step={0.01}
+                  onChange={(radialStrength) => updateCenter({ radialStrength })}
+                />
+                <ParamRange
+                  paramKey="radialSpacing"
+                  label="Radial spacing"
+                  value={draft.center.radialSpacing}
+                  min={10}
+                  max={200}
+                  step={1}
+                  onChange={(radialSpacing) => updateCenter({ radialSpacing })}
+                />
+              </TuningSection>
+
+              <EuiHorizontalRule margin="s" />
+
+              <TuningSection
+                id="ki-graph-tuning-simulation"
+                title="Simulation"
+                summary="Tick count, cooling, and repulsion accuracy."
+              >
+                <EuiFormRow
+                  label={<TooltipFieldLabel name="simulationTicks" text="Simulation ticks" />}
+                  display="columnCompressed"
+                  fullWidth
+                >
+                  <>
+                    <EuiSwitch
+                      label="Auto ticks"
+                      checked={ticksIsAuto}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          updateForce({ ticks: 'auto' });
+                        } else {
+                          updateForce({ ticks: manualTicks });
+                        }
+                      }}
+                    />
+                    {ticksIsAuto ? null : (
+                      <>
+                        <EuiSpacer size="s" />
+                        <EuiRange
+                          fullWidth
+                          compressed
+                          showInput
+                          min={10}
+                          max={1000}
+                          step={10}
+                          value={manualTicks}
+                          onChange={(e) => updateForce({ ticks: Number(e.currentTarget.value) })}
+                        />
+                      </>
+                    )}
+                  </>
+                </EuiFormRow>
+                <ParamRange
+                  paramKey="alphaDecay"
+                  label="Alpha decay"
+                  value={draft.force.alphaDecay}
+                  min={0.001}
+                  max={0.1}
+                  step={0.001}
+                  onChange={(alphaDecay) => updateForce({ alphaDecay })}
+                />
+                <ParamRange
+                  paramKey="velocityDecay"
+                  label="Velocity decay"
+                  value={draft.force.velocityDecay}
+                  min={0.05}
+                  max={0.9}
+                  step={0.01}
+                  onChange={(velocityDecay) => updateForce({ velocityDecay })}
+                />
+                <ParamRange
+                  paramKey="manyBodyTheta"
+                  label="Repulsion accuracy (theta)"
+                  value={draft.force.manyBodyTheta}
+                  min={0.3}
+                  max={1.5}
+                  step={0.05}
+                  onChange={(manyBodyTheta) => updateForce({ manyBodyTheta })}
+                />
+              </TuningSection>
+            </EuiForm>
+            <EuiSpacer size="m" />
+            <EuiFlexGroup gutterSize="s" responsive={false} wrap>
+              <EuiFlexItem grow={false}>
+                <EuiButton size="s" onClick={handleReset}>
+                  Reset to defaults
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty size="s" iconType="copy" onClick={handleCopy}>
+                  Copy values
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </div>
         </EuiPanel>
       ) : null}
     </div>

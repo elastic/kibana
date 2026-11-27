@@ -255,15 +255,13 @@ export const AiIndexDetailPage = () => {
       });
     }
 
-    if (isMemoryEnabled) {
-      tabs.push({
-        id: 'graph',
-        label: graphTabLabel,
-        isSelected: isGraphTab,
-        onClick: () => navigateToContextEngine(getAiIndexGraphPath(resolvedAiIndexId)),
-        'data-test-subj': 'contextAiIndexDetailTab-graph',
-      });
-    }
+    tabs.push({
+      id: 'graph',
+      label: graphTabLabel,
+      isSelected: isGraphTab,
+      onClick: () => navigateToContextEngine(getAiIndexGraphPath(resolvedAiIndexId)),
+      'data-test-subj': 'contextAiIndexDetailTab-graph',
+    });
 
     tabs.push({
       id: 'settings',
@@ -279,7 +277,6 @@ export const AiIndexDetailPage = () => {
     hasKnowledgeIndicators,
     isGraphTab,
     isKnowledgeIndicatorsTab,
-    isMemoryEnabled,
     isSettingsTab,
     isSourcesTab,
     navigateToContextEngine,
@@ -373,15 +370,13 @@ export const AiIndexDetailPage = () => {
       >
         {aiIndex ? <ListKiPanel aiIndex={aiIndex} discoverHref={discoverHref} /> : null}
       </Route>
-      {isMemoryEnabled && (
-        <Route path={CONTEXT_ENGINE_PATHS.detailGraph} exact>
-          {aiIndex ? (
-            <Suspense fallback={<EuiLoadingSpinner size="l" />}>
-              <KiGraphPanel aiIndex={aiIndex} />
-            </Suspense>
-          ) : null}
-        </Route>
-      )}
+      <Route path={CONTEXT_ENGINE_PATHS.detailGraph} exact>
+        {aiIndex ? (
+          <Suspense fallback={<EuiLoadingSpinner size="l" />}>
+            <KiGraphPanel aiIndex={aiIndex} />
+          </Suspense>
+        ) : null}
+      </Route>
       <Route path={CONTEXT_ENGINE_PATHS.detailSettings} exact>
         <SettingsTab
           isLoading={isLoading}
