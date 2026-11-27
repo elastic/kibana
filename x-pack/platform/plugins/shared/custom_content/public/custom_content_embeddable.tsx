@@ -28,6 +28,7 @@ import {
   timeRangeComparators,
   initializeStateApi,
   useBatchedPublishingSubjects,
+  apiPublishesPauseFetch,
   apiPublishesReload,
   apiPublishesTimeRange,
   apiIsPresentationContainer,
@@ -232,6 +233,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     // Starts true so the panel is not reported as render-complete before its first fetch resolves;
     // screenshotting would otherwise capture an empty panel.
     const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
+    const isComponentLoading$ = new BehaviorSubject<boolean>(true);
 
     const serializeState = (): CustomContentEmbeddableState => ({
       ...titleManager.getLatestState(),
@@ -447,6 +449,15 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       isFetchContextReady$.next(true);
     });
 
+    // A panel paused because it is offscreen (deferred loading) must not hold up the dashboard's
+    // auto-refresh, while one waiting for the dashboard's controls still counts as loading.
+    const dataLoadingSubscription = combineLatest([
+      isComponentLoading$,
+      apiPublishesPauseFetch(api) ? api.isFetchPaused$ : of(false),
+    ]).subscribe(([isLoading, isPausedOffscreen]) =>
+      dataLoading$.next(isLoading && !isPausedOffscreen)
+    );
+
     const viewMode$ = getViewModeSubject(api) ?? new BehaviorSubject<ViewMode>('edit');
 
     return {
@@ -488,6 +499,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
             esqlUsageSubscription.unsubscribe();
             dataSourcesSubscription.unsubscribe();
             fetchSubscription.unsubscribe();
+            dataLoadingSubscription.unsubscribe();
           };
         }, []);
 
@@ -549,7 +561,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
         }, []);
 
         const handleLoadingChange = useCallback((isLoading: boolean) => {
-          dataLoading$.next(isLoading);
+          isComponentLoading$.next(isLoading);
         }, []);
 
         const setApproximationApplied = useCallback((value: boolean | undefined) => {

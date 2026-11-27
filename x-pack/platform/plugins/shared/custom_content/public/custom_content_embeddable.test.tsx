@@ -154,7 +154,8 @@ const baseState: CustomContentEmbeddableState = {
 
 const buildEmbeddable = async (
   initialState: CustomContentEmbeddableState,
-  parentApi: Record<string, unknown> = {}
+  parentApi: Record<string, unknown> = {},
+  apiExtras: Record<string, unknown> = {}
 ) => {
   const uuid = 'test-uuid';
 
@@ -162,7 +163,8 @@ const buildEmbeddable = async (
     initializeDrilldownsManager: jest.fn(),
     initialState,
     parentApi,
-    finalizeApi: (api) => ({ ...api, uuid, parentApi } as unknown as CustomContentApi),
+    finalizeApi: (api) =>
+      ({ ...api, ...apiExtras, uuid, parentApi } as unknown as CustomContentApi),
     uuid,
   });
 
@@ -686,6 +688,35 @@ describe('customContentEmbeddableFactory', () => {
         expect(capturedComponentProps?.isFetchContextReady).toBe(true);
         expect(capturedComponentProps?.esqlVariables).toEqual([region]);
       });
+    });
+
+    it('counts a visible panel waiting for the dashboard controls as loading, so exports wait for it', async () => {
+      const { embeddable } = await buildEmbeddable(baseState, {
+        isFetchPaused$: new BehaviorSubject(true),
+      });
+      await act(async () => render(<embeddable.Component />));
+
+      await act(async () => capturedComponentProps?.onLoadingChange?.(true));
+      expect(embeddable.api.dataLoading$.getValue()).toBe(true);
+
+      await act(async () => capturedComponentProps?.onLoadingChange?.(false));
+      expect(embeddable.api.dataLoading$.getValue()).toBe(false);
+    });
+
+    it('does not count a panel deferred offscreen as loading until it becomes visible', async () => {
+      const isPausedOffscreen$ = new BehaviorSubject(true);
+      const { embeddable } = await buildEmbeddable(
+        baseState,
+        {},
+        { isFetchPaused$: isPausedOffscreen$ }
+      );
+      await act(async () => render(<embeddable.Component />));
+
+      await act(async () => capturedComponentProps?.onLoadingChange?.(true));
+      expect(embeddable.api.dataLoading$.getValue()).toBe(false);
+
+      await act(async () => isPausedOffscreen$.next(false));
+      expect(embeddable.api.dataLoading$.getValue()).toBe(true);
     });
   });
 

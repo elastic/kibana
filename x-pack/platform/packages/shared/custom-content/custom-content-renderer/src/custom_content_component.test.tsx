@@ -80,35 +80,6 @@ describe('CustomContentComponent', () => {
     expect(onLoadingChange).toHaveBeenCalledWith(true);
   });
 
-  it('does not report loading while the host holds the panel back, then does once it can fetch', () => {
-    const onLoadingChange = jest.fn();
-    mockUseCustomContentHtml.mockReturnValue({
-      html: '',
-      isLoading: true,
-      error: undefined,
-      noContent: false,
-    });
-
-    const { rerender } = render(
-      <CustomContentComponent
-        {...defaultProps}
-        isFetchContextReady={false}
-        onLoadingChange={onLoadingChange}
-      />
-    );
-    expect(onLoadingChange).toHaveBeenLastCalledWith(false);
-    expect(onLoadingChange).not.toHaveBeenCalledWith(true);
-
-    rerender(
-      <CustomContentComponent
-        {...defaultProps}
-        isFetchContextReady={true}
-        onLoadingChange={onLoadingChange}
-      />
-    );
-    expect(onLoadingChange).toHaveBeenLastCalledWith(true);
-  });
-
   it('sandboxes the iframe so that only user-initiated top navigation is allowed', () => {
     const { container } = render(<CustomContentComponent {...defaultProps} />);
 

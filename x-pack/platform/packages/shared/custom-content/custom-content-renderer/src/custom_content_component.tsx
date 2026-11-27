@@ -115,12 +115,7 @@ export const CustomContentComponent = ({
     setApproximationApplied,
   });
 
-  // Like Lens, a panel held back by the host (e.g. offscreen with deferred loading) is not
-  // reported as loading, or the dashboard would wait on it before its next auto-refresh.
-  useEffect(
-    () => onLoadingChange(isLoading && isFetchContextReady !== false),
-    [isLoading, isFetchContextReady, onLoadingChange]
-  );
+  useEffect(() => onLoadingChange(isLoading), [isLoading, onLoadingChange]);
 
   const wrapperCss = useMemo(
     () =>
