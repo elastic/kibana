@@ -14,6 +14,8 @@ import type {
   PluginStart as DataPluginStart,
 } from '@kbn/data-plugin/server';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
+import type { FileUploadServerPluginSetup } from '@kbn/file-upload-plugin/server';
 
 export interface StartDeps {
   security?: SecurityPluginStart;
@@ -25,4 +27,6 @@ export interface SetupDeps {
   home?: HomeServerPluginSetup;
   data: DataPluginSetup;
   embeddable: EmbeddableSetup;
+  fileUpload: FileUploadServerPluginSetup;
+  agentBuilder?: AgentBuilderPluginSetup;
 }

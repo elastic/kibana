@@ -33,6 +33,11 @@ dependsOn:
   - '@kbn/test-jest-helpers'
   - '@kbn/ui-callout'
   - '@kbn/code-editor-mock'
+  - '@kbn/agent-builder-server'
+  - '@kbn/agent-builder-common'
+  - '@kbn/zod'
+  - '@kbn/logging-mocks'
+  - '@kbn/core-http-server-mocks'
 tags:
   - plugin
   - prod

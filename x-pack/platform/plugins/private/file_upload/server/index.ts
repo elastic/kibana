@@ -7,6 +7,9 @@
 
 import type { PluginInitializerContext } from '@kbn/core/server';
 
+export type { FileUploadServerPluginSetup } from './types';
+export type { FileUploadAgentBuilderDefinitions } from './agent_builder';
+
 export const plugin = async (initializerContext: PluginInitializerContext) => {
   const { FileUploadPlugin } = await import('./plugin');
   return new FileUploadPlugin(initializerContext);

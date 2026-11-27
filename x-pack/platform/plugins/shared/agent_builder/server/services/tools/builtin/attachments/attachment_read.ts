@@ -65,6 +65,7 @@ export const createAttachmentReadTool = ({
               id: attachment.id,
               type: attachment.type,
               data: versionData.data,
+              origin: attachmentManager.getAttachmentRecord(attachmentId)?.origin,
             },
             attachmentsService,
             formatContext,
@@ -138,7 +139,7 @@ const tryGetRepresentation = async ({
   attachmentsService,
   formatContext,
 }: {
-  attachment: { id: string; type: string; data: unknown };
+  attachment: { id: string; type: string; data: unknown; origin?: string };
   attachmentsService: NonNullable<AttachmentToolsOptions['attachmentsService']>;
   formatContext: NonNullable<AttachmentToolsOptions['formatContext']>;
 }) => {

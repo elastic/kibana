@@ -22,6 +22,7 @@ import type {
 } from './application/common/types/data_visualizer_plugin';
 import { registerEmbeddables } from './application/index_data_visualizer/embeddables/field_stats';
 import { registerUiActions } from './register_ui_actions';
+import { registerAgentBuilderAttachments } from './register_agent_builder';
 
 export type DataVisualizerPluginSetup = ReturnType<DataVisualizerPlugin['setup']>;
 export type DataVisualizerPluginStart = ReturnType<DataVisualizerPlugin['start']>;
@@ -71,6 +72,10 @@ export class DataVisualizerPlugin
 
     if (plugins.uiActions) {
       registerUiActions(core, plugins);
+    }
+
+    if (plugins.agentBuilder) {
+      registerAgentBuilderAttachments(core, plugins, plugins.agentBuilder);
     }
 
     const { getIndexDataVisualizerComponent, getDataDriftComponent } = getComponents(

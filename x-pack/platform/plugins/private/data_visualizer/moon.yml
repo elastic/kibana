@@ -91,6 +91,8 @@ dependsOn:
   - '@kbn/file-upload-common'
   - '@kbn/charts-theme'
   - '@kbn/file-upload'
+  - '@kbn/agent-builder-browser'
+  - '@kbn/agent-builder-server'
   - '@kbn/charts-theme'
   - '@kbn/presentation-util'
   - '@kbn/cps'

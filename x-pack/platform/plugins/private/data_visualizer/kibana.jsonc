@@ -24,6 +24,7 @@
       "fieldFormats"
     ],
     "optionalPlugins": [
+      "agentBuilder",
       "security",
       "maps",
       "home",

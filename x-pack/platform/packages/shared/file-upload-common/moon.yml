@@ -19,6 +19,8 @@ project:
 dependsOn:
   - '@kbn/data-plugin'
   - '@kbn/core'
+  - '@kbn/zod'
+  - '@kbn/agent-builder-common'
 tags:
   - shared-common
   - package
