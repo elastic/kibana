@@ -14,6 +14,19 @@ import type {
 } from './types';
 
 export type { ContextEnginePluginSetup, ContextEnginePluginStart } from './types';
+export type {
+  ForgetSessionMemoriesInput,
+  RememberSessionMemoryInput,
+  SaveSessionEventsInput,
+  SessionMemoryClient,
+} from './session_memory_client/client';
+export {
+  ContextEngineDisabledError,
+  MemoryDisabledError,
+  MemoryForbiddenError,
+  RememberCapacityError,
+  SessionMemoryNotFoundError,
+} from './session_memory_client/errors';
 
 export const plugin: PluginInitializer<
   ContextEnginePluginSetup,
