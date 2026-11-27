@@ -284,18 +284,18 @@ export async function sendWaitForInputNotifications({
       renderedChannelMessage != null && renderedChannelMessage.length > 0
         ? renderedChannelMessage
         : stepMessage.length > 0
-        ? stepMessage
-        : 'Provide the requested input';
+          ? stepMessage
+          : 'Provide the requested input';
     const text = interactive
       ? interactivePrompt
       : slack2Config.message != null
-      ? resolveWaitForInputChannelMessage({
-          channelMessageTemplate: slack2Config.message,
-          stepMessage,
-          formUrl,
-          renderTemplate,
-        })
-      : buildDefaultInputSlackMessage({ stepMessage, formUrl });
+        ? resolveWaitForInputChannelMessage({
+            channelMessageTemplate: slack2Config.message,
+            stepMessage,
+            formUrl,
+            renderTemplate,
+          })
+        : buildDefaultInputSlackMessage({ stepMessage, formUrl });
     const blocks =
       interactive && slackInteractiveResume
         ? buildHitlSlackInputBlocksFromSchema({

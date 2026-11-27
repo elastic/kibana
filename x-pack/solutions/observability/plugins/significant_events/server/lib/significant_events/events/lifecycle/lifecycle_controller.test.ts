@@ -147,7 +147,7 @@ describe('decideLifecycle', () => {
         string,
         SignificantEventStatus | undefined,
         'breached' | 'recovered' | 'no_data',
-        LifecycleDecision
+        LifecycleDecision,
       ]
     >([
       ['opens a new series on a breach', undefined, 'breached', ACTIVE],
@@ -321,7 +321,7 @@ const decideFromMembers = ({
   });
 
 const eventAt = (status: SignificantEvent['status']): SignificantEvent =>
-  ({ event_id: 'e1', status } as SignificantEvent);
+  ({ event_id: 'e1', status }) as SignificantEvent;
 
 const signal = (rule: string, verdict: SignalEntry['verdict']): SignalEntry =>
   ({
@@ -330,7 +330,7 @@ const signal = (rule: string, verdict: SignalEntry['verdict']): SignalEntry =>
     description: `${rule} ${verdict}`,
     verdict,
     metadata: { rule_uuid: rule, rule_name: rule },
-  } as SignalEntry);
+  }) as SignalEntry;
 
 const breaching = [signal('a', 'confirms'), signal('b', 'confirms')];
 const oneHealthy = [signal('a', 'refutes'), signal('b', 'confirms')];

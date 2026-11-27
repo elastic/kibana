@@ -46,8 +46,8 @@ export const applyPenalty = (result: PenaltyInput): number => {
     ground_truth_verdict === 'contradicted'
       ? Math.min(score, 1)
       : score >= 3 && !allMatch
-      ? 2
-      : score;
+        ? 2
+        : score;
   return isHallucination(result) ? Math.max(0, consistent - 1) : consistent;
 };
 

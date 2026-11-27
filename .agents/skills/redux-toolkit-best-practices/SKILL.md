@@ -37,8 +37,8 @@ Read Kibana's [Redux Toolkit v1/v2 dual-version support documentation](../../../
 - For new code or code fully migrated to RTK v2, use the default package names (`@reduxjs/toolkit`, `redux`, `react-redux`, `reselect`, `immer`, and `redux-thunk`).
 - For code that remains on RTK v1, treat the versioned packages (`redux-toolkit-v1`, `redux-v4`, `react-redux-v7`, `reselect-v4`, `immer-v9`, and `redux-thunk-v2`) as one legacy compatibility family. Do not mix dependency generations within a migration boundary without verifying runtime and type compatibility.
 - Preserve the special compatibility handling for `@elastic/charts` and `kea`; do not replace their dependency aliases or bundler rewrites as part of an unrelated Redux change.
-- Check whether the target path is covered by the `@kbn/imports/no_redux_toolkit_v2_imports` ESLint override. Covered paths must continue using legacy aliases until the path is deliberately migrated.
-- When migrating a plugin or scoped path, update legacy imports to default imports, address RTK v2 breaking changes, update Jest mocks from `react-redux-v7` to `react-redux`, remove the migrated path from the ESLint override, and run focused tests. Account for stricter types and removed APIs such as Immer's `enableES5()`.
+- Check whether the target path is covered by the `@kbn/imports/no_redux_toolkit_v2_imports` lint override in `.oxlint/imports.mts`. Covered paths must continue using legacy aliases until the path is deliberately migrated.
+- When migrating a plugin or scoped path, update legacy imports to default imports, address RTK v2 breaking changes, update Jest mocks from `react-redux-v7` to `react-redux`, remove the migrated path from the lint override, and run focused tests. Account for stricter types and removed APIs such as Immer's `enableES5()`.
 
 ## Select a mode
 
@@ -94,10 +94,10 @@ Kibana warns on middleware spreading and draft reassignment via `@kbn/imports/no
 
 `@kbn/imports/restricted_redux_imports` also warns on `createStore` / `legacy_createStore` imports from `redux` and `redux-v4`; prefer `configureStore`. See [import restrictions](../../../packages/kbn-eslint-plugin-imports/README.mdx#redux-store-import-warnings).
 
-Run from the repository root through the wrapper, which runs Oxlint and reports these warnings before invoking ESLint:
+Run oxlint from the repository root; it reports these warnings:
 
 ```bash
-node scripts/eslint path/to/file.ts
+node scripts/lint path/to/file.ts
 ```
 
 ## Review output

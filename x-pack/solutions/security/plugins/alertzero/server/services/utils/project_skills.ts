@@ -85,7 +85,7 @@ export const projectSkillsFromDefinition = (
           const baseSkills: readonly string[] = agentTypeDef?.baseConfiguration?.skill_ids ?? [];
           // When the step has no overrides, fall back to the agent's own skill list.
           const agentSkills: readonly string[] =
-            overrideSkillIds === null ? agentDef.configuration.skill_ids ?? [] : [];
+            overrideSkillIds === null ? (agentDef.configuration.skill_ids ?? []) : [];
           for (const id of [...baseSkills, ...(overrideSkillIds ?? agentSkills)]) {
             if (id) skillIds.add(id);
           }

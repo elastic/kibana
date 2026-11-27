@@ -23,7 +23,7 @@ export class AggTypesRegistry {
     return {
       registerBucket: <
         N extends string,
-        T extends (deps: AggTypesDependencies) => BucketAggType<any>
+        T extends (deps: AggTypesDependencies) => BucketAggType<any>,
       >(
         name: N,
         type: T
@@ -36,7 +36,7 @@ export class AggTypesRegistry {
       },
       registerMetric: <
         N extends string,
-        T extends (deps: AggTypesDependencies) => MetricAggType<any>
+        T extends (deps: AggTypesDependencies) => MetricAggType<any>,
       >(
         name: N,
         type: T
@@ -48,7 +48,7 @@ export class AggTypesRegistry {
       },
       registerLegacy: <
         N extends string,
-        T extends (deps: AggTypesDependencies) => BucketAggType<any> | MetricAggType<any>
+        T extends (deps: AggTypesDependencies) => BucketAggType<any> | MetricAggType<any>,
       >(
         name: N,
         type: T

@@ -25,7 +25,7 @@ const response = (serviceName: string, environments: string[]) =>
     overview: { serviceName },
     environments,
     filters: FILTERS,
-  } as unknown as ApplicationOverviewResponse);
+  }) as unknown as ApplicationOverviewResponse;
 
 const renderOptions = (
   serviceName: string,

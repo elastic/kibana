@@ -46,15 +46,12 @@ import type {
   ValueClickDataContext,
 } from './actions/filters';
 
-export class DataPublicPlugin
-  implements
-    Plugin<
-      DataPublicPluginSetup,
-      DataPublicPluginStart,
-      DataSetupDependencies,
-      DataStartDependencies
-    >
-{
+export class DataPublicPlugin implements Plugin<
+  DataPublicPluginSetup,
+  DataPublicPluginStart,
+  DataSetupDependencies,
+  DataStartDependencies
+> {
   private readonly searchService: SearchService;
   private readonly queryService: QueryService;
   private readonly storage: IStorageWrapper;

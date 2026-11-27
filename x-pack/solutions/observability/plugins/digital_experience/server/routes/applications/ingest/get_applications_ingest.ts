@@ -61,7 +61,7 @@ const toSeries = (
   source,
   points: buckets.map(({ timestamp, applications }) => {
     const counts = applications.find((application) => application.serviceName === serviceName);
-    const bytes = counts ? estimateBytes(counts.indices, averages) ?? 0 : 0;
+    const bytes = counts ? (estimateBytes(counts.indices, averages) ?? 0) : 0;
     return { timestamp, bytes: Math.round(bytes) };
   }),
 });

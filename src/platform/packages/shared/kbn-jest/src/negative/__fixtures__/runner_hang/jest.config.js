@@ -14,9 +14,7 @@
 // affected by the preset's __fixtures__ ignore or its jsdom/enzyme setup files.
 module.exports = {
   rootDir: '../../../../../../../../..',
-  roots: [
-    '<rootDir>/src/platform/packages/shared/kbn-jest/src/negative/__fixtures__/runner_hang',
-  ],
+  roots: ['<rootDir>/src/platform/packages/shared/kbn-jest/src/negative/__fixtures__/runner_hang'],
   testEnvironment: 'node',
   testMatch: ['**/*.test.ts'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'json'],

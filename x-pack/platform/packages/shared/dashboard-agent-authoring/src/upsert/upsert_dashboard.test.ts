@@ -66,7 +66,7 @@ const createMockLogger = (): Logger =>
     error: jest.fn(),
     info: jest.fn(),
     warn: jest.fn(),
-  } as unknown as Logger);
+  }) as unknown as Logger;
 
 const createDeferred = <T>() => {
   let resolve: (value: T) => void = () => {};
@@ -1922,8 +1922,8 @@ describe('executeDashboardUpsert', () => {
               type === 'custom_content'
                 ? CUSTOM_CONTENT_EMBEDDABLE_TYPE
                 : type === 'vega'
-                ? VEGA_VIS_TYPE
-                : LENS_EMBEDDABLE_TYPE,
+                  ? VEGA_VIS_TYPE
+                  : LENS_EMBEDDABLE_TYPE,
             config: { updated: true },
           })
         );

@@ -674,10 +674,10 @@ const sendRequest = (
   const statusCode = isNetworkError
     ? undefined
     : random() < failureRate
-    ? pick(random, failureStatusCodes)
-    : method === 'POST'
-    ? 201
-    : 200;
+      ? pick(random, failureStatusCodes)
+      : method === 'POST'
+        ? 201
+        : 200;
   const traceContext = { traceId: randomHex(random, 32), spanId: randomHex(random, 16) };
 
   const events: EdotBrowserEvent[] = [
@@ -691,7 +691,7 @@ const sendRequest = (
         // XHR doesn't report the size of the body it sends
         requestBodySize:
           instrumentation === 'fetch' && (bodySizeBytes !== undefined || method === 'POST')
-            ? bodySizeBytes ?? Math.round(between(random, 120, 2_000))
+            ? (bodySizeBytes ?? Math.round(between(random, 120, 2_000)))
             : undefined,
         instrumentation,
         ...traceContext,
@@ -1018,10 +1018,10 @@ const interactWithPage = (
     const rageRate = slow
       ? SLOW_RESPONSE_RAGE_RATE
       : failed || thrown
-      ? FAILURE_RAGE_RATE
-      : dead
-      ? DEAD_CLICK_RAGE_RATE
-      : health.rageClickRate;
+        ? FAILURE_RAGE_RATE
+        : dead
+          ? DEAD_CLICK_RAGE_RATE
+          : health.rageClickRate;
     const burst = frustrationRandom
       ? rageBurst(frustrationRandom, rageRate * ctx.impatience, clickTime, slotEnd)
       : [clickTime];

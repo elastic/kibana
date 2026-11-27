@@ -36,15 +36,12 @@ const settingsKeys: Array<keyof CustomBranding> = [
   'pageTitle',
 ];
 
-export class CustomBrandingPlugin
-  implements
-    Plugin<
-      CustomBrandingServerSetup,
-      CustomBrandingServerStart,
-      CustomBrandingServerSetupDependencies,
-      CustomBrandingServerStartDependencies
-    >
-{
+export class CustomBrandingPlugin implements Plugin<
+  CustomBrandingServerSetup,
+  CustomBrandingServerStart,
+  CustomBrandingServerSetupDependencies,
+  CustomBrandingServerStartDependencies
+> {
   private readonly license: License;
   private readonly logger: Logger;
   private licensingSubscription?: Subscription;

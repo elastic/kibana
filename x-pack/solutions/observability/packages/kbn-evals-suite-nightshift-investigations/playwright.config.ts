@@ -32,8 +32,8 @@ export default createPlaywrightEvalsConfig({
   timeout: runReinforcement
     ? 70 * 60_000
     : runInvestigations || runStoredInvestigations || runStoredRecovery
-    ? 45 * 60_000
-    : 10 * 60_000,
+      ? 45 * 60_000
+      : 10 * 60_000,
   concurrency: 16,
   testIgnore: [
     ...(runInvestigations ? [] : ['**/investigation/investigation.spec.ts']),

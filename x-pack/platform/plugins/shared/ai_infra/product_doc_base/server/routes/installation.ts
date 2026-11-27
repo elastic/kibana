@@ -12,6 +12,8 @@ import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import {
   resolveDefaultInferenceIdFromInferenceGet,
   ResourceTypes,
+  INFERENCE_ID_MAX_LENGTH,
+  validateInferenceId,
   type ResourceType,
 } from '@kbn/product-doc-common';
 import type {
@@ -48,6 +50,14 @@ const resourceTypeSchema = schema.oneOf(
   ],
   { defaultValue: ResourceTypes.productDoc }
 );
+
+// The inferenceId is interpolated into an Elasticsearch index name that is later deleted as the
+// internal user, so it must be constrained to reject multi-index characters such as `,` and `*`.
+const inferenceIdSchema = schema.string({
+  defaultValue: defaultInferenceEndpoints.ELSER,
+  maxLength: INFERENCE_ID_MAX_LENGTH,
+  validate: validateInferenceId,
+});
 
 export const registerInstallationRoutes = ({
   router,
@@ -99,7 +109,7 @@ export const registerInstallationRoutes = ({
       path: INSTALLATION_STATUS_API_PATH,
       validate: {
         query: schema.object({
-          inferenceId: schema.string({ defaultValue: defaultInferenceEndpoints.ELSER }),
+          inferenceId: inferenceIdSchema,
           resourceType: resourceTypeSchema,
         }),
       },
@@ -176,7 +186,7 @@ export const registerInstallationRoutes = ({
       path: INSTALL_ALL_API_PATH,
       validate: {
         body: schema.object({
-          inferenceId: schema.string({ defaultValue: defaultInferenceEndpoints.ELSER }),
+          inferenceId: inferenceIdSchema,
           resourceType: resourceTypeSchema,
         }),
       },
@@ -275,7 +285,12 @@ export const registerInstallationRoutes = ({
       validate: {
         body: schema.object({
           forceUpdate: schema.boolean({ defaultValue: false }),
-          inferenceIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10000 })),
+          inferenceIds: schema.maybe(
+            schema.arrayOf(
+              schema.string({ maxLength: INFERENCE_ID_MAX_LENGTH, validate: validateInferenceId }),
+              { maxSize: 10000 }
+            )
+          ),
         }),
       },
       options: {
@@ -314,7 +329,7 @@ export const registerInstallationRoutes = ({
       path: UNINSTALL_ALL_API_PATH,
       validate: {
         body: schema.object({
-          inferenceId: schema.string({ defaultValue: defaultInferenceEndpoints.ELSER }),
+          inferenceId: inferenceIdSchema,
           resourceType: resourceTypeSchema,
         }),
       },

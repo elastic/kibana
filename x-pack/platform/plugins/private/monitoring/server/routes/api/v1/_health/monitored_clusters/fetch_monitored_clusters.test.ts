@@ -14,7 +14,7 @@ const getMockLogger = () =>
   ({
     warn: sinon.spy(),
     error: sinon.spy(),
-  } as unknown as Logger);
+  }) as unknown as Logger;
 
 describe(__filename, () => {
   describe('fetchMonitoringClusters', () => {

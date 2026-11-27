@@ -40,7 +40,10 @@ export class ActionPolicyFormPage {
   /** Shown instead of the workflows combo box when `workflows:ui:enabled` is off. */
   public readonly workflowsDisabledCallout: Locator;
 
-  constructor(private readonly page: ScoutPage, private readonly mountConfig: AlertingMountConfig) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly mountConfig: AlertingMountConfig
+  ) {
     this.container = this.page.testSubj.locator('actionPolicyFormPage');
     this.pageTitle = this.container.getByTestId('appHeaderTitle');
     this.nameInput = this.container.getByTestId('nameInput');

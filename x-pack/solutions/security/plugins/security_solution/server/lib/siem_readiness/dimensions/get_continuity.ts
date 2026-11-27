@@ -88,8 +88,8 @@ export const getContinuity = async ({
     pipelines.length === 0
       ? ('noData' as const)
       : actionableFindings.length > 0
-      ? ('actionsRequired' as const)
-      : ('healthy' as const);
+        ? ('actionsRequired' as const)
+        : ('healthy' as const);
 
   const summary = buildContinuitySummary(status, pipelines.length, actionableFindings);
 

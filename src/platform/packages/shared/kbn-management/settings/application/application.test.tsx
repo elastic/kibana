@@ -477,17 +477,16 @@ describe('Settings application', () => {
       },
     });
     const metadata = {
-      getAll: jest.fn(
-        async (scope: UiSettingsScope): Promise<UiSettingsMetadataState> =>
-          scope === 'namespace'
-            ? {
-                'test:setting': {
-                  name: 'Test setting',
-                  type: 'string',
-                  value: 'default',
-                },
-              }
-            : {}
+      getAll: jest.fn(async (scope: UiSettingsScope): Promise<UiSettingsMetadataState> =>
+        scope === 'namespace'
+          ? {
+              'test:setting': {
+                name: 'Test setting',
+                type: 'string',
+                value: 'default',
+              },
+            }
+          : {}
       ),
     };
 

@@ -88,11 +88,11 @@ describe('updateAssetCriticalityStepDefinition', () => {
     async () =>
       ({
         getClient,
-      } as unknown as WorkflowsExtensionsServerPluginStart)
+      }) as unknown as WorkflowsExtensionsServerPluginStart
   );
   const getLicense = jest.fn().mockResolvedValue({ hasAtLeast: () => true });
   const getLicensingStart = jest.fn(
-    async () => ({ getLicense } as unknown as LicensingPluginStart)
+    async () => ({ getLicense }) as unknown as LicensingPluginStart
   );
   const checkPrivileges = jest.fn().mockResolvedValue(buildCheckPrivilegesResponse(true));
   const checkPrivilegesDynamicallyWithRequest = jest.fn().mockReturnValue(checkPrivileges);
@@ -103,7 +103,7 @@ describe('updateAssetCriticalityStepDefinition', () => {
           checkPrivilegesDynamicallyWithRequest,
           actions: { api: { get: (privilege: string) => `api:${privilege}` } },
         },
-      } as unknown as SecurityPluginStart)
+      }) as unknown as SecurityPluginStart
   );
 
   const updateAssetCriticalityStepDefinition = getUpdateAssetCriticalityStepDefinition(

@@ -165,7 +165,8 @@ export const DetectionPage = ({
     margin-block-end: ${expanded && spaceAfter ? euiTheme.size.m : 0};
 
     ${euiCanAnimate} {
-      transition: grid-template-rows ${euiTheme.animation.normal} ${euiTheme.animation.resistance},
+      transition:
+        grid-template-rows ${euiTheme.animation.normal} ${euiTheme.animation.resistance},
         opacity ${euiTheme.animation.normal} ${euiTheme.animation.resistance},
         margin-block-end ${euiTheme.animation.normal} ${euiTheme.animation.resistance},
         visibility 0s linear ${expanded ? '0s' : euiTheme.animation.normal};
@@ -254,9 +255,9 @@ export const DetectionPage = ({
               <div
                 css={css`
                   flex: ${view.sourceCreation === 'enabled' ? '0 1 auto' : '1 1 auto'};
-                  max-block-size: ${view.sourceCreation === 'enabled' && !isMobile
-                    ? '40vh'
-                    : 'none'};
+                  max-block-size: ${
+                    view.sourceCreation === 'enabled' && !isMobile ? '40vh' : 'none'
+                  };
                   min-height: 0;
                   ${isMobile ? '' : 'overflow: auto;'}
                   margin-block-end: ${view.sourceCreation === 'enabled' ? euiTheme.size.m : 0};

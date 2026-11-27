@@ -14,7 +14,7 @@ const capabilities = (digitalExperience: Record<string, boolean>): Capabilities 
     management: {},
     catalogue: {},
     digital_experience: digitalExperience,
-  } as Capabilities);
+  }) as Capabilities;
 
 describe('canSaveViews', () => {
   it('is granted with the save privilege of the feature, which `all` has', () => {

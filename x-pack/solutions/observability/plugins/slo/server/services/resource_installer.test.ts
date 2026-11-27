@@ -203,8 +203,8 @@ describe('resourceInstaller', () => {
       name === SLI_COMPONENT_TEMPLATE_MAPPINGS_NAME
         ? Promise.reject(new EsErrors.RequestAbortedError('Request aborted'))
         : name === SLI_COMPONENT_TEMPLATE_SETTINGS_NAME
-        ? Promise.reject(new Error('boom'))
-        : Promise.resolve({ acknowledged: true })
+          ? Promise.reject(new Error('boom'))
+          : Promise.resolve({ acknowledged: true })
     );
 
     await expect(createInstaller(esClient).install()).rejects.toThrow(

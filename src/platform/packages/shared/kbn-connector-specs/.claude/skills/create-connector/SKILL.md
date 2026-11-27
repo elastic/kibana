@@ -268,7 +268,7 @@ Add tests following the existing examples:
    without emitting. Prefer the vendor id as `correlationKey` in the recognized case.
 
 You do not need to execute the tests — just create the files. You should, however, run
-`node scripts/eslint <path>` on every file you create or edit (including test files) before moving on.
+`node scripts/lint <path>` on every file you create or edit (including test files) before moving on.
 This is fast, requires no running Kibana/Elasticsearch, and catches mechanical rule violations — e.g. a
 forbidden non-null assertion (`@typescript-eslint/no-non-null-assertion`) in a test file's
 `Connector.action!.handler` — that a code-reading self-review or an AI PR reviewer can miss, and that

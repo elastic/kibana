@@ -204,8 +204,8 @@ const toInteger = (value: unknown): number | undefined => {
     typeof value === 'number'
       ? value
       : typeof value === 'string' && value !== ''
-      ? Number(value)
-      : NaN;
+        ? Number(value)
+        : NaN;
   return Number.isInteger(number) ? number : undefined;
 };
 
@@ -216,7 +216,7 @@ const requestOf = (pagination: PaginationDescriptor): NextUrlRequest & Located =
 const parameterLocation = (pagination: PaginationDescriptor): PaginationParameterLocation =>
   pagination.style === 'link' || pagination.style === 'next_url'
     ? 'query'
-    : requestOf(pagination).in ?? 'query';
+    : (requestOf(pagination).in ?? 'query');
 
 const readPageSize = (
   pagination: PaginationDescriptor,
@@ -250,7 +250,7 @@ const readStart = (
       return 0;
     }
     return typeof cursor === 'string'
-      ? recordedPositions?.get(cursor) ?? decode(cursor)
+      ? (recordedPositions?.get(cursor) ?? decode(cursor))
       : undefined;
   }
   if ('offsetParam' in request) {
@@ -461,8 +461,8 @@ const pagingParameters = (pagination: PaginationDescriptor): string[] => {
     'cursorParam' in request
       ? request.cursorParam
       : 'offsetParam' in request
-      ? request.offsetParam
-      : request.pageParam;
+        ? request.offsetParam
+        : request.pageParam;
   return request.sizeParam === undefined ? [selector] : [selector, request.sizeParam];
 };
 

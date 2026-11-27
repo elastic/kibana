@@ -151,9 +151,76 @@ describe('getMobileReleases', () => {
     const { releases } = await run();
 
     expect(releases).toEqual([
-      { release: '1', isOther: false, sessions: 100, users: 10, errorRate: 0.25 },
-      { release: '2', isOther: false, sessions: 99, users: 9, errorRate: null },
+      {
+        release: '1',
+        isOther: false,
+        sessions: 100,
+        users: 10,
+        errorRate: 0.25,
+        coldStart: null,
+        coldStarts: 0,
+      },
+      {
+        release: '2',
+        isOther: false,
+        sessions: 99,
+        users: 9,
+        errorRate: null,
+        coldStart: null,
+        coldStarts: 0,
+      },
     ]);
+  });
+
+  it('shows the average cold start of each release and "Other" from 100 sessions, with its count', async () => {
+    const { run, requests } = setup({
+      stats: [
+        {
+          ...stats('3.0.0', 400),
+          cold_start: 2600,
+          cold_starts: 120,
+          warm_start: 600,
+          warm_starts: 80,
+        },
+        { ...stats('2.0.0', 300), cold_start: 1400, cold_starts: 90 },
+        stats('1.0.0', 200),
+        stats('0.8.0', 150),
+        stats('0.7.0', 120),
+        // One more than the top, so some are left for "Other"
+        stats('0.6.0', 110),
+      ],
+      other: [{ sessions: 900, users: 40, exceptions: 0, cold_start: 1700, cold_starts: 250 }],
+    });
+
+    const { releases } = await run();
+
+    expect(
+      releases.map(({ release, coldStart, coldStarts }) => [release, coldStart, coldStarts])
+    ).toEqual([
+      ['3.0.0', 2600, 120],
+      ['2.0.0', 1400, 90],
+      // No cold starts
+      ['1.0.0', null, 0],
+      ['0.8.0', null, 0],
+      ['0.7.0', null, 0],
+      ['', 1700, 250],
+    ]);
+    // Both queries average the starts of the group
+    [...requests('stats'), ...requests('other')].forEach(({ query }) =>
+      expect(query).toContain('cold_start = AVG(cold_start_ms), cold_starts = COUNT(cold_start_ms)')
+    );
+  });
+
+  it("holds a release's cold start back below 100 sessions, as its error rate", async () => {
+    const { run } = setup({
+      stats: [{ ...stats('1', 99), cold_start: 1500, cold_starts: 30 }],
+    });
+
+    const { releases } = await run();
+
+    expect(releases[0]).toEqual(
+      expect.objectContaining({ errorRate: null, coldStart: null, coldStarts: 30 })
+    );
   });
 
   it('runs every query at once for the release filter, its only group', async () => {

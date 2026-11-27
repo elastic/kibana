@@ -258,8 +258,8 @@ export const useWatchSettingsDraft = (workers: Worker[]) => {
             typeof body?.message === 'string'
               ? body.message
               : error instanceof Error
-              ? error.message
-              : String(error);
+                ? error.message
+                : String(error);
           setError(worker.id, message);
         }
       }

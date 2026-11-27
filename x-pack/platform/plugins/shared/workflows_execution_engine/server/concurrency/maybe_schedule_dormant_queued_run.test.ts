@@ -40,7 +40,7 @@ describe('handleConcurrencyBlockedExecution', () => {
         },
       },
       ...overrides,
-    } as EsWorkflowExecution);
+    }) as EsWorkflowExecution;
 
   const createDependencies = (execution: EsWorkflowExecution | null) => {
     const workflowExecutionRepository = {

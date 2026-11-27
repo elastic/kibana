@@ -27,9 +27,10 @@ import { createCoreUiamService } from './uiam';
 import { WorkloadTypeRegistry } from './workload_type_registry';
 import { createBoundWorkloadResolver } from './resolve_bound_workloads';
 
-export class SecurityService
-  implements CoreService<InternalSecurityServiceSetup, InternalSecurityServiceStart>
-{
+export class SecurityService implements CoreService<
+  InternalSecurityServiceSetup,
+  InternalSecurityServiceStart
+> {
   private readonly log: Logger;
   private securityApi?: CoreSecurityDelegateContract;
   private fakeRequestEnricherAcquired = false;

@@ -122,19 +122,21 @@ export const ServiceGroupNode = memo(
       cursor: ${isInteractive ? 'pointer' : 'default'};
       pointer-events: all;
 
-      ${isInteractive &&
-      css`
-        &:focus-visible {
-          outline: ${euiTheme.border.width.thick} solid ${euiTheme.colors.primary};
-          outline-offset: ${euiTheme.size.xxs};
-        }
+      ${
+        isInteractive &&
+        css`
+          &:focus-visible {
+            outline: ${euiTheme.border.width.thick} solid ${euiTheme.colors.primary};
+            outline-offset: ${euiTheme.size.xxs};
+          }
 
-        [data-id]:focus &,
-        [data-id]:focus-visible & {
-          outline: ${euiTheme.border.width.thick} solid ${euiTheme.colors.primary};
-          outline-offset: ${euiTheme.size.xxs};
-        }
-      `}
+          [data-id]:focus &,
+          [data-id]:focus-visible & {
+            outline: ${euiTheme.border.width.thick} solid ${euiTheme.colors.primary};
+            outline-offset: ${euiTheme.size.xxs};
+          }
+        `
+      }
     `;
 
     const memberCountStyles = css`

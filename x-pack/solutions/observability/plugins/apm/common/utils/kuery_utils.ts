@@ -25,5 +25,5 @@ export const toAnyOfKuery = (pairs: Array<[field: string, value?: string]>) => {
     .filter((pair): pair is [string, string] => !isEmpty(pair[1]))
     .map(([field, value]) => `${field} : "${value}"`);
 
-  return clauses.length > 1 ? `(${clauses.join(' or ')})` : clauses[0] ?? '';
+  return clauses.length > 1 ? `(${clauses.join(' or ')})` : (clauses[0] ?? '');
 };

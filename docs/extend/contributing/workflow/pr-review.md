@@ -69,7 +69,7 @@ Reviewers are not simply evaluating the code itself, they are also evaluating th
 
 ## Consistency, style, readability [_consistency_style_readability]
 
-Having a relatively consistent codebase is an important part of us building a sustainable project. With dozens of active contributors at any given time, we rely on automation to help ensure consistency - we enforce a comprehensive set of linting rules through CI. We’re also rolling out prettier to make this even more automatic.
+Having a relatively consistent codebase is an important part of us building a sustainable project. With dozens of active contributors at any given time, we rely on automation to help ensure consistency - we enforce a comprehensive set of linting rules (oxlint) and code formatting (oxfmt) through CI.
 
 For things that can’t be easily automated, we maintain a [style guide](https://github.com/elastic/kibana/tree/master/STYLEGUIDE.mdx) that authors should adhere to and reviewers should keep in mind when they review a pull request.
 

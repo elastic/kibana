@@ -229,8 +229,8 @@ export function deriveJudgeProvenance(aggregated: AggregatedModelScores[]): Deri
       const judges = suite.judgeModelIds?.length
         ? suite.judgeModelIds
         : suite.judgeModelId
-        ? [suite.judgeModelId]
-        : [];
+          ? [suite.judgeModelId]
+          : [];
       for (const judge of judges) {
         counts.set(judge, (counts.get(judge) ?? 0) + 1);
       }

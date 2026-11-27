@@ -22,8 +22,7 @@ export interface InboxActionRegistryListParams extends InboxActionProviderListPa
   perPage: number;
 }
 
-export interface InboxActionRegistryListHistoryParams
-  extends InboxActionProviderListProcessedParams {
+export interface InboxActionRegistryListHistoryParams extends InboxActionProviderListProcessedParams {
   sourceApp?: string;
   page: number;
   perPage: number;

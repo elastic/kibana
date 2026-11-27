@@ -382,7 +382,7 @@ describe('var_group_helpers (cloud connector)', () => {
         inputs: [],
         policy_ids: [],
         ...overrides,
-      } as NewPackagePolicy);
+      }) as NewPackagePolicy;
 
     it('should return provider from var_group selection when cloud connector is selected', () => {
       const varGroups = createMockVarGroups();

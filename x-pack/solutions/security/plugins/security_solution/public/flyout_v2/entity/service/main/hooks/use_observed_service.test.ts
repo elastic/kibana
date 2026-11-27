@@ -77,7 +77,7 @@ const buildStoreResult = (
     inspect: undefined,
     refetch: jest.fn(),
     ...overrides,
-  } as unknown as EntityFromStoreResult<ServiceItem>);
+  }) as unknown as EntityFromStoreResult<ServiceItem>;
 
 const getEuidFilterBasedOnEntityRecord = jest.fn(
   (_definition: unknown, record: { entity: { id: string } }) => ({

@@ -168,7 +168,7 @@ const getImplicitPreSelection = (
     return hookStep.data?.skills ?? [];
   }
   const legacyStep = steps.find(isImplicitRelevantSkillsStep);
-  return legacyStep ? legacyStep.skills ?? [] : undefined;
+  return legacyStep ? (legacyStep.skills ?? []) : undefined;
 };
 
 /**

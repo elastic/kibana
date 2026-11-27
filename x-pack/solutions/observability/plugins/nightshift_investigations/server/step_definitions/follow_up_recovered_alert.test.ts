@@ -21,7 +21,7 @@ const createContext = (input: Record<string, unknown>) =>
       getFakeRequest: jest.fn().mockReturnValue(request),
       getContext: jest.fn().mockReturnValue({ workflow: { id: 'wf-1', spaceId: 'test-space' } }),
     },
-  } as never);
+  }) as never;
 
 const createDefinition = (followUpRecoveredAlert: jest.Mock) => {
   const getInvestigationsClient = jest

@@ -31,15 +31,12 @@ export type VisualizationListingPluginStart = void;
 export type VisualizationListingPluginSetup = void;
 
 /** @public */
-export class VisualizationListingPlugin
-  implements
-    Plugin<
-      VisualizationListingPluginSetup,
-      VisualizationListingPluginStart,
-      SetupDependencies,
-      VisualizationListingStartDependencies
-    >
-{
+export class VisualizationListingPlugin implements Plugin<
+  VisualizationListingPluginSetup,
+  VisualizationListingPluginStart,
+  SetupDependencies,
+  VisualizationListingStartDependencies
+> {
   public setup(
     core: CoreSetup<VisualizationListingStartDependencies>,
     dependencies: SetupDependencies

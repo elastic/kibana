@@ -20,9 +20,9 @@ export const pinShapeStyles = (
   width: ${PIN_SIZE}px;
   height: ${PIN_SIZE}px;
   border-radius: 50% 50% 50% 0;
-  border: ${resolved
-    ? `3px solid ${euiTheme.colors.success}`
-    : `2px solid ${euiTheme.colors.emptyShade}`};
+  border: ${
+    resolved ? `3px solid ${euiTheme.colors.success}` : `2px solid ${euiTheme.colors.emptyShade}`
+  };
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 `;
 

@@ -45,7 +45,7 @@ const otherUiEvent = (): ChatAgentEvent =>
       custom_event: 'some_ui_event',
       data: {},
     },
-  } as ChatAgentEvent);
+  }) as ChatAgentEvent;
 
 const GRAPH = 'my-graph';
 const stateChunk = (

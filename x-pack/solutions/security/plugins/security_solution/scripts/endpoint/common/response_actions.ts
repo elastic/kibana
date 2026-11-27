@@ -366,7 +366,7 @@ export const sendEndpointActionResponse = async (
 };
 
 type ResponseOutput<
-  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
 > = Pick<LogsEndpointActionResponse<TOutputContent>['EndpointActions']['data'], 'output'>;
 
 /** Returns the file path(s) requested via `parameters.path` or `parameters.paths` of a get-file action */

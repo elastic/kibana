@@ -51,7 +51,7 @@ describe('createClassicEpisodeSource', () => {
 
   describe('getRuleTypeIds', () => {
     const episodeWith = (ruleTypeId?: string) =>
-      ({ source_action_context: ruleTypeId ? { ruleTypeId } : {} } as AlertEpisode);
+      ({ source_action_context: ruleTypeId ? { ruleTypeId } : {} }) as AlertEpisode;
 
     it('collects the distinct rule types of the given rows', () => {
       const source = createClassicEpisodeSource({ ruleTypeIds: ['a', 'b'] });

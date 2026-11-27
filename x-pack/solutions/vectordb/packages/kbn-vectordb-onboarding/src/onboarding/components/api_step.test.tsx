@@ -61,7 +61,7 @@ const makeServices = () =>
     share: {},
     console: {},
     cloud: { isInTrial },
-  } as unknown as OnboardingServices);
+  }) as unknown as OnboardingServices;
 
 const renderComponent = (props: Partial<React.ComponentProps<typeof ApiStep>> = {}) =>
   render(

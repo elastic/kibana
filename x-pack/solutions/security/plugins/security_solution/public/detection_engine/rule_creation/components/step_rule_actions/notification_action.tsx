@@ -109,8 +109,8 @@ export function NotificationAction({
   rule details page.
   */
   const connectorTypeName = isRuleAction
-    ? connectorType?.name ?? ''
-    : registeredAction.actionTypeTitle ?? '';
+    ? (connectorType?.name ?? '')
+    : (registeredAction.actionTypeTitle ?? '');
   const iconType = registeredAction?.iconClass ?? 'apps';
 
   const connector = connectors.find(({ id }) => id === action.id);

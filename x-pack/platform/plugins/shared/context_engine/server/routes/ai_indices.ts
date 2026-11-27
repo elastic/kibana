@@ -145,7 +145,8 @@ import {
 import type { ContextEngineAnalyticsService } from '../telemetry';
 import { withKiWriteTelemetry } from '../step_types/helpers';
 import { CONTEXT_ENGINE_DOCS_NOTE, SOURCE_AUTOMATIONS_NOTE } from './constants';
-import { MEMORY_DISABLED_MESSAGE, withContextEngineFeatureFlag } from './with_feature_flag';
+import { MEMORY_DISABLED_MESSAGE } from '../session_memory_client/errors';
+import { withContextEngineFeatureFlag } from './with_feature_flag';
 
 const READ_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [apiPrivileges.readContextEngine] },
@@ -240,8 +241,8 @@ const handleAiIndexError = (error: unknown, response: KibanaResponseFactory, log
   if (error instanceof KiValidationError) {
     return response.badRequest({ body: { message: error.message } });
   }
-  logger.error(error instanceof Error ? error.stack ?? error.message : String(error));
-  const statusCode = isResponseError(error) ? error.statusCode ?? 500 : 500;
+  logger.error(error instanceof Error ? (error.stack ?? error.message) : String(error));
+  const statusCode = isResponseError(error) ? (error.statusCode ?? 500) : 500;
   return response.customError({
     statusCode,
     body: { message: formatErrorMessage(error) },

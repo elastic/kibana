@@ -36,7 +36,7 @@ describe('List service account workloads route', () => {
 
     const serviceAccountsMock =
       'serviceAccounts' in options
-        ? options.serviceAccounts ?? null
+        ? (options.serviceAccounts ?? null)
         : serviceAccountsServiceMock.createStart();
     mockRouteDefinitionParams.getServiceAccountsService.mockReturnValue(serviceAccountsMock);
 

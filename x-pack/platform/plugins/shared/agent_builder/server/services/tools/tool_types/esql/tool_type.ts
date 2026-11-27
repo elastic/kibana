@@ -29,22 +29,25 @@ const convertConfigFromPersistence = (rawConfig: EsqlToolPersistedConfig): EsqlT
     return config;
   }
 
-  const params = Object.entries(rawConfig.params).reduce((acc, [paramName, rawParam]) => {
-    const type = convertLegacyEsqlToolFieldType(rawParam.type);
-    const defaultValue = convertLegacyEsqlToolParamDefaultValue(
-      rawParam.type,
-      rawParam.defaultValue
-    );
+  const params = Object.entries(rawConfig.params).reduce(
+    (acc, [paramName, rawParam]) => {
+      const type = convertLegacyEsqlToolFieldType(rawParam.type);
+      const defaultValue = convertLegacyEsqlToolParamDefaultValue(
+        rawParam.type,
+        rawParam.defaultValue
+      );
 
-    const nextParam: EsqlToolConfig['params'][string] = {
-      ...rawParam,
-      type,
-      defaultValue,
-    };
+      const nextParam: EsqlToolConfig['params'][string] = {
+        ...rawParam,
+        type,
+        defaultValue,
+      };
 
-    acc[paramName] = nextParam;
-    return acc;
-  }, {} as EsqlToolConfig['params']);
+      acc[paramName] = nextParam;
+      return acc;
+    },
+    {} as EsqlToolConfig['params']
+  );
 
   return { query: rawConfig.query, params };
 };

@@ -20,8 +20,10 @@ import type {
 import { ManageViewsFlyout } from './manage_views_flyout';
 import { UpsertViewModal } from './upsert_modal';
 
-interface Props<TSingleSavedViewState extends SavedViewItem, TViewState>
-  extends SavedViewState<TSingleSavedViewState> {
+interface Props<
+  TSingleSavedViewState extends SavedViewItem,
+  TViewState,
+> extends SavedViewState<TSingleSavedViewState> {
   viewState?: TViewState & BasicAttributes;
   onCreateView: SavedViewOperations<TSingleSavedViewState>['createView'];
   onDeleteView: SavedViewOperations<TSingleSavedViewState>['deleteViewById'];

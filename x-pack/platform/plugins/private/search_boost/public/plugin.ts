@@ -13,9 +13,12 @@ import type { SearchBoostSetupDependencies, SearchBoostStartDependencies } from 
 
 const INDEX_MANAGEMENT_APP_ID = 'index_management';
 
-export class SearchBoostPlugin
-  implements Plugin<void, void, SearchBoostSetupDependencies, SearchBoostStartDependencies>
-{
+export class SearchBoostPlugin implements Plugin<
+  void,
+  void,
+  SearchBoostSetupDependencies,
+  SearchBoostStartDependencies
+> {
   public setup(
     core: CoreSetup<SearchBoostStartDependencies>,
     { management }: SearchBoostSetupDependencies

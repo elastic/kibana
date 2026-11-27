@@ -20,7 +20,7 @@ const createClient = (putIndexTemplate: jest.Mock) =>
       exists: jest.fn().mockResolvedValue(false),
       getMapping: jest.fn(),
     },
-  } as unknown as ElasticsearchClient);
+  }) as unknown as ElasticsearchClient;
 
 describe('installSpaceScopedIndexTemplates', () => {
   it('installs the template of each space-scoped AlertZero index under its shipped name', async () => {

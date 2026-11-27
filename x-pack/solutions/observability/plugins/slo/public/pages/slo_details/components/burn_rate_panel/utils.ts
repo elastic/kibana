@@ -20,8 +20,8 @@ export function getStatus(
   return areBothBurnRatesAboveThreshold
     ? 'BREACHED'
     : isLongWindowBurnRateAboveThreshold && !isShortWindowBurnRateAboveThreshold
-    ? 'RECOVERING'
-    : !isLongWindowBurnRateAboveThreshold && isShortWindowBurnRateAboveThreshold
-    ? 'INCREASING'
-    : 'ACCEPTABLE';
+      ? 'RECOVERING'
+      : !isLongWindowBurnRateAboveThreshold && isShortWindowBurnRateAboveThreshold
+        ? 'INCREASING'
+        : 'ACCEPTABLE';
 }

@@ -93,15 +93,14 @@ const spanLinksRoute = createApmServerRoute({
         start: query.start,
         end: query.end,
         processorEvent: query.processorEvent,
-      }).then(
-        (linkedParents): Promise<SpanLinkDetails[]> =>
-          getSpanLinksDetails({
-            apmEventClient,
-            spanLinks: linkedParents,
-            kuery: query.kuery,
-            start: query.start,
-            end: query.end,
-          })
+      }).then((linkedParents): Promise<SpanLinkDetails[]> =>
+        getSpanLinksDetails({
+          apmEventClient,
+          spanLinks: linkedParents,
+          kuery: query.kuery,
+          start: query.start,
+          end: query.end,
+        })
       ),
       getLinkedChildrenOfSpan({
         apmEventClient,
@@ -109,15 +108,14 @@ const spanLinksRoute = createApmServerRoute({
         spanId: path.spanId,
         start: query.start,
         end: query.end,
-      }).then(
-        (linkedChildren): Promise<SpanLinkDetails[]> =>
-          getSpanLinksDetails({
-            apmEventClient,
-            spanLinks: linkedChildren,
-            kuery: query.kuery,
-            start: query.start,
-            end: query.end,
-          })
+      }).then((linkedChildren): Promise<SpanLinkDetails[]> =>
+        getSpanLinksDetails({
+          apmEventClient,
+          spanLinks: linkedChildren,
+          kuery: query.kuery,
+          start: query.start,
+          end: query.end,
+        })
       ),
     ]);
 

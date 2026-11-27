@@ -44,9 +44,8 @@ export async function getApmAlertsClient({
     throw Error('No alert indices exist for "apm"');
   }
 
-  const excludedDataTiers = await coreContext.uiSettings.client.get<DataTier[]>(
-    searchExcludedDataTiers
-  );
+  const excludedDataTiers =
+    await coreContext.uiSettings.client.get<DataTier[]>(searchExcludedDataTiers);
 
   return {
     search<TParams extends ApmAlertsRequiredParams>(

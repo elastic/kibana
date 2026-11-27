@@ -53,11 +53,10 @@ export interface AlertShape {
   observable: (v: Variation) => Record<string, unknown>;
 }
 
-export interface BatchRule
-  extends Pick<
-    BuildAlertParams,
-    'ruleName' | 'ruleDescription' | 'severity' | 'riskScore' | 'tactic' | 'technique'
-  > {
+export interface BatchRule extends Pick<
+  BuildAlertParams,
+  'ruleName' | 'ruleDescription' | 'severity' | 'riskScore' | 'tactic' | 'technique'
+> {
   id: string;
   shapes: AlertShape[];
 }

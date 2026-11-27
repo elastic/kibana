@@ -39,4 +39,4 @@ export const getSignalsMigrationSavedObjectErrorMock = (
       message: 'Saved object [security-solution-signals-migration/dne-migration] not found',
       ...overrides,
     },
-  } as SignalsMigrationSO);
+  }) as SignalsMigrationSO;

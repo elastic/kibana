@@ -255,9 +255,9 @@ export function TracesLatencyMapView({
   // just drawn at its edge.
   const selectionOutOfRange = Boolean(
     selection &&
-      source &&
-      (Date.parse(selection.to) <= Date.parse(source.timeRange.from) - RANGE_CLEAR_GRACE_MS ||
-        Date.parse(selection.from) >= Date.parse(source.timeRange.to) + RANGE_CLEAR_GRACE_MS)
+    source &&
+    (Date.parse(selection.to) <= Date.parse(source.timeRange.from) - RANGE_CLEAR_GRACE_MS ||
+      Date.parse(selection.from) >= Date.parse(source.timeRange.to) + RANGE_CLEAR_GRACE_MS)
   );
   useEffect(() => {
     if (selectionOutOfRange) commitSelection(undefined, undefined);

@@ -24,7 +24,7 @@ export interface ClientHelpers<SRM extends BaseSearchRuntimeMappings> {
 export interface IDataStreamClient<
   MappingsInDefinition extends MappingsDefinition,
   FullDocumentType extends GetFieldsOf<MappingsInDefinition> = GetFieldsOf<MappingsInDefinition>,
-  SRM extends BaseSearchRuntimeMappings = never
+  SRM extends BaseSearchRuntimeMappings = never,
 > extends InternalIDataStreamClient<MappingsInDefinition, FullDocumentType, SRM> {
   /** Clint Helpers */
   helpers: ClientHelpers<SRM>;

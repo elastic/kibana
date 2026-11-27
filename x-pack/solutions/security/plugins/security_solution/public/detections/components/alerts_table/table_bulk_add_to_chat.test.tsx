@@ -138,7 +138,7 @@ jest.mock('../../../flyout_v2/shared/hooks/use_open_flyout', () => ({
 }));
 
 const makeItem = (id: string): TimelineItem =>
-  ({ _id: id, data: [], ecs: { _id: id, _index: '' } } as unknown as TimelineItem);
+  ({ _id: id, data: [], ecs: { _id: id, _index: '' } }) as unknown as TimelineItem;
 
 describe('Alerts Page Table — bulkAddToChatConfig', () => {
   let mockReportAddToChat: jest.Mock;

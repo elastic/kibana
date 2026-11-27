@@ -29,7 +29,7 @@ type OverviewFilterName =
   | 'pageContains';
 
 /** The KPIs of the mobile page's row. */
-type MobileKpi = 'Sessions' | 'Users' | 'ErrorRate';
+type MobileKpi = 'Sessions' | 'Users' | 'ErrorRate' | 'ColdStart' | 'WarmStart';
 
 export class DigitalExperiencePage {
   public readonly mainContainer: Locator;
@@ -110,6 +110,9 @@ export class DigitalExperiencePage {
   public readonly mobileReleaseTable: Locator;
   public readonly mobileReleaseErrorRateChart: Locator;
   public readonly mobileReleaseAdoptionChart: Locator;
+  public readonly mobilePerformance: Locator;
+  public readonly mobileColdStartChart: Locator;
+  public readonly mobileWarmStartChart: Locator;
   public readonly mobilePagePlatforms: Locator;
   public readonly mobileOsFilter: Locator;
   public readonly mobileCompareToggle: Locator;
@@ -125,7 +128,10 @@ export class DigitalExperiencePage {
   public readonly platformFilter: Locator;
   public readonly platformList: EuiSelectableObject;
 
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {
     this.mainContainer = page.getByTestId('digitalExperienceMainContainer');
     this.applicationsTable = page.components.basicTable('digitalExperienceApplicationsTable');
     this.environmentFilter = page.getByTestId('digitalExperienceEnvironmentFilter');
@@ -223,6 +229,9 @@ export class DigitalExperiencePage {
     this.mobileReleaseAdoptionChart = page.getByTestId(
       'digitalExperienceMobileReleaseAdoptionChart'
     );
+    this.mobilePerformance = page.getByTestId('digitalExperienceMobilePerformance');
+    this.mobileColdStartChart = page.getByTestId('digitalExperienceMobileColdStartChart');
+    this.mobileWarmStartChart = page.getByTestId('digitalExperienceMobileWarmStartChart');
     // The header's badges, one per platform the application reported on.
     this.mobilePagePlatforms = page.getByTestId(/^digitalExperienceMobilePlatformBadge-/);
     this.mobileOsFilter = page.getByTestId('digitalExperienceMobileOsFilter');
@@ -253,11 +262,12 @@ export class DigitalExperiencePage {
   }
 
   /**
-   * The legend item of `release` in a Release health chart (`chart`), which only shows once the
-   * chart is drawn. `@elastic/charts` names it by the series; there's no test subject to add.
+   * The legend item of the series `name` in a chart of the mobile Overview (`chart`), which only
+   * shows once the chart is drawn. `@elastic/charts` names it by the series; there's no test
+   * subject to add.
    */
-  mobileReleaseChartSeries(chart: Locator, release: string): Locator {
-    return chart.locator(`[data-ech-series-name="${release}"]`);
+  mobileChartSeries(chart: Locator, name: string): Locator {
+    return chart.locator(`[data-ech-series-name="${name}"]`);
   }
 
   /** The control in the Release health table that filters the page by `release`. */

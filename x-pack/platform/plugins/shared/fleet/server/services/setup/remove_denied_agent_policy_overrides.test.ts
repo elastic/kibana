@@ -39,7 +39,7 @@ const mockStoredPolicies = (
   // By default the current overrides are the ones seen by the scan
   mockedGet.mockImplementation(
     async (_soClient, id) =>
-      ({ id, overrides: policies.find((policy) => policy.id === id)?.overrides } as any)
+      ({ id, overrides: policies.find((policy) => policy.id === id)?.overrides }) as any
   );
   soClient.createPointInTimeFinder.mockReturnValue({
     close: jest.fn(),
@@ -81,7 +81,7 @@ describe('removeDeniedAgentPolicyOverrides', () => {
     logger = loggingSystemMock.createLogger();
     mockedAppContextService.getInternalUserSOClientWithoutSpaceExtension.mockReturnValue(soClient);
     mockedAppContextService.getInternalUserSOClientForSpaceId.mockImplementation(
-      (spaceId?: string) => ({ spaceId } as any)
+      (spaceId?: string) => ({ spaceId }) as any
     );
     mockedAppContextService.getLogger.mockReturnValue(logger);
     mockedGet.mockReset();
