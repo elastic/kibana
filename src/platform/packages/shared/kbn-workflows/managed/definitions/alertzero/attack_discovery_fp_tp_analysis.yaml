@@ -431,8 +431,9 @@ steps:
       message: |
         You judge ONE persisted Attack Discovery as a chain: do the world facts around its
         cited alerts support the attack story it tells? You do not generate a discovery,
-        judge individual detection rules, or confirm compromise. You have no tools; use
-        only the evidence below.
+        judge individual detection rules, or confirm compromise. Use only the evidence
+        below and call no tools, attachment tools included: this workflow stores your
+        answer, so answer directly.
 
         Verdicts:
         - true_positive: the alerts plus the world warrant investigating them as one unit.
