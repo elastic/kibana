@@ -26,7 +26,7 @@ import {
   SYSTEM_SECURITY_HUNT_PROPOSAL_GATE_ID,
   WRITE_HUNT_EVIDENCE_URL,
 } from '@kbn/alertzero-common';
-import { MAX_HUNT_TECHNIQUE_IDS } from '../../../common/hunt_technique_limit';
+import { MAX_HUNT_TECHNIQUE_IDS } from '../../../common/workers/continuous_threat_hunt/hunt_technique_limit';
 
 interface NestedStep {
   name: string;
