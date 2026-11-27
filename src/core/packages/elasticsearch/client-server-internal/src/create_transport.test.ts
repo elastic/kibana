@@ -808,7 +808,7 @@ describe('createTransport', () => {
     });
   });
 
-  describe('expired UIAM assertion', () => {
+  describe('UIAM client authentication', () => {
     const CLIENT_AUTHENTICATION = 'x-client-authentication';
 
     let getUiamClientAuthenticationHeaders: jest.Mock;
@@ -840,12 +840,52 @@ describe('createTransport', () => {
     const requestParams = { method: 'GET', path: '/' };
     const retryResult = { body: 'some dummy content' };
 
-    it('does not resolve client authentication for a request that succeeds', async () => {
+    const resolveExpiredAssertionOnce = (headerName = CLIENT_AUTHENTICATION) =>
+      getUiamClientAuthenticationHeaders.mockReturnValueOnce({ [headerName]: 'expired-assertion' });
+
+    it('resolves client authentication before each request', async () => {
       transportRequestMock.mockResolvedValue(retryResult);
+      getUiamClientAuthenticationHeaders
+        .mockReturnValueOnce({ [CLIENT_AUTHENTICATION]: 'first-assertion' })
+        .mockReturnValueOnce({ [CLIENT_AUTHENTICATION]: 'second-assertion' });
+      const transport = createUiamTransport();
+
+      await transport.request(requestParams, {});
+      await transport.request(requestParams, {});
+
+      expect(getUiamClientAuthenticationHeaders).toHaveBeenCalledTimes(2);
+      expect(getUiamClientAuthenticationHeaders).toHaveBeenCalledWith({
+        authorization: 'Bearer essu_token',
+        [CLIENT_AUTHENTICATION]: 'stale-assertion',
+      });
+      expect(transportRequestMock).toHaveBeenNthCalledWith(
+        1,
+        requestParams,
+        expect.objectContaining({
+          headers: {
+            authorization: 'Bearer essu_token',
+            [CLIENT_AUTHENTICATION]: 'first-assertion',
+          },
+        })
+      );
+      expect(transportRequestMock).toHaveBeenNthCalledWith(
+        2,
+        requestParams,
+        expect.objectContaining({
+          headers: {
+            authorization: 'Bearer essu_token',
+            [CLIENT_AUTHENTICATION]: 'second-assertion',
+          },
+        })
+      );
+    });
+
+    it('keeps the client authentication of the transport when nothing is resolved', async () => {
+      transportRequestMock.mockResolvedValue(retryResult);
+      getUiamClientAuthenticationHeaders.mockReturnValue({});
 
       await createUiamTransport().request(requestParams, {});
 
-      expect(getUiamClientAuthenticationHeaders).not.toHaveBeenCalled();
       expect(transportRequestMock).toHaveBeenCalledWith(
         requestParams,
         expect.objectContaining({
@@ -857,7 +897,25 @@ describe('createTransport', () => {
       );
     });
 
-    it('does not resolve client authentication for another unauthorized error', async () => {
+    it('sends the client authentication of the request instead of the resolved one', async () => {
+      transportRequestMock.mockResolvedValue(retryResult);
+
+      await createUiamTransport().request(requestParams, {
+        headers: { [CLIENT_AUTHENTICATION]: 'per-request-assertion' },
+      });
+
+      expect(transportRequestMock).toHaveBeenCalledWith(
+        requestParams,
+        expect.objectContaining({
+          headers: {
+            authorization: 'Bearer essu_token',
+            [CLIENT_AUTHENTICATION]: 'per-request-assertion',
+          },
+        })
+      );
+    });
+
+    it('does not resolve client authentication again for another unauthorized error', async () => {
       const handler: jest.MockedFunction<InternalUnauthorizedErrorHandler> = jest.fn();
       handler.mockReturnValue({ type: 'notHandled' });
       getUnauthorizedErrorHandler.mockReturnValue(handler);
@@ -866,12 +924,13 @@ describe('createTransport', () => {
 
       await expect(createUiamTransport().request(requestParams, {})).rejects.toBe(error);
 
-      expect(getUiamClientAuthenticationHeaders).not.toHaveBeenCalled();
+      expect(getUiamClientAuthenticationHeaders).toHaveBeenCalledTimes(1);
       expect(handler).toHaveBeenCalledTimes(1);
       expect(transportRequestMock).toHaveBeenCalledTimes(1);
     });
 
     it('retries once with a newly signed assertion without calling the unauthorized handler', async () => {
+      resolveExpiredAssertionOnce();
       transportRequestMock
         .mockRejectedValueOnce(createUiamAssertionExpiredError())
         .mockResolvedValueOnce(retryResult);
@@ -879,12 +938,22 @@ describe('createTransport', () => {
       await expect(createUiamTransport().request(requestParams, {})).resolves.toEqual(retryResult);
 
       expect(getUnauthorizedErrorHandler).not.toHaveBeenCalled();
-      expect(getUiamClientAuthenticationHeaders).toHaveBeenCalledTimes(1);
-      expect(getUiamClientAuthenticationHeaders).toHaveBeenCalledWith({
+      expect(getUiamClientAuthenticationHeaders).toHaveBeenCalledTimes(2);
+      expect(getUiamClientAuthenticationHeaders).toHaveBeenLastCalledWith({
         authorization: 'Bearer essu_token',
         [CLIENT_AUTHENTICATION]: 'stale-assertion',
       });
       expect(transportRequestMock).toHaveBeenCalledTimes(2);
+      expect(transportRequestMock).toHaveBeenNthCalledWith(
+        1,
+        requestParams,
+        expect.objectContaining({
+          headers: {
+            authorization: 'Bearer essu_token',
+            [CLIENT_AUTHENTICATION]: 'expired-assertion',
+          },
+        })
+      );
       expect(transportRequestMock).toHaveBeenNthCalledWith(
         2,
         requestParams,
@@ -898,6 +967,7 @@ describe('createTransport', () => {
     });
 
     it('keeps the newly signed assertion for the next requests', async () => {
+      resolveExpiredAssertionOnce();
       transportRequestMock
         .mockRejectedValueOnce(createUiamAssertionExpiredError())
         .mockResolvedValue(retryResult);
@@ -906,21 +976,16 @@ describe('createTransport', () => {
       await transport.request(requestParams, {});
       await transport.request(requestParams, {});
 
-      expect(getUiamClientAuthenticationHeaders).toHaveBeenCalledTimes(1);
+      expect(getUiamClientAuthenticationHeaders).toHaveBeenCalledTimes(3);
+      expect(getUiamClientAuthenticationHeaders).toHaveBeenLastCalledWith({
+        authorization: 'Bearer essu_token',
+        [CLIENT_AUTHENTICATION]: 'fresh-assertion-for-Bearer essu_token',
+      });
       expect(transportRequestMock).toHaveBeenCalledTimes(3);
-      expect(transportRequestMock).toHaveBeenNthCalledWith(
-        3,
-        requestParams,
-        expect.objectContaining({
-          headers: {
-            authorization: 'Bearer essu_token',
-            [CLIENT_AUTHENTICATION]: 'fresh-assertion-for-Bearer essu_token',
-          },
-        })
-      );
     });
 
     it('does not retry more than once', async () => {
+      resolveExpiredAssertionOnce();
       const error = createUiamAssertionExpiredError();
       transportRequestMock
         .mockRejectedValueOnce(createUiamAssertionExpiredError())
@@ -988,6 +1053,7 @@ describe('createTransport', () => {
       getUiamClientAuthenticationHeaders.mockImplementation((headers) => ({
         [SECONDARY_CLIENT_AUTHENTICATION]: `fresh-assertion-for-${headers[SECONDARY_AUTHORIZATION]}`,
       }));
+      resolveExpiredAssertionOnce(SECONDARY_CLIENT_AUTHENTICATION);
       transportRequestMock
         .mockRejectedValueOnce(createUiamAssertionExpiredError())
         .mockResolvedValueOnce(retryResult);
@@ -1007,6 +1073,16 @@ describe('createTransport', () => {
 
       await expect(transport.request(requestParams, {})).resolves.toEqual(retryResult);
 
+      expect(transportRequestMock).toHaveBeenNthCalledWith(
+        1,
+        requestParams,
+        expect.objectContaining({
+          headers: {
+            [SECONDARY_AUTHORIZATION]: 'ApiKey essu_key',
+            [SECONDARY_CLIENT_AUTHENTICATION]: 'expired-assertion',
+          },
+        })
+      );
       expect(transportRequestMock).toHaveBeenNthCalledWith(
         2,
         requestParams,
@@ -1028,6 +1104,7 @@ describe('createTransport', () => {
       expect(transportRequestMock).toHaveBeenCalledTimes(1);
 
       transportRequestMock.mockReset();
+      resolveExpiredAssertionOnce();
       transportRequestMock
         .mockResolvedValueOnce(createUiamAssertionExpiredStreamResponse())
         .mockResolvedValueOnce(retryResult);

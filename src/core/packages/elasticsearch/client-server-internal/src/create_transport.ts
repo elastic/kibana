@@ -171,8 +171,8 @@ export const createTransport = ({
   getUnauthorizedErrorHandler?: ErrorHandlerAccessor;
   /**
    * Resolves the UIAM client authentication headers for the credential in the transport's current
-   * headers. Called only for a UIAM credential, when Elasticsearch reports that the signed
-   * assertion expired.
+   * headers. Called only for a UIAM credential: before each request, and again when Elasticsearch
+   * reports that the signed assertion expired.
    */
   getUiamClientAuthenticationHeaders?: (
     headers: IncomingHttpHeaders
@@ -219,9 +219,15 @@ export const createTransport = ({
         opts.opaqueId = opaqueId;
       }
 
+      const uiamClientAuthenticationHeaders =
+        getUiamClientAuthenticationHeaders && hasUiamCredential(this.headers)
+          ? getUiamClientAuthenticationHeaders(this.headers)
+          : {};
+
       // add stored headers to the options
       opts.headers = {
         ...this.headers,
+        ...uiamClientAuthenticationHeaders,
         ...options?.headers,
       };
 

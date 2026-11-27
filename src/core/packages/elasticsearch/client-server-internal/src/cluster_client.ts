@@ -252,8 +252,8 @@ export class ClusterClient implements ICustomClusterClient {
     // The effective credential is whatever ends up in `scopedHeaders`: for real requests the auth
     // provider's post-authentication headers override the one that came in on the wire. The client
     // authentication that travels with it is read from the same object, so a secret the request
-    // already carries is relayed rather than replaced. The transport resolves it again, from the
-    // credential the client holds by then, once the assertion expires.
+    // already carries is relayed rather than replaced. The transport resolves it again before each
+    // request, from the credential the client holds by then.
     const hasCredential = scopedHeaders[AUTHORIZATION_HEADER] !== undefined;
     const relayedClientAuthentication = scopedHeaders[ES_CLIENT_AUTHENTICATION_HEADER];
     const getUiamClientAuthenticationHeaders = (headers: Headers): ClientAuthenticationHeaders => {
