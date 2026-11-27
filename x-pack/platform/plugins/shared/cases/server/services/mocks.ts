@@ -157,6 +157,8 @@ export const createAlertServiceMock = (): AlertServiceMock => {
     updateAlertsStatus: jest.fn(),
     getAlerts: jest.fn(),
     executeAggregations: jest.fn(),
+    getAlertFields: jest.fn(),
+    getSequenceStartTimes: jest.fn(),
     bulkUpdateCases: jest.fn(),
     ensureAlertsAuthorized: jest.fn(),
     ensureAttacksAuthorized: jest.fn(),

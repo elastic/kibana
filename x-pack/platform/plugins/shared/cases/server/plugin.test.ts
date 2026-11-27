@@ -58,6 +58,7 @@ function getConfig(overrides: Partial<ConfigType> = {}): ConfigType {
     },
     templates: { enabled: true },
     runWorkflows: { enabled: true },
+    incidentTimeline: { enabled: false },
     attachments: { enabled: true },
     chat: { enabled: true },
     ...overrides,
@@ -330,6 +331,9 @@ describe('Cases Plugin', () => {
                 "application/pdf",
               ],
               "maxSize": 1,
+            },
+            "incidentTimeline": Object {
+              "enabled": false,
             },
             "incrementalId": Object {
               "enabled": true,

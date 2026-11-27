@@ -174,6 +174,11 @@ export const ConfigSchema = schema.object({
   runWorkflows: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),
+  // NOTE: exposed to the Browser via `exposeToBrowser` setting in cases/server/index.ts
+  // Prototype flag for the case view incident timeline (panel, alerts route, entry attachment type).
+  incidentTimeline: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+  }),
   enabled: schema.boolean({ defaultValue: true }),
 });
 

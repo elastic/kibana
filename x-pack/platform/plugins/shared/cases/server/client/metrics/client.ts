@@ -11,6 +11,7 @@ import type {
   SingleCaseMetricsResponse,
   CasesMetricsRequest,
   CasesMetricsResponse,
+  IncidentTimelineAlertsResponse,
 } from '../../../common/types/api';
 import type { CasesClient } from '../client';
 
@@ -18,6 +19,7 @@ import type { CasesClientArgs } from '../types';
 import { getStatusTotalsByType } from './get_status_totals';
 import { getCaseMetrics } from './get_case_metrics';
 import { getCasesMetrics } from './get_cases_metrics';
+import { getIncidentTimelineAlerts } from './get_incident_timeline_alerts';
 import type { GetCaseMetricsParams } from './types';
 
 /**
@@ -30,6 +32,10 @@ export interface MetricsSubClient {
    * Retrieves the total number of open, closed, and in-progress cases.
    */
   getStatusTotalsByType(params: CasesStatusRequest): Promise<CasesStatusResponse>;
+  /**
+   * Retrieves the attached alert documents of a case for the incident timeline.
+   */
+  getIncidentTimelineAlerts(params: { caseId: string }): Promise<IncidentTimelineAlertsResponse>;
 }
 
 /**
@@ -48,6 +54,8 @@ export const createMetricsSubClient = (
       getCasesMetrics(params, casesClient, clientArgs),
     getStatusTotalsByType: (params: CasesStatusRequest) =>
       getStatusTotalsByType(params, clientArgs),
+    getIncidentTimelineAlerts: (params: { caseId: string }) =>
+      getIncidentTimelineAlerts(params, casesClient, clientArgs),
   };
 
   return Object.freeze(casesSubClient);
