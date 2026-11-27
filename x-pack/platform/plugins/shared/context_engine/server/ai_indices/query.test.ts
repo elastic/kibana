@@ -20,7 +20,7 @@ import {
 import type { QueryAiIndicesRequest } from '../../common/http_api/ai_indices';
 import { buildAiIndexReadFilter, buildAiIndexSpaceFilter } from '../../common/space_filter';
 import { AiIndexQueryResponseTooLargeError, InvalidAiIndexQueryError } from './errors';
-import { queryAiIndices } from './query';
+import { executeAiIndexQuery, queryAiIndices } from './query';
 
 describe('queryAiIndices', () => {
   const esqlQuery = jest.fn();
@@ -222,5 +222,23 @@ describe('queryAiIndices', () => {
     await expect(
       queryAiIndices({ esClient, spaceId: 'default', query: 'FROM ai-index-idx-a' })
     ).rejects.toThrow('boom');
+  });
+
+  it('executeAiIndexQuery skips public _query length bounds', async () => {
+    const longQuery = `FROM "${'a'.repeat(MAX_AI_INDEX_QUERY_LENGTH)}"`;
+    const longUserId = 'u'.repeat(MAX_AI_INDEX_USER_ID_LENGTH + 1);
+
+    await executeAiIndexQuery({
+      esClient,
+      spaceId: 'default',
+      query: longQuery,
+      user_id: longUserId,
+      limit: 5,
+    });
+
+    expect(lastRequest().query.replace(/\s+/g, ' ')).toBe(`${longQuery} | LIMIT 5`);
+    expect(lastRequest().filter).toEqual(
+      buildAiIndexReadFilter({ spaceId: 'default', userId: longUserId })
+    );
   });
 });

@@ -31,10 +31,10 @@ export interface QueryAiIndicesParams extends QueryAiIndicesRequest {
 }
 
 /**
- * Runs caller-supplied ES|QL with server-owned lifecycle filters, space and user filters, and
- * row cap. `allow_partial_results` may silently drop failed shards.
+ * Runs server-constructed ES|QL with server-owned lifecycle filters, space and user filters, and
+ * row cap without enforcing public `_query` request-size bounds. Callers must validate inputs.
  */
-export const queryAiIndices = async ({
+export const executeAiIndexQuery = async ({
   esClient,
   spaceId,
   query,
@@ -43,11 +43,6 @@ export const queryAiIndices = async ({
   user_id: userId,
   aiIndexDests = [],
 }: QueryAiIndicesParams): Promise<QueryAiIndicesResponse> => {
-  const validationError = validateQueryAiIndicesRequest({ query, params, limit, user_id: userId });
-  if (validationError) {
-    throw new InvalidAiIndexQueryError(validationError);
-  }
-
   const namedParams: EsqlNamedValue[] = Object.entries(params ?? {}).map(([name, value]) => ({
     [name]: value,
   }));
@@ -73,4 +68,19 @@ export const queryAiIndices = async ({
     }
     throw error;
   }
+};
+
+/**
+ * Runs caller-supplied ES|QL with server-owned lifecycle filters, space and user filters, and
+ * row cap. `allow_partial_results` may silently drop failed shards.
+ */
+export const queryAiIndices = async (
+  request: QueryAiIndicesParams
+): Promise<QueryAiIndicesResponse> => {
+  const { query, params, limit, user_id: userId } = request;
+  const validationError = validateQueryAiIndicesRequest({ query, params, limit, user_id: userId });
+  if (validationError) {
+    throw new InvalidAiIndexQueryError(validationError);
+  }
+  return executeAiIndexQuery(request);
 };

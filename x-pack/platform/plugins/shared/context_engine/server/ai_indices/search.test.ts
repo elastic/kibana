@@ -9,6 +9,11 @@ import { errors } from '@elastic/elasticsearch';
 import type { EsqlQueryRequest, FieldValue } from '@elastic/elasticsearch/lib/api/types';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import {
+  MAX_AI_INDEX_QUERY_LENGTH,
+  MAX_AI_INDEX_QUERY_LIMIT,
+  MAX_MEMORY_USER_ID_LENGTH,
+} from '../../common/constants';
 import type { AiIndexItem, AiIndexType } from '../../common/http_api/ai_indices';
 import { buildAiIndexReadFilter } from '../../common/space_filter';
 import { applyLimit } from './apply_limit';
@@ -153,6 +158,21 @@ describe('searchAiIndices', () => {
       await expect(searchAiIndices({ ...baseParams, ...invalid })).rejects.toThrow(pattern);
       await expect(searchAiIndices({ ...baseParams, ...invalid, size: 0 })).rejects.toThrow(
         pattern
+      );
+      expect(aiIndexService.list).not.toHaveBeenCalled();
+      expect(esClient.esql.query).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['fractional', 1.5],
+      ['negative fractional', -1.5],
+      ['above max', MAX_AI_INDEX_QUERY_LIMIT + 1],
+      ['NaN', Number.NaN],
+      ['infinite', Number.POSITIVE_INFINITY],
+    ])('rejects a %s size before calling any service', async (_, size) => {
+      await expect(searchAiIndices({ ...baseParams, size })).rejects.toThrow(/size/);
+      await expect(searchAiIndices({ ...baseParams, size, aiIndexIds: [] })).rejects.toThrow(
+        /size/
       );
       expect(aiIndexService.list).not.toHaveBeenCalled();
       expect(esClient.esql.query).not.toHaveBeenCalled();
@@ -339,6 +359,33 @@ describe('searchAiIndices', () => {
       expect(query.indexOf('INLINE STATS')).toBeGreaterThan(-1);
       expect(query.indexOf('INLINE STATS')).toBeLessThan(query.indexOf('FORK'));
       expect(query.indexOf('governance.lifecycle.status')).toBeLessThan(query.indexOf('FORK'));
+    });
+
+    it('accepts a userId up to MAX_MEMORY_USER_ID_LENGTH', async () => {
+      givenAiIndices(PLAIN);
+      const longUserId = 'u'.repeat(MAX_MEMORY_USER_ID_LENGTH);
+
+      await searchAiIndices({ ...baseParams, userId: longUserId });
+
+      expect(esqlRequest().filter).toEqual(
+        buildAiIndexReadFilter({ spaceId: 'default', userId: longUserId })
+      );
+    });
+
+    it('runs when the generated FROM clause exceeds MAX_AI_INDEX_QUERY_LENGTH', async () => {
+      const manyIndices = Array.from({ length: 45 }, (_, idx) =>
+        aiIndex(
+          `idx-${idx}`,
+          'index',
+          `ai-index-idx-${String(idx).padStart(2, '0')}-${'a'.repeat(225)}`
+        )
+      );
+      givenAiIndices(...manyIndices);
+
+      await searchAiIndices(baseParams);
+
+      expect(esqlRequest().query.length).toBeGreaterThan(MAX_AI_INDEX_QUERY_LENGTH);
+      expect(esClient.esql.query).toHaveBeenCalledTimes(1);
     });
   });
 

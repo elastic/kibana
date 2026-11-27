@@ -8,11 +8,12 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
 import { isEsqlUnknownIndexError } from '@kbn/storage-adapter';
+import { MAX_AI_INDEX_QUERY_LIMIT } from '../../common/constants';
 import type { AiIndexItem, QueryAiIndicesResponse } from '../../common/http_api/ai_indices';
 import type { KiJsonValue } from '../../common/http_api/knowledge_indicators';
 import { isKiJsonObject } from '../../common/ki_lifecycle_status';
 import { probeAiIndices, type ProbedAiIndex } from './filter_readable_ai_indices';
-import { queryAiIndices } from './query';
+import { executeAiIndexQuery } from './query';
 import type { AiIndexService } from './service';
 
 export interface SearchAiIndicesRequest {
@@ -46,7 +47,8 @@ const assertSearchScope = ({
   spaceId,
   userId,
   query,
-}: Pick<SearchAiIndicesParams, 'spaceId' | 'userId' | 'query'>): void => {
+  size,
+}: Pick<SearchAiIndicesParams, 'spaceId' | 'userId' | 'query' | 'size'>): void => {
   if (spaceId.trim() === '') {
     throw new Error('AI index search requires a non-empty spaceId');
   }
@@ -55,6 +57,9 @@ const assertSearchScope = ({
   }
   if (query.trim() === '') {
     throw new Error('AI index search requires a non-empty query');
+  }
+  if (!Number.isInteger(size) || size > MAX_AI_INDEX_QUERY_LIMIT) {
+    throw new Error(`AI index search size must be an integer at most ${MAX_AI_INDEX_QUERY_LIMIT}`);
   }
 };
 
@@ -112,7 +117,7 @@ export const searchAiIndices = async ({
   size,
   aiIndexIds,
 }: SearchAiIndicesParams): Promise<AiIndexSearchResult[]> => {
-  assertSearchScope({ spaceId, userId, query });
+  assertSearchScope({ spaceId, userId, query, size });
   if (size <= 0 || aiIndexIds?.length === 0) {
     return [];
   }
@@ -151,7 +156,7 @@ export const searchAiIndices = async ({
 
   let response: QueryAiIndicesResponse;
   try {
-    response = await queryAiIndices({
+    response = await executeAiIndexQuery({
       esClient,
       spaceId,
       query: buildHybridQuery(targets, size),
