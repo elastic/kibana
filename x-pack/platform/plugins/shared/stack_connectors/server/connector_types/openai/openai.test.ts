@@ -22,6 +22,7 @@ import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import { PassThrough, Transform } from 'stream';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import { RedirectNotAllowedError } from '@kbn/actions-plugin/server/lib/create_redirect_safe_fetch';
 import { TaskErrorSource, getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 
 const DEFAULT_OTHER_OPENAI_MODEL = 'local-model';
@@ -678,6 +679,20 @@ describe('OpenAIConnector', () => {
         await expect(
           connector.invokeAsyncIterator(sampleOpenAiBody, connectorUsageCollector)
         ).rejects.toThrow('API Error');
+      });
+
+      it('explains a redirect to a host that is not allowed instead of a generic connection error', async () => {
+        mockCreate.mockImplementationOnce(() => {
+          throw Object.assign(new Error('Connection error.'), {
+            cause: new RedirectNotAllowedError('evil.example.org'),
+          });
+        });
+
+        await expect(
+          connector.invokeAsyncIterator(sampleOpenAiBody, connectorUsageCollector)
+        ).rejects.toThrow(
+          'Unexpected API Error: Connector request was redirected to "evil.example.org", which is not added to the Kibana config xpack.actions.allowedHosts'
+        );
       });
 
       it('marks 429 errors as user errors', async () => {

@@ -432,6 +432,28 @@ describe('axios connections', () => {
         expect(data.headers).not.toHaveProperty('x-routing-key');
       });
 
+      test('the fetch for non-axios SDKs closes the connection of a redirect whose body never ends', async () => {
+        const targetUrl = await listen(echoRequest);
+        let redirectClosed: () => void = () => {};
+        const closed = new Promise<void>((resolve) => {
+          redirectClosed = resolve;
+        });
+        const redirectUrl = await listen((req, res) => {
+          res.on('close', () => redirectClosed());
+          res.writeHead(302, { Location: `${targetUrl}/landing` });
+          res.write('never ends');
+        });
+
+        const fetch = createRedirectSafeFetch({
+          configurationUtilities: getACUfromConfig(),
+          logger,
+        });
+        const response = await fetch(redirectUrl, { headers });
+
+        expect((await response.json()).path).toBe('/landing');
+        await closed;
+      });
+
       test('the fetch for non-axios SDKs rejects a redirect to a host that is not allowed', async () => {
         const redirectUrl = await listen((req, res) => {
           res.writeHead(302, { Location: 'http://127.0.0.1:1/capture' });

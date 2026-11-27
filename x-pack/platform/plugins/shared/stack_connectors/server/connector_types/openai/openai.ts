@@ -24,7 +24,10 @@ import { trace } from '@opentelemetry/api';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { TaskErrorSource, createTaskRunError } from '@kbn/task-manager-plugin/server';
 import { getCustomAgents } from '@kbn/actions-plugin/server/lib/get_custom_agents';
-import { createRedirectSafeFetch } from '@kbn/actions-plugin/server/lib/create_redirect_safe_fetch';
+import {
+  createRedirectSafeFetch,
+  RedirectNotAllowedError,
+} from '@kbn/actions-plugin/server/lib/create_redirect_safe_fetch';
 import {
   DEFAULT_MODEL,
   DEFAULT_TIMEOUT_MS,
@@ -449,7 +452,11 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       return { consumerStream: teed[0], tokenCountStream: teed[1] };
       // since we do not use the sub action connector request method, we need to do our own error handling
     } catch (e) {
-      const errorMessage = this.getResponseErrorMessage(e);
+      // The SDK wraps fetch errors in a generic "Connection error."; keep the allowedHosts reason.
+      const errorMessage =
+        e.cause instanceof RedirectNotAllowedError
+          ? `Unexpected API Error: ${e.cause.message}`
+          : this.getResponseErrorMessage(e);
 
       // Based on the OpenAI API documentation, the error contains the status code in the `status` property
       if (e.status === 429) {

@@ -18,6 +18,19 @@ const REDIRECT_STATUSES: ReadonlySet<number> = new Set([301, 302, 303, 307, 308]
 
 export type NodeFetch = (url: RequestInfo, init?: RequestInit) => Promise<Response>;
 
+/**
+ * Thrown when a redirect points at a host outside xpack.actions.allowedHosts. The message names only
+ * the hostname, so callers can show it to users.
+ */
+export class RedirectNotAllowedError extends Error {
+  constructor(hostname: string) {
+    super(
+      `Connector request was redirected to "${hostname}", which is not added to the Kibana config xpack.actions.allowedHosts`
+    );
+    this.name = 'RedirectNotAllowedError';
+  }
+}
+
 interface CreateRedirectSafeFetchOpts {
   configurationUtilities: ActionsConfigurationUtilities;
   logger: Logger;
@@ -67,21 +80,43 @@ export const createRedirectSafeFetch = ({
     init: RequestInit,
     redirectCount: number
   ): Promise<Response> => {
-    const response = await fetch(url, { ...init, redirect: 'manual' });
+    // Each hop gets its own signal so a redirect response can be closed without aborting the caller.
+    const hop = new AbortController();
+    const { signal: callerSignal } = init;
+    const abortHop = () => hop.abort();
+    if (callerSignal?.aborted) {
+      hop.abort();
+    }
+    callerSignal?.addEventListener('abort', abortHop);
+
+    let response: Response;
+    try {
+      response = await fetch(url, { ...init, signal: hop.signal, redirect: 'manual' });
+    } catch (error) {
+      callerSignal?.removeEventListener('abort', abortHop);
+      throw error;
+    }
+
     const location = response.headers.get('location');
     if (!REDIRECT_STATUSES.has(response.status) || location == null) {
       return response;
     }
 
-    // Free the socket; the redirect response body is never read.
-    response.body?.resume?.();
+    // The redirect body is never read. Aborting closes the socket instead of draining the body,
+    // and node-fetch reports the abort as an error on the body, which is expected here.
+    callerSignal?.removeEventListener('abort', abortHop);
+    response.body?.on?.('error', () => {});
+    hop.abort();
 
     if (redirectCount >= MAX_REDIRECTS) {
       throw new Error(`Maximum number of redirects (${MAX_REDIRECTS}) exceeded`);
     }
 
     const nextUrl = new URL(location, url).toString();
-    configurationUtilities.ensureUriAllowed(nextUrl);
+    const { hostname: nextHostname } = new URL(nextUrl);
+    if (!configurationUtilities.isHostnameAllowed(nextHostname)) {
+      throw new RedirectNotAllowedError(nextHostname);
+    }
 
     const method = (init.method ?? 'GET').toUpperCase();
     const headers = toHeaderRecord(init.headers);
@@ -118,7 +153,7 @@ export const createRedirectSafeFetch = ({
       logger.debug(
         `Removed headers [${removed.join(
           ', '
-        )}] from a connector request redirected to another origin (${new URL(nextUrl).hostname})`
+        )}] from a connector request redirected to another origin (${nextHostname})`
       );
     }
 

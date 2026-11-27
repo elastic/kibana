@@ -15,7 +15,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '../actions_config.mock';
 import { getCustomAgents } from './get_custom_agents';
 import { recordConnectorRedirect } from './connector_metrics';
-import { createRedirectSafeFetch } from './create_redirect_safe_fetch';
+import { createRedirectSafeFetch, RedirectNotAllowedError } from './create_redirect_safe_fetch';
 
 jest.mock('./get_custom_agents');
 jest.mock('./connector_metrics');
@@ -69,6 +69,7 @@ describe('createRedirectSafeFetch', () => {
     expect(fetch).toHaveBeenCalledWith('https://api.example.com/v1', {
       method: 'POST',
       redirect: 'manual',
+      signal: expect.any(AbortSignal),
     });
     expect(configurationUtilities.ensureUriAllowed).toHaveBeenCalledWith(
       'https://api.example.com/v1'
@@ -84,15 +85,44 @@ describe('createRedirectSafeFetch', () => {
   });
 
   test('checks every redirect hop against the allowed hosts', async () => {
-    configurationUtilities.ensureUriAllowed.mockImplementation((url) => {
-      if (url.startsWith('https://evil.example.org')) {
-        throw new Error('not allowed');
-      }
-    });
-    const safeFetch = setup(redirectTo('https://evil.example.org/capture'));
+    configurationUtilities.isHostnameAllowed.mockImplementation(
+      (hostname) => hostname !== 'evil.example.org'
+    );
+    const safeFetch = setup(redirectTo('https://evil.example.org/capture?token=secret'));
 
-    await expect(safeFetch('https://api.example.com/v1')).rejects.toThrow('not allowed');
+    const result = safeFetch('https://api.example.com/v1');
+
+    await expect(result).rejects.toThrow(RedirectNotAllowedError);
+    await expect(result).rejects.toThrow(
+      'Connector request was redirected to "evil.example.org", which is not added to the Kibana config xpack.actions.allowedHosts'
+    );
     expect(fetch).toHaveBeenCalledTimes(1);
+  });
+
+  test('aborts each redirect hop so its connection closes without reading the body', async () => {
+    const redirectBody = new PassThrough();
+    const safeFetch = setup(
+      new Response(redirectBody, { status: 302, headers: { location: '/v2' } })
+    );
+
+    await safeFetch('https://api.example.com/v1');
+
+    expect(sentInit(0).signal?.aborted).toBe(true);
+    expect(sentInit(1).signal?.aborted).toBe(false);
+    // node-fetch emits the abort on the body; it must not become an unhandled error.
+    expect(() =>
+      redirectBody.emit('error', new Error('The user aborted a request.'))
+    ).not.toThrow();
+  });
+
+  test("passes the caller's abort to the request in flight", async () => {
+    const controller = new AbortController();
+    const safeFetch = setup(redirectTo('/v2'));
+
+    await safeFetch('https://api.example.com/v1', { signal: controller.signal });
+    controller.abort();
+
+    expect(sentInit(1).signal?.aborted).toBe(true);
   });
 
   test('keeps all headers, the body and the agent on a same-origin 307 redirect', async () => {
