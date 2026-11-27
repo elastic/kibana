@@ -7,3 +7,4 @@
 
 export * from './policy_response';
 export * from './policy_response.gen';
+export * from './export_provider_key';

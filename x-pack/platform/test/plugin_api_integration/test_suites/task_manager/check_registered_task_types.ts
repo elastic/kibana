@@ -195,6 +195,7 @@ export default function ({ getService }: FtrProviderContext) {
         'digital_experience:mobile-sessions-summaries',
         'digital_experience:sessions-summaries',
         'endpoint:complete-external-response-actions',
+        'endpoint:export-provider-key-cleanup',
         'endpoint:metadata-check-transforms-task',
         'endpoint:user-artifact-packager',
         'entity_analytics:lead_generation:engine',

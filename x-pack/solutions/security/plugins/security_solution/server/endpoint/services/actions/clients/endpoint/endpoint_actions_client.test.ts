@@ -17,6 +17,7 @@ import {
 } from '../../../../../../common/endpoint/constants';
 
 import { DEFAULT_EXECUTE_ACTION_TIMEOUT } from '../../../../../../common/endpoint/service/response_actions/constants';
+import type { EndpointCapabilities } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { applyEsClientSearchMock } from '../../../../mocks/utils.mock';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { BaseDataGenerator } from '../../../../../../common/endpoint/data_generators/base_data_generator';
@@ -54,6 +55,29 @@ describe('EndpointActionsClient', () => {
       endpoint_ids: ['1-2-3', 'invalid-id', '1-2-3'],
       case_ids: ['case-a'],
     };
+  };
+
+  /** Two hosts that support `export` for get-file and memory-dump, so only the host count can fail */
+  const mockTwoExportCapableHosts = (): string[] => {
+    const generator = new EndpointMetadataGenerator('seed');
+    const agentIds = ['agent-1', 'agent-2'];
+
+    applyEsClientSearchMock({
+      esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+      index: metadataCurrentIndexPattern,
+      response: generator.toEsSearchResponse(
+        agentIds.map((id) =>
+          generator.toEsSearchHit(
+            generator.generate({
+              elastic: { agent: { id } },
+              Endpoint: { capabilities: ['memdump_process', 'file_export'] },
+            })
+          )
+        )
+      ),
+    });
+
+    return agentIds;
   };
 
   beforeEach(() => {
@@ -823,6 +847,23 @@ describe('EndpointActionsClient', () => {
           });
         });
 
+        it('should reject more than one host without dispatching the action', async () => {
+          await expect(
+            endpointActionsClient.getFile(
+              responseActionsClientMock.createGetFileOptions({
+                endpoint_ids: mockTwoExportCapableHosts(),
+                parameters: { path: 'C:\\file.txt', export: 'provider-1' },
+              })
+            )
+          ).rejects.toMatchObject({
+            message: 'get-file `export` supports one host per request',
+            statusCode: 400,
+          });
+          expect(
+            (await classConstructorOptions.endpointService.getFleetActionsClient()).create
+          ).not.toHaveBeenCalled();
+        });
+
         it('should succeed and keep `export` in the Fleet action and the action request when endpoint supports the `file_export` capability', async () => {
           const generator = new EndpointMetadataGenerator('seed');
 
@@ -965,6 +1006,47 @@ describe('EndpointActionsClient', () => {
             });
 
             await expect(getFileWithForceAndExport()).resolves.toBeDefined();
+          });
+        });
+
+        describe('and `paths` is set instead of `path`', () => {
+          const getFileWithPathsAndExport = () =>
+            endpointActionsClient.getFile(
+              createGetFileOptions({ paths: ['/one', '/two'], export: 'provider-1' })
+            );
+
+          const mockEndpointCapabilities = (capabilities: EndpointCapabilities[]) => {
+            const generator = new EndpointMetadataGenerator('seed');
+
+            applyEsClientSearchMock({
+              esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+              index: metadataCurrentIndexPattern,
+              response: generator.toEsSearchResponse([
+                generator.toEsSearchHit(
+                  // Endpoint 9.5/9.6 get multi-path through a backport but not export, so pin a
+                  // version whose generated capabilities include neither
+                  generator.generate({ agent: { version: '9.6.0' }, Endpoint: { capabilities } })
+                ),
+              ]),
+            });
+          };
+
+          it('should reject a host that reports `get_file_multi_path` but not `file_export`', async () => {
+            mockEndpointCapabilities(['get_file_multi_path']);
+
+            const error = await getFileWithPathsAndExport().catch((e) => e);
+
+            expect(error).toMatchObject({ statusCode: 400 });
+            expect(error.message).toContain(
+              'The following agent IDs do not support exporting files to external storage'
+            );
+            expect(error.message).not.toContain('do not support the get-file `paths` parameter');
+          });
+
+          it('should succeed when the host reports both `get_file_multi_path` and `file_export`', async () => {
+            mockEndpointCapabilities(['get_file_multi_path', 'file_export']);
+
+            await expect(getFileWithPathsAndExport()).resolves.toBeDefined();
           });
         });
       });
@@ -1341,6 +1423,23 @@ describe('EndpointActionsClient', () => {
             ),
             statusCode: 400,
           });
+        });
+
+        it('should reject more than one host without dispatching the action', async () => {
+          await expect(
+            endpointActionsClient.memoryDump(
+              responseActionsClientMock.createMemoryDumpActionOption({
+                endpoint_ids: mockTwoExportCapableHosts(),
+                parameters: { type: 'process', pid: 123, export: 'provider-1' },
+              })
+            )
+          ).rejects.toMatchObject({
+            message: 'memory-dump `export` supports one host per request',
+            statusCode: 400,
+          });
+          expect(
+            (await classConstructorOptions.endpointService.getFleetActionsClient()).create
+          ).not.toHaveBeenCalled();
         });
 
         it('should succeed and keep `export` in the Fleet action and the action request when endpoint supports both `memdump_process` and `file_export`', async () => {

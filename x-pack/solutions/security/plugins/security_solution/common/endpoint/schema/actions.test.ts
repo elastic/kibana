@@ -1575,39 +1575,73 @@ describe('actions schemas', () => {
   describe.each([
     [
       'EndpointActionGetFileSchema',
-      (exportValue: string | number) =>
+      (exportValue: string | number | undefined, endpointIds: string[] = ['endpoint_id']) =>
         EndpointActionGetFileSchema.body.validate({
-          endpoint_ids: ['endpoint_id'],
-          parameters: { path: 'C:\\file.txt', export: exportValue },
+          endpoint_ids: endpointIds,
+          parameters: {
+            path: 'C:\\file.txt',
+            ...(exportValue === undefined ? {} : { export: exportValue }),
+          },
         }),
     ],
     [
       'MemoryDumpActionRequestSchema',
-      (exportValue: string | number) =>
+      (exportValue: string | number | undefined, endpointIds: string[] = ['endpoint_id']) =>
         MemoryDumpActionRequestSchema.body.validate({
-          endpoint_ids: ['endpoint_id'],
-          parameters: { type: 'kernel', export: exportValue },
+          endpoint_ids: endpointIds,
+          parameters: {
+            type: 'kernel',
+            ...(exportValue === undefined ? {} : { export: exportValue }),
+          },
         }),
     ],
   ])('%s `export` parameter', (_schemaName, validateWithExport) => {
     it.each([
-      ['a provider id', 'azure-1'],
-      ['a provider id of exactly 256 characters', 'a'.repeat(256)],
+      ['a lowercase provider id with a hyphen', 'azure-1'],
+      ['a provider id with uppercase letters and an underscore', 'Azure_1'],
+      ['a provider id of exactly 64 characters', 'a'.repeat(64)],
     ])('should accept %s', (_description, exportValue) => {
       expect(() => validateWithExport(exportValue)).not.toThrow();
     });
 
+    it('should accept several endpoint ids when `export` is not set', () => {
+      expect(() => validateWithExport(undefined, ['endpoint_1', 'endpoint_2'])).not.toThrow();
+    });
+
     it.each([
       ['an empty string', ''],
-      ['a value longer than 256 characters', 'a'.repeat(257)],
+      ['a whitespace-only value', '   '],
+      ['a value with a leading space', ' azure-1'],
+      ['a value with a dot', 'azure.1'],
+      ['a value with an embedded space', 'azure 1'],
+      ['a unicode value', 'azuré-1'],
+      ['a value longer than 64 characters', 'a'.repeat(65)],
       ['a value that is not a string', 1],
     ])('should reject %s', (_description, exportValue) => {
       expect(() => validateWithExport(exportValue)).toThrow('[parameters.export]');
     });
 
-    it('should reject a whitespace-only value', () => {
-      expect(() => validateWithExport('   ')).toThrow(
-        '[parameters.export]: export cannot be an empty string'
+    it('should reject an empty string with the minimum length message', () => {
+      expect(() => validateWithExport('')).toThrow(
+        '[parameters.export]: value has length [0] but it must have a minimum length of [1].'
+      );
+    });
+
+    it('should reject a value that does not match the allowed character set', () => {
+      expect(() => validateWithExport('azure 1')).toThrow(
+        '[parameters.export]: export can only contain letters, digits, "_" and "-"'
+      );
+    });
+
+    it('should reject a value longer than 64 characters with the maximum length message', () => {
+      expect(() => validateWithExport('a'.repeat(65))).toThrow(
+        '[parameters.export]: value has length [65] but it must have a maximum length of [64].'
+      );
+    });
+
+    it('should reject `export` used with more than one endpoint id', () => {
+      expect(() => validateWithExport('azure-1', ['endpoint_1', 'endpoint_2'])).toThrow(
+        '[parameters.export]: export supports one host per request'
       );
     });
   });
@@ -1635,6 +1669,35 @@ describe('actions schemas', () => {
         }).toThrow(`[parameters.export]: is not valid with agent type of ${agentType}`);
       }
     );
+
+    it('should accept `export` together with `paths`', () => {
+      expect(() => {
+        EndpointActionGetFileSchema.body.validate({
+          agent_type: 'endpoint',
+          endpoint_ids: ['endpoint_id'],
+          parameters: { paths: ['/one', '/two'], export: 'azure-1' },
+        });
+      }).not.toThrow();
+    });
+
+    it('should accept `export` together with a single-entry `paths`', () => {
+      expect(() => {
+        EndpointActionGetFileSchema.body.validate({
+          endpoint_ids: ['endpoint_id'],
+          parameters: { paths: ['/one'], export: 'azure-1' },
+        });
+      }).not.toThrow();
+    });
+
+    it('should accept `export` together with `path`', () => {
+      expect(() => {
+        EndpointActionGetFileSchema.body.validate({
+          agent_type: 'endpoint',
+          endpoint_ids: ['endpoint_id'],
+          parameters: { path: '/one', export: 'azure-1' },
+        });
+      }).not.toThrow();
+    });
   });
 
   describe('maxLength bounds', () => {
