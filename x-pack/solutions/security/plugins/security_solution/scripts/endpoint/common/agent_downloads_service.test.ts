@@ -13,9 +13,11 @@ import {
 } from './agent_downloads_service';
 import fs from 'fs';
 import { readFile, unlink, writeFile } from 'fs/promises';
+import { pipeline } from 'stream/promises';
 
 const mockedFetch = jest.spyOn(global, 'fetch');
 const mockDigest = jest.fn();
+const MOCK_LOCK_TOKEN = '00000000-0000-4000-8000-000000000000';
 
 jest.mock('fs');
 jest.mock('fs/promises', () => ({
@@ -27,7 +29,7 @@ jest.mock('fs/promises', () => ({
   readFile: jest.fn(),
 }));
 jest.mock('stream/promises', () => ({
-  finished: jest.fn().mockResolvedValue(undefined),
+  pipeline: jest.fn().mockResolvedValue(undefined),
 }));
 jest.mock('stream', () => {
   const actual = jest.requireActual('stream');
@@ -42,6 +44,7 @@ jest.mock('stream', () => {
   };
 });
 jest.mock('crypto', () => ({
+  randomUUID: jest.fn(() => MOCK_LOCK_TOKEN),
   createHash: jest.fn(() => ({
     digest: mockDigest,
     update: jest.fn(),
@@ -113,6 +116,8 @@ describe('AgentDownloadStorage', () => {
       },
     };
     (fs.createReadStream as unknown as jest.Mock).mockReturnValue(mockReadStream);
+    // `fs` is auto-mocked, so the lock this process just took must read back as its own.
+    (fs.readFileSync as unknown as jest.Mock).mockReturnValue(`${process.pid}:${MOCK_LOCK_TOKEN}`);
   });
 
   describe('downloadAndStoreAgent', () => {
@@ -134,6 +139,11 @@ describe('AgentDownloadStorage', () => {
         filename: fileName,
         directory: expect.any(String),
         fullFilePath: expect.stringContaining(fileName),
+      });
+      // The body is piped with the lock's signal so losing the lock stops the write.
+      expect(mockedFetch).toHaveBeenCalledWith(url, { signal: expect.any(AbortSignal) });
+      expect(pipeline).toHaveBeenCalledWith(expect.anything(), mockWriteStream, {
+        signal: expect.any(AbortSignal),
       });
     });
 
@@ -218,7 +228,7 @@ describe('AgentDownloadStorage', () => {
         directory: expect.any(String),
         fullFilePath: expect.stringContaining(fileName),
       });
-      expect(mockedFetch).toHaveBeenCalledWith(url);
+      expect(mockedFetch).toHaveBeenCalledWith(url, expect.anything());
     });
 
     it('validates hash after fresh download with shaUrl', async () => {

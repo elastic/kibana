@@ -9,8 +9,8 @@ import pRetry from 'p-retry';
 import { mkdir, readdir, stat, unlink, writeFile, readFile } from 'fs/promises';
 import { join } from 'path';
 import fs from 'fs';
-import { createHash } from 'crypto';
-import { finished } from 'stream/promises';
+import { createHash, randomUUID } from 'crypto';
+import { pipeline } from 'stream/promises';
 import { Readable } from 'stream';
 import type { ReadableStream as WebReadableStream } from 'stream/web';
 import type { ReadStream } from 'fs';
@@ -21,21 +21,56 @@ import { SettingsStorage } from './settings_storage';
 
 const DOWNLOAD_LOCK_WAIT_MS = 10 * 60 * 1000;
 const DOWNLOAD_LOCK_POLL_MS = 500;
+const DOWNLOAD_LOCK_HEARTBEAT_MS = 1000;
+const DOWNLOAD_LOCK_STALE_MS = 30 * 1000;
+const DOWNLOAD_LOCK_LEGACY_STALE_MS = 5 * 60 * 1000;
 
 interface DownloadLockOptions {
   /** How long to wait for a live or unwritten lock before failing. */
   waitMs?: number;
   /** Delay between checks while waiting. */
   pollMs?: number;
+  /** How often the holder refreshes the lock's mtime to advertise progress. */
+  heartbeatMs?: number;
+  /** How long a lock may go unrefreshed before a waiter reclaims it. */
+  staleMs?: number;
+  /**
+   * The same, for a bare-pid lock written by code that predates the heartbeat. Such a holder never
+   * refreshes the mtime, so only a lock much older than any real download is treated as abandoned.
+   */
+  legacyStaleMs?: number;
 }
 
-/** Positive integer pid. Empty or non-numeric text means the owner is still writing the file. */
-const readLockPid = (ownerText: string): number | undefined => {
-  const trimmed = ownerText.trim();
-  if (!/^[1-9]\d*$/.test(trimmed)) {
+/** Handed to the code running under the lock so it can stop once the lock is taken over. */
+export interface DownloadLockHandle {
+  /** Aborted as soon as the lock is found to be owned by someone else. */
+  signal: AbortSignal;
+  /** Synchronously re-checks ownership and throws when the lock was lost. */
+  assertHeld: () => void;
+  /** Synchronous, non-throwing ownership check for cleanup paths. */
+  isHeld: () => boolean;
+}
+
+const lockLostError = (lockPath: string): Error =>
+  new Error(`Lost ownership of agent download lock [${lockPath}]`);
+
+interface DownloadLockOwner {
+  pid: number;
+  /** Unique per acquisition. Missing for a lock written by code that predates the heartbeat. */
+  token?: string;
+}
+
+/**
+ * Lock contents are `<pid>:<token>`, or a bare `<pid>` from older code. Anything else (empty or
+ * partial text) means the owner is still writing the file. Older code reads `<pid>:<token>` the
+ * same way, so it waits for these locks and never reclaims or deletes them.
+ */
+const readLockOwner = (ownerText: string): DownloadLockOwner | undefined => {
+  const match = /^([1-9]\d*)(?::([0-9a-f-]{36}))?$/.exec(ownerText.trim());
+  if (!match) {
     return undefined;
   }
-  return Number(trimmed);
+  return { pid: Number(match[1]), token: match[2] };
 };
 
 const isProcessAlive = (pid: number): boolean => {
@@ -53,6 +88,68 @@ const isProcessAlive = (pid: number): boolean => {
 
 const isEnoent = (error: unknown): boolean => (error as NodeJS.ErrnoException).code === 'ENOENT';
 
+/**
+ * The downloads directory lives under the home directory, so it outlives the CI build that
+ * wrote a lock and a recorded pid can be recycled by an unrelated process in a later build.
+ * A refreshed mtime is the only owner signal that survives that, so a lock whose holder has
+ * stopped advertising progress is treated as abandoned no matter what its pid resolves to.
+ */
+const isDownloadLockStale = (lockPath: string, staleMs: number): boolean => {
+  try {
+    return Date.now() - fs.statSync(lockPath).mtimeMs >= staleMs;
+  } catch (error) {
+    if (isEnoent(error)) {
+      return false;
+    }
+    throw error;
+  }
+};
+
+/**
+ * `false` only when the lock names a different acquisition. A missing lock still counts as ours:
+ * a waiter may have moved it aside for a moment to check it (see `removeStaleDownloadLock`), and a
+ * worker that really takes it over writes its own contents, which the next check sees.
+ */
+const isLockStillOurs = (lockPath: string, lockContents: string): boolean => {
+  const current = readDownloadLock(lockPath);
+  return current === undefined || current.trim() === lockContents;
+};
+
+/**
+ * Keeps the lock's mtime advancing while the holder works. The heartbeat only touches a lock that
+ * still names this acquisition: after a stall long enough for a waiter to reclaim the lock it would
+ * otherwise keep the replacement fresh. When ownership is gone it aborts `controller` instead.
+ * Returns the stop function.
+ */
+const startDownloadLockHeartbeat = (
+  log: ToolingLog,
+  lockPath: string,
+  lockContents: string,
+  heartbeatMs: number,
+  controller: AbortController
+): (() => void) => {
+  const timer = setInterval(() => {
+    try {
+      if (!isLockStillOurs(lockPath, lockContents)) {
+        clearInterval(timer);
+        controller.abort(lockLostError(lockPath));
+        return;
+      }
+      const now = new Date();
+      fs.utimesSync(lockPath, now, now);
+    } catch (error) {
+      if (!isEnoent(error)) {
+        // A missed refresh only risks another worker reclaiming the lock, which the ownership check detects.
+        log.warning(
+          `Could not refresh agent download lock [${lockPath}]: ${(error as Error).message}`
+        );
+      }
+    }
+  }, heartbeatMs);
+
+  return () => clearInterval(timer);
+};
+
 /** `undefined` means the lock disappeared and the caller should try to create it again. */
 const readDownloadLock = (lockPath: string): string | undefined => {
   try {
@@ -66,10 +163,16 @@ const readDownloadLock = (lockPath: string): string | undefined => {
 };
 
 /**
- * Take the lock file aside and delete it only when it still names `expectedOwner`.
- * A replacement created by another worker stays at `lockPath`.
+ * Take the lock file aside and delete it only when it still names `expectedOwner` and, when
+ * `staleMs` is given, its mtime is still that old. A holder cannot refresh a file that has been
+ * moved aside, so this catches a refresh that landed after the caller's own staleness check.
+ * A refreshed lock, or a replacement created by another worker, stays at `lockPath`.
  */
-const removeStaleDownloadLock = (lockPath: string, expectedOwner: string): void => {
+const removeStaleDownloadLock = (
+  lockPath: string,
+  expectedOwner: string,
+  staleMs: number | undefined
+): void => {
   const heldAside = `${lockPath}.${process.pid}.${Date.now()}.stale`;
 
   try {
@@ -82,7 +185,11 @@ const removeStaleDownloadLock = (lockPath: string, expectedOwner: string): void 
   }
 
   const contents = readDownloadLock(heldAside);
-  if (contents === undefined || contents.trim() === expectedOwner.trim()) {
+  if (
+    contents === undefined ||
+    (contents.trim() === expectedOwner.trim() &&
+      (staleMs === undefined || isDownloadLockStale(heldAside, staleMs)))
+  ) {
     fs.rmSync(heldAside, { force: true });
     return;
   }
@@ -100,10 +207,37 @@ const removeStaleDownloadLock = (lockPath: string, expectedOwner: string): void 
   fs.rmSync(heldAside, { force: true });
 };
 
-const releaseDownloadLock = (lockPath: string): void => {
-  if (readDownloadLock(lockPath) === String(process.pid)) {
+const releaseDownloadLock = (lockPath: string, lockContents: string): void => {
+  if (readDownloadLock(lockPath)?.trim() === lockContents) {
     fs.rmSync(lockPath, { force: true });
   }
+};
+
+/**
+ * Removes the lock when its owner is gone or has stopped refreshing it. Returns `false` when
+ * the lock still looks live and the caller should keep waiting.
+ */
+const reclaimAbandonedDownloadLock = (
+  log: ToolingLog,
+  lockPath: string,
+  ownerText: string,
+  owner: DownloadLockOwner | undefined,
+  { staleMs, legacyStaleMs }: { staleMs: number; legacyStaleMs: number }
+): boolean => {
+  const ownerStaleMs = owner && owner.token === undefined ? legacyStaleMs : staleMs;
+  const ownerIsGone = owner !== undefined && !isProcessAlive(owner.pid);
+  const ownerStoppedProgressing = !ownerIsGone && isDownloadLockStale(lockPath, ownerStaleMs);
+
+  if (!ownerIsGone && !ownerStoppedProgressing) {
+    return false;
+  }
+  if (ownerStoppedProgressing) {
+    log.info(
+      `Reclaiming agent download lock [${lockPath}] not refreshed for ${ownerStaleMs}ms (owner [${ownerText.trim()}])`
+    );
+  }
+  removeStaleDownloadLock(lockPath, ownerText, ownerIsGone ? undefined : ownerStaleMs);
+  return true;
 };
 
 /**
@@ -113,17 +247,21 @@ const releaseDownloadLock = (lockPath: string): void => {
 export const withDownloadLock = async <T>(
   log: ToolingLog,
   lockPath: string,
-  run: () => Promise<T>,
+  run: (lock: DownloadLockHandle) => Promise<T>,
   options?: DownloadLockOptions
 ): Promise<T> => {
   const started = Date.now();
   const waitMs = options?.waitMs ?? DOWNLOAD_LOCK_WAIT_MS;
   const pollMs = options?.pollMs ?? DOWNLOAD_LOCK_POLL_MS;
+  const heartbeatMs = options?.heartbeatMs ?? DOWNLOAD_LOCK_HEARTBEAT_MS;
+  const staleMs = options?.staleMs ?? DOWNLOAD_LOCK_STALE_MS;
+  const legacyStaleMs = options?.legacyStaleMs ?? DOWNLOAD_LOCK_LEGACY_STALE_MS;
+  const lockContents = `${process.pid}:${randomUUID()}`;
   let reportedWait = false;
 
   while (true) {
     try {
-      fs.writeFileSync(lockPath, String(process.pid), { flag: 'wx' });
+      fs.writeFileSync(lockPath, lockContents, { flag: 'wx' });
       break;
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== 'EEXIST') {
@@ -132,16 +270,19 @@ export const withDownloadLock = async <T>(
 
       const ownerText = readDownloadLock(lockPath);
       if (ownerText !== undefined) {
-        const owner = readLockPid(ownerText);
-        if (owner !== undefined && !isProcessAlive(owner)) {
-          removeStaleDownloadLock(lockPath, ownerText);
-        } else {
+        const owner = readLockOwner(ownerText);
+        const reclaimed = reclaimAbandonedDownloadLock(log, lockPath, ownerText, owner, {
+          staleMs,
+          legacyStaleMs,
+        });
+
+        if (!reclaimed) {
           if (!reportedWait) {
             reportedWait = true;
             log.info(
               owner === undefined
                 ? 'Waiting for agent download lock contents to be written'
-                : `Waiting for agent download lock held by pid ${owner}`
+                : `Waiting for agent download lock held by pid ${owner.pid}`
             );
           }
 
@@ -155,10 +296,38 @@ export const withDownloadLock = async <T>(
     }
   }
 
+  const controller = new AbortController();
+  const stopHeartbeat = startDownloadLockHeartbeat(
+    log,
+    lockPath,
+    lockContents,
+    heartbeatMs,
+    controller
+  );
+  const isHeld = (): boolean => {
+    try {
+      if (!controller.signal.aborted && !isLockStillOurs(lockPath, lockContents)) {
+        controller.abort(lockLostError(lockPath));
+      }
+    } catch {
+      // Unreadable lock: keep the last known state rather than throwing from a cleanup path.
+    }
+    return !controller.signal.aborted;
+  };
+  const assertHeld = () => {
+    if (!isHeld()) {
+      throw lockLostError(lockPath);
+    }
+  };
+
   try {
-    return await run();
+    const result = await run({ signal: controller.signal, assertHeld, isHeld });
+    // A holder that outlived its lock must not report success for work done outside it.
+    assertHeld();
+    return result;
   } finally {
-    releaseDownloadLock(lockPath);
+    stopHeartbeat();
+    releaseDownloadLock(lockPath, lockContents);
   }
 };
 
@@ -271,12 +440,13 @@ class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings>
   ): Promise<DownloadedAgentInfo> {
     await this.ensureExists();
     const downloadInfo = this.getPathsForUrl(agentDownloadUrl, agentFileName);
-    return withDownloadLock(this.log, `${downloadInfo.fullFilePath}.lock`, () =>
-      this.downloadAndStoreUnlocked(agentDownloadUrl, agentFileName, shaUrl)
+    return withDownloadLock(this.log, `${downloadInfo.fullFilePath}.lock`, (lock) =>
+      this.downloadAndStoreUnlocked(lock, agentDownloadUrl, agentFileName, shaUrl)
     );
   }
 
   private async downloadAndStoreUnlocked(
+    lock: DownloadLockHandle,
     agentDownloadUrl: string,
     agentFileName?: string,
     shaUrl?: string
@@ -313,6 +483,7 @@ class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings>
         );
       }
       // Delete corrupt/unverifiable cached file and sidecar
+      lock.assertHeld();
       await this.deleteCachedFileAndSidecar(newDownloadInfo.fullFilePath, sidecarPath);
     }
 
@@ -338,17 +509,23 @@ class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings>
           this.log.info(
             `Attempt ${attempt} - Downloading agent from [${agentDownloadUrl}] to [${newDownloadInfo.fullFilePath}]`
           );
+          // Never open the shared file for writing unless the lock is still ours.
+          lock.assertHeld();
           const outputStream = fs.createWriteStream(newDownloadInfo.fullFilePath);
 
           await handleProcessInterruptions(
             async () => {
               try {
-                const response = await fetch(agentDownloadUrl);
+                const response = await fetch(agentDownloadUrl, { signal: lock.signal });
                 if (!response.ok || !response.body) {
                   throw new Error(`Failed to download: ${response.status} ${response.statusText}`);
                 }
-                const nodeStream = Readable.fromWeb(response.body as WebReadableStream);
-                await finished(nodeStream.pipe(outputStream));
+                // Unlike `.pipe()`, `pipeline` destroys the file stream when the body errors
+                // (for example when the lock is lost mid-download), so the attempt settles
+                // instead of hanging or leaking the error to the process-level handlers below.
+                await pipeline(Readable.fromWeb(response.body as WebReadableStream), outputStream, {
+                  signal: lock.signal,
+                });
               } catch (error) {
                 this.log.error(
                   `Error during download attempt ${attempt}: ${(error as Error).message}`
@@ -357,11 +534,16 @@ class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings>
               }
             },
             // `exit` listeners that throw are fatal. The file may already be gone
-            // when another worker cleaned up the same shared download path.
+            // when another worker cleaned up the same shared download path, and once
+            // the lock is lost the file belongs to the new holder.
             () => {
-              fs.rmSync(newDownloadInfo.fullFilePath, { force: true });
+              if (lock.isHeld()) {
+                fs.rmSync(newDownloadInfo.fullFilePath, { force: true });
+              }
             }
           );
+
+          lock.assertHeld();
 
           // Validate hash after download
           const actualHash = await computeFileHash(newDownloadInfo.fullFilePath);
@@ -383,6 +565,8 @@ class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings>
           retries: 2, // 2 retries = 3 total attempts (1 initial + 2 retries)
           onFailedAttempt: async (error) => {
             this.log.error(`Download attempt ${error.attemptNumber} failed: ${error.message}`);
+            // The file now belongs to the new holder.
+            lock.assertHeld();
             await unlink(newDownloadInfo.fullFilePath).catch(() => undefined);
           },
         }
@@ -392,10 +576,12 @@ class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings>
     }
 
     // Write sidecar hash file (always write — use remote hash if available, otherwise local)
+    lock.assertHeld();
     if (downloadedFileHash) {
       await writeFile(sidecarPath, downloadedFileHash, 'utf-8');
     }
 
+    lock.assertHeld();
     await this.cleanupDownloads();
     return newDownloadInfo;
   }
