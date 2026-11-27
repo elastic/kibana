@@ -180,8 +180,9 @@ first, in this order:
    source. This keeps drift checked automatically.
 2. The tool definitions the vendor publishes, one document per tool (`--tool name=url`).
 3. Anything a plain `GET` can't fetch, because it needs credentials or an MCP request: fetch the
-   `tools/list` result yourself, save it to a file and record with `--capture`. The source is pinned,
-   so drift is only found when someone captures it again.
+   `tools/list` result yourself, save it to a file and record with
+   `--capture <source>=<file> --note <source>="<what capturing it took>"` (a first capture needs the
+   note). The source is pinned, so drift is only found when someone captures it again.
 
 See "GraphQL and MCP sources" in the package README. Only if none of these is possible, add it to
 `src/platform/packages/shared/kbn-connector-specs/src/test/vendor_api/vendor_api_exemptions.json`, in the PR that adds the connector:
