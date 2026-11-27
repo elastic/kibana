@@ -23,15 +23,9 @@ import {
   AI_AGENT_ID_PREFIX,
   AI_AGENTS_MAX_ROWS,
   getEndpointProcessIndex,
-  getEntraUserIndex,
-  getOktaUserIndex,
-  HR_INDEX,
 } from '../constants';
 import type { AgentIdentity } from '../types';
 import { getLocalUserEntityId } from '../utils';
-
-/** Raw IdP user documents may carry fields the integration doesn't map; load them from `_source`. */
-const SET_UNMAPPED_LOAD = 'SET unmapped_fields="load";';
 
 /** Columns every related-entity read keeps, so one parser reads agents, hosts and users. */
 export const ENTITY_ROW_COLUMNS = [
@@ -167,55 +161,6 @@ export const buildEntitiesByIdQuery = (spaceId: string, entityIds: readonly stri
     `FROM ${getEntityAlias(spaceId)}`,
     `| WHERE entity.id IN (${toList(entityIds)})`,
     `| KEEP ${ENTITY_ROW_COLUMNS.join(', ')}`,
-    '| LIMIT 100',
-  ].join('\n');
-
-/**
- * Okta account state per email, from the raw user documents (`asset.status`,
- * `user.account.status.*`). MFA has no integration field, so the storyline writes
- * `user.entity.attributes.mfa_enabled`. Each provider is read on its own, because a field mapped in
- * one integration and loaded from `_source` in the other would conflict. `tags` comes from the
- * same newest document, so a generated value can be labelled.
- */
-export const buildOktaAccountsQuery = (namespace: string, emails: readonly string[]): string =>
-  [
-    SET_UNMAPPED_LOAD,
-    `FROM ${getOktaUserIndex(namespace)}`,
-    `| WHERE user.email IN (${toList(emails)})`,
-    '| STATS status = LAST(asset.status, @timestamp),',
-    '    deprovisioned = LAST(user.account.status.deprovisioned, @timestamp),',
-    '    suspended = LAST(user.account.status.suspended, @timestamp),',
-    '    mfa_enabled = LAST(user.entity.attributes.mfa_enabled, @timestamp),',
-    '    full_name = LAST(user.full_name, @timestamp),',
-    '    tags = LAST(tags, @timestamp)',
-    '  BY user.email, event.module',
-    '| LIMIT 100',
-  ].join('\n');
-
-/** Entra ID account state per email: `account_enabled` false reads as deprovisioned. */
-export const buildEntraAccountsQuery = (namespace: string, emails: readonly string[]): string =>
-  [
-    SET_UNMAPPED_LOAD,
-    `FROM ${getEntraUserIndex(namespace)}`,
-    `| WHERE user.email IN (${toList(emails)})`,
-    '| STATS account_enabled = LAST(entityanalytics_entra_id.user.account_enabled, @timestamp),',
-    '    mfa_enabled = LAST(user.entity.attributes.mfa_enabled, @timestamp),',
-    '    full_name = LAST(user.full_name, @timestamp),',
-    '    tags = LAST(tags, @timestamp)',
-    '  BY user.email, event.module',
-    '| LIMIT 100',
-  ].join('\n');
-
-/** Employment status per email from the storyline's HR index, which has no namespace. */
-export const buildHrRecordsQuery = (emails: readonly string[]): string =>
-  [
-    SET_UNMAPPED_LOAD,
-    `FROM ${HR_INDEX}`,
-    `| WHERE user.email IN (${toList(emails)})`,
-    '| STATS employment_status = LAST(employment.status, @timestamp),',
-    '    termination_date = LAST(employment.termination_date, @timestamp),',
-    '    tags = LAST(tags, @timestamp)',
-    '  BY user.email',
     '| LIMIT 100',
   ].join('\n');
 

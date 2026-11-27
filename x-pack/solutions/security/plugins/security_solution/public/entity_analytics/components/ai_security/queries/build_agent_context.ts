@@ -6,23 +6,13 @@
  */
 
 import { AI_AGENT_ENGINE_TYPE } from '../constants';
-import type {
-  AgentContext,
-  AgentIdentity,
-  AgentPerson,
-  AgentRow,
-  HrRecord,
-  IdpAccount,
-  RelatedEntity,
-} from '../types';
+import type { AgentContext, AgentIdentity, AgentPerson, AgentRow, RelatedEntity } from '../types';
 import { getHostEntityId, getLocalUserEntityId } from '../utils';
 
 export interface BuildAgentContextParams {
   readonly identity: AgentIdentity;
   readonly agent?: AgentRow;
   readonly related: readonly RelatedEntity[];
-  readonly idpAccounts: readonly IdpAccount[];
-  readonly hrRecords?: readonly HrRecord[];
   readonly signedInAs?: string;
   readonly signedInAt?: string;
 }
@@ -41,8 +31,6 @@ export const buildAgentContext = ({
   identity,
   agent,
   related,
-  idpAccounts,
-  hrRecords = [],
   signedInAs,
   signedInAt,
 }: BuildAgentContextParams): AgentContext => {
@@ -93,8 +81,6 @@ export const buildAgentContext = ({
       email,
       rows: personRows,
       primary,
-      idpAccounts: idpAccounts.filter((account) => lower(account.email) === lower(email)),
-      hr: hrRecords.find((record) => lower(record.email) === lower(email)),
       watchlistIds: Array.from(new Set(personRows.flatMap((row) => row.watchlistIds))),
     };
   });

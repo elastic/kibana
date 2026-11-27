@@ -81,9 +81,7 @@ describe('AttributionSection', () => {
     expect(screen.getByTestId(AI_AGENT_TEST_IDS.personWatchlists)).toHaveTextContent(
       'Departing Employees'
     );
-    expect(within(person).getByTestId(AI_AGENT_TEST_IDS.entityStatus)).toHaveTextContent(
-      'Terminated Nov 25, 2026 · Okta deprovisioned · MFA off'
-    );
+    expect(within(person).getByTestId(AI_AGENT_TEST_IDS.entityStatus)).toHaveTextContent('MFA off');
   });
 
   it('shows no watchlist row and no status for a healthy person', () => {
@@ -92,16 +90,7 @@ describe('AttributionSection', () => {
       people: [
         {
           ...mockAgentContext.people[0],
-          idpAccounts: [
-            {
-              email: 'avery.quinn@example.com',
-              provider: 'Okta',
-              status: 'ACTIVE',
-              mfaEnabled: true,
-              isMock: false,
-            },
-          ],
-          hr: { email: 'avery.quinn@example.com', status: 'Active', isMock: false },
+          rows: [],
           watchlistIds: [],
         },
       ],
@@ -134,7 +123,7 @@ describe('AttributionSection', () => {
     renderSection({
       ...mockAgentContext,
       people: [
-        { email: 'jordan.blake@example.com', rows: [], idpAccounts: [], watchlistIds: [] },
+        { email: 'jordan.blake@example.com', rows: [], watchlistIds: [] },
         ...mockAgentContext.people,
       ],
     });

@@ -62,7 +62,14 @@ export const mockAgentContext: AgentContext = {
   people: [
     {
       email: 'avery.quinn@example.com',
-      rows: [],
+      rows: [
+        mockRelatedRow({
+          entityId: 'user:avery.quinn@example.com@entra_id',
+          engineType: 'user',
+          email: 'avery.quinn@example.com',
+          mfaEnabled: false,
+        }),
+      ],
       primary: mockRelatedRow({
         entityId: 'user:avery.quinn@example.com@okta',
         engineType: 'user',
@@ -70,22 +77,6 @@ export const mockAgentContext: AgentContext = {
         fullName: 'Avery Quinn',
         userName: 'avery.quinn@example.com',
       }),
-      idpAccounts: [
-        {
-          email: 'avery.quinn@example.com',
-          provider: 'Okta',
-          status: 'DEPROVISIONED',
-          deprovisioned: true,
-          mfaEnabled: false,
-          isMock: false,
-        },
-      ],
-      hr: {
-        email: 'avery.quinn@example.com',
-        status: 'Terminated',
-        terminationDate: '2026-11-25',
-        isMock: false,
-      },
       watchlistIds: ['departing-employees'],
     },
   ],

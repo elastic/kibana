@@ -28,15 +28,6 @@ export const getEndpointNetworkIndex = (namespace: string): string =>
 /** The dataset is `claude_code.events` or `claude_code.events.otel`, depending on the collector. */
 export const getClaudeCodeOtelIndex = (namespace: string): string =>
   `logs-claude_code.events*-${namespace}`;
-export const getOktaUserIndex = (namespace: string): string =>
-  `logs-entityanalytics_okta.user-${namespace}`;
-export const getEntraUserIndex = (namespace: string): string =>
-  `logs-entityanalytics_entra_id.user-${namespace}`;
-/**
- * The storyline's HR index (lane A generator). A made-up shape: no HR integration was looked at.
- * It isn't a data stream and has no namespace, so every space reads it.
- */
-export const HR_INDEX = 'hr-workday-demo*';
 
 export const POC_MOCK_TAG = 'poc-mock';
 

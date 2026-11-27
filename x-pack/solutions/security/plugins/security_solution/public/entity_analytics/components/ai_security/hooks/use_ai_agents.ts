@@ -31,9 +31,6 @@ import {
   buildAgentContextQuery,
   buildAgentInventoryQuery,
   buildEntitiesByIdQuery,
-  buildEntraAccountsQuery,
-  buildHrRecordsQuery,
-  buildOktaAccountsQuery,
   buildSignedInAsQuery,
 } from '../queries/agent_queries';
 import {
@@ -42,14 +39,7 @@ import {
   buildOwnProcessesQuery,
   buildProcessSideEffectsQuery,
 } from '../queries/activity_queries';
-import {
-  isDefined,
-  toAgentAlert,
-  toAgentRow,
-  toHrRecord,
-  toIdpAccount,
-  toRelatedEntity,
-} from '../queries/parse_rows';
+import { isDefined, toAgentAlert, toAgentRow, toRelatedEntity } from '../queries/parse_rows';
 import { buildAgentContext } from '../queries/build_agent_context';
 import {
   buildAgentActivity,
@@ -64,7 +54,6 @@ import type {
   AgentIdentity,
   AgentInventoryRow,
   AgentRow,
-  IdpAccount,
 } from '../types';
 import { firstString, isClaudeCode, parseAgentId, toNumber, toStringArray } from '../utils';
 
@@ -202,38 +191,14 @@ export const useAiAgentContext = (entityId: string) => {
       const missingTargets = Array.from(
         new Set(related.flatMap((row) => row.resolvedTo).filter((id) => !knownIds.has(id)))
       );
-      const emails = Array.from(
-        new Set([
-          ...(agent?.accountEmails ?? []),
-          ...related
-            .filter((row) => agent?.accountIds.includes(row.entityId))
-            .map((row) => row.email)
-            .filter(isDefined),
-        ])
-      );
-      const noRecords = Promise.resolve({ records: [], failed: false });
-      const [targets, okta, entra, hr] = await Promise.all([
-        missingTargets.length
-          ? esqlRecords(
-              data.search,
-              buildEntitiesByIdQuery(space, missingTargets),
-              'targets',
-              signal
-            )
-          : Promise.resolve([]),
-        emails.length
-          ? optionalRecords(data.search, buildOktaAccountsQuery(space, emails), 'okta', signal)
-          : noRecords,
-        emails.length
-          ? optionalRecords(data.search, buildEntraAccountsQuery(space, emails), 'entra', signal)
-          : noRecords,
-        emails.length
-          ? optionalRecords(data.search, buildHrRecordsQuery(emails), 'hr', signal)
-          : noRecords,
-      ]);
-      const idpAccounts: IdpAccount[] = [...okta.records, ...entra.records]
-        .map(toIdpAccount)
-        .filter(isDefined);
+      const targets = missingTargets.length
+        ? await esqlRecords(
+            data.search,
+            buildEntitiesByIdQuery(space, missingTargets),
+            'targets',
+            signal
+          )
+        : [];
 
       return {
         identity,
@@ -241,8 +206,6 @@ export const useAiAgentContext = (entityId: string) => {
           identity,
           agent,
           related: [...related, ...targets.map(toRelatedEntity).filter(isDefined)],
-          idpAccounts,
-          hrRecords: hr.records.map(toHrRecord).filter(isDefined),
           signedInAs: firstString(signedInRecords.records[0]?.['process.ai_agent.email']),
           signedInAt: firstString(signedInRecords.records[0]?.['@timestamp']),
         }),

@@ -10,9 +10,6 @@ import {
   buildAgentAlertsQuery,
   buildAgentContextQuery,
   buildAgentInventoryQuery,
-  buildEntraAccountsQuery,
-  buildHrRecordsQuery,
-  buildOktaAccountsQuery,
   buildSignedInAsQuery,
 } from './agent_queries';
 import {
@@ -21,7 +18,7 @@ import {
   buildOwnProcessesQuery,
   buildProcessSideEffectsQuery,
 } from './activity_queries';
-import { toAgentAlert, toAgentRow, toHrRecord, toIdpAccount, toRelatedEntity } from './parse_rows';
+import { toAgentAlert, toAgentRow, toRelatedEntity } from './parse_rows';
 import type { AgentRow, RelatedEntity } from '../types';
 import { getToolShellCommand, parseAgentId, parseAgentVersion } from '../utils';
 
@@ -91,10 +88,6 @@ describe('buildAgentContext', () => {
       identity,
       agent,
       related: [entra, okta, host, localUser, sameHostAgent, sameAccountAgent],
-      idpAccounts: [
-        { email: 'alex@example.com', provider: 'Okta', deprovisioned: true, isMock: false },
-      ],
-      hrRecords: [{ email: 'Alex@Example.com', status: 'Terminated', isMock: false }],
       signedInAs: 'alex@example.com',
       signedInAt: '2026-11-26T10:00:00.000Z',
     });
@@ -104,8 +97,6 @@ describe('buildAgentContext', () => {
     expect(context.people).toHaveLength(1);
     expect(context.people[0].primary?.entityId).toBe('user:alex@example.com@okta');
     expect(context.people[0].watchlistIds).toEqual(['departing-employees']);
-    expect(context.people[0].idpAccounts[0].deprovisioned).toBe(true);
-    expect(context.people[0].hr?.status).toBe('Terminated');
     expect(context.signedInAt).toBe('2026-11-26T10:00:00.000Z');
     expect(context.otherAgentsOnHost.map((r) => r.entityId)).toEqual([sameHostAgent.entityId]);
     expect(context.otherInstallsOnAccount.map((r) => r.entityId)).toEqual([
@@ -118,7 +109,6 @@ describe('buildAgentContext', () => {
       identity,
       agent: { ...agent, accountEmails: [], accountIds: ['user:alex@example.com@okta'] },
       related: [okta, sameAccountAgent],
-      idpAccounts: [],
     });
     expect(context.people.map((person) => person.primary?.entityId)).toEqual([
       'user:alex@example.com@okta',
@@ -126,7 +116,7 @@ describe('buildAgentContext', () => {
   });
 
   it('keeps an email no IdP user has, without a primary row', () => {
-    const context = buildAgentContext({ identity, agent, related: [], idpAccounts: [] });
+    const context = buildAgentContext({ identity, agent, related: [] });
     expect(context.people).toEqual([
       expect.objectContaining({ email: 'alex@example.com', primary: undefined, rows: [] }),
     ]);
@@ -139,7 +129,6 @@ describe('buildAgentContext', () => {
       identity,
       agent,
       related: [],
-      idpAccounts: [],
       signedInAt: '2026-11-26T10:00:00.000Z',
     });
     expect(context.signedInAt).toBeUndefined();
@@ -150,7 +139,6 @@ describe('buildAgentContext', () => {
       identity,
       agent,
       related: [{ ...localUser, ownsInferredIds: [] }],
-      idpAccounts: [],
     });
     expect(context.runsAs?.entityId).toBe('user:ec2-user@host-1@local');
   });
@@ -176,48 +164,13 @@ describe('row readers', () => {
     });
   });
 
-  it('reads IdP booleans whether mapped or loaded from _source', () => {
-    expect(
-      toIdpAccount({
-        'user.email': 'a@x',
-        'event.module': 'entityanalytics_okta',
-        deprovisioned: 'true',
-        mfa_enabled: false,
-      })
-    ).toMatchObject({ provider: 'Okta', deprovisioned: true, mfaEnabled: false });
-    expect(
-      toIdpAccount({
-        'user.email': 'a@x',
-        'event.module': 'entityanalytics_entra_id',
-        account_enabled: false,
-      })
-    ).toMatchObject({ provider: 'Entra ID', deprovisioned: true });
-  });
-
-  it('marks IdP, HR and alert rows whose source document is tagged poc-mock', () => {
-    const idp = { 'user.email': 'a@x', 'event.module': 'entityanalytics_okta' };
-    expect(toIdpAccount({ ...idp, tags: 'poc-mock' })?.isMock).toBe(true);
-    expect(toIdpAccount({ ...idp, tags: null })?.isMock).toBe(false);
-    expect(toHrRecord({ 'user.email': 'a@x', tags: ['poc-mock'] })?.isMock).toBe(true);
+  it('marks alert rows whose source document is tagged poc-mock', () => {
     const alert = { _id: '1', _index: '.alerts', '@timestamp': '2026-11-26T10:00:00.000Z' };
     expect(toAgentAlert({ ...alert, tags: ['other', 'poc-mock'] })?.isMock).toBe(true);
     expect(toAgentAlert({ ...alert, tags: ['other'] })?.isMock).toBe(false);
   });
 
-  it('reads HR records and MFA from the entity row', () => {
-    expect(
-      toHrRecord({
-        'user.email': 'a@x',
-        employment_status: 'Terminated',
-        termination_date: '2026-12-01',
-      })
-    ).toEqual({
-      email: 'a@x',
-      status: 'Terminated',
-      terminationDate: '2026-12-01',
-      isMock: false,
-    });
-    expect(toHrRecord({ employment_status: 'Active' })).toBeUndefined();
+  it('reads MFA from the entity row', () => {
     expect(
       toRelatedEntity({
         'entity.id': 'user:a@x@okta',
@@ -305,19 +258,9 @@ describe('queries', () => {
     expect(sources(buildOtelEventsQuery('gen-demo', { sessionIds: ['s1'] }))).toBe(
       'FROM logs-claude_code.events*-gen-demo'
     );
-    expect(sources(buildOktaAccountsQuery('gen-demo', ['a@x']))).toBe(
-      'FROM logs-entityanalytics_okta.user-gen-demo'
-    );
-    expect(sources(buildEntraAccountsQuery('gen-demo', ['a@x']))).toBe(
-      'FROM logs-entityanalytics_entra_id.user-gen-demo'
-    );
-    expect(sources(buildHrRecordsQuery(['a@x']))).toBe('FROM hr-workday-demo*');
   });
 
-  it('keeps tags on IdP, HR and alert reads so generated values can be labelled', () => {
-    expect(buildOktaAccountsQuery('gen-demo', ['a@x'])).toContain('tags = LAST(tags, @timestamp)');
-    expect(buildEntraAccountsQuery('gen-demo', ['a@x'])).toContain('tags = LAST(tags, @timestamp)');
-    expect(buildHrRecordsQuery(['a@x'])).toContain('tags = LAST(tags, @timestamp)');
+  it('keeps tags on alert reads so generated values can be labelled', () => {
     expect(buildAgentAlertsQuery('gen-demo', identity.entityId)).toMatch(/KEEP[^|]*\btags\b/);
   });
 });

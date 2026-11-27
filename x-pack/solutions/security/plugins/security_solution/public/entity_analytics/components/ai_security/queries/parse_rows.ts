@@ -6,14 +6,7 @@
  */
 
 import { getAiAgentContextFieldPath } from '@kbn/entity-store/common/domain/definitions/ai_agent_context';
-import type {
-  AgentAlert,
-  AgentRow,
-  AgentStoreContext,
-  HrRecord,
-  IdpAccount,
-  RelatedEntity,
-} from '../types';
+import type { AgentAlert, AgentRow, AgentStoreContext, RelatedEntity } from '../types';
 import {
   firstString,
   isMockRow,
@@ -108,40 +101,6 @@ export const toAgentRow = (row: EsqlRecord): AgentRow | undefined => {
     dependsOnIds: toStringArray(row['entity.relationships.depends_on.ids']),
     dataSources: toStringArray(row['entity.source']),
     storeContext: toAgentStoreContext(row),
-  };
-};
-
-const PROVIDER_NAMES: Readonly<Record<string, string>> = {
-  entityanalytics_okta: 'Okta',
-  entityanalytics_entra_id: 'Entra ID',
-};
-
-export const toIdpAccount = (row: EsqlRecord): IdpAccount | undefined => {
-  const email = firstString(row['user.email']);
-  const module = firstString(row['event.module']);
-  if (!email || !module) return undefined;
-  const accountEnabled = toBoolean(row.account_enabled);
-  return {
-    email,
-    provider: PROVIDER_NAMES[module] ?? module,
-    status: firstString(row.status),
-    deprovisioned: toBoolean(row.deprovisioned) ?? (accountEnabled === false ? true : undefined),
-    suspended: toBoolean(row.suspended),
-    enabled: accountEnabled,
-    mfaEnabled: toBoolean(row.mfa_enabled),
-    fullName: firstString(row.full_name),
-    isMock: isMockRow(row),
-  };
-};
-
-export const toHrRecord = (row: EsqlRecord): HrRecord | undefined => {
-  const email = firstString(row['user.email']);
-  if (!email) return undefined;
-  return {
-    email,
-    status: firstString(row.employment_status),
-    terminationDate: firstString(row.termination_date),
-    isMock: isMockRow(row),
   };
 };
 

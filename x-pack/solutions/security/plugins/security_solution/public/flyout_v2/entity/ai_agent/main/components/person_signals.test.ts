@@ -15,13 +15,12 @@ import { formatPersonStatus, getMfaEnabled, getPersonSignals } from './person_si
 const person = (overrides: Partial<AgentPerson> = {}): AgentPerson => ({
   email: 'avery.quinn@example.com',
   rows: [],
-  idpAccounts: [],
   watchlistIds: [],
   ...overrides,
 });
 
-const userRow = (mfaEnabled: boolean): RelatedEntity => ({
-  entityId: 'user:avery.quinn@example.com@okta',
+const userRow = (mfaEnabled: boolean, source = 'okta'): RelatedEntity => ({
+  entityId: `user:avery.quinn@example.com@${source}`,
   engineType: 'user',
   email: 'avery.quinn@example.com',
   mfaEnabled,
@@ -41,59 +40,13 @@ const rowFacts: AgentStoreContext = {
 describe('getPersonSignals', () => {
   it('gives nothing for a healthy or unknown person', () => {
     expect(getPersonSignals(person())).toEqual([]);
-    expect(
-      getPersonSignals(
-        person({
-          idpAccounts: [
-            {
-              email: 'avery.quinn@example.com',
-              provider: 'Entra ID',
-              enabled: true,
-              mfaEnabled: true,
-              isMock: false,
-            },
-          ],
-          hr: { email: 'avery.quinn@example.com', status: 'Active', isMock: false },
-        })
-      )
-    ).toEqual([]);
+    expect(getPersonSignals(person({ rows: [userRow(true)] }))).toEqual([]);
   });
 
-  it('lists watchlists, termination, deprovisioned or suspended accounts and MFA off, in that order', () => {
+  it('lists watchlists, then MFA off', () => {
     expect(
-      getPersonSignals(
-        person({
-          watchlistIds: ['departing-employees'],
-          hr: {
-            email: 'avery.quinn@example.com',
-            status: 'Terminated',
-            terminationDate: '2026-11-25',
-            isMock: false,
-          },
-          idpAccounts: [
-            {
-              email: 'avery.quinn@example.com',
-              provider: 'Okta',
-              deprovisioned: true,
-              mfaEnabled: false,
-              isMock: false,
-            },
-            {
-              email: 'avery.quinn@example.com',
-              provider: 'Entra ID',
-              suspended: true,
-              isMock: false,
-            },
-          ],
-        })
-      )
-    ).toEqual([
-      { kind: 'watchlist', watchlistId: 'departing-employees' },
-      { kind: 'terminated', date: '2026-11-25' },
-      { kind: 'idp', provider: 'Okta', state: 'deprovisioned' },
-      { kind: 'idp', provider: 'Entra ID', state: 'suspended' },
-      { kind: 'mfa_off' },
-    ]);
+      getPersonSignals(person({ watchlistIds: ['departing-employees'], rows: [userRow(false)] }))
+    ).toEqual([{ kind: 'watchlist', watchlistId: 'departing-employees' }, { kind: 'mfa_off' }]);
   });
 
   it("prefers the agent row's watchlists and MFA when it speaks for this person", () => {
@@ -109,24 +62,12 @@ describe('getPersonSignals', () => {
 });
 
 describe('getMfaEnabled', () => {
-  it('is off when any source reports off, and unknown when none reports', () => {
+  it('is off when any row reports off, and unknown when none reports', () => {
     expect(getMfaEnabled(person())).toBeUndefined();
     expect(getMfaEnabled(person({ rows: [userRow(true)] }))).toBe(true);
-    expect(
-      getMfaEnabled(
-        person({
-          rows: [userRow(true)],
-          idpAccounts: [
-            {
-              email: 'avery.quinn@example.com',
-              provider: 'Okta',
-              mfaEnabled: false,
-              isMock: false,
-            },
-          ],
-        })
-      )
-    ).toBe(false);
+    expect(getMfaEnabled(person({ rows: [userRow(true), userRow(false, 'entra_id')] }))).toBe(
+      false
+    );
   });
 });
 
@@ -135,16 +76,9 @@ describe('formatPersonStatus', () => {
     expect(
       formatPersonStatus([
         { kind: 'watchlist', watchlistId: 'departing-employees' },
-        { kind: 'terminated', date: '2026-11-25' },
-        { kind: 'idp', provider: 'Okta', state: 'deprovisioned' },
-        { kind: 'idp', provider: 'Entra ID', state: 'suspended' },
         { kind: 'mfa_off' },
       ])
-    ).toEqual(['Terminated Nov 25, 2026', 'Okta deprovisioned', 'Entra ID suspended', 'MFA off']);
-  });
-
-  it('says Terminated without a date when none is known', () => {
-    expect(formatPersonStatus([{ kind: 'terminated' }])).toEqual(['Terminated']);
+    ).toEqual(['MFA off']);
   });
 
   it('gives nothing when only watchlists are set', () => {

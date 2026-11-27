@@ -49,10 +49,6 @@ export const NO_SIGNED_IN_ACCOUNT = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.aiAgent.attribution.noSignedInAccount',
   { defaultMessage: 'No signed-in account' }
 );
-export const TERMINATED = i18n.translate(
-  'xpack.securitySolution.flyout.entityDetails.aiAgent.attribution.terminated',
-  { defaultMessage: 'Terminated' }
-);
 export const MFA_OFF = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.aiAgent.attribution.mfaOff',
   { defaultMessage: 'MFA off' }
@@ -73,24 +69,6 @@ export const WATCHLISTS_OVERFLOW_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.aiAgent.attribution.watchlistsOverflowTitle',
   { defaultMessage: 'Additional watchlists' }
 );
-export const statusTerminatedOn = (date: string) =>
-  i18n.translate('xpack.securitySolution.flyout.entityDetails.aiAgent.attribution.terminatedOn', {
-    defaultMessage: 'Terminated {date}',
-    values: { date },
-  });
-export const statusIdpDeprovisioned = (provider: string) =>
-  i18n.translate(
-    'xpack.securitySolution.flyout.entityDetails.aiAgent.attribution.idpDeprovisioned',
-    {
-      defaultMessage: '{provider} deprovisioned',
-      values: { provider },
-    }
-  );
-export const statusIdpSuspended = (provider: string) =>
-  i18n.translate('xpack.securitySolution.flyout.entityDetails.aiAgent.attribution.idpSuspended', {
-    defaultMessage: '{provider} suspended',
-    values: { provider },
-  });
 export const RUNS_AS_ROOT = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.aiAgent.attribution.runsAsRoot',
   { defaultMessage: 'Runs as root' }

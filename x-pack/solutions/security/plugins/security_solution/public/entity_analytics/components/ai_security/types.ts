@@ -80,38 +80,12 @@ export interface RelatedEntity {
   readonly mfaEnabled?: boolean;
 }
 
-/** Account state from an identity provider's user documents. */
-export interface IdpAccount {
-  readonly email: string;
-  readonly provider: string;
-  readonly status?: string;
-  readonly deprovisioned?: boolean;
-  readonly suspended?: boolean;
-  /** Entra ID reports `account_enabled` rather than a status. */
-  readonly enabled?: boolean;
-  readonly mfaEnabled?: boolean;
-  readonly fullName?: string;
-  /** The newest user document was generated (`poc-mock`), not collected. */
-  readonly isMock: boolean;
-}
-
-/** Employment record from the HR index, keyed by `user.email`. */
-export interface HrRecord {
-  readonly email: string;
-  readonly status?: string;
-  readonly terminationDate?: string;
-  /** The newest HR document was generated (`poc-mock`). */
-  readonly isMock: boolean;
-}
-
 /** The person an agent acts for, from one of its accounts. */
 export interface AgentPerson {
   readonly email: string;
   /** User rows for the email, with the resolution target first when one is known. */
   readonly rows: readonly RelatedEntity[];
   readonly primary?: RelatedEntity;
-  readonly idpAccounts: readonly IdpAccount[];
-  readonly hr?: HrRecord;
   readonly watchlistIds: readonly string[];
 }
 
