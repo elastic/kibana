@@ -27,6 +27,7 @@ jest.mock('../../components', () => {
 
   return {
     ...actual,
+    preloadWorkflowGraphCanvas: jest.fn(() => Promise.resolve()),
     ReactFlowProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
     TypeIcon: () => <span data-test-subj="mockTypeIcon" />,
     WorkflowDetailBottomBar: () => <div data-test-subj="mockWorkflowDetailBottomBar" />,

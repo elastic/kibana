@@ -5,11 +5,20 @@
  * 2.0.
  */
 
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { usePager } from '@kbn/discover-utils/components';
 import { I18nProvider } from '@kbn/i18n-react';
 import { JSONDataTable } from './json_data_table';
+import {
+  clearActiveDataReferenceInsertTarget,
+  setActiveDataReferenceInsertTarget,
+} from '../../lib/active_data_reference_insert_target';
+
+const mockExperimentalFeatures = { enabled: true };
+jest.mock('../../../hooks/use_workflows_experimental_ui_setting', () => ({
+  useWorkflowsExperimentalUiSetting: () => mockExperimentalFeatures.enabled,
+}));
 
 // Helper function to render with I18n provider
 const renderWithIntl = (component: React.ReactElement) => {
@@ -295,6 +304,73 @@ describe('JSONDataTable', () => {
 
       // Grid should still render but without copy actions
       expect(screen.getByRole('grid')).toBeInTheDocument();
+    });
+
+    it('drags the reference token, not the literal value', () => {
+      render(
+        <JSONDataTable
+          data={{ permalink: 'https://example.com' }}
+          fieldPathActionsPrefix="steps.vt.output"
+        />
+      );
+
+      // Name + value cells are both sources; either must transfer the reference.
+      const source = screen.getByTestId('workflowExecutionOutputField-permalink');
+      const dataTransfer = { setData: jest.fn(), effectAllowed: '' };
+      fireEvent.dragStart(source, { dataTransfer });
+
+      expect(dataTransfer.setData).toHaveBeenCalledWith(
+        'text/plain',
+        '{{ steps.vt.output.permalink }}'
+      );
+      expect(dataTransfer.setData).not.toHaveBeenCalledWith('text/plain', 'https://example.com');
+    });
+
+    it('gives the name cell and the value cell their own test subjects', () => {
+      render(
+        <JSONDataTable
+          data={{ permalink: 'https://example.com' }}
+          fieldPathActionsPrefix="steps.vt.output"
+        />
+      );
+
+      expect(screen.getByTestId('workflowExecutionOutputField-permalink')).toBeInTheDocument();
+      expect(
+        screen.getByTestId('workflowExecutionOutputField-permalink-value')
+      ).toBeInTheDocument();
+    });
+
+    it('offers no drag or click sources while the experimental features are off', () => {
+      mockExperimentalFeatures.enabled = false;
+      try {
+        render(
+          <JSONDataTable
+            data={{ permalink: 'https://example.com' }}
+            fieldPathActionsPrefix="steps.vt.output"
+          />
+        );
+
+        expect(screen.getByRole('grid')).toBeInTheDocument();
+        expect(screen.queryByTestId(/workflowExecutionOutputField-/)).not.toBeInTheDocument();
+      } finally {
+        mockExperimentalFeatures.enabled = true;
+      }
+    });
+
+    it('click-to-insert delivers the reference token to the active target', () => {
+      const target = jest.fn();
+      setActiveDataReferenceInsertTarget(target);
+      render(
+        <JSONDataTable
+          data={{ permalink: 'https://example.com' }}
+          fieldPathActionsPrefix="steps.vt.output"
+        />
+      );
+
+      fireEvent.click(screen.getByTestId('workflowExecutionOutputField-permalink'));
+
+      expect(target).toHaveBeenCalledWith('{{ steps.vt.output.permalink }}');
+      clearActiveDataReferenceInsertTarget(target);
     });
   });
 
