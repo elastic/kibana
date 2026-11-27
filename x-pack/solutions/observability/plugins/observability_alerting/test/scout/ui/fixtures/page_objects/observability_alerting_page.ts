@@ -10,7 +10,10 @@ import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { ADD_TO_CASE_EPISODE_ACTION_ID } from '@kbn/alerting-v2-episodes-ui/actions/add_to_case_action_id';
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
-import { OBSERVABILITY_ALERTING_BASE_PATH } from '@kbn/deeplinks-observability';
+import {
+  OBSERVABILITY_ALERTING_APP_ROUTE,
+  OBSERVABILITY_ALERTING_BASE_PATH,
+} from '@kbn/deeplinks-observability';
 import {
   OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
   OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
@@ -141,12 +144,15 @@ export class ObservabilityAlertingPage {
     return this.kbnUrl.get(`${OBSERVABILITY_ALERTING_BASE_PATH}${path}`);
   }
 
-  async goto(path: string): Promise<string> {
-    const requested = this.urlFor(path);
-    // `gotoApp` waits for `load`, which Kibana's SPA often never reaches
-    // (pending XHRs / "Loading Elastic"). `domcontentloaded` is enough for
-    // both the flag-off app-not-found page and the flag-on chrome title.
-    await this.page.goto(requested, {
+  /** Navigates to `path`, gating on `readyWhen` when an element proves the app has rendered. */
+  async goto(path: string, { readyWhen }: { readyWhen?: Locator } = {}): Promise<string> {
+    if (readyWhen) {
+      await this.page.gotoApp(`${OBSERVABILITY_ALERTING_APP_ROUTE}${path}`, { readyWhen });
+      return this.page.url();
+    }
+    // Ungated: the flag-off app-not-found page and the redirect cases have no ready element, and
+    // Kibana's SPA often never reaches `load` (pending XHRs / "Loading Elastic").
+    await this.page.goto(this.urlFor(path), {
       waitUntil: 'domcontentloaded',
       timeout: 60_000,
     });
@@ -172,8 +178,9 @@ export class ObservabilityAlertingPage {
   /** Opens the inbox with `listState`, the rison body of its `alertsList` URL state. */
   private async gotoInboxWithListState(listState: string): Promise<void> {
     const search = new URLSearchParams({ _a: `(alertsList:(${listState}))` });
-    await this.goto(`${OBSERVABILITY_ALERTING_ALERTS_PATH}?${search.toString()}`);
-    await this.inboxPage.waitFor({ state: 'visible' });
+    await this.goto(`${OBSERVABILITY_ALERTING_ALERTS_PATH}?${search.toString()}`, {
+      readyWhen: this.inboxPage,
+    });
   }
 
   async gotoInboxFilteredByRule(ruleId: string): Promise<void> {
@@ -201,8 +208,9 @@ export class ObservabilityAlertingPage {
   }
 
   async gotoEpisodeDetails(episodeId: string): Promise<void> {
-    await this.goto(`${OBSERVABILITY_ALERTING_ALERTS_PATH}/${encodeURIComponent(episodeId)}`);
-    await this.episodeDetailsPage.waitFor({ state: 'visible' });
+    await this.goto(`${OBSERVABILITY_ALERTING_ALERTS_PATH}/${encodeURIComponent(episodeId)}`, {
+      readyWhen: this.episodeDetailsPage,
+    });
   }
 
   async investigateFromDetails(): Promise<void> {
