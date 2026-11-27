@@ -79,7 +79,6 @@ import type { DiscoverEBTManager } from './ebt_manager';
 import {
   CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY,
   IS_ESQL_DEFAULT_FEATURE_FLAG_KEY,
-  SESSION_HTTP_API_ENABLED_FEATURE_FLAG_KEY,
 } from './constants';
 import { EmbeddableEditorService } from './plugin_imports/embeddable_editor_service';
 import { InitialTabStateService } from './plugin_imports/initial_tab_state_service';
@@ -227,8 +226,6 @@ export const buildServices = ({
   const storage = new Storage(localStorage);
   const discoverSessionService = createDiscoverSessionService({
     apiClient: createDiscoverSessionClient(core.http),
-    legacyClient: plugins.savedSearch,
-    useHttpApi: readBooleanFlag(core, SESSION_HTTP_API_ENABLED_FEATURE_FLAG_KEY, true),
   });
 
   return {

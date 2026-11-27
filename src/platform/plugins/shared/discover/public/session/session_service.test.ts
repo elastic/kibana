@@ -7,13 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  VIEW_MODE,
-  type DiscoverSession,
-  type DiscoverSessionTab,
-} from '@kbn/saved-search-plugin/common';
+import { VIEW_MODE, type DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import type { SaveDiscoverSessionParams } from '@kbn/saved-search-plugin/public';
-import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import { DiscoverTabType, UnifiedHistogramSuggestionType } from '@kbn/discover-session-constants';
@@ -87,29 +82,16 @@ const session: SaveDiscoverSessionParams = {
   description: '',
   tabs: [runtimeTab],
 };
-const persistedSession: DiscoverSession = {
-  ...session,
-  id: 'session-id',
-  managed: false,
-};
-
 describe('Discover session service', () => {
-  it('loads through REST with resolution metadata and warnings when the switch is enabled', async () => {
+  it('loads through REST with resolution metadata and warnings', async () => {
     const apiClient = createApiClient();
-    const legacyClient = savedSearchPluginMock.createStartContract();
-    const discoverSessionService = createDiscoverSessionService({
-      apiClient,
-      legacyClient,
-      useHttpApi: true,
-    });
+    const discoverSessionService = createDiscoverSessionService({ apiClient });
 
     const loaded = await discoverSessionService.get('session-id');
 
     expect(apiClient.get).toHaveBeenCalledWith('session-id');
     expect(apiClient.upsert).not.toHaveBeenCalled();
     expect(apiClient.create).not.toHaveBeenCalled();
-    expect(legacyClient.getDiscoverSession).not.toHaveBeenCalled();
-    expect(legacyClient.saveDiscoverSession).not.toHaveBeenCalled();
     expect(loaded.session.sharingSavedObjectProps).toEqual(apiGetResponse.resolve);
     expect(loaded.warnings).toEqual(apiGetResponse.warnings);
     expect(loaded.session).toEqual(
@@ -144,7 +126,6 @@ describe('Discover session service', () => {
       const { submittedSession, data } = createSaveFixture();
       const beforeSave = cloneDeep(submittedSession);
       const apiClient = createApiClient();
-      const legacyClient = savedSearchPluginMock.createStartContract();
       // The API omits pin markers, the live fingerprint, and control order numbers.
       // Saving must keep those local values without rebuilding the tabs from this response.
       const saveResponse: DiscoverSessionInternalResponse = {
@@ -154,18 +135,13 @@ describe('Discover session service', () => {
       };
       apiClient.create.mockResolvedValue(saveResponse);
       apiClient.upsert.mockResolvedValue(saveResponse);
-      const discoverSessionService = createDiscoverSessionService({
-        apiClient,
-        legacyClient,
-        useHttpApi: true,
-      });
+      const discoverSessionService = createDiscoverSessionService({ apiClient });
 
       const savedSession = await discoverSessionService.save(submittedSession, { copyOnSave });
 
       expect(apiClient[method]).toHaveBeenCalledTimes(1);
       expect(apiClient[method]).toHaveBeenCalledWith(...idArgs, data);
       expect(apiClient[unusedMethod]).not.toHaveBeenCalled();
-      expect(legacyClient.saveDiscoverSession).not.toHaveBeenCalled();
       expect(savedSession).toStrictEqual({
         ...beforeSave,
         id: savedId,
@@ -193,11 +169,7 @@ describe('Discover session service', () => {
   it('creates a new session without an ID and keeps the submitted tabs', async () => {
     const { id: _id, ...newSession } = session;
     const apiClient = createApiClient();
-    const discoverSessionService = createDiscoverSessionService({
-      apiClient,
-      legacyClient: savedSearchPluginMock.createStartContract(),
-      useHttpApi: true,
-    });
+    const discoverSessionService = createDiscoverSessionService({ apiClient });
 
     const savedSession = await discoverSessionService.save(newSession, {});
 
@@ -207,31 +179,6 @@ describe('Discover session service', () => {
     expect(savedSession?.id).toBe(apiResponse.id);
     expect(savedSession?.tabs).toStrictEqual(newSession.tabs);
     expect(newSession).not.toHaveProperty('id');
-  });
-
-  it('uses the legacy client when the local switch is disabled', async () => {
-    const apiClient = createApiClient();
-    const legacyClient = savedSearchPluginMock.createStartContract();
-    jest.mocked(legacyClient.getDiscoverSession).mockResolvedValue(persistedSession);
-    jest.mocked(legacyClient.saveDiscoverSession).mockResolvedValue(persistedSession);
-    const discoverSessionService = createDiscoverSessionService({
-      apiClient,
-      legacyClient,
-      useHttpApi: false,
-    });
-
-    const loaded = await discoverSessionService.get('session-id');
-    const savedSession = await discoverSessionService.save(session, { copyOnSave: false });
-
-    expect(legacyClient.getDiscoverSession).toHaveBeenCalledWith('session-id');
-    expect(legacyClient.saveDiscoverSession).toHaveBeenCalledWith(session, {
-      copyOnSave: false,
-    });
-    expect(apiClient.get).not.toHaveBeenCalled();
-    expect(apiClient.upsert).not.toHaveBeenCalled();
-    expect(apiClient.create).not.toHaveBeenCalled();
-    expect(loaded).toEqual({ session: persistedSession, warnings: [] });
-    expect(savedSession).toBe(persistedSession);
   });
 });
 

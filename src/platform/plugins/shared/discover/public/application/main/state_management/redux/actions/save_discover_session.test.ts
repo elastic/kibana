@@ -251,11 +251,7 @@ describe('saveDiscoverSession', () => {
       };
       const saveError = new Error('Save failed');
       apiClient[method].mockRejectedValueOnce(saveError);
-      const discoverSessionService = createDiscoverSessionService({
-        apiClient,
-        legacyClient: services.savedSearch,
-        useHttpApi: true,
-      });
+      const discoverSessionService = createDiscoverSessionService({ apiClient });
       saveDiscoverSessionSpy.mockImplementation(discoverSessionService.save);
 
       toolkit.internalState.dispatch(

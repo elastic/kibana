@@ -11,36 +11,27 @@ import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import type {
   SaveDiscoverSessionOptions,
   SaveDiscoverSessionParams,
-  SavedSearchPublicPluginStart,
 } from '@kbn/saved-search-plugin/public';
 import type { DiscoverSessionWarning } from '../../server';
 import type { DiscoverSessionInternalResponse } from '../../server/api/internal_schema';
 import type { DiscoverSessionClient } from './api_client';
-import { normalizeSessionFilters } from './normalize_session_filters';
 import {
   fromDiscoverSessionApiResponse,
   getDiscoverSessionReferences,
   toDiscoverSessionApiData,
 } from './session_conversions';
 
-// Coordinates session loading and saving through HTTP or the legacy client, selected by the flag.
-// HTTP loads convert the API response and return its warnings without showing UI.
+// Coordinates session loading and saving through the HTTP API.
+// Loads convert the API response and return its warnings without showing UI.
 // Internal routes preserve inline Data View IDs; tab restoration fills any missing IDs.
-// HTTP saves convert the session into a create or upsert request, then keep the submitted tabs
+// Saves convert the session into a create or upsert request, then keep the submitted tabs
 // and update only the session ID, metadata, and references from the response.
-
-type LegacyDiscoverSessionClient = Pick<
-  SavedSearchPublicPluginStart,
-  'getDiscoverSession' | 'saveDiscoverSession'
->;
 
 interface DiscoverSessionLoadResult {
   session: DiscoverSession;
   warnings: DiscoverSessionWarning[];
 }
 
-// Keep the legacy save types while callers use the existing save flow.
-// Revisit those types when the legacy path is removed; the session service can remain.
 export interface DiscoverSessionService {
   get: (id: string) => Promise<DiscoverSessionLoadResult>;
   save: (
@@ -49,20 +40,12 @@ export interface DiscoverSessionService {
   ) => Promise<DiscoverSession | undefined>;
 }
 
-/** Selects the REST or legacy path for loading and saving Discover sessions. */
+/** Loads and saves Discover sessions through the HTTP API. */
 export const createDiscoverSessionService = ({
   apiClient,
-  legacyClient,
-  useHttpApi,
 }: {
   apiClient: DiscoverSessionClient;
-  legacyClient: LegacyDiscoverSessionClient;
-  useHttpApi: boolean;
 }): DiscoverSessionService => {
-  if (!useHttpApi) {
-    return createLegacyDiscoverSessionService(legacyClient);
-  }
-
   return {
     get: async (id) => {
       const response = await apiClient.get(id);
@@ -93,14 +76,3 @@ export const createDiscoverSessionService = ({
     },
   };
 };
-
-// Remove this fallback and the flag once Discover uses only HTTP.
-const createLegacyDiscoverSessionService = (
-  legacyClient: LegacyDiscoverSessionClient
-): DiscoverSessionService => ({
-  get: async (id) => ({
-    session: normalizeSessionFilters(await legacyClient.getDiscoverSession(id)),
-    warnings: [],
-  }),
-  save: (session, options) => legacyClient.saveDiscoverSession(session, options),
-});
