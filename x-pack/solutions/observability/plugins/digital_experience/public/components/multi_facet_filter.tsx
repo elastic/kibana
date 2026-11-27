@@ -48,39 +48,26 @@ export const facetRows = (buckets: FacetBucket[], selected: readonly FilterValue
 
 /**
  * The text of the values of one filter that are all included or all excluded, e.g. "Browser:
- * Chrome, Edge", or "Browser: not Chrome, Edge" when excluded. Past `maxShown` values it ends in
- * how many more there are, e.g. "Browser: Chrome, Edge, Safari +2".
+ * Chrome, Edge", or "NOT Browser: Chrome, Edge" when excluded, as the pills of Discover.
  */
 export const filterPillText = ({
   label,
   values,
   exclude,
-  maxShown = values.length,
 }: {
   label: string;
   values: readonly string[];
   exclude: boolean;
-  maxShown?: number;
-}): string => {
-  const shown = values.slice(0, maxShown).join(', ');
-  const hidden = values.length - maxShown;
-  const list =
-    hidden > 0
-      ? i18n.translate('xpack.digitalExperience.multiFacetFilter.moreValues', {
-          defaultMessage: '{shown} +{hidden}',
-          values: { shown, hidden },
-        })
-      : shown;
-  return exclude
+}): string =>
+  exclude
     ? i18n.translate('xpack.digitalExperience.multiFacetFilter.excludedPill', {
-        defaultMessage: '{label}: not {values}',
-        values: { label, values: list },
+        defaultMessage: 'NOT {label}: {values}',
+        values: { label, values: values.join(', ') },
       })
     : i18n.translate('xpack.digitalExperience.multiFacetFilter.includedPill', {
         defaultMessage: '{label}: {values}',
-        values: { label, values: list },
+        values: { label, values: values.join(', ') },
       });
-};
 
 /**
  * A filter button of an `EuiFilterGroup` that lists the values of one facet with their counts, to

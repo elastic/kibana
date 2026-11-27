@@ -145,32 +145,50 @@ export const PILL_VALUES_SHOWN = 3;
 /**
  * The pills for `filters`: one per filter for its included values and one for its excluded values,
  * so a filter with many values takes one pill, and an exclusion, which drops data, stays apart.
+ * With `isSplit`, one pill per value, for where nothing else lets a single value be removed.
  */
-export const groupFilterPills = (filters: OverviewFilters): FilterPillGroup[] =>
+export const groupFilterPills = (filters: OverviewFilters, isSplit = false): FilterPillGroup[] =>
   OVERVIEW_FILTER_NAMES.flatMap((name) =>
     [false, true].flatMap((exclude) => {
       const values = (filters[name] ?? [])
         .filter((item) => item.exclude === exclude)
         .map(({ value }) => value);
+      if (isSplit) {
+        return values.map((value) => ({ name, exclude, values: [value] }));
+      }
       return values.length > 0 ? [{ name, exclude, values }] : [];
     })
   );
 
+const pillTextCss = css({
+  display: 'flex',
+  minInlineSize: 0,
+  gap: '0.25em',
+});
+const pillPreviewCss = css({
+  minInlineSize: 0,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+});
+
 /**
  * The values the filters select, as one pill per filter (and one more for its exclusions) that
  * removes those values, and the button that clears all the filters. Nothing shows while no filter
- * has a value.
+ * has a value. With `isSplit`, each value has a pill of its own.
  */
 export function OverviewFilterPills({
   filters,
   setFilter,
   onClear,
+  isSplit = false,
 }: {
   filters: OverviewFilters;
   setFilter: (name: OverviewFilterName, values: FilterValue[]) => void;
   onClear: () => void;
+  isSplit?: boolean;
 }) {
-  const pills = groupFilterPills(filters);
+  const pills = groupFilterPills(filters, isSplit);
   if (pills.length === 0) {
     return null;
   }
@@ -185,10 +203,16 @@ export function OverviewFilterPills({
     >
       {pills.map(({ name, exclude, values }) => {
         const label = FILTER_LABELS[name];
-        const text = filterPillText({ label, values, exclude, maxShown: PILL_VALUES_SHOWN });
         const fullText = filterPillText({ label, values, exclude });
+        const preview = filterPillText({
+          label,
+          values: values.slice(0, PILL_VALUES_SHOWN),
+          exclude,
+        });
+        const hidden = values.length - PILL_VALUES_SHOWN;
+        const testSubj = isSplit ? `${name}-${values[0]}` : `${name}${exclude ? '-excluded' : ''}`;
         return (
-          <EuiFlexItem grow={false} key={`${name}-${exclude}`}>
+          <EuiFlexItem grow={false} key={testSubj}>
             <EuiBadge
               color={exclude ? 'danger' : 'hollow'}
               iconType="cross"
@@ -196,7 +220,9 @@ export function OverviewFilterPills({
               iconOnClick={() =>
                 setFilter(
                   name,
-                  (filters[name] ?? []).filter((item) => item.exclude !== exclude)
+                  (filters[name] ?? []).filter(
+                    (item) => item.exclude !== exclude || !values.includes(item.value)
+                  )
                 )
               }
               iconOnClickAriaLabel={i18n.translate(
@@ -205,13 +231,21 @@ export function OverviewFilterPills({
               )}
               title={fullText}
               css={css({ maxInlineSize: '28em' })}
-              data-test-subj={`digitalExperienceOverviewPill-${name}${exclude ? '-excluded' : ''}`}
+              data-test-subj={`digitalExperienceOverviewPill-${testSubj}`}
               {...getEbtProps({
                 action: DIGITAL_EXPERIENCE_EBT_ACTIONS.SET_FILTER,
                 element: FILTER_EBT_ELEMENTS[name],
               })}
             >
-              {text}
+              {/* The preview gives way to a long value, never the count of the others. */}
+              <span css={pillTextCss}>
+                <span css={pillPreviewCss}>{preview}</span>
+                {hidden > 0 && (
+                  <span css={{ flexShrink: 0 }} data-test-subj="digitalExperienceOverviewPillMore">
+                    {`+${hidden}`}
+                  </span>
+                )}
+              </span>
             </EuiBadge>
           </EuiFlexItem>
         );

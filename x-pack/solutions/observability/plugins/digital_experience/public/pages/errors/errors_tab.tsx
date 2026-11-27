@@ -67,6 +67,8 @@ export function ErrorsTab({ serviceName }: { serviceName: string }) {
             filters={errorFilters}
             setFilter={setFilter}
             onClear={clearErrorFilters}
+            // The tab has no dropdown to take one value off, so each value keeps its pill.
+            isSplit
           />
         </>
       )}

@@ -130,4 +130,14 @@ describe('groupFilterPills', () => {
   it('gives none while no filter has a value', () => {
     expect(groupFilterPills({})).toEqual([]);
   });
+
+  it('gives each value a pill of its own when split', () => {
+    expect(
+      groupFilterPills({ browser: [...include('Chrome', 'Edge'), ...exclude('Safari')] }, true)
+    ).toEqual([
+      { name: 'browser', exclude: false, values: ['Chrome'] },
+      { name: 'browser', exclude: false, values: ['Edge'] },
+      { name: 'browser', exclude: true, values: ['Safari'] },
+    ]);
+  });
 });

@@ -33,24 +33,10 @@ describe('filterPillText', () => {
     );
   });
 
-  it('puts "not" before the values of an exclusion', () => {
+  it('puts "NOT" before the filter of an exclusion', () => {
     expect(filterPillText({ label: 'Browser', values: ['Chrome', 'Edge'], exclude: true })).toBe(
-      'Browser: not Chrome, Edge'
+      'NOT Browser: Chrome, Edge'
     );
-  });
-
-  it('ends in how many values it leaves out past the most it shows', () => {
-    const values = ['Chrome', 'Edge', 'Safari', 'Firefox', 'Opera'];
-
-    expect(filterPillText({ label: 'Browser', values, exclude: false, maxShown: 3 })).toBe(
-      'Browser: Chrome, Edge, Safari +2'
-    );
-    expect(filterPillText({ label: 'Browser', values, exclude: true, maxShown: 3 })).toBe(
-      'Browser: not Chrome, Edge, Safari +2'
-    );
-    expect(
-      filterPillText({ label: 'Browser', values: ['Chrome'], exclude: false, maxShown: 3 })
-    ).toBe('Browser: Chrome');
   });
 });
 

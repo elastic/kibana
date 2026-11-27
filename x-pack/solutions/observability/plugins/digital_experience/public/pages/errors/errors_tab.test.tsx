@@ -183,10 +183,12 @@ describe('ErrorsTab', () => {
     });
     render(<ErrorsTab serviceName="shop" />, { wrapper: Providers });
 
-    expect(await screen.findByTestId('digitalExperienceOverviewPill-browser')).toBeVisible();
-    expect(screen.getByTestId('digitalExperienceOverviewPill-pageUrl')).toBeVisible();
+    expect(await screen.findByTestId('digitalExperienceOverviewPill-browser-Chrome')).toBeVisible();
     expect(
-      screen.queryByTestId('digitalExperienceOverviewPill-pageContains')
+      screen.getByTestId('digitalExperienceOverviewPill-pageUrl-/products/{slug}')
+    ).toBeVisible();
+    expect(
+      screen.queryByTestId('digitalExperienceOverviewPill-pageContains-cart')
     ).not.toBeInTheDocument();
     expect(screen.getByTestId('digitalExperienceErrorsKuery')).toHaveTextContent(
       'user_agent.name: Chrome'
