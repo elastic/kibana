@@ -11,9 +11,15 @@ import { cloneDeep, differenceBy, omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { DataViewSpec, QueryState } from '@kbn/data-plugin/common';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
-import { isEmptyEsqlQuery, isOfAggregateQueryType } from '@kbn/es-query';
+import { isEmptyEsqlQuery, isOfAggregateQueryType, isOfQueryType } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { getInitialESQLQuery } from '@kbn/esql-utils';
+import { NL_TO_ESQL_ROUTE } from '@kbn/esql-types';
+import { ESQLEditorTelemetryService } from '@kbn/esql-editor';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import { MAX_TAB_LABEL_LENGTH } from '@kbn/discover-session-constants';
 import type { TabItem } from '@kbn/unified-tabs';
-import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
+import { MAX_DISCOVER_SESSION_TABS, type DiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { UISession } from '@kbn/data-plugin/public';
 import type { OpenInNewTabParams } from '../../../../../context_awareness/types';
 import { ProfileStateType, type ProfileStateMap } from '../../../../../../common/context_awareness';
@@ -596,10 +602,19 @@ export const openInNewTab: InternalStateThunkActionCreator<
       searchSessionId?: string;
       dataViewSpec?: DataViewSpec;
       profileState?: ProfileStateMap;
+      forceInitialFetch?: boolean;
     }
   ],
   Promise<void>
-> = ({ tabLabel, appState, globalState, searchSessionId, dataViewSpec, profileState }) =>
+> = ({
+  tabLabel,
+  appState,
+  globalState,
+  searchSessionId,
+  dataViewSpec,
+  profileState,
+  forceInitialFetch,
+}) =>
   function openInNewTabThunkFn(dispatch, getState) {
     const initialAppState = appState ? cloneDeep(appState) : {};
     const initialGlobalState = globalState ? cloneDeep(globalState) : {};
@@ -618,6 +633,10 @@ export const openInNewTab: InternalStateThunkActionCreator<
       newDefaultTab.label = tabLabel;
     }
 
+    if (forceInitialFetch) {
+      newDefaultTab.forceInitialFetch = true;
+    }
+
     if (searchSessionId) {
       newDefaultTab.initialInternalState = {
         ...newDefaultTab.initialInternalState,
@@ -634,6 +653,97 @@ export const openInNewTab: InternalStateThunkActionCreator<
 
     return dispatch(
       updateTabs({ items: [...currentTabs, newDefaultTab], selectedItem: newDefaultTab })
+    );
+  };
+
+const askAiFailedErrorTitle = i18n.translate('discover.askAi.generationFailedTitle', {
+  defaultMessage: 'Could not generate a query from your prompt',
+});
+
+/**
+ * Generates an ES|QL query from the natural language prompt, with the given tab's query and filters as context, and opens it in a new tab
+ */
+export const openAskInEsqlTab: InternalStateThunkActionCreator<
+  [TabActionPayload<{ dataView: DataView; prompt: string; signal: AbortSignal }>],
+  Promise<void>
+> = ({ tabId, dataView, prompt, signal }) =>
+  async function openAskInEsqlTabThunkFn(dispatch, getState, { services }) {
+    if (selectAllTabs(getState()).length >= MAX_DISCOVER_SESSION_TABS) {
+      services.toastNotifications.addWarning({
+        title: i18n.translate('discover.askAi.tabLimitReachedTitle', {
+          defaultMessage: 'Tab limit reached',
+        }),
+        text: i18n.translate('discover.askAi.tabLimitReachedText', {
+          defaultMessage: 'Close a tab to open the generated query in a new one.',
+        }),
+      });
+      return;
+    }
+
+    const { appState, globalState, uiState } = selectTab(getState(), tabId);
+    // Unsubmitted edits to the query and the time range live in the search draft, so the new tab
+    // gets what the query bar shows rather than what was last submitted
+    const { searchDraft } = uiState;
+    const liveQuery = searchDraft?.query ?? appState.query;
+    const query = isOfQueryType(liveQuery) ? liveQuery : undefined;
+    const draftTimeRange =
+      searchDraft?.dateRangeFrom && searchDraft?.dateRangeTo
+        ? { from: searchDraft.dateRangeFrom, to: searchDraft.dateRangeTo }
+        : undefined;
+    const filters = [...(appState.filters ?? []), ...(globalState.filters ?? [])];
+    const timeRange = draftTimeRange ?? globalState.timeRange ?? services.timefilter.getTime();
+    const currentQuery = getInitialESQLQuery(dataView, query, filters);
+
+    // Reported with the same event as the ES|QL editor's natural language input
+    const startTime = Date.now();
+    const telemetryService = new ESQLEditorTelemetryService(services.analytics);
+    const trackGeneration = (
+      result:
+        | { success: true; generatedQueryLength: number }
+        | { success: false; errorCode?: string }
+    ) =>
+      telemetryService.trackVisorNlSubmitted({
+        source: 'discover_ask_ai',
+        nlLength: prompt.length,
+        contextQueryLength: currentQuery.length,
+        durationMs: Date.now() - startTime,
+        ...result,
+      });
+
+    let generatedQuery: string | undefined;
+    try {
+      const { content } = await services.http.post<{ content: string }>(NL_TO_ESQL_ROUTE, {
+        body: JSON.stringify({ nlInstruction: prompt, currentQuery }),
+        signal,
+      });
+      generatedQuery = content;
+    } catch (error) {
+      if (signal.aborted) return;
+      const { body } = error as IHttpFetchError<ResponseErrorBody>;
+      trackGeneration({
+        success: false,
+        errorCode: body?.statusCode ? String(body.statusCode) : undefined,
+      });
+      services.toastNotifications.addDanger({ title: body?.message ?? askAiFailedErrorTitle });
+      return;
+    }
+    if (signal.aborted) return;
+    if (!generatedQuery) {
+      trackGeneration({ success: false });
+      services.toastNotifications.addDanger({ title: askAiFailedErrorTitle });
+      return;
+    }
+    trackGeneration({ success: true, generatedQueryLength: generatedQuery.length });
+
+    await dispatch(
+      openInNewTab({
+        // The prompt names the tab, within the length the saved session allows
+        tabLabel: prompt.slice(0, MAX_TAB_LABEL_LENGTH),
+        appState: { query: { esql: generatedQuery } },
+        globalState: { timeRange },
+        // Sending the prompt is an explicit search, so the results show without another run
+        forceInitialFetch: true,
+      })
     );
   };
 

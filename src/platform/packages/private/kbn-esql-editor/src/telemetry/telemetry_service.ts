@@ -320,6 +320,7 @@ export class ESQLEditorTelemetryService {
   }
 
   public trackVisorNlSubmitted(params: {
+    source: 'quick_search' | 'discover_ask_ai';
     nlLength: number;
     contextQueryLength: number;
     success: boolean;
@@ -328,6 +329,7 @@ export class ESQLEditorTelemetryService {
     generatedQueryLength?: number;
   }) {
     this._reportEvent(ESQL_VISOR_NL_SUBMITTED, {
+      source: params.source,
       nl_length: params.nlLength,
       context_query_length: params.contextQueryLength,
       success: params.success,

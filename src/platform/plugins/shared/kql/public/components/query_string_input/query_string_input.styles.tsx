@@ -42,6 +42,23 @@ const queryStringInputStyles = {
           maxHeight: euiTheme.size.xxl,
         },
       },
+      '.kbnQueryBar__append': {
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        zIndex: euiTheme.levels.flyout,
+        height: euiTheme.size.xl,
+        display: 'flex',
+        alignItems: 'center',
+        gap: euiTheme.size.s,
+        paddingInline: euiTheme.size.s,
+      },
+      '.kbnQueryBar__appendContent': {
+        display: 'flex',
+        alignItems: 'center',
+        paddingLeft: euiTheme.size.s,
+        borderLeft: euiTheme.border.thin,
+      },
       '.kbnQueryBar__textarea': {
         zIndex: euiTheme.levels.content,
         height: euiTheme.size.xl,

@@ -64,6 +64,7 @@ dependsOn:
   - '@kbn/esql-utils'
   - '@kbn/licensing-plugin'
   - '@kbn/field-formats-common'
+  - '@kbn/ui-ai-components'
 tags:
   - plugin
   - prod

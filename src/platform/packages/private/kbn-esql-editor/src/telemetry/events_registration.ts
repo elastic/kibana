@@ -293,6 +293,13 @@ export const registerESQLEditorAnalyticsEvents = once((analytics: AnalyticsServi
   analytics.registerEventType({
     eventType: ESQL_VISOR_NL_SUBMITTED,
     schema: {
+      source: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'Where the instruction was submitted. Possible values are: quick_search|discover_ask_ai',
+        },
+      },
       nl_length: {
         type: 'long',
         _meta: { description: 'Character count of the natural language instruction.' },

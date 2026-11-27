@@ -442,11 +442,20 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       );
     }
 
+    // An explicit search, e.g. a generated query, is not subject to discover:searchOnPageLoad.
+    // The flag is consumed here so a restored copy of the tab behaves like any other.
+    const { forceInitialFetch } = tabState;
+    if (forceInitialFetch) {
+      dispatch(
+        internalStateSlice.actions.setForceInitialFetch({ tabId, forceInitialFetch: false })
+      );
+    }
+
     if (isCurrentTabActive()) {
       dispatch(initializeAndSync({ tabId }));
 
       if (!shouldSkipInitialFetch) {
-        dispatch(fetchData({ tabId, initial: true }));
+        dispatch(fetchData({ tabId, initial: !forceInitialFetch }));
       }
     } else {
       dispatch(

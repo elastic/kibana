@@ -47,6 +47,7 @@ import {
   useInternalStateGetState,
   useInternalStateSelector,
 } from '../../state_management/redux';
+import { useAskAi } from './use_ask_ai';
 import { DiscoverTopNavMenu } from './discover_topnav_menu';
 import { DiscoverSessionSaveModalContainer } from './save_discover_session';
 import { useDiscoverTopNav } from './use_discover_topnav';
@@ -380,6 +381,8 @@ export const DiscoverTopNav = ({
     persistedDiscoverSession,
   });
 
+  const askAi = useAskAi();
+
   const shouldHideDefaultDataviewPicker =
     !!searchBarCustomization?.CustomDataViewPicker || !!searchBarCustomization?.hideDataViewPicker;
 
@@ -427,6 +430,7 @@ export const DiscoverTopNav = ({
         dataViewPickerComponentProps={
           shouldHideDefaultDataviewPicker ? undefined : dataViewPickerProps
         }
+        askAi={askAi}
         displayStyle="detached"
         textBasedLanguageModeErrors={textBasedLanguageModeErrors}
         textBasedLanguageModeWarning={esqlModeWarning}

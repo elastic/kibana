@@ -300,6 +300,7 @@ export function createSearchBar({
             nonKqlMode={props.nonKqlMode}
             customSubmitButton={props.customSubmitButton}
             dataViewPickerOverride={props.dataViewPickerOverride}
+            askAi={props.askAi}
             isClearable={props.isClearable}
             placeholder={props.placeholder}
             additionalQueryBarMenuItems={props.additionalQueryBarMenuItems}

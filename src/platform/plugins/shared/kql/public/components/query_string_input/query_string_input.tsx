@@ -20,6 +20,7 @@ import {
   EuiLink,
   EuiOutsideClickDetector,
   EuiPortal,
+  EuiResizeObserver,
   EuiTextArea,
   htmlIdGenerator,
   toSentenceCase,
@@ -107,6 +108,10 @@ export interface QueryStringInputProps {
   disableAutoFocus?: boolean;
   screenTitle?: string;
   prepend?: any;
+  /**
+   * Rendered inside the input on its right edge, after a separator
+   */
+  append?: React.ReactNode;
   persistedLog?: PersistedLog;
   bubbleSubmitEvent?: boolean;
   placeholder?: string;
@@ -166,6 +171,7 @@ interface State {
   selectionStart: number | null;
   selectionEnd: number | null;
   indexPatterns: FilterableSource[];
+  appendWidth: number;
 
   /**
    * Part of state because passed down to child components
@@ -200,6 +206,7 @@ export class QueryStringInput extends PureComponent<QueryStringInputProps, State
     selectionStart: null,
     selectionEnd: null,
     indexPatterns: [],
+    appendWidth: 0,
     queryBarInputDiv: null,
   };
 
@@ -828,6 +835,27 @@ export class QueryStringInput extends PureComponent<QueryStringInputProps, State
       'kbnQueryBar__textarea--isClearable': this.props.isClearable,
       'kbnQueryBar__textarea--withPrepend': prependElement,
     });
+    const clearIcon =
+      this.props.isClearable && !this.props.isDisabled && this.props.query.query ? (
+        <EuiFormControlLayoutIcons
+          side="right"
+          iconsPosition={this.props.append ? 'static' : 'absolute'}
+          clear={{
+            onClick: () => {
+              this.onQueryStringChange('');
+              // Force close the dropdown/suggestions
+              this.setState({
+                isSuggestionsVisible: false,
+                index: null,
+              });
+              if (this.props.autoSubmit) {
+                this.onSubmit({ query: '', language: this.props.query.language });
+              }
+            },
+            title: strings.getQueryBarClearInputLabel(),
+          }}
+        />
+      ) : null;
     const inputWrapClassName = classNames('kbnQueryBar__textareaWrap', {
       'kbnQueryBar__textareaWrap--withSuggestionVisible':
         isSuggestionsVisible && !isEmpty(this.state.suggestions),
@@ -882,6 +910,7 @@ export class QueryStringInput extends PureComponent<QueryStringInputProps, State
                 role="textbox"
                 data-test-subj={this.props.dataTestSubj || 'queryInput'}
                 isInvalid={this.props.isInvalid}
+                style={this.props.append ? { paddingRight: this.state.appendWidth } : undefined}
               >
                 {this.forwardNewValueIfNeeded(this.getQueryString())}
               </EuiTextArea>
@@ -893,26 +922,18 @@ export class QueryStringInput extends PureComponent<QueryStringInputProps, State
                   isDisabled={this.props.isDisabled}
                 />
               ) : null}
-              {this.props.isClearable && !this.props.isDisabled && this.props.query.query ? (
-                <EuiFormControlLayoutIcons
-                  side="right"
-                  iconsPosition="absolute"
-                  clear={{
-                    onClick: () => {
-                      this.onQueryStringChange('');
-                      // Force close the dropdown/suggestions
-                      this.setState({
-                        isSuggestionsVisible: false,
-                        index: null,
-                      });
-                      if (this.props.autoSubmit) {
-                        this.onSubmit({ query: '', language: this.props.query.language });
-                      }
-                    },
-                    title: strings.getQueryBarClearInputLabel(),
-                  }}
-                />
-              ) : null}
+              {this.props.append ? (
+                <EuiResizeObserver onResize={this.onAppendResize}>
+                  {(resizeRef) => (
+                    <div ref={resizeRef} className="kbnQueryBar__append">
+                      {clearIcon}
+                      <div className="kbnQueryBar__appendContent">{this.props.append}</div>
+                    </div>
+                  )}
+                </EuiResizeObserver>
+              ) : (
+                clearIcon
+              )}
             </div>
             <EuiPortal>
               <SuggestionsComponent
@@ -964,6 +985,10 @@ export class QueryStringInput extends PureComponent<QueryStringInputProps, State
 
   private assignInputRef = (node: HTMLTextAreaElement | null) => {
     this.inputRef = node;
+  };
+
+  private onAppendResize = ({ width }: { width: number }) => {
+    this.setState({ appendWidth: width });
   };
 
   private assignQueryInputDivRef = (node: HTMLDivElement | null) => {

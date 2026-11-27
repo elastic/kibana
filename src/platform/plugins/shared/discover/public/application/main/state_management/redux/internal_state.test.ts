@@ -11,6 +11,8 @@ import { ExistenceFetchStatus } from '@kbn/unified-field-list';
 import { EsqlSource, registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
 import { createMockDataViewsService } from '@kbn/data-source/src/__mocks__/data_views_service.mock';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { NL_TO_ESQL_ROUTE } from '@kbn/esql-types';
+import { MAX_DISCOVER_SESSION_TABS } from '@kbn/saved-search-plugin/common';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { TABS_LOCAL_STORAGE_KEY } from '../tabs_storage_manager';
@@ -171,6 +173,169 @@ describe('InternalStateStore', () => {
     expect(tabsState.byId[tabsState.unsafeCurrentId].globalState).toEqual(params.globalState);
     expect(tabsState.byId[tabsState.unsafeCurrentId].initialInternalState).toEqual({
       searchSessionId: params.searchSessionId,
+    });
+  });
+
+  describe('openAskInEsqlTab', () => {
+    const mockGeneration = (
+      services: Awaited<ReturnType<typeof setup>>['services'],
+      generate: () => Promise<{ content: string }>
+    ) => {
+      const post = services.http.post as jest.Mock;
+      const defaultPost = post.getMockImplementation();
+      post.mockImplementation((path: string, options: unknown) =>
+        path === NL_TO_ESQL_ROUTE ? generate() : defaultPost?.(path, options)
+      );
+      return post;
+    };
+
+    const askInEsqlTab = (
+      store: Awaited<ReturnType<typeof setup>>['store'],
+      signal = new AbortController().signal
+    ) =>
+      store.dispatch(
+        internalStateActions.openAskInEsqlTab({
+          tabId: store.getState().tabs.unsafeCurrentId,
+          dataView: dataViewMock,
+          prompt: 'show me logs',
+          signal,
+        })
+      );
+
+    it('should generate the query from the current tab and open it in a new tab', async () => {
+      const { store, services } = await setup();
+      const initialTabId = store.getState().tabs.unsafeCurrentId;
+      const query = { query: 'response:404', language: 'kuery' };
+      const filters = [
+        {
+          meta: { key: 'extension', params: { query: 'jpg' }, type: 'phrase' },
+          query: { match_phrase: { extension: 'jpg' } },
+        },
+      ];
+      const timeRange = { from: '2024-01-01T00:00:00.000Z', to: '2024-01-02T00:00:00.000Z' };
+      store.dispatch(
+        internalStateActions.updateAppState({ tabId: initialTabId, appState: { query, filters } })
+      );
+      store.dispatch(
+        internalStateActions.updateGlobalState({ tabId: initialTabId, globalState: { timeRange } })
+      );
+      const initialTab = selectTab(store.getState(), initialTabId);
+      const post = mockGeneration(services, () =>
+        Promise.resolve({ content: 'FROM logs | LIMIT 10' })
+      );
+
+      await askInEsqlTab(store);
+
+      const { body } = post.mock.calls.find(([path]) => path === NL_TO_ESQL_ROUTE)[1];
+      expect(JSON.parse(body)).toEqual({
+        nlInstruction: 'show me logs',
+        currentQuery: expect.stringMatching(
+          /WHERE KQL\("""response:404"""\) AND `extension` : "jpg"/
+        ),
+      });
+      const { allIds, byId, unsafeCurrentId } = store.getState().tabs;
+      expect(allIds).toHaveLength(2);
+      expect(unsafeCurrentId).toBe(allIds[1]);
+      expect(byId[unsafeCurrentId].label).toBe('show me logs');
+      expect(byId[unsafeCurrentId].appState.query).toEqual({ esql: 'FROM logs | LIMIT 10' });
+      expect(byId[unsafeCurrentId].globalState.timeRange).toEqual(timeRange);
+      expect(byId[unsafeCurrentId].forceInitialFetch).toBe(true);
+      expect(selectTab(store.getState(), initialTabId).appState).toEqual(initialTab.appState);
+      expect(services.analytics.reportEvent).toHaveBeenCalledWith('esql.visor_nl_submitted', {
+        source: 'discover_ask_ai',
+        nl_length: 'show me logs'.length,
+        context_query_length: JSON.parse(body).currentQuery.length,
+        duration_ms: expect.any(Number),
+        success: true,
+        generated_query_length: 'FROM logs | LIMIT 10'.length,
+      });
+    });
+
+    it('should prefer the unsubmitted search draft', async () => {
+      const { store, services } = await setup();
+      const initialTabId = store.getState().tabs.unsafeCurrentId;
+      store.dispatch(
+        internalStateActions.updateAppState({
+          tabId: initialTabId,
+          appState: { query: { query: 'response:404', language: 'kuery' } },
+        })
+      );
+      store.dispatch(
+        internalStateActions.setSearchDraftUiState({
+          tabId: initialTabId,
+          searchDraftUiState: {
+            query: { query: 'response:500', language: 'kuery' },
+            dateRangeFrom: 'now-7d',
+            dateRangeTo: 'now',
+          },
+        })
+      );
+      const post = mockGeneration(services, () =>
+        Promise.resolve({ content: 'FROM logs | LIMIT 10' })
+      );
+
+      await askInEsqlTab(store);
+
+      const { body } = post.mock.calls.find(([path]) => path === NL_TO_ESQL_ROUTE)[1];
+      expect(JSON.parse(body).currentQuery).toMatch(/WHERE KQL\("""response:500"""\)/);
+      const { byId, unsafeCurrentId } = store.getState().tabs;
+      expect(byId[unsafeCurrentId].globalState.timeRange).toEqual({ from: 'now-7d', to: 'now' });
+    });
+
+    it('should show the error and open no tab when the generation fails', async () => {
+      const { store, services } = await setup();
+      mockGeneration(services, () =>
+        Promise.reject({ body: { message: 'Connector unavailable', statusCode: 503 } })
+      );
+
+      await askInEsqlTab(store);
+
+      expect(services.toastNotifications.addDanger).toHaveBeenCalledWith({
+        title: 'Connector unavailable',
+      });
+      expect(store.getState().tabs.allIds).toHaveLength(1);
+      expect(services.analytics.reportEvent).toHaveBeenCalledWith(
+        'esql.visor_nl_submitted',
+        expect.objectContaining({ success: false, error_code: '503' })
+      );
+    });
+
+    it('should do nothing when the generation is aborted', async () => {
+      const { store, services } = await setup();
+      const abortController = new AbortController();
+      mockGeneration(services, () => {
+        abortController.abort();
+        return Promise.reject(new Error('aborted'));
+      });
+
+      await askInEsqlTab(store, abortController.signal);
+
+      expect(services.toastNotifications.addDanger).not.toHaveBeenCalled();
+      expect(store.getState().tabs.allIds).toHaveLength(1);
+    });
+
+    it('should not generate a query when the tab limit is reached', async () => {
+      const { store, services } = await setup();
+      const currentTab = selectTab(store.getState(), store.getState().tabs.unsafeCurrentId);
+      const otherTabs = Array.from({ length: MAX_DISCOVER_SESSION_TABS - 1 }, (_, index) => ({
+        ...createTabItem([currentTab]),
+        id: `other-tab-${index}`,
+      }));
+      await store.dispatch(
+        internalStateActions.updateTabs({
+          items: [currentTab, ...otherTabs],
+          selectedItem: currentTab,
+        })
+      );
+      const post = mockGeneration(services, () =>
+        Promise.resolve({ content: 'FROM logs | LIMIT 10' })
+      );
+
+      await askInEsqlTab(store);
+
+      expect(services.toastNotifications.addWarning).toHaveBeenCalled();
+      expect(post).not.toHaveBeenCalledWith(NL_TO_ESQL_ROUTE, expect.anything());
+      expect(store.getState().tabs.allIds).toHaveLength(MAX_DISCOVER_SESSION_TABS);
     });
   });
 

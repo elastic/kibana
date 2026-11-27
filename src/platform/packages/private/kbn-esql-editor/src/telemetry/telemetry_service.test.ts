@@ -177,6 +177,7 @@ describe('ESQLEditorTelemetryService', () => {
   describe('trackVisorNlSubmitted', () => {
     it('tracks a successful NL submission with all fields, omitting error_code', () => {
       telemetryService.trackVisorNlSubmitted({
+        source: 'quick_search',
         nlLength: 42,
         contextQueryLength: 100,
         success: true,
@@ -185,6 +186,7 @@ describe('ESQLEditorTelemetryService', () => {
       });
 
       expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(ESQL_VISOR_NL_SUBMITTED, {
+        source: 'quick_search',
         nl_length: 42,
         context_query_length: 100,
         success: true,
@@ -200,6 +202,7 @@ describe('ESQLEditorTelemetryService', () => {
 
     it('tracks a failed NL submission with error code, omitting generated_query_length', () => {
       telemetryService.trackVisorNlSubmitted({
+        source: 'discover_ask_ai',
         nlLength: 42,
         contextQueryLength: 100,
         success: false,
@@ -208,6 +211,7 @@ describe('ESQLEditorTelemetryService', () => {
       });
 
       expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(ESQL_VISOR_NL_SUBMITTED, {
+        source: 'discover_ask_ai',
         nl_length: 42,
         context_query_length: 100,
         success: false,
@@ -223,6 +227,7 @@ describe('ESQLEditorTelemetryService', () => {
 
     it('omits error_code when not provided', () => {
       telemetryService.trackVisorNlSubmitted({
+        source: 'quick_search',
         nlLength: 10,
         contextQueryLength: 50,
         success: false,

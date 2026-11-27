@@ -11,6 +11,7 @@ import { css } from '@emotion/react';
 import type { ComponentPropsWithoutRef, ReactNode } from 'react';
 import { EuiButtonEmpty, EuiButtonIcon, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { getIndexPatternFromESQLQuery, getSourceCommandQueryFromESQLQuery } from '@kbn/esql-utils';
+import { QuerySource } from '@kbn/esql-types';
 import { EsqlSource, registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -234,8 +235,11 @@ interface QuickSearchVisorPropsInternal {
   isVisible?: boolean;
   // Called with the LLM-generated ES|QL so the parent editor can show the diff review UI
   onNlResult?: VisorNlResultHandler;
-  // Callback when the query is updated and submitted
-  onUpdateAndSubmitQuery: (query: string) => void;
+  // Callback when the query is updated and submitted, with the visor mode that produced it
+  onUpdateAndSubmitQuery: (
+    query: string,
+    source: QuerySource.QUICK_SEARCH_KQL | QuerySource.QUICK_SEARCH_NL
+  ) => void;
   // When true, every visor submit is a no-op (e.g. invalid date range or a disabled caller)
   isDisabled?: boolean;
   // When true, KQL submit is a no-op. Natural language is still allowed while the editor query is empty
@@ -275,6 +279,10 @@ function QuickSearchVisorInternal({
     [core.analytics]
   );
 
+  const onNlQueryApplied = useCallback(
+    (generatedQuery: string) => onUpdateAndSubmitQuery(generatedQuery, QuerySource.QUICK_SEARCH_NL),
+    [onUpdateAndSubmitQuery]
+  );
   const {
     nlValue,
     setNlValue,
@@ -286,7 +294,7 @@ function QuickSearchVisorInternal({
     query,
     onNlResult,
     onNlReject: focusNlInput,
-    onUpdateAndSubmitQuery,
+    onUpdateAndSubmitQuery: onNlQueryApplied,
     telemetryService,
   });
   const showAskAiButton = isNlToEsqlEnabled && hasConnector === true;
@@ -305,7 +313,7 @@ function QuickSearchVisorInternal({
       if (sourcesKey && kqlQuery.trim()) {
         const sourceCommand = query.trim().toUpperCase().startsWith('TS ') ? 'TS' : 'FROM';
         const newQuery = `${sourceCommand} ${sourcesKey} | WHERE KQL("""${kqlQuery.trim()}""")`;
-        onUpdateAndSubmitQuery(newQuery);
+        onUpdateAndSubmitQuery(newQuery, QuerySource.QUICK_SEARCH_KQL);
         setSearchValue('');
         onKqlSubmitted?.();
       }

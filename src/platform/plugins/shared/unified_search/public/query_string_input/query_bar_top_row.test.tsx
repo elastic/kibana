@@ -705,6 +705,150 @@ describe('QueryBarTopRowTopRow', () => {
     });
   });
 
+  describe('ask AI', () => {
+    const getTestProps = (onSubmit: jest.Mock) => ({
+      screenTitle: 'Another Screen',
+      isDirty: false,
+      indexPatterns: [stubIndexPattern],
+      timeHistory: mockTimeHistory,
+      askAi: {
+        suggestedPrompts: ['prompt 1', 'prompt 2', 'prompt 3', 'prompt 4', 'prompt 5', 'prompt 6'],
+        onSubmit,
+      },
+    });
+
+    it('should submit a suggested prompt and wait for it to be handled', async () => {
+      let resolveSubmit: () => void = () => {};
+      const onSubmit = jest.fn(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveSubmit = resolve;
+          })
+      );
+      render(wrapQueryBarTopRowInContext({ ...getTestProps(onSubmit), query: kqlQuery }));
+
+      await userEvent.click(await screen.findByTestId('unifiedSearchAskAiButton'));
+
+      expect(screen.getByTestId('unifiedSearchAskAiInput')).toHaveFocus();
+      expect(screen.getByTestId('unifiedSearchAskAiSend')).toBeDisabled();
+      const prompts = await screen.findAllByTestId('unifiedSearchAskAiPrompt');
+      expect(prompts).toHaveLength(5);
+
+      await userEvent.click(prompts[1]);
+      expect(screen.getByTestId('unifiedSearchAskAiInput')).toHaveValue('prompt 2');
+
+      await userEvent.click(screen.getByTestId('unifiedSearchAskAiSend'));
+      expect(onSubmit).toHaveBeenCalledWith('prompt 2', expect.any(AbortSignal));
+      expect(screen.getByTestId('unifiedSearchAskAiInput')).toHaveAttribute('readonly');
+      expect(screen.getByTestId('unifiedSearchAskAiSend')).toBeDisabled();
+
+      await act(async () => resolveSubmit());
+      expect(screen.getByTestId('unifiedSearchAskAiInput')).not.toHaveAttribute('readonly');
+      expect(screen.getByTestId('unifiedSearchAskAiSend')).toBeEnabled();
+    });
+
+    it('should submit on Enter and cancel the submission on close', async () => {
+      const onSubmit = jest.fn(
+        (_prompt: string, _signal: AbortSignal) => new Promise<void>(() => {})
+      );
+      render(wrapQueryBarTopRowInContext({ ...getTestProps(onSubmit), query: kqlQuery }));
+
+      await userEvent.click(await screen.findByTestId('unifiedSearchAskAiButton'));
+      await userEvent.type(screen.getByTestId('unifiedSearchAskAiInput'), '  my prompt {enter}');
+      expect(onSubmit).toHaveBeenCalledWith('my prompt', expect.any(AbortSignal));
+
+      await userEvent.click(screen.getByTestId('unifiedSearchAskAiClose'));
+      expect(onSubmit.mock.calls[0][1].aborted).toBe(true);
+      expect(screen.queryByTestId('unifiedSearchAskAiInput')).not.toBeInTheDocument();
+      expect(screen.getByTestId('unifiedSearchAskAiButton')).toHaveFocus();
+    });
+
+    it('should not submit a prompt longer than the generation accepts', async () => {
+      const onSubmit = jest.fn();
+      render(wrapQueryBarTopRowInContext({ ...getTestProps(onSubmit), query: kqlQuery }));
+
+      await userEvent.click(await screen.findByTestId('unifiedSearchAskAiButton'));
+      fireEvent.change(screen.getByTestId('unifiedSearchAskAiInput'), {
+        target: { value: 'a'.repeat(2001) },
+      });
+      fireEvent.keyDown(screen.getByTestId('unifiedSearchAskAiInput'), { key: 'Enter' });
+
+      expect(screen.getByTestId('unifiedSearchAskAiInput')).toBeInvalid();
+      expect(screen.getByTestId('unifiedSearchAskAiSend')).toHaveAttribute('aria-disabled', 'true');
+      expect(onSubmit).not.toHaveBeenCalled();
+    });
+
+    it('should not submit on the Enter that confirms an input method editor candidate', async () => {
+      const onSubmit = jest.fn();
+      render(wrapQueryBarTopRowInContext({ ...getTestProps(onSubmit), query: kqlQuery }));
+
+      await userEvent.click(await screen.findByTestId('unifiedSearchAskAiButton'));
+      fireEvent.change(screen.getByTestId('unifiedSearchAskAiInput'), {
+        target: { value: 'ログを表示' },
+      });
+      fireEvent.keyDown(screen.getByTestId('unifiedSearchAskAiInput'), {
+        key: 'Enter',
+        isComposing: true,
+      });
+
+      expect(onSubmit).not.toHaveBeenCalled();
+    });
+
+    it('should close on Escape once the suggested prompts are hidden', async () => {
+      render(wrapQueryBarTopRowInContext({ ...getTestProps(jest.fn()), query: kqlQuery }));
+
+      await userEvent.click(await screen.findByTestId('unifiedSearchAskAiButton'));
+      await userEvent.keyboard('{Escape}');
+      expect(screen.getByTestId('unifiedSearchAskAiInput')).toBeInTheDocument();
+
+      await userEvent.keyboard('{Escape}');
+      expect(screen.queryByTestId('unifiedSearchAskAiInput')).not.toBeInTheDocument();
+      expect(screen.getByTestId('unifiedSearchAskAiButton')).toHaveFocus();
+    });
+
+    it('should navigate the suggested prompts with the arrow keys', async () => {
+      render(wrapQueryBarTopRowInContext({ ...getTestProps(jest.fn()), query: kqlQuery }));
+
+      await userEvent.click(await screen.findByTestId('unifiedSearchAskAiButton'));
+      const prompts = await screen.findAllByTestId('unifiedSearchAskAiPrompt');
+
+      await userEvent.keyboard('{ArrowDown}{ArrowDown}');
+      expect(prompts[1]).toHaveFocus();
+
+      await userEvent.keyboard('{ArrowUp}{ArrowUp}');
+      expect(screen.getByTestId('unifiedSearchAskAiInput')).toHaveFocus();
+
+      await userEvent.keyboard('{ArrowDown}{Enter}');
+      expect(screen.getByTestId('unifiedSearchAskAiInput')).toHaveValue('prompt 1');
+      expect(screen.getByTestId('unifiedSearchAskAiInput')).toHaveFocus();
+    });
+
+    it('should leave Ask AI mode when switching to ES|QL', async () => {
+      const testProps = getTestProps(jest.fn());
+      const { rerender } = render(wrapQueryBarTopRowInContext({ ...testProps, query: kqlQuery }));
+
+      await userEvent.click(await screen.findByTestId('unifiedSearchAskAiButton'));
+      rerender(wrapQueryBarTopRowInContext({ ...testProps, query: esqlQuery }));
+      rerender(wrapQueryBarTopRowInContext({ ...testProps, query: kqlQuery }));
+
+      expect(await screen.findByTestId('unifiedSearchAskAiButton')).toBeInTheDocument();
+      expect(screen.queryByTestId('unifiedSearchAskAiInput')).not.toBeInTheDocument();
+    });
+
+    it('should not render the Ask AI button when the query input is disabled', async () => {
+      render(
+        wrapQueryBarTopRowInContext({
+          ...getTestProps(jest.fn()),
+          query: kqlQuery,
+          isDisabled: true,
+        })
+      );
+
+      expect(await screen.findByTestId('queryInput')).toBeInTheDocument();
+      expect(screen.queryByTestId('unifiedSearchAskAiButton')).not.toBeInTheDocument();
+    });
+  });
+
   it('Should render cancel button when loading', async () => {
     render(
       wrapQueryBarTopRowInContext({

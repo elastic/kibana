@@ -18,6 +18,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { EsqlSource, registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
+import { QuerySource } from '@kbn/esql-types';
 import { QuickSearchVisor, type QuickSearchVisorProps } from '.';
 import { VisorMode } from './visor_mode';
 import { NL_TEXTAREA_MAX_HEIGHT, visorStyles } from './visor.styles';
@@ -46,6 +47,8 @@ describe('Quick search visor', () => {
     kql: kqlMock,
     esql: {
       getLicense: jest.fn().mockResolvedValue(null),
+      hasEnterpriseLicense: jest.fn().mockResolvedValue(false),
+      hasInferenceConnector: jest.fn().mockResolvedValue(false),
     },
   };
 
@@ -68,9 +71,6 @@ describe('Quick search visor', () => {
           { name: 'test_index', hidden: false, type: 'index' },
           { name: 'logs', hidden: false, type: 'index' },
         ]);
-      }
-      if (url.includes('/internal/inference/connectors')) {
-        return Promise.resolve({ connectors: [{ connectorId: 'test-connector' }] });
       }
       return Promise.resolve([]);
     });
@@ -194,7 +194,8 @@ describe('Quick search visor', () => {
     act(() => onSubmit({ query: 'hostname:web-01', language: 'kuery' }));
 
     expect(onUpdateAndSubmitQuery).toHaveBeenCalledWith(
-      'FROM test_index | WHERE KQL("""hostname:web-01""")'
+      'FROM test_index | WHERE KQL("""hostname:web-01""")',
+      QuerySource.QUICK_SEARCH_KQL
     );
   });
 
@@ -270,7 +271,8 @@ describe('Quick search visor', () => {
     act(() => onSubmit({ query: 'hostname:web-01', language: 'kuery' }));
 
     expect(onUpdateAndSubmitQuery).toHaveBeenCalledWith(
-      expect.stringMatching(/^TS ts_index \| WHERE KQL/)
+      expect.stringMatching(/^TS ts_index \| WHERE KQL/),
+      QuerySource.QUICK_SEARCH_KQL
     );
   });
 
@@ -326,6 +328,8 @@ describe('Quick search visor', () => {
           hasAtLeast: jest.fn().mockReturnValue(true),
           getFeature: jest.fn().mockReturnValue({ isAvailable: false }),
         }),
+        hasEnterpriseLicense: jest.fn().mockResolvedValue(true),
+        hasInferenceConnector: jest.fn().mockResolvedValue(true),
       },
     };
 

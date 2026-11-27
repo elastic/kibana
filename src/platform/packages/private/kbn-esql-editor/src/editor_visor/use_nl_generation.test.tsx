@@ -20,11 +20,16 @@ jest.mock('../hooks/use_nl_to_esql_check', () => ({
 
 describe('useNlGeneration', () => {
   const coreStart = coreMock.createStart();
+  const esqlService = { hasInferenceConnector: jest.fn() };
 
   const createWrapper =
     () =>
     ({ children }: { children: React.ReactNode }) =>
-      <KibanaContextProvider services={{ core: coreStart }}>{children}</KibanaContextProvider>;
+      (
+        <KibanaContextProvider services={{ core: coreStart, esql: esqlService }}>
+          {children}
+        </KibanaContextProvider>
+      );
 
   const defaultParams = {
     query: 'FROM test_index',
@@ -71,6 +76,31 @@ describe('useNlGeneration', () => {
     act(() => onNlResult.mock.calls[0][1].onAccept());
 
     expect(result.current.nlValue).toBe('');
+  });
+
+  it('onNlSubmit hands the result to a handler registered while the request was running', async () => {
+    const onNlResult = jest.fn();
+    const response = Promise.withResolvers<{ content: string }>();
+    (coreStart.http.post as jest.Mock).mockReturnValue(response.promise);
+    const initialProps: Parameters<typeof useNlGeneration>[0] = defaultParams;
+
+    const { result, rerender } = renderHook((params) => useNlGeneration(params), {
+      wrapper: createWrapper(),
+      initialProps,
+    });
+
+    act(() => result.current.setNlValue('show me logs'));
+    act(() => {
+      void result.current.onNlSubmit();
+    });
+    rerender({ ...defaultParams, onNlResult });
+    await act(async () => {
+      response.resolve({ content: 'FROM logs | LIMIT 10' });
+      await response.promise;
+    });
+
+    expect(onNlResult).toHaveBeenCalledWith('FROM logs | LIMIT 10', expect.anything());
+    expect(defaultParams.onUpdateAndSubmitQuery).not.toHaveBeenCalled();
   });
 
   it('onNlSubmit falls back to onUpdateAndSubmitQuery when onNlResult is not provided', async () => {
@@ -240,38 +270,18 @@ describe('useNlGeneration', () => {
       (useNlToEsqlCheck as jest.Mock).mockReturnValue(false);
     });
 
-    it('hasConnector is true when the connectors endpoint returns a non-empty array', async () => {
-      (coreStart.http.get as jest.Mock).mockResolvedValue({ connectors: [{ id: 'c1' }] });
+    it.each([true, false])('hasConnector is %s when the esql service says so', async (expected) => {
+      esqlService.hasInferenceConnector.mockResolvedValue(expected);
 
       const { result } = renderHook(() => useNlGeneration(defaultParams), {
         wrapper: createWrapper(),
       });
 
-      await waitFor(() => expect(result.current.hasConnector).toBe(true));
+      await waitFor(() => expect(result.current.hasConnector).toBe(expected));
     });
 
-    it('hasConnector is false when the connectors endpoint returns an empty array', async () => {
-      (coreStart.http.get as jest.Mock).mockResolvedValue({ connectors: [] });
-
-      const { result } = renderHook(() => useNlGeneration(defaultParams), {
-        wrapper: createWrapper(),
-      });
-
-      await waitFor(() => expect(result.current.hasConnector).toBe(false));
-    });
-
-    it('hasConnector is false when the connectors endpoint throws', async () => {
-      (coreStart.http.get as jest.Mock).mockRejectedValue(new Error('network error'));
-
-      const { result } = renderHook(() => useNlGeneration(defaultParams), {
-        wrapper: createWrapper(),
-      });
-
-      await waitFor(() => expect(result.current.hasConnector).toBe(false));
-    });
-
-    it('reuses the connector result for the next editor', async () => {
-      (coreStart.http.get as jest.Mock).mockResolvedValue({ connectors: [{ id: 'c1' }] });
+    it('starts the next editor with the last known connector result', async () => {
+      esqlService.hasInferenceConnector.mockResolvedValue(true);
       const wrapper = createWrapper();
       const first = renderHook(() => useNlGeneration(defaultParams), { wrapper });
 
@@ -279,7 +289,6 @@ describe('useNlGeneration', () => {
 
       const second = renderHook(() => useNlGeneration(defaultParams), { wrapper });
       expect(second.result.current.hasConnector).toBe(true);
-      expect(coreStart.http.get).toHaveBeenCalledTimes(1);
     });
   });
 });

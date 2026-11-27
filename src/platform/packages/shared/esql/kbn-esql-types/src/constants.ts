@@ -28,6 +28,8 @@ export const ESQL_VIEWS_CAPABILITIES = {
   delete: 'delete',
 } as const;
 export const NL_TO_ESQL_ROUTE = '/internal/esql/nl_to_esql';
+/** The longest natural language instruction {@link NL_TO_ESQL_ROUTE} accepts. */
+export const NL_TO_ESQL_MAX_INSTRUCTION_LENGTH = 2000;
 export const SUGGEST_FIX_ROUTE = '/internal/esql/suggest_fix';
 export const EXPLAIN_ERROR_ROUTE = '/internal/esql/explain_error';
 export const NO_AI_CONNECTOR_ERROR_CODE = 'no_ai_connector';

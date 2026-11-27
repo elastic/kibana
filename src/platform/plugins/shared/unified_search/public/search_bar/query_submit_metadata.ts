@@ -11,4 +11,5 @@ export enum QuerySubmitTrigger {
   QUERY_BAR_SUBMIT = 'query_bar_submit',
   TIME_FILTER = 'time_filter',
   QUICK_SEARCH = 'quick_search',
+  QUICK_SEARCH_NL = 'quick_search_nl',
 }

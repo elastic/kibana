@@ -16,29 +16,13 @@ import { nlErrorMessage } from './visor_i18n';
 import type { ESQLEditorDeps, VisorNlResultHandler } from '../types';
 import type { ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
 
-const INFERENCE_CONNECTORS_ROUTE = '/internal/inference/connectors';
-
+// The esql service looks the connectors up; this mirror lets the next visor start with the
+// last known result synchronously instead of flashing the AI button in after the promise resolves
 let hasInferenceConnector: boolean | undefined;
-let inferenceConnectorRequest: Promise<boolean> | undefined;
 
-const loadHasInferenceConnector = (http: ESQLEditorDeps['core']['http']): Promise<boolean> => {
-  inferenceConnectorRequest ??= http
-    .get<{ connectors: unknown[] }>(INFERENCE_CONNECTORS_ROUTE)
-    .then((res) => {
-      hasInferenceConnector = res.connectors.length > 0;
-      return hasInferenceConnector;
-    })
-    .catch(() => {
-      hasInferenceConnector = false;
-      return false;
-    });
-  return inferenceConnectorRequest;
-};
-
-/** Drops the cached connector lookup so tests can change the result. */
+/** Drops the last known connector result so tests can change it. */
 export const clearInferenceConnectorCache = (): void => {
   hasInferenceConnector = undefined;
-  inferenceConnectorRequest = undefined;
 };
 
 interface UseNlGenerationParams {
@@ -56,18 +40,23 @@ export const useNlGeneration = ({
   onUpdateAndSubmitQuery,
   telemetryService,
 }: UseNlGenerationParams) => {
-  const { core } = useKibana<ESQLEditorDeps>().services;
+  const { core, esql } = useKibana<ESQLEditorDeps>().services;
   const isNlToEsqlEnabled = useNlToEsqlCheck();
 
   const [nlValue, setNlValue] = useState('');
   const [isNlLoading, setIsNlLoading] = useState(false);
   const [hasConnector, setHasConnector] = useState<boolean | undefined>(hasInferenceConnector);
   const abortControllerRef = useRef<AbortController | null>(null);
+  // The editor loads lazily and registers its review handler when it mounts, which can happen
+  // while a request is running, so the handler is read when the result arrives
+  const onNlResultRef = useRef(onNlResult);
+  onNlResultRef.current = onNlResult;
 
   useEffect(() => {
-    if (!isNlToEsqlEnabled) return;
+    if (!isNlToEsqlEnabled || !esql) return;
     let cancelled = false;
-    loadHasInferenceConnector(core.http).then((available) => {
+    esql.hasInferenceConnector().then((available) => {
+      hasInferenceConnector = available;
       if (!cancelled) {
         setHasConnector(available);
       }
@@ -75,7 +64,7 @@ export const useNlGeneration = ({
     return () => {
       cancelled = true;
     };
-  }, [isNlToEsqlEnabled, core.http]);
+  }, [isNlToEsqlEnabled, esql]);
 
   const trackNlResult = useCallback(
     (
@@ -87,6 +76,7 @@ export const useNlGeneration = ({
       generatedQueryLength?: number
     ) =>
       telemetryService?.trackVisorNlSubmitted({
+        source: 'quick_search',
         nlLength,
         contextQueryLength,
         success,
@@ -127,9 +117,10 @@ export const useNlGeneration = ({
           undefined,
           result.content.length
         );
-        if (onNlResult) {
+        const showReview = onNlResultRef.current;
+        if (showReview) {
           // The prompt stays until the generated query is kept
-          onNlResult(result.content, { onAccept: () => setNlValue(''), onReject: onNlReject });
+          showReview(result.content, { onAccept: () => setNlValue(''), onReject: onNlReject });
         } else {
           appliedContent = true;
           onUpdateAndSubmitQuery(result.content);
@@ -159,7 +150,6 @@ export const useNlGeneration = ({
     query,
     core.http,
     core.notifications.toasts,
-    onNlResult,
     onNlReject,
     onUpdateAndSubmitQuery,
     trackNlResult,
