@@ -29,7 +29,10 @@
     "@kbn/es-ui-shared-plugin",
     "@kbn/react-query",
     "@kbn/shared-ux-router",
-    "@kbn/core-security-server"
+    "@kbn/core-security-server",
+    "@kbn/index-management-shared-types",
+    "@kbn/share-plugin",
+    "@kbn/router-utils"
   ],
   "exclude": [
     "target/**/*"

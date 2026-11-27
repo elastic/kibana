@@ -3682,6 +3682,23 @@ describe('NightshiftInvestigationsClient.claimSlackThread()', () => {
     ]);
   });
 
+  it('records the permalink and summary when the workspace is known', async () => {
+    await makeClient().claimSlackThread({ ...THREAD, workspace: 'T1', summary: 'Latency' });
+
+    expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-1', [
+      {
+        type: 'slack_thread',
+        id: 'slack:T1:C1:1.1',
+        slack: {
+          channel: 'C1',
+          thread_ts: '1.1',
+          permalink: 'https://app.slack.com/client/T1/C1/thread/C1-1.1',
+        },
+        summary: 'Latency',
+      },
+    ]);
+  });
+
   it('leaves a thread another investigation holds with that investigation', async () => {
     subjectsClient.claimSubjects.mockResolvedValue({ claimed: false, heldBy: 'inv-2' });
 

@@ -6,7 +6,7 @@
  */
 
 import { createBurnRateRule } from '../fixtures/rule';
-import { buildCandidatesQuery, buildQuery } from './build_query';
+import { buildCandidatesQuery, buildQuery, EVALUATION_PAGE_SIZE } from './build_query';
 import {
   createKQLCustomIndicator,
   createSLO,
@@ -92,5 +92,27 @@ describe('buildCandidatesQuery()', () => {
     const { aggs } = buildCandidatesQuery(STARTED_AT, slo, rule, { instanceId: 'host-a' });
 
     expect(aggs.instances.composite.after).toEqual({ instanceId: 'host-a' });
+  });
+
+  it('should page the candidates by the evaluation page size', () => {
+    const slo = createSLO({ id: 'test-slo', indicator: createKQLCustomIndicator() });
+    const rule = createBurnRateRule(slo);
+
+    const { aggs } = buildCandidatesQuery(STARTED_AT, slo, rule);
+
+    expect(aggs.instances.composite.size).toBe(EVALUATION_PAGE_SIZE);
+  });
+
+  it('should only return the instance keys, the after key and the search time', () => {
+    const slo = createSLO({ id: 'test-slo', indicator: createKQLCustomIndicator() });
+    const rule = createBurnRateRule(slo);
+
+    const { filter_path: filterPath } = buildCandidatesQuery(STARTED_AT, slo, rule);
+
+    expect(filterPath).toEqual([
+      'took',
+      'aggregations.instances.after_key',
+      'aggregations.instances.buckets.key',
+    ]);
   });
 });

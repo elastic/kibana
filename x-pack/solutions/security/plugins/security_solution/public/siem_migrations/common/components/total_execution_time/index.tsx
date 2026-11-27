@@ -21,6 +21,16 @@ const getDurationFomatter = () => {
   });
 };
 
+const getItemTypes = (migrationType: MigrationType) => {
+  if (migrationType === 'rule') {
+    return 'rules';
+  } else if (migrationType === 'dashboard') {
+    return 'dashboards';
+  } else {
+    return 'workflows';
+  }
+};
+
 interface TotalExecutionTimeProps {
   migrationType: MigrationType;
   milliseconds: number;
@@ -35,7 +45,7 @@ export const TotalExecutionTime: React.FC<TotalExecutionTimeProps> = ({
   }, [milliseconds]);
 
   const toolTipContent = useMemo(
-    () => i18n.TOTAL_EXECUTION_TIME_TOOLTIP(migrationType === 'rule' ? 'rules' : 'dashboards'),
+    () => i18n.TOTAL_EXECUTION_TIME_TOOLTIP(getItemTypes(migrationType)),
     [migrationType]
   );
 

@@ -8,22 +8,23 @@ the remaining eligible detections into new events.
 - **`## Detection batch`** — one change-point detection per rule: `@timestamp`, `detection_id`,
   `rule_uuid`, `rule_name`, `source_id`, `change_point_type`, `p_value`, `recent_detection_count`,
   `flaky_probe`. Copy `source_id` as is into `slugs` and signal `source_id`.
-- `flaky_probe: true` → apply `<chronic_and_recurring>` rule 1. Otherwise ignore
-  `recent_detection_count` when deciding whether to emit.
+- `flaky_probe: true` → apply `<chronic_and_recurring>` rule 1, whatever `classifier.reason` says.
+  Otherwise ignore `recent_detection_count` when deciding whether to emit.
 - **`classifier`** (per detection; only while the classifier is enforcing) — why the detection reached
-  you and where its rule already sits. You only see a change the agent has not already reviewed.
-  `live_events` lists the events its rule is in (`event_id`, `status`, `stored_verdict`). It points at
-  what to verify and where to route; it is never evidence. `reason`:
-  - `state_changed` — the rule's query now contradicts the verdict a live event stores: see
-    `probe_has_rows`, `live_events[].stored_verdict` and `evidence_found`.
-  - `above_normal` — its match count is above its own normal: see `baseline`.
-  - `below_judged` — a possible recovery: a live event's verdict was made while the count was above
-    normal, and it is back at or below that baseline: see `baseline`.
+  you and where its rule already sits. `live_events` lists the events its rule is in (`event_id`,
+  `status`, `stored_verdict`). It points at what to verify and where to route; it is never evidence.
+  `reason`:
+  - `state_changed` — either the current breach state contradicts the stored verdict (`rule_breached`:
+    the rule recorded a breach in its recent runs, against `live_events[].stored_verdict`), or a
+    stored `refutes` verdict recorded found evidence
+    (`evidence_found`), which makes the membership something to verify rather than proof of the
+    rule's current state.
   - `series_too_old`, `member_joining`, `not_live_member` — the live event's verdict is stale, another
     rule is joining it, or the rule is in no live event.
-  - `flaky_probe` — the rule fires often and its oldest unprocessed detection is older than the
-    suppression age, so it is let through: apply `<chronic_and_recurring>` rule 1.
-  - `unjudged_member`, `over_cap`, `probe_unavailable` — it could not be judged.
+  - `flaky_probe` — the rule fires often, is in no live event, and its oldest unprocessed detection is
+    older than the suppression age, so it is let through; the `flaky_probe` flag above says how to
+    handle it.
+  - `unjudged_member`, `over_cap` — it could not be judged.
 
 </inputs>
 
@@ -168,7 +169,7 @@ Evaluate detections pairwise. Compare one current detection against another usin
 `<grounding_evidence>` and grounded topology only; a current detection has no stored narrative.
 Compare one current detection against one active event using that event's compact search fields only
 (`title`, `summary`, `symptom_hypothesis`, `causal_features`, `blast_radius`, `signal_counts`). The
-`full` view is read only for recovery candidates and accepted continuations.
+`full` view is read only where the search-call limit below allows it.
 
 **Gather context**
 1. Onset is the earliest time a `<grounding_evidence>` description says the failure was first seen
@@ -331,13 +332,13 @@ stored ones from the compact search result. Both are required on the write paylo
   never individual signal prose.**
 - 4 search calls maximum (2 phases × up to 2 pages each). Each matching phase may inspect page 1 and
   at most one additional page. No additional calls outside the two phases. The one exception: for
-  each accepted continuation, and for each holder you re-send a held rule to (Step 6), call it with
-  `view: "full"` and `event_ids: [that event_id]` to read
-  the event's stored signal descriptions and verdicts, which the compact view never returns; while
-  `signals_has_more` is true, repeat with `signals_page + 1`, up to 5 pages. Severity rates over
-  what was read; signals beyond the fifth page are unmeasured. A `full` read never informs a
-  breach's accept decision; the only read before acceptance is the Recovery verdict read in Rule
-  Match.
+  each accepted continuation, for each holder you re-send a held rule to (Step 6), and for a flaky
+  detection's routed event (`<chronic_and_recurring>` rule 1), call it with `view: "full"` and
+  `event_ids: [that event_id]` to read the event's stored signal descriptions and verdicts, which the
+  compact view never returns; while `signals_has_more` is true, repeat with `signals_page + 1`, up to
+  5 pages. Severity rates over what was read; signals beyond the fifth page are unmeasured. A `full`
+  read never informs a breach's accept decision; the only reads before acceptance are the Recovery
+  verdict read in Rule Match and the flaky-detection read above.
 - Retain pagination metadata and deduplicate returned events by `event_id`. Never perform a source-only search.
 - `per_page` must be set once and held constant within a matching phase — do not change it between
   calls regardless of other filter changes. When `has_more` is true, increment `page` with all other
@@ -664,10 +665,13 @@ Two guards against announcing the same condition again: a rule that fires often,
 continuation that has not changed. Neither grades severity: that is Step 5, from what the
 confirming descriptions measure.
 
-1. **Flaky probe.** Apply when the detection's `flaky_probe` is true. If grounding shows no new
-   impact, do not announce a new event and include the detection in `written_rule_uuids`. The
-   recovery checklist in `<eligibility>`
-   still applies. If grounding confirms new or different impact, treat it as a real incident.
+1. **Flaky rule.** Apply when the detection's `flaky_probe` is true: the rule fires often, so only
+   new impact matters. New means the failure reaches further, or measures higher, than its reference
+   — the stored confirming descriptions of the event it routes to (read in the `full` view Step 2
+   allows), or, with no live event or none stored, the rule's own `trend` and `baseline` from its
+   `<grounding_evidence>`. A reference `<grounding_evidence>` names as not measured proves nothing. With no new impact, do
+   not announce a new event and include the detection in `written_rule_uuids`; the `<eligibility>`
+   recovery checklist still applies. With new or different impact, treat it as a real incident.
 2. **Unchanged continuation.** Applied while routing, not during grouping. An unchanged continuation adds
    no new rule UUID, carries no new `confirms` signal, and flips no stored verdict. A recovery
    (stored `confirms` replaced by `refutes`) is not unchanged: keep the stored `title`,

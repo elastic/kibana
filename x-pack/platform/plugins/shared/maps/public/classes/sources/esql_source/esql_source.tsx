@@ -370,7 +370,7 @@ export class ESQLSource
     return columns.map(({ name }) => this.getFieldByName(name));
   }
 
-  renderSourceSettingsEditor({ onChange }: SourceEditorArgs) {
+  renderSourceSettingsEditor({ onChange }: SourceEditorArgs<ESQLSourceDescriptor>) {
     return (
       <UpdateSourceEditor
         onChange={onChange}

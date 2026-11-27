@@ -57,6 +57,19 @@ export interface ExtractDiamondResponse {
   extraction_mode: 'single_call' | 'per_vertex_fallback';
 }
 
+/** IOC as the enrich pipeline stores it, trimmed to what the email review scores. */
+export interface ReviewedIoc {
+  type: string;
+  value: string;
+  tier: string;
+  tier_basis: string;
+  deferred_unreviewed?: boolean;
+}
+
+export interface ReviewIocsResponse {
+  iocs: ReviewedIoc[];
+}
+
 // ---------------------------------------------------------------------------
 // Request inputs
 // ---------------------------------------------------------------------------
@@ -84,6 +97,12 @@ export interface EnrichTaxonomyInput extends Record<string, unknown> {
 export interface ExtractDiamondInput extends Record<string, unknown> {
   text: string;
   report_id?: string;
+}
+
+export interface ReviewIocsInput extends Record<string, unknown> {
+  text: string;
+  title?: string;
+  article_url?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -120,5 +139,22 @@ export type EnrichTaxonomyExample = Example<
 export type ExtractDiamondExample = Example<
   ExtractDiamondInput,
   { min_signal_count: number },
+  StageMetadata
+>;
+
+/**
+ * One labelled email. `decidedBy: 'rule'` addresses are settled by the deterministic extractor
+ * (placeholder hosts, Message-IDs) and are asserted in Jest, not scored; `'model'` addresses are
+ * plain prose the model must judge.
+ */
+export interface ReviewIocsExpectedEmail {
+  value: string;
+  hunted: boolean;
+  decidedBy: 'rule' | 'model';
+}
+
+export type ReviewIocsExample = Example<
+  ReviewIocsInput,
+  { emails: ReviewIocsExpectedEmail[] },
   StageMetadata
 >;

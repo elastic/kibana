@@ -36,9 +36,17 @@ interface Versioned {
 
 /**
  * Whether sessions are set up and healthy, and a way to set them up. Sets them up by itself, once,
- * when the status says the current user can, and checks back while they rebuild.
+ * when the status says the current user can, and checks back while they rebuild and `isWatched`.
  */
-export const useSessionsStatusState = (): SessionsStatusState => {
+export const useSessionsStatusState = ({
+  isRequested = true,
+  isWatched = true,
+}: {
+  /** Whether a page has needed the status yet. */
+  isRequested?: boolean;
+  /** Whether a page that shows it is open. */
+  isWatched?: boolean;
+} = {}): SessionsStatusState => {
   const apiClient = useApiClient();
   const finishedChanges = useRef(0);
   const [changed, setChanged] = useState<Versioned>();
@@ -53,7 +61,10 @@ export const useSessionsStatusState = (): SessionsStatusState => {
     error,
     refresh,
   } = useAbortableAsync(
-    async ({ signal }): Promise<Versioned> => {
+    async ({ signal }): Promise<Versioned | undefined> => {
+      if (!isRequested) {
+        return undefined;
+      }
       const changes = finishedChanges.current;
       return {
         status: await apiClient.fetch('GET /internal/digital_experience/sessions/status', {
@@ -62,7 +73,7 @@ export const useSessionsStatusState = (): SessionsStatusState => {
         changes,
       };
     },
-    [apiClient]
+    [apiClient, isRequested]
   );
 
   const change = useCallback(
@@ -113,18 +124,26 @@ export const useSessionsStatusState = (): SessionsStatusState => {
   }, [autoEnable, enable]);
 
   const rebuilding = status?.rebuilding === true;
+  // Back on a page that shows the rebuild, which may have finished while no page did
+  const wasWatched = useRef(isWatched);
   useEffect(() => {
-    if (!rebuilding) {
+    if (isWatched && !wasWatched.current && rebuilding) {
+      refresh();
+    }
+    wasWatched.current = isWatched;
+  }, [isWatched, rebuilding, refresh]);
+  useEffect(() => {
+    if (!rebuilding || !isWatched) {
       return;
     }
     const interval = setInterval(refresh, STATUS_REFRESH_MS);
     return () => clearInterval(interval);
-  }, [rebuilding, refresh]);
+  }, [rebuilding, isWatched, refresh]);
 
   return {
     status,
     // Nothing has been fetched before the first request starts.
-    loading: loading || (!status && !error),
+    loading: isRequested && (loading || (!status && !error)),
     error,
     refresh,
     enable,

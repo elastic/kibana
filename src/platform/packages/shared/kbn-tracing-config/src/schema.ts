@@ -9,7 +9,12 @@
 import type { Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { inferenceTracingExportConfigSchema } from '@kbn/inference-tracing-config';
-import type { TracingConfig, TracingExporterConfig, OTLPExportConfig } from './types';
+import type {
+  TracingConfig,
+  TracingExporterConfig,
+  OTLPExportConfig,
+  BrowserTracingConfig,
+} from './types';
 
 const scheduledDelay = schema.conditional(
   schema.contextRef('dev'),
@@ -37,6 +42,25 @@ const tracingExportConfigSchema: Type<TracingExporterConfig> = schema.oneOf([
   }),
 ]);
 
+const browserTracingConfigSchema: Type<BrowserTracingConfig> = schema.object(
+  {
+    enabled: schema.boolean({ defaultValue: false }),
+    url: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
+    headers: schema.maybe(
+      schema.recordOf(schema.string({ maxLength: 256 }), schema.string({ maxLength: 4096 }))
+    ),
+  },
+  {
+    validate: ({ enabled, url }) => {
+      if (!enabled) return;
+      if (!url) return 'url is required when browser tracing is enabled';
+      // The url is rendered into every page, including anonymous ones.
+      const { username, password } = new URL(url);
+      if (username || password) return 'url must not contain credentials';
+    },
+  }
+);
+
 /**
  * The tracing config schema that is exposed by the Telemetry plugin.
  */
@@ -47,4 +71,5 @@ export const tracingConfigSchema: Type<TracingConfig> = schema.object({
     [tracingExportConfigSchema, schema.arrayOf(tracingExportConfigSchema, { maxSize: 25 })],
     { defaultValue: [] }
   ),
+  browser: browserTracingConfigSchema,
 });

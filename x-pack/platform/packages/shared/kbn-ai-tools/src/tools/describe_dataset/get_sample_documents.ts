@@ -17,14 +17,17 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { kqlQuery, dateRangeQuery } from '@kbn/es-query';
 import { castArray } from 'lodash';
+import { randomUUID } from 'crypto';
 import {
   parseEsqlSourceDocuments,
   getEsqlDocumentId,
 } from '../../utils/parse_esql_source_documents';
-import { esqlTimeRange } from '../../utils/esql_time_range';
+import { esqlTimeRange, TIME_FIELD } from '../../utils/esql_time_range';
 
-const SAMPLE_PROBABILITY_FACTOR = 3;
-const SAMPLE_LIMIT_FACTOR = 10;
+// Headroom over the highest measured variance, ~23x that of independent sampling.
+const SAMPLE_COUNT_VARIANCE_RATIO = 25;
+// ~1 short sample in 1,000 under a normal approximation.
+const SAMPLE_COUNT_MARGIN_DEVIATIONS = 3;
 const ESQL_VIEW_PREFIX = '$.';
 
 const isEsqlView = (index: string) => index.startsWith(ESQL_VIEW_PREFIX);
@@ -146,10 +149,11 @@ export function getSampleDocuments({
  * Query DSL.
  *
  * When `sampleSize` is provided, ES|QL has no `random_score` equivalent, and
- * `SAMPLE p | LIMIT n` returns sampled rows in storage order. To preserve the
+ * `SAMPLE p` returns a varying number of rows in storage order. To preserve the
  * old random-sampling behavior, this first counts the matching population,
- * oversamples with `SAMPLE`, shuffles the returned rows client-side, then trims
- * to the requested size.
+ * oversamples with `SAMPLE`, then has Elasticsearch keep `sampleSize` rows in
+ * random order. The order is a salted hash of `@timestamp`, the only row key
+ * views expose, so rows sharing a timestamp tie.
  *
  * `unmappedFields` emits `SET unmapped_fields="<mode>"` so ES|QL predicates
  * can evaluate source-only fields (`'LOAD'`, replaces the older fieldCaps +
@@ -190,25 +194,32 @@ export async function getSampleDocumentsEsql({
     return query.print('basic');
   };
 
-  const buildQuery = ({
+  // Outer METADATA on a view is null-injected as an Eval between FROM and WHERE,
+  // which makes QSTR/MATCH fail with "cannot be used after FROM".
+  const hasView = indices.some(isEsqlView);
+  const buildSourceQuery = () =>
+    esql.from(indices, hasView ? undefined : ['_id', '_source']).where`${whereExpression}`;
+
+  const buildQuery = ({ limit }: { limit: number }) => printQuery(buildSourceQuery().limit(limit));
+
+  const buildSampleQuery = ({
     sampleProbability,
     limit,
   }: {
-    sampleProbability?: number;
-    limit?: number;
-  } = {}) => {
-    // Outer METADATA on a view is null-injected as an Eval between FROM and WHERE,
-    // which makes QSTR/MATCH fail with "cannot be used after FROM".
-    const metadata = indices.some(isEsqlView) ? undefined : ['_id', '_source'];
-    let query = esql.from(indices, metadata).where`${whereExpression}`;
-    if (sampleProbability !== undefined && sampleProbability < 1) {
+    sampleProbability: number;
+    limit: number;
+  }) => {
+    let query = buildSourceQuery();
+    if (sampleProbability < 1) {
       query = query.sample(sampleProbability);
     }
-    if (limit !== undefined) {
-      query = query.limit(limit);
-    }
+    const timeField = esql.col(TIME_FIELD);
+    // Without the salt, the same documents would win the sort on every request.
+    const salt = esql.str(randomUUID());
 
-    return printQuery(query);
+    return printQuery(
+      query.pipe`SORT HASH("md5", CONCAT(${salt}, ${timeField}::string))`.limit(limit)
+    );
   };
 
   const buildCountQuery = () => {
@@ -231,16 +242,14 @@ export async function getSampleDocumentsEsql({
       return { hits: [], total: 0 };
     }
 
-    const sampleProbability = Math.min(1, (SAMPLE_PROBABILITY_FACTOR * sampleSize) / total);
-    const sampleLimit = SAMPLE_LIMIT_FACTOR * sampleSize;
+    const sampleProbability = Math.min(1, getExpectedSampleRows(sampleSize) / total);
     const sampleResponse = await runQuery({
-      query: buildQuery({ sampleProbability, limit: sampleLimit }),
+      query: buildSampleQuery({ sampleProbability, limit: sampleSize }),
       drop_null_columns: true,
     });
 
     const hits = parseHits(sampleResponse);
-    shuffleInPlace(hits); // This is very important, read the function jsdoc for more information
-    return { hits: hits.slice(0, sampleSize), total: hits.length };
+    return { hits, total: hits.length };
   }
 
   const response = await runQuery({
@@ -286,17 +295,13 @@ function getCount(response: ESQLSearchResponse): number {
 }
 
 /**
- * Fisher-Yates shuffle.
- *
- * The old DSL path sorted by `function_score.random_score`, so both the selected
- * documents and their returned order were random. ES|QL `SAMPLE` randomly
- * includes rows, but the resulting rows still come back in storage order; without
- * this shuffle, taking the first N rows after oversampling would reintroduce an
- * ordering bias.
+ * Elasticsearch samples the same positions in every segment a data node reads,
+ * so the `SAMPLE` row count varies far more than independent sampling: up to
+ * about 23 times its mean on production data (elastic/nightshift-program#2543).
+ * Returns the smallest mean that stays `SAMPLE_COUNT_MARGIN_DEVIATIONS` standard
+ * deviations above `sampleSize` at `SAMPLE_COUNT_VARIANCE_RATIO` times the mean.
  */
-function shuffleInPlace<T>(items: T[]) {
-  for (let i = items.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [items[i], items[j]] = [items[j], items[i]];
-  }
-}
+const getExpectedSampleRows = (sampleSize: number): number => {
+  const margin = SAMPLE_COUNT_MARGIN_DEVIATIONS * Math.sqrt(SAMPLE_COUNT_VARIANCE_RATIO);
+  return Math.ceil(((margin + Math.sqrt(margin ** 2 + 4 * sampleSize)) / 2) ** 2);
+};

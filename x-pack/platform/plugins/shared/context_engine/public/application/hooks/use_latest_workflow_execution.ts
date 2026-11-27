@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { useQuery } from '@kbn/react-query';
+import { useQueries } from '@kbn/react-query';
+import { useEffect, useRef } from 'react';
 import {
   ExecutionStatusValues,
   ExecutionType,
@@ -15,16 +16,23 @@ import {
 import { useWorkflowsApi, type GetWorkflowExecutionsParams } from '@kbn/workflows-ui';
 
 const RUNNING_REFETCH_MS = 3_000;
-const IDLE_REFETCH_MS = 30_000;
+export const IDLE_REFETCH_MS = 30_000;
 
 const NON_TERMINAL_STATUSES = ExecutionStatusValues.filter((status) => !isTerminalStatus(status));
 
 export const latestWorkflowExecutionQueryKey = (workflowId: string) =>
   ['context_engine', 'workflow_latest_execution', workflowId] as const;
 
+export interface WorkflowLatestExecution {
+  workflowId: string;
+  execution: WorkflowExecutionListItemDto;
+}
+
 export interface LatestWorkflowExecution {
-  /** The most recent run; `null` when the workflow never ran, `undefined` until loaded. */
-  execution: WorkflowExecutionListItemDto | null | undefined;
+  /** Latest run per workflow that has one; `undefined` only while any lookup is still pending. */
+  executions: readonly WorkflowLatestExecution[] | undefined;
+  /** Workflows whose history lookup failed and has no cached result. */
+  unavailableWorkflowIds: readonly string[];
   /** A run is in progress, or the one just started has not been observed yet. */
   isRunning: boolean;
   activeExecutionId: string | undefined;
@@ -32,57 +40,145 @@ export interface LatestWorkflowExecution {
   isLoading: boolean;
 }
 
-interface LatestWorkflowExecutionData {
+export interface LatestWorkflowExecutionData {
   execution: WorkflowExecutionListItemDto | null;
   activeExecution: WorkflowExecutionListItemDto | null;
 }
 
-/**
- * The most recent run of a workflow, kept current while one is in progress.
- * `awaitedExecutionId` keeps the row running until that execution is observed.
- */
+type WorkflowsApi = ReturnType<typeof useWorkflowsApi>;
+
+const productionExecutionsParams: GetWorkflowExecutionsParams = {
+  executionTypes: [ExecutionType.PRODUCTION],
+  sortField: 'createdAt',
+  sortOrder: 'desc',
+  size: 1,
+  omitStepRuns: true,
+};
+
+/** Loads the latest production run and the run in progress (if any) of a workflow. */
+export const fetchLatestWorkflowExecution = async (
+  api: WorkflowsApi,
+  workflowId: string
+): Promise<LatestWorkflowExecutionData> => {
+  const [latest, active] = await Promise.all([
+    api.getWorkflowExecutions(workflowId, productionExecutionsParams),
+    api.getWorkflowExecutions(workflowId, {
+      ...productionExecutionsParams,
+      statuses: NON_TERMINAL_STATUSES,
+    }),
+  ]);
+  return {
+    execution: latest.results[0] ?? null,
+    activeExecution: active.results[0] ?? null,
+  };
+};
+
+/** Latest production runs for the given workflow ids, with optional await until listed execution ids appear. */
 export const useLatestWorkflowExecution = (
-  workflowId: string,
-  { enabled = true, awaitedExecutionId }: { enabled?: boolean; awaitedExecutionId?: string } = {}
+  workflowIds: readonly string[],
+  {
+    enabled = true,
+    awaitedExecutionIds,
+    onAwaitedObserved,
+  }: {
+    enabled?: boolean;
+    awaitedExecutionIds?: readonly string[];
+    onAwaitedObserved?: () => void;
+  } = {}
 ): LatestWorkflowExecution => {
   const api = useWorkflowsApi();
-  const isAwaiting = (execution: WorkflowExecutionListItemDto | null | undefined) =>
-    awaitedExecutionId !== undefined && execution?.id !== awaitedExecutionId;
+  const queriesEnabled = enabled && workflowIds.length > 0;
 
-  const { data, isLoading, isError } = useQuery({
-    queryKey: latestWorkflowExecutionQueryKey(workflowId),
-    queryFn: async (): Promise<LatestWorkflowExecutionData> => {
-      const production: GetWorkflowExecutionsParams = {
-        executionTypes: [ExecutionType.PRODUCTION],
-        sortField: 'createdAt',
-        sortOrder: 'desc',
-        size: 1,
-        omitStepRuns: true,
-      };
-      const [latest, active] = await Promise.all([
-        api.getWorkflowExecutions(workflowId, production),
-        api.getWorkflowExecutions(workflowId, { ...production, statuses: NON_TERMINAL_STATUSES }),
-      ]);
-      return {
-        execution: latest.results[0] ?? null,
-        activeExecution: active.results[0] ?? null,
-      };
-    },
-    enabled,
-    refetchInterval: (current) =>
-      current?.activeExecution || isAwaiting(current?.execution)
-        ? RUNNING_REFETCH_MS
-        : IDLE_REFETCH_MS,
+  const awaitSettledRef = useRef(false);
+  const onAwaitedObservedRef = useRef(onAwaitedObserved);
+  onAwaitedObservedRef.current = onAwaitedObserved;
+
+  const awaitedIds = awaitedExecutionIds ?? [];
+  const hasAwaited = awaitedIds.length > 0;
+  const awaitedKey = awaitedIds.join(',');
+
+  const observedAwaitedIdsRef = useRef<Set<string>>(new Set());
+  const lastAwaitedKeyRef = useRef(awaitedKey);
+
+  const queries = useQueries({
+    queries: workflowIds.map((workflowId) => ({
+      queryKey: latestWorkflowExecutionQueryKey(workflowId),
+      queryFn: () => fetchLatestWorkflowExecution(api, workflowId),
+      enabled: queriesEnabled,
+      refetchInterval: (current: LatestWorkflowExecutionData | undefined) =>
+        current?.activeExecution || (hasAwaited && !awaitSettledRef.current)
+          ? RUNNING_REFETCH_MS
+          : IDLE_REFETCH_MS,
+    })),
   });
 
-  const activeExecutionId = data?.activeExecution?.id;
-  const isRunning = enabled && (activeExecutionId !== undefined || isAwaiting(data?.execution));
+  if (lastAwaitedKeyRef.current !== awaitedKey) {
+    observedAwaitedIdsRef.current = new Set();
+    lastAwaitedKeyRef.current = awaitedKey;
+  }
+
+  const observedAwaitedIds = observedAwaitedIdsRef.current;
+  for (const { data } of queries) {
+    for (const id of [data?.execution?.id, data?.activeExecution?.id]) {
+      if (id !== undefined && awaitedIds.includes(id)) {
+        observedAwaitedIds.add(id);
+      }
+    }
+  }
+
+  const awaitedObserved =
+    hasAwaited && awaitedIds.every((awaitedId) => observedAwaitedIds.has(awaitedId));
+  awaitSettledRef.current = !hasAwaited || awaitedObserved;
+
+  useEffect(() => {
+    if (awaitedObserved) {
+      onAwaitedObservedRef.current?.();
+    }
+  }, [awaitedObserved, awaitedKey]);
+
+  if (!queriesEnabled) {
+    return {
+      executions: undefined,
+      unavailableWorkflowIds: [],
+      isRunning: false,
+      activeExecutionId: undefined,
+      isError: false,
+      isLoading: false,
+    };
+  }
+
+  const hasPending = queries.some((query) => !query.isError && query.data === undefined);
+  const isError = queries.some((query) => query.isError);
+
+  let executions: readonly WorkflowLatestExecution[] | undefined;
+
+  if (hasPending) {
+    executions = undefined;
+  } else {
+    executions = queries.flatMap(({ data }, index) => {
+      if (data === undefined) {
+        return [];
+      }
+      const run = data.execution;
+      return run !== null ? [{ workflowId: workflowIds[index], execution: run }] : [];
+    });
+  }
+
+  const activeExecutionId = queries
+    .map(({ data }) => data?.activeExecution?.id)
+    .find((id) => id !== undefined);
+
+  const unavailableWorkflowIds = workflowIds.filter((_, index) => {
+    const query = queries[index];
+    return query.isError && query.data === undefined;
+  });
 
   return {
-    execution: data?.execution,
-    isRunning,
+    executions,
+    unavailableWorkflowIds,
+    isRunning: activeExecutionId !== undefined || !awaitSettledRef.current,
     activeExecutionId,
     isError,
-    isLoading: enabled && isLoading,
+    isLoading: queries.some(({ isLoading }) => isLoading),
   };
 };

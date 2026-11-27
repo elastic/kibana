@@ -107,6 +107,7 @@ export async function relaySendMessage(
   channel: string;
   ts: string;
   timestamp: string;
+  workspace: string;
   externalConversationId?: string;
 }> {
   if (input.unfurlLinks !== undefined || input.unfurlMedia !== undefined) {
@@ -140,6 +141,7 @@ export async function relaySendMessage(
       channel: resolvedChannel,
       ts: ref,
       timestamp: ref,
+      workspace: connection.tenantKey,
       ...(externalConversationId ? { externalConversationId } : {}),
     };
   } catch (error) {
@@ -317,7 +319,7 @@ const RELAY_DEFAULT_HISTORY_WINDOW_SECONDS = 2 * 60 * 60;
  * as bad credentials and every 429 as "do not move on".
  */
 type RelayReadOutcome =
-  | { ok: false; reason: 'not_readable'; channel: string }
+  | { ok: false; reason: 'not_readable'; channel: string; message?: string }
   | { ok: false; reason: 'throttled'; retry_after_seconds?: number };
 
 interface ReadWindow {
@@ -326,22 +328,29 @@ interface ReadWindow {
 }
 
 const getRelayErrorDetails = (error: unknown) => {
-  const { statusCode, reason, retryAfterSeconds } = (error ?? {}) as {
+  const { statusCode, reason, relayMessage, retryAfterSeconds } = (error ?? {}) as {
     statusCode?: unknown;
     reason?: unknown;
+    relayMessage?: unknown;
     retryAfterSeconds?: unknown;
   };
   return {
     statusCode: typeof statusCode === 'number' ? statusCode : undefined,
     reason: typeof reason === 'string' ? reason : undefined,
+    relayMessage: typeof relayMessage === 'string' && relayMessage ? relayMessage : undefined,
     retryAfterSeconds: typeof retryAfterSeconds === 'number' ? retryAfterSeconds : undefined,
   };
 };
 
 const toReadOutcome = (error: unknown, channel: string): RelayReadOutcome | undefined => {
-  const { statusCode, reason, retryAfterSeconds } = getRelayErrorDetails(error);
+  const { statusCode, reason, relayMessage, retryAfterSeconds } = getRelayErrorDetails(error);
   if (statusCode === 403 && reason === 'not_readable') {
-    return { ok: false, reason: 'not_readable', channel };
+    return {
+      ok: false,
+      reason: 'not_readable',
+      channel,
+      ...(relayMessage ? { message: relayMessage } : {}),
+    };
   }
   if (statusCode === 429) {
     return {

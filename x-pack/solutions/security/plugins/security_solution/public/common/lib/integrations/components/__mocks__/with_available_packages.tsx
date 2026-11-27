@@ -20,8 +20,6 @@ export const getDefaultAvailablePackages = () => ({
   setSearchTerm: jest.fn(),
   setUrlandPushHistory: jest.fn(),
   setUrlandReplaceHistory: jest.fn(),
-  preference: '',
-  setPreference: jest.fn(),
   isLoading: false,
   isLoadingCategories: false,
   isLoadingAllPackages: false,

@@ -36,6 +36,8 @@ import { registerAutomationSuggestionRoutes } from './routes/automation_suggesti
 import { registerSessionEventsRoutes } from './routes/session_events';
 import { registerSessionMemoryRoutes } from './routes/session_memory';
 import { registerSignalRoutes } from './routes/signals';
+import { registerSpendRoutes } from './routes/spend';
+import { SpendService, createPriceCatalog, createWorkflowExecutionsSpendSource } from './spend';
 import type {
   FeedbackAnalysisScheduleService,
   WorkflowEnablementApi,
@@ -55,6 +57,7 @@ import { AiIndexService } from './ai_indices/service';
 import { AiIndexRegistry } from './ai_indices/registry';
 import { ImprovementsService } from './improvements/service';
 import { installImprovementsIndexTemplate } from './improvements/storage';
+import { BackgroundWriteTracker } from './session_memory/background_write_tracker';
 import { createSessionMemoryService } from './session_memory/service';
 import { createSessionEventsService } from './session_events/service';
 import { SignalsService } from './signals/service';
@@ -69,6 +72,8 @@ import { resolveSpaceId } from './utils/resolve_space_id';
 
 /** Must match the `pluginId` on the managed workflow definition. */
 const CONTEXT_ENGINE_WORKFLOW_OWNER = 'contextEngine';
+
+const DEFAULT_PRICE_CATALOG_BASE_URL = 'https://cloud.elastic.co';
 
 export class ContextEnginePlugin
   implements
@@ -98,6 +103,9 @@ export class ContextEnginePlugin
   private isGlobalMemoryEnabled: () => Promise<boolean> = async () => false;
   private readonly aiIndexRegistry = new AiIndexRegistry();
   private readonly aiIndexChanges: AiIndexChangeNotifier;
+  private readonly rememberWriteTracker: BackgroundWriteTracker;
+  private spendService?: SpendService;
+  private priceCatalogBaseUrl = DEFAULT_PRICE_CATALOG_BASE_URL;
   private analyticsService?: ContextEngineAnalyticsService;
   private workflowsManagementApiPromise: Promise<
     | (DeleteWorkflowsApi &
@@ -110,6 +118,9 @@ export class ContextEnginePlugin
   constructor(context: PluginInitializerContext) {
     this.logger = context.logger.get();
     this.aiIndexChanges = new AiIndexChangeNotifier(this.logger.get('ai_index_changes'));
+    this.rememberWriteTracker = new BackgroundWriteTracker({
+      logger: this.logger.get('session_memory'),
+    });
   }
 
   setup(
@@ -237,11 +248,24 @@ export class ContextEnginePlugin
       return this.createImprovementsService(esClient, spaceId);
     };
 
+    const getSpendService = () => {
+      if (!this.spendService) {
+        throw new Error('Spend service not available — plugin has not started');
+      }
+      return this.spendService;
+    };
+
     const getScheduleService = () => {
       if (!this.scheduleService) {
         throw new Error('Schedule service not available — plugin has not started');
       }
       return this.scheduleService;
+    };
+    const getDreamingScheduleService = () => {
+      if (!this.dreamingScheduleService) {
+        throw new Error('Dreaming schedule service not available; plugin has not started');
+      }
+      return this.dreamingScheduleService;
     };
     const isContextEngineEnabled = async (spaceId: string) => {
       const [coreStart] = await coreSetup.getStartServices();
@@ -325,6 +349,7 @@ export class ContextEnginePlugin
         return agentBuilder.found ? agentBuilder.contract : undefined;
       },
       getWorkflowsManagementApi: () => this.workflowsManagementApiPromise,
+      getDreamingScheduleService,
       getSpaces: async () => {
         const [, startDeps] = await coreSetup.getStartServices();
         return startDeps.spaces;
@@ -374,6 +399,14 @@ export class ContextEnginePlugin
         isContextEngineEnabled,
         isMemoryEnabled: () => this.isGlobalMemoryEnabled(),
         checkReadPrivilege: checkContextEnginePrivilege(apiPrivileges.readContextEngine),
+        getSessionMemoryService: async () => {
+          const [, , contextEngineStart] = await coreSetup.getStartServices();
+          return contextEngineStart.getSessionMemoryService();
+        },
+        getSessionEventsService: async () => {
+          const [, , contextEngineStart] = await coreSetup.getStartServices();
+          return contextEngineStart.getSessionEventsService();
+        },
       },
     });
 
@@ -386,6 +419,17 @@ export class ContextEnginePlugin
       },
       // Reads the current value at request time (assigned in start(), after this setup() runs).
       getFeedbackLoopEnabled: () => this.isFeedbackLoopEnabled(),
+    });
+
+    this.priceCatalogBaseUrl = setupDeps.cloud?.baseUrl ?? DEFAULT_PRICE_CATALOG_BASE_URL;
+    registerSpendRoutes({
+      router,
+      logger: this.logger.get('spend'),
+      getSpendService,
+      getSpaces: async () => {
+        const [, startDeps] = await coreSetup.getStartServices();
+        return startDeps.spaces;
+      },
     });
 
     registerAutomationSuggestionRoutes({
@@ -428,6 +472,7 @@ export class ContextEnginePlugin
       },
       getAiIndexService,
       isMemoryEnabled,
+      backgroundWrites: this.rememberWriteTracker,
       logger: this.logger.get('session_memory'),
     });
 
@@ -503,6 +548,17 @@ export class ContextEnginePlugin
       logger: this.logger.get('signals'),
     });
     const signalsService = this.signalsService;
+
+    const internalEsClient = coreStart.elasticsearch.client.asInternalUser;
+    this.spendService = new SpendService({
+      aiIndexService,
+      priceCatalog: createPriceCatalog({
+        fetchFn: (url, init) => fetch(url, init),
+        baseUrl: this.priceCatalogBaseUrl,
+        logger: this.logger.get('spend', 'pricing'),
+      }),
+      sources: [createWorkflowExecutionsSpendSource({ getEsClient: () => internalEsClient })],
+    });
 
     const sessionMemoryService = createSessionMemoryService(this.esClient);
     const sessionEventsService = createSessionEventsService(this.esClient);
@@ -585,5 +641,7 @@ export class ContextEnginePlugin
     };
   }
 
-  stop() {}
+  async stop(): Promise<void> {
+    await this.rememberWriteTracker.drain();
+  }
 }

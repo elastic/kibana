@@ -84,6 +84,17 @@ export const loadSkillTools = async ({
         ).map((tool) => ({ ...tool, origin: ToolOrigin.registry }))
       : [];
 
+  // The registry checked the tools it saw; this call may resolve different ids, so check these too.
+  if (skill.requiresAllRegistryTools) {
+    const loadedIds = new Set(registryExecutableTools.map(({ id }) => id));
+    const missing = registryToolIds.filter((id) => !loadedIds.has(id));
+    if (missing.length > 0) {
+      throw new Error(
+        `Skill '${skill.id}' requires tools that are not available: ${missing.join(', ')}.`
+      );
+    }
+  }
+
   const tools = [...inlineExecutableTools, ...registryExecutableTools];
   const result = dynamicToolsEnabled
     ? await registerAsDynamicTools({ tools, toolManager })

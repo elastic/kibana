@@ -15,11 +15,9 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiSwitch,
-  EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import {
   MAX_MAINTENANCE_NEIGHBORS,
@@ -93,31 +91,15 @@ export const MaintenanceSettings = ({ maintenance, onChange }: MaintenanceSettin
 
   return (
     <>
-      <EuiTitle size="xs">
-        <h3>
-          <FormattedMessage
-            id="xpack.contextEngine.aiIndexDetail.dreaming.maintenance.title"
-            defaultMessage="Maintenance"
-          />
-        </h3>
-      </EuiTitle>
-      <EuiSpacer size="m" />
-      <EuiFormRow
-        helpText={i18n.translate('xpack.contextEngine.aiIndexDetail.dreaming.maintenance.help', {
-          defaultMessage:
-            'Merges duplicates, settles contradictions and removes items whose memories are gone. Items a person edited are never changed.',
-        })}
-      >
-        <EuiSwitch
-          label={i18n.translate(
-            'xpack.contextEngine.aiIndexDetail.dreaming.maintenance.enabledLabel',
-            { defaultMessage: 'Maintain on a schedule' }
-          )}
-          checked={maintenance.enabled}
-          onChange={(event) => update({ enabled: event.target.checked })}
-          data-test-subj="contextAiIndexMaintenanceEnabled"
-        />
-      </EuiFormRow>
+      <EuiSwitch
+        label={i18n.translate(
+          'xpack.contextEngine.aiIndexDetail.dreaming.maintenance.enabledLabel',
+          { defaultMessage: 'Maintain on a schedule' }
+        )}
+        checked={maintenance.enabled}
+        onChange={(event) => update({ enabled: event.target.checked })}
+        data-test-subj="contextAiIndexMaintenanceEnabled"
+      />
       {maintenance.enabled && (
         <>
           <EuiSpacer size="m" />

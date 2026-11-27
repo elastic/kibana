@@ -66,7 +66,7 @@ x-codeSamples:
   - lang: curl
     source: |
       curl \
-        -X POST "https://${KIBANA_URL}/api/context_engine/ai_index/_query" \
+        -X POST "${KIBANA_URL}/api/context_engine/ai_index/_query" \
         -H "Authorization: ApiKey ${API_KEY}" \
         -H "kbn-xsrf: true" \
         -H "Content-Type: application/json" \
