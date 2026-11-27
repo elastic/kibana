@@ -12,5 +12,7 @@ export {
   SavedObjectsClient,
   SavedObjectsClientProvider,
   PointInTimeFinder,
+  associateEsClientCacheScope,
+  INTERNAL_SAVED_OBJECTS_CACHE_SCOPE,
 } from './src';
 export type { ISavedObjectsClientProvider } from './src';
