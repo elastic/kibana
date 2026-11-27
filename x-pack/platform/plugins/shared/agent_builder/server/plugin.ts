@@ -47,6 +47,7 @@ import { AnalyticsService } from './telemetry';
 import { registerSampleData } from './register_sample_data';
 import { registerBeforeAgentWorkflowsHook } from './hooks/agent_workflows/register_before_agent_workflows_hook';
 import { registerAfterExecutionWorkflowsHook } from './hooks/agent_workflows/register_after_execution_workflows_hook';
+import { registerSessionEventsHook } from './hooks/session_events/register_session_events_hook';
 import { registerSkillToolsLoaderHook } from './hooks/skills/register_skill_tools_loader_hook';
 import { createRelevantSkillsCycleHook } from './services/execution/run_agent/cycle_hooks/relevant_skills_hook';
 import { registerTaskDefinitions } from './services/execution';
@@ -296,6 +297,12 @@ export class AgentBuilderPlugin
       workflowsManagement: setupDeps.workflowsManagement,
       logger: this.logger,
       getInternalServices,
+    });
+
+    registerSessionEventsHook(serviceSetups, {
+      logger: this.logger,
+      getInternalServices,
+      getStartServices: coreSetup.getStartServices,
     });
 
     registerSkillToolsLoaderHook(serviceSetups, {
