@@ -13,6 +13,12 @@ export const plugin = async (initializerContext: PluginInitializerContext) => {
 };
 
 export { config } from './config';
+export {
+  createSecretBodySchema,
+  secretNameParamsSchema,
+  updateSecretBodySchema,
+} from './routes/request_schemas';
+export { toSecretsErrorResponse } from './routes/secrets_error_response';
 export type { SecretsConfig } from './config';
 export type { SecretsClient } from './client/types';
 export type { GetSecretsClientParams, SecretsPluginSetup, SecretsPluginStart } from './types';

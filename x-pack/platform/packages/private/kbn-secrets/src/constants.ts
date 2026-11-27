@@ -13,3 +13,5 @@ export const SECRET_DESCRIPTION_MAX_LENGTH = 1024;
  */
 export const SECRET_VALUE_MIN_LENGTH = 8;
 export const SECRET_VALUE_MAX_LENGTH = 16384;
+/** Bounds the work of a list, which returns every secret of a space. */
+export const SECRETS_MAX_PER_SPACE = 10_000;

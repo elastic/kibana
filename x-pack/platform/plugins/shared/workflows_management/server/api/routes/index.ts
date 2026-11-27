@@ -8,6 +8,7 @@
 import { registerExecutionRoutes } from './executions';
 import { registerInternalRoutes } from './internal';
 import { registerLibraryRoutes } from './library';
+import { registerSecretsRoutes } from './secrets';
 import type { RouteDependencies } from './types';
 import { registerWorkflowRoutes } from './workflows';
 
@@ -16,4 +17,5 @@ export function defineRoutes(deps: RouteDependencies): void {
   registerExecutionRoutes(deps);
   registerInternalRoutes(deps);
   registerLibraryRoutes(deps);
+  registerSecretsRoutes(deps);
 }

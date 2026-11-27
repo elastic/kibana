@@ -126,6 +126,26 @@ export const WORKFLOW_EXECUTION_CANCEL_SECURITY: RouteSecurity = {
 export const WORKFLOW_EXECUTION_RESUME_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [...WorkflowsManagementOperationPrivileges.resumeExecution] },
 };
+/**
+ * Names and descriptions, never values. Workflow authors need them to reference a secret, and
+ * secret managers need them to manage one.
+ */
+export const SECRETS_LIST_SECURITY: RouteSecurity = {
+  authz: {
+    requiredPrivileges: [
+      {
+        anyRequired: [
+          WorkflowsManagementApiActions.create,
+          WorkflowsManagementApiActions.update,
+          WorkflowsManagementApiActions.manageSecrets,
+        ],
+      },
+    ],
+  },
+};
+export const SECRETS_MANAGE_SECURITY: RouteSecurity = {
+  authz: { requiredPrivileges: [...WorkflowsManagementOperationPrivileges.manageSecrets] },
+};
 
 const hasPrivilege = (request: AuthzRequest, action: WorkflowsManagementApiActions): boolean =>
   request.authzResult?.[action] === true;

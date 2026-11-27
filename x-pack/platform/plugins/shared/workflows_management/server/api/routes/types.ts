@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
+import type { AnalyticsServiceSetup, KibanaRequest, Logger } from '@kbn/core/server';
+import type { SecretsClient } from '@kbn/secrets-plugin/server';
 import type { SpacesServiceSetup } from '@kbn/spaces-plugin/server';
 import type { WorkflowManagementAuditLog } from './utils/workflow_audit_logging';
 import type { WorkflowsManagementConfig } from '../../config';
@@ -22,6 +23,8 @@ export interface RouteDependencies {
   spaces: SpacesServiceSetup;
   audit: WorkflowManagementAuditLog;
   analytics: AnalyticsServiceSetup;
+  /** Returns the secrets client of the request's space. Undefined while secrets are disabled. */
+  getSecretsClient?: (request: KibanaRequest) => Promise<SecretsClient>;
 }
 
 export type RouteHandler = (deps: RouteDependencies) => void;

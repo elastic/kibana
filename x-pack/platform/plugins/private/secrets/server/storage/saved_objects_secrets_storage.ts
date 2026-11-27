@@ -19,6 +19,7 @@ import {
   SecretAlreadyExistsError,
   SecretConflictError,
   SecretNotFoundError,
+  SECRETS_MAX_PER_SPACE,
   SecretUndecryptableError,
 } from '@kbn/secrets';
 import type { SecretMetadata } from '@kbn/secrets';
@@ -40,7 +41,7 @@ export interface CreateSavedObjectsSecretsStorageParams {
   /** Must include the hidden secret type and must not apply the spaces extension. */
   readonly savedObjectsClient: Pick<
     SavedObjectsClientContract,
-    'create' | 'createPointInTimeFinder' | 'delete' | 'get'
+    'create' | 'createPointInTimeFinder' | 'delete' | 'find' | 'get'
   >;
   readonly encryptedClient: Pick<EncryptedSavedObjectsClient, 'getDecryptedAsInternalUser'>;
 }
@@ -114,11 +115,24 @@ export const createSavedObjectsSecretsStorage = ({
         for await (const { saved_objects: page } of finder.find()) {
           // A read that does not decrypt never returns the encrypted `value`.
           secrets.push(...page.map(({ attributes }) => attributes));
+          // Creation stops at the limit, but two creates at once can pass it.
+          if (secrets.length >= SECRETS_MAX_PER_SPACE) {
+            break;
+          }
         }
       } finally {
         await finder.close();
       }
-      return secrets;
+      return secrets.slice(0, SECRETS_MAX_PER_SPACE);
+    },
+
+    count: async () => {
+      const { total } = await savedObjectsClient.find({
+        type: SECRET_SAVED_OBJECT_TYPE,
+        namespaces: [spaceId],
+        perPage: 0,
+      });
+      return total;
     },
 
     get: async ({ name }) => {

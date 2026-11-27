@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { SecretConflictError, SecretNotFoundError, SecretValidationError } from '@kbn/secrets';
+import {
+  SECRETS_MAX_PER_SPACE,
+  SecretConflictError,
+  SecretNotFoundError,
+  SecretValidationError,
+} from '@kbn/secrets';
 import type { SecretMetadata, UpdateSecretParams } from '@kbn/secrets';
 import type { SecretsStorage, StoredSecret } from './storage';
 import type { SecretEntry, SecretsClient } from './types';
@@ -54,6 +59,11 @@ export const createSecretsClient = ({
 
     create: async (secret) => {
       validateSecret(secret);
+      if ((await storage.count()) >= SECRETS_MAX_PER_SPACE) {
+        throw new SecretValidationError(
+          `A space holds at most ${SECRETS_MAX_PER_SPACE} secrets. Delete one to create another.`
+        );
+      }
       const { name, description, value } = secret;
       const timestamp = new Date().toISOString();
       const entry: SecretEntry = {
@@ -98,6 +108,10 @@ export const createSecretsClient = ({
       return withoutValue(entry);
     },
 
-    delete: async ({ name }) => storage.delete({ name }),
+    delete: async ({ name }) => {
+      // A malformed name is reported as such, not as a missing secret.
+      validateSecret({ name });
+      return storage.delete({ name });
+    },
   };
 };

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AuditLogger } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { SecretsUnavailableError } from '@kbn/secrets';
@@ -14,11 +15,13 @@ import { SECRET_SAVED_OBJECT_TYPE } from './saved_objects/secret_saved_object';
 
 const VALUE = 'correct-horse-battery-staple';
 
-const operations: Array<[keyof SecretsClient, (client: SecretsClient) => Promise<unknown>]> = [
-  ['list', (client) => client.list()],
-  ['create', (client) => client.create({ name: 'github_token', value: VALUE })],
-  ['update', (client) => client.update({ name: 'github_token', value: VALUE })],
-  ['delete', (client) => client.delete({ name: 'github_token' })],
+const operations: Array<
+  [keyof SecretsClient, string, (client: SecretsClient) => Promise<unknown>]
+> = [
+  ['list', 'secret_find', (client) => client.list()],
+  ['create', 'secret_create', (client) => client.create({ name: 'github_token', value: VALUE })],
+  ['update', 'secret_update', (client) => client.update({ name: 'github_token', value: VALUE })],
+  ['delete', 'secret_delete', (client) => client.delete({ name: 'github_token' })],
 ];
 
 describe('SecretsPlugin without an encryption key', () => {
@@ -28,10 +31,19 @@ describe('SecretsPlugin without an encryption key', () => {
     plugin.setup(coreSetup, {
       encryptedSavedObjects: encryptedSavedObjectsMock.createSetup({ canEncrypt: false }),
     });
-    const { getClient } = plugin.start(coreMock.createStart(), {
+    const coreStart = coreMock.createStart();
+    const log = jest.fn<void, Parameters<AuditLogger['log']>>();
+    jest
+      .spyOn(coreStart.security.audit, 'asScoped')
+      .mockReturnValue({ log, enabled: true, includeSavedObjectNames: true });
+    const { getClient } = plugin.start(coreStart, {
       encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
     });
-    return { coreSetup, client: getClient({ request: httpServerMock.createKibanaRequest() }) };
+    return {
+      coreSetup,
+      client: getClient({ request: httpServerMock.createKibanaRequest() }),
+      auditEvents: () => log.mock.calls.map(([auditEvent]) => auditEvent),
+    };
   };
 
   it('still registers the secret type, so that migrations and checks see it', () => {
@@ -42,10 +54,18 @@ describe('SecretsPlugin without an encryption key', () => {
     );
   });
 
-  it.each(operations)('fails %s and says how to fix it', async (_, operation) => {
-    const { client } = setup();
+  it.each(operations)(
+    'fails %s, says how to fix it and records the attempt in the audit log',
+    async (_, action, operation) => {
+      const { client, auditEvents } = setup();
 
-    await expect(operation(client)).rejects.toThrow(SecretsUnavailableError);
-    await expect(operation(client)).rejects.toThrow('xpack.encryptedSavedObjects.encryptionKey');
-  });
+      const attempt = operation(client);
+
+      await expect(attempt).rejects.toThrow(SecretsUnavailableError);
+      await expect(attempt).rejects.toThrow('xpack.encryptedSavedObjects.encryptionKey');
+      expect(auditEvents()).toMatchObject([
+        { event: { action, outcome: 'failure' }, error: { code: 'SecretsUnavailableError' } },
+      ]);
+    }
+  );
 });

@@ -10,6 +10,7 @@ export {
   SECRET_NAME_MAX_LENGTH,
   SECRET_VALUE_MAX_LENGTH,
   SECRET_VALUE_MIN_LENGTH,
+  SECRETS_MAX_PER_SPACE,
 } from './src/constants';
 export {
   SecretAlreadyExistsError,

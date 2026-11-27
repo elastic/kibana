@@ -180,18 +180,40 @@ const workflowPageManagePrivilege: SubFeaturePrivilegeConfig = {
   ui: [WorkflowsManagementUiActions.managePages],
 };
 
+const workflowSecretManagePrivilege: SubFeaturePrivilegeConfig = {
+  id: 'workflow_secret_manage',
+  name: i18n.translate('workflows.featureRegistry.manageWorkflowSecretsSubFeaturePrivilege', {
+    defaultMessage: 'Manage Secrets',
+  }),
+  includeIn: 'all',
+  // The secrets plugin stores secrets with its internal user, so no saved object access is needed.
+  savedObject: { all: [], read: [] },
+  api: [WorkflowsManagementApiActions.manageSecrets],
+  ui: [],
+};
+
 /**
- * Returns the feature config, with the page privilege only while `workflowsManagement.pages.enabled`
- * is on. A shipped privilege id is hard to remove, so it waits for pages to graduate.
- * TODO: merge the privilege into `WorkflowsManagementFeatureConfig` when pages graduate.
+ * Features whose privilege is registered only while the feature is enabled. A shipped privilege id
+ * is hard to remove, so each waits for its feature to graduate.
+ * TODO: move a privilege into `WorkflowsManagementFeatureConfig` when its feature graduates.
  */
-export const getWorkflowsManagementFeatureConfig = ({
-  pagesEnabled,
-}: {
-  pagesEnabled: boolean;
-}): KibanaFeatureConfig => {
+const GATED_FEATURES = ['pages', 'secrets'] as const;
+export type GatedFeature = (typeof GATED_FEATURES)[number];
+
+const gatedPrivileges: Record<GatedFeature, SubFeaturePrivilegeConfig> = {
+  pages: workflowPageManagePrivilege,
+  secrets: workflowSecretManagePrivilege,
+};
+
+/** Returns the feature config, with the privileges of the enabled gated features. */
+export const getWorkflowsManagementFeatureConfig = (
+  enabledFeatures: Record<GatedFeature, boolean>
+): KibanaFeatureConfig => {
   const [actions, ...otherSubFeatures] = WorkflowsManagementFeatureConfig.subFeatures ?? [];
-  if (!pagesEnabled || !actions) {
+  const privileges = GATED_FEATURES.filter((feature) => enabledFeatures[feature]).map(
+    (feature) => gatedPrivileges[feature]
+  );
+  if (privileges.length === 0 || !actions) {
     return WorkflowsManagementFeatureConfig;
   }
   const [group, ...otherGroups] = actions.privilegeGroups;
@@ -201,7 +223,7 @@ export const getWorkflowsManagementFeatureConfig = ({
       {
         ...actions,
         privilegeGroups: [
-          { ...group, privileges: [...group.privileges, workflowPageManagePrivilege] },
+          { ...group, privileges: [...group.privileges, ...privileges] },
           ...otherGroups,
         ],
       },
