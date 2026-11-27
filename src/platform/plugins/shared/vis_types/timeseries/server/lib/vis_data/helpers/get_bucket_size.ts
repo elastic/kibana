@@ -8,7 +8,8 @@
  */
 
 import type { Unit } from '@kbn/datemath';
-import { ianaTimeZoneOrUtc, pickDateRounding } from '@kbn/es-date-rounding';
+
+import { search } from '@kbn/data-plugin/server';
 import {
   getUnitValue,
   parseInterval,
@@ -56,6 +57,13 @@ const calculateBucketData = (timeInterval: string, capabilities: SearchCapabilit
   };
 };
 
+const calcAutoInterval = (req: VisTypeTimeseriesVisDataRequest, maxBars: number) => {
+  const { from, to } = getTimerange(req);
+  const timerange = to.valueOf() - from.valueOf();
+
+  return search.aggs.calcAutoIntervalLessThan(maxBars, timerange).asSeconds();
+};
+
 export const getBucketSize = (
   req: VisTypeTimeseriesVisDataRequest,
   interval: string,
@@ -68,24 +76,15 @@ export const getBucketSize = (
     return calculateBucketData(interval, capabilities);
   }
 
-  const { from, to } = getTimerange(req);
-  const picked = pickDateRounding(bars, {
-    from: from.valueOf(),
-    to: to.valueOf(),
-    timeZone: ianaTimeZoneOrUtc(capabilities.timezone),
-  });
-  const autoBucketData = calculateBucketData(picked.expression, capabilities);
-  if (autoBucketData.intervalString === picked.expression) {
-    autoBucketData.bucketSize = Math.max(1, Math.round(picked.nominalMs / 1000));
-  }
-
   const gteAutoMatch = Boolean(interval) && interval.match(GTE_INTERVAL_RE);
+  const autoInterval = calcAutoInterval(req, bars);
+  const autoBucketData = calculateBucketData(`${autoInterval}s`, capabilities);
 
   if (gteAutoMatch) {
     const gteBucketData = calculateBucketData(gteAutoMatch[1], capabilities);
     const gteInSecondInterval = convertIntervalToUnit(gteBucketData.intervalString, 's');
 
-    if (gteInSecondInterval && gteInSecondInterval.value > autoBucketData.bucketSize) {
+    if (gteInSecondInterval && gteInSecondInterval?.value > autoInterval) {
       return gteBucketData;
     }
   }
