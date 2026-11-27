@@ -71,16 +71,9 @@ export const slackNotificationHandler: NotificationHandler = {
       params,
       getOutcome: (response) => {
         if (response.status !== 'ok') {
-          const userFacingMessage =
-            response.errorMeta?.isUserFacing === true ? response.message : undefined;
           return {
             status: 'failed',
-            error:
-              userFacingMessage ||
-              response.serviceMessage ||
-              response.message ||
-              'Slack delivery failed',
-            ...(userFacingMessage ? { is_user_facing_error: true } : {}),
+            error: response.serviceMessage || response.message || 'Slack delivery failed',
           };
         }
         const data = response.data;

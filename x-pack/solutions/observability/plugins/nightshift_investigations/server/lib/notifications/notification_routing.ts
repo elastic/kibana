@@ -37,7 +37,6 @@ export const notificationAttemptSchema = lazySchema(() =>
       external_conversation_id: identifier.optional(),
       sent_at: timestamp.optional(),
       error: z.string().max(MAX_TEXT_LENGTH).optional(),
-      is_user_facing_error: z.literal(true).optional(),
     })
     .loose()
 );
@@ -90,7 +89,7 @@ export type NotificationPhase = z.infer<typeof notificationPhaseSchema>;
 export type NotificationAttempt = z.infer<typeof notificationAttemptSchema>;
 export type NotificationOutcome = Pick<
   NotificationAttempt,
-  'message_ts' | 'external_conversation_id' | 'sent_at' | 'error' | 'is_user_facing_error'
+  'message_ts' | 'external_conversation_id' | 'sent_at' | 'error'
 > & {
   status: z.infer<typeof outcomeStatusSchema>;
   channel?: string;

@@ -25,8 +25,6 @@ export interface ConnectorActionErrorMeta {
    * (for example, base64 expansion).
    */
   estimatedOutputBytes?: number;
-  /** Indicates that the connector authored the error message for display. */
-  isUserFacing?: true;
 }
 
 const connectorActionErrorMeta = new WeakMap<object, ConnectorActionErrorMeta>();
@@ -111,7 +109,6 @@ export const setConnectorActionErrorMeta = (
   const sanitizedMeta = {
     ...(contentLengthBytes !== undefined ? { contentLengthBytes } : {}),
     ...(estimatedOutputBytes !== undefined ? { estimatedOutputBytes } : {}),
-    ...(meta.isUserFacing === true ? { isUserFacing: true as const } : {}),
   };
 
   connectorActionErrorMeta.set(error, {

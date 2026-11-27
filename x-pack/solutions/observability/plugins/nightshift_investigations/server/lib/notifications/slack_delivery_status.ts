@@ -42,8 +42,7 @@ const getAttemptMessage = (
   attempts: NotificationAttempt[]
 ): string | undefined => {
   if (attempt.status !== 'failed') return;
-  if (attempt.is_user_facing_error) return attempt.error;
-  if (attempt.error !== MISSING_NOTIFICATION_THREAD) return;
+  if (attempt.error !== MISSING_NOTIFICATION_THREAD) return attempt.error || undefined;
 
   const start = attempts.find(
     (entry) =>
@@ -52,7 +51,7 @@ const getAttemptMessage = (
       entry.phase === 'started' &&
       entry.status === 'failed'
   );
-  return (start?.is_user_facing_error && start.error) || MISSING_NOTIFICATION_THREAD;
+  return start?.error || MISSING_NOTIFICATION_THREAD;
 };
 
 const isPreferredAttempt = (
@@ -85,7 +84,7 @@ const selectAttemptsByDestination = (
   return latest;
 };
 
-/** Selects one receipt per Slack destination and projects its status without connector diagnostics. */
+/** Selects one receipt per Slack destination and projects its delivery status. */
 export const getSlackDeliveryStatus = (
   routing: NotificationRouting,
   executionIds?: ReadonlySet<string>

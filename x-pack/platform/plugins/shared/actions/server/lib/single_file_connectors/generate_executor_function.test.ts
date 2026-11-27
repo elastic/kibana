@@ -8,11 +8,7 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { generateExecutorFunction } from './generate_executor_function';
-import {
-  connectorsSpecs,
-  setConnectorActionErrorMeta,
-  TEST_CONNECTOR_SUB_ACTION,
-} from '@kbn/connector-specs';
+import { setConnectorActionErrorMeta, TEST_CONNECTOR_SUB_ACTION } from '@kbn/connector-specs';
 import type {
   ActionContext,
   BuildContext,
@@ -1365,47 +1361,6 @@ describe('generateExecutorFunction', () => {
         },
       });
     });
-
-    it.each([
-      { statusCode: 403, message: 'is not connected', subAction: 'sendMessage' },
-      { statusCode: 409, message: 'is no longer installed', subAction: 'updateMessage' },
-      { statusCode: 429, message: 'rate-limited this request', subAction: 'sendMessage' },
-    ])(
-      'returns the user-facing message for Slack Relay $statusCode',
-      async ({ statusCode, message, subAction }) => {
-        const relay = {
-          trigger: jest
-            .fn()
-            .mockRejectedValue(Object.assign(new Error('Relay failure'), { statusCode })),
-          listBindings: jest.fn(),
-          readMessages: jest.fn(),
-          readThread: jest.fn(),
-        };
-        const executor = generateExecutorFunction({
-          actions: connectorsSpecs.Slack.actions,
-          getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
-          getCredential: mockGetCredential,
-          getClientLeasePool: () => fakeLeasePool,
-          getRelayClient: () => relay,
-          networkSettings: mockNetwork,
-          platform: mockPlatform,
-        });
-
-        const result = await executor({
-          ...makeExecOptions({
-            subAction,
-            subActionParams: { channel: 'C0123456789', text: 'hello', messageTs: '1700.0001' },
-          }),
-          secrets: { authType: 'relay', tenantKey: 'team-A' },
-        });
-
-        expect(result).toMatchObject({
-          status: 'error',
-          message: expect.stringContaining(message),
-          errorMeta: { isUserFacing: true },
-        });
-      }
-    );
 
     describe('HTTP status and retry date', () => {
       const now = Date.parse('2026-10-23T12:00:00Z');
