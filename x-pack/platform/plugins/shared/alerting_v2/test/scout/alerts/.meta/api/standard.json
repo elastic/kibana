@@ -1,5 +1,5 @@
 {
-  "sha1": "42b1fc5b9cb7e05afa75a9e19b032195faeaedfb",
+  "sha1": "c579bdd982c50713f7024731cb6814f5ca4b00c0",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -2549,6 +2549,32 @@
       }
     },
     {
+      "id": "fe0dc58aa8ace83-bdae7937f58824c",
+      "title": "Episodes query when the latest events of an episode share a timestamp the list query returns one row for the episode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/episodes_query_timestamp_ties.spec.ts",
+        "line": 75,
+        "column": 13
+      }
+    },
+    {
+      "id": "fe0dc58aa8ace83-4aea202557cff8e",
+      "title": "Episodes query when the latest events of an episode share a timestamp the single episode query returns one row for the episode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/episodes_query_timestamp_ties.spec.ts",
+        "line": 80,
+        "column": 26
+      }
+    },
+    {
       "id": "9eed9c99ffddd93-aaee8a03285479c",
       "title": "List execution history — tolerates missing rule ids resolves names for surviving rules and falls back to id for deleted ones",
       "expectedStatus": "passed",
@@ -3029,6 +3055,22 @@
       }
     },
     {
+      "id": "30e7de065b28dbd-0077e27d26ab9c5",
+      "title": "List rule executions API sort: orders executions by started_at ascending and descending",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_rule_executions.spec.ts",
+        "line": 260,
+        "column": 73
+      }
+    },
+    {
       "id": "18ff53bc0b9026e-e35a15e1cb7bd4c",
       "title": "Rule event fields suggestions API returns the union of data.* field names across all matching alerts when no matcher is given",
       "expectedStatus": "passed",
@@ -3057,6 +3099,20 @@
       }
     },
     {
+      "id": "18ff53bc0b9026e-74f92edb73527d1",
+      "title": "Rule event fields suggestions API narrows the field names to the matching alerts when a valid matcher is given",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/rule_event_fields_suggestions.spec.ts",
+        "line": 119,
+        "column": 30
+      }
+    },
+    {
       "id": "18ff53bc0b9026e-fdcb48ef8a6e538",
       "title": "Rule event fields suggestions API validation: rejects empty matcher with a 400",
       "expectedStatus": "passed",
@@ -3066,8 +3122,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/rule_event_fields_suggestions.spec.ts",
-        "line": 117,
-        "column": 84
+        "line": 136,
+        "column": 22
       }
     },
     {
@@ -3080,8 +3136,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/rule_event_fields_suggestions.spec.ts",
-        "line": 128,
-        "column": 5
+        "line": 147,
+        "column": 14
       }
     },
     {
@@ -3094,8 +3150,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/rule_event_fields_suggestions.spec.ts",
-        "line": 139,
-        "column": 14
+        "line": 159,
+        "column": 4
       }
     },
     {
@@ -3108,8 +3164,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/rule_event_fields_suggestions.spec.ts",
-        "line": 151,
-        "column": 83
+        "line": 170,
+        "column": 23
       }
     },
     {

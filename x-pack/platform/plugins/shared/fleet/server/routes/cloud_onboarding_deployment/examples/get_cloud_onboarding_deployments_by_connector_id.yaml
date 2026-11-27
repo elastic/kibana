@@ -5,7 +5,7 @@ responses:
       application/json:
         examples:
           getCloudOnboardingDeploymentsByConnectorIdExample:
-            description: 'List of cloud onboarding deployments for a connector'
+            description: 'List of cloud onboarding instances for a connector'
             value:
               items:
                 - id: 'onboarding-deployment-id-1'

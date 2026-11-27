@@ -1,0 +1,109 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import semverGt from 'semver/functions/gt';
+import semverGte from 'semver/functions/gte';
+import semverLte from 'semver/functions/lte';
+import semverValid from 'semver/functions/valid';
+
+export type YamlParseFn = (value: string) => unknown;
+
+export enum ChangeType {
+  Enhancement = 'enhancement',
+  BreakingChange = 'breaking-change',
+  BugFix = 'bugfix',
+}
+
+interface Change<T extends ChangeType = ChangeType> {
+  description: string;
+  link: string;
+  type: T;
+}
+
+export interface ChangelogEntry<T extends ChangeType = ChangeType> {
+  version: string;
+  changes: Array<Change<T>>;
+}
+
+export type Changelog = ChangelogEntry[];
+
+export type BreakingChangesLog = Array<ChangelogEntry<ChangeType.BreakingChange>>;
+
+export const formatChangelog = (parsedChangelog: Changelog) => {
+  if (!parsedChangelog) return '';
+
+  return parsedChangelog.reduce((acc, val) => {
+    acc += `Version: ${val.version}\nChanges:\n  Type: ${val.changes[0].type}\n  Description: ${val.changes[0].description}\n  Link: ${val.changes[0].link}\n\n`;
+    return acc;
+  }, '');
+};
+
+export const parseYamlChangelog = (
+  parse: YamlParseFn,
+  changelogText: string | null | undefined,
+  latestVersion: string,
+  currentVersion?: string
+) => {
+  // A malformed changelog must not break the callers: it is treated as empty, and entries without
+  // a valid version are ignored.
+  let parsed: unknown = [];
+  try {
+    parsed = changelogText ? parse(changelogText) : [];
+  } catch (error) {
+    return [];
+  }
+  const parsedChangelog: Changelog = Array.isArray(parsed)
+    ? parsed.filter(
+        (entry): entry is ChangelogEntry =>
+          typeof entry?.version === 'string' && semverValid(entry.version) !== null
+      )
+    : [];
+
+  if (!currentVersion) return parsedChangelog.filter((e) => semverLte(e.version, latestVersion));
+
+  return parsedChangelog.filter(
+    (e) => semverLte(e.version, latestVersion) && semverGte(e.version, currentVersion)
+  );
+};
+
+export const getBreakingChanges = (changelog: Changelog): BreakingChangesLog => {
+  return changelog.reduce<BreakingChangesLog>((acc, entry) => {
+    const breakingChanges = (Array.isArray(entry?.changes) ? entry.changes : []).filter(
+      (change): change is Change<ChangeType.BreakingChange> => {
+        return change?.type === ChangeType.BreakingChange;
+      }
+    );
+
+    if (breakingChanges.length > 0) {
+      return [...acc, { ...entry, changes: breakingChanges }];
+    }
+
+    return acc;
+  }, []);
+};
+
+/**
+ * Returns the breaking changes of the versions greater than `fromVersion` and lower than or equal
+ * to `toVersion`, i.e. the breaking changes applied by an upgrade from `fromVersion` to `toVersion`.
+ * Entries with an invalid version are ignored.
+ */
+export const getBreakingChangesInRange = (
+  changelog: Changelog,
+  fromVersion: string,
+  toVersion: string
+): BreakingChangesLog => {
+  if (!Array.isArray(changelog)) return [];
+
+  return getBreakingChanges(
+    changelog.filter(
+      (entry) =>
+        typeof entry?.version === 'string' &&
+        semverValid(entry.version) !== null &&
+        semverGt(entry.version, fromVersion) &&
+        semverLte(entry.version, toVersion)
+    )
+  );
+};

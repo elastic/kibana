@@ -132,6 +132,7 @@ export const getKibanaContextFn = (
 
       return {
         type: 'kibana_context',
+        now: input?.now,
         query: queries,
         esqlVariables: input?.esqlVariables,
         filters: uniqFilters(filters.filter((f: Filter) => !f.meta?.disabled)),

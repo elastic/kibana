@@ -30,10 +30,10 @@ export type ServiceAccountAssumableBy =
     };
 
 /**
- * One organization-scoped role assignment. `role_id` names a Cloud role. For service accounts,
- * Kibana only ever sends `organization-application-only`, the role UIAM defines as carrying no
- * control-plane privileges, so the account's privileges are exactly its `application_roles` on
- * every project in the organization.
+ * One organization-scoped role assignment. `role_id` names a Cloud role. Kibana does not send
+ * these, but UIAM reports them on accounts that earlier Kibana versions created with
+ * `organization-application-only`, whose `application_roles` apply on every project in the
+ * organization.
  */
 export interface UiamOrganizationRoleAssignment {
   role_id: string;
@@ -42,9 +42,11 @@ export interface UiamOrganizationRoleAssignment {
 }
 
 /**
- * One project-scoped role assignment. Kibana does not send these, but UIAM reports them on
- * accounts created before the organization-wide role existed.
- * Scope is either every project of that type in the organization (`all: true`) or the listed `project_ids`.
+ * One project-scoped role assignment. Scope is either every project of that type in the
+ * organization (`all: true`) or the listed `project_ids`. For service accounts, Kibana sends
+ * `<project type>-application-only`, the role UIAM defines as carrying no control-plane
+ * privileges, scoped to the current project alone. The account's privileges are then exactly its
+ * `application_roles` on that project.
  */
 export interface UiamProjectRoleAssignment {
   role_id: string;
@@ -57,8 +59,8 @@ export interface UiamProjectRoleAssignment {
 /**
  * Role assignments as Kibana sends them when creating a service account and as UIAM reports them
  * on one. Only the organization and project sections are modelled. Kibana writes the
- * organization section, and accounts created before Kibana did so may carry the project section. The other
- * sections (deployment, platform, and so on) are not something a Kibana-created account carries.
+ * project section, and accounts created by earlier Kibana versions may carry the organization section.
+ * The other sections (deployment, platform, and so on) are not something a Kibana-created account carries.
  *
  * On create, UIAM stores these as the account's roles and records the creator's own role
  * assignments as the account's `limited_by`. UIAM reports that ceiling only when the account's

@@ -274,23 +274,6 @@ export async function restoreDataStream(
     .then((response) => response.body);
 }
 
-export async function getIlmStats(
-  apiClient: StreamsSupertestRepositoryClient,
-  name: string,
-  expectStatusCode: number = 200
-) {
-  return await apiClient
-    .fetch('GET /internal/streams/{name}/lifecycle/_stats', {
-      params: {
-        path: {
-          name,
-        },
-      },
-    })
-    .expect(expectStatusCode)
-    .then((response) => response.body);
-}
-
 export async function getFailureStoreStats(
   apiClient: StreamsSupertestRepositoryClient,
   name: string,
@@ -302,38 +285,6 @@ export async function getFailureStoreStats(
         path: {
           name,
         },
-      },
-    })
-    .expect(expectStatusCode)
-    .then((response) => response.body);
-}
-
-export async function putQueryStream(
-  apiClient: StreamsSupertestRepositoryClient,
-  name: string,
-  body: { query: { esql: string }; field_descriptions?: Record<string, string> },
-  expectStatusCode: number = 200
-) {
-  return await apiClient
-    .fetch('PUT /api/streams/{name}/_query 2023-10-31', {
-      params: {
-        path: { name },
-        body,
-      },
-    })
-    .expect(expectStatusCode)
-    .then((response) => response.body);
-}
-
-export async function getQueryStream(
-  apiClient: StreamsSupertestRepositoryClient,
-  name: string,
-  expectStatusCode: number = 200
-) {
-  return await apiClient
-    .fetch('GET /api/streams/{name}/_query 2023-10-31', {
-      params: {
-        path: { name },
       },
     })
     .expect(expectStatusCode)

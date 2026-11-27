@@ -11,7 +11,7 @@ import { HostIsolationPanel } from '.';
 import { useKibana as mockUseKibana } from '../../../../lib/kibana/__mocks__';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { endpointAlertDataMock } from '../../../../mock/endpoint';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { TimelineEventsDetailsItem } from '@kbn/securitysolution-timeline-search-strategy';
 
 const queryClient = new QueryClient({
   logger: {

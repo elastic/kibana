@@ -6,7 +6,7 @@
  */
 import { createServerRouteFactory } from '@kbn/server-route-repository';
 import type { Boom } from '@hapi/boom';
-import { forbidden, notFound, conflict, badRequest } from '@hapi/boom';
+import { forbidden, notFound, conflict, badRequest, serverUnavailable } from '@hapi/boom';
 import { addSpanLabels } from '@kbn/apm-utils';
 import type { CreateServerRouteFactory } from '@kbn/server-route-repository-utils/src/typings';
 import { inspectableEsQueriesMap } from '../../lib/inspect/inspectable_es_queries_map';
@@ -15,11 +15,13 @@ import {
   SLOError,
   SLONotFound,
   SLOIdConflict,
+  SLOOperationTimeout,
+  SLOResourcesNotInstalled,
   SecurityException,
   SLOTemplateNotFound,
 } from '../../errors';
 
-function handleSLOError(error: SLOError): Boom {
+export function handleSLOError(error: SLOError): Boom {
   if (error instanceof SLONotFound) {
     return notFound(error.message);
   }
@@ -36,6 +38,10 @@ function handleSLOError(error: SLOError): Boom {
     return forbidden(error.message);
   }
 
+  if (error instanceof SLOOperationTimeout || error instanceof SLOResourcesNotInstalled) {
+    return serverUnavailable(error.message);
+  }
+
   return badRequest(error.message);
 }
 
@@ -47,6 +53,10 @@ export const createSloServerRoute: CreateServerRouteFactory<
 > = ({ handler, ...config }) => {
   return createPlainSloServerRoute({
     ...config,
+    options: {
+      ...config.options,
+      tags: [...(config.options?.tags ?? []), 'oas-tag:slo'],
+    },
     handler: async (options) => {
       addSpanLabels({ plugin: 'slo' });
       const { request } = options;

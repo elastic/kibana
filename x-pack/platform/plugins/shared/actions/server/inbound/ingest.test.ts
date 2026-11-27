@@ -8,19 +8,22 @@
 import { Socket } from 'node:net';
 
 import { errors } from '@elastic/elasticsearch';
+import { computeTokenHmac } from '@kbn/crypto';
 import type { DiagnosticResult, TransportResult } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { DEFAULT_SPACE_ID, type SpaceId } from '@kbn/core-spaces-common';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers, defineTopic, type Topic } from '@kbn/core/server';
+import { coreMock } from '@kbn/core/server/mocks';
 import { CLOUD_SERVICE_ACCOUNT_REALM_TYPE } from '@kbn/core-security-common';
 import {
   ES_CLIENT_AUTHENTICATION_HEADER,
   isExternalUiamCredential,
 } from '@kbn/core-security-server';
 import { z } from '@kbn/zod/v4';
+import type { ConnectorEventHubFields } from '@kbn/connector-topics';
 import {
   buildEventId,
   MAX_CONNECTOR_TYPE_ID_LENGTH,
@@ -28,11 +31,11 @@ import {
 } from '@kbn/connector-specs';
 
 import { CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
-import { computeIngestTokenHash } from './compute_ingest_token_hash';
 import { composeIngestToken } from './ingress_credential';
 import { INBOUND_EVENTS_DISABLED_MESSAGE, INBOUND_EVENTS_MAX_EMITTED_DEFAULT } from './constants';
 import { dispatchConnectorEvents } from './dispatch_connector_events';
 import { ingestInboundEvent } from './ingest';
+import { setConnectorEventPublisher } from './publish_connector_event';
 import { InboundEventRateLimiter } from './inbound_event_rate_limiter';
 import { mapIngestResultToResponse } from './map_ingest_result_to_response';
 import {
@@ -80,11 +83,7 @@ describe('ingestInboundEvent', () => {
   const credentialId = 'cred-1';
   const token = composeIngestToken(credentialId, 'ingest-token-value');
   const spaceId = DEFAULT_SPACE_ID;
-  const ingestTokenHash = computeIngestTokenHash({
-    connectorId,
-    spaceId,
-    token,
-  });
+  const ingestTokenHash = computeTokenHmac(token, connectorId, spaceId);
 
   const mockConnectorGet = (config: Record<string, unknown> = { other: 'kept' }) => ({
     id: connectorId,
@@ -165,6 +164,7 @@ describe('ingestInboundEvent', () => {
       }
       return mockConnectorGet() as never;
     });
+    setConnectorEventPublisher(undefined);
     rateLimiter = new InboundEventRateLimiter({
       enabled: false,
       maxKeys: 10_000,
@@ -657,11 +657,7 @@ describe('ingestInboundEvent', () => {
   it('returns 404 for the previous token after rotate', async () => {
     const rotatedCredentialId = 'cred-2';
     const rotatedToken = composeIngestToken(rotatedCredentialId, 'rotated-secret');
-    const rotatedHash = computeIngestTokenHash({
-      connectorId,
-      spaceId,
-      token: rotatedToken,
-    });
+    const rotatedHash = computeTokenHmac(rotatedToken, connectorId, spaceId);
     const eventId = buildEventId('.myConnector', 'received');
     const handleEvents = jest.fn().mockResolvedValue({
       type: 'emit',
@@ -802,6 +798,255 @@ describe('ingestInboundEvent', () => {
     expect(emitConnectorEvents).not.toHaveBeenCalled();
     expect(getDecryptedConnectorAttributes).not.toHaveBeenCalled();
     expectOutcome('info', 'accepted');
+  });
+
+  describe('event bus', () => {
+    const busDataCap = 256 * 1024;
+
+    const installPublisher = (...eventIds: string[]) => {
+      const pubsub = coreMock.createStart().pubsub;
+      setConnectorEventPublisher({
+        pubsub,
+        logger,
+        topics: new Map(
+          eventIds.map((eventId) => [
+            eventId,
+            defineTopic<Topic<ConnectorEventHubFields, string>>(eventId),
+          ])
+        ),
+      });
+      return pubsub;
+    };
+
+    const specEmitting = (
+      events: Array<{ eventId: string; correlationKey: string; payload: Record<string, unknown> }>
+    ) => {
+      const handleEvents = jest.fn().mockResolvedValue({ type: 'emit', events });
+      const definitions = Object.fromEntries(
+        events.map((event) => [
+          event.eventId,
+          {
+            eventId: event.eventId,
+            title: 'Received',
+            description: 'test',
+            eventSchema: z.object({ body: z.unknown() }),
+          },
+        ])
+      );
+      getConnectorSpecMock.mockReturnValue({
+        ...createFakeSpec(handleEvents),
+        events: { definitions, handleEvents },
+      } as ReturnType<typeof getConnectorSpec>);
+    };
+
+    const publishedNames = (pubsub: ReturnType<typeof installPublisher>) =>
+      pubsub.publish.mock.calls.map(([topic]) => topic.name);
+
+    it('publishes slack2.message and still emits', async () => {
+      const pubsub = installPublisher('slack2.message');
+      specEmitting([
+        {
+          eventId: 'slack2.message',
+          correlationKey: 'corr-1',
+          payload: { body: { hello: 'world' } },
+        },
+      ]);
+
+      const { response: res } = await run();
+
+      expect(res.accepted).toHaveBeenCalledWith({ body: { ok: true } });
+      expect(pubsub.publish).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'slack2.message' }),
+        expect.objectContaining({
+          id: JSON.stringify(['default', connectorId, 'corr-1']),
+          data: expect.objectContaining({
+            body: { hello: 'world' },
+            connectorId,
+            connectorTypeId: '.myConnector',
+            spaceId: 'default',
+            correlationKey: 'corr-1',
+          }),
+        })
+      );
+      expect(emitConnectorEvents).toHaveBeenCalledWith(
+        expect.objectContaining({ eventId: 'slack2.message' })
+      );
+    });
+
+    it('publishes github.issues and does not publish slack2.message', async () => {
+      const pubsub = installPublisher('slack2.message', 'github.issues');
+      specEmitting([
+        {
+          eventId: 'github.issues',
+          correlationKey: 'corr-1',
+          payload: { body: { hello: 'world' } },
+        },
+      ]);
+
+      await run();
+
+      expect(publishedNames(pubsub)).toEqual(['github.issues']);
+      expect(emitConnectorEvents).toHaveBeenCalledWith(
+        expect.objectContaining({ eventId: 'github.issues' })
+      );
+    });
+
+    it('does not publish slack2.hitl_action and still emits', async () => {
+      const pubsub = installPublisher('slack2.message');
+      specEmitting([
+        {
+          eventId: 'slack2.hitl_action',
+          correlationKey: 'corr-1',
+          payload: { body: { hello: 'world' } },
+        },
+      ]);
+
+      const { response: res } = await run();
+
+      expect(res.accepted).toHaveBeenCalledWith({ body: { ok: true } });
+      expect(pubsub.publish).not.toHaveBeenCalled();
+      expect(emitConnectorEvents).toHaveBeenCalledWith(
+        expect.objectContaining({ eventId: 'slack2.hitl_action' })
+      );
+      expect(logger.warn).not.toHaveBeenCalled();
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Connector event is not a bus topic (eventId=slack2.hitl_action)'
+      );
+      expect(JSON.stringify(logger.warn.mock.calls)).not.toContain('emit_partial');
+    });
+
+    it('publishes when the last-saver identity is missing and does not emit', async () => {
+      const pubsub = installPublisher('slack2.message');
+      getDecryptedConnectorAttributes.mockResolvedValueOnce({
+        actionTypeId: '.myConnector',
+        name: 'Test',
+        isMissingSecrets: false,
+        config: {},
+        secrets: {},
+      });
+      specEmitting([
+        {
+          eventId: 'slack2.message',
+          correlationKey: 'corr-1',
+          payload: { body: { hello: 'world' } },
+        },
+      ]);
+
+      const { response: res } = await run();
+
+      expect(res.accepted).toHaveBeenCalledWith({ body: { ok: true } });
+      expect(publishedNames(pubsub)).toEqual(['slack2.message']);
+      expect(emitConnectorEvents).not.toHaveBeenCalled();
+      expectOutcome('warn', 'identity_missing');
+    });
+
+    it('returns 202 and still emits when publish throws', async () => {
+      const pubsub = installPublisher('slack2.message');
+      pubsub.publish.mockRejectedValue(new Error('bus stopped'));
+      specEmitting([
+        {
+          eventId: 'slack2.message',
+          correlationKey: 'corr-1',
+          payload: { body: { hello: 'world' } },
+        },
+      ]);
+
+      const { response: res } = await run();
+
+      expect(res.accepted).toHaveBeenCalledWith({ body: { ok: true } });
+      expect(emitConnectorEvents).toHaveBeenCalledWith(
+        expect.objectContaining({ eventId: 'slack2.message' })
+      );
+      expectOutcome('info', 'accepted');
+      expect(JSON.stringify(logger.warn.mock.calls)).not.toContain('emit_partial');
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Failed to publish connector event (eventId=slack2.message): bus stopped'
+      );
+    });
+
+    it('returns 202 and still emits when the bus rejects an oversized payload', async () => {
+      const pubsub = installPublisher('slack2.message');
+      pubsub.publish.mockImplementation(async (_topic, event) => {
+        const bytes = Buffer.byteLength(JSON.stringify(event.data), 'utf8');
+        if (bytes > busDataCap) {
+          throw new Error(
+            `Pubsub event data is ${bytes} bytes, which exceeds the ${busDataCap} byte limit.`
+          );
+        }
+        return { id: event.id, acceptedAt: '2026-01-01T00:00:00.000Z' };
+      });
+      specEmitting([
+        {
+          eventId: 'slack2.message',
+          correlationKey: 'corr-1',
+          payload: { body: 'x'.repeat(busDataCap) },
+        },
+      ]);
+
+      const { response: res } = await run();
+
+      expect(res.accepted).toHaveBeenCalledWith({ body: { ok: true } });
+      expect(pubsub.publish).toHaveBeenCalled();
+      expect(emitConnectorEvents).toHaveBeenCalledWith(
+        expect.objectContaining({ eventId: 'slack2.message' })
+      );
+      expectOutcome('info', 'accepted');
+      expect(JSON.stringify(logger.warn.mock.calls)).not.toContain('emit_partial');
+    });
+
+    it('publishes nothing when a later event in the batch fails validation', async () => {
+      const pubsub = installPublisher('slack2.message');
+      const handleEvents = jest.fn().mockResolvedValue({
+        type: 'emit',
+        events: [
+          {
+            eventId: 'slack2.message',
+            correlationKey: 'corr-1',
+            payload: { body: { hello: 'world' } },
+          },
+          {
+            eventId: 'slack2.not_a_topic',
+            correlationKey: 'corr-2',
+            payload: { body: {} },
+          },
+        ],
+      });
+      getConnectorSpecMock.mockReturnValue({
+        ...createFakeSpec(handleEvents),
+        events: {
+          definitions: {
+            message: {
+              eventId: 'slack2.message',
+              title: 'Received',
+              description: 'test',
+              eventSchema: z.object({ body: z.unknown() }),
+            },
+          },
+          handleEvents,
+        },
+      } as ReturnType<typeof getConnectorSpec>);
+
+      const { response: res } = await run();
+
+      expect(res.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 500 }));
+      expect(pubsub.publish).not.toHaveBeenCalled();
+      expect(emitConnectorEvents).not.toHaveBeenCalled();
+      expectOutcome('error', 'validate_fail');
+    });
+
+    it('publishes nothing when no events are emitted', async () => {
+      const pubsub = installPublisher('slack2.message');
+      getConnectorSpecMock.mockReturnValue(
+        createFakeSpec(jest.fn().mockResolvedValue({ type: 'emit', events: [] })) as ReturnType<
+          typeof getConnectorSpec
+        >
+      );
+
+      await run();
+
+      expect(pubsub.publish).not.toHaveBeenCalled();
+      expect(emitConnectorEvents).not.toHaveBeenCalled();
+    });
   });
 
   it('returns 202 with emit_partial when emitConnectorEvents returns ok:false', async () => {
@@ -1207,6 +1452,73 @@ describe('ingestInboundEvent', () => {
       expect.anything()
     );
     expect(JSON.stringify(logger.warn.mock.calls)).not.toContain('es-secret');
+  });
+
+  it('returns the emit HTTP ack and still schedules events', async () => {
+    const eventId = buildEventId('.myConnector', 'received');
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(
+        jest.fn().mockResolvedValue({
+          type: 'emit',
+          events: [{ eventId, correlationKey: 'corr-1', payload: { body: {} } }],
+          httpResponse: { status: 200 },
+        })
+      ) as ReturnType<typeof getConnectorSpec>
+    );
+
+    const { response: res } = await run();
+    expect(res.custom).toHaveBeenCalledWith({ statusCode: 200 });
+    expect(res.accepted).not.toHaveBeenCalled();
+    expect(emitConnectorEvents).toHaveBeenCalledTimes(1);
+    expectOutcome('info', 'accepted');
+  });
+
+  it('returns the emit HTTP ack and does not schedule when the connector has no last-saver apiKey', async () => {
+    const eventId = buildEventId('.myConnector', 'received');
+    getDecryptedConnectorAttributes.mockResolvedValueOnce({
+      actionTypeId: '.myConnector',
+      name: 'Test',
+      isMissingSecrets: false,
+      config: {},
+      secrets: {},
+    });
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(
+        jest.fn().mockResolvedValue({
+          type: 'emit',
+          events: [{ eventId, correlationKey: 'corr-1', payload: { body: {} } }],
+          httpResponse: { status: 200 },
+        })
+      ) as ReturnType<typeof getConnectorSpec>
+    );
+
+    const { response: res } = await run();
+    expect(res.custom).toHaveBeenCalledWith({ statusCode: 200 });
+    expect(res.accepted).not.toHaveBeenCalled();
+    expect(emitConnectorEvents).not.toHaveBeenCalled();
+    expectOutcome('warn', 'identity_missing');
+  });
+
+  it('returns 500 and does not emit when an emit HTTP ack includes Location', async () => {
+    const eventId = buildEventId('.myConnector', 'received');
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(
+        jest.fn().mockResolvedValue({
+          type: 'emit',
+          events: [{ eventId, correlationKey: 'corr-1', payload: { body: {} } }],
+          httpResponse: {
+            status: 200,
+            headers: { Location: 'https://evil.example' },
+          },
+        })
+      ) as ReturnType<typeof getConnectorSpec>
+    );
+
+    const { response: res } = await run();
+    expect(res.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 500 }));
+    expect(res.custom).not.toHaveBeenCalled();
+    expect(emitConnectorEvents).not.toHaveBeenCalled();
+    expectOutcome('error', 'handle_fail');
   });
 
   const windowLimiter = ({

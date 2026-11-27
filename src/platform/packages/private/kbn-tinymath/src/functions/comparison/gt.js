@@ -8,17 +8,18 @@
  */
 
 /**
- * Performs a greater than comparison between two values.
+ * Checks whether one value is greater than another. For arrays, the function returns `true` only if every element is greater.
  * @param {number|number[]} a a number or an array of numbers
- * @param {number|number[]} b a number or an array of numbers
- * @return {boolean} Returns true if `a` is greater than `b`, false otherwise.  Returns an array with the greater than comparison of each element if `a` is an array.
+ * @param {number|number[]} b a number, or, if `a` is also an array, an array of numbers with the same length as `a`
+ * @return {boolean} `true` if `a` is greater than `b`, `false` otherwise. If `a` is an array, returns `true` only if every element of `a` is greater than `b`, or greater than the element at the same index of `b` if `b` is an array.
  * @throws `'Missing b value'` if `b` is not provided
- * @throws `'Array length mismatch'` if `args` contains arrays of different lengths
+ * @throws `'Array length mismatch'` if `a` and `b` are arrays of different lengths
  * @example
  * gt(1, 1) // returns false
  * gt(2, 1) // returns true
- * gt([1, 2], 1) // returns [true, false]
- * gt([1, 2], [2, 1]) // returns [false, true]
+ * gt([2, 3], 1) // returns true
+ * gt([1, 2], 1) // returns false
+ * gt([1, 2], [0, 1]) // returns true
  */
 
 function gt(a, b) {

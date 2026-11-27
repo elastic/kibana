@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 
 jest.mock('@kbn/fleet-plugin/public', () => ({
@@ -66,11 +67,20 @@ const FARGATE_ICON = {
   type: 'image/svg+xml',
 };
 
-const renderIcon = (service: AwsServiceMatrixEntry) =>
+const S3_DARK_ICON = {
+  src: '/img/logo_s3_dark.svg',
+  path: '/package/aws/7.1.0/img/logo_s3_dark.svg',
+  type: 'image/svg+xml',
+  dark_mode: true,
+};
+
+const renderIcon = (service: AwsServiceMatrixEntry, colorMode: 'light' | 'dark' = 'light') =>
   render(
-    <I18nProvider>
-      <ServiceIcon service={service} />
-    </I18nProvider>
+    <EuiProvider colorMode={colorMode}>
+      <I18nProvider>
+        <ServiceIcon service={service} />
+      </I18nProvider>
+    </EuiProvider>
   );
 
 describe('ServiceIcon', () => {
@@ -126,6 +136,65 @@ describe('ServiceIcon', () => {
       '/api/fleet/epm/packages/awsfargate/1.3.0/img/logo_fargate.svg'
     );
   });
+
+  it('tier 1: prefers the dark_mode icon variant in dark mode', () => {
+    mockUseGetPackageInfoByKeyQuery.mockReturnValue({
+      isLoading: false,
+      data: {
+        item: {
+          name: 'aws',
+          version: '7.1.0',
+          icons: [AWS_PKG_ICON],
+          policy_templates: [{ name: 's3', icons: [S3_DARK_ICON, S3_ICON] }],
+        },
+      },
+    });
+
+    const { container } = renderIcon(BASE_SERVICE, 'dark');
+    const img = container.querySelector('img');
+    expect(img?.getAttribute('src')).toBe('/api/fleet/epm/packages/aws/7.1.0/img/logo_s3_dark.svg');
+  });
+
+  it('tier 1: ignores the dark_mode icon variant in light mode', () => {
+    mockUseGetPackageInfoByKeyQuery.mockReturnValue({
+      isLoading: false,
+      data: {
+        item: {
+          name: 'aws',
+          version: '7.1.0',
+          icons: [AWS_PKG_ICON],
+          policy_templates: [{ name: 's3', icons: [S3_DARK_ICON, S3_ICON] }],
+        },
+      },
+    });
+
+    const { container } = renderIcon(BASE_SERVICE);
+    const img = container.querySelector('img');
+    expect(img?.getAttribute('src')).toBe('/api/fleet/epm/packages/aws/7.1.0/img/logo_s3.svg');
+  });
+
+  it.each(['aws', 'aws_logs', 'aws_billing'])(
+    'tier 3: skips the generic AWS package icon of %s in favour of logoAWS EuiIcon',
+    (packageName) => {
+      const service: AwsServiceMatrixEntry = { ...BASE_SERVICE, packageName };
+
+      mockUseGetPackageInfoByKeyQuery.mockReturnValue({
+        isLoading: false,
+        data: {
+          item: {
+            name: packageName,
+            version: '7.1.0',
+            icons: [AWS_PKG_ICON],
+            policy_templates: [],
+          },
+        },
+      });
+
+      const { container } = renderIcon(service);
+      expect(container.querySelector('img')).toBeNull();
+      expect(document.querySelector('[data-euiicon-type="logoAWS"]')).not.toBeNull();
+    }
+  );
 
   it('tier 3: renders logoAWS EuiIcon when package returns no icons', () => {
     mockUseGetPackageInfoByKeyQuery.mockReturnValue({

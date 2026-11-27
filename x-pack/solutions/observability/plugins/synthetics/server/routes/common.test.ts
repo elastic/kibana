@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { getSavedObjectKqlFilter, parseArrayFilters, parseMappingKey, QuerySchema } from './common';
+import {
+  getSavedObjectKqlFilter,
+  getScheduleKqlFilter,
+  parseArrayFilters,
+  parseMappingKey,
+  QuerySchema,
+  scheduleBucketLabel,
+} from './common';
 
 describe('common utils', () => {
   it('tests parseArrayFilters', () => {
@@ -33,10 +40,10 @@ describe('common utils', () => {
       monitorTypes: ['type1', 'type2'],
       projects: ['project1', 'project2'],
       monitorQueryIds: ['query1', 'query2'],
-      schedules: ['schedule1', 'schedule2'],
+      schedules: ['10s', '5'],
     });
     expect(filters.filtersStr).toMatchInlineSnapshot(
-      `"synthetics-monitor-multi-space.attributes.tags:(\\"tag1\\" OR \\"tag2\\") AND synthetics-monitor-multi-space.attributes.project_id:(\\"project1\\" OR \\"project2\\") AND synthetics-monitor-multi-space.attributes.type:(\\"type1\\" OR \\"type2\\") AND synthetics-monitor-multi-space.attributes.locations.id:(\\"loc1\\" OR \\"loc2\\") AND synthetics-monitor-multi-space.attributes.schedule.number:(\\"schedule1\\" OR \\"schedule2\\") AND synthetics-monitor-multi-space.attributes.id:(\\"query1\\" OR \\"query2\\") AND synthetics-monitor-multi-space.attributes.config_id:(\\"1\\" OR \\"2\\")"`
+      `"synthetics-monitor-multi-space.attributes.tags:(\\"tag1\\" OR \\"tag2\\") AND synthetics-monitor-multi-space.attributes.project_id:(\\"project1\\" OR \\"project2\\") AND synthetics-monitor-multi-space.attributes.type:(\\"type1\\" OR \\"type2\\") AND synthetics-monitor-multi-space.attributes.locations.id:(\\"loc1\\" OR \\"loc2\\") AND (synthetics-monitor-multi-space.attributes.schedule_interval_seconds:10 OR synthetics-monitor-multi-space.attributes.schedule_interval_seconds:300) AND synthetics-monitor-multi-space.attributes.id:(\\"query1\\" OR \\"query2\\") AND synthetics-monitor-multi-space.attributes.config_id:(\\"1\\" OR \\"2\\")"`
     );
   });
 });
@@ -110,14 +117,44 @@ describe('getSavedObjectKqlFilter', () => {
   });
 });
 
+describe('getScheduleKqlFilter', () => {
+  it('treats a bare number as minutes', () => {
+    expect(getScheduleKqlFilter('10')).toBe(
+      'synthetics-monitor-multi-space.attributes.schedule_interval_seconds:600'
+    );
+  });
+
+  it('keeps seconds and minutes as separate clauses', () => {
+    expect(getScheduleKqlFilter(['10s', '10m'])).toBe(
+      '(synthetics-monitor-multi-space.attributes.schedule_interval_seconds:10 OR synthetics-monitor-multi-space.attributes.schedule_interval_seconds:600)'
+    );
+  });
+
+  it('drops a value that is not a schedule', () => {
+    expect(getScheduleKqlFilter('schedule1')).toBe('');
+  });
+});
+
+describe('scheduleBucketLabel', () => {
+  it('labels a duration that is not a whole number of minutes in seconds', () => {
+    expect(scheduleBucketLabel(10)).toBe('10s');
+    expect(scheduleBucketLabel(30)).toBe('30s');
+  });
+
+  it('labels a whole number of minutes in minutes', () => {
+    expect(scheduleBucketLabel(180)).toBe('3m');
+    expect(scheduleBucketLabel(600)).toBe('10m');
+  });
+});
+
 describe('parseMappingKey', () => {
   it.each([
     ['name', 'name.keyword'],
     ['tags', 'tags'],
     ['tags.keyword', 'tags'],
     ['type', 'type.keyword'],
-    ['schedule', 'schedule.number'],
-    ['schedule.keyword', 'schedule.number'],
+    ['schedule', 'schedule_interval_seconds'],
+    ['schedule.keyword', 'schedule_interval_seconds'],
     ['project_id.keyword', 'project_id'],
     ['name.keyword', 'name.keyword'],
     ['created_at', 'created_at'],

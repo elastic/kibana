@@ -10,11 +10,8 @@
 import React, { createRef } from 'react';
 import { act, fireEvent } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import {
-  DEVELOPER_TOOLBAR_ID,
-  DEVTOOL_MANAGED_ATTR,
-  MEASURE_OVERLAY_ID,
-} from '../../lib/constants';
+import { DEVELOPER_TOOLBAR_ID, DEVTOOL_MANAGED_ATTR } from '../../lib/constants';
+import { setInspectionOverlayActive } from '../../lib/inspection_overlay_state';
 import { getDefaultLayoutConfig } from '../../lib/layout/layout_config';
 import { EditOverlay } from './edit_overlay';
 import type { EditOverlayHandle } from './edit_overlay';
@@ -345,9 +342,7 @@ describe('EditOverlay', () => {
   });
 
   it('should not handle Escape when measure overlay is active', () => {
-    const measureOverlay = document.createElement('div');
-    measureOverlay.id = MEASURE_OVERLAY_ID;
-    document.body.appendChild(measureOverlay);
+    setInspectionOverlayActive('measure', true);
 
     document.elementsFromPoint = jest.fn().mockReturnValue([target]);
 
@@ -380,7 +375,7 @@ describe('EditOverlay', () => {
     expect(target.style.visibility).toBe('hidden');
     expect(getClone()).toBeInTheDocument();
 
-    measureOverlay.remove();
+    setInspectionOverlayActive('measure', false);
   });
 
   it('should not interact with ignored elements on pointer down', () => {

@@ -402,6 +402,31 @@ describe('invokeGenerationWorkflow', () => {
       expect(workflowInputs.additional_context).toContain('Skill corroboration: high-risk host');
     });
 
+    it('passes plugin_id and aggregate_by in workflow inputs when telemetryMetadata is set', async () => {
+      await invokeGenerationWorkflow({
+        ...defaultProps,
+        telemetryMetadata: { aggregateBy: 'rollup_parent', pluginId: 'some_plugin' },
+      });
+
+      expect(mockWorkflowsManagementApi.scheduleWorkflow).toHaveBeenCalledWith(
+        expect.anything(),
+        'default',
+        expect.objectContaining({ aggregate_by: 'rollup_parent', plugin_id: 'some_plugin' }),
+        mockRequest,
+        'attack-discovery-pipeline'
+      );
+    });
+
+    it('does NOT include plugin_id or aggregate_by in workflow inputs when unset', async () => {
+      await invokeGenerationWorkflow(defaultProps);
+
+      const workflowInputs = (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mock
+        .calls[0][2] as Record<string, unknown>;
+
+      expect(workflowInputs).not.toHaveProperty('plugin_id');
+      expect(workflowInputs).not.toHaveProperty('aggregate_by');
+    });
+
     it('does NOT include newAlerts in the generate-step-succeeded event', async () => {
       await invokeGenerationWorkflow(defaultProps);
 
@@ -583,6 +608,40 @@ describe('invokeGenerationWorkflow', () => {
     it('throws with the failure message', async () => {
       await expect(invokeGenerationWorkflow(defaultProps)).rejects.toThrow(
         'Generation workflow failed: Generation failed'
+      );
+    });
+  });
+
+  describe('when workflow execution fails because the model refused the request', () => {
+    const mockContentFilterExecution: WorkflowExecutionDto = {
+      ...mockCompletedExecution,
+      error: {
+        message:
+          'The model (claude-opus-5-5) refused to complete the response, so generation stopped without retrying. Sending fewer alerts or events will not help, and retrying is unlikely to; choose a different model or connector. Details: The model refused to complete the response: The response was stopped by the provider content filter (finish_reason: content_filter).',
+        type: 'Error',
+      },
+      status: ExecutionStatus.FAILED,
+    };
+
+    beforeEach(() => {
+      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mockResolvedValue(
+        'workflow-run-id'
+      );
+      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue(
+        mockContentFilterExecution
+      );
+    });
+
+    it('throws with errorCategory content_filter', async () => {
+      await expect(invokeGenerationWorkflow(defaultProps)).rejects.toMatchObject({
+        errorCategory: 'content_filter',
+      });
+    });
+
+    it('keeps the content filter details in the message', async () => {
+      await expect(invokeGenerationWorkflow(defaultProps)).rejects.toThrow(
+        'content filter (finish_reason: content_filter)'
       );
     });
   });

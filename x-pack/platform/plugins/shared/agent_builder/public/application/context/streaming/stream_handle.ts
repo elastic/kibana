@@ -33,3 +33,10 @@ export const requestAbort = (handle: StreamHandle, chatService: Pick<ChatService
 
 export const isStreamCancelled = ({ abortRequested, controller }: StreamHandle): boolean =>
   abortRequested || controller.signal.aborted;
+
+/**
+ * The connection was closed locally without asking the server to stop the run: the UI that held
+ * it is going away. Only Stop sets `abortRequested`, so a closed connection without it is a detach.
+ */
+export const isDetached = ({ abortRequested, controller }: StreamHandle): boolean =>
+  controller.signal.aborted && !abortRequested;

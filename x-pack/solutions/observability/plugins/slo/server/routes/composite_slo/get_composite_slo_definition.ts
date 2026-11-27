@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { getCompositeSLOParamsSchema } from '@kbn/slo-schema';
+import {
+  getCompositeSLOParamsSchema,
+  getCompositeSLODefinitionResponseSchema,
+} from '@kbn/slo-schema';
 import { GetCompositeSLODefinition } from '../../services';
 import { createCompositeSloServerRoute } from './create_composite_slo_server_route';
 
@@ -18,6 +21,9 @@ export const getCompositeSLODefinitionRoute = createCompositeSloServerRoute({
     },
   },
   params: getCompositeSLOParamsSchema,
+  responses: {
+    200: { description: 'Successful request', body: () => getCompositeSLODefinitionResponseSchema },
+  },
   handler: async ({ params, logger, request, getScopedClients }) => {
     const { compositeRepository } = await getScopedClients({ request, logger });
     const getCompositeSLODefinition = new GetCompositeSLODefinition(compositeRepository);

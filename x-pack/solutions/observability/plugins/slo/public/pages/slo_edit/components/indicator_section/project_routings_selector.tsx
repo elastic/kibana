@@ -9,7 +9,7 @@ import { EuiButton, EuiFormRow, EuiPopover, EuiSpacer, EuiText } from '@elastic/
 import { ProjectScopePicker, useFetchProjects } from '@kbn/cps-utils';
 import type { ProjectRouting } from '@kbn/es-query';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, useWatch } from 'react-hook-form';
 import {
   ALL_PROJECT_ROUTING,
   LOCAL_PROJECT_ROUTING,
@@ -26,9 +26,9 @@ import {
 import type { CreateSLOForm } from '../../types';
 
 export function ProjectRoutingsSelector() {
-  const { watch, setValue } = useFormContext<CreateSLOForm>();
+  const { control, setValue } = useFormContext<CreateSLOForm>();
   const { showProjectScopeUI, fetchProjects, cpsManager } = useCpsProjectScope();
-  const projectRoutings = watch('settings.projectRoutings');
+  const projectRoutings = useWatch({ control, name: 'settings.projectRoutings' });
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const { originProject, linkedProjects, isLoading, error } = useFetchProjects(

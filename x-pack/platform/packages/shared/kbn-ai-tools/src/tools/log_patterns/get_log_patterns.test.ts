@@ -6,7 +6,6 @@
  */
 
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
-import { kqlQuery, dateRangeQuery } from '@kbn/es-query';
 import { getSigEventsLogPatternsEsql } from './get_log_patterns';
 
 const createEsClient = (
@@ -53,7 +52,8 @@ describe('getSigEventsLogPatternsEsql', () => {
     const { esClient, esql, rawEsqlQuery } = createEsClient([{ name: 'body.text', type: 'text' }]);
     esql
       .mockResolvedValueOnce(countResponse(10))
-      .mockResolvedValueOnce(categorizeResponse([[10, 'error one', 'error']]));
+      .mockResolvedValueOnce(categorizeResponse([[10, 'error one', 'error']]))
+      .mockResolvedValueOnce(categorizeResponse([]));
 
     const result = await getSigEventsLogPatternsEsql({
       esClient,
@@ -67,24 +67,23 @@ describe('getSigEventsLogPatternsEsql', () => {
     expect(esql.mock.calls[0]).toEqual([
       'count_docs_for_sigevents_log_patterns',
       expect.objectContaining({
-        query: 'FROM logs-* | WHERE KQL("service.name:\\"checkout\\"") | STATS total = COUNT(*)',
+        query:
+          'FROM logs-* | WHERE @timestamp >= "1970-01-01T00:00:00.100Z" AND @timestamp <= "1970-01-01T00:00:00.200Z" | WHERE KQL("service.name:\\"checkout\\"") | WHERE body.text IS NOT NULL | STATS total = COUNT(*)',
       }),
     ]);
     expect(esql.mock.calls[1]).toEqual([
       'categorize_noise_exclusion_head',
-      expect.objectContaining({
+      {
         query:
-          'FROM logs-* | STATS count = COUNT(*), `sample` = TOP(body.text::KEYWORD, 1, "desc") BY pattern = CATEGORIZE(body.text, {"output_format": "tokens"}) | WHERE count > 0.1 | SORT count ASC | LIMIT 1000',
-        filter: {
-          bool: { filter: [...kqlQuery('service.name:"checkout"'), ...dateRangeQuery(100, 200)] },
-        },
-      }),
+          'FROM logs-* | WHERE @timestamp >= "1970-01-01T00:00:00.100Z" AND @timestamp <= "1970-01-01T00:00:00.200Z" | WHERE KQL("service.name:\\"checkout\\"") | WHERE body.text IS NOT NULL | STATS count = COUNT(*), `sample` = TOP(body.text::KEYWORD, 1, "desc") BY pattern = CATEGORIZE(body.text, {"output_format": "tokens"}) | WHERE count > 0.1 | SORT count ASC | LIMIT 1000',
+      },
     ]);
-    expect(esql).toHaveBeenCalledTimes(2);
+    expect(esql).toHaveBeenCalledTimes(3);
     expect(rawEsqlQuery).toHaveBeenCalledTimes(1);
     expect(rawEsqlQuery.mock.calls[0][0]).toEqual(
       expect.objectContaining({
-        query: 'FROM logs-* | LIMIT 0',
+        query:
+          'SET unmapped_fields = "NULLIFY"; FROM logs-* | WHERE @timestamp >= "1970-01-01T00:00:00.100Z" AND @timestamp <= "1970-01-01T00:00:00.200Z" | KEEP body.text | LIMIT 0',
       })
     );
     expect(result).toEqual([
@@ -93,7 +92,7 @@ describe('getSigEventsLogPatternsEsql', () => {
   });
 
   it('short-circuits when schema returns no eligible text fields', async () => {
-    const { esClient, esql } = createEsClient([{ name: 'host.name', type: 'keyword' }]);
+    const { esClient, esql } = createEsClient([{ name: 'message', type: 'null' }]);
 
     const result = await getSigEventsLogPatternsEsql({
       esClient,
@@ -112,12 +111,17 @@ describe('getSigEventsLogPatternsEsql', () => {
       { name: 'message', type: 'text' },
       { name: 'body.text', type: 'text' },
     ]);
-    esql
-      .mockResolvedValueOnce(countResponse(10))
-      .mockResolvedValueOnce(categorizeResponse([[2, 'same', 'message low']]))
-      .mockResolvedValueOnce(categorizeResponse([[8, 'same', 'body high']]))
-      .mockResolvedValueOnce(categorizeResponse([]))
-      .mockResolvedValueOnce(categorizeResponse([]));
+    esql.mockImplementation(async (operationName: string, { query }: { query: string }) => {
+      if (operationName === 'count_docs_for_sigevents_log_patterns') {
+        return countResponse(10);
+      }
+      if (operationName !== 'categorize_noise_exclusion_head') {
+        return categorizeResponse([]);
+      }
+      return query.includes('CATEGORIZE(message')
+        ? categorizeResponse([[2, 'same', 'message low']])
+        : categorizeResponse([[8, 'same', 'body high']]);
+    });
 
     const result = await getSigEventsLogPatternsEsql({
       esClient,
@@ -129,6 +133,37 @@ describe('getSigEventsLogPatternsEsql', () => {
 
     expect(result).toEqual([
       { field: 'body.text', pattern: 'body high', count: 8, sample: 'same' },
+    ]);
+  });
+
+  it('counts each field separately and skips one that no document holds', async () => {
+    const { esClient, esql } = createEsClient([
+      { name: 'message', type: 'text' },
+      { name: 'body.text', type: 'text' },
+    ]);
+    esql.mockImplementation(async (operationName: string, { query }: { query: string }) => {
+      if (operationName === 'count_docs_for_sigevents_log_patterns') {
+        return countResponse(query.includes('WHERE message IS NOT NULL') ? 0 : 1_000_000);
+      }
+      return operationName === 'categorize_noise_exclusion_head'
+        ? categorizeResponse([[50_000, 'body sample', 'body pattern']])
+        : categorizeResponse([]);
+    });
+
+    const result = await getSigEventsLogPatternsEsql({
+      esClient,
+      samplingSource: 'logs-*',
+      start: 100,
+      end: 200,
+      fields: ['message', 'body.text'],
+    });
+
+    const queries = esql.mock.calls.map(([, { query }]) => query).join('\n');
+    expect(queries).not.toContain('CATEGORIZE(message');
+    expect(queries).toContain('| SAMPLE 0.1 |');
+    expect(queries).toContain('| WHERE count > 1000 |');
+    expect(result).toEqual([
+      { field: 'body.text', pattern: 'body pattern', count: 500_000, sample: 'body sample' },
     ]);
   });
 

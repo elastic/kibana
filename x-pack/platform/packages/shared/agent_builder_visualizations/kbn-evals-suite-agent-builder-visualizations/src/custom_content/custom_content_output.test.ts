@@ -11,6 +11,7 @@ import {
   getLastCustomContentAttachmentId,
   getLastWrittenDashboardId,
   findStoredPanel,
+  getCustomContentToolArgs,
   getToolErrors,
   readStoredCustomContent,
   readStoredCustomContentFromDashboard,
@@ -46,6 +47,7 @@ describe('toStoredCustomContent', () => {
   it('reads the query, template and height of a custom content panel', () => {
     expect(toStoredCustomContent(customContentData())).toEqual({
       esql: 'FROM logs | STATS count = COUNT(*) BY host',
+      esqls: ['FROM logs | STATS count = COUNT(*) BY host'],
       template: '<div>{{ rows.size }}</div>',
       height: 320,
     });
@@ -56,6 +58,25 @@ describe('toStoredCustomContent', () => {
       'esql'
     );
     expect(toStoredCustomContent(customContentData({ esql: '  ' }))).not.toHaveProperty('esql');
+    expect(toStoredCustomContent(customContentData({ esql: [] }))).not.toHaveProperty('esql');
+  });
+
+  it('reads the main query of a panel stored as a list of queries, as the tools write it', () => {
+    expect(
+      toStoredCustomContent(customContentData({ esql: ['FROM logs | LIMIT 1', 'FROM other'] }))
+    ).toMatchObject({ esql: 'FROM logs | LIMIT 1' });
+  });
+
+  it('keeps the position of every query, blank ones included', () => {
+    expect(
+      toStoredCustomContent(customContentData({ esql: ['FROM logs', '  ', 'FROM other'] }))
+    ).toMatchObject({ esqls: ['FROM logs', '  ', 'FROM other'] });
+  });
+
+  it('keeps every query of the panel, in order', () => {
+    expect(
+      toStoredCustomContent(customContentData({ esql: ['FROM logs | LIMIT 1', 'FROM other'] }))
+    ).toMatchObject({ esqls: ['FROM logs | LIMIT 1', 'FROM other'] });
   });
 
   it('ignores panels of other renderers', () => {
@@ -180,9 +201,34 @@ describe('readStoredCustomContentFromDashboard', () => {
       'dash-1'
     );
 
-    expect(after).toEqual({ esql: 'FROM logs | STATS c = COUNT(*)', template: '<p>hi</p>' });
+    expect(after).toEqual({
+      esql: 'FROM logs | STATS c = COUNT(*)',
+      esqls: ['FROM logs | STATS c = COUNT(*)'],
+      template: '<p>hi</p>',
+    });
     expect(before).toEqual(after);
     expect(versionCount).toBe(1);
+  });
+
+  it('reads every query of a dashboard panel', () => {
+    const conversation = dashboardConversation([
+      {
+        panels: [
+          {
+            ...customContentPanel('p1'),
+            config: {
+              esql_query: ['FROM logs | STATS c = COUNT(*)', 'FROM logs | LIMIT 5'],
+              template: 'x',
+            },
+          },
+        ],
+      },
+    ]);
+
+    expect(readStoredCustomContentFromDashboard(conversation, 'dash-1').after).toMatchObject({
+      esql: 'FROM logs | STATS c = COUNT(*)',
+      esqls: ['FROM logs | STATS c = COUNT(*)', 'FROM logs | LIMIT 5'],
+    });
   });
 
   it('returns the id of the panel it read', () => {
@@ -212,7 +258,11 @@ describe('readStoredCustomContentFromDashboard', () => {
       'dash-1'
     );
 
-    expect(before).toEqual({ esql: 'FROM logs | STATS c = COUNT(*)', template: '<p>old</p>' });
+    expect(before).toEqual({
+      esql: 'FROM logs | STATS c = COUNT(*)',
+      esqls: ['FROM logs | STATS c = COUNT(*)'],
+      template: '<p>old</p>',
+    });
     expect(after?.esql).toBe('FROM logs | STATS c = COUNT(*) BY machine.os');
     expect(versionCount).toBe(2);
   });
@@ -320,5 +370,74 @@ describe('findStoredPanel', () => {
       versionCount: 0,
       storedIn: 'none',
     });
+  });
+});
+
+describe('getCustomContentToolArgs', () => {
+  const call = (tool_id: string, params: Record<string, unknown>) => ({
+    type: 'tool_call',
+    tool_id,
+    params,
+  });
+
+  it('shows whether generate_dashboard was told the panel has data', () => {
+    const [omitted, passed] = getCustomContentToolArgs([
+      call('platform.dashboard.generate_dashboard', {
+        panels: [
+          {
+            id: 'banner',
+            content: {
+              type: 'custom_content',
+              query: 'show the live total number of requests',
+            },
+          },
+          {
+            id: 'kpi',
+            content: {
+              type: 'custom_content',
+              query: 'show requests',
+              dataQueries: [{ esql: 'FROM logs | STATS c = COUNT(*)' }],
+            },
+          },
+        ],
+      }),
+    ]);
+
+    expect(omitted).toContain('panel banner: dataQueries=unset');
+    expect(passed).toContain('panel kpi: dataQueries=1');
+    expect(passed).not.toContain('FROM logs');
+  });
+
+  it('reads create_visualization targets and the update tool', () => {
+    const lines = getCustomContentToolArgs([
+      call('platform.core.create_visualization', {
+        query: 'a status board',
+        target: { type: 'custom_content', removeAllQueries: true },
+      }),
+      call('custom_content_update_panel', {
+        embeddable_id: 'p1',
+        prompt: 'x'.repeat(200),
+        dataQueries: [{ description: 'x' }, {}],
+      }),
+    ]);
+
+    expect(lines[0]).toContain('create_visualization custom_content: dataQueries=unset');
+    expect(lines[0]).toContain('removeAllQueries=true');
+    expect(lines[1]).toContain('dataQueries=2');
+    expect(lines[1].length).toBeLessThan(200);
+  });
+
+  it('ignores other tools, other panel types and steps without params', () => {
+    expect(
+      getCustomContentToolArgs([
+        call('platform.core.get_index_mapping', { index: 'logs' }),
+        call('platform.dashboard.generate_dashboard', {
+          panels: [{ id: 'a', content: { type: 'vis', query: 'x' } }],
+        }),
+        { type: 'tool_call', tool_id: 'platform.dashboard.generate_dashboard' },
+        { type: 'reasoning' },
+      ])
+    ).toEqual([]);
+    expect(getCustomContentToolArgs(undefined)).toEqual([]);
   });
 });

@@ -122,12 +122,6 @@ const useHeaderStyles = (
         border-bottom: ${euiTheme.border.thin};
         margin-bottom: -${euiTheme.border.width.thin};
       `}
-
-      &:hover .titleActionsReveal,
-      &:focus-within .titleActionsReveal {
-        opacity: 1;
-        pointer-events: auto;
-      }
     `;
 
     // Preserve the single-row content floor in multi-row headers while replacing its symmetric
@@ -205,14 +199,11 @@ const useHeaderStyles = (
       padding-block-end: ${bottomPad(hasTabs)};
     `;
 
-    const titleActionsReveal = css`
+    const titleActions = css`
       display: flex;
       flex-shrink: 0;
       align-items: center;
       gap: ${euiTheme.size.xs};
-      opacity: ${hasTitleAppend ? 1 : 0};
-      pointer-events: ${hasTitleAppend ? 'auto' : 'none'};
-      transition: opacity ${euiTheme.animation.fast} ease;
     `;
 
     return {
@@ -223,7 +214,7 @@ const useHeaderStyles = (
       titleClusterSpacer,
       titleAppend,
       trailingSlot,
-      titleActionsReveal,
+      titleActions,
       secondaryContentRow,
       tabsRow,
     };
@@ -261,11 +252,7 @@ export const AppHeaderShell = React.memo<AppHeaderShellProps>(
             <div css={styles.titleGroup}>
               {title}
               {badges}
-              {titleActions && (
-                <div className="titleActionsReveal" css={styles.titleActionsReveal}>
-                  {titleActions}
-                </div>
-              )}
+              {titleActions && <div css={styles.titleActions}>{titleActions}</div>}
             </div>
             {hasTitleAppend && <div css={styles.titleAppend}>{titleAppend}</div>}
             <div css={styles.titleClusterSpacer} aria-hidden />

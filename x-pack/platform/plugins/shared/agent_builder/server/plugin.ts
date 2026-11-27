@@ -28,8 +28,14 @@ import type {
   AgentBuilderStartDependencies,
 } from './types';
 import { registerFeatures } from './features';
+import {
+  AGENT_WORKLOAD_TYPE,
+  resolveAgentWorkloads,
+} from './services/agents/service_account_binding';
+import { createStorage as createAgentStorage } from './services/agents/persisted/client/storage';
 import { registerRoutes } from './routes';
 import { agentBuilderSpaceSettingsType } from './saved_objects';
+import { pinnedBaselinesDataStreamDefinition } from './services/eval_baselines/pinned_baselines_data_stream';
 import { registerUISettings } from './ui_settings';
 import { getRunAgentStepDefinition, rerankStepDefinition } from './step_types';
 import type { AgentBuilderHandlerContext } from './request_handler_context';
@@ -44,7 +50,10 @@ import { registerAfterExecutionWorkflowsHook } from './hooks/agent_workflows/reg
 import { registerSkillToolsLoaderHook } from './hooks/skills/register_skill_tools_loader_hook';
 import { createRelevantSkillsCycleHook } from './services/execution/run_agent/cycle_hooks/relevant_skills_hook';
 import { registerTaskDefinitions } from './services/execution';
-import { createModelProviderFactory } from './services/execution/runner/model_provider';
+import {
+  createModelProviderFactory,
+  createRuntimeModelProviderFactory,
+} from './services/execution/runner/model_provider';
 import { createSmlTools } from './services/tools/builtin/sml';
 import { createConnectorTools } from './services/tools/builtin/connectors';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
@@ -144,6 +153,7 @@ export class AgentBuilderPlugin
 
     registerTaskDefinitions({
       taskManager: setupDeps.taskManager,
+      getStartServices: coreSetup.getStartServices,
       getTaskHandler: () => {
         const services = this.serviceManager.internalStart;
         if (!services) {
@@ -155,7 +165,35 @@ export class AgentBuilderPlugin
 
     registerFeatures({ features: setupDeps.features });
 
+    // Registered even where service accounts are disabled so existing bindings can still be
+    // listed and removed.
+    coreSetup.security.serviceAccounts.registerWorkloadType({
+      type: AGENT_WORKLOAD_TYPE,
+      name: 'Agent',
+      description: 'Agent Builder agent that runs every conversation as the bound service account',
+      resolveWorkloads: async (workloads, { signal }) => {
+        const [coreStart] = await coreSetup.getStartServices();
+        return resolveAgentWorkloads({
+          storage: createAgentStorage({
+            logger: this.logger.get('agents'),
+            esClient: coreStart.elasticsearch.client.asInternalUser,
+          }),
+          workloads,
+          signal,
+        });
+      },
+    });
+
     coreSetup.savedObjects.registerType(agentBuilderSpaceSettingsType);
+
+    // Pinned regression baselines for eval suites; served through the internal
+    // `/internal/agent_builder/evals/baselines` routes on the evaluations cluster. Only
+    // registered where the evals product runs, so ordinary deployments install no
+    // template for it (the routes are gated the same way). The evals setup contract
+    // reports the configured mode even when the plugin is disabled, so check both.
+    if (setupDeps.evals?.enabled && setupDeps.evals.mode === 'full') {
+      coreSetup.dataStreams.registerDataStream(pinnedBaselinesDataStreamDefinition);
+    }
 
     // Phantom capability: not a registered feature privilege. Used as an admin check
     // (e.g. superuser / wildcard roles get true). Resolved in the switcher via ES hasPrivileges.
@@ -333,6 +371,7 @@ export class AgentBuilderPlugin
       },
       callbacks: {
         registerConversationResolver: serviceSetups.callbacks.registerConversationResolver,
+        registerOnBeforeNewConversation: serviceSetups.callbacks.registerOnBeforeNewConversation,
         registerTransport: serviceSetups.callbacks.registerTransport,
       },
       topSnippets: this.config.topSnippets,
@@ -393,6 +432,8 @@ export class AgentBuilderPlugin
       }),
       deductiveRegister: this.config.deductive?.register ?? false,
       isomer,
+      getSmlTypeDefinition: startDeps.agentBuilderSml.getTypeDefinition,
+      cloud: this.cloudSetup,
       conversationEventBus: this.conversationEventBus,
     });
 
@@ -435,7 +476,10 @@ export class AgentBuilderPlugin
       esClient: elasticsearch.client.asInternalUser,
       features: searchInferenceEndpoints.features,
     });
-    this.recommendedEndpointsPoller.start();
+    // Intentionally not started: the EIS-derived list is too broad with the current family
+    // heuristic, so the static recommended endpoints are used instead.
+    // See https://github.com/elastic/search-team/issues/16741
+    // this.recommendedEndpointsPoller.start();
 
     return {
       agents: {
@@ -460,7 +504,7 @@ export class AgentBuilderPlugin
         findExecutions: execution.findExecutions.bind(execution),
       },
       runtime: {
-        createModelProvider: modelProviderFactory,
+        createModelProvider: createRuntimeModelProviderFactory(modelProviderFactory),
       },
       conversations: {
         getScopedClient: async ({ request }) => {

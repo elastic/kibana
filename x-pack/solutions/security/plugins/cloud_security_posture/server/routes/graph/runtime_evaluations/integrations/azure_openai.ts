@@ -6,7 +6,7 @@
  */
 
 /* eslint-disable prettier/prettier */
-/* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable @kbn/compat/typescript-naming-convention */
 
 import type { IntegrationEvaluations } from "../types";
 

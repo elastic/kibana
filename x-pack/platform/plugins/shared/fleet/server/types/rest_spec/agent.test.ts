@@ -5,7 +5,12 @@
  * 2.0.
  */
 
+import { buildPolicyBaseIdsWithFallbackKuery } from '../../../common/services';
 import { AGENTS_PREFIX, SO_SEARCH_LIMIT } from '../../constants';
+import {
+  AGENT_FIELDS_TO_EXPORT,
+  INITIAL_AGENT_FIELDS_TO_EXPORT,
+} from '../../../public/applications/fleet/sections/agents/components/agent_export_csv_modal/columns';
 
 import {
   AGENT_ID_MAX_LENGTH,
@@ -13,6 +18,8 @@ import {
   BulkChangeAgentsPrivilegeLevelRequestSchema,
   BulkMigrateAgentsRequestSchema,
   GetAgentsRequestSchema,
+  GetOneAgentRequestSchema,
+  PostGenerateAgentsReportRequestSchema,
   PostBulkAgentReassignRequestSchema,
   PostBulkAgentRestartRequestSchema,
   PostBulkAgentRollbackRequestSchema,
@@ -20,7 +27,9 @@ import {
   PostBulkAgentUpgradeRequestSchema,
   PostBulkRemoveCollectorsRequestSchema,
   PostBulkRequestDiagnosticsActionRequestSchema,
+  PostAgentRestartRequestSchema,
   PostBulkUpdateAgentTagsRequestSchema,
+  UpdateAgentRequestSchema,
 } from './agent';
 
 describe('GetAgentsRequestSchema', () => {
@@ -133,5 +142,153 @@ describe('bulk action request schemas validate the `agents` KQL string', () => {
         dryRun: true,
       })
     ).toThrow(/not allowed/);
+  });
+});
+
+describe('reporting mode string fields', () => {
+  // These fields use the string helpers' warn() mode: overlong input is recorded in the
+  // kibana.schema.string_length_violation.length histogram instead of being rejected.
+  it.each([10_000, 10_001, 50_000])('accepts a kuery of %i characters', (length) => {
+    expect(() =>
+      GetAgentsRequestSchema.query.validate({ kuery: 'a'.repeat(length) })
+    ).not.toThrow();
+  });
+
+  // Regression: the Agents list page builds one kuery from every managed agent policy ID,
+  // inlined twice by buildPolicyBaseIdsWithFallbackKuery. At ~124 policies that exceeds
+  // 10 000 characters, so a hard limit would 400 the page on load.
+  it('accepts the kuery the Agents list page builds for 500 managed policies', () => {
+    const ids = Array.from(
+      { length: 500 },
+      (_, i) => `550e8400-e29b-41d4-a716-${String(i).padStart(12, '0')}`
+    );
+    const kuery = buildPolicyBaseIdsWithFallbackKuery(
+      ids,
+      `${AGENTS_PREFIX}.policy_base_id`,
+      `${AGENTS_PREFIX}.policy_id`
+    );
+
+    expect(kuery.length).toBeGreaterThan(10_000);
+    expect(() => GetAgentsRequestSchema.query.validate({ kuery })).not.toThrow();
+  });
+
+  it('still applies KQL validation to the kuery field', () => {
+    expect(() => GetAgentsRequestSchema.query.validate({ kuery: 'not_a_field: 1' })).toThrow();
+  });
+
+  it('accepts an overlong agentId', () => {
+    expect(() =>
+      GetOneAgentRequestSchema.params.validate({ agentId: 'a'.repeat(1000) })
+    ).not.toThrow();
+  });
+
+  it('accepts overlong agent tags', () => {
+    expect(() =>
+      UpdateAgentRequestSchema.body.validate({ tags: ['a'.repeat(1000)] })
+    ).not.toThrow();
+    expect(() =>
+      PostBulkUpdateAgentTagsRequestSchema.body.validate({
+        agents: ['agent-1'],
+        tagsToAdd: ['a'.repeat(1000)],
+        tagsToRemove: ['b'.repeat(1000)],
+      })
+    ).not.toThrow();
+  });
+
+  it('accepts an overlong policy_id in bulk reassign', () => {
+    expect(() =>
+      PostBulkAgentReassignRequestSchema.body.validate({
+        agents: ['agent-1'],
+        policy_id: 'a'.repeat(1000),
+      })
+    ).not.toThrow();
+  });
+});
+
+describe('PostAgentRestartRequestSchema', () => {
+  // This agentId keeps its existing enforced limit rather than reporting mode.
+  it('accepts an agentId at exactly 512 characters', () => {
+    expect(() =>
+      PostAgentRestartRequestSchema.params.validate({ agentId: 'a'.repeat(512) })
+    ).not.toThrow();
+  });
+
+  it('rejects an agentId over 512 characters', () => {
+    expect(() =>
+      PostAgentRestartRequestSchema.params.validate({ agentId: 'a'.repeat(513) })
+    ).toThrow();
+  });
+});
+
+describe('GetAgentsRequestSchema sortField validation', () => {
+  it.each(['default_api_key', 'access_api_key', 'default_api_key.keyword', 'not_a_field'])(
+    'rejects sorting by the field %s, which is not in the agent mappings',
+    (sortField) => {
+      expect(() => GetAgentsRequestSchema.query.validate({ sortField })).toThrow(
+        /is not supported/
+      );
+    }
+  );
+
+  it.each([
+    'enrolled_at',
+    'local_metadata.host.hostname',
+    'local_metadata.host.hostname.keyword',
+    'local_metadata.elastic.agent.version.keyword',
+    'default_api_key_id',
+    'policy_id',
+  ])('allows sorting by the mapped field %s', (sortField) => {
+    expect(() => GetAgentsRequestSchema.query.validate({ sortField })).not.toThrow();
+  });
+});
+
+describe('PostGenerateAgentsReportRequestSchema field validation', () => {
+  it.each([...INITIAL_AGENT_FIELDS_TO_EXPORT, ...AGENT_FIELDS_TO_EXPORT].map(({ field }) => field))(
+    'allows exporting the export modal column %s',
+    (field) => {
+      expect(() =>
+        PostGenerateAgentsReportRequestSchema.body.validate({ agents: '*', fields: [field] })
+      ).not.toThrow();
+    }
+  );
+
+  it.each(['default_api_key', 'access_api_key', 'not_a_field'])(
+    'rejects a report that exports the field %s, which is not in the agent mappings',
+    (field) => {
+      expect(() =>
+        PostGenerateAgentsReportRequestSchema.body.validate({ agents: '*', fields: [field] })
+      ).toThrow(/is not supported/);
+    }
+  );
+
+  it.each(['default_api_key', 'access_api_key', 'not_a_field'])(
+    'rejects a report sorted by the field %s, which is not in the agent mappings',
+    (field) => {
+      expect(() =>
+        PostGenerateAgentsReportRequestSchema.body.validate({
+          agents: '*',
+          fields: ['agent.id'],
+          sort: { field, direction: 'asc' },
+        })
+      ).toThrow(/is not supported/);
+    }
+  );
+
+  it('allows a report that exports and sorts by allowed fields', () => {
+    expect(() =>
+      PostGenerateAgentsReportRequestSchema.body.validate({
+        agents: '*',
+        fields: [
+          'agent.id',
+          'status',
+          'local_metadata.host.hostname',
+          'default_api_key_id',
+          'audit_unenrolled_reason',
+          'audit_unenrolled_time',
+          'user_provided_metadata',
+        ],
+        sort: { field: 'enrolled_at', direction: 'desc' },
+      })
+    ).not.toThrow();
   });
 });

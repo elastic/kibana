@@ -7,7 +7,7 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useEffect } from 'react';
 import { profilingShowErrorFrames } from '@kbn/observability-plugin/common';
-import { usePerformanceContext } from '@kbn/ebt-tools';
+import { usePerformanceContext } from '@kbn/ebt-tools/react';
 import { AsyncComponent } from '../../../components/async_component';
 import { useProfilingDependencies } from '../../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { FlameGraph } from '../../../components/flamegraph';

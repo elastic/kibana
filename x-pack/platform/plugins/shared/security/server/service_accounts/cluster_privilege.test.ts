@@ -8,7 +8,11 @@
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 
-import { ensureClusterPrivilege } from './cluster_privilege';
+import {
+  clusterPrivilegeRefusal,
+  ensureClusterPrivilege,
+  hasClusterPrivilege,
+} from './cluster_privilege';
 
 describe('ensureClusterPrivilege', () => {
   let logger: MockedLogger;
@@ -68,7 +72,7 @@ describe('ensureClusterPrivilege', () => {
   it('propagates a failed privilege check rather than treating it as a refusal', async () => {
     globally.mockRejectedValue(new Error('cluster unavailable'));
 
-    await expect(check()).rejects.toThrowError('cluster unavailable');
+    await expect(check()).rejects.toThrow('cluster unavailable');
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
@@ -106,8 +110,47 @@ describe('ensureClusterPrivilege', () => {
       globally.mockRejectedValue(new Error('cluster unavailable'));
       const onRefused = jest.fn();
 
-      await expect(checkWith(onRefused)).rejects.toThrowError('cluster unavailable');
+      await expect(checkWith(onRefused)).rejects.toThrow('cluster unavailable');
       expect(onRefused).not.toHaveBeenCalled();
     });
+  });
+});
+
+describe('hasClusterPrivilege', () => {
+  it('answers whether the request holds the privilege, without refusing or logging', async () => {
+    const globally = jest.fn().mockResolvedValue({ hasAllRequested: false });
+    const request = httpServerMock.createKibanaRequest();
+
+    await expect(
+      hasClusterPrivilege({
+        request,
+        checkPrivilegesWithRequest: jest.fn().mockReturnValue({ globally }),
+        privilege: 'manage_security',
+      })
+    ).resolves.toBe(false);
+    expect(globally).toHaveBeenCalledWith({
+      elasticsearch: { cluster: ['manage_security'], index: {} },
+    });
+  });
+});
+
+describe('clusterPrivilegeRefusal', () => {
+  it('logs the refusal and returns the 403 that ensureClusterPrivilege would throw', () => {
+    const logger = loggingSystemMock.createLogger();
+
+    const error = clusterPrivilegeRefusal({
+      logger,
+      privilege: 'manage_security',
+      action: 'unbind a service account from a workload',
+    });
+
+    expect(error).toMatchObject({
+      message:
+        'Cannot unbind a service account from a workload: missing `manage_security` cluster privilege',
+      output: { statusCode: 403 },
+    });
+    expect(logger.warn).toHaveBeenCalledWith(
+      'Refused to unbind a service account from a workload: missing `manage_security` cluster privilege'
+    );
   });
 });

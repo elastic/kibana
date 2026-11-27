@@ -15,6 +15,8 @@ import {
   EuiText,
   EuiSpacer,
   EuiIconTip,
+  EuiBadge,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -22,10 +24,11 @@ import type { Action } from '@elastic/eui/src/components/basic_table/action_type
 
 import { TableIcon } from '../../../../../../../components/package_icon';
 import type { PackageListItem } from '../../../../../../../../common';
+import { AWS_ONBOARDING_PACKAGE_NAMES } from '../../../../../../../../common/constants';
 import { type UrlPagination, useLink, useAuthz, useLicense } from '../../../../../../../hooks';
 
 import type { InstalledPackageUIPackageListItem } from '../types';
-import { useViewPolicies } from '../hooks/use_url_filters';
+import { useViewOnboardingInstances, useViewPolicies } from '../hooks/use_url_filters';
 import { useInstalledIntegrationsActions } from '../hooks/use_installed_integrations_actions';
 
 import { doesPackageHaveIntegrations, ExperimentalFeaturesService } from '../../../../../services';
@@ -44,6 +47,8 @@ import { InstallationVersionStatus } from './installation_version_status';
 import { DisabledWrapperTooltip } from './disabled_wrapper_tooltip';
 import { AlertsCell } from './alerts_cell';
 import { DashboardsCell } from './dashboards_cell';
+
+const EMPTY_COUNTS: ReadonlyMap<string, number> = new Map();
 
 function wrapActionWithDisabledTooltip(
   action: Action<InstalledPackageUIPackageListItem>,
@@ -65,11 +70,25 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
     selectedItems: InstalledPackageUIPackageListItem[];
     setSelectedItems: React.Dispatch<React.SetStateAction<InstalledPackageUIPackageListItem[]>>;
   };
-}> = ({ installedPackages, total, isLoading, pagination, selection }) => {
+  /** Number of instances (onboarding sessions) per package name. */
+  onboardingInstanceCounts?: ReadonlyMap<string, number>;
+  /** Whether the AWS onboarding flow is available: its packages then show the Collection badge. */
+  isOnboardingEnabled?: boolean;
+}> = ({
+  installedPackages,
+  total,
+  isLoading,
+  pagination,
+  selection,
+  onboardingInstanceCounts = EMPTY_COUNTS,
+  isOnboardingEnabled = false,
+}) => {
   const authz = useAuthz();
   const { getHref } = useLink();
   const { selectedItems, setSelectedItems } = selection;
   const { addViewPolicies } = useViewPolicies();
+  const { addViewOnboardingInstances } = useViewOnboardingInstances();
+  const hasOnboardingInstances = [...onboardingInstanceCounts.values()].some((count) => count > 0);
   const {
     actions: {
       bulkUninstallIntegrationsWithConfirmModal,
@@ -144,6 +163,8 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                 defaultMessage: 'Integration name',
               }
             ),
+            // Room for long names next to the Instances column, which only shows with instances.
+            ...(hasOnboardingInstances ? { width: '340px' } : {}),
             render: (item: PackageListItem) => {
               const url = getHref('integration_details_overview', {
                 pkgkey: `${item.name}-${item.installationInfo!.version}`,
@@ -160,59 +181,107 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                 !isUpcomingDeprecated &&
                 (item.policy_templates || []).some((pt) => !!pt.deprecated);
 
+              const integrationTitle = wrapTitleWithDeprecated({
+                title: item.title,
+                deprecated: isDeprecated,
+              });
+
+              const isCollection =
+                (isOnboardingEnabled && AWS_ONBOARDING_PACKAGE_NAMES.includes(item.name)) ||
+                (onboardingInstanceCounts.get(item.name) ?? 0) > 0;
+
               return (
-                <EuiLink href={url}>
-                  <EuiFlexGroup gutterSize="s" alignItems="center">
+                // The cell content is a flex container: without a min width the group can't shrink
+                // below the full name and the badge, which then overflow into the next column.
+                <EuiFlexGroup
+                  gutterSize="s"
+                  alignItems="center"
+                  responsive={false}
+                  css={{ minWidth: 0, maxWidth: '100%' }}
+                >
+                  <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
+                    <EuiToolTip
+                      content={integrationTitle}
+                      anchorProps={{ css: { display: 'block', minWidth: 0, maxWidth: '100%' } }}
+                    >
+                      <EuiLink href={url} css={{ display: 'block' }}>
+                        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                          <EuiFlexItem grow={false} css={{ flexShrink: 0 }}>
+                            <TableIcon
+                              size="m"
+                              icons={item.icons}
+                              packageName={item.name}
+                              version={item.version}
+                            />
+                          </EuiFlexItem>
+                          <EuiFlexItem
+                            data-test-subj={`installedIntegrationsTable.integrationNameColumn.${item.name}`}
+                            grow={false}
+                            css={{ minWidth: 0 }}
+                          >
+                            <span
+                              css={{
+                                display: 'block',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                              }}
+                            >
+                              {integrationTitle}
+                            </span>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      </EuiLink>
+                    </EuiToolTip>
+                  </EuiFlexItem>
+                  {isCollection && (
+                    <EuiFlexItem grow={false} css={{ flexShrink: 0 }}>
+                      <EuiBadge
+                        iconType="layers"
+                        color="hollow"
+                        data-test-subj={`installedIntegrationsTable.collectionBadge.${item.name}`}
+                      >
+                        {i18n.translate('xpack.fleet.epmInstalledIntegrations.collectionBadge', {
+                          defaultMessage: 'Collection',
+                        })}
+                      </EuiBadge>
+                    </EuiFlexItem>
+                  )}
+                  {(isDeprecated || isUpcomingDeprecated || hasDeprecatedPolicyTemplates) && (
                     <EuiFlexItem grow={false}>
-                      <TableIcon
-                        size="m"
-                        icons={item.icons}
-                        packageName={item.name}
-                        version={item.version}
+                      <EuiIconTip
+                        type="warning"
+                        color="warning"
+                        content={
+                          isUpcomingDeprecated && item.deprecated?.since
+                            ? i18n.translate(
+                                'xpack.fleet.installedIntegrations.upcomingDeprecationTooltip',
+                                {
+                                  defaultMessage:
+                                    'This integration will be deprecated starting from version {version}',
+                                  values: { version: item.deprecated?.since },
+                                }
+                              )
+                            : isDeprecated
+                            ? i18n.translate(
+                                'xpack.fleet.installedIntegrations.deprecatedTooltip',
+                                {
+                                  defaultMessage: 'This integration is deprecated',
+                                }
+                              )
+                            : hasDeprecatedPolicyTemplates
+                            ? i18n.translate(
+                                'xpack.fleet.installedIntegrations.deprecatedPolicyTemplatesTooltip',
+                                {
+                                  defaultMessage: 'This integration contains deprecated features',
+                                }
+                              )
+                            : undefined
+                        }
                       />
                     </EuiFlexItem>
-                    <EuiFlexItem
-                      data-test-subj={`installedIntegrationsTable.integrationNameColumn.${item.name}`}
-                      grow={false}
-                    >
-                      {wrapTitleWithDeprecated({ title: item.title, deprecated: isDeprecated })}
-                    </EuiFlexItem>
-                    {(isDeprecated || isUpcomingDeprecated || hasDeprecatedPolicyTemplates) && (
-                      <EuiFlexItem grow={false}>
-                        <EuiIconTip
-                          type="warning"
-                          color="warning"
-                          content={
-                            isUpcomingDeprecated && item.deprecated?.since
-                              ? i18n.translate(
-                                  'xpack.fleet.installedIntegrations.upcomingDeprecationTooltip',
-                                  {
-                                    defaultMessage:
-                                      'This integration will be deprecated starting from version {version}',
-                                    values: { version: item.deprecated?.since },
-                                  }
-                                )
-                              : isDeprecated
-                              ? i18n.translate(
-                                  'xpack.fleet.installedIntegrations.deprecatedTooltip',
-                                  {
-                                    defaultMessage: 'This integration is deprecated',
-                                  }
-                                )
-                              : hasDeprecatedPolicyTemplates
-                              ? i18n.translate(
-                                  'xpack.fleet.installedIntegrations.deprecatedPolicyTemplatesTooltip',
-                                  {
-                                    defaultMessage: 'This integration contains deprecated features',
-                                  }
-                                )
-                              : undefined
-                          }
-                        />
-                      </EuiFlexItem>
-                    )}
-                  </EuiFlexGroup>
-                </EuiLink>
+                  )}
+                </EuiFlexGroup>
               );
             },
           },
@@ -307,6 +376,30 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
               return policiesLink;
             },
           },
+          ...(hasOnboardingInstances
+            ? [
+                {
+                  name: i18n.translate(
+                    'xpack.fleet.epmInstalledIntegrations.instancesColumnTitle',
+                    {
+                      defaultMessage: 'Instances',
+                    }
+                  ),
+                  width: '160px',
+                  render: (item: InstalledPackageUIPackageListItem) => {
+                    const count = onboardingInstanceCounts.get(item.name) ?? 0;
+                    return count > 0 ? (
+                      <EuiLink
+                        onClick={() => addViewOnboardingInstances(item.name)}
+                        data-test-subj={`installedIntegrationsTable.instancesLink.${item.name}`}
+                      >
+                        {count}
+                      </EuiLink>
+                    ) : null;
+                  },
+                },
+              ]
+            : []),
           {
             actions: [
               wrapActionWithDisabledTooltip(

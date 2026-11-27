@@ -7,15 +7,15 @@
 
 import React from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiPaddingCSS } from '@elastic/eui';
+import { useEuiPaddingCSS } from '@elastic/eui';
 
 import type { PackageInfo } from '../../../../../../../../common';
 import { IntegrationsStateContextProvider } from '../../../../../hooks';
 import type { InstalledPackageUIPackageListItem } from '../types';
-import { TableIcon } from '../../../../../../../components/package_icon';
 import { PackagePoliciesPage } from '../../detail/policies';
 import { useViewPolicies } from '../hooks/use_url_filters';
 
+import { PackagePanelTitle } from './package_panel_title';
 import { ResizablePanel } from './resizable_panel';
 
 export const PackagePoliciesPanel: React.FunctionComponent<{
@@ -25,22 +25,6 @@ export const PackagePoliciesPanel: React.FunctionComponent<{
   const paddingStyles = useEuiPaddingCSS();
   const cssStyles = [paddingStyles.s];
 
-  const title = (
-    <EuiFlexGroup gutterSize="s" alignItems="center">
-      <EuiFlexItem grow={false}>
-        <TableIcon
-          size="m"
-          icons={installedPackage.icons}
-          packageName={installedPackage.name}
-          version={installedPackage.version}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiText size="s">{installedPackage.title}</EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-
   const content = (
     <div css={cssStyles}>
       <IntegrationsStateContextProvider>
@@ -49,5 +33,11 @@ export const PackagePoliciesPanel: React.FunctionComponent<{
     </div>
   );
 
-  return <ResizablePanel title={title} content={content} onClose={() => addViewPolicies('')} />;
+  return (
+    <ResizablePanel
+      title={<PackagePanelTitle installedPackage={installedPackage} />}
+      content={content}
+      onClose={() => addViewPolicies('')}
+    />
+  );
 };

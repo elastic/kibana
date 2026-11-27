@@ -14,6 +14,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type {
   EuiInMemoryTableProps,
+  EuiTableActionsColumnType,
   EuiTableFieldDataColumnType,
   EuiSelectableOption,
 } from '@elastic/eui';
@@ -35,7 +36,6 @@ import {
 import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 import type { Pipeline } from '../../../../common/types';
 import { useKibana } from '../../../shared_imports';
-
 export interface Props {
   pipelines: Pipeline[];
   onReloadClick: () => void;
@@ -131,7 +131,10 @@ export const PipelineTable: FunctionComponent<Props> = ({
   const [queryText, setQueryText] = useState<string>('');
   const [filterOptions, setFilterOptions] = useState<EuiSelectableOption[]>(defaultFilterOptions);
 
-  const { history } = useKibana().services;
+  const {
+    history,
+    config: { canManage },
+  } = useKibana().services;
   const [selection, setSelection] = useState<Pipeline[]>([]);
 
   const filterButtonRef = useRef<HTMLButtonElement>(null);
@@ -241,17 +244,55 @@ export const PipelineTable: FunctionComponent<Props> = ({
     { defaultMessage: 'Refresh' }
   );
 
+  const actionsColumn: EuiTableActionsColumnType<Pipeline> = {
+    width: '120px',
+    name: (
+      <FormattedMessage
+        id="xpack.ingestPipelines.list.table.actionColumnTitle"
+        defaultMessage="Actions"
+      />
+    ),
+    actions: [
+      {
+        isPrimary: true,
+        name: editActionText,
+        description: editActionText,
+        type: 'icon',
+        icon: 'pencil',
+        onClick: ({ name }) => onEditPipelineClick(name),
+      },
+      {
+        name: duplicateActionText,
+        description: duplicateActionText,
+        type: 'icon',
+        icon: 'copy',
+        onClick: ({ name }) => onClonePipelineClick(name),
+      },
+      {
+        isPrimary: true,
+        name: deleteActionText,
+        description: deleteActionText,
+        type: 'icon',
+        icon: 'trash',
+        color: 'danger',
+        onClick: (pipeline) => onDeletePipelineClick([pipeline]),
+      },
+    ],
+  };
+
   const tableProps: EuiInMemoryTableProps<Pipeline> = {
     'data-test-subj': 'pipelinesTable',
     itemId: 'name',
     sorting,
-    selection: {
-      onSelectionChange: setSelection,
-      selectableMessage: () =>
-        i18n.translate('xpack.ingestPipelines.list.table.selection.selectRowAriaLabel', {
-          defaultMessage: 'Select this row',
-        }),
-    },
+    selection: canManage
+      ? {
+          onSelectionChange: setSelection,
+          selectableMessage: () =>
+            i18n.translate('xpack.ingestPipelines.list.table.selection.selectRowAriaLabel', {
+              defaultMessage: 'Select this row',
+            }),
+        }
+      : undefined,
     rowProps: () => ({
       'data-test-subj': 'pipelineTableRow',
     }),
@@ -270,7 +311,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
         }
       },
       toolsLeft:
-        selection.length > 0 ? (
+        canManage && selection.length > 0 ? (
           <EuiButton
             data-test-subj="deletePipelinesButton"
             onClick={() => onDeletePipelineClick(selection)}
@@ -409,41 +450,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
         sortable: ({ processors }: Pipeline) => processors.length,
         render: ({ processors }: Pipeline) => processors.length,
       },
-      {
-        width: '120px',
-        name: (
-          <FormattedMessage
-            id="xpack.ingestPipelines.list.table.actionColumnTitle"
-            defaultMessage="Actions"
-          />
-        ),
-        actions: [
-          {
-            isPrimary: true,
-            name: editActionText,
-            description: editActionText,
-            type: 'icon',
-            icon: 'pencil',
-            onClick: ({ name }) => onEditPipelineClick(name),
-          },
-          {
-            name: duplicateActionText,
-            description: duplicateActionText,
-            type: 'icon',
-            icon: 'copy',
-            onClick: ({ name }) => onClonePipelineClick(name),
-          },
-          {
-            isPrimary: true,
-            name: deleteActionText,
-            description: deleteActionText,
-            type: 'icon',
-            icon: 'trash',
-            color: 'danger',
-            onClick: (pipeline) => onDeletePipelineClick([pipeline]),
-          },
-        ],
-      },
+      ...(canManage ? [actionsColumn] : []),
     ],
     items: filteredPipelines,
     loading: isLoading,

@@ -536,4 +536,69 @@ describe('ToolRegistryImpl', () => {
       expect(runTool).toHaveBeenCalledWith(expect.objectContaining({ approvals }));
     });
   });
+
+  describe('availability check timeouts', () => {
+    const never = () => new Promise<never>(() => {});
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('does not time out checks that resolve within 5s', async () => {
+      const isAvailable = jest.fn(
+        () =>
+          new Promise<{ status: 'available' }>((resolve) =>
+            setTimeout(() => resolve({ status: 'available' }), 4000)
+          )
+      );
+      const tool = availableTool({ id: 'slow_tool', isAvailable });
+      const { registry } = setup({ builtinTools: [tool] });
+
+      const promise = registry.list();
+      await jest.advanceTimersByTimeAsync(4000);
+
+      expect((await promise).map((t) => t.id)).toEqual(['slow_tool']);
+      expect(isAvailable).toHaveBeenCalledTimes(1);
+    });
+
+    it('retries a timed-out check and uses the result of the retry', async () => {
+      const isAvailable = jest
+        .fn()
+        .mockImplementationOnce(never)
+        .mockResolvedValueOnce({ status: 'available' });
+      const tool = availableTool({ id: 'flaky_tool', isAvailable });
+      const { registry } = setup({ builtinTools: [tool] });
+
+      const promise = registry.list();
+      await jest.advanceTimersByTimeAsync(5000 + 250);
+
+      expect((await promise).map((t) => t.id)).toEqual(['flaky_tool']);
+      expect(isAvailable).toHaveBeenCalledTimes(2);
+    });
+
+    it('treats the tool as unavailable once all retries timed out', async () => {
+      const isAvailable = jest.fn(never);
+      const tool = availableTool({ id: 'stuck_tool', isAvailable });
+      const { registry } = setup({ builtinTools: [tool] });
+
+      const promise = registry.list();
+      await jest.advanceTimersByTimeAsync(3 * 5000 + 250 + 500);
+
+      expect(await promise).toEqual([]);
+      expect(isAvailable).toHaveBeenCalledTimes(3);
+    });
+
+    it('does not retry when the check resolves as unavailable', async () => {
+      const isAvailable = jest.fn(async () => ({ status: 'unavailable' as const }));
+      const tool = availableTool({ id: 'unavailable_tool', isAvailable });
+      const { registry } = setup({ builtinTools: [tool] });
+
+      expect(await registry.list()).toEqual([]);
+      expect(isAvailable).toHaveBeenCalledTimes(1);
+    });
+  });
 });

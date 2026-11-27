@@ -11,6 +11,7 @@ import { BehaviorSubject } from 'rxjs';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import {
   apiHasDisableTriggers,
+  apiPublishesProjectRouting,
   apiPublishesViewMode,
   useSearchApi,
 } from '@kbn/presentation-publishing';
@@ -76,6 +77,7 @@ export function LensRenderer({
   titleHighlight,
   parentApi,
   onApiAvailable,
+  projectRouting,
   ...props
 }: LensRendererProps) {
   // Use the settings interface to store panel settings
@@ -93,6 +95,7 @@ export function LensRenderer({
   const esqlVariables$ = useObservableVariable(props.esqlVariables);
   const isApproximate$ = useObservableVariable(props.isApproximate);
   const disableTriggers$ = useObservableVariable(props.disableTriggers ?? false);
+  const projectRouting$ = useObservableVariable(projectRouting);
 
   // Lens API will be set once, but when set trigger a reflow to adopt the latest attributes
   const [lensApi, setLensApi] = useState<LensApi | undefined>(undefined);
@@ -193,6 +196,9 @@ export function LensRenderer({
           disableTriggers$: apiHasDisableTriggers(parentApi)
             ? parentApi.disableTriggers$ // parent API takes precedence for this value
             : disableTriggers$,
+          projectRouting$: apiPublishesProjectRouting(parentApi)
+            ? parentApi.projectRouting$ // parent API takes precedence for this value
+            : projectRouting$,
           // pass the sync* settings with the unified settings interface
           settings,
           // make sure to provide the initial state (useful for the comparison check)

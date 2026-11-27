@@ -9,6 +9,7 @@ import {
   DEFAULT_FLAPPING_SETTINGS,
   DEFAULT_QUERY_DELAY_SETTINGS,
 } from '@kbn/alerting-plugin/common';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { Superuser } from '../../security_and_spaces/scenarios';
 import { getUrlPrefix } from './space_test_utils';
 
@@ -16,6 +17,7 @@ export const resetRulesSettings = async (supertest: any, space: string) => {
   await supertest
     .post(`${getUrlPrefix(space)}/internal/alerting/rules/settings/_flapping`)
     .set('kbn-xsrf', 'foo')
+    .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
     .auth(Superuser.username, Superuser.password)
     .send({
       enabled: DEFAULT_FLAPPING_SETTINGS.enabled,
@@ -26,6 +28,7 @@ export const resetRulesSettings = async (supertest: any, space: string) => {
   return supertest
     .post(`${getUrlPrefix(space)}/internal/alerting/rules/settings/_query_delay`)
     .set('kbn-xsrf', 'foo')
+    .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
     .auth(Superuser.username, Superuser.password)
     .send({
       delay: DEFAULT_QUERY_DELAY_SETTINGS.delay,

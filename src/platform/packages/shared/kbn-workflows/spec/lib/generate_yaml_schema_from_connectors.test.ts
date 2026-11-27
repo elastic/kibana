@@ -100,6 +100,35 @@ describe('generateYamlSchemaFromConnectors', () => {
     });
   });
 
+  describe('unknown step types', () => {
+    const schema = generateYamlSchemaFromConnectors([]);
+    const waitStep = { name: 'pause', type: 'wait', with: { duration: '1s' } };
+    const inLoop = (step: Record<string, unknown>) => ({
+      name: 'loop',
+      type: 'foreach',
+      foreach: '{{ inputs.items }}',
+      steps: [step],
+    });
+    // `merge` was a built-in step type that never ran. This is a complete snippet that
+    // used to validate, so it fails only because the type is gone.
+    const unknownSteps = [
+      { name: 'combine', type: 'merge', sources: ['a', 'b'], steps: [waitStep] },
+      { name: 'unknown', type: 'not.a.step' },
+    ];
+
+    it.each(unknownSteps)('rejects type "$type" at the workflow root', (step) => {
+      expect(schema.safeParse({ ...BASE_WORKFLOW, steps: [step] }).success).toBe(false);
+    });
+
+    it.each(unknownSteps)('rejects type "$type" inside a container step', (step) => {
+      expect(schema.safeParse({ ...BASE_WORKFLOW, steps: [inLoop(step)] }).success).toBe(false);
+    });
+
+    it('accepts the same container with a known step type', () => {
+      expect(schema.safeParse({ ...BASE_WORKFLOW, steps: [inLoop(waitStep)] }).success).toBe(true);
+    });
+  });
+
   describe('with field optionality', () => {
     it('does not require `with` for a step whose paramsSchema has no fields', () => {
       const connectors: ConnectorContractUnion[] = [

@@ -16,14 +16,12 @@ export const DATASET_ANALYSIS_FEATURE_TYPE = 'dataset_analysis' as const;
 export const LOG_SAMPLES_FEATURE_TYPE = 'log_samples' as const;
 export const LOG_PATTERNS_FEATURE_TYPE = 'log_patterns' as const;
 export const ERROR_LOGS_FEATURE_TYPE = 'error_logs' as const;
-export const CODE_ANALYSIS_FEATURE_TYPE = 'code_analysis' as const;
 
 export const COMPUTED_FEATURE_TYPES = [
   DATASET_ANALYSIS_FEATURE_TYPE,
   LOG_SAMPLES_FEATURE_TYPE,
   LOG_PATTERNS_FEATURE_TYPE,
   ERROR_LOGS_FEATURE_TYPE,
-  CODE_ANALYSIS_FEATURE_TYPE,
 ] as const;
 
 export const INFERRED_FEATURE_TYPES = [
@@ -39,7 +37,7 @@ export const INFERRED_FEATURE_TYPES = [
 // route (or tool) it was submitted through. See `featureSchema` for the read shape.
 export const baseFeatureSchema = lazySchema(() =>
   z.object({
-    id: z.string().max(MAX_ID_LENGTH),
+    id: z.string().overwrite(normalizeFeatureSlug).max(MAX_ID_LENGTH),
     type: z.string().max(MAX_ID_LENGTH),
     subtype: z.string().max(MAX_ID_LENGTH).optional(),
     title: z.string().max(MAX_TITLE_LENGTH).optional(),

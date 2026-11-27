@@ -52,7 +52,8 @@ export function logHealthMetrics(
   logger: Logger,
   config: TaskManagerConfig,
   shouldRunTasks: boolean,
-  docLinks: DocLinksServiceSetup
+  docLinks: DocLinksServiceSetup,
+  esBackpressureActive = false
 ) {
   let logLevel: LogLevel =
     config.monitored_stats_health_verbose_log.level === 'info' ? LogLevel.Info : LogLevel.Debug;
@@ -64,7 +65,13 @@ export function logHealthMetrics(
       capacity_estimation: undefined,
     },
   };
-  const healthStatus = calculateHealthStatus(healthWithoutCapacity, config, shouldRunTasks, logger);
+  const healthStatus = calculateHealthStatus(
+    healthWithoutCapacity,
+    config,
+    shouldRunTasks,
+    logger,
+    esBackpressureActive
+  );
 
   const statusWithoutCapacity = healthStatus?.status;
   if (statusWithoutCapacity === HealthStatus.Warning) {
@@ -95,10 +102,14 @@ export function logHealthMetrics(
         }, [])
         .join(', ');
 
-      logger.warn(
-        `Detected delay task start of ${driftInSeconds}s for task(s) "${taskTypes}" (which exceeds configured value of ${config.monitored_stats_health_verbose_log.warn_delayed_task_start_in_seconds}s)`
-      );
-      logLevel = LogLevel.Warn;
+      const driftMessage = `Detected delay task start of ${driftInSeconds}s for task(s) "${taskTypes}" (which exceeds configured value of ${config.monitored_stats_health_verbose_log.warn_delayed_task_start_in_seconds}s)`;
+      // Drift grows by design while backpressure backs off the poll interval
+      if (esBackpressureActive) {
+        logger.debug(driftMessage);
+      } else {
+        logger.warn(driftMessage);
+        logLevel = LogLevel.Warn;
+      }
     }
     switch (logLevel) {
       case LogLevel.Info:

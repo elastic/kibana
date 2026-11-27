@@ -15,7 +15,7 @@ import {
 import { getEbtProps } from '@kbn/ebt-click';
 import type { Detection } from '@kbn/significant-events-schema';
 import React, { useMemo } from 'react';
-import { useFormatTimestamp } from '../../../common/format_timestamp';
+import { useFormatTimestamp } from '../../../hooks/use_format_timestamp';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import { getChangePointLabel } from '../../../common/change_point';
 import { DetectionDiscoveryStatus } from '../../../components/entities/detection/detection_discovery_status';
@@ -66,6 +66,7 @@ export const SignalsTable = ({
       {
         field: 'rule_name',
         name: RULE_COLUMN_LABEL,
+        minWidth: '280px',
         render: (_ruleName: string | undefined, signal: Detection) => (
           <EuiLink
             onClick={(event: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
@@ -122,6 +123,9 @@ export const SignalsTable = ({
     <EuiBasicTable<Detection>
       data-test-subj="nightshiftDetectionSignalsTable"
       tableCaption={TABLE_CAPTION}
+      stickyHeader
+      tableLayout="auto"
+      scrollableInline
       itemId="detection_id"
       items={signals}
       columns={columns}

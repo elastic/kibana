@@ -23,7 +23,11 @@ import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import type { BootstrapRenderer } from './bootstrap_renderer';
-import { bootstrapRendererFactory } from './bootstrap_renderer';
+import {
+  bootstrapRendererFactory,
+  getChunkFilenamesForPlugins,
+  normalizeChunkPreloadManifest,
+} from './bootstrap_renderer';
 import { userSettingsServiceMock } from '@kbn/core-user-settings-server-mocks';
 import type { ThemeName } from '@kbn/core-ui-settings-common';
 import { DEFAULT_THEME_NAME } from '@kbn/core-ui-settings-common';
@@ -54,6 +58,47 @@ const createUiPlugins = (): UiPlugins => ({
   public: new Map(),
   internal: new Map(),
   browserConfigs: new Map(),
+});
+
+describe('getChunkFilenamesForPlugins', () => {
+  it('returns the sorted union for core and selected plugin entries', () => {
+    expect(
+      getChunkFilenamesForPlugins(
+        {
+          allChunks: ['all.js'],
+          entrypointChunks: {
+            core: ['shared.js', 'plugin-core.js'],
+            security: ['shared.js', 'plugin-security.js'],
+          },
+        },
+        ['core', 'security']
+      )
+    ).toEqual(['plugin-core.js', 'plugin-security.js', 'shared.js']);
+  });
+
+  it('falls back to allChunks for an older or incomplete manifest', () => {
+    expect(getChunkFilenamesForPlugins({ allChunks: ['all.js'] }, ['core', 'security'])).toEqual([
+      'all.js',
+    ]);
+    expect(
+      getChunkFilenamesForPlugins(
+        {
+          allChunks: ['all.js'],
+          entrypointChunks: { core: ['plugin-core.js'] },
+        },
+        ['core', 'security']
+      )
+    ).toEqual(['all.js']);
+  });
+});
+
+describe('normalizeChunkPreloadManifest', () => {
+  it.each([null, { allChunks: null }])(
+    'normalizes malformed but valid JSON manifests',
+    (manifest) => {
+      expect(normalizeChunkPreloadManifest(manifest)).toEqual({ allChunks: [] });
+    }
+  );
 });
 
 describe('bootstrapRenderer', () => {
@@ -446,6 +491,67 @@ describe('bootstrapRenderer', () => {
     );
   });
 
+  it('uses selected preload paths from a valid chunk manifest', async () => {
+    const bundlesHref = '/base-path/buildShaShort/bundles';
+    const readFileSyncSpy = jest.spyOn(Fs, 'readFileSync').mockReturnValue(
+      JSON.stringify({
+        allChunks: ['fallback.js'],
+        entrypointChunks: {
+          core: ['plugin-core.js', 'shared.js'],
+          discover: ['plugin-discover.js', 'shared.js'],
+          security: ['plugin-security.js', 'shared.js'],
+        },
+      })
+    );
+    getPluginsBundlePathsMock.mockReturnValue(
+      new Map([['security', { bundlePath: '/security.js', publicPath: '/security/' }]])
+    );
+
+    try {
+      await renderer({
+        request: httpServerMock.createKibanaRequest(),
+        uiSettingsClient,
+      });
+
+      expect(readFileSyncSpy).toHaveBeenCalledWith(
+        fromRoot('target/public/bundles/chunk-manifest.json'),
+        'utf-8'
+      );
+      expect(getRspackDependencyPathsMock).toHaveBeenCalledWith(
+        bundlesHref,
+        [],
+        [
+          `${bundlesHref}/plugin-core.js`,
+          `${bundlesHref}/plugin-security.js`,
+          `${bundlesHref}/shared.js`,
+        ]
+      );
+    } finally {
+      readFileSyncSpy.mockRestore();
+    }
+  });
+
+  it('passes core and the page bundle closure to the generated bootstrap', async () => {
+    getPluginsBundlePathsMock.mockReturnValue(
+      new Map([
+        ['security', { bundlePath: '/security.js', publicPath: '/security/' }],
+        ['spaces', { bundlePath: '/spaces.js', publicPath: '/spaces/' }],
+      ])
+    );
+
+    await renderer({
+      request: httpServerMock.createKibanaRequest(),
+      uiSettingsClient,
+      isAnonymousPage: true,
+    });
+
+    expect(renderTemplateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        pluginIdsToLoad: ['core', 'security', 'spaces'],
+      })
+    );
+  });
+
   describe('external plugins', () => {
     const bundlesHref = '/base-path/buildShaShort/bundles';
 
@@ -458,6 +564,7 @@ describe('bootstrapRenderer', () => {
       const externalPluginsDir = fromRoot('plugins');
       for (const pluginId of ['extFirst', 'extSecond']) {
         uiPlugins.internal.set(pluginId, {
+          requiredPlugins: [],
           requiredBundles: [],
           version: '1.0.0',
           publicTargetDir: Path.join(externalPluginsDir, pluginId, 'target', 'public'),
@@ -507,6 +614,11 @@ describe('bootstrapRenderer', () => {
         })
       );
       expect(publicPathMap).not.toHaveProperty('extFirst');
+      expect(renderTemplateMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          pluginIdsToLoad: ['core', 'internalPlugin', 'extSecond'],
+        })
+      );
     });
 
     it('keeps the detection order of external plugins regardless of bundle path order', async () => {
@@ -546,6 +658,7 @@ describe('bootstrapRenderer', () => {
       colorMode: 'light',
       jsDependencyPaths: ['path-1', 'path-2'],
       publicPathMap: expect.any(String),
+      pluginIdsToLoad: ['core'],
       useHMR: expect.any(Boolean),
     });
   });

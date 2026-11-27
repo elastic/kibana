@@ -14,7 +14,6 @@ import {
 import type { Conversation, ConversationPermissions } from '@kbn/agent-builder-common';
 import type { ConversationPublicClient } from '@kbn/agent-builder-server';
 import { INVESTIGATION_TEMPLATE_ID } from '@kbn/agentic-investigations-plugin/common';
-import { telemetryTargetNameSchema } from '../../common/telemetry_targets';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../common';
 import { InvestigationNotFoundError } from './errors';
 
@@ -22,7 +21,6 @@ import { InvestigationNotFoundError } from './errors';
 export interface InvestigationConversation {
   /** The investigation id, which is the conversation id. */
   id: string;
-  telemetryTarget?: string;
   /** Agent Builder's placeholder until Agent Builder titles it on the first round. */
   title: string;
   /** `metadata.status`; a missing status reads as open. */
@@ -52,9 +50,6 @@ const toInvestigationConversation = (
   }
   return {
     id: conversation.id,
-    telemetryTarget: telemetryTargetNameSchema
-      .optional()
-      .parse(conversation.metadata?.telemetry_target),
     title: conversation.title,
     status: conversation.metadata?.status === 'closed' ? 'closed' : 'open',
     workflowExecutionIds: toWorkflowExecutionIds(conversation.metadata),
@@ -112,7 +107,6 @@ export const getOrCreateInvestigationConversation = async ({
   id,
   workflowExecutionId,
   beforeCreate,
-  telemetryTarget,
 }: {
   conversations: ConversationPublicClient;
   id: string;
@@ -122,7 +116,6 @@ export const getOrCreateInvestigationConversation = async ({
    */
   workflowExecutionId?: string;
   beforeCreate?: () => Promise<void>;
-  telemetryTarget?: string;
 }): Promise<InvestigationConversation> => {
   const existing = await findInvestigationConversation(conversations, id);
   if (existing) {
@@ -141,7 +134,6 @@ export const getOrCreateInvestigationConversation = async ({
           // the agent re-rates it from its findings when it concludes.
           severity: INITIAL_INVESTIGATION_SEVERITY,
           ...(workflowExecutionId ? { workflow_execution_ids: [workflowExecutionId] } : {}),
-          ...(telemetryTarget ? { telemetry_target: telemetryTarget } : {}),
         },
         accessControl: { access_mode: ConversationAccessControlMode.Public },
       });

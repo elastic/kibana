@@ -132,6 +132,17 @@ export const testUsers: {
     username: 'fleet_agent_policies_read_only',
     password: 'changeme',
   },
+  fleet_agent_policies_read_int_read: {
+    permissions: {
+      feature: {
+        fleetv2: ['agent_policies_read'],
+        fleet: ['read'],
+      },
+      spaces: ['*'],
+    },
+    username: 'fleet_agent_policies_read_int_read',
+    password: 'changeme',
+  },
   fleet_agent_policies_all_only: {
     permissions: {
       feature: {

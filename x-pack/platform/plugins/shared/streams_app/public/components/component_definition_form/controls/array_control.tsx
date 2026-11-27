@@ -8,11 +8,12 @@
 import React, { useMemo } from 'react';
 import {
   EuiButtonEmpty,
-  EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormErrorText,
   EuiFormRow,
   EuiPanel,
+  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -22,15 +23,18 @@ import type { CatalogueArrayField } from '@kbn/streams-schema';
 import { DraggableStepWrapper, DragHandle, useListReorderMonitor } from '../../draggable_steps';
 import { FieldControl } from '../field_control';
 import { toControlId } from '../field_helpers';
-import { FieldList } from '../field_list';
+import { FieldSections } from '../field_sections';
 import { useDefinitionFormContext } from '../form_context';
-import { allowsItemTelemetry, createInitialItem, ITEM_TELEMETRY_KEY } from '../serialize';
+import {
+  allowsItemTelemetry,
+  createInitialItem,
+  ITEM_TELEMETRY_KEY,
+  readItemScope,
+} from '../serialize';
 import { useRowKeys } from '../use_row_keys';
-import { isObjectValue, joinPointer, type FormValue } from '../values';
+import { isObjectValue, joinPointer, type FormValue, type ObjectValue } from '../values';
 import { RemoveButton } from './remove_button';
-
-/** Cap for arrays whose catalogue definition sets no `max_items`. */
-const DEFAULT_MAX_ARRAY_ITEMS = 5;
+import { SignalPicker } from './signal_picker';
 
 const removeItemLabel = i18n.translate('xpack.streams.componentDefinitionForm.array.remove', {
   defaultMessage: 'Remove item',
@@ -39,38 +43,27 @@ const removeItemLabel = i18n.translate('xpack.streams.componentDefinitionForm.ar
 function ItemTelemetry({
   value,
   onChange,
+  pointer,
 }: {
   value: FormValue | undefined;
   onChange: (value: FormValue | undefined) => void;
+  pointer: string;
 }) {
-  const { telemetry } = useDefinitionFormContext();
-  const selected = (Array.isArray(value) ? value : []).flatMap((signal) =>
-    typeof signal === 'string' ? [{ label: signal }] : []
-  );
-  const label = i18n.translate('xpack.streams.componentDefinitionForm.array.itemTelemetry', {
-    defaultMessage: 'Applies to',
-  });
+  const { telemetry, errors } = useDefinitionFormContext();
   return (
-    <EuiFormRow
-      fullWidth
-      label={label}
+    <SignalPicker
+      label={i18n.translate('xpack.streams.componentDefinitionForm.array.itemTelemetry', {
+        defaultMessage: 'Applies to',
+      })}
       helpText={i18n.translate('xpack.streams.componentDefinitionForm.array.itemTelemetryHelp', {
         defaultMessage: 'Leave empty to apply to every signal.',
       })}
-    >
-      <EuiComboBox
-        compressed
-        fullWidth
-        aria-label={label}
-        options={telemetry.map((signal) => ({ label: signal }))}
-        selectedOptions={selected}
-        onChange={(next) => {
-          const signals = next.map(({ label: signal }) => signal);
-          onChange(signals.length > 0 ? signals : undefined);
-        }}
-        data-test-subj="componentDefinitionFormItemTelemetry"
-      />
-    </EuiFormRow>
+      options={telemetry}
+      selected={readItemScope(value)}
+      error={errors[pointer]}
+      onChange={(signals) => onChange(signals.length > 0 ? signals : undefined)}
+      dataTestSubj="componentDefinitionFormItemTelemetry"
+    />
   );
 }
 
@@ -79,17 +72,31 @@ interface ArrayControlProps {
   value: FormValue | undefined;
   onChange: (value: FormValue | undefined) => void;
   pointer: string;
+  scope: ObjectValue;
+  required: boolean;
 }
 
 /** A sortable list of items, laid out like the processing editor's Grok pattern list. */
-export function ArrayControl({ field, value, onChange, pointer }: ArrayControlProps) {
+export function ArrayControl({
+  field,
+  value,
+  onChange,
+  pointer,
+  scope,
+  required,
+}: ArrayControlProps) {
   const context = useDefinitionFormContext();
   const items = useMemo(() => (Array.isArray(value) ? value : []), [value]);
   const rowKeys = useRowKeys(items.length);
-  const canRemove = items.length > (field.min_items ?? 0);
-  const maxItems = field.max_items ?? DEFAULT_MAX_ARRAY_ITEMS;
-  const canAdd = items.length < maxItems;
-  const showItemTelemetry = allowsItemTelemetry(field) && context.telemetry.length > 1;
+  // A list that is not required can be emptied, which leaves the setting out again.
+  const canRemove = !required || items.length > (field.min_items ?? 0);
+  const maxItems = field.max_items;
+  const canAdd = maxItems === undefined || items.length < maxItems;
+  // An item that already has a scope keeps its picker, so a scope the processor's signals no
+  // longer cover can still be fixed.
+  const showItemTelemetry = (item: ObjectValue) =>
+    allowsItemTelemetry(field) &&
+    (context.telemetry.length > 1 || readItemScope(item[ITEM_TELEMETRY_KEY]).length > 0);
 
   const setItem = (index: number, item: FormValue | undefined) =>
     onChange(items.map((current, position) => (position === index ? item ?? '' : current)));
@@ -104,10 +111,7 @@ export function ArrayControl({ field, value, onChange, pointer }: ArrayControlPr
     next.splice(to, 0, moved);
     onChange(next);
   };
-  const add = () => {
-    const item = createInitialItem(field.items, context);
-    onChange([...items, item ?? (field.items.type === 'object' ? {} : '')]);
-  };
+  const add = () => onChange([...items, createInitialItem(field.items, context)]);
 
   const listId = toControlId(`${context.idPrefix}-rows`, pointer);
   const rowIds = rowKeys.keys.map((key) => `${listId}-${key}`);
@@ -116,12 +120,35 @@ export function ArrayControl({ field, value, onChange, pointer }: ArrayControlPr
 
   return (
     <div>
+      {field.items.description ? (
+        <>
+          <EuiText
+            size="xs"
+            color="subdued"
+            data-test-subj={`componentDefinitionFormArrayItemHelp-${field.name ?? 'items'}`}
+          >
+            <p>{field.items.description}</p>
+          </EuiText>
+          <EuiSpacer size="s" />
+        </>
+      ) : null}
       {items.length > 0 ? (
         <EuiPanel color="subdued" paddingSize="m" hasShadow={false}>
           <EuiFlexGroup direction="column" gutterSize="s">
             {items.map((item, index) => {
               const itemPointer = joinPointer(pointer, index);
               const objectItem = isObjectValue(item) ? item : {};
+              const itemError = context.errors[itemPointer];
+              const itemControl = (
+                <FieldControl
+                  field={field.items}
+                  value={item}
+                  onChange={(next) => setItem(index, next)}
+                  pointer={itemPointer}
+                  scope={scope}
+                  required
+                />
+              );
               return (
                 <EuiFlexItem key={rowIds[index]} grow={false}>
                   <DraggableStepWrapper
@@ -134,7 +161,11 @@ export function ArrayControl({ field, value, onChange, pointer }: ArrayControlPr
                     <EuiFlexGroup
                       gutterSize="s"
                       responsive={false}
-                      alignItems={field.items.type === 'object' ? 'flexStart' : 'center'}
+                      alignItems={
+                        field.items.type === 'object' || itemError !== undefined
+                          ? 'flexStart'
+                          : 'center'
+                      }
                       data-test-subj="componentDefinitionFormArrayItem"
                     >
                       {isDragEnabled ? (
@@ -149,37 +180,50 @@ export function ArrayControl({ field, value, onChange, pointer }: ArrayControlPr
                       >
                         {field.items.type === 'object' ? (
                           <EuiPanel hasShadow={false} paddingSize="m">
-                            <FieldList
+                            {itemError !== undefined ? (
+                              <>
+                                <EuiFormErrorText>{itemError}</EuiFormErrorText>
+                                <EuiSpacer size="s" />
+                              </>
+                            ) : null}
+                            <FieldSections
                               fields={field.items.fields}
                               choiceGroups={field.items.choice_groups}
                               value={objectItem}
                               onChange={(next) => setItem(index, next)}
                               pointer={itemPointer}
                             />
-                            {showItemTelemetry ? (
-                              <ItemTelemetry
-                                value={objectItem[ITEM_TELEMETRY_KEY]}
-                                onChange={(signals) => {
-                                  const rest = omit(objectItem, ITEM_TELEMETRY_KEY);
-                                  setItem(
-                                    index,
-                                    signals === undefined
-                                      ? rest
-                                      : { ...rest, [ITEM_TELEMETRY_KEY]: signals }
-                                  );
-                                }}
-                              />
+                            {showItemTelemetry(objectItem) ? (
+                              <>
+                                <EuiSpacer size="m" />
+                                <ItemTelemetry
+                                  pointer={joinPointer(itemPointer, ITEM_TELEMETRY_KEY)}
+                                  value={objectItem[ITEM_TELEMETRY_KEY]}
+                                  onChange={(signals) => {
+                                    const rest = omit(objectItem, ITEM_TELEMETRY_KEY);
+                                    setItem(
+                                      index,
+                                      signals === undefined
+                                        ? rest
+                                        : { ...rest, [ITEM_TELEMETRY_KEY]: signals }
+                                    );
+                                  }}
+                                />
+                              </>
                             ) : null}
                           </EuiPanel>
+                        ) : field.items.type === 'path' ? (
+                          // A path picker is a form row of its own and shows its error itself.
+                          itemControl
                         ) : (
-                          <FieldControl
-                            field={field.items}
-                            value={item}
-                            onChange={(next) => setItem(index, next)}
-                            pointer={itemPointer}
-                            scope={{}}
-                            required
-                          />
+                          <EuiFormRow
+                            fullWidth
+                            isInvalid={itemError !== undefined}
+                            error={itemError}
+                            id={toControlId(context.idPrefix, itemPointer)}
+                          >
+                            {itemControl}
+                          </EuiFormRow>
                         )}
                       </EuiFlexItem>
                       {canRemove ? (
@@ -213,7 +257,7 @@ export function ArrayControl({ field, value, onChange, pointer }: ArrayControlPr
             })}
           </EuiButtonEmpty>
         </EuiFlexItem>
-        {canAdd ? null : (
+        {maxItems === undefined || canAdd ? null : (
           <EuiFlexItem grow={false}>
             <EuiText
               size="xs"

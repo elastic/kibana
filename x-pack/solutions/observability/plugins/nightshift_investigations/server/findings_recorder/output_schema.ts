@@ -1,0 +1,551 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { createHash } from 'node:crypto';
+import { z, lazySchema } from '@kbn/zod/v4';
+import {
+  EVIDENCE_CHART_TYPES,
+  EVIDENCE_CHART_X_AXIS_TYPES,
+  EVIDENCE_CHART_Y_AXIS_UNITS,
+  HYPOTHESIS_STATUSES,
+  investigationEvidenceSchema,
+  MAX_ENTITY_ID_LENGTH,
+  MAX_ENTITY_NAME_LENGTH,
+  MAX_EVIDENCE_CHART_ANNOTATIONS,
+  MAX_EVIDENCE_CHART_LABEL_LENGTH,
+  MAX_EVIDENCE_CHART_POINTS,
+  MAX_EVIDENCE_CHART_SERIES,
+  MAX_EVIDENCE_SHORT_TEXT_LENGTH,
+  MAX_EVIDENCE_TEXT_LENGTH,
+  MAX_HYPOTHESES,
+  MAX_IMPACT_TOOL_ENTITIES,
+  type InvestigationEvidence,
+} from '@kbn/agentic-investigations-plugin/common';
+import {
+  MAX_COMMENT_LENGTH,
+  MAX_TITLE_LENGTH,
+  proposalConfidenceSchema,
+  proposalImpactSchema,
+} from '@kbn/proposals-common';
+
+export const FINDINGS_SEVERITIES = ['low', 'medium', 'high', 'critical'] as const;
+
+const MAX_METADATA_TEXT_LENGTH = 10_000;
+/** Actions the final pass may propose for a person to decide. */
+export const MAX_PROPOSALS = 3;
+/** Open proposals an investigation may hold at once before new ones must supersede existing ones. */
+export const MAX_OPEN_PROPOSALS = 5;
+/** Evidence charts the recorder may attach to one hypothesis. */
+const MAX_HYPOTHESIS_EVIDENCE_ITEMS = 2;
+
+/**
+ * What the model may return. Sizes are not enforced here or in {@link FINDINGS_JSON_SCHEMA}: the
+ * inference layer rejects a whole call when one string is over its limit, and the model writes
+ * close to the limits it is told, so a hard limit throws away good records. {@link limitFindings}
+ * trims to the sizes the stores accept instead.
+ */
+export const findingsOutputSchema = lazySchema(() => {
+  const chartSchema = z.object({
+    type: z.enum(EVIDENCE_CHART_TYPES),
+    title: z.string(),
+    x_axis: z.object({
+      type: z.enum(EVIDENCE_CHART_X_AXIS_TYPES),
+      label: z.string().optional(),
+    }),
+    y_axis: z.object({
+      label: z.string().optional(),
+      unit: z.enum(EVIDENCE_CHART_Y_AXIS_UNITS).optional(),
+    }),
+    stacked: z.boolean().optional(),
+    series: z.array(
+      z.object({
+        name: z.string(),
+        points: z.array(z.object({ x: z.string(), y: z.number() })),
+      })
+    ),
+    annotations: z
+      .array(z.object({ x: z.string(), x_end: z.string().optional(), label: z.string() }))
+      .optional(),
+  });
+  const evidenceSchema = z.object({
+    description: z.string().optional(),
+    chart: chartSchema.optional(),
+  });
+  const hypothesisSchema = z.object({
+    candidate: z.string().min(1),
+    confidence: z.number(),
+    status: z.enum(HYPOTHESIS_STATUSES),
+    reason: z.string().optional(),
+    evidence: z.array(evidenceSchema).optional(),
+  });
+
+  return z.object({
+    summary: z.string().min(1),
+    verdict: z.string().optional(),
+    severity: z.enum(FINDINGS_SEVERITIES).optional(),
+    impact_summary: z.string().min(1).optional(),
+    // `null` retracts the stored impact evidence; omitting the field keeps it.
+    impact_evidence: evidenceSchema.nullable().optional(),
+    // Omitting the field keeps the stored entities; an empty list clears them.
+    impact_entities: z
+      .array(
+        z.object({
+          name: z.string().min(1),
+          type: z.string().min(1).optional(),
+          evidence: evidenceSchema.optional(),
+        })
+      )
+      .optional(),
+    // Actions for a person to decide. Only the final pass records them. A model writes `null` for
+    // an optional field it leaves empty often enough that rejecting it would lose the whole record.
+    proposals: z
+      .array(
+        z.object({
+          supersedes: z.string().nullish(),
+          title: z.string().min(1),
+          comment: z.string().min(1),
+          impact: z.string().nullish(),
+          confidence: z.string().nullish(),
+          action_workflow_id: z.string().nullish(),
+          action_input: z.record(z.string(), z.unknown()).nullish(),
+        })
+      )
+      .optional(),
+    hypotheses: z.array(hypothesisSchema),
+  });
+});
+
+export type FindingsOutput = z.infer<typeof findingsOutputSchema>;
+
+const truncate = (text: string, max: number): string =>
+  text.length > max ? text.slice(0, max) : text;
+
+type RawEvidence = NonNullable<FindingsOutput['impact_evidence']>;
+
+/** At most `max` items spread evenly over the whole list, always including the first and last. */
+const spreadEvenly = <T>(items: readonly T[], max: number): T[] =>
+  items.length <= max
+    ? [...items]
+    : Array.from(
+        { length: max },
+        (_, i) => items[Math.round((i * (items.length - 1)) / (max - 1))]
+      );
+
+const ENTITY_ID_PREFIX_LENGTH = 200;
+
+/**
+ * A stable id for an entity. The name when it fits the id limit; otherwise its start plus a hash
+ * of the whole name, so two long names with the same start still get different ids.
+ */
+export const entityIdFor = (name: string): string =>
+  name.length <= MAX_ENTITY_ID_LENGTH
+    ? name
+    : `${name.slice(0, ENTITY_ID_PREFIX_LENGTH)}-${createHash('sha256')
+        .update(name)
+        .digest('hex')
+        .slice(0, 12)}`;
+
+/**
+ * Trims evidence to what the stores accept. A chart is only the model's reading of numbers in the
+ * conversation, so a chart that does not fit (no usable points, or a shape the schema rejects) is
+ * dropped and the description is kept.
+ */
+export const limitEvidence = (raw: RawEvidence): InvestigationEvidence | undefined => {
+  const description = raw.description?.trim()
+    ? truncate(raw.description, MAX_EVIDENCE_TEXT_LENGTH)
+    : undefined;
+  const label = (text: string) => truncate(text, MAX_EVIDENCE_CHART_LABEL_LENGTH);
+  const short = (text: string) => truncate(text, MAX_EVIDENCE_SHORT_TEXT_LENGTH);
+  const series = (raw.chart?.series ?? [])
+    .slice(0, MAX_EVIDENCE_CHART_SERIES)
+    .map(({ name, points }) => ({
+      name: label(name),
+      // An oversized series is thinned over its whole window, so an event near the end stays.
+      points: spreadEvenly(
+        points.filter(({ x, y }) => x !== '' && Number.isFinite(y)),
+        MAX_EVIDENCE_CHART_POINTS
+      ).map(({ x, y }) => ({ x: label(x), y })),
+    }))
+    .filter(({ points }) => points.length > 0);
+  const chart =
+    raw.chart && series.length > 0
+      ? {
+          type: raw.chart.type,
+          title: short(raw.chart.title),
+          x_axis: {
+            type: raw.chart.x_axis.type,
+            ...(raw.chart.x_axis.label ? { label: label(raw.chart.x_axis.label) } : {}),
+          },
+          y_axis: {
+            ...(raw.chart.y_axis.label ? { label: label(raw.chart.y_axis.label) } : {}),
+            ...(raw.chart.y_axis.unit ? { unit: raw.chart.y_axis.unit } : {}),
+          },
+          ...(raw.chart.stacked !== undefined ? { stacked: raw.chart.stacked } : {}),
+          series,
+          ...(raw.chart.annotations?.length
+            ? {
+                annotations: raw.chart.annotations
+                  .slice(0, MAX_EVIDENCE_CHART_ANNOTATIONS)
+                  .map(({ x, x_end: xEnd, label: text }) => ({
+                    x: label(x),
+                    ...(xEnd ? { x_end: label(xEnd) } : {}),
+                    label: short(text),
+                  })),
+              }
+            : {}),
+        }
+      : undefined;
+  const parsed = investigationEvidenceSchema.safeParse({
+    ...(description ? { description } : {}),
+    ...(chart ? { chart } : {}),
+  });
+  if (parsed.success && (parsed.data.description || parsed.data.chart)) return parsed.data;
+  return description ? { description } : undefined;
+};
+
+/** A proposal the final pass recorded, optionally carried out by an action workflow. */
+export interface RecordedProposal {
+  /** The open proposal this one refines or replaces in place: a handle such as `P1`. */
+  supersedes?: string;
+  title: string;
+  comment: string;
+  impact?: string;
+  confidence?: string;
+  /** The action workflow that carries the proposal out once a person approves it. */
+  action_workflow_id?: string;
+  /** That workflow's `actionInput`. Present exactly when `action_workflow_id` is. */
+  action_input?: Record<string, unknown>;
+}
+
+/** A parsed record with its evidence trimmed to what the stores accept. */
+export type FindingsRecord = Omit<
+  FindingsOutput,
+  'impact_evidence' | 'impact_entities' | 'hypotheses' | 'proposals'
+> & {
+  proposals?: RecordedProposal[];
+  /** `null` retracts the stored evidence. */
+  impact_evidence?: InvestigationEvidence | null;
+  impact_entities?: Array<{ name: string; type?: string; evidence?: InvestigationEvidence }>;
+  hypotheses: Array<
+    Omit<FindingsOutput['hypotheses'][number], 'evidence'> & { evidence?: InvestigationEvidence[] }
+  >;
+};
+
+/** Trims a parsed record to the sizes the metadata, hypotheses and impact stores accept. */
+export const limitFindings = (output: FindingsOutput): FindingsRecord => {
+  // The fields that carry evidence are rebuilt below, so the raw ones are not spread back in.
+  const {
+    impact_evidence: rawImpactEvidence,
+    impact_entities: rawEntities,
+    proposals: rawProposals,
+    hypotheses: rawHypotheses,
+    ...rest
+  } = output;
+  const impactEvidence = rawImpactEvidence ? limitEvidence(rawImpactEvidence) : rawImpactEvidence;
+  return {
+    ...rest,
+    impact_evidence: impactEvidence,
+    summary: truncate(output.summary, MAX_METADATA_TEXT_LENGTH),
+    ...(output.verdict !== undefined
+      ? { verdict: truncate(output.verdict, MAX_METADATA_TEXT_LENGTH) }
+      : {}),
+    ...(output.impact_summary !== undefined
+      ? { impact_summary: truncate(output.impact_summary, MAX_EVIDENCE_TEXT_LENGTH) }
+      : {}),
+    ...(rawEntities !== undefined
+      ? {
+          impact_entities: rawEntities
+            .slice(0, MAX_IMPACT_TOOL_ENTITIES)
+            .map(({ name, type, evidence }) => {
+              const kept = evidence ? limitEvidence(evidence) : undefined;
+              return {
+                name: truncate(name, MAX_ENTITY_NAME_LENGTH),
+                ...(type !== undefined ? { type: truncate(type, MAX_ENTITY_ID_LENGTH) } : {}),
+                ...(kept ? { evidence: kept } : {}),
+              };
+            }),
+        }
+      : {}),
+    ...(rawProposals !== undefined
+      ? {
+          proposals: rawProposals
+            .slice(0, MAX_PROPOSALS)
+            .map(
+              ({
+                supersedes,
+                title,
+                comment,
+                impact,
+                confidence,
+                action_workflow_id,
+                action_input,
+              }) => ({
+                ...(supersedes?.trim()
+                  ? { supersedes: truncate(supersedes.trim(), MAX_ENTITY_ID_LENGTH) }
+                  : {}),
+                title: truncate(title.trim(), MAX_TITLE_LENGTH),
+                comment: truncate(comment, MAX_COMMENT_LENGTH),
+                // A value the proposal store does not know is left out, not sent to fail the write.
+                ...(impact && proposalImpactSchema.safeParse(impact).success ? { impact } : {}),
+                ...(confidence && proposalConfidenceSchema.safeParse(confidence).success
+                  ? { confidence }
+                  : {}),
+                ...(action_workflow_id?.trim()
+                  ? {
+                      action_workflow_id: action_workflow_id.trim(),
+                      action_input: action_input ?? {},
+                    }
+                  : {}),
+              })
+            ),
+        }
+      : {}),
+    hypotheses: rawHypotheses.slice(0, MAX_HYPOTHESES).map(({ evidence, ...hypothesis }) => {
+      const kept = (evidence ?? [])
+        .map(limitEvidence)
+        .filter((item): item is InvestigationEvidence => item !== undefined)
+        .slice(0, MAX_HYPOTHESIS_EVIDENCE_ITEMS);
+      return {
+        ...hypothesis,
+        candidate: truncate(hypothesis.candidate, MAX_EVIDENCE_TEXT_LENGTH),
+        confidence: Math.min(1, Math.max(0, hypothesis.confidence)),
+        ...(hypothesis.reason !== undefined
+          ? { reason: truncate(hypothesis.reason, MAX_EVIDENCE_TEXT_LENGTH) }
+          : {}),
+        ...(kept.length ? { evidence: kept } : {}),
+      };
+    }),
+  };
+};
+
+const EVIDENCE_JSON_SCHEMA = {
+  type: 'object',
+  description:
+    'An observation that backs the claim: a short description, a small chart, or both. Add a chart only when the tool results in this conversation contain the numbers: copy the values exactly, never estimate or invent points, and describe instead when the numbers were clipped.',
+  properties: {
+    description: {
+      type: 'string',
+      description:
+        'Markdown: what was observed and why it matters, only what a chart does not already show.',
+    },
+    chart: {
+      type: 'object',
+      properties: {
+        type: { type: 'string', enum: EVIDENCE_CHART_TYPES },
+        title: { type: 'string', description: 'What it measures and the time window.' },
+        x_axis: {
+          type: 'object',
+          properties: {
+            type: { type: 'string', enum: EVIDENCE_CHART_X_AXIS_TYPES },
+            label: { type: 'string' },
+          },
+          required: ['type'],
+        },
+        y_axis: {
+          type: 'object',
+          properties: {
+            label: { type: 'string' },
+            unit: {
+              type: 'string',
+              enum: EVIDENCE_CHART_Y_AXIS_UNITS,
+              description: 'percent values are on a 0 to 100 scale.',
+            },
+          },
+        },
+        stacked: { type: 'boolean' },
+        series: {
+          type: 'array',
+          description: 'Up to 5 series of at most about 30 points each.',
+          items: {
+            type: 'object',
+            properties: {
+              name: { type: 'string' },
+              points: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    x: {
+                      type: 'string',
+                      description: 'ISO 8601 timestamp for a time axis, else a category label.',
+                    },
+                    y: { type: 'number' },
+                  },
+                  required: ['x', 'y'],
+                },
+              },
+            },
+            required: ['name', 'points'],
+          },
+        },
+        annotations: {
+          type: 'array',
+          description: 'At most 5: for example when the problem began.',
+          items: {
+            type: 'object',
+            properties: {
+              x: { type: 'string' },
+              x_end: { type: 'string' },
+              label: { type: 'string' },
+            },
+            required: ['x', 'label'],
+          },
+        },
+      },
+      required: ['type', 'title', 'x_axis', 'y_axis', 'series'],
+    },
+  },
+} as const;
+
+/**
+ * The tool call is validated against this schema before {@link findingsOutputSchema} reads it, so
+ * an optional proposal field the parser accepts as `null` must accept it here too.
+ */
+const orNull = <T extends object>(schema: T) => ({ anyOf: [schema, { type: 'null' }] } as const);
+
+/** The same shape as {@link findingsOutputSchema}, for the inference client. */
+export const FINDINGS_JSON_SCHEMA = {
+  type: 'object',
+  properties: {
+    summary: {
+      type: 'string',
+      description:
+        'What we saw and since when, not the cause. At most 60 words of Markdown: a lead sentence of at most 25 words, then at most three short bullets.',
+    },
+    verdict: {
+      type: 'string',
+      description:
+        'Only when the agent has given its final answer: the most likely cause. At most 70 words of Markdown: a lead sentence of at most 25 words, then at most three short bullets. Starts with Cause not confirmed: when no hypothesis is confirmed. Omit while the investigation is still running.',
+    },
+    severity: {
+      type: 'string',
+      enum: FINDINGS_SEVERITIES,
+      description: 'Severity of the situation investigated, decided from what was confirmed.',
+    },
+    impact_summary: {
+      type: 'string',
+      description:
+        'The business consequence: who or what was hurt and how badly, with measured numbers. At most 45 words: a lead sentence of at most 25 words, then at most three short bullets. Omit when the evidence shows no impact yet.',
+    },
+    impact_evidence: {
+      anyOf: [EVIDENCE_JSON_SCHEMA, { type: 'null' }],
+      description:
+        'Evidence of the impact: for example a chart of the error rate or request volume over the window. Omit to keep the stored evidence, or when the conversation holds no numbers for it. Use null only to retract evidence you now know is wrong.',
+    },
+    impact_entities: {
+      type: 'array',
+      description:
+        'Only when two or more services or components were affected in different ways, grouped at service level. At most 5. Omit to keep the stored entities; an empty list removes them.',
+      items: {
+        type: 'object',
+        properties: {
+          name: { type: 'string' },
+          type: { type: 'string', description: 'For example service, host or database.' },
+          evidence: {
+            ...EVIDENCE_JSON_SCHEMA,
+            description:
+              'How this entity was affected: a short description, a small chart of its own failure signal, or both. Keep the stored evidence when you list the entity again.',
+          },
+        },
+        required: ['name'],
+      },
+    },
+    proposals: {
+      type: 'array',
+      description: `New or updated concrete actions for a person to decide, at most ${MAX_PROPOSALS} per pass and at most ${MAX_OPEN_PROPOSALS} open in total: a command, a config change, a code fix, a rollback or a targeted check the findings support. Omit unchanged open proposals, and send [] or omit on follow-ups that add no new or revised action. Set supersedes to an open proposal's ID (such as P1) to update or replace that same action instead of adding a duplicate, never to fold a different action into it.`,
+      items: {
+        type: 'object',
+        properties: {
+          supersedes: {
+            ...orNull({ type: 'string' }),
+            description:
+              'ID of an open proposal listed in this conversation (such as P1) that this proposal refines or replaces. Omit only when the action is genuinely new and not covered by any open proposal.',
+          },
+          title: { type: 'string', description: 'Short plain text naming the action.' },
+          comment: {
+            type: 'string',
+            description:
+              'What to do and why, in Markdown: the concrete steps and the findings that support them. When superseding an open proposal, give the complete standalone comment.',
+          },
+          impact: {
+            ...orNull({ type: 'string', enum: proposalImpactSchema.options }),
+            description: 'How disruptive carrying out the action is.',
+          },
+          confidence: {
+            ...orNull({ type: 'string', enum: proposalConfidenceSchema.options }),
+            description: 'How strongly the findings support that this action resolves the issue.',
+          },
+          action_workflow_id: {
+            ...orNull({ type: 'string' }),
+            description:
+              'Id of a workflow listed under Workflows that carries this action out once approved. Omit when none fits, or when none are listed. When superseding, it must be the workflow the open proposal already runs: a proposal cannot change or gain a workflow.',
+          },
+          action_input: {
+            ...orNull({ type: 'object', additionalProperties: true }),
+            description:
+              "The workflow's actionInput, filled to match its input schema. Only with action_workflow_id.",
+          },
+        },
+        required: ['title', 'comment'],
+      },
+    },
+    hypotheses: {
+      type: 'array',
+      description:
+        'Every candidate cause considered so far, each with its own confidence and status. A snapshot: it replaces the stored list. At most 8.',
+      items: {
+        type: 'object',
+        properties: {
+          candidate: {
+            type: 'string',
+            description:
+              'The name on the card: a noun phrase of at most eight words, with no counts or ids.',
+          },
+          confidence: { type: 'number', description: 'From 0 to 1.' },
+          status: { type: 'string', enum: HYPOTHESIS_STATUSES },
+          reason: {
+            type: 'string',
+            description:
+              'Two Markdown lines: **Tested:** what was checked, against which signal and window, then **Result:** what the data showed, ending in Confirmed, Dismissed or Unresolved. While the status is investigating, add a third line, **Settled by:** the observation that would refute or confirm it, as Refuted if <signal> <comparison> <threshold> in <window>; confirmed if <the opposite>. Under 700 characters.',
+          },
+          evidence: {
+            type: 'array',
+            description:
+              'At most 2, only for the confirmed or leading hypothesis: the observations that decided it.',
+            items: EVIDENCE_JSON_SCHEMA,
+          },
+        },
+        required: ['candidate', 'confidence', 'status'],
+      },
+    },
+  },
+  required: ['summary', 'hypotheses'],
+} as const;
+
+const { evidence: _hypothesisEvidence, ...LIVE_HYPOTHESIS_PROPERTIES } =
+  FINDINGS_JSON_SCHEMA.properties.hypotheses.items.properties;
+
+/**
+ * What a live pass may answer while the investigation runs: the summary and the hypothesis tree.
+ * The rest of the record, with its evidence, is written once, from the final pass.
+ */
+export const LIVE_FINDINGS_JSON_SCHEMA = {
+  type: 'object',
+  properties: {
+    summary: FINDINGS_JSON_SCHEMA.properties.summary,
+    hypotheses: {
+      ...FINDINGS_JSON_SCHEMA.properties.hypotheses,
+      description:
+        'Every candidate cause considered so far, each with its own confidence, status and reason. A snapshot: it replaces the stored list. At most 8.',
+      items: {
+        ...FINDINGS_JSON_SCHEMA.properties.hypotheses.items,
+        properties: LIVE_HYPOTHESIS_PROPERTIES,
+      },
+    },
+  },
+  required: ['summary', 'hypotheses'],
+} as const;

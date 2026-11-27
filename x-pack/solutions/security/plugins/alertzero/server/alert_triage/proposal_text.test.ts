@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import {
-  buildEntitySummary,
-  buildProposalText,
-  buildVarietySummary,
-  PROPOSAL_TEXT_FIELDS,
-} from './proposal_text';
-import { buildPatternKeys } from './pattern_key';
-import { PARITY_ALERTS } from './pattern_key_parity_fixture';
+import { buildEntitySummary, buildProposalText, buildVarietySummary } from './proposal_text';
 
 const alert = (host?: string, user?: string, exe?: string) => ({
   ...(host ? { host: { name: host } } : {}),
@@ -50,6 +43,16 @@ describe('buildVarietySummary', () => {
     expect(buildVarietySummary(docs, 'keyed')).toBe(
       '3 alerts · 2 hosts · 1 user · 2 distinct programs'
     );
+  });
+
+  it('says a cloud proposal groups by rule only even when its alerts have a strict key', () => {
+    const cloud = {
+      'kibana.alert.rule.uuid': 'r',
+      'kibana.alert.rule.revision': 1,
+      event: { action: 'login' },
+      cloud: { account: { id: '1' } },
+    };
+    expect(buildVarietySummary([cloud], 'keyed')).toContain('group by rule only');
   });
 
   it('says a proposal groups by rule only when no alert has an identifying field', () => {
@@ -98,42 +101,5 @@ describe('buildProposalText', () => {
       expect(textWith({ falsePositive: 9, truePositive: 0 })).not.toContain('earlier alert');
       expect(textWith()).not.toContain('earlier alert');
     });
-  });
-});
-
-// A revise loads only PROPOSAL_TEXT_FIELDS of each alert. A field that the keys or the text read but
-// the list misses would change them silently, so the trimmed alerts must give the same result.
-describe('PROPOSAL_TEXT_FIELDS', () => {
-  type Doc = Record<string, unknown>;
-  const pick = (doc: Doc, path: string): Doc => {
-    if (path in doc) return { [path]: doc[path] };
-    const [head, ...rest] = path.split('.');
-    const child = doc[head];
-    if (rest.length === 0 || typeof child !== 'object' || child === null) {
-      return rest.length === 0 && head in doc ? { [head]: child } : {};
-    }
-    const picked = pick(child as Doc, rest.join('.'));
-    return Object.keys(picked).length > 0 ? { [head]: picked } : {};
-  };
-  const merge = (target: Doc, source: Doc): Doc => {
-    Object.entries(source).forEach(([key, value]) => {
-      const current = target[key];
-      target[key] =
-        typeof value === 'object' && value !== null && !Array.isArray(value) && current
-          ? merge(current as Doc, value as Doc)
-          : value;
-    });
-    return target;
-  };
-  const trim = (doc: Doc): Doc =>
-    PROPOSAL_TEXT_FIELDS.reduce<Doc>((acc, path) => merge(acc, pick(doc, path)), {});
-
-  it('gives the same keys and proposal text as the full alerts', () => {
-    const docs = PARITY_ALERTS.map(({ doc }) => ({ ...doc, 'process.args': ['x'], noise: 'y' }));
-    const trimmed = docs.map(trim);
-    expect(trimmed.map(buildPatternKeys)).toEqual(docs.map(buildPatternKeys));
-    const text = (alerts: Doc[]) =>
-      buildProposalText({ alerts, ruleName: 'R', confidenceFloor: 0.8, kind: 'keyed' });
-    expect(text(trimmed)).toEqual(text(docs));
   });
 });

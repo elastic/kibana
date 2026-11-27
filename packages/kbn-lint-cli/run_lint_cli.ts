@@ -29,9 +29,14 @@ const LINTABLE_EXTENSIONS = new Set(['.ts', '.tsx', '.js', '.jsx', '.cjs', '.mjs
 const ERRORS_ONLY_CONFIG = 'oxlint.fix.config.mjs';
 
 // JS plugin rules run on a single JS thread per oxlint process, so a full-repo run splits the
-// repo across processes. Each process also pays a fixed config/plugin startup cost, so a few
-// multi-threaded shards are faster than one single-threaded shard per core.
-const THREADS_PER_SHARD = 4;
+// repo across processes. Oxlint's native import plugin keeps every module's import and export
+// records in memory, so with it enabled more shards run CI agents out of memory. The run lints in
+// two passes (see `.oxlint/passes.mts`): every other rule with more shards, then the import
+// plugin rules, which run in Rust and need few processes.
+const PASSES = [
+  { pass: 'without-import-plugin', threadsPerShard: 2 },
+  { pass: 'import-plugin', threadsPerShard: 4 },
+] as const;
 
 interface LintOptions {
   fix: boolean;
@@ -100,7 +105,10 @@ async function lintFiles({
   );
 }
 
-/** Lints the whole repo with one oxlint process per shard, printing each shard's output whole. */
+/**
+ * Lints the whole repo in each of `PASSES` in turn, with one oxlint process per shard, printing
+ * each shard's output whole.
+ */
 async function runOxlintShards(args: string[]) {
   // `-z` keeps paths with non-ASCII characters unquoted, so they are not dropped by the filter
   const { stdout } = await execa(
@@ -118,24 +126,29 @@ async function runOxlintShards(args: string[]) {
   const files = stdout
     .split('\0')
     .filter((file) => LINTABLE_EXTENSIONS.has(Path.extname(file)) && !eslintIgnore.ignores(file));
-  const shardCount = Math.max(1, Math.round(Os.availableParallelism() / THREADS_PER_SHARD));
 
-  const results = await Promise.all(
-    getShardPaths(files, shardCount).map((shardPaths) =>
-      runOxlintShard([...args, `--threads=${THREADS_PER_SHARD}`, ...shardPaths])
-    )
-  );
+  let failed = false;
+  for (const { pass, threadsPerShard } of PASSES) {
+    const shardCount = Math.max(1, Math.round(Os.availableParallelism() / threadsPerShard));
+    process.stdout.write(`oxlint pass "${pass}": ${shardCount} shards\n`);
+    const results = await Promise.all(
+      getShardPaths(files, shardCount).map((shardPaths) =>
+        runOxlintShard(pass, [...args, `--threads=${threadsPerShard}`, ...shardPaths])
+      )
+    );
 
-  for (const result of results) {
-    if (result.all) {
-      process.stdout.write(`${result.all}\n`);
+    for (const result of results) {
+      if (result.all) {
+        process.stdout.write(`${result.all}\n`);
+      }
+      // a shard that failed to start or was killed has no exit code; execa's failure carries the reason
+      if (result.exitCode === undefined && 'shortMessage' in result) {
+        process.stdout.write(`${result.shortMessage}\n`);
+      }
     }
-    // a shard that failed to start or was killed has no exit code; execa's failure carries the reason
-    if (result.exitCode === undefined && 'shortMessage' in result) {
-      process.stdout.write(`${result.shortMessage}\n`);
-    }
+    failed ||= results.some(({ exitCode }) => exitCode !== 0);
   }
-  if (results.some(({ exitCode }) => exitCode !== 0)) {
+  if (failed) {
     throw createFailError('oxlint found errors');
   }
 }
@@ -150,17 +163,20 @@ const CRASH_SIGNALS: Record<string, true> = {
   SIGILL: true,
 };
 
-async function runOxlintShard(args: string[]) {
+async function runOxlintShard(pass: (typeof PASSES)[number]['pass'], args: string[]) {
   for (let attempt = 1; ; attempt++) {
     const result = await execa('oxlint', args, {
       cwd: REPO_ROOT,
       preferLocal: true,
       reject: false,
       all: true,
-      // The shards start together and would all write the plugin sources to the same
-      // @kbn/swc-register LMDB cache, which has crashed a shard with `MDB_BAD_TXN`. Transpiling
-      // the plugins without the cache is no slower.
-      env: { DISABLE_SWC_REGISTER_CACHE: 'true' },
+      env: {
+        OXLINT_PASS: pass,
+        // The shards start together and would all write the plugin sources to the same
+        // @kbn/swc-register LMDB cache, which has crashed a shard with `MDB_BAD_TXN`. Transpiling
+        // the plugins without the cache is no slower.
+        DISABLE_SWC_REGISTER_CACHE: 'true',
+      },
     });
     if (result.signal === undefined || !CRASH_SIGNALS[result.signal] || attempt === 2) {
       return result;

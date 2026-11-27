@@ -6,62 +6,57 @@
  */
 
 import React from 'react';
+import type { EuiStepsProps } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { WRITING_MODE_STEP_TITLE } from './destination_type_config';
 import { LocalElasticsearchFields } from './local_elasticsearch_fields';
+import { RemoteElasticsearchConnectionFields } from './remote_elasticsearch_connection_fields';
+import { RemoteElasticsearchRoutingFields } from './remote_elasticsearch_routing_fields';
 import { S3Fields } from './s3_fields';
-import type {
-  DestinationCreationFormErrors,
-  DestinationStorageKind,
-  ElasticsearchDestinationFormData,
-  S3DestinationFormData,
-  S3FieldsErrors,
-} from './types';
+import type { DestinationCreationFormErrors, DestinationStorageKind } from './types';
 
-interface DestinationTypeFieldsProps {
+interface DestinationTypeStepsProps {
   storageKind: DestinationStorageKind;
-  auto: boolean;
-  logsIndex: string;
-  metricsIndex: string;
-  tracesIndex: string;
-  staticIndexesError?: DestinationCreationFormErrors['staticIndexes'];
-  logsIndexError?: DestinationCreationFormErrors['logsIndex'];
-  metricsIndexError?: DestinationCreationFormErrors['metricsIndex'];
-  tracesIndexError?: DestinationCreationFormErrors['tracesIndex'];
+  errors: DestinationCreationFormErrors;
   disabled: boolean;
-  onAutoChange: (auto: boolean) => void;
-  onIndexesChange: (
-    indexes: Partial<
-      Pick<ElasticsearchDestinationFormData, 'logsIndex' | 'metricsIndex' | 'tracesIndex'>
-    >
-  ) => void;
-  s3Form: S3DestinationFormData;
-  s3Errors: S3FieldsErrors;
-  onS3Change: (changes: Partial<S3DestinationFormData>) => void;
-  onBlur: () => void;
 }
 
-/**
- * Renders the form section for the selected destination type.
- * Add a case and a fields component when a new type becomes available.
- */
-export const DestinationTypeFields = ({
+/** Modal steps for the selected destination type. Fields bind through the surrounding `FormProvider`. */
+export const getDestinationTypeSteps = ({
   storageKind,
-  s3Form,
-  s3Errors,
-  onS3Change,
-  ...fields
-}: DestinationTypeFieldsProps) => {
+  errors,
+  disabled,
+}: DestinationTypeStepsProps): EuiStepsProps['steps'] => {
   switch (storageKind) {
     case 'local_elasticsearch':
-      return <LocalElasticsearchFields {...fields} />;
+      return [
+        {
+          title: WRITING_MODE_STEP_TITLE,
+          children: <LocalElasticsearchFields errors={errors} disabled={disabled} />,
+        },
+      ];
+    case 'remote_elasticsearch':
+      return [
+        {
+          title: i18n.translate(
+            'xpack.streams.destinations.remoteElasticsearch.connectionStepTitle',
+            { defaultMessage: 'Connect your remote cluster' }
+          ),
+          children: <RemoteElasticsearchConnectionFields errors={errors} disabled={disabled} />,
+        },
+        {
+          title: WRITING_MODE_STEP_TITLE,
+          children: <RemoteElasticsearchRoutingFields errors={errors} disabled={disabled} />,
+        },
+      ];
     case 'external_storage':
-      return (
-        <S3Fields
-          values={s3Form}
-          errors={s3Errors}
-          disabled={fields.disabled}
-          onChange={onS3Change}
-          onBlur={fields.onBlur}
-        />
-      );
+      return [
+        {
+          title: i18n.translate('xpack.streams.destinations.externalStorageStepTitle', {
+            defaultMessage: 'Configure external storage',
+          }),
+          children: <S3Fields errors={errors} disabled={disabled} />,
+        },
+      ];
   }
 };

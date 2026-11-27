@@ -8,12 +8,19 @@
  */
 
 import { set } from '@kbn/safer-lodash-set';
-import { cloneDeep, get, unset } from 'lodash';
+import { cloneDeep, get, isEqual, last, maxBy, omit, toPath, unset } from 'lodash';
 import type { ContractRequest, ContractResponse, Responder } from '../contract/types';
 import { isRecord } from '../openapi/schema_walk';
 import { MOCK_PAGE_PARAM } from '../openapi/read_parameters';
 import type { ContractOperation } from '../openapi/types';
-import type { OperationRef, RecordedExchange, StoredResponse } from './response_engine';
+import type { RequestMatcher } from './request_match';
+import { countConditions, matchesRequest } from './request_match';
+import type {
+  OperationRef,
+  RecordedExchange,
+  ResponseEngine,
+  StoredResponse,
+} from './response_engine';
 import { createOperationIndex } from './response_engine';
 
 /** How a cursor-paginated response says there are no more pages. */
@@ -51,16 +58,20 @@ interface Located {
  * How a vendor operation pages, as declared in the connector's manifest. Paths into bodies use
  * lodash syntax; keys containing dots are quoted, e.g. `["@odata.nextLink"]`. An empty
  * `itemsPath` means the body is the collection itself, which leaves no room in it for a next
- * cursor, URL or total: such operations page by offset, page number, `Link` header or a cursor
- * in a header.
+ * cursor, URL or total: such operations page by offset, page number, `Link` header, or a cursor
+ * in a header or in the last item.
  */
 export type PaginationDescriptor =
   | {
       readonly style: 'cursor';
       readonly request: CursorRequest & Located;
       readonly response: {
-        /** Where the next cursor goes; with `header`, `nextPath` is a header name. */
-        readonly in?: 'body' | 'header';
+        /**
+         * Where the next cursor goes; defaults to `body`. With `header`, `nextPath` is a header
+         * name. With `last_item`, `nextPath` is a path within the page's last item, whose value,
+         * an array's elements joined with commas, is the next cursor, as with urlscan's `sort`.
+         */
+        readonly in?: 'body' | 'header' | 'last_item';
         readonly itemsPath: string;
         readonly nextPath: string;
         /** A boolean body field that is `true` while more pages follow, e.g. Stripe's `has_more`. */
@@ -123,11 +134,20 @@ interface RecordedCollection {
   readonly cursors: ReadonlyMap<number, string>;
 }
 
+/** A recorded collection, and the requests it answers: its recordings' non-paging values. */
+interface ScopedCollection {
+  readonly scope: RequestMatcher;
+  readonly recorded: RecordedCollection;
+}
+
 type RequestParameters = Pick<ContractRequest, 'query' | 'headers' | 'body'>;
 
 const DEFAULT_COLLECTION_SIZE = 3;
 const DEFAULT_PAGE_SIZE = 10;
 const CURSOR_PREFIX = 'contract-mock:';
+// A numeric cursor field needs a numeric cursor: the mock's own start here, above likely IDs
+// and within int32.
+const NUMERIC_CURSOR_BASE = 2_000_000_000;
 // Opaque next-page URLs carry the mock's own cursor.
 const OPAQUE_REQUEST: CursorRequest = { cursorParam: MOCK_PAGE_PARAM };
 
@@ -141,6 +161,32 @@ const decodeCursor = (cursor: string): number | undefined => {
     ? position
     : undefined;
 };
+
+const decodeNumericCursor = (cursor: string): number | undefined =>
+  /^\d+$/.test(cursor) && Number(cursor) >= NUMERIC_CURSOR_BASE
+    ? Number(cursor) - NUMERIC_CURSOR_BASE
+    : undefined;
+
+// A last-item cursor is a number where the item before its position holds one, else a string.
+const decodeLastItemCursor = (
+  cursor: string,
+  { collection, path }: { collection: readonly unknown[]; path: string }
+): number | undefined => {
+  const numeric = decodeNumericCursor(cursor);
+  const position = numeric ?? decodeCursor(cursor);
+  if (position === undefined) {
+    return undefined;
+  }
+  const holdsNumber = typeof get(collection[position - 1], path) === 'number';
+  return holdsNumber === (numeric !== undefined) ? position : undefined;
+};
+
+// Cursors are compared as strings, whether the vendor sends them as strings or numbers.
+const asCursor = (value: unknown): unknown => (typeof value === 'number' ? String(value) : value);
+
+// A value an item holds, as a request carries it: an array's elements joined with commas.
+const toCursor = (held: unknown): unknown =>
+  Array.isArray(held) ? held.join(',') : asCursor(held);
 
 const readParameter = (
   { query, headers, body }: RequestParameters,
@@ -190,15 +236,21 @@ const readStart = (
   request: NextUrlRequest,
   read: (name: string) => unknown,
   size: number,
-  recordedPositions?: ReadonlyMap<string, number>
+  {
+    recordedPositions,
+    decode = decodeCursor,
+  }: {
+    recordedPositions?: ReadonlyMap<string, number>;
+    decode?: (cursor: string) => number | undefined;
+  } = {}
 ): number | undefined => {
   if ('cursorParam' in request) {
-    const cursor = read(request.cursorParam);
+    const cursor = asCursor(read(request.cursorParam));
     if (cursor === undefined || cursor === '') {
       return 0;
     }
     return typeof cursor === 'string'
-      ? recordedPositions?.get(cursor) ?? decodeCursor(cursor)
+      ? recordedPositions?.get(cursor) ?? decode(cursor)
       : undefined;
   }
   if ('offsetParam' in request) {
@@ -263,6 +315,33 @@ const resize = (items: readonly unknown[], size: number | undefined): unknown[] 
 
 const LINK_NEXT = /<([^>]+)>[^,]*rel="?next"?/;
 
+const getItems = (body: unknown, itemsPath: string): unknown =>
+  itemsPath === '' ? body : isRecord(body) ? get(body, itemsPath) : undefined;
+
+// The items with the cursor for `position` written over the value at `path` in the last one, in
+// that value's shape: a one-element array, a number or else a string.
+const withLastItemCursor = (
+  items: readonly unknown[],
+  { path, position, recorded }: { path: string; position: number; recorded?: string }
+): readonly unknown[] => {
+  const item = cloneDeep(last(items));
+  if (!isRecord(item)) {
+    return items;
+  }
+  const held: unknown = get(item, path);
+  // A replayed item already holds its recorded cursor, in the vendor's own shape.
+  if (recorded !== undefined && toCursor(held) === recorded) {
+    return items;
+  }
+  if (typeof held === 'number') {
+    set(item, path, Number(recorded ?? NUMERIC_CURSOR_BASE + position));
+  } else {
+    const cursor = recorded ?? encodeCursor(position);
+    set(item, path, Array.isArray(held) ? [cursor] : cursor);
+  }
+  return [...items.slice(0, -1), item];
+};
+
 // The cursor a recorded response hands to the next request, wherever the vendor puts it.
 const readRecordedNext = (
   pagination: PaginationDescriptor,
@@ -272,12 +351,16 @@ const readRecordedNext = (
     Object.entries(headers).find(([key]) => key.toLowerCase() === name.toLowerCase())?.[1];
   let url: unknown;
   if (pagination.style === 'cursor') {
-    const { in: nextIn = 'body', nextPath } = pagination.response;
-    return nextIn === 'header'
-      ? header(nextPath)
-      : isRecord(body)
-      ? get(body, nextPath)
-      : undefined;
+    const { in: nextIn = 'body', itemsPath, nextPath } = pagination.response;
+    if (nextIn === 'header') {
+      return header(nextPath);
+    }
+    if (nextIn === 'body') {
+      return isRecord(body) ? get(body, nextPath) : undefined;
+    }
+    const items = getItems(body, itemsPath);
+    const held: unknown = Array.isArray(items) ? get(last(items), nextPath) : undefined;
+    return toCursor(held);
   } else if (pagination.style === 'link') {
     url = LINK_NEXT.exec(header('link') ?? '')?.[1];
   } else if (pagination.style === 'next_url') {
@@ -302,9 +385,6 @@ interface RecordedPage {
   readonly next: unknown;
 }
 
-const getItems = (body: unknown, itemsPath: string): unknown =>
-  itemsPath === '' ? body : isRecord(body) ? get(body, itemsPath) : undefined;
-
 const readRecordedPage = (
   pagination: PaginationDescriptor,
   { request = {}, response }: RecordedExchange
@@ -322,7 +402,7 @@ const readRecordedPage = (
   };
   const read = (name: string) => readParameter(parameters, parameterLocation(pagination), name);
   const pageRequest = requestOf(pagination);
-  const cursor = 'cursorParam' in pageRequest ? read(pageRequest.cursorParam) : '';
+  const cursor = 'cursorParam' in pageRequest ? asCursor(read(pageRequest.cursorParam)) : '';
   const next = readRecordedNext(pagination, response);
   return typeof cursor === 'string' && cursor !== ''
     ? [{ items, cursor, next }]
@@ -375,6 +455,87 @@ const readRecordedCollection = (
   };
 };
 
+const pagingParameters = (pagination: PaginationDescriptor): string[] => {
+  const request = requestOf(pagination);
+  const selector =
+    'cursorParam' in request
+      ? request.cursorParam
+      : 'offsetParam' in request
+      ? request.offsetParam
+      : request.pageParam;
+  return request.sizeParam === undefined ? [selector] : [selector, request.sizeParam];
+};
+
+// Removes a body parameter and the objects it leaves empty, so a body that only sends `page` for
+// its `page.cursor` compares equal to one that doesn't send `page` at all.
+const removeBodyParameter = (body: object, name: string) => {
+  unset(body, name);
+  const parents = toPath(name).slice(0, -1);
+  for (let depth = parents.length; depth > 0; depth--) {
+    const parent = parents.slice(0, depth);
+    const value = get(body, parent);
+    if (!isRecord(value) || Object.keys(value).length > 0) {
+      return;
+    }
+    unset(body, parent);
+  }
+};
+
+// What sets a recording's collection apart from the operation's others: its path parameters, and
+// its query and body without the parameters that select a page.
+const toRecordedScope = (
+  pagination: PaginationDescriptor,
+  { request: { pathParameters = {}, query = {}, body } = {} }: RecordedExchange
+): RequestMatcher => {
+  const names = pagingParameters(pagination);
+  const location = parameterLocation(pagination);
+  const scopedQuery = location === 'query' ? omit(query, names) : query;
+  const scopedBody = location === 'body' && isRecord(body) ? cloneDeep(body) : body;
+  if (location === 'body' && isRecord(scopedBody)) {
+    names.forEach((name) => removeBodyParameter(scopedBody, name));
+  }
+  const hasBody =
+    scopedBody !== undefined && !(isRecord(scopedBody) && Object.keys(scopedBody).length === 0);
+  return {
+    ...(Object.keys(pathParameters).length > 0 ? { path: pathParameters } : {}),
+    ...(Object.keys(scopedQuery).length > 0 ? { query: scopedQuery } : {}),
+    ...(hasBody ? { body: scopedBody } : {}),
+  };
+};
+
+const readRecordedCollections = (
+  pagination: PaginationDescriptor,
+  exchanges: readonly RecordedExchange[]
+): ScopedCollection[] => {
+  const groups: Array<{ scope: RequestMatcher; exchanges: RecordedExchange[] }> = [];
+  for (const exchange of exchanges) {
+    const scope = toRecordedScope(pagination, exchange);
+    const group = groups.find((candidate) => isEqual(candidate.scope, scope));
+    if (group) {
+      group.exchanges.push(exchange);
+    } else {
+      groups.push({ scope, exchanges: [exchange] });
+    }
+  }
+  return groups.flatMap(({ scope, exchanges: own }) => {
+    const recorded = readRecordedCollection(pagination, own);
+    return recorded ? [{ scope, recorded }] : [];
+  });
+};
+
+// The most specific collection whose scope the request meets, else the operation's first, as
+// with the recording a request gets.
+const selectCollection = (
+  collections: readonly ScopedCollection[],
+  request: ContractRequest
+): RecordedCollection | undefined =>
+  (
+    maxBy(
+      collections.filter(({ scope }) => matchesRequest(scope, request)),
+      ({ scope }) => countConditions(scope)
+    ) ?? collections[0]
+  )?.recorded;
+
 const BAD_CURSOR: ContractResponse = {
   statusCode: 400,
   headers: { 'content-type': 'application/json' },
@@ -418,20 +579,40 @@ const paginate = (
   }
   const read = (name: string) => readParameter(request, parameterLocation(pagination), name);
   const size = readPageSize(pagination, read);
-  const start = readStart(requestOf(pagination), read, size, recorded?.positions);
+  const collection = recorded
+    ? resize(recorded.items, collectionSize)
+    : buildCollection(template[0], collectionSize ?? DEFAULT_COLLECTION_SIZE);
+  const lastItemPath =
+    pagination.style === 'cursor' && pagination.response.in === 'last_item'
+      ? pagination.response.nextPath
+      : undefined;
+  const start = readStart(requestOf(pagination), read, size, {
+    recordedPositions: recorded?.positions,
+    decode:
+      lastItemPath === undefined
+        ? decodeCursor
+        : (cursor) => decodeLastItemCursor(cursor, { collection, path: lastItemPath }),
+  });
   if (start === undefined) {
     return BAD_CURSOR;
   }
 
-  const collection = recorded
-    ? resize(recorded.items, collectionSize)
-    : buildCollection(template[0], collectionSize ?? DEFAULT_COLLECTION_SIZE);
-  const items = collection.slice(start, start + size);
+  const cursorAt = (position: number) => recorded?.cursors.get(position) ?? encodeCursor(position);
+  const slice = collection.slice(start, start + size);
+  // A last item's cursor points past it, on the last page too: the next page is then empty.
+  const items =
+    lastItemPath === undefined
+      ? slice
+      : withLastItemCursor(slice, {
+          path: lastItemPath,
+          position: start + slice.length,
+          recorded: recorded?.cursors.get(start + slice.length),
+        });
   const page: object =
     itemsPath === '' || !isRecord(body) ? items : set(cloneDeep(body), itemsPath, items);
   const inBody = !Array.isArray(page);
   const next = start + size < collection.length ? start + size : undefined;
-  const cursor = next === undefined ? undefined : recorded?.cursors.get(next) ?? encodeCursor(next);
+  const cursor = next === undefined ? undefined : cursorAt(next);
   const nextUrl =
     next === undefined || cursor === undefined
       ? undefined
@@ -445,7 +626,7 @@ const paginate = (
         if (inBody) {
           setNext(page, nextPath, cursor, pagination.end);
         }
-      } else {
+      } else if (nextIn === 'header') {
         const atEnd = pagination.end === 'empty_string' ? '' : undefined;
         headers = withHeader(headers, nextPath, cursor ?? atEnd);
       }
@@ -471,12 +652,12 @@ const paginate = (
 };
 
 /**
- * Wraps a responder so paginated operations serve pages of a virtual collection: the recorded
- * pages joined, or copies of the first item of the response the responder would give. Pages are
- * selected by the request's cursor, offset or page number and page size, read from its query,
- * body or headers; the next page is signalled by a cursor, a `Link` header or a next-page URL in
- * the body. Cursors are opaque positions or recorded vendor cursors; others get 400, as a vendor
- * would answer.
+ * Wraps a responder so paginated operations serve pages of a virtual collection: the pages
+ * recorded for the request's non-paging values joined, or copies of the first item of the response
+ * the responder would give. Fixtures are served as written. Pages are selected by the request's
+ * cursor, offset or page number and page size, read from its query, body or headers; the next page
+ * is signalled by a cursor, a `Link` header or a next-page URL in the body. Cursors are opaque
+ * positions or recorded vendor cursors; others get 400, as a vendor would answer.
  */
 export const withPagination = (
   operations: readonly ContractOperation[],
@@ -484,23 +665,46 @@ export const withPagination = (
     pagination = [],
     collectionSize,
     recordedExchanges = () => [],
-  }: PaginationOptions & {
-    readonly recordedExchanges?: (operation: ContractOperation) => readonly RecordedExchange[];
-  },
+    servedFrom = () => undefined,
+  }: PaginationOptions & Partial<Pick<ResponseEngine, 'recordedExchanges' | 'servedFrom'>>,
   respond: Responder
 ): Responder => {
   const findOperations = createOperationIndex(operations);
   const paginated = new Map(
     pagination.flatMap((entry) =>
-      findOperations(entry.operation).map((operation) => {
-        const recorded = readRecordedCollection(entry.pagination, recordedExchanges(operation));
-        return [operation, { pagination: entry.pagination, collectionSize, recorded }] as const;
-      })
+      findOperations(entry.operation).map(
+        (operation) =>
+          [
+            operation,
+            {
+              pagination: entry.pagination,
+              collections: readRecordedCollections(entry.pagination, recordedExchanges(operation)),
+            },
+          ] as const
+      )
     )
   );
-  return (operation, request) => {
-    const response = respond(operation, request);
-    const options = paginated.get(operation);
-    return options && response.statusCode < 300 ? paginate(options, request, response) : response;
+  return async (operation, request, context) => {
+    const origin = servedFrom(operation, request);
+    const response = await respond(operation, request, context);
+    const entry = paginated.get(operation);
+    if (
+      !entry ||
+      response.statusCode >= 300 ||
+      origin === 'fixture' ||
+      origin === 'runtime-fixture'
+    ) {
+      return response;
+    }
+    const { pagination: descriptor, collections } = entry;
+    return paginate(
+      {
+        pagination: descriptor,
+        collectionSize,
+        recorded: selectCollection(collections, request),
+      },
+      request,
+      response
+    );
   };
 };

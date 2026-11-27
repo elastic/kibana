@@ -111,6 +111,7 @@ dependsOn:
   - '@kbn/code-editor'
   - '@kbn/shared-ux-utility'
   - '@kbn/management-settings-components-field-row'
+  - '@kbn/management-settings-hooks'
   - '@kbn/shared-ux-markdown'
   - '@kbn/react-kibana-context-theme'
   - '@kbn/core-http-request-handler-context-server'

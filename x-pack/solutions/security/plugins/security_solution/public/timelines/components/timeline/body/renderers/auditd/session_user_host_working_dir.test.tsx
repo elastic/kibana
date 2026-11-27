@@ -6,12 +6,11 @@
  */
 
 import { EuiFlexItem } from '@elastic/eui';
-import { shallow } from 'enzyme';
 import React from 'react';
+import { render } from '@testing-library/react';
 
 import { TestProviders } from '../../../../../../common/mock';
 import { SessionUserHostWorkingDir } from './session_user_host_working_dir';
-import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 
 jest.mock('../../../../../../common/lib/kibana');
 
@@ -24,30 +23,9 @@ jest.mock('@elastic/eui', () => {
 });
 
 describe('SessionUserHostWorkingDir', () => {
-  const mount = useMountAppended();
-
   describe('rendering', () => {
-    test('it renders the default SessionUserHostWorkingDir', () => {
-      const wrapper = shallow(
-        <EuiFlexItem grow={false} component="span">
-          <SessionUserHostWorkingDir
-            eventId="eventid-123"
-            session="session-123"
-            scopeId="some_scope"
-            contextId="contextid-123"
-            hostName="hostname-123"
-            userName="username-123"
-            primary="primary-123"
-            secondary="secondary-123"
-            workingDirectory="workingdir-123"
-          />
-        </EuiFlexItem>
-      );
-      expect(wrapper).toMatchSnapshot();
-    });
-
     test('it renders with just eventId and contextId', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <EuiFlexItem grow={false} component="span">
             <SessionUserHostWorkingDir
@@ -64,11 +42,11 @@ describe('SessionUserHostWorkingDir', () => {
           </EuiFlexItem>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('Session');
+      expect(container.textContent).toEqual('Session');
     });
 
     test('it renders with only eventId, contextId, session', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <EuiFlexItem grow={false} component="span">
             <SessionUserHostWorkingDir
@@ -85,11 +63,11 @@ describe('SessionUserHostWorkingDir', () => {
           </EuiFlexItem>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('Sessionsession-123');
+      expect(container.textContent).toEqual('Sessionsession-123');
     });
 
     test('it renders with only eventId, contextId, session, hostName', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <EuiFlexItem grow={false} component="span">
             <SessionUserHostWorkingDir
@@ -106,11 +84,11 @@ describe('SessionUserHostWorkingDir', () => {
           </EuiFlexItem>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('Sessionsession-123@hostname-123');
+      expect(container.textContent).toEqual('Sessionsession-123@hostname-123');
     });
 
     test('it renders with only eventId, contextId, session, hostName, userName', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <EuiFlexItem grow={false} component="span">
             <SessionUserHostWorkingDir
@@ -127,11 +105,11 @@ describe('SessionUserHostWorkingDir', () => {
           </EuiFlexItem>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('Sessionsession-123username-123@hostname-123');
+      expect(container.textContent).toEqual('Sessionsession-123username-123@hostname-123');
     });
 
     test('it renders with only eventId, contextId, session, hostName, userName, primary', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <EuiFlexItem grow={false} component="span">
             <SessionUserHostWorkingDir
@@ -148,11 +126,11 @@ describe('SessionUserHostWorkingDir', () => {
           </EuiFlexItem>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('Sessionsession-123primary-123@hostname-123');
+      expect(container.textContent).toEqual('Sessionsession-123primary-123@hostname-123');
     });
 
     test('it renders with only eventId, contextId, session, hostName, userName, primary, secondary', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <EuiFlexItem grow={false} component="span">
             <SessionUserHostWorkingDir
@@ -169,11 +147,13 @@ describe('SessionUserHostWorkingDir', () => {
           </EuiFlexItem>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('Sessionsession-123primary-123assecondary-123@hostname-123');
+      expect(container.textContent).toEqual(
+        'Sessionsession-123primary-123assecondary-123@hostname-123'
+      );
     });
 
     test('it renders with everything as expected', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <EuiFlexItem grow={false} component="span">
             <SessionUserHostWorkingDir
@@ -190,7 +170,7 @@ describe('SessionUserHostWorkingDir', () => {
           </EuiFlexItem>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         'Sessionsession-123primary-123assecondary-123@hostname-123inworkingdirectory-123'
       );
     });

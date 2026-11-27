@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Client } from '@elastic/elasticsearch';
+import type { Client, estypes } from '@elastic/elasticsearch';
 import type {
   EdotBrowserSpanDocument,
+  EdotReactNativeSpanDocument,
   ESDocumentWithOperation,
   Fields,
   OtelLogDocument,
@@ -21,9 +22,11 @@ import { SynthtraceEsClientBase } from '../shared/base_client';
 import { getSerializeTransform } from '../shared/get_serialize_transform';
 import type { Logger } from '../utils/create_logger';
 
-export type OtelDocument = OtelLogDocument | EdotBrowserSpanDocument;
+export type OtelDocument = OtelLogDocument | EdotBrowserSpanDocument | EdotReactNativeSpanDocument;
 
-export type OtelSynthtraceEsClient = SynthtraceEsClient<OtelDocument>;
+export interface OtelSynthtraceEsClient extends SynthtraceEsClient<OtelDocument> {
+  installBrowserIndexTemplates(): Promise<void>;
+}
 
 export type OtelSynthtraceEsClientOptions = Omit<SynthtraceEsClientOptions, 'pipeline'>;
 
@@ -74,6 +77,22 @@ const getOtelRoutingTransform = () =>
     },
   });
 
+const BROWSER_INDEX_SORT: estypes.IndicesIndexSegmentSort = {
+  field: ['resource.attributes.service.name', 'attributes.session.id', '@timestamp'],
+  order: ['asc', 'asc', 'desc'],
+};
+
+// Sort fields must be mapped when the index is created. Dotted names merge into the passthrough
+// objects of the OTel templates, where an `attributes` or `resource` object would replace them.
+const BROWSER_SORT_FIELD_MAPPINGS: Record<string, estypes.MappingProperty> = {
+  'resource.attributes.service.name': { type: 'keyword', ignore_above: 1024 },
+  'attributes.session.id': { type: 'keyword', ignore_above: 1024 },
+};
+
+const BROWSER_TEMPLATE_TYPES = ['logs', 'traces'] as const;
+const browserTemplateName = (type: (typeof BROWSER_TEMPLATE_TYPES)[number]): string =>
+  `synthtrace-${type}-browser.otel`;
+
 /**
  * Indexes OTel-native documents as-is: no OTel to APM translation, no metric aggregation.
  * Documents are routed by `_index` or their `data_stream` fields.
@@ -90,6 +109,66 @@ export class OtelSynthtraceEsClientImpl
       pipeline: otelPipeline({ includeSerialization: options.pipeline?.includeSerialization }),
     });
     this.dataStreams = ['logs-*.otel-*', 'traces-*.otel-*'];
+  }
+
+  /**
+   * Sorts the EDOT Browser datasets by application, session and time, as elastic/observability-dev#6361
+   * proposes for them. Copies the OTel templates of the cluster, so the data maps as it would in
+   * `generic`. Without them, the data streams take the OTel templates' host and time sort.
+   */
+  async installBrowserIndexTemplates(): Promise<void> {
+    await Promise.all(
+      BROWSER_TEMPLATE_TYPES.map(async (type) => {
+        const name = browserTemplateName(type);
+        try {
+          const {
+            index_templates: [stock],
+          } = await this.client.indices.getIndexTemplate({ name: `${type}-otel@template` });
+          const {
+            template,
+            composed_of,
+            ignore_missing_component_templates,
+            data_stream,
+            priority,
+          } = stock.index_template;
+          await this.client.indices.putIndexTemplate({
+            name,
+            index_patterns: [`${type}-browser.otel-*`],
+            // Overlapping templates of the same priority are rejected.
+            priority: (priority ?? 0) + 1,
+            composed_of,
+            ignore_missing_component_templates:
+              typeof ignore_missing_component_templates === 'string'
+                ? [ignore_missing_component_templates]
+                : ignore_missing_component_templates,
+            data_stream,
+            template: {
+              ...template,
+              settings: { ...template?.settings, sort: BROWSER_INDEX_SORT },
+              mappings: {
+                ...template?.mappings,
+                properties: { ...template?.mappings?.properties, ...BROWSER_SORT_FIELD_MAPPINGS },
+              },
+            },
+          });
+          this.logger.info(`Created index template "${name}"`);
+        } catch (error) {
+          this.logger.warning(`Failed to create index template "${name}": ${error}`);
+        }
+      })
+    );
+  }
+
+  override async clean(): Promise<void> {
+    await super.clean();
+    // Otherwise every later browser data stream would keep the session sort.
+    await Promise.all(
+      BROWSER_TEMPLATE_TYPES.map(async (type) => {
+        const name = browserTemplateName(type);
+        await this.client.indices.deleteIndexTemplate({ name }, { ignore: [404] });
+        this.logger.info(`Deleted index template "${name}"`);
+      })
+    );
   }
 }
 

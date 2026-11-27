@@ -317,8 +317,8 @@ export const JobsList: FC<JobsListProps> = ({
           <EuiScreenReaderOnly>
             <p>
               <FormattedMessage
-                id="xpack.ml.jobsList.jobActionsColumn.screenReaderDescription"
-                defaultMessage="This column contains extra actions in a menu that can be performed on each job"
+                id="xpack.ml.jobsList.resultLinksColumn.screenReaderLabel"
+                defaultMessage="Results"
               />
             </p>
           </EuiScreenReaderOnly>

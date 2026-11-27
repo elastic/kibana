@@ -24,9 +24,14 @@ import { Handle, Position, type Node, type NodeProps } from '@xyflow/react';
 import type { HypothesisStatus } from '../../../common/hypotheses/hypotheses';
 import type { InvestigationProposalSummary } from '../../../common/investigations/investigation';
 import type { InvestigationSubjectType } from '../../../common/subjects/subject';
-import { getSubjectTitle } from '../../subjects/attachments/subject_title';
-import { useAlertsListLink, useSubjectLink } from '../../subjects/attachments/subject_link';
+import { getSubjectDisplayType, getSubjectTitle } from '../../subjects/attachments/subject_title';
+import {
+  useAlertsListLink,
+  useSubjectLink,
+  type SubjectLink,
+} from '../../subjects/attachments/subject_link';
 import type { SubjectRowData } from '../../subjects/attachments/subject_title';
+import { useSubjectFlyout } from '../../subjects/attachments/use_subject_flyout';
 import { SUBJECT_TYPE_LABELS } from '../../subjects/attachments/translations';
 import { HYPOTHESIS_STATUS_LABELS, confidenceLabel } from '../attachments/translations';
 import type { HypothesisTreeNodeData, HypothesisTreeNodeKind } from './build_hypothesis_graph';
@@ -38,6 +43,7 @@ import {
   PROPOSAL_CONFIDENCE_LABELS,
   VIEW_ALERT_LABEL,
   actionsCountLabel,
+  getHypothesisStatusLabel,
   hypothesesCountLabel,
   hypothesisStatusCountLabel,
   moreSubjectsLabel,
@@ -50,6 +56,8 @@ const NO_SUBJECTS: readonly SubjectRowData[] = [];
 export type HypothesisTreeFlowNodeData = HypothesisTreeNodeData & {
   isSelected: boolean;
   isDimmed: boolean;
+  /** An agent is working on the investigation, so an open hypothesis is still being checked. */
+  isRunning: boolean;
   /** Which proposed action is open in the detail panel, when the actions node is selected. */
   selectedActionIndex: number | null;
 };
@@ -347,9 +355,22 @@ const TRIGGER_ICONS: Record<InvestigationSubjectType, IconType> = {
 
 export const HypothesisStatusBadge = ({
   status,
+  isRunning,
 }: {
   status: HypothesisStatus;
+  isRunning: boolean;
 }): React.ReactElement => {
+  if (status === 'investigating' && !isRunning) {
+    return (
+      <EuiBadge
+        color="hollow"
+        iconType="question"
+        data-test-subj="investigationHypothesisTreeStatus-unresolved"
+      >
+        {getHypothesisStatusLabel(status, isRunning)}
+      </EuiBadge>
+    );
+  }
   switch (status) {
     case 'confirmed':
       return (
@@ -469,6 +490,63 @@ const STATUS_COUNT_BADGES: ReadonlyArray<{
   { status: 'investigating', color: 'hollow' },
 ];
 
+/**
+ * A click inside a flyout bubbles through its portal to the node, which would select it; this keeps
+ * the click inside the flyout.
+ */
+const FlyoutClickBoundary = ({ children }: { children: React.ReactNode }) => (
+  <div role="presentation" onClick={(event) => event.stopPropagation()}>
+    {children}
+  </div>
+);
+
+/**
+ * The trigger's link. A single alert whose source has a registered flyout opens it here, so the
+ * user stays on the investigation; every other trigger keeps following its link.
+ */
+const TriggerLink = ({
+  link,
+  subject,
+  alertCount,
+}: {
+  link: SubjectLink;
+  subject?: SubjectRowData;
+  alertCount: number;
+}) => {
+  const { href, onClick: onLinkClick, isExternal: isSlack } = link;
+  const { onClick: onTriggerLinkClick, flyout } = useSubjectFlyout(subject, href, {
+    onlyRegistered: true,
+    onLinkClick,
+  });
+  if (!href) {
+    return null;
+  }
+  return (
+    <>
+      <EuiText size="xs">
+        <EuiLink
+          href={href}
+          external={isSlack}
+          target={isSlack ? '_blank' : undefined}
+          data-test-subj="investigationHypothesisTreeTriggerLink"
+          // Following the link should not also select the node.
+          onClick={(event: React.MouseEvent) => {
+            event.stopPropagation();
+            onTriggerLinkClick?.(event);
+          }}
+        >
+          {isSlack
+            ? OPEN_SLACK_THREAD_LABEL
+            : alertCount > 1
+            ? viewAlertsLabel(alertCount)
+            : VIEW_ALERT_LABEL}
+        </EuiLink>
+      </EuiText>
+      {flyout && <FlyoutClickBoundary>{flyout}</FlyoutClickBoundary>}
+    </>
+  );
+};
+
 const HypothesisTreeNodeComponent = ({
   id,
   data,
@@ -488,13 +566,12 @@ const HypothesisTreeNodeComponent = ({
   switch (data.kind) {
     case 'trigger': {
       const [first, ...rest] = data.subjects;
-      const { href, onClick: onTriggerLinkClick, isExternal: isSlack } = triggerLink;
       return (
         <NodeShell kind="trigger" label={NODE_LABELS.trigger} {...selectableProps}>
           <EuiFlexGroup alignItems="flexStart" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiIcon
-                type={first ? TRIGGER_ICONS[first.type] : 'magnifyExclamation'}
+                type={first ? TRIGGER_ICONS[getSubjectDisplayType(first)] : 'magnifyExclamation'}
                 size="m"
                 aria-hidden={true}
               />
@@ -505,31 +582,15 @@ const HypothesisTreeNodeComponent = ({
               </BodyText>
               {first && (
                 <EuiText size="xs" color="subdued">
-                  {SUBJECT_TYPE_LABELS[first.type]}
+                  {SUBJECT_TYPE_LABELS[getSubjectDisplayType(first)]}
                   {rest.length > 0 && ` · ${moreSubjectsLabel(rest.length)}`}
                 </EuiText>
               )}
-              {href && (
-                <EuiText size="xs">
-                  <EuiLink
-                    href={href}
-                    external={isSlack}
-                    target={isSlack ? '_blank' : undefined}
-                    data-test-subj="investigationHypothesisTreeTriggerLink"
-                    // Following the link should not also select the node.
-                    onClick={(event: React.MouseEvent) => {
-                      event.stopPropagation();
-                      onTriggerLinkClick?.(event);
-                    }}
-                  >
-                    {isSlack
-                      ? OPEN_SLACK_THREAD_LABEL
-                      : triggerAlertCount > 1
-                      ? viewAlertsLabel(triggerAlertCount)
-                      : VIEW_ALERT_LABEL}
-                  </EuiLink>
-                </EuiText>
-              )}
+              <TriggerLink
+                link={triggerLink}
+                subject={triggerAlertCount > 1 ? undefined : triggerSubjects[0]}
+                alertCount={triggerAlertCount}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </NodeShell>
@@ -548,7 +609,7 @@ const HypothesisTreeNodeComponent = ({
                 ({ status, color, iconType }) => (
                   <EuiFlexItem grow={false} key={status}>
                     <EuiBadge color={color} iconType={iconType}>
-                      {hypothesisStatusCountLabel(status, data.counts[status])}
+                      {hypothesisStatusCountLabel(status, data.counts[status], data.isRunning)}
                     </EuiBadge>
                   </EuiFlexItem>
                 )
@@ -574,7 +635,7 @@ const HypothesisTreeNodeComponent = ({
               responsive={false}
             >
               <EuiFlexItem grow={false}>
-                <HypothesisStatusBadge status={data.hypothesis.status} />
+                <HypothesisStatusBadge status={data.hypothesis.status} isRunning={data.isRunning} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiText size="xs" color="subdued">

@@ -7,6 +7,7 @@
 
 import Fs from 'fs';
 import { schema, type TypeOf } from '@kbn/config-schema';
+import { ESTIMATED_COST_EVALUATOR_NAME } from '@kbn/evals';
 
 const MAX_STRING_LENGTH = 1024;
 const MAX_ARRAY_SIZE = 1000;
@@ -112,6 +113,7 @@ export const DEFAULT_EXCLUDED_EVALUATORS: readonly string[] = [
   'Input Tokens',
   'Output Tokens',
   'Cached Tokens',
+  ESTIMATED_COST_EVALUATOR_NAME,
   'Skill Invoked',
 ];
 

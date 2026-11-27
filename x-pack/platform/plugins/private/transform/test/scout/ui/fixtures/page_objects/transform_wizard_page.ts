@@ -12,6 +12,8 @@ const RUNTIME_MAPPINGS_EDITOR = 'transformAdvancedRuntimeMappingsEditor';
 const PIVOT_EDITOR = 'transformAdvancedPivotEditor';
 // The filter term options load from Elasticsearch behind a 600ms debounced search.
 const TERM_OPTIONS_TIMEOUT_MS = 10_000;
+// Creating or starting a transform waits on an Elasticsearch round-trip, slow on Cloud.
+const TRANSFORM_API_TIMEOUT_MS = 30_000;
 const TYPING_DELAY_MS = 100;
 
 export type FieldStatsOptionList =
@@ -64,8 +66,6 @@ export class TransformWizardPage {
   public readonly indexPreviewHistogramButton: Locator;
   public readonly useFullDataButton: Locator;
   public readonly dataTierOptionsButton: Locator;
-  public readonly startDateButton: Locator;
-  public readonly endDateButton: Locator;
   public readonly fieldStatsFlyout: Locator;
   public readonly dataViewTimeFieldSelect: Locator;
   public readonly continuousModeDateFieldSelect: Locator;
@@ -115,8 +115,6 @@ export class TransformWizardPage {
     this.indexPreviewHistogramButton = page.getByTestId('transformIndexPreviewHistogramButton');
     this.useFullDataButton = page.getByTestId('mlDatePickerButtonUseFullData');
     this.dataTierOptionsButton = page.getByTestId('mlDatePickerButtonDataTierOptions');
-    this.startDateButton = page.getByTestId('superDatePickerstartDatePopoverButton');
-    this.endDateButton = page.getByTestId('superDatePickerendDatePopoverButton');
     this.fieldStatsFlyout = page.getByTestId('mlFieldStatsFlyout');
     this.dataViewTimeFieldSelect = page.getByTestId('mlDataViewTimeFieldSelect');
     this.continuousModeDateFieldSelect = page.getByTestId('transformContinuousDateFieldSelect');
@@ -426,13 +424,13 @@ export class TransformWizardPage {
     await this.createButton.click();
     await this.startButton
       .and(this.page.getByRole('button', { disabled: false }))
-      .waitFor({ state: 'visible' });
+      .waitFor({ state: 'visible', timeout: TRANSFORM_API_TIMEOUT_MS });
     await this.managementCard.waitFor({ state: 'visible' });
   }
 
   async startTransform() {
     await this.startButton.click();
-    await this.discoverCard.waitFor({ state: 'visible' });
+    await this.discoverCard.waitFor({ state: 'visible', timeout: TRANSFORM_API_TIMEOUT_MS });
   }
 
   async redirectToDiscover() {

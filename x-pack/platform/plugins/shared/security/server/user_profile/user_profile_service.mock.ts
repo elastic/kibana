@@ -16,5 +16,6 @@ export const userProfileServiceMock = {
     update: jest.fn(),
     suggest: jest.fn(),
     bulkGet: jest.fn(),
+    getApiKeyProfileId: jest.fn(),
   }),
 };

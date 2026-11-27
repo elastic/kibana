@@ -6,10 +6,14 @@
  */
 
 import React from 'react';
+import { get } from 'lodash';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
 import { getSegments, Streams } from '@kbn/streams-schema';
-import { STREAMS_UI_PRIVILEGES } from '@kbn/streams-plugin/public';
+import {
+  REMOVED_STREAM_TYPE_NOT_FOUND_REASON,
+  STREAMS_UI_PRIVILEGES,
+} from '@kbn/streams-plugin/public';
 import { getAncestorsAndSelf } from '@kbn/streams-schema';
 import { isHttpFetchError } from '@kbn/server-route-repository-client';
 import { useStreamsAppFetch } from './use_streams_app_fetch';
@@ -17,6 +21,10 @@ import { useStreamsAppBreadcrumbs } from './use_streams_app_breadcrumbs';
 import { useStreamsAppParams } from './use_streams_app_params';
 import { useKibana } from './use_kibana';
 import { StreamNotFoundPrompt } from '../components/stream_not_found_prompt';
+import { RedirectTo } from '../components/redirect_to';
+
+const isRemovedStreamTypeNotFound = (body: unknown): boolean =>
+  get(body, 'attributes.data.reason') === REMOVED_STREAM_TYPE_NOT_FOUND_REASON;
 
 export interface StreamDetailContextProviderProps {
   name: string;
@@ -117,10 +125,6 @@ export function StreamDetailContextProvider({
             };
           }
 
-          if (Streams.QueryStream.GetResponse.is(response)) {
-            return response;
-          }
-
           // Both strict (DeepStrict) type guards failed — delegate to shared handler.
           handleStrictSchemaFailure(
             response,
@@ -177,6 +181,9 @@ export function StreamDetailContextProvider({
   }
 
   if (!definition && error && isHttpFetchError(error) && error.body?.statusCode === 404) {
+    if (isRemovedStreamTypeNotFound(error.body)) {
+      return <RedirectTo path="/" />;
+    }
     return <StreamNotFoundPrompt streamName={name} />;
   }
 
@@ -197,6 +204,7 @@ export function useStreamDetail() {
 
 export function useStreamDetailAsIngestStream() {
   const ctx = useStreamDetail();
+  const streamName = ctx.definition.stream.name;
   if (
     !Streams.WiredStream.GetResponse.is(ctx.definition) &&
     !Streams.ClassicStream.GetResponse.is(ctx.definition)
@@ -205,7 +213,7 @@ export function useStreamDetailAsIngestStream() {
     handleStrictSchemaFailure(
       ctx.definition,
       Streams.ingest.all.GetResponse.right,
-      `[Streams] useStreamDetailAsIngestStream: definition for stream "${ctx.definition.stream.name}" failed strict schema validation.`
+      `[Streams] useStreamDetailAsIngestStream: definition for stream "${streamName}" failed strict schema validation.`
     );
   }
   return ctx as {

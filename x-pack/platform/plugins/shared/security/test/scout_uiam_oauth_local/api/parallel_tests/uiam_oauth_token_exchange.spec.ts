@@ -98,6 +98,7 @@ apiTest.describe(
       });
 
       expect(response.statusCode).toBe(401);
+      expect(response.headers['www-authenticate']).toContain('error="invalid_token"');
     });
 
     apiTest(

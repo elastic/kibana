@@ -6,7 +6,11 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { isIndexExclusion, splitRemoteCluster } from '../../../../../common/remote_cluster';
+import {
+  isIndexExclusion,
+  splitRemoteCluster,
+  stripBackingPrefix,
+} from '../../../../../common/remote_cluster';
 import { statusCodeOf } from '../../../../lib/es_error';
 import { compileGlob } from './index_glob';
 
@@ -58,14 +62,20 @@ export const uncoveredPatterns = ({
 }): string[] =>
   patterns.filter((pattern) => {
     if (isIndexExclusion(pattern)) return false;
-    const { cluster, index } = splitRemoteCluster(pattern);
+    // A backing-index entry is readable through a grant on its data stream (`logs-*`) or on
+    // the backing name itself (`.ds-logs-*`), so both spellings are tried.
+    const { cluster, index: rawIndex } = splitRemoteCluster(pattern);
+    const { index } = splitRemoteCluster(stripBackingPrefix(pattern));
     if (index.includes('::')) return true;
-    if (isServerless || cluster === undefined) return !coveredByLocal(role, index);
+    const spellings = rawIndex === index ? [index] : [index, rawIndex];
+    if (isServerless || cluster === undefined) {
+      return !spellings.some((spelling) => coveredByLocal(role, spelling));
+    }
     return !role.remoteIndices.some(
       ({ clusters, names, privileges }) =>
         hasReadPrivilege(privileges) &&
         clusters.some((entryCluster) => patternCovers(entryCluster, cluster)) &&
-        names.some((name) => patternCovers(name, index))
+        names.some((name) => spellings.some((spelling) => patternCovers(name, spelling)))
     );
   });
 

@@ -21,6 +21,8 @@ function makeFeature(overrides: Partial<Feature> = {}): Feature {
   };
 }
 
+const noTopology = async () => undefined;
+
 function makeStreamQuery(overrides: Partial<StreamQuery> = {}): StreamQuery {
   return {
     id: 'query-id',
@@ -37,6 +39,7 @@ describe('searchKnowledgeIndicators', () => {
     const res = await searchKnowledgeIndicators({
       params: {},
       getSourceIds: async () => ['logs.test'],
+      resolveTopologySeeds: noTopology,
       getFeatures: async () => [makeFeature({ id: 'f1', confidence: 80 })],
       getQueries: async () => [
         {
@@ -70,6 +73,7 @@ describe('searchKnowledgeIndicators', () => {
     const res = await searchKnowledgeIndicators({
       params: { kind: ['query'] },
       getSourceIds: async () => ['logs.test'],
+      resolveTopologySeeds: noTopology,
       getFeatures,
       getQueries,
     });
@@ -86,6 +90,7 @@ describe('searchKnowledgeIndicators', () => {
     const res = await searchKnowledgeIndicators({
       params: { kind: ['feature'] },
       getSourceIds: async () => ['logs.test'],
+      resolveTopologySeeds: noTopology,
       getFeatures,
       getQueries,
     });
@@ -102,6 +107,7 @@ describe('searchKnowledgeIndicators', () => {
     await searchKnowledgeIndicators({
       params: { source_ids: ['logs.allowed', 'logs.denied'] },
       getSourceIds: async () => ['logs.allowed'],
+      resolveTopologySeeds: noTopology,
       getFeatures,
       getQueries,
     });
@@ -121,6 +127,7 @@ describe('searchKnowledgeIndicators', () => {
     const res = await searchKnowledgeIndicators({
       params: { source_ids: ['logs.missing'] },
       getSourceIds: async () => ['logs.allowed'],
+      resolveTopologySeeds: noTopology,
       getFeatures,
       getQueries,
     });
@@ -134,6 +141,7 @@ describe('searchKnowledgeIndicators', () => {
     const res = await searchKnowledgeIndicators({
       params: { per_page: 2 },
       getSourceIds: async () => ['logs.test'],
+      resolveTopologySeeds: noTopology,
       getFeatures: async () => [
         makeFeature({ id: 'f1', confidence: 10 }),
         makeFeature({ id: 'f2', confidence: 20 }),
@@ -196,6 +204,7 @@ describe('searchKnowledgeIndicators', () => {
         per_page: 1,
       },
       getSourceIds: async () => ['logs.test'],
+      resolveTopologySeeds: noTopology,
       getFeatures,
       getQueries: async () => [],
     });
@@ -247,6 +256,7 @@ describe('searchKnowledgeIndicators', () => {
         rule_backed: true,
       },
       getSourceIds: async () => ['logs.test'],
+      resolveTopologySeeds: noTopology,
       getFeatures: async () => [],
       getQueries,
     });
@@ -270,6 +280,7 @@ describe('searchKnowledgeIndicators', () => {
         feature_ids: ['orders-api'],
       },
       getSourceIds: async () => ['logs.test'],
+      resolveTopologySeeds: noTopology,
       getFeatures: async () => [
         makeFeature({
           id: 'orders-api-storage',
@@ -309,6 +320,7 @@ describe('searchKnowledgeIndicators', () => {
         feature_ids: ['orders-api'],
       },
       getSourceIds: async () => ['logs.test'],
+      resolveTopologySeeds: noTopology,
       getFeatures: async () => [
         makeFeature({
           id: 'orders-api-storage',
@@ -355,6 +367,7 @@ describe('searchKnowledgeIndicators', () => {
         feature_ids: ['frontend-balancereader-http'],
       },
       getSourceIds: async () => ['logs.test'],
+      resolveTopologySeeds: noTopology,
       getFeatures: async () => [
         makeFeature({
           id: 'frontend-balancereader-http',
@@ -391,6 +404,7 @@ describe('searchKnowledgeIndicators', () => {
         feature_ids: ['k8s-node-1'],
       },
       getSourceIds: async () => ['logs.test'],
+      resolveTopologySeeds: noTopology,
       getFeatures: async () => [
         makeFeature({ id: 'k8s-node-1', type: 'infrastructure', properties: {} }),
         makeFeature({ id: 'k8s-node-2', type: 'infrastructure', properties: {} }),
@@ -407,6 +421,104 @@ describe('searchKnowledgeIndicators', () => {
     expect(ids).not.toContain('some-entity');
   });
 
+  describe('topology snapshot expansion', () => {
+    const dependency = makeFeature({
+      id: 'orders-api-storage',
+      type: 'dependency',
+      properties: { source: 'orders-api', target: 'storage' },
+    });
+    const storage = makeFeature({
+      id: 'storage',
+      type: 'entity',
+      properties: { name: 'storage', technology: 'redis' },
+    });
+    const byNameOnly = makeFeature({
+      id: 'storage-entity',
+      type: 'entity',
+      properties: { name: 'storage', technology: 'redis' },
+    });
+    const unrelated = makeFeature({
+      id: 'unrelated-entity',
+      type: 'entity',
+      properties: { name: 'identity-service' },
+    });
+
+    it('filters with topology-expanded ids', async () => {
+      const resolveTopologySeeds = jest.fn().mockResolvedValue({
+        featureIds: ['orders-api', 'orders-api-storage', 'storage'],
+        selectedFeatureUuids: [],
+      });
+      const getFeatures = jest.fn(async () => [dependency, storage, byNameOnly, unrelated]);
+
+      const res = await searchKnowledgeIndicators({
+        params: {
+          kind: ['feature'],
+          feature_types: ['dependency', 'entity'],
+          feature_ids: ['orders-api', 'orders-api'],
+        },
+        getSourceIds: async () => ['logs.test'],
+        getFeatures,
+        getQueries: async () => [],
+        resolveTopologySeeds,
+      });
+
+      expect(resolveTopologySeeds).toHaveBeenCalledWith(['orders-api'], ['logs.test']);
+      expect(getFeatures).toHaveBeenCalledWith('logs.test', {
+        searchText: undefined,
+        featureTypes: ['dependency', 'entity'],
+        featureIds: ['orders-api', 'orders-api-storage', 'storage'],
+      });
+      const ids = res.knowledge_indicators.map((ki) =>
+        ki.kind === 'feature' ? ki.feature.id : null
+      );
+      expect(ids).toEqual(['orders-api-storage', 'storage']);
+    });
+
+    it('loads topology-expanded ids in bounded batches', async () => {
+      const expandedIds = Array.from({ length: 5_001 }, (_, index) => `feature-${index}`);
+      const getFeatures = jest.fn(
+        async (_sourceId: string, _options: { featureIds?: string[] }): Promise<Feature[]> => []
+      );
+
+      await searchKnowledgeIndicators({
+        params: { kind: ['feature'], feature_ids: ['seed'] },
+        getSourceIds: async () => ['logs.test'],
+        getFeatures,
+        getQueries: async () => [],
+        resolveTopologySeeds: async () => ({
+          featureIds: expandedIds,
+          selectedFeatureUuids: [],
+        }),
+      });
+
+      expect(getFeatures).toHaveBeenCalledTimes(2);
+      expect(getFeatures.mock.calls[0][1].featureIds).toHaveLength(5_000);
+      expect(getFeatures.mock.calls[1][1].featureIds).toEqual(['feature-5000']);
+    });
+
+    it('keeps text fallback seed-scoped', async () => {
+      const getFeatures = jest.fn(async () => [dependency]);
+
+      await searchKnowledgeIndicators({
+        params: {
+          kind: ['feature'],
+          search_text: 'orders',
+          feature_ids: ['orders-api'],
+        },
+        getSourceIds: async () => ['logs.test'],
+        resolveTopologySeeds: noTopology,
+        getFeatures,
+        getQueries: async () => [],
+      });
+
+      expect(getFeatures).toHaveBeenCalledWith('logs.test', {
+        searchText: 'orders',
+        featureTypes: undefined,
+        featureIds: ['orders-api'],
+      });
+    });
+  });
+
   it('calls onFeatureFetchError when a stream feature fetch fails', async () => {
     const onFeatureFetchError = jest.fn();
 
@@ -414,6 +526,7 @@ describe('searchKnowledgeIndicators', () => {
       params: { kind: ['feature'] },
       onFeatureFetchError,
       getSourceIds: async () => ['logs.bad', 'logs.good'],
+      resolveTopologySeeds: noTopology,
       getFeatures: async (sourceId) => {
         if (sourceId === 'logs.bad') {
           throw new Error('boom');
@@ -426,5 +539,77 @@ describe('searchKnowledgeIndicators', () => {
     expect(onFeatureFetchError).toHaveBeenCalledTimes(1);
     expect(res.knowledge_indicators).toHaveLength(1);
     expect(res.knowledge_indicators[0].kind).toBe('feature');
+  });
+
+  it('keeps a folded row and its connected entities when only a non-representative copy matches feature_ids', async () => {
+    const res = await searchKnowledgeIndicators({
+      params: {
+        kind: ['feature'],
+        feature_types: ['dependency', 'entity'],
+        feature_ids: ['redis-cache'],
+      },
+      getSourceIds: async () => ['src-a', 'src-b'],
+      resolveTopologySeeds: noTopology,
+      getFeatures: async (sourceId) => [
+        makeFeature({
+          id: 'frontend-redis',
+          uuid: `${sourceId}:frontend-redis`,
+          source_id: sourceId,
+          type: 'dependency',
+          confidence: sourceId === 'src-a' ? 90 : 60,
+          properties: {
+            source: 'frontend',
+            target: sourceId === 'src-a' ? 'redis' : 'redis-cache',
+          },
+        }),
+        makeFeature({
+          id: 'frontend-entity',
+          uuid: `${sourceId}:frontend-entity`,
+          source_id: sourceId,
+          type: 'entity',
+          properties: { name: 'frontend' },
+        }),
+        makeFeature({
+          id: 'unrelated-entity',
+          uuid: `${sourceId}:unrelated-entity`,
+          source_id: sourceId,
+          type: 'entity',
+          properties: { name: 'checkout' },
+        }),
+      ],
+      getQueries: async () => [],
+    });
+
+    const ids = res.knowledge_indicators.map((ki) =>
+      ki.kind === 'feature' ? ki.feature.id : null
+    );
+    expect(ids).toEqual(expect.arrayContaining(['frontend-redis', 'frontend-entity']));
+    expect(ids).not.toContain('unrelated-entity');
+    const dependency = res.knowledge_indicators.find(
+      (ki) => ki.kind === 'feature' && ki.feature.id === 'frontend-redis'
+    );
+    expect(dependency).toMatchObject({
+      feature: { source_id: 'src-a', sources: ['src-a', 'src-b'] },
+    });
+  });
+
+  it('ranks the feature held by more sources first on a confidence tie', async () => {
+    const res = await searchKnowledgeIndicators({
+      params: { kind: ['feature'] },
+      getSourceIds: async () => ['src-a', 'src-b'],
+      resolveTopologySeeds: noTopology,
+      getFeatures: async (sourceId) =>
+        [
+          makeFeature({ id: 'shared', uuid: `${sourceId}:shared`, source_id: sourceId }),
+          makeFeature({ id: 'aaa-local', uuid: 'local', source_id: 'src-a' }),
+        ]
+          .filter((feature) => feature.source_id === sourceId)
+          .map((feature) => ({ ...feature, type: 'technology' })),
+      getQueries: async () => [],
+    });
+
+    expect(
+      res.knowledge_indicators.map((ki) => (ki.kind === 'feature' ? ki.feature.id : ki.query.id))
+    ).toEqual(['shared', 'aaa-local']);
   });
 });

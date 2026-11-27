@@ -7,7 +7,6 @@
 
 import { renderHook } from '@testing-library/react';
 import { EuiProvider, useEuiTheme } from '@elastic/eui';
-import { CODE_EDITOR_DEFAULT_THEME_ID, defaultThemesResolvers } from '@kbn/code-editor';
 import { buildYaraTheme } from './theme';
 
 describe('buildYaraTheme', () => {
@@ -18,15 +17,6 @@ describe('buildYaraTheme', () => {
 
   const theme = buildYaraTheme(euiThemeContext);
   const getRule = (token: string) => theme.rules.find((rule) => rule.token === token);
-
-  it('should extend the default code editor theme', () => {
-    const baseTheme = defaultThemesResolvers[CODE_EDITOR_DEFAULT_THEME_ID](euiThemeContext);
-
-    expect(theme).toEqual(
-      expect.objectContaining({ base: baseTheme.base, colors: baseTheme.colors })
-    );
-    expect(theme.rules).toEqual(expect.arrayContaining(baseTheme.rules));
-  });
 
   it('should color string references differently than keywords', () => {
     expect(getRule('variable.yara')).toEqual({

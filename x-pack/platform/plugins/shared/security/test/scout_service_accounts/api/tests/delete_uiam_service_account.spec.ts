@@ -8,7 +8,10 @@
 import { randomBytes, randomUUID } from 'crypto';
 import { setTimeout } from 'timers/promises';
 
-import { MOCK_IDP_GATEWAY_SHARED_SECRET } from '@kbn/mock-idp-utils';
+import {
+  exchangeUiamServiceAccountToken,
+  MOCK_IDP_GATEWAY_SHARED_SECRET,
+} from '@kbn/mock-idp-utils';
 import type { ApiClientFixture } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
@@ -23,7 +26,6 @@ import {
   serviceAccountPath,
 } from '../fixtures';
 import { workloadPath } from '../fixtures/service_account_workloads';
-import { exchangeUiamServiceAccountToken } from '../fixtures/uiam_service_account_token';
 
 const PRINCIPAL_PATH = 'internal/service_accounts_test/_principal';
 /**

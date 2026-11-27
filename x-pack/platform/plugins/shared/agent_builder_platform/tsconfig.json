@@ -6,6 +6,7 @@
   "include": ["../../../../../typings/**/*", "common/**/*", "public/**/*", "server/**/*"],
   "exclude": ["target/**/*", ".storybook/**/*.js"],
   "kbn_references": [
+    "@kbn/isomer-components",
     "@kbn/agent-builder-elastic-ai-index-ki-types",
     "@kbn/core",
     "@kbn/logging",
@@ -28,6 +29,10 @@
     "@kbn/core-http-server-mocks",
     "@kbn/core-ui-settings-server-mocks",
     "@kbn/share-plugin",
+    "@kbn/utility-types",
+    "@kbn/isomer-plugin",
+    "@kbn/deeplinks-agent-builder",
+    "@kbn/deeplinks-analytics",
     "@kbn/core-logging-server-mocks",
     "@kbn/connector-specs",
     "@kbn/connector-schemas",

@@ -1,0 +1,1468 @@
+{
+  "components": {
+    "responses": {
+      "Error": {
+        "content": {
+          "*/*": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "AssociatedId": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "type"
+        ],
+        "type": "object"
+      },
+      "CollectionResponseAssociatedId": {
+        "properties": {
+          "paging": {
+            "$ref": "#/components/schemas/Paging"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/AssociatedId"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "results"
+        ],
+        "type": "object"
+      },
+      "CollectionResponseWithTotalSimplePublicObject": {
+        "properties": {
+          "paging": {
+            "$ref": "#/components/schemas/Paging"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/SimplePublicObject"
+            },
+            "type": "array"
+          },
+          "total": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "results",
+          "total"
+        ],
+        "type": "object"
+      },
+      "Error": {
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "context": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object"
+          },
+          "correlationId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "errors": {
+            "items": {
+              "$ref": "#/components/schemas/ErrorDetail"
+            },
+            "type": "array"
+          },
+          "links": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "message": {
+            "type": "string"
+          },
+          "subCategory": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "category",
+          "correlationId",
+          "message"
+        ],
+        "type": "object"
+      },
+      "ErrorDetail": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "context": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object"
+          },
+          "in": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "subCategory": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "message"
+        ],
+        "type": "object"
+      },
+      "Filter": {
+        "properties": {
+          "highValue": {
+            "type": "string"
+          },
+          "operator": {
+            "enum": [
+              "BETWEEN",
+              "CONTAINS_TOKEN",
+              "EQ",
+              "GT",
+              "GTE",
+              "HAS_PROPERTY",
+              "IN",
+              "LT",
+              "LTE",
+              "NEQ",
+              "NOT_CONTAINS_TOKEN",
+              "NOT_HAS_PROPERTY",
+              "NOT_IN"
+            ],
+            "type": "string"
+          },
+          "propertyName": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          },
+          "values": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "operator",
+          "propertyName"
+        ],
+        "type": "object"
+      },
+      "FilterGroup": {
+        "properties": {
+          "filters": {
+            "items": {
+              "$ref": "#/components/schemas/Filter"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "filters"
+        ],
+        "type": "object"
+      },
+      "NextPage": {
+        "properties": {
+          "after": {
+            "type": "string"
+          },
+          "link": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "after"
+        ],
+        "type": "object"
+      },
+      "Paging": {
+        "properties": {
+          "next": {
+            "$ref": "#/components/schemas/NextPage"
+          },
+          "prev": {
+            "$ref": "#/components/schemas/PreviousPage"
+          }
+        },
+        "type": "object"
+      },
+      "PreviousPage": {
+        "properties": {
+          "before": {
+            "type": "string"
+          },
+          "link": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "before"
+        ],
+        "type": "object"
+      },
+      "PublicObjectSearchRequest": {
+        "properties": {
+          "after": {
+            "type": "string"
+          },
+          "filterGroups": {
+            "items": {
+              "$ref": "#/components/schemas/FilterGroup"
+            },
+            "type": "array"
+          },
+          "limit": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "properties": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "query": {
+            "type": "string"
+          },
+          "sorts": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "after",
+          "filterGroups",
+          "limit",
+          "properties",
+          "sorts"
+        ],
+        "type": "object"
+      },
+      "PublicObjectWarning": {
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "context": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "category",
+          "context",
+          "message"
+        ],
+        "type": "object"
+      },
+      "SimplePublicObject": {
+        "properties": {
+          "archived": {
+            "type": "boolean"
+          },
+          "archivedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "objectWriteTraceId": {
+            "type": "string"
+          },
+          "properties": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "propertiesWithHistory": {
+            "additionalProperties": {
+              "items": {
+                "$ref": "#/components/schemas/ValueWithTimestamp"
+              },
+              "type": "array"
+            },
+            "type": "object"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "warnings": {
+            "items": {
+              "$ref": "#/components/schemas/PublicObjectWarning"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "archived",
+          "createdAt",
+          "id",
+          "properties",
+          "updatedAt"
+        ],
+        "type": "object"
+      },
+      "SimplePublicObjectWithAssociations": {
+        "properties": {
+          "archived": {
+            "type": "boolean"
+          },
+          "archivedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "associations": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/CollectionResponseAssociatedId"
+            },
+            "type": "object"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "objectWriteTraceId": {
+            "type": "string"
+          },
+          "properties": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "propertiesWithHistory": {
+            "additionalProperties": {
+              "items": {
+                "$ref": "#/components/schemas/ValueWithTimestamp"
+              },
+              "type": "array"
+            },
+            "type": "object"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "warnings": {
+            "items": {
+              "$ref": "#/components/schemas/PublicObjectWarning"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "archived",
+          "createdAt",
+          "id",
+          "properties",
+          "updatedAt"
+        ],
+        "type": "object"
+      },
+      "ValueWithTimestamp": {
+        "properties": {
+          "sourceId": {
+            "type": "string"
+          },
+          "sourceLabel": {
+            "type": "string"
+          },
+          "sourceType": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedByUserId": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "sourceType",
+          "timestamp",
+          "value"
+        ],
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "oauth2": {
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "https://app.hubspot.com/oauth/authorize",
+            "scopes": {
+              "crm.objects.appointments.read": "",
+              "crm.objects.appointments.sensitive.read.v2": "",
+              "crm.objects.appointments.sensitive.write.v2": "",
+              "crm.objects.appointments.write": "",
+              "crm.objects.calls.read": "",
+              "crm.objects.carts.read": "",
+              "crm.objects.carts.write": "",
+              "crm.objects.commercepayments.read": "",
+              "crm.objects.commercepayments.write": "",
+              "crm.objects.companies.highly_sensitive.read.v2": "",
+              "crm.objects.companies.highly_sensitive.write.v2": "",
+              "crm.objects.companies.read": "",
+              "crm.objects.companies.sensitive.read.v2": "",
+              "crm.objects.companies.sensitive.write.v2": "",
+              "crm.objects.companies.write": "",
+              "crm.objects.contacts.highly_sensitive.read.v2": "",
+              "crm.objects.contacts.highly_sensitive.write.v2": "",
+              "crm.objects.contacts.read": "",
+              "crm.objects.contacts.sensitive.read.v2": "",
+              "crm.objects.contacts.sensitive.write.v2": "",
+              "crm.objects.contacts.write": "",
+              "crm.objects.courses.read": "",
+              "crm.objects.courses.write": "",
+              "crm.objects.custom.highly_sensitive.read.v2": "",
+              "crm.objects.custom.highly_sensitive.write.v2": "",
+              "crm.objects.custom.read": "",
+              "crm.objects.custom.sensitive.read.v2": "",
+              "crm.objects.custom.sensitive.write.v2": "",
+              "crm.objects.custom.write": "",
+              "crm.objects.deals.highly_sensitive.read.v2": "",
+              "crm.objects.deals.highly_sensitive.write.v2": "",
+              "crm.objects.deals.read": "",
+              "crm.objects.deals.sensitive.read.v2": "",
+              "crm.objects.deals.sensitive.write.v2": "",
+              "crm.objects.deals.write": "",
+              "crm.objects.emails.read": "",
+              "crm.objects.goals.read": "",
+              "crm.objects.goals.write": "",
+              "crm.objects.invoices.read": "",
+              "crm.objects.invoices.write": "",
+              "crm.objects.leads.read": "",
+              "crm.objects.leads.write": "",
+              "crm.objects.line_items.read": "",
+              "crm.objects.line_items.write": "",
+              "crm.objects.listings.read": "",
+              "crm.objects.listings.write": "",
+              "crm.objects.meetings.read": "",
+              "crm.objects.notes.read": "",
+              "crm.objects.orders.read": "",
+              "crm.objects.orders.write": "",
+              "crm.objects.partner-clients.read": "",
+              "crm.objects.partner-clients.write": "",
+              "crm.objects.partner-services.read": "",
+              "crm.objects.partner-services.write": "",
+              "crm.objects.products.read": "",
+              "crm.objects.products.write": "",
+              "crm.objects.projects.highly_sensitive.read": "",
+              "crm.objects.projects.highly_sensitive.write": "",
+              "crm.objects.projects.read": "",
+              "crm.objects.projects.sensitive.read": "",
+              "crm.objects.projects.sensitive.write": "",
+              "crm.objects.projects.write": "",
+              "crm.objects.quotes.read": "",
+              "crm.objects.quotes.write": "",
+              "crm.objects.services.read": "",
+              "crm.objects.services.write": "",
+              "crm.objects.subscriptions.read": "",
+              "crm.objects.subscriptions.write": "",
+              "crm.objects.tasks.read": "",
+              "crm.objects.users.read": "",
+              "crm.objects.users.write": "",
+              "e-commerce": "",
+              "media_bridge.read": "",
+              "oauth": "",
+              "tickets": "",
+              "tickets.highly_sensitive.v2": "",
+              "tickets.sensitive.v2": ""
+            },
+            "tokenUrl": "https://api.hubapi.com/oauth/v1/token"
+          }
+        },
+        "type": "oauth2"
+      }
+    }
+  },
+  "info": {
+    "title": "CRM Objects"
+  },
+  "openapi": "3.0.1",
+  "paths": {
+    "/crm/v3/objects/{objectType}/search": {
+      "post": {
+        "operationId": "post-/crm/v3/objects/{objectType}/search_doSearch",
+        "parameters": [
+          {
+            "explode": false,
+            "in": "path",
+            "name": "objectType",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "style": "simple"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PublicObjectSearchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CollectionResponseWithTotalSimplePublicObject"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "oauth"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.deals.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.subscriptions.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.services.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.orders.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.listings.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.custom.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.companies.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.custom.sensitive.write.v2"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.tasks.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.custom.highly_sensitive.write.v2"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.companies.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.contacts.highly_sensitive.read.v2"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.appointments.sensitive.read.v2"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.companies.sensitive.read.v2"
+            ]
+          },
+          {
+            "oauth2": [
+              "media_bridge.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.deals.highly_sensitive.read.v2"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.contacts.highly_sensitive.write.v2"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.companies.highly_sensitive.read.v2"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.commercepayments.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.invoices.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.contacts.sensitive.write.v2"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.users.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.calls.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.meetings.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.custom.sensitive.read.v2"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.users.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.partner-services.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.orders.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.partner-services.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.appointments.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.projects.highly_sensitive.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.carts.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "tickets"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.commercepayments.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.products.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.services.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.subscriptions.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.deals.sensitive.write.v2"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.contacts.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.appointments.sensitive.write.v2"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.invoices.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.projects.highly_sensitive.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "tickets.sensitive.v2"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.custom.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.deals.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "e-commerce"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.appointments.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.projects.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.companies.sensitive.write.v2"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.deals.highly_sensitive.write.v2"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.companies.highly_sensitive.write.v2"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.custom.highly_sensitive.read.v2"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.goals.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.line_items.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.projects.sensitive.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.contacts.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.goals.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.line_items.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.partner-clients.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.projects.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.deals.sensitive.read.v2"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.projects.sensitive.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.quotes.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "tickets.highly_sensitive.v2"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.leads.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.leads.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.carts.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.emails.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.quotes.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.courses.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.partner-clients.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.notes.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.courses.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.listings.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.contacts.sensitive.read.v2"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.products.read"
+            ]
+          }
+        ]
+      }
+    },
+    "/crm/v3/objects/{objectType}/{objectId}": {
+      "get": {
+        "operationId": "get-/crm/v3/objects/{objectType}/{objectId}_getById",
+        "parameters": [
+          {
+            "explode": false,
+            "in": "path",
+            "name": "objectId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "style": "simple"
+          },
+          {
+            "explode": false,
+            "in": "path",
+            "name": "objectType",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "style": "simple"
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "archived",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            },
+            "style": "form"
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "associations",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "idProperty",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "style": "form"
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "properties",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "propertiesWithHistory",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimplePublicObjectWithAssociations"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "oauth"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.deals.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.subscriptions.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.services.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.orders.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.listings.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.custom.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.companies.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.custom.sensitive.write.v2"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.tasks.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.custom.highly_sensitive.write.v2"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.companies.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.contacts.highly_sensitive.read.v2"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.appointments.sensitive.read.v2"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.companies.sensitive.read.v2"
+            ]
+          },
+          {
+            "oauth2": [
+              "media_bridge.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.deals.highly_sensitive.read.v2"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.contacts.highly_sensitive.write.v2"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.companies.highly_sensitive.read.v2"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.commercepayments.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.invoices.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.contacts.sensitive.write.v2"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.users.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.calls.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.meetings.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.custom.sensitive.read.v2"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.users.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.partner-services.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.orders.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.partner-services.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.appointments.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.projects.highly_sensitive.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.carts.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "tickets"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.commercepayments.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.products.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.services.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.subscriptions.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.deals.sensitive.write.v2"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.contacts.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.appointments.sensitive.write.v2"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.invoices.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.projects.highly_sensitive.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "tickets.sensitive.v2"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.custom.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.deals.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "e-commerce"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.appointments.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.projects.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.companies.sensitive.write.v2"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.deals.highly_sensitive.write.v2"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.companies.highly_sensitive.write.v2"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.custom.highly_sensitive.read.v2"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.goals.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.line_items.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.projects.sensitive.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.contacts.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.goals.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.line_items.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.partner-clients.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.projects.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.deals.sensitive.read.v2"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.projects.sensitive.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.quotes.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "tickets.highly_sensitive.v2"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.leads.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.leads.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.carts.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.emails.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.quotes.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.courses.write"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.partner-clients.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.notes.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.courses.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.listings.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.contacts.sensitive.read.v2"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.objects.products.read"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.hubapi.com"
+    }
+  ]
+}

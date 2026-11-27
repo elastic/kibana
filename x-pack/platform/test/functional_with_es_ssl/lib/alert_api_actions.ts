@@ -6,6 +6,7 @@
  */
 
 import moment from 'moment';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import type { ObjectRemover } from './object_remover';
 import { getTestAlertData, getTestConnectorData } from './get_test_data';
 
@@ -91,6 +92,7 @@ export async function snoozeAlert({ supertest, alertId }: { supertest: any; aler
   const { body: alert } = await supertest
     .post(`/internal/alerting/rule/${alertId}/_snooze`)
     .set('kbn-xsrf', 'foo')
+    .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
     .set('content-type', 'application/json')
     .send({
       snooze_schedule: {
@@ -109,6 +111,7 @@ export async function scheduleRule({ supertest, ruleId }: { supertest: any; rule
   const { body: alert } = await supertest
     .post(`/internal/alerting/rule/${ruleId}/_snooze`)
     .set('kbn-xsrf', 'foo')
+    .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
     .set('content-type', 'application/json')
     .send({
       snooze_schedule: {

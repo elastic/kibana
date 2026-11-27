@@ -13,6 +13,7 @@ import {
 } from '@kbn/fleet-plugin/public';
 
 import { getEffectiveNamespace } from '../../common/effective_namespace';
+import { getDefaultEnabledDataStreams } from '../../aws_service_matrix';
 import type { ServiceVars } from '../service_settings_step/use_service_settings';
 import { buildPackageInputs, buildPackageVars, getPackageVarNames } from './package_inputs';
 import {
@@ -23,8 +24,17 @@ import {
 import type { ExistingSecretRefs } from './secret_refs';
 import { runWithSharedSecrets } from './shared_secrets';
 import type { AgentCredentialVars } from './package_inputs';
-import { computePolicyCleanupOps, resolveSurvivingMembers } from './policy_cleanup';
+import {
+  computePolicyCleanupOps,
+  resolveSurvivingMembers,
+  toOnboardingDeploymentQuery,
+} from './policy_cleanup';
 import type { BuildPolicyBodyOpts, PolicyCleanupOps } from './policy_cleanup';
+import {
+  getPolicySettingsUpdate,
+  getPolicyVarSettings,
+  getPolicyVarSettingsUpdate,
+} from '../../common/policy_settings';
 
 export interface UpdateAgentBasedPolicyOpts extends BuildPolicyBodyOpts {
   selectedAgentPolicyIds: string[];
@@ -58,6 +68,7 @@ export async function cleanupAgentBasedPolicies(
     currentPolicyIdsByInstance,
     hasTypedSecrets,
     addedInstanceIdsByPolicy,
+    onboardingDeploymentId,
   } = opts;
   const planned = computePolicyCleanupOps(pendingCleanupPolicyIds, currentPolicyIdsByInstance);
 
@@ -66,8 +77,18 @@ export async function cleanupAgentBasedPolicies(
 
   const deletes = Promise.allSettled(
     planned.toDelete.map((policyId) =>
-      sendDeletePackagePolicy({ packagePolicyIds: [policyId] })
-        .then(() => {
+      sendDeletePackagePolicy(
+        { packagePolicyIds: [policyId] },
+        toOnboardingDeploymentQuery(onboardingDeploymentId)
+      )
+        .then(({ data, error }) => {
+          // Resolves with { error } on HTTP failure, and reports a failed delete in the body. A
+          // policy that is already gone counts as deleted.
+          if (error) throw error;
+          const result = data?.find(({ id }) => id === policyId);
+          if (result && !result.success && result.statusCode !== 404) {
+            throw new Error(result.body?.message ?? 'Delete failed');
+          }
           succeededDeletes.push(policyId);
         })
         .catch((err) => {
@@ -131,6 +152,7 @@ export async function updateAgentBasedPolicy(
     servicesMap,
     selectedAgentPolicyIds,
     agentCredentials,
+    policySettings,
   } = opts;
 
   const members = resolveSurvivingMembers(survivingInstanceIds, instances, servicesMap);
@@ -192,13 +214,18 @@ export async function updateAgentBasedPolicy(
   const serviceVarsMap: Record<string, ServiceVars> = {};
   for (const { instance, service } of members) {
     serviceVarsMap[service.id] = storedServiceVars[instance.instanceId] ?? {
-      enabledDataStreams: service.dataStreams,
+      enabledDataStreams: getDefaultEnabledDataStreams(service),
       varsByDataStream: {},
     };
   }
 
   const services = members.map(({ service }) => service);
-  const inputs = buildPackageInputs(services, serviceVarsMap, globalRegion);
+  const inputs = buildPackageInputs(
+    services,
+    serviceVarsMap,
+    globalRegion,
+    getPolicyVarSettings(policySettings, 'agent_based')
+  );
 
   const pkgTemplates: Array<{
     name?: string;
@@ -222,14 +249,15 @@ export async function updateAgentBasedPolicy(
     staticKeys,
     pkgVarNames,
     agentCredentials,
-    authenticateAndDeployStep.existingSecretRefs ?? existingSecretRefs
+    authenticateAndDeployStep.existingSecretRefs ?? existingSecretRefs,
+    getPolicyVarSettingsUpdate(policySettings, 'agent_based', pkgVarNames)
   );
   // When new credentials are explicitly provided, use only the newly built vars — merging the
   // existing values would retain stale fields from the old credential method (e.g. access_key_id
   // left over after switching to shared_credentials). When no credentials are in memory (access/
   // temp keys are memory-only and lost after reload), merge existing vars as a base so a
   // service-var-only dirty redeploy does not silently clear credential fields from the policy.
-  let vars: Record<string, string | { isSecretRef: boolean; id: string }> | undefined;
+  let vars: Record<string, string | null | { isSecretRef: boolean; id: string }> | undefined;
   if (agentCredentials) {
     vars = builtVars;
   } else {
@@ -250,18 +278,24 @@ export async function updateAgentBasedPolicy(
   // Use simplified consistently — `enabled` is intentionally omitted.
   // sendUpdatePackagePolicy resolves with { error } on HTTP failure rather than rejecting.
   // Throw explicitly so Promise.allSettled callers can detect the failure.
-  const updateResult = await sendUpdatePackagePolicy(policyId, {
-    name: policyName,
-    namespace: policyNamespace,
-    package: { name: packageName, version: pkgVersion },
-    ...(vars ? { vars } : {}),
-    inputs,
-    // A non-empty selectedAgentPolicyIds is an explicit override (policy-selection drift);
-    // otherwise keep the policy's current policy_ids so agent policies attached outside the
-    // wizard are not detached.
-    policy_ids:
-      selectedAgentPolicyIds.length > 0 ? selectedAgentPolicyIds : existingPolicyIds ?? [],
-  } as unknown as Parameters<typeof sendUpdatePackagePolicy>[1]);
+  const updateResult = await sendUpdatePackagePolicy(
+    policyId,
+    {
+      name: policyName,
+      namespace: policyNamespace,
+      // A setting set back to empty is sent as null, which clears what the policy had.
+      ...getPolicySettingsUpdate(policySettings, 'agent_based'),
+      package: { name: packageName, version: pkgVersion },
+      ...(vars ? { vars } : {}),
+      inputs,
+      // A non-empty selectedAgentPolicyIds is an explicit override (policy-selection drift);
+      // otherwise keep the policy's current policy_ids so agent policies attached outside the
+      // wizard are not detached.
+      policy_ids:
+        selectedAgentPolicyIds.length > 0 ? selectedAgentPolicyIds : existingPolicyIds ?? [],
+    } as unknown as Parameters<typeof sendUpdatePackagePolicy>[1],
+    { query: toOnboardingDeploymentQuery(opts.onboardingDeploymentId) }
+  );
   if (updateResult.error) {
     throw updateResult.error;
   }

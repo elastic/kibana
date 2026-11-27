@@ -9,7 +9,7 @@ value:
         required: false
         type: text
     observableTypes: []
-    extractObservables: true
+    extractObservables: false
     workflowTags:
       - soc-triage
     owner: cases

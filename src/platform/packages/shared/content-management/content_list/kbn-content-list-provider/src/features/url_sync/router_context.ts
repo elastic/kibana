@@ -7,19 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useLocation } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 
 /**
  * Checks if the component is rendered in a router context.
  *
  * @returns `true` if the component is rendered in a router context, `false` otherwise.
  */
-export const useInRouterContext = (): boolean => {
-  try {
-    // Deliberately invoke a router hook to detect embedded/no-router callers.
-    useLocation();
-    return true;
-  } catch {
-    return false;
-  }
-};
+export const useInRouterContext = (): boolean =>
+  // `useHistory` reads the context provided by `<Router>`, so it is undefined outside of one.
+  useHistory() !== undefined;

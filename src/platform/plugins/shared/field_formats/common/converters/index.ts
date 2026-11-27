@@ -23,3 +23,4 @@ export { TruncateFormat } from './truncate';
 export { BoolFormat } from './boolean';
 export { StaticLookupFormat } from './static_lookup';
 export { HistogramFormat } from './histogram';
+export { NumberRangeFormat } from './number_range';

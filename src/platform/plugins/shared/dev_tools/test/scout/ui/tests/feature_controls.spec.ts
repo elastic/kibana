@@ -48,7 +48,13 @@ test.describe('Dev Tools feature controls', { tag: tags.stateful.classic }, () =
     pageObjects: { collapsibleNav },
   }) => {
     await browserAuth.loginAsNoDevToolsPrivileges();
-    await page.gotoApp('discover');
+    // `gotoApp` alone resolves on the browser `load` event, before Discover has mounted. Opening
+    // the nav during that bootstrap can stall past the click timeout on a loaded CI agent, so wait
+    // for Discover to render first. This role can't read any index, so Discover shows its no-data
+    // page; `dscPage` covers environments where a data view exists.
+    await page.gotoApp('discover', {
+      readyWhen: page.testSubj.locator('dscPage').or(page.testSubj.locator('kbnNoDataPage')),
+    });
 
     const navLinks = await collapsibleNav.getNavLinks();
     expect(navLinks).toContain('Discover');

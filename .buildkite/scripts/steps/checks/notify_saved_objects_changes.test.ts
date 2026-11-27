@@ -27,7 +27,7 @@ const finding = (overrides: Partial<SavedObjectsCheckFinding> = {}): SavedObject
   typeName: 'task',
   message: "Some modelVersions have been updated for SO type 'task'.",
   fixHint: 'Existing model versions are immutable.',
-  docsAnchor: '#defining-model-versions',
+  docsAnchor: '/troubleshooting#existing-type-mutated-model-version',
   ...overrides,
 });
 
@@ -89,7 +89,9 @@ describe('buildSuccessBody', () => {
     const body = buildSuccessBody(report({ updatedTypes: ['task'] }));
     expect(body).toMatch(/2-step release/);
     expect(body).toContain('[!CAUTION]');
-    expect(body).toContain('https://www.elastic.co/docs/extend/kibana/saved-objects');
+    expect(body).toContain(
+      'https://www.elastic.co/docs/extend/kibana/key-concepts/saved-objects/update'
+    );
   });
 
   it('includes the 2-step release reminder when types were removed', () => {
@@ -209,7 +211,7 @@ describe('buildFailureBody', () => {
     expect(body).toContain('**[existing-type/mutated-existing-model-version]**');
     expect(body).toContain('**[new-type/legacy-migrations]**');
     expect(body).toContain(
-      '([docs](https://www.elastic.co/docs/extend/kibana/saved-objects#defining-model-versions))'
+      '([docs](https://www.elastic.co/docs/extend/kibana/key-concepts/saved-objects/troubleshooting#existing-type-mutated-model-version))'
     );
     expect(body).toMatch(/3 issue\(s\) across 2 type\(s\)/);
   });

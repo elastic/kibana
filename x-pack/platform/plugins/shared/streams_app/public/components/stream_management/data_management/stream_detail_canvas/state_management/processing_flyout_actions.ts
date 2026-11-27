@@ -147,6 +147,7 @@ export const getProcessingSaveUpdate = ({
     savingComponentIntent: 'processing',
     savingSecrets: undefined,
     processingRollbackUnit: context.nextUnit,
+    processingRollbackNodePositions: context.nodePositions,
     processingSaveIds: processorIds,
     error: undefined,
   };
@@ -156,9 +157,12 @@ export const getProcessingRollbackUpdate = ({
   context,
 }: CanvasActionArgs): Partial<CanvasState> => ({
   nextUnit: context.processingRollbackUnit ?? context.unit,
+  // The canvas tidies the flow a new processing node joins as the save starts.
+  nodePositions: context.processingRollbackNodePositions ?? context.nodePositions,
   savingUnit: undefined,
   savingComponentIntent: undefined,
   processingRollbackUnit: undefined,
+  processingRollbackNodePositions: undefined,
   processingSaveIds: undefined,
 });
 

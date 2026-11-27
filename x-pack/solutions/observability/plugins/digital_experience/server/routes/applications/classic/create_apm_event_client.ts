@@ -7,32 +7,24 @@
 
 import { APMEventClient } from '@kbn/apm-data-access-plugin/server';
 import type { ApmDataAccessPluginSetup } from '@kbn/apm-data-access-plugin/server';
-import type {
-  ElasticsearchClient,
-  IUiSettingsClient,
-  KibanaRequest,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
+import type { ElasticsearchClient, IUiSettingsClient, KibanaRequest } from '@kbn/core/server';
 import { UI_SETTINGS } from '@kbn/data-plugin/server';
 
-/** An APM event client over the space's APM index settings, querying as the current user. */
+export type ApmIndices = Awaited<ReturnType<ApmDataAccessPluginSetup['getApmIndices']>>;
+
+/** An APM event client over the given APM indices, querying as the current user. */
 export const createApmEventClient = async ({
-  apmDataAccess,
+  indices,
   esClient,
-  savedObjectsClient,
   uiSettingsClient,
   request,
 }: {
-  apmDataAccess: ApmDataAccessPluginSetup;
+  indices: ApmIndices;
   esClient: ElasticsearchClient;
-  savedObjectsClient: SavedObjectsClientContract;
   uiSettingsClient: IUiSettingsClient;
   request: KibanaRequest;
 }): Promise<APMEventClient> => {
-  const [indices, includeFrozen] = await Promise.all([
-    apmDataAccess.getApmIndices(savedObjectsClient),
-    uiSettingsClient.get<boolean>(UI_SETTINGS.SEARCH_INCLUDE_FROZEN),
-  ]);
+  const includeFrozen = await uiSettingsClient.get<boolean>(UI_SETTINGS.SEARCH_INCLUDE_FROZEN);
   return new APMEventClient({
     indices,
     options: { includeFrozen },

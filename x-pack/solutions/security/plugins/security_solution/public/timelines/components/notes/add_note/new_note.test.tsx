@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { mount, shallow } from 'enzyme';
 import React from 'react';
+import { render, screen } from '@testing-library/react';
 
 import { NewNote } from './new_note';
 
@@ -17,8 +17,8 @@ jest.mock('../../../../common/hooks/use_upselling', () => ({
 describe('NewNote', () => {
   const note = 'The contents of a new note';
 
-  test('renders correctly', () => {
-    const wrapper = shallow(
+  test('renders the note editor', () => {
+    render(
       <NewNote
         noteInputHeight={200}
         note={note}
@@ -26,11 +26,12 @@ describe('NewNote', () => {
         setIsMarkdownInvalid={jest.fn()}
       />
     );
-    expect(wrapper).toMatchSnapshot();
+    expect(screen.getByTestId('new-note-tabs')).toBeInTheDocument();
+    expect(screen.getByTestId('add-a-note')).toBeInTheDocument();
   });
 
   test('it renders a text area containing the contents of a new (raw) note', () => {
-    const wrapper = mount(
+    render(
       <NewNote
         noteInputHeight={200}
         note={note}
@@ -39,8 +40,6 @@ describe('NewNote', () => {
       />
     );
 
-    expect(
-      wrapper.find('[data-test-subj="add-a-note"] .euiMarkdownEditorDropZone').first().text()
-    ).toEqual(note);
+    expect(screen.getByTestId('add-a-note')).toHaveTextContent(note);
   });
 });

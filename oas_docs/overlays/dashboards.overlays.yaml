@@ -15,7 +15,7 @@ actions:
         ## When to use this API
 
         - Use this API to define a complete, self-contained dashboard in a single payload, including inline visualizations (both data view and ES|QL based), controls, and filters.
-        - Use the [Visualizations API](visualizations#tag/Visualizations/operation/create-visualization) to create reusable charts saved to your [visualization library](https://www.elastic.co/docs/explore-analyze/visualize/visualize-library). You can then embed them in dashboards as linked panels using their ID.
+        - Use the [Visualizations API](../operation/operation-create-visualization) to create reusable charts saved to your [visualization library](https://www.elastic.co/docs/explore-analyze/visualize/visualize-library). You can then embed them in dashboards as linked panels using their ID.
 
         ## Stability
 
@@ -114,6 +114,7 @@ actions:
         | `image` | Image |
         | `markdown` | Markdown text |
         | `links` | Navigation links to dashboards and external URLs |
+        | `vega` | Vega or Vega-Lite visualization |
         | `esql_control` | ES&#124;QL variable control |
         | `options_list_control` | Dropdown filter by field value |
         | `range_slider_control` | Slider filter by numeric range |
@@ -162,16 +163,16 @@ actions:
         | Synthetics | Since 9.4 | N/A |
         | APM service map | Since 9.5 | N/A |
         | Machine learning and AIOps | Since 9.5 | N/A |
+        | Vega | Since 9.7 | Since 9.7 |
         | Maps | Coming soon | Coming soon |
-        | Vega | Coming soon | Coming soon |
         | Alerts table | Coming soon | N/A |
         | Legacy visualizations | N/A | N/A |
 
         ### Embedding library items
 
-        `vis`, `discover_session`, `markdown`, and `links` panels can be embedded **inline** (full config stored in the dashboard) or **linked from library** (references a library item by ID).
+        `vis`, `discover_session`, `markdown`, `links`, and `vega` panels can be embedded **inline** (full config stored in the dashboard) or **linked from library** (references a library item by ID).
 
-        For the full `config` schema for visualization panels, including chart types, metric operations, and breakdowns, refer to the [Visualizations API](visualizations#tag/Visualizations/operation/create-visualization).
+        For the full `config` schema for visualization panels, including chart types, metric operations, and breakdowns, refer to the [Visualizations API](../operation/operation-create-visualization).
 
         - **Inline**: use when the panel is specific to this dashboard or must work across Kibana spaces. The panel configuration goes directly inside `config`:
 
@@ -203,7 +204,7 @@ actions:
           }
           ```
 
-        - **Linked from library**: references an item in your library by its ID. Use `ref_id` with any supported panel type (`vis`, `discover_session`, `markdown`, `links`). Use the [Visualizations API](visualizations#tag/Visualizations/operation/create-visualization) to create and retrieve IDs for visualization items.
+        - **Linked from library**: references an item in your library by its ID. Use `ref_id` with any supported panel type (`vis`, `discover_session`, `markdown`, `links`). Use the [Visualizations API](../operation/operation-create-visualization) to create and retrieve IDs for visualization items.
 
           ```json
           {
@@ -252,9 +253,30 @@ actions:
           }
           ```
 
-        - **`xy` charts**: `data_source` goes inside each layer. Use `BUCKET(@timestamp, 75, ?_tstart, ?_tend)` to align time-series buckets with the dashboard's selected time range. For a complete xy chart example, see the [Create a dashboard](#operation/create-dashboard) endpoint.
+        - **`xy` charts**: `data_source` goes inside each layer. Use `BUCKET(@timestamp, 75, ?_tstart, ?_tend)` to align time-series buckets with the dashboard's selected time range. For a complete xy chart example, see the [Create a dashboard](../operation/operation-create-dashboard) endpoint.
 
       externalDocs:
         description: Dashboards documentation
         url: https://www.elastic.co/docs/explore-analyze/dashboards
       x-displayName: Dashboards
+  # ──────────────────────────────────────────────
+  # Temporary: hide the `lens-dashboard-app` panel type
+  # It is registered only while the `lens.apiFormat` flag is on (dev mode defaults to on, which is how
+  # the OAS snapshot is captured), and is not part of the public Dashboards API.
+  # Route validation still accepts it. Remove these actions once the `lens.apiFormat` flag is removed.
+  # ──────────────────────────────────────────────
+  - target: "$.components.schemas['Kibana_HTTP_APIs_kbn-dashboard-panel-type-lens-dashboard-app']"
+    description: Remove the lens-dashboard-app panel schema
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_kbn-dashboard-data'].properties.panels.items.anyOf[0].discriminator.mapping['lens-dashboard-app']"
+    description: Remove lens-dashboard-app from the dashboard panel discriminator mapping
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_kbn-dashboard-data'].properties.panels.items.anyOf[0].oneOf[?(@['$ref']=='#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-lens-dashboard-app')]"
+    description: Remove lens-dashboard-app from the dashboard panel oneOf
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_kbn-dashboard-section'].properties.panels.items.discriminator.mapping['lens-dashboard-app']"
+    description: Remove lens-dashboard-app from the section panel discriminator mapping
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_kbn-dashboard-section'].properties.panels.items.oneOf[?(@['$ref']=='#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-lens-dashboard-app')]"
+    description: Remove lens-dashboard-app from the section panel oneOf
+    remove: true

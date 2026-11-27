@@ -201,7 +201,9 @@ const resolveServiceAccountBearer = async ({
   }
 
   // The schedule request carries the same pair the grant reads. It is not used to
-  // decide admission: asScoped on this object would classify the call as internal.
+  // decide admission: asScoped on this object would classify the call as internal
+  // and send Kibana's secret instead of Relay's assertion. Tracked in
+  // https://github.com/elastic/kibana/issues/305342
   return {
     request: kibanaBearerRequest(authorization.toString(), clientAuthentication, spaceId),
     authenticatedUser,

@@ -135,6 +135,26 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
       });
     },
 
+    /**
+     * Selects a case in the "Select case" modal, re-issuing the click until the modal closes —
+     * a click dispatched while the modal is still resizing around the loading cases table lands
+     * off the button, and webdriver reports no error. Re-issuing is safe: the handler closes the
+     * modal before the attach request, so only the first click that lands takes effect.
+     */
+    async selectCaseInModal(caseId: string) {
+      await testSubjects.existOrFail('all-cases-modal');
+      await testSubjects.existOrFail(`cases-table-row-select-${caseId}`);
+
+      await retry.waitFor(`the cases modal to close after selecting case ${caseId}`, async () => {
+        if (!(await testSubjects.exists('all-cases-modal'))) {
+          return true;
+        }
+
+        await (await testSubjects.find(`cases-table-row-select-${caseId}`)).click();
+        return false;
+      });
+    },
+
     async assertCaseModalVisible(expectVisible = true) {
       await retry.tryForTime(5000, async () => {
         if (expectVisible) {

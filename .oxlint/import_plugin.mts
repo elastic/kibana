@@ -88,6 +88,7 @@ export const importPluginOverrides: OxlintOverride[] = [
       'x-pack/solutions/*/test/api_integration_deployment_agnostic/*configs/**/*',
       'x-pack/solutions/*/test/alerting_api_integration/**/*',
       'x-pack/solutions/*/test/serverless/*/configs/**/*',
+      'x-pack/solutions/security/packages/kbn-test-suites-xpack-security-endpoint/{apps,configs}/**/*',
       'x-pack/platform/test/saved_object_api_integration/*/apis/**/*',
       'x-pack/platform/test/ui_capabilities/*/tests/**/*',
       'x-pack/platform/test/upgrade_assistant_integration/**/*',
@@ -96,8 +97,8 @@ export const importPluginOverrides: OxlintOverride[] = [
       'x-pack/platform/test/serverless/*/test_suites/**/*',
       'x-pack/platform/test/serverless/functional/config*.ts',
       'x-pack/platform/test/serverless/*/configs/**/*',
-      'x-pack/solutions/security/test/security_solution_api_integration/*/test_suites/**/*',
-      'x-pack/solutions/security/test/security_solution_api_integration/**/config*.ts',
+      'x-pack/solutions/security/test_suites/test-suites-security-solution-apis/test_suites/**/*',
+      'x-pack/solutions/security/test_suites/test-suites-security-solution-apis/**/config*.ts',
       '**/playwright.config.ts',
       '**/playwright.v2.config.ts',
       '**/*.playwright.config.ts',
@@ -170,6 +171,7 @@ export const importPluginOverrides: OxlintOverride[] = [
     files: inDirs([
       'x-pack/solutions/security/packages/test-api-clients',
       'x-pack/solutions/security/packages/kbn-security-evals-matrix',
+      'x-pack/solutions/security/packages/kbn-test-suites-xpack-security-endpoint',
     ]),
     rules: {
       'import/no-nodejs-modules': 'off',
@@ -206,9 +208,9 @@ export const importPluginOverrides: OxlintOverride[] = [
       'x-pack/platform/test/security_functional',
       'x-pack/platform/plugins/shared/spaces',
       'x-pack/platform/test/spaces_api_integration',
-      'src/platform/plugins/shared/workflows_management',
-      'src/platform/plugins/shared/workflows_execution_engine',
-      'src/platform/plugins/shared/workflows_extensions',
+      'x-pack/platform/plugins/shared/workflows_management',
+      'x-pack/platform/plugins/shared/workflows_execution_engine',
+      'x-pack/platform/plugins/shared/workflows_extensions',
       'src/platform/packages/shared/kbn-workflows',
       'src/platform/packages/shared/kbn-workflows-ui',
     ]),
@@ -217,11 +219,11 @@ export const importPluginOverrides: OxlintOverride[] = [
     },
   },
   {
-    // ESLint fixes the generated API client bundles with this rule and `no_unused_imports` in one
-    // pass, as the OpenAPI generator expects. See the matching override in `.eslintrc.js`.
+    // The OpenAPI generator writes these API client bundles with duplicate and unused imports and
+    // relies on this rule and `@kbn/imports/no_unused_imports` to clean them up.
     files: ['x-pack/solutions/security/packages/test-api-clients/{supertest,scout}/*.gen.ts'],
     rules: {
-      'import/no-duplicates': 'off',
+      'import/no-duplicates': 'error',
     },
   },
   {
@@ -245,7 +247,7 @@ export const importPluginOverrides: OxlintOverride[] = [
     files: [
       'src/platform/packages/shared/kbn-connector-specs/**/*.test.{ts,tsx}',
       'src/platform/packages/shared/kbn-connector-specs/scripts/**/*.ts',
-      'src/platform/packages/shared/kbn-connector-specs/src/test/vendor_api/**/*.ts',
+      'src/platform/packages/shared/kbn-connector-specs/src/test/**/*.ts',
     ],
     rules: {
       'import/no-nodejs-modules': 'off',
@@ -296,10 +298,10 @@ export const importPluginOverrides: OxlintOverride[] = [
   {
     // Workflows front end and common files
     files: inDirs([
-      'src/platform/plugins/shared/workflows_management/public',
-      'src/platform/plugins/shared/workflows_management/common',
-      'src/platform/plugins/shared/workflows_extensions/public',
-      'src/platform/plugins/shared/workflows_extensions/common',
+      'x-pack/platform/plugins/shared/workflows_management/public',
+      'x-pack/platform/plugins/shared/workflows_management/common',
+      'x-pack/platform/plugins/shared/workflows_extensions/public',
+      'x-pack/platform/plugins/shared/workflows_extensions/common',
       'src/platform/packages/shared/kbn-workflows',
       'src/platform/packages/shared/kbn-workflows-ui',
     ]),
@@ -338,6 +340,7 @@ export const importPluginOverrides: OxlintOverride[] = [
         'kbn-evals-suite-hunt-watch',
         'kbn-evals-suite-lead-generation',
         'kbn-evals-suite-security-alert-triage',
+        'kbn-evals-suite-security-persona-matrix',
         'security-mitre-attack-server',
       ].map((pkg) => `x-pack/solutions/security/packages/${pkg}`)
     ),

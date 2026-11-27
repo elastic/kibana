@@ -22,7 +22,7 @@
  *   https://github.com/elastic/edot-cloud-forwarder-aws/tree/main/templates/release
  */
 
-import type { EcfLogType } from './aws_service_matrix';
+import type { AwsServiceMatrixEntry, EcfLogType } from './aws_service_matrix';
 import { AWS_SERVICES_MAP } from './aws_service_matrix';
 import type {
   ServiceInstance,
@@ -76,6 +76,27 @@ export interface EcfServiceConfig {
    */
   logGroupArns: string[];
 }
+
+// ── Template families ─────────────────────────────────────────────────────────
+
+/** The CloudFormation template a service deploys with. */
+export type EcfTemplateFamily = 'unified' | 'otel' | 'crowdstrike';
+
+/** The template family of a service that deploys through ECF, or undefined for any other service. */
+export const getEcfTemplateFamily = (
+  entry: AwsServiceMatrixEntry
+): EcfTemplateFamily | undefined => {
+  if (entry.ecfDedicatedTemplate === 'otel') return 'otel';
+  if (entry.ecfDedicatedTemplate === 'crowdstrike_fdr') return 'crowdstrike';
+  return entry.ecfLogType ? 'unified' : undefined;
+};
+
+/** Only the unified (ECS) template takes a `DataStreamNamespace` parameter. */
+export const ecfFamilySupportsNamespace = (family: string | undefined): boolean =>
+  family === 'unified';
+
+/** The namespace a unified stack uses when the `DataStreamNamespace` parameter is left out. */
+export const ECF_DEFAULT_NAMESPACE = 'default';
 
 // ── Stack ARN utilities ───────────────────────────────────────────────────────
 
@@ -213,7 +234,8 @@ export const getEcfServiceConfigs = (
  * Ensures a CloudWatch log group ARN ends with `:*` as required by the ECF template's
  * `CloudWatchLogGroups` parameter.
  */
-const normaliseLogGroupArn = (arn: string): string => (arn.endsWith(':*') ? arn : `${arn}:*`);
+export const normaliseLogGroupArn = (arn: string): string =>
+  arn.endsWith(':*') ? arn : `${arn}:*`;
 
 /**
  * Appends the default port (443 for https, 80 for http) to an OTLP endpoint URL when no
@@ -249,6 +271,7 @@ export const ensureOtlpPort = (endpoint: string): string => {
  *  - `S3Buckets`             – comma-separated bucket ARNs from S3-transport services
  *  - `CloudWatchLogGroups`   – comma-separated log group ARNs from CW-transport services
  *  - `LogTypes`              – comma-separated ECF log type identifiers
+ *  - `DataStreamNamespace`   – the global namespace, when set (the template defaults to `default`)
  *
  * `ElasticAPIKey` is intentionally NOT pre-filled: it is a sensitive credential that should
  * not appear in browser history or URL logs.  The user fills it in the AWS console.
@@ -261,6 +284,7 @@ export const ensureOtlpPort = (endpoint: string): string => {
  * @param version       ECF template semantic version (from the version-resolver hook).
  *                      Falls back to `ECF_FALLBACK_TEMPLATE_VERSION` when omitted.
  * @param stackName     CloudFormation stack name. Defaults to `ECF_UNIFIED_STACK_NAME`.
+ * @param namespace     Global data stream namespace. Left out of the URL when empty.
  */
 export const buildEcfUnifiedCloudFormationUrl = ({
   ecfConfigs,
@@ -268,12 +292,14 @@ export const buildEcfUnifiedCloudFormationUrl = ({
   otlpEndpoint,
   version = ECF_FALLBACK_TEMPLATE_VERSION,
   stackName = ECF_UNIFIED_STACK_NAME,
+  namespace,
 }: {
   ecfConfigs: EcfServiceConfig[];
   region: string;
   otlpEndpoint?: string;
   version?: string;
   stackName?: string;
+  namespace?: string;
 }): string => {
   const s3BucketArns = ecfConfigs.flatMap((c) => c.bucketArns);
   const logGroupArns = ecfConfigs.flatMap((c) => c.logGroupArns.map(normaliseLogGroupArn));
@@ -302,6 +328,9 @@ export const buildEcfUnifiedCloudFormationUrl = ({
   }
   if (logTypes.length > 0) {
     hashParams.set('param_LogTypes', logTypes.join(','));
+  }
+  if (namespace) {
+    hashParams.set('param_DataStreamNamespace', namespace);
   }
 
   url.hash = `/stacks/quickcreate?${hashParams.toString()}`;

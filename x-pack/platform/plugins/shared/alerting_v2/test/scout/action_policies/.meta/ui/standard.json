@@ -1,5 +1,5 @@
 {
-  "sha1": "b9bba22a52e6f4eae98900116d33ef5de25a3bd0",
+  "sha1": "4183d93c4d75cef8efaa1ce99ee3873119a95a21",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -48,7 +48,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/action_policies_privileges.spec.ts",
-        "line": 27,
+        "line": 28,
         "column": 6
       }
     },
@@ -64,7 +64,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/action_policies_privileges.spec.ts",
-        "line": 38,
+        "line": 39,
         "column": 11
       }
     },
@@ -80,7 +80,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/action_policies_privileges.spec.ts",
-        "line": 54,
+        "line": 55,
         "column": 98
       }
     },
@@ -126,8 +126,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/action_policy_attachment_canvas.spec.ts",
-        "line": 160,
-        "column": 22
+        "line": 182,
+        "column": 9
       }
     },
     {
@@ -140,8 +140,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/action_policy_attachment_canvas.spec.ts",
-        "line": 175,
-        "column": 11
+        "line": 199,
+        "column": 7
       }
     },
     {
@@ -154,8 +154,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/action_policy_attachment_canvas.spec.ts",
-        "line": 208,
-        "column": 18
+        "line": 235,
+        "column": 97
       }
     },
     {
@@ -168,8 +168,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/action_policy_attachment_canvas.spec.ts",
-        "line": 220,
-        "column": 83
+        "line": 246,
+        "column": 35
+      }
+    },
+    {
+      "id": "fef2892633c85b5-c2f707ca091d2b6",
+      "title": "Action policy attachment canvas in Agent Builder flags an agent edit to a saved policy until Update Policy saves it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/action_policy_attachment_canvas.spec.ts",
+        "line": 253,
+        "column": 35
       }
     }
   ]

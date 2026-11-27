@@ -7,17 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import INVESTIGATION_WORKFLOW_YAML from './investigation_workflow.yaml';
 import type { ManagedWorkflowDefinition } from '../../../types';
+import { readManagedWorkflowYaml } from '../../read_managed_workflow_yaml';
 
 export const NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID = 'system-nightshift-investigation';
 
 export const NIGHTSHIFT_INVESTIGATION_WORKFLOW = {
   id: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
   pluginId: 'nightshiftInvestigations',
-  version: 5,
+  version: 6,
   billable: false,
-  yaml: INVESTIGATION_WORKFLOW_YAML,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'investigation_workflow.yaml');
+  },
   management: {
     lifecycle: 'static',
     versionStrategy: 'auto',

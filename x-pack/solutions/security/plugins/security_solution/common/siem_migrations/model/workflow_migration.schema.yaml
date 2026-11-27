@@ -1,0 +1,161 @@
+openapi: 3.0.3
+info:
+  title: SIEM Workflow Migration components
+  version: 'not applicable'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    OriginalWorkflowVendor:
+      type: string
+      description: The original workflow vendor identifier.
+      enum:
+        - tines
+
+    WorkflowMigration:
+      type: object
+      description: A workflow migration document.
+      required:
+        - id
+        - name
+        - created_by
+        - created_at
+      properties:
+        id:
+          description: The workflow migration id.
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        name:
+          description: The workflow migration name.
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        created_by:
+          description: The user who created the migration.
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        created_at:
+          description: The moment the migration was created.
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        last_execution:
+          description: The last execution of the migration task.
+          $ref: './common.schema.yaml#/components/schemas/MigrationLastExecution'
+
+    OriginalWorkflowFormat:
+      type: string
+      description: Serialization format of the original workflow export. Tines exports use json.
+      enum:
+        - json
+
+    OriginalWorkflow:
+      type: object
+      description: The original workflow to migrate.
+      required:
+        - id
+        - vendor
+        - title
+        - data
+        - format
+      properties:
+        id:
+          description: The original workflow id.
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        vendor:
+          description: The original workflow vendor identifier.
+          $ref: '#/components/schemas/OriginalWorkflowVendor'
+        title:
+          description: The original workflow title.
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        description:
+          type: string
+          maxLength: 10000
+          description: The original workflow description.
+        data:
+          type: string
+          maxLength: 1000000
+          description: Raw workflow export from source system.
+        format:
+          description: Serialization format of the original workflow export.
+          $ref: '#/components/schemas/OriginalWorkflowFormat'
+
+    ElasticWorkflow:
+      type: object
+      description: The translated Elastic workflow.
+      required:
+        - title
+      properties:
+        id:
+          type: string
+          minLength: 1
+          maxLength: 256
+          description: The Elastic workflow id.
+        title:
+          description: The Elastic workflow title.
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        description:
+          type: string
+          maxLength: 10000
+          description: The Elastic workflow description.
+        yaml:
+          type: string
+          maxLength: 1000000
+          description: Translated Elastic Workflow YAML.
+
+    WorkflowMigrationWorkflow:
+      type: object
+      description: A workflow item stored for a workflow migration.
+      required:
+        - id
+        - '@timestamp'
+        - migration_id
+        - created_by
+        - original_workflow
+      properties:
+        id:
+          description: The workflow migration item id.
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        '@timestamp':
+          description: The moment the workflow item was created.
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        migration_id:
+          description: The migration id.
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        created_by:
+          description: The user who created the workflow item.
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        original_workflow:
+          description: The original workflow.
+          $ref: '#/components/schemas/OriginalWorkflow'
+        elastic_workflow:
+          description: The translated Elastic workflow.
+          $ref: '#/components/schemas/ElasticWorkflow'
+        translation_result:
+          description: The workflow translation result.
+          $ref: './common.schema.yaml#/components/schemas/MigrationTranslationResult'
+        status:
+          description: The status of the workflow migration item.
+          $ref: './common.schema.yaml#/components/schemas/MigrationStatus'
+          default: pending
+        comments:
+          description: The comments for the migration including a summary from the LLM in markdown.
+          $ref: './common.schema.yaml#/components/schemas/MigrationComments'
+        updated_at:
+          type: string
+          maxLength: 64
+          description: The moment of the last update.
+        updated_by:
+          type: string
+          maxLength: 256
+          description: The user who last updated the workflow item.
+
+    UpdateWorkflowMigrationWorkflow:
+      type: object
+      description: A workflow migration item update.
+      required:
+        - id
+      properties:
+        id:
+          description: The workflow migration item id.
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        elastic_workflow:
+          description: The translated Elastic workflow attributes to update.
+          $ref: '#/components/schemas/ElasticWorkflow'
+        comments:
+          description: The comments for the migration including a summary from the LLM in markdown.
+          $ref: './common.schema.yaml#/components/schemas/MigrationComments'

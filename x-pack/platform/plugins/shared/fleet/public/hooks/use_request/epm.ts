@@ -63,13 +63,6 @@ export function useGetAppendCustomIntegrationsQuery() {
   });
 }
 
-export function useGetReplacementCustomIntegrationsQuery() {
-  return useQuery(['get-replacemenet-custom-integrations'], () => {
-    const customIntegrations = getCustomIntegrations();
-    return customIntegrations.getReplacementCustomIntegrations();
-  });
-}
-
 export function useGetCategoriesQuery(query: GetCategoriesRequest['query'] = {}) {
   return useQuery<GetCategoriesResponse, RequestError>(
     ['categories', query],
@@ -346,8 +339,19 @@ export const sendGetFileByPath = (filePath: string) => {
   });
 };
 
-export const sendInstallPackage = (pkgName: string, pkgVersion: string, force: boolean = false) => {
-  const body = force ? { force } : undefined;
+export const sendInstallPackage = (
+  pkgName: string,
+  pkgVersion: string,
+  force: boolean = false,
+  options?: { acknowledgeBreakingChanges?: boolean }
+) => {
+  const body =
+    force || options?.acknowledgeBreakingChanges
+      ? {
+          ...(force ? { force } : {}),
+          ...(options?.acknowledgeBreakingChanges ? { acknowledge_breaking_changes: true } : {}),
+        }
+      : undefined;
   return sendRequest<InstallPackageResponse, FleetErrorResponse>({
     path: epmRouteService.getInstallPath(pkgName, pkgVersion),
     method: 'post',

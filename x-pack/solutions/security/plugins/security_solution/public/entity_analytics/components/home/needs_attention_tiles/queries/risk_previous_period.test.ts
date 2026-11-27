@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TimeRange } from '../../entities_grid/common';
+import type { TimeRange } from '../../queries/time_range';
 import { buildNewlyHighCriticalCountQuery } from './tile_newly_high_critical_query';
 import { buildRiskMoversCountQuery } from './tile_risk_movers_query';
 import { buildRiskHistoryReachesBackQuery } from './risk_previous_period';

@@ -30,7 +30,6 @@ import type {
 import type { ReplaySubject } from 'rxjs';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type { SerializedStyles } from '@emotion/serialize';
 import type { ResizableLayoutProps } from '@kbn/resizable-layout';
@@ -61,7 +60,6 @@ export interface UnifiedHistogramServices {
   fieldFormats: FieldFormatsStart;
   lens: LensPublicStart;
   storage: Storage;
-  expressions: ExpressionsStart;
   capabilities: Capabilities;
   dataViews: DataViewsPublicPluginStart;
   fieldsMetadata?: FieldsMetadataPublicStart;
@@ -327,6 +325,11 @@ export interface ChartSectionProps {
    * inspectorAdapters.lensRequests via the unified histogram state service.
    */
   setLensRequestAdapter?: (adapter: RequestAdapter | undefined) => void;
+  /**
+   * Optional callback for reporting the only fields the custom chart section can use as a breakdown.
+   * When nothing is reported, any field supported by the default breakdown is accepted.
+   */
+  setBreakdownFieldNames?: (fieldNames: string[] | undefined) => void;
   /**
    * Indicates whether the current tab is selected/active.
    */

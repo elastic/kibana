@@ -5,99 +5,40 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import { tags } from '@kbn/scout-security';
-import {
-  buildDocument,
-  createAndSyncRuleAndAlertsFactory,
-  waitForRiskScoresToBePresent,
-  dataViewRouteHelpersFactory,
-  deleteAllRiskScores,
-} from '@kbn/test-suites-security-solution-apis/test_suites/entity_analytics/utils';
-import { deleteAllRules } from '@kbn/detections-response-ftr-services/rules';
-import { dataGeneratorFactory } from '@kbn/test-suites-security-solution-apis/test_suites/detections_response/utils';
-import { deleteAllAlerts, createAlertsIndex } from '@kbn/detections-response-ftr-services/alerts';
 import { evaluate } from '../../src/evaluate';
+import {
+  bulkIndexEntities,
+  deleteEntityEngines,
+  installEntityStoreV2AndWait,
+} from '../../src/setup_helpers';
 
 /**
- * Risk score grounding evals with deterministic seeded data.
+ * Grounding evals for three seeded users. Scores are written onto the entity
+ * documents, so the ranking does not depend on the risk engine:
  *
- * Unlike risk_score_engine_on.spec.ts which uses random scores, this spec seeds
- * three users with deliberately different risk profiles so criteria can assert
- * exact entity names, correct risk levels, and relative ordering. The risk engine
- * normalizes alert-level scores using weighted aggregation, so we use high-contrast
- * inputs to ensure each user lands in a distinct risk level bucket:
- *
- *   eval-alice  — riskScore=99, 50 alerts → Critical
- *   eval-bob    — riskScore=70, 15 alerts → High
- *   eval-carol  — riskScore=25,  2 alerts → Low
+ *   user:eval-alice: 99, Critical
+ *   user:eval-bob: 70, High
+ *   user:eval-carol: 25, Low
  */
 evaluate.describe(
   'SIEM Entity Analytics Skill - Risk Score Grounding',
   { tag: tags.serverless.security.complete },
   () => {
-    const aliceId = uuidv4();
-    const bobId = uuidv4();
-    const carolId = uuidv4();
-
-    evaluate.beforeAll(async ({ log, esArchiverLoad, esClient: es, quickApiClient, supertest }) => {
-      await createAlertsIndex(supertest, log);
-      await esArchiverLoad(
-        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
-      );
-      const dataView = dataViewRouteHelpersFactory(supertest);
-      await dataView.create('security-solution', 'ecs_compliant');
-
-      const { indexListOfDocuments } = dataGeneratorFactory({
-        es,
-        index: 'ecs_compliant',
-        log,
+    evaluate.beforeAll(async ({ log, esClient, supertest }) => {
+      await installEntityStoreV2AndWait({ supertest, log });
+      await bulkIndexEntities({
+        esClient,
+        entities: [
+          { euid: 'user:eval-alice', riskScoreNorm: 99, riskLevel: 'Critical' },
+          { euid: 'user:eval-bob', riskScoreNorm: 70, riskLevel: 'High' },
+          { euid: 'user:eval-carol', riskScoreNorm: 25, riskLevel: 'Low' },
+        ],
       });
-
-      // Seed deterministic documents for each user
-      const aliceDocs = Array(50)
-        .fill({})
-        .map(() => buildDocument({ user: { name: 'eval-alice' } }, aliceId));
-      const bobDocs = Array(15)
-        .fill({})
-        .map(() => buildDocument({ user: { name: 'eval-bob' } }, bobId));
-      const carolDocs = Array(2)
-        .fill({})
-        .map(() => buildDocument({ user: { name: 'eval-carol' } }, carolId));
-
-      await indexListOfDocuments([...aliceDocs, ...bobDocs, ...carolDocs]);
-
-      const createAndSyncRuleAndAlerts = createAndSyncRuleAndAlertsFactory({ supertest, log });
-
-      // Create rules with distinct risk scores for each user
-      await createAndSyncRuleAndAlerts({
-        query: `id: ${aliceId}`,
-        alerts: 50,
-        riskScore: 99,
-      });
-      await createAndSyncRuleAndAlerts({
-        query: `id: ${bobId}`,
-        alerts: 15,
-        riskScore: 70,
-      });
-      await createAndSyncRuleAndAlerts({
-        query: `id: ${carolId}`,
-        alerts: 2,
-        riskScore: 25,
-      });
-
-      await quickApiClient.initRiskEngine();
-      await waitForRiskScoresToBePresent({ es, log, scoreCount: 3 });
     });
 
-    evaluate.afterAll(async ({ esClient, log, quickApiClient, supertest }) => {
-      await quickApiClient.cleanUpRiskEngine();
-      await deleteAllRiskScores(log, esClient);
-      await deleteAllAlerts(supertest, log, esClient);
-      await deleteAllRules(supertest, log);
-
-      const dataView = dataViewRouteHelpersFactory(supertest);
-      await dataView.delete('security-solution');
+    evaluate.afterAll(async ({ log, supertest }) => {
+      await deleteEntityEngines({ supertest, log });
     });
 
     evaluate('risk score grounding: known entities', async ({ evaluateDataset }) => {
@@ -121,7 +62,7 @@ evaluate.describe(
                 ],
                 toolCalls: [
                   {
-                    id: 'security.entity_analytics.risk_score',
+                    id: 'security.search_entities',
                   },
                 ],
               },
@@ -139,7 +80,7 @@ evaluate.describe(
                 ],
                 toolCalls: [
                   {
-                    id: 'security.entity_analytics.risk_score',
+                    id: 'security.search_entities',
                     criteria: ['The tool query filters by or references user "eval-alice".'],
                   },
                 ],
@@ -158,7 +99,7 @@ evaluate.describe(
                 ],
                 toolCalls: [
                   {
-                    id: 'security.entity_analytics.risk_score',
+                    id: 'security.search_entities',
                     criteria: ['The tool query filters by or references user "eval-bob".'],
                   },
                 ],
@@ -177,7 +118,7 @@ evaluate.describe(
                 ],
                 toolCalls: [
                   {
-                    id: 'security.entity_analytics.risk_score',
+                    id: 'security.search_entities',
                     criteria: ['The tool query filters by or references user "eval-carol".'],
                   },
                 ],
@@ -196,7 +137,7 @@ evaluate.describe(
                 ],
                 toolCalls: [
                   {
-                    id: 'security.entity_analytics.risk_score',
+                    id: 'security.search_entities',
                     criteria: [
                       'The tool query filters by Critical risk level or sorts by risk score descending.',
                     ],
@@ -218,7 +159,7 @@ evaluate.describe(
                 ],
                 toolCalls: [
                   {
-                    id: 'security.entity_analytics.risk_score',
+                    id: 'security.search_entities',
                   },
                 ],
               },

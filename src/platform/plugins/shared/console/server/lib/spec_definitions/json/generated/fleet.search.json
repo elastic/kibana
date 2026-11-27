@@ -71,6 +71,11 @@
       "wait_for_checkpoints": [
         ""
       ],
+      "wait_for_checkpoints_timeout": [
+        "30s",
+        "-1",
+        "0"
+      ],
       "allow_partial_search_results": "__flag__"
     },
     "data_autocomplete_rules": {
@@ -154,6 +159,7 @@
                 "options": {},
                 "order": {
                   "__one_of": [
+                    "none",
                     "score"
                   ]
                 },
@@ -227,6 +233,7 @@
                         "options": {},
                         "order": {
                           "__one_of": [
+                            "none",
                             "score"
                           ]
                         },
@@ -297,6 +304,7 @@
                           "options": {},
                           "order": {
                             "__one_of": [
+                              "none",
                               "score"
                             ]
                           },
@@ -487,6 +495,7 @@
                   "options": {},
                   "order": {
                     "__one_of": [
+                      "none",
                       "score"
                     ]
                   },
@@ -560,6 +569,7 @@
                           "options": {},
                           "order": {
                             "__one_of": [
+                              "none",
                               "score"
                             ]
                           },
@@ -630,6 +640,7 @@
                             "options": {},
                             "order": {
                               "__one_of": [
+                                "none",
                                 "score"
                               ]
                             },
@@ -749,8 +760,7 @@
             ]
           ]
         },
-        "max_concurrent_group_searches": "",
-        "collapse": {}
+        "max_concurrent_group_searches": ""
       },
       "explain": {
         "__one_of": [
@@ -807,6 +817,7 @@
         "options": {},
         "order": {
           "__one_of": [
+            "none",
             "score"
           ]
         },
@@ -880,6 +891,7 @@
                 "options": {},
                 "order": {
                   "__one_of": [
+                    "none",
                     "score"
                   ]
                 },
@@ -950,6 +962,7 @@
                   "options": {},
                   "order": {
                     "__one_of": [
+                      "none",
                       "score"
                     ]
                   },
@@ -1454,7 +1467,8 @@
       "POST"
     ],
     "patterns": [
-      "{index}/_fleet/_fleet_search"
+      "{index}/_fleet/_fleet_search",
+      "{index}/{_slice}/_fleet/_fleet_search"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-fleet-search",
     "availability": {

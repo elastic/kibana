@@ -23,7 +23,9 @@ const result = await validateYaraRule(ruleText);
 
 ## Logging
 
-Call `setYaraLogger(logger)` once at Endpoint service start (done in `EndpointAppContextService.start`). The wrapper logs module load, WASM traps, and per-validate debug metadata (`outcome`, counts, duration, source byte length). **Never logs rule source text.**
+Call `setYaraLogger(logger)` once at Endpoint service start (done in `EndpointAppContextService.start`). The wrapper logs module load, WASM traps, and per-validate debug metadata (`outcome`, counts, duration, source byte length). Cache hits are logged at trace level only: the artifact packager validates every signature on each run, once per artifact it is part of. **Never logs rule source text.**
+
+The compile is synchronous, so a validate taking more than 1 s is logged as a warning (duration, `outcome`, rule count, source byte length and the SHA-256 of the source, to match it to an exported artifact).
 
 ## Modules
 

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export { AWS_JSON_EXTENSION, isAwsJsonDocument, toAwsJsonDocument } from './aws_json';
+export type { AwsJsonServiceInfo } from './aws_json';
 export { convertSmithy } from './convert_smithy';
 export type { ConvertSmithyOptions } from './convert_smithy';
 export { isSmithyModel } from './smithy_model';

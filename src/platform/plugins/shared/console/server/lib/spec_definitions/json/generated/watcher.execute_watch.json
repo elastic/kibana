@@ -198,6 +198,7 @@
                               "options": {},
                               "order": {
                                 "__one_of": [
+                                  "none",
                                   "score"
                                 ]
                               },
@@ -271,6 +272,7 @@
                                       "options": {},
                                       "order": {
                                         "__one_of": [
+                                          "none",
                                           "score"
                                         ]
                                       },
@@ -341,6 +343,7 @@
                                         "options": {},
                                         "order": {
                                           "__one_of": [
+                                            "none",
                                             "score"
                                           ]
                                         },
@@ -531,6 +534,7 @@
                                 "options": {},
                                 "order": {
                                   "__one_of": [
+                                    "none",
                                     "score"
                                   ]
                                 },
@@ -604,6 +608,7 @@
                                         "options": {},
                                         "order": {
                                           "__one_of": [
+                                            "none",
                                             "score"
                                           ]
                                         },
@@ -674,6 +679,7 @@
                                           "options": {},
                                           "order": {
                                             "__one_of": [
+                                              "none",
                                               "score"
                                             ]
                                           },
@@ -793,8 +799,7 @@
                           ]
                         ]
                       },
-                      "max_concurrent_group_searches": "",
-                      "collapse": {}
+                      "max_concurrent_group_searches": ""
                     },
                     "explain": {
                       "__one_of": [
@@ -851,6 +856,7 @@
                       "options": {},
                       "order": {
                         "__one_of": [
+                          "none",
                           "score"
                         ]
                       },
@@ -924,6 +930,7 @@
                               "options": {},
                               "order": {
                                 "__one_of": [
+                                  "none",
                                   "score"
                                 ]
                               },
@@ -994,6 +1001,7 @@
                                 "options": {},
                                 "order": {
                                   "__one_of": [
+                                    "none",
                                     "score"
                                   ]
                                 },
@@ -1044,7 +1052,7 @@
                       "__one_of": [
                         {
                           "field": "",
-                          "query_vector": [],
+                          "query_vector": "",
                           "query_vector_builder": {
                             "embedding": {
                               "inference_id": "",
@@ -1093,8 +1101,7 @@
                                   ]
                                 ]
                               },
-                              "max_concurrent_group_searches": "",
-                              "collapse": {}
+                              "max_concurrent_group_searches": ""
                             },
                             "docvalue_fields": {
                               "__any_of": [
@@ -1164,6 +1171,7 @@
                               "options": {},
                               "order": {
                                 "__one_of": [
+                                  "none",
                                   "score"
                                 ]
                               },
@@ -1237,6 +1245,7 @@
                                       "options": {},
                                       "order": {
                                         "__one_of": [
+                                          "none",
                                           "score"
                                         ]
                                       },
@@ -1307,6 +1316,7 @@
                                         "options": {},
                                         "order": {
                                           "__one_of": [
+                                            "none",
                                             "score"
                                           ]
                                         },
@@ -1431,7 +1441,7 @@
                         [
                           {
                             "field": "",
-                            "query_vector": [],
+                            "query_vector": "",
                             "query_vector_builder": {
                               "embedding": {
                                 "inference_id": "",
@@ -1480,8 +1490,7 @@
                                     ]
                                   ]
                                 },
-                                "max_concurrent_group_searches": "",
-                                "collapse": {}
+                                "max_concurrent_group_searches": ""
                               },
                               "docvalue_fields": {
                                 "__any_of": [
@@ -1551,6 +1560,7 @@
                                 "options": {},
                                 "order": {
                                   "__one_of": [
+                                    "none",
                                     "score"
                                   ]
                                 },
@@ -1624,6 +1634,7 @@
                                         "options": {},
                                         "order": {
                                           "__one_of": [
+                                            "none",
                                             "score"
                                           ]
                                         },
@@ -1694,6 +1705,7 @@
                                           "options": {},
                                           "order": {
                                             "__one_of": [
+                                              "none",
                                               "score"
                                             ]
                                           },
@@ -2034,6 +2046,7 @@
                                   "options": {},
                                   "order": {
                                     "__one_of": [
+                                      "none",
                                       "score"
                                     ]
                                   },
@@ -2107,6 +2120,7 @@
                                           "options": {},
                                           "order": {
                                             "__one_of": [
+                                              "none",
                                               "score"
                                             ]
                                           },
@@ -2177,6 +2191,7 @@
                                             "options": {},
                                             "order": {
                                               "__one_of": [
+                                                "none",
                                                 "score"
                                               ]
                                             },
@@ -2367,6 +2382,7 @@
                                     "options": {},
                                     "order": {
                                       "__one_of": [
+                                        "none",
                                         "score"
                                       ]
                                     },
@@ -2440,6 +2456,7 @@
                                             "options": {},
                                             "order": {
                                               "__one_of": [
+                                                "none",
                                                 "score"
                                               ]
                                             },
@@ -2510,6 +2527,7 @@
                                               "options": {},
                                               "order": {
                                                 "__one_of": [
+                                                  "none",
                                                   "score"
                                                 ]
                                               },
@@ -2629,8 +2647,7 @@
                               ]
                             ]
                           },
-                          "max_concurrent_group_searches": "",
-                          "collapse": {}
+                          "max_concurrent_group_searches": ""
                         }
                       },
                       "knn": {
@@ -2649,7 +2666,7 @@
                         "min_score": "",
                         "_name": "",
                         "field": "",
-                        "query_vector": [],
+                        "query_vector": "",
                         "query_vector_builder": {
                           "embedding": {
                             "inference_id": "",
@@ -2953,7 +2970,7 @@
                         "retriever": {},
                         "size": "",
                         "rank_window_size": "",
-                        "query_vector": [],
+                        "query_vector": "",
                         "query_vector_builder": {
                           "embedding": {
                             "inference_id": "",
@@ -3872,6 +3889,7 @@
                           "options": {},
                           "order": {
                             "__one_of": [
+                              "none",
                               "score"
                             ]
                           },
@@ -3945,6 +3963,7 @@
                                   "options": {},
                                   "order": {
                                     "__one_of": [
+                                      "none",
                                       "score"
                                     ]
                                   },
@@ -4015,6 +4034,7 @@
                                     "options": {},
                                     "order": {
                                       "__one_of": [
+                                        "none",
                                         "score"
                                       ]
                                     },
@@ -4205,6 +4225,7 @@
                             "options": {},
                             "order": {
                               "__one_of": [
+                                "none",
                                 "score"
                               ]
                             },
@@ -4278,6 +4299,7 @@
                                     "options": {},
                                     "order": {
                                       "__one_of": [
+                                        "none",
                                         "score"
                                       ]
                                     },
@@ -4348,6 +4370,7 @@
                                       "options": {},
                                       "order": {
                                         "__one_of": [
+                                          "none",
                                           "score"
                                         ]
                                       },
@@ -4467,8 +4490,7 @@
                       ]
                     ]
                   },
-                  "max_concurrent_group_searches": "",
-                  "collapse": {}
+                  "max_concurrent_group_searches": ""
                 },
                 "explain": {
                   "__one_of": [
@@ -4525,6 +4547,7 @@
                   "options": {},
                   "order": {
                     "__one_of": [
+                      "none",
                       "score"
                     ]
                   },
@@ -4598,6 +4621,7 @@
                           "options": {},
                           "order": {
                             "__one_of": [
+                              "none",
                               "score"
                             ]
                           },
@@ -4668,6 +4692,7 @@
                             "options": {},
                             "order": {
                               "__one_of": [
+                                "none",
                                 "score"
                               ]
                             },
@@ -4718,7 +4743,7 @@
                   "__one_of": [
                     {
                       "field": "",
-                      "query_vector": [],
+                      "query_vector": "",
                       "query_vector_builder": {
                         "embedding": {
                           "inference_id": "",
@@ -4767,8 +4792,7 @@
                               ]
                             ]
                           },
-                          "max_concurrent_group_searches": "",
-                          "collapse": {}
+                          "max_concurrent_group_searches": ""
                         },
                         "docvalue_fields": {
                           "__any_of": [
@@ -4838,6 +4862,7 @@
                           "options": {},
                           "order": {
                             "__one_of": [
+                              "none",
                               "score"
                             ]
                           },
@@ -4911,6 +4936,7 @@
                                   "options": {},
                                   "order": {
                                     "__one_of": [
+                                      "none",
                                       "score"
                                     ]
                                   },
@@ -4981,6 +5007,7 @@
                                     "options": {},
                                     "order": {
                                       "__one_of": [
+                                        "none",
                                         "score"
                                       ]
                                     },
@@ -5105,7 +5132,7 @@
                     [
                       {
                         "field": "",
-                        "query_vector": [],
+                        "query_vector": "",
                         "query_vector_builder": {
                           "embedding": {
                             "inference_id": "",
@@ -5154,8 +5181,7 @@
                                 ]
                               ]
                             },
-                            "max_concurrent_group_searches": "",
-                            "collapse": {}
+                            "max_concurrent_group_searches": ""
                           },
                           "docvalue_fields": {
                             "__any_of": [
@@ -5225,6 +5251,7 @@
                             "options": {},
                             "order": {
                               "__one_of": [
+                                "none",
                                 "score"
                               ]
                             },
@@ -5298,6 +5325,7 @@
                                     "options": {},
                                     "order": {
                                       "__one_of": [
+                                        "none",
                                         "score"
                                       ]
                                     },
@@ -5368,6 +5396,7 @@
                                       "options": {},
                                       "order": {
                                         "__one_of": [
+                                          "none",
                                           "score"
                                         ]
                                       },
@@ -5708,6 +5737,7 @@
                               "options": {},
                               "order": {
                                 "__one_of": [
+                                  "none",
                                   "score"
                                 ]
                               },
@@ -5781,6 +5811,7 @@
                                       "options": {},
                                       "order": {
                                         "__one_of": [
+                                          "none",
                                           "score"
                                         ]
                                       },
@@ -5851,6 +5882,7 @@
                                         "options": {},
                                         "order": {
                                           "__one_of": [
+                                            "none",
                                             "score"
                                           ]
                                         },
@@ -6041,6 +6073,7 @@
                                 "options": {},
                                 "order": {
                                   "__one_of": [
+                                    "none",
                                     "score"
                                   ]
                                 },
@@ -6114,6 +6147,7 @@
                                         "options": {},
                                         "order": {
                                           "__one_of": [
+                                            "none",
                                             "score"
                                           ]
                                         },
@@ -6184,6 +6218,7 @@
                                           "options": {},
                                           "order": {
                                             "__one_of": [
+                                              "none",
                                               "score"
                                             ]
                                           },
@@ -6303,8 +6338,7 @@
                           ]
                         ]
                       },
-                      "max_concurrent_group_searches": "",
-                      "collapse": {}
+                      "max_concurrent_group_searches": ""
                     }
                   },
                   "knn": {
@@ -6323,7 +6357,7 @@
                     "min_score": "",
                     "_name": "",
                     "field": "",
-                    "query_vector": [],
+                    "query_vector": "",
                     "query_vector_builder": {
                       "embedding": {
                         "inference_id": "",
@@ -6627,7 +6661,7 @@
                     "retriever": {},
                     "size": "",
                     "rank_window_size": "",
-                    "query_vector": [],
+                    "query_vector": "",
                     "query_vector_builder": {
                       "embedding": {
                         "inference_id": "",
@@ -7159,6 +7193,7 @@
                             "options": {},
                             "order": {
                               "__one_of": [
+                                "none",
                                 "score"
                               ]
                             },
@@ -7232,6 +7267,7 @@
                                     "options": {},
                                     "order": {
                                       "__one_of": [
+                                        "none",
                                         "score"
                                       ]
                                     },
@@ -7302,6 +7338,7 @@
                                       "options": {},
                                       "order": {
                                         "__one_of": [
+                                          "none",
                                           "score"
                                         ]
                                       },
@@ -7492,6 +7529,7 @@
                               "options": {},
                               "order": {
                                 "__one_of": [
+                                  "none",
                                   "score"
                                 ]
                               },
@@ -7565,6 +7603,7 @@
                                       "options": {},
                                       "order": {
                                         "__one_of": [
+                                          "none",
                                           "score"
                                         ]
                                       },
@@ -7635,6 +7674,7 @@
                                         "options": {},
                                         "order": {
                                           "__one_of": [
+                                            "none",
                                             "score"
                                           ]
                                         },
@@ -7754,8 +7794,7 @@
                         ]
                       ]
                     },
-                    "max_concurrent_group_searches": "",
-                    "collapse": {}
+                    "max_concurrent_group_searches": ""
                   },
                   "explain": {
                     "__one_of": [
@@ -7812,6 +7851,7 @@
                     "options": {},
                     "order": {
                       "__one_of": [
+                        "none",
                         "score"
                       ]
                     },
@@ -7885,6 +7925,7 @@
                             "options": {},
                             "order": {
                               "__one_of": [
+                                "none",
                                 "score"
                               ]
                             },
@@ -7955,6 +7996,7 @@
                               "options": {},
                               "order": {
                                 "__one_of": [
+                                  "none",
                                   "score"
                                 ]
                               },
@@ -8005,7 +8047,7 @@
                     "__one_of": [
                       {
                         "field": "",
-                        "query_vector": [],
+                        "query_vector": "",
                         "query_vector_builder": {
                           "embedding": {
                             "inference_id": "",
@@ -8054,8 +8096,7 @@
                                 ]
                               ]
                             },
-                            "max_concurrent_group_searches": "",
-                            "collapse": {}
+                            "max_concurrent_group_searches": ""
                           },
                           "docvalue_fields": {
                             "__any_of": [
@@ -8125,6 +8166,7 @@
                             "options": {},
                             "order": {
                               "__one_of": [
+                                "none",
                                 "score"
                               ]
                             },
@@ -8198,6 +8240,7 @@
                                     "options": {},
                                     "order": {
                                       "__one_of": [
+                                        "none",
                                         "score"
                                       ]
                                     },
@@ -8268,6 +8311,7 @@
                                       "options": {},
                                       "order": {
                                         "__one_of": [
+                                          "none",
                                           "score"
                                         ]
                                       },
@@ -8392,7 +8436,7 @@
                       [
                         {
                           "field": "",
-                          "query_vector": [],
+                          "query_vector": "",
                           "query_vector_builder": {
                             "embedding": {
                               "inference_id": "",
@@ -8441,8 +8485,7 @@
                                   ]
                                 ]
                               },
-                              "max_concurrent_group_searches": "",
-                              "collapse": {}
+                              "max_concurrent_group_searches": ""
                             },
                             "docvalue_fields": {
                               "__any_of": [
@@ -8512,6 +8555,7 @@
                               "options": {},
                               "order": {
                                 "__one_of": [
+                                  "none",
                                   "score"
                                 ]
                               },
@@ -8585,6 +8629,7 @@
                                       "options": {},
                                       "order": {
                                         "__one_of": [
+                                          "none",
                                           "score"
                                         ]
                                       },
@@ -8655,6 +8700,7 @@
                                         "options": {},
                                         "order": {
                                           "__one_of": [
+                                            "none",
                                             "score"
                                           ]
                                         },
@@ -8995,6 +9041,7 @@
                                 "options": {},
                                 "order": {
                                   "__one_of": [
+                                    "none",
                                     "score"
                                   ]
                                 },
@@ -9068,6 +9115,7 @@
                                         "options": {},
                                         "order": {
                                           "__one_of": [
+                                            "none",
                                             "score"
                                           ]
                                         },
@@ -9138,6 +9186,7 @@
                                           "options": {},
                                           "order": {
                                             "__one_of": [
+                                              "none",
                                               "score"
                                             ]
                                           },
@@ -9328,6 +9377,7 @@
                                   "options": {},
                                   "order": {
                                     "__one_of": [
+                                      "none",
                                       "score"
                                     ]
                                   },
@@ -9401,6 +9451,7 @@
                                           "options": {},
                                           "order": {
                                             "__one_of": [
+                                              "none",
                                               "score"
                                             ]
                                           },
@@ -9471,6 +9522,7 @@
                                             "options": {},
                                             "order": {
                                               "__one_of": [
+                                                "none",
                                                 "score"
                                               ]
                                             },
@@ -9590,8 +9642,7 @@
                             ]
                           ]
                         },
-                        "max_concurrent_group_searches": "",
-                        "collapse": {}
+                        "max_concurrent_group_searches": ""
                       }
                     },
                     "knn": {
@@ -9610,7 +9661,7 @@
                       "min_score": "",
                       "_name": "",
                       "field": "",
-                      "query_vector": [],
+                      "query_vector": "",
                       "query_vector_builder": {
                         "embedding": {
                           "inference_id": "",
@@ -9914,7 +9965,7 @@
                       "retriever": {},
                       "size": "",
                       "rank_window_size": "",
-                      "query_vector": [],
+                      "query_vector": "",
                       "query_vector_builder": {
                         "embedding": {
                           "inference_id": "",
@@ -10503,6 +10554,7 @@
                           "options": {},
                           "order": {
                             "__one_of": [
+                              "none",
                               "score"
                             ]
                           },
@@ -10576,6 +10628,7 @@
                                   "options": {},
                                   "order": {
                                     "__one_of": [
+                                      "none",
                                       "score"
                                     ]
                                   },
@@ -10646,6 +10699,7 @@
                                     "options": {},
                                     "order": {
                                       "__one_of": [
+                                        "none",
                                         "score"
                                       ]
                                     },
@@ -10836,6 +10890,7 @@
                             "options": {},
                             "order": {
                               "__one_of": [
+                                "none",
                                 "score"
                               ]
                             },
@@ -10909,6 +10964,7 @@
                                     "options": {},
                                     "order": {
                                       "__one_of": [
+                                        "none",
                                         "score"
                                       ]
                                     },
@@ -10979,6 +11035,7 @@
                                       "options": {},
                                       "order": {
                                         "__one_of": [
+                                          "none",
                                           "score"
                                         ]
                                       },
@@ -11098,8 +11155,7 @@
                       ]
                     ]
                   },
-                  "max_concurrent_group_searches": "",
-                  "collapse": {}
+                  "max_concurrent_group_searches": ""
                 },
                 "explain": {
                   "__one_of": [
@@ -11156,6 +11212,7 @@
                   "options": {},
                   "order": {
                     "__one_of": [
+                      "none",
                       "score"
                     ]
                   },
@@ -11229,6 +11286,7 @@
                           "options": {},
                           "order": {
                             "__one_of": [
+                              "none",
                               "score"
                             ]
                           },
@@ -11299,6 +11357,7 @@
                             "options": {},
                             "order": {
                               "__one_of": [
+                                "none",
                                 "score"
                               ]
                             },
@@ -11349,7 +11408,7 @@
                   "__one_of": [
                     {
                       "field": "",
-                      "query_vector": [],
+                      "query_vector": "",
                       "query_vector_builder": {
                         "embedding": {
                           "inference_id": "",
@@ -11398,8 +11457,7 @@
                               ]
                             ]
                           },
-                          "max_concurrent_group_searches": "",
-                          "collapse": {}
+                          "max_concurrent_group_searches": ""
                         },
                         "docvalue_fields": {
                           "__any_of": [
@@ -11469,6 +11527,7 @@
                           "options": {},
                           "order": {
                             "__one_of": [
+                              "none",
                               "score"
                             ]
                           },
@@ -11542,6 +11601,7 @@
                                   "options": {},
                                   "order": {
                                     "__one_of": [
+                                      "none",
                                       "score"
                                     ]
                                   },
@@ -11612,6 +11672,7 @@
                                     "options": {},
                                     "order": {
                                       "__one_of": [
+                                        "none",
                                         "score"
                                       ]
                                     },
@@ -11736,7 +11797,7 @@
                     [
                       {
                         "field": "",
-                        "query_vector": [],
+                        "query_vector": "",
                         "query_vector_builder": {
                           "embedding": {
                             "inference_id": "",
@@ -11785,8 +11846,7 @@
                                 ]
                               ]
                             },
-                            "max_concurrent_group_searches": "",
-                            "collapse": {}
+                            "max_concurrent_group_searches": ""
                           },
                           "docvalue_fields": {
                             "__any_of": [
@@ -11856,6 +11916,7 @@
                             "options": {},
                             "order": {
                               "__one_of": [
+                                "none",
                                 "score"
                               ]
                             },
@@ -11929,6 +11990,7 @@
                                     "options": {},
                                     "order": {
                                       "__one_of": [
+                                        "none",
                                         "score"
                                       ]
                                     },
@@ -11999,6 +12061,7 @@
                                       "options": {},
                                       "order": {
                                         "__one_of": [
+                                          "none",
                                           "score"
                                         ]
                                       },
@@ -12339,6 +12402,7 @@
                               "options": {},
                               "order": {
                                 "__one_of": [
+                                  "none",
                                   "score"
                                 ]
                               },
@@ -12412,6 +12476,7 @@
                                       "options": {},
                                       "order": {
                                         "__one_of": [
+                                          "none",
                                           "score"
                                         ]
                                       },
@@ -12482,6 +12547,7 @@
                                         "options": {},
                                         "order": {
                                           "__one_of": [
+                                            "none",
                                             "score"
                                           ]
                                         },
@@ -12672,6 +12738,7 @@
                                 "options": {},
                                 "order": {
                                   "__one_of": [
+                                    "none",
                                     "score"
                                   ]
                                 },
@@ -12745,6 +12812,7 @@
                                         "options": {},
                                         "order": {
                                           "__one_of": [
+                                            "none",
                                             "score"
                                           ]
                                         },
@@ -12815,6 +12883,7 @@
                                           "options": {},
                                           "order": {
                                             "__one_of": [
+                                              "none",
                                               "score"
                                             ]
                                           },
@@ -12934,8 +13003,7 @@
                           ]
                         ]
                       },
-                      "max_concurrent_group_searches": "",
-                      "collapse": {}
+                      "max_concurrent_group_searches": ""
                     }
                   },
                   "knn": {
@@ -12954,7 +13022,7 @@
                     "min_score": "",
                     "_name": "",
                     "field": "",
-                    "query_vector": [],
+                    "query_vector": "",
                     "query_vector_builder": {
                       "embedding": {
                         "inference_id": "",
@@ -13258,7 +13326,7 @@
                     "retriever": {},
                     "size": "",
                     "rank_window_size": "",
-                    "query_vector": [],
+                    "query_vector": "",
                     "query_vector_builder": {
                       "embedding": {
                         "inference_id": "",

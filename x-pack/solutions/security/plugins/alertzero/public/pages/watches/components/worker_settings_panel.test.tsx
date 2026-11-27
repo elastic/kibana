@@ -81,6 +81,7 @@ const createWorker = (workflowId: string | null): Worker => ({
   state: 'ok',
   settingsRevision: 1,
   workflowId,
+  workflowOutdated: false,
   blockingReasons: [],
   settings: {
     workerId: WORKER_ID,
@@ -222,7 +223,7 @@ describe('WorkerSettingsPanel models and no-model block', () => {
     const core = renderPanel(WORKFLOW_ID, isAccordion);
 
     expect(screen.getByTestId(`alertZeroModelsRow-${WORKER_ID}`)).toHaveTextContent(
-      'This Worker uses models configured in Feature settings'
+      'This Worker uses the models configured in Feature settings'
     );
     const link = screen.getByTestId(`alertZeroModelsLink-${WORKER_ID}`);
     expect(link).toHaveAttribute('href', FEATURE_SETTINGS_URL);
@@ -350,6 +351,7 @@ describe('WorkerSettingsPanel Hunt threat intel supply', () => {
       state: 'ok',
       settingsRevision: 1,
       workflowId: null,
+      workflowOutdated: false,
       blockingReasons: [],
       settings: {
         workerId: HUNT_WORKER_ID,
@@ -383,7 +385,26 @@ describe('WorkerSettingsPanel Hunt threat intel supply', () => {
         </KibanaContextProvider>
       </I18nProvider>
     );
+
+    return core;
   };
+
+  it('links the Worker description to the Continuous Threat Hunt docs in a new tab', () => {
+    const core = renderHuntPanel();
+
+    const link = screen.getByTestId(`alertZeroWorkerDocsLink-${HUNT_WORKER_ID}`);
+    expect(link).toHaveTextContent('Learn more');
+    expect(link).toHaveAttribute(
+      'href',
+      core.docLinks.links.securitySolution.alertZero.continuousThreatHunt
+    );
+    expect(link).toHaveAttribute('target', '_blank');
+  });
+
+  it('omits the docs link for non-Hunt workers', () => {
+    renderPanel(WORKFLOW_ID, false);
+    expect(screen.queryByTestId(`alertZeroWorkerDocsLink-${WORKER_ID}`)).not.toBeInTheDocument();
+  });
 
   it('renders the threat intel supply section for Hunt', () => {
     renderHuntPanel();

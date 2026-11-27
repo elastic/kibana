@@ -15,7 +15,7 @@ import type { EventFieldsData } from '../../../../common/components/event_detail
 import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 import { FormattedFieldValue } from '../../../../timelines/components/timeline/body/renderers/formatted_field';
 import { getFieldFormat } from '../../../shared/utils/get_field_format';
-import { useExpandableValues } from '../../../../flyout/document_details/shared/hooks/use_expandable_values';
+import { useExpandableValues } from '../hooks/use_expandable_values';
 
 export interface FieldValueCellProps {
   /**

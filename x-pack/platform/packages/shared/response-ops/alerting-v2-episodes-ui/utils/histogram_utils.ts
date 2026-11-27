@@ -8,6 +8,12 @@
 import moment from 'moment';
 
 import type { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
+import {
+  HISTOGRAM_MAX_BREAKDOWN_SERIES,
+  HISTOGRAM_MAX_BUCKETS,
+  HISTOGRAM_OTHER_BREAKDOWN,
+  HISTOGRAM_UNKNOWN_BREAKDOWN,
+} from '../constants';
 
 export interface TimeBucket {
   start: number;
@@ -47,6 +53,33 @@ export const intervalToMs = (interval: string): number => {
   return moment.duration(n, match[2] as moment.unitOfTime.DurationConstructor).asMilliseconds();
 };
 
+/** Number of buckets `generateTimeBuckets` yields; the first bucket starts at the boundary at or before `startMs`. */
+const countTimeBuckets = (startMs: number, endMs: number, ms: number): number =>
+  startMs >= endMs ? 0 : Math.ceil((endMs - Math.floor(startMs / ms) * ms) / ms);
+
+/**
+ * Returns `interval` unchanged when it yields at most `maxBuckets` buckets over [startMs, endMs];
+ * otherwise returns the smallest multiple of the same unit that fits.
+ */
+export const clampBucketInterval = (
+  startMs: number,
+  endMs: number,
+  interval: string,
+  maxBuckets: number = HISTOGRAM_MAX_BUCKETS
+): string => {
+  if (countTimeBuckets(startMs, endMs, intervalToMs(interval)) <= maxBuckets) return interval;
+
+  const match = interval.match(/^(\d*)([smhdwMy])$/);
+  if (!match) return interval;
+  const [, count, unit] = match;
+  const n = count ? parseInt(count, 10) : 1;
+  let factor = Math.ceil((endMs - startMs) / intervalToMs(interval) / maxBuckets);
+  while (countTimeBuckets(startMs, endMs, intervalToMs(`${n * factor}${unit}`)) > maxBuckets) {
+    factor++;
+  }
+  return `${n * factor}${unit}`;
+};
+
 /** Generates non-overlapping buckets aligned to interval boundaries covering [startMs, endMs]. */
 export const generateTimeBuckets = (
   startMs: number,
@@ -64,6 +97,9 @@ export const generateTimeBuckets = (
   }
   return buckets;
 };
+
+const toBreakdownValue = (episode: HistogramEpisodeRow, breakdownField: string): string =>
+  String(episode[breakdownField] ?? HISTOGRAM_UNKNOWN_BREAKDOWN);
 
 /**
  * For each bucket, counts episodes whose [first_timestamp, last_timestamp] overlaps with
@@ -93,7 +129,7 @@ export const computeOverlapCounts = (
 
     const counts = new Map<string, number>();
     for (const { ep } of overlapping) {
-      const key = String(ep[breakdownField] ?? 'unknown');
+      const key = toBreakdownValue(ep, breakdownField);
       counts.set(key, (counts.get(key) ?? 0) + 1);
     }
     return [...counts.entries()].map(([breakdown, count]) => ({
@@ -102,6 +138,88 @@ export const computeOverlapCounts = (
       breakdown,
     }));
   });
+};
+
+/** Sums bucket counts sharing the same (bucketStart, breakdown) pair across sources. */
+export const mergeBucketCounts = (...sources: HistogramBucketCount[][]): HistogramBucketCount[] => {
+  const merged = new Map<string, HistogramBucketCount>();
+  for (const { bucketStart, count, breakdown } of sources.flat()) {
+    const key = `${bucketStart}::${breakdown ?? ''}`;
+    const existing = merged.get(key);
+    if (existing) {
+      existing.count += count;
+    } else {
+      merged.set(key, { bucketStart, count, ...(breakdown !== undefined ? { breakdown } : {}) });
+    }
+  }
+  return [...merged.values()];
+};
+
+/** Counts episodes per breakdown value, the ranking used by `limitBreakdownSeries`. */
+export const countEpisodesByBreakdown = (
+  episodes: HistogramEpisodeRow[],
+  breakdownField: string
+): Record<string, number> => {
+  const totals: Record<string, number> = {};
+  for (const episode of episodes) {
+    const value = toBreakdownValue(episode, breakdownField);
+    totals[value] = (totals[value] ?? 0) + 1;
+  }
+  return totals;
+};
+
+/** Sums per-breakdown-value totals across sources. */
+export const sumBreakdownTotals = (
+  ...sources: Array<Record<string, number>>
+): Record<string, number> => {
+  const totals: Record<string, number> = {};
+  for (const source of sources) {
+    for (const [value, total] of Object.entries(source)) {
+      totals[value] = (totals[value] ?? 0) + total;
+    }
+  }
+  return totals;
+};
+
+/** Code-unit order, matching how Elasticsearch `terms` breaks count ties (`_key` ascending). */
+const compareValues = (a: string, b: string): number => {
+  if (a === b) return 0;
+  return a < b ? -1 : 1;
+};
+
+/**
+ * Keeps the `limit` breakdown values with the highest totals as their own series and folds every
+ * other value, including counts a source already folded, into one `HISTOGRAM_OTHER_BREAKDOWN`
+ * series. Bucket totals are unchanged. Series are ordered by rank with Other last, so the stack
+ * order is the same in every bucket.
+ *
+ * Kept series are exact only if a value a source already folded (beyond its own top N) does not
+ * also appear in another source; otherwise that source's share stays in Other. The current
+ * breakdowns satisfy this: rule ids are disjoint across sources, and the classic source never
+ * folds status, ack or assignee values because it has at most a handful of each.
+ */
+export const limitBreakdownSeries = (
+  counts: HistogramBucketCount[],
+  totals: Record<string, number>,
+  limit: number = HISTOGRAM_MAX_BREAKDOWN_SERIES
+): HistogramBucketCount[] => {
+  const ranks = new Map(
+    Object.entries(totals)
+      .filter(([value]) => value !== HISTOGRAM_OTHER_BREAKDOWN)
+      .sort(([a, aTotal], [b, bTotal]) => bTotal - aTotal || compareValues(a, b))
+      .slice(0, limit)
+      .map(([value], rank) => [value, rank])
+  );
+  const toRank = ({ breakdown }: HistogramBucketCount): number =>
+    (breakdown !== undefined ? ranks.get(breakdown) : undefined) ?? ranks.size;
+
+  return mergeBucketCounts(
+    counts.map((count) =>
+      count.breakdown === undefined || ranks.has(count.breakdown)
+        ? count
+        : { ...count, breakdown: HISTOGRAM_OTHER_BREAKDOWN }
+    )
+  ).sort((a, b) => toRank(a) - toRank(b));
 };
 
 /** Formats overlap counts as a Lens-compatible Datatable for @kbn/unified-histogram. */

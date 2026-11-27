@@ -7,6 +7,8 @@
 
 // a11y tests for rules, logs and connectors page
 
+import expect from '@kbn/expect';
+
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const RULE_NAME = 'testRule';
@@ -47,7 +49,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
       await testSubjects.click('apm.anomaly-SelectOption');
       await testSubjects.existOrFail('ruleForm');
-      await testSubjects.setValue('ruleDetailsNameInput', RULE_NAME);
+      // React doesn't observe FTR's JS-based clearValue, so the pre-filled default name has to be cleared with real key events
+      await testSubjects.setValue('ruleDetailsNameInput', RULE_NAME, { clearWithKeyboard: true });
+      expect(await testSubjects.getAttribute('ruleDetailsNameInput', 'value')).to.eql(RULE_NAME);
       await comboBox.setCustom('ruleDetailsTagsInput', 'ruleTag');
       await a11y.testAppSnapshot();
     });

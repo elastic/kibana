@@ -1,0 +1,24 @@
+format_version: 3.0.0
+name: agent_version_condition
+title: Agent version condition
+description: Test package for blocking package policies on a package-level agent version condition
+version: 1.1.0
+type: integration
+license: basic
+categories: []
+conditions:
+  kibana:
+    version: '>=8.0.0'
+  agent:
+    version: '^9.3.0'
+policy_templates:
+  - name: agent_version_condition
+    title: Agent version condition
+    description: Collect test logs
+    inputs:
+      - type: test_input
+        title: Test input
+        description: Collect test logs
+owner:
+  github: elastic/fleet
+  type: elastic

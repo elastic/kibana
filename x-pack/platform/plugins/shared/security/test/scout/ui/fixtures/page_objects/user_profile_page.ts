@@ -19,7 +19,6 @@ export class UserProfilePage {
   public readonly changePasswordConfirmInput: Locator;
   public readonly changePasswordSubmitButton: Locator;
   public readonly themeKeypadMenu: Locator;
-  public readonly windowReloadButton: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.fullNameInput = page.testSubj.locator('userProfileFullName');
@@ -35,7 +34,6 @@ export class UserProfilePage {
     );
     this.changePasswordSubmitButton = page.testSubj.locator('changePasswordFormSubmitButton');
     this.themeKeypadMenu = page.testSubj.locator('themeMenu');
-    this.windowReloadButton = page.testSubj.locator('windowReloadButton');
   }
 
   async goto(): Promise<void> {
@@ -73,9 +71,7 @@ export class UserProfilePage {
   async changeTheme(mode: ThemeMode): Promise<void> {
     await this.themeKeypadButton(mode).click();
     await this.saveProfileChangesButton.click();
-    await this.windowReloadButton.waitFor({ state: 'visible' });
-    await this.windowReloadButton.click();
-    await this.themeKeypadMenu.waitFor({ state: 'visible' });
+    await this.saveProfileChangesButton.waitFor({ state: 'hidden' });
   }
 
   async getThemeTag(): Promise<string> {

@@ -9,7 +9,7 @@ import type { SavedObjectsClientContract, UiSettingsServiceStart } from '@kbn/co
 import type { JsonObject } from '@kbn/utility-types';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import {
-  isUserMessageEvent,
+  isMessageEvent,
   relevantSkillsHookId,
   type RelevantSkill,
 } from '@kbn/agent-builder-common';
@@ -92,12 +92,12 @@ const recentExchanges = ({
   const answers = new Map(
     executions.flatMap((execution) =>
       execution.events
-        .filter(isUserMessageEvent)
+        .filter(isMessageEvent)
         .map((event) => [event.id, execution.response] as const)
     )
   );
   return events
-    .filter(isUserMessageEvent)
+    .filter(isMessageEvent)
     .map((event) => ({ input: event.data, response: answers.get(event.id) }));
 };
 

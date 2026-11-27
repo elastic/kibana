@@ -46,7 +46,7 @@ export const createSingleMetricViewerAttachmentType = (): AttachmentTypeDefiniti
   isReadonly: false,
 
   getAgentDescription: () =>
-    'An ML single metric viewer attachment renders a continuous time series for one detector in one job — actual metric values with model confidence bounds overlaid, anomaly markers, and an optional forecast band. Render it inline with <render_attachment id="{attachment_id}" version="{version}" />. The config can also be forwarded to the dashboard generation tool as a panel with source: "config" and type: "ml_single_metric_viewer".',
+    'An ML single metric viewer attachment renders a continuous time series for one detector in one job — actual metric values with model confidence bounds overlaid, anomaly markers, and an optional forecast band. Render it inline with <render_attachment id="{attachment_id}" version="{version}" />. The config can also be forwarded to the dashboard generation tool as a panel with type: "ml_single_metric_viewer".',
 
   getTools: () => [],
 });

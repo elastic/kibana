@@ -9,6 +9,8 @@ import { get } from 'lodash';
 import * as esKuery from '@kbn/es-query';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 
+import { AGENTS_PREFIX, AGENT_QUERYABLE_MAPPINGS } from '../../../common/constants';
+
 type KueryNode = any;
 
 const astFunctionType = ['is', 'range', 'nested'];
@@ -16,7 +18,7 @@ const allowedTerms = ['_exists_'];
 
 interface ValidateFilterKueryNode {
   astPath: string;
-  error: string;
+  error: string | null;
   isSavedObjectAttr: boolean;
   key: string;
   type: string | null;
@@ -44,24 +46,25 @@ export const validateFilterKueryNode = ({
   skipNormalization,
 }: ValidateFilterKueryNodeParams): ValidateFilterKueryNode[] => {
   let localNestedKeys: string | undefined;
-  return astFilter.arguments.reduce((kueryNode: string[], ast: KueryNode, index: number) => {
-    if (hasNestedKey && ast.type === 'literal' && ast.value != null) {
-      localNestedKeys = ast.value;
-    } else if (ast.type === 'literal' && ast.value && typeof ast.value === 'string') {
-      const key = ast.value.replace('.attributes', '');
-      const mappingKey = 'properties.' + key.split('.').join('.properties.');
-      const field = get(indexMapping, mappingKey);
-
-      if (field != null && field.type === 'nested') {
+  // Results are appended to one accumulator: re-spreading it for every clause made validation
+  // quadratic in the number of sibling clauses.
+  return astFilter.arguments.reduce(
+    (kueryNode: ValidateFilterKueryNode[], ast: KueryNode, index: number) => {
+      if (hasNestedKey && ast.type === 'literal' && ast.value != null) {
         localNestedKeys = ast.value;
-      }
-    }
+      } else if (ast.type === 'literal' && ast.value && typeof ast.value === 'string') {
+        const key = ast.value.replace('.attributes', '');
+        const mappingKey = 'properties.' + key.split('.').join('.properties.');
+        const field = get(indexMapping, mappingKey);
 
-    if (ast.arguments) {
-      const myPath = `${path}.${index}`;
-      return [
-        ...kueryNode,
-        ...validateFilterKueryNode({
+        if (field != null && field.type === 'nested') {
+          localNestedKeys = ast.value;
+        }
+      }
+
+      if (ast.arguments) {
+        const myPath = `${path}.${index}`;
+        const childResults = validateFilterKueryNode({
           astFilter: ast,
           types,
           indexMapping,
@@ -70,29 +73,33 @@ export const validateFilterKueryNode = ({
           hasNestedKey: ast.type === 'function' && ast.function === 'nested',
           nestedKeys: localNestedKeys || nestedKeys,
           skipNormalization,
-        }),
-      ];
-    }
-    if (storeValue && index === 0) {
-      const splitPath = path.split('.');
-      const astPath = path.includes('.')
-        ? splitPath.slice(0, splitPath.length - 1).join('.')
-        : `${path}.${index}`;
-      const key = nestedKeys != null ? `${nestedKeys}.${ast.value}` : ast.value;
+        });
+        // A loop rather than `push(...childResults)`, which can exceed the engine's argument limit.
+        for (const childResult of childResults) {
+          kueryNode.push(childResult);
+        }
+        return kueryNode;
+      }
+      if (storeValue && index === 0) {
+        const splitPath = path.split('.');
+        const astPath = path.includes('.')
+          ? splitPath.slice(0, splitPath.length - 1).join('.')
+          : `${path}.${index}`;
+        const key = nestedKeys != null ? `${nestedKeys}.${ast.value}` : ast.value;
 
-      return [
-        ...kueryNode,
-        {
+        kueryNode.push({
           astPath,
           error: hasFilterKeyError(key, types, indexMapping, skipNormalization),
           isSavedObjectAttr: isSavedObjectAttr(key, indexMapping),
           key,
           type: getType(key),
-        },
-      ];
-    }
-    return kueryNode;
-  }, []);
+        });
+        return kueryNode;
+      }
+      return kueryNode;
+    },
+    []
+  );
 };
 
 const getType = (key: string | undefined | null) => {
@@ -255,4 +262,47 @@ export const validateKuery = (
     isValid = false;
     error = e.message;
   }
+};
+
+/**
+ * Returns an error when `field` is not in `AGENT_QUERYABLE_MAPPINGS`, the allowlist for agent sort
+ * and export fields.
+ */
+export const validateAgentField = (field: string): string | undefined => {
+  if (!fieldDefined(AGENT_QUERYABLE_MAPPINGS, field)) {
+    return `Field '${field}' is not supported`;
+  }
+};
+
+/**
+ * Returns an error when a KQL expression references a field that is not in
+ * `AGENT_QUERYABLE_MAPPINGS`, including wildcard field names. Field-less (free text) terms are
+ * allowed. A kuery that does not parse returns `undefined` so the caller keeps its own syntax error.
+ */
+export const validateAgentKueryFields = (kuery: string | undefined): string | undefined => {
+  if (!kuery) {
+    return undefined;
+  }
+  let astFilter: KueryNode;
+  try {
+    astFilter = esKuery.fromKueryExpression(kuery);
+  } catch (e) {
+    return undefined;
+  }
+  let errors: string[];
+  try {
+    errors = validateFilterKueryNode({
+      astFilter,
+      types: [AGENTS_PREFIX],
+      indexMapping: AGENT_QUERYABLE_MAPPINGS,
+      storeValue: true,
+      skipNormalization: true,
+    })
+      .map(({ error }) => error)
+      .filter((error): error is string => error != null);
+  } catch (e) {
+    // The parser accepts non-string field names (e.g. `true:foo`), which the walker cannot check.
+    return 'Kuery field is not supported';
+  }
+  return errors.length > 0 ? errors.join('\n') : undefined;
 };

@@ -5,23 +5,21 @@
  * 2.0.
  */
 
-import type { Action } from 'redux-actions';
-import { handleActions } from 'redux-actions';
+import { createSlice } from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit';
 
-import { startBasicLicenseStatus, cancelStartBasicLicense } from '../actions/start_basic';
 import type { StartBasicStatusState } from '../types';
 
-export const startBasicStatus = handleActions<StartBasicStatusState, StartBasicStatusState>(
-  {
-    [String(startBasicLicenseStatus)](
-      state: StartBasicStatusState,
-      { payload }: Action<StartBasicStatusState>
-    ) {
-      return payload;
-    },
-    [String(cancelStartBasicLicense)]() {
-      return {};
-    },
+const initialState: StartBasicStatusState = {};
+
+const startBasicStatusSlice = createSlice({
+  name: 'startBasicStatus',
+  initialState,
+  reducers: {
+    startBasicLicenseStatus: (_state, { payload }: PayloadAction<StartBasicStatusState>) => payload,
+    cancelStartBasicLicense: () => initialState,
   },
-  {}
-);
+});
+
+export const { startBasicLicenseStatus, cancelStartBasicLicense } = startBasicStatusSlice.actions;
+export const startBasicStatus = startBasicStatusSlice.reducer;

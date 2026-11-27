@@ -152,6 +152,46 @@ export const BulkActionContextProvider: React.FunctionComponent<{ children: Reac
               actionCompletedCallback('failed');
             }
           }
+
+          // Package policies blocked by their agents' versions stay on their current package
+          // version, without failing the package upgrade.
+          const skippedPackagePolicies =
+            action.type === 'bulk_upgrade'
+              ? (res.results ?? []).flatMap(({ name, skipped_package_policies: skipped }) =>
+                  (skipped ?? []).map((packagePolicy) => ({ ...packagePolicy, packageName: name }))
+                )
+              : [];
+          if (skippedPackagePolicies.length > 0) {
+            toasts.addWarning({
+              title: i18n.translate(
+                'xpack.fleet.epmInstalledIntegrations.bulkActions.bulkUpgradeSkippedPoliciesTitle',
+                {
+                  defaultMessage:
+                    'Fleet skipped {skippedCount, plural, one {# agent-based policy} other {# agent-based policies}}',
+                  values: { skippedCount: skippedPackagePolicies.length },
+                }
+              ),
+              text: i18n.translate(
+                'xpack.fleet.epmInstalledIntegrations.bulkActions.bulkUpgradeSkippedPoliciesMessage',
+                {
+                  defaultMessage:
+                    "Some agents using {skippedNames} don't satisfy the agent version required by the new integration version and would stop collecting its data. Upgrade those agents, then upgrade {skippedCount, plural, one {this policy} other {these policies}}.",
+                  values: {
+                    skippedCount: skippedPackagePolicies.length,
+                    skippedNames: i18n.formatList(
+                      'conjunction',
+                      skippedPackagePolicies.map(
+                        ({ id, name, packageName, version_condition: versionCondition }) =>
+                          `${name ?? id} (${packageName}${
+                            versionCondition ? ` ${versionCondition}` : ''
+                          })`
+                      )
+                    ),
+                  },
+                }
+              ),
+            });
+          }
         }
       },
       refetchInterval: 3 * 1000,

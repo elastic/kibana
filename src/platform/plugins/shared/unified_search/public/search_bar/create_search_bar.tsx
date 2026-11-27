@@ -321,10 +321,12 @@ export function createSearchBar({
             esqlVariablesConfig={props.esqlVariablesConfig}
             onOpenQueryInNewTab={props.onOpenQueryInNewTab}
             useBackgroundSearchButton={props.useBackgroundSearchButton}
+            cachedResultsLoadedAt={props.cachedResultsLoadedAt}
             esqlQueryStats={props.esqlQueryStats}
             enableResourceBrowser={props.enableResourceBrowser}
             enableCreateView={props.enableCreateView}
             enableDateRangePicker={props.enableDateRangePicker}
+            legacyDatePickerProps={props.legacyDatePickerProps}
             showTimeWindowButtons={props.showTimeWindowButtons}
             esqlApproximation={props.esqlApproximation}
           />

@@ -9,6 +9,7 @@ import React, { useCallback, useRef } from 'react';
 import type { ConsoleApi, ConsoleProps } from '../components/console/types';
 import { type SupportedHostOsType } from '../../../common/endpoint/constants';
 import { useLicense } from '../../common/hooks/use_license';
+import { useKibana } from '../../common/lib/kibana';
 import type { MaybeImmutable } from '../../../common/endpoint/types';
 import {
   type ResponseActionAgentType,
@@ -18,7 +19,7 @@ import { AgentInfo } from '../components/endpoint_responder/components/header_in
 
 import { useUserPrivileges } from '../../common/components/user_privileges';
 import {
-  ActionLogButton,
+  ResponseActionsHistoryAppMenu,
   getEndpointConsoleCommands,
   OfflineCallout,
 } from '../components/endpoint_responder';
@@ -52,6 +53,7 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
   const consoleManager = useConsoleManager();
   const endpointPrivileges = useUserPrivileges().endpointPrivileges;
   const isEnterpriseLicense = useLicense().isEnterprise();
+  const { docLinks } = useKibana().services;
   const consoleApi = useRef<ConsoleApi>();
   const pendingInputCommand = useRef<string | undefined>();
 
@@ -125,11 +127,10 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
               platform,
             },
             consoleProps,
-            PageTitleComponent: () => {
-              return <>{RESPONDER_PAGE_TITLE}</>;
-            },
-            ActionComponents: endpointPrivileges.canReadActionsLogManagement
-              ? [ActionLogButton]
+            pageTitle: RESPONDER_PAGE_TITLE,
+            docLink: docLinks.links.securitySolution.responseActions,
+            HeaderActionsComponent: endpointPrivileges.canReadActionsLogManagement
+              ? ResponseActionsHistoryAppMenu
               : undefined,
             PageBodyComponent: () => (
               <>
@@ -145,6 +146,6 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
           .show();
       }
     },
-    [endpointPrivileges, isEnterpriseLicense, consoleManager, applyPendingInputCommand]
+    [endpointPrivileges, isEnterpriseLicense, consoleManager, applyPendingInputCommand, docLinks]
   );
 };

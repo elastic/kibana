@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import { buildPatternKeys, getField, PATTERN_KEY_FIELDS } from './pattern_key';
+import { buildPatternKeys, getField } from './pattern_key';
 
 type AlertDocument = Record<string, unknown>;
-
-/** Every field the proposal title, comment and pattern history read from an alert. */
-export const PROPOSAL_TEXT_FIELDS: readonly string[] = [
-  ...new Set([...PATTERN_KEY_FIELDS, 'host.name', 'user.name', 'process.executable']),
-];
 
 const MAX_LISTED = 5;
 const SHOWN = 2;
@@ -75,7 +70,7 @@ export const buildVarietySummary = (docs: readonly AlertDocument[], kind: Propos
   const lines = [parts.join(' · ')];
   if (kind === 'pooled') {
     lines.push('These alerts matched no other alert of their batch, so they are pooled.');
-  } else if (docs.length > 0 && docs.every((doc) => buildPatternKeys(doc).strict === undefined)) {
+  } else if (docs.length > 0 && docs.every((doc) => buildPatternKeys(doc).wideIsRuleOnly)) {
     lines.push('These alerts have no program, file or registry field, so they group by rule only.');
   }
   return lines.join('\n');

@@ -17,6 +17,7 @@ import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { WorkflowInsights } from './components/insights/workflow_insights';
 import { WorkflowInsightsAB } from './components/insights/workflow_insights_ab';
+import { ConfigurationTroubleshootingSunsetCallout } from './components/configuration_troubleshooting_sunset_callout';
 import { isPolicyOutOfDate } from '../../utils';
 import { AgentStatus } from '../../../../../common/components/endpoint/agents/agent_status';
 import type { HostInfo } from '../../../../../../common/endpoint/types';
@@ -48,6 +49,9 @@ export const EndpointDetailsContent = memo<EndpointDetailsContentProps>(
     // Access control
     const { canReadWorkflowInsights } = useUserPrivileges().endpointPrivileges;
     const isAgentBuilderEnabled = useIsExperimentalFeatureEnabled('automaticTroubleshootingSkill');
+    const isUniversalSkillEnabled = useIsExperimentalFeatureEnabled(
+      'automaticTroubleshootingUniversalSkill'
+    );
 
     const queryParams = useEndpointSelector(uiQueryParams);
     const policyStatus = useMemo(
@@ -191,7 +195,12 @@ export const EndpointDetailsContent = memo<EndpointDetailsContentProps>(
     return (
       <div>
         {canReadWorkflowInsights &&
-          (isAgentBuilderEnabled ? (
+          (isUniversalSkillEnabled ? (
+            <ConfigurationTroubleshootingSunsetCallout
+              hostName={hostInfo.metadata.host.hostname}
+              agentId={hostInfo.metadata.agent.id}
+            />
+          ) : isAgentBuilderEnabled ? (
             <WorkflowInsightsAB endpointId={hostInfo.metadata.agent.id} />
           ) : (
             <WorkflowInsights endpointId={hostInfo.metadata.agent.id} />

@@ -30,8 +30,9 @@ jest.mock('@kbn/react-query', () => ({
   useQueryClient: () => ({ invalidateQueries: jest.fn() }),
 }));
 
+let mockSearch = '';
 jest.mock('@kbn/shared-ux-router', () => ({
-  useSearchParams: () => [new URLSearchParams(), jest.fn()],
+  useSearchParams: () => [new URLSearchParams(mockSearch), jest.fn()],
 }));
 
 jest.mock('../use_agent_builder_service', () => ({
@@ -76,6 +77,7 @@ describe('useAgentEdit submit (create/clone branch)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockAgent = undefined;
+    mockSearch = '';
     mockCreate.mockResolvedValue({ id: 'cloned-agent' });
     mockUpdate.mockResolvedValue({ id: 'existing-agent' });
     mockUpdateAccessControl.mockResolvedValue({
@@ -372,6 +374,25 @@ describe('useAgentEdit submit (create/clone branch)', () => {
     });
   });
 
+  it('never carries the binding into a clone', () => {
+    mockAgent = {
+      id: 'source-agent',
+      name: 'Source',
+      description: 'd',
+      access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
+      configuration: baseConfiguration,
+      service_account_id: 'kibana/sa-1',
+    };
+
+    mockSearch = 'sourceId=source-agent';
+
+    const { result } = renderHook(() =>
+      useAgentEdit({ onSaveSuccess: jest.fn(), onSaveError: jest.fn() })
+    );
+
+    expect(result.current.state.service_account_id).toBeUndefined();
+    expect(result.current.state.id).not.toBe('source-agent');
+  });
   it('exposes permissions separately from editable form state', async () => {
     mockAgent = {
       id: 'existing-agent',

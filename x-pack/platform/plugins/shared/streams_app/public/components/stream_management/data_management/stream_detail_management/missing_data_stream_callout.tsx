@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { useAbortController } from '@kbn/react-hooks';
 import { useKibana } from '../../../../hooks/use_kibana';
+import { useNavigateToStreamsHome } from '../../../../hooks/use_streams_home_link';
 
 export function MissingDataStreamCallout({
   streamName,
@@ -24,7 +25,6 @@ export function MissingDataStreamCallout({
 }) {
   const {
     core: {
-      application: { navigateToApp },
       notifications: { toasts },
       overlays,
     },
@@ -36,6 +36,7 @@ export function MissingDataStreamCallout({
   } = useKibana();
 
   const abortController = useAbortController();
+  const navigateToStreamsHome = useNavigateToStreamsHome();
 
   const restoreStream = useCallback(async () => {
     await streamsRepositoryClient.fetch('POST /internal/streams/{name}/_restore_data_stream', {
@@ -91,10 +92,10 @@ export function MissingDataStreamCallout({
         defaultMessage: 'Stream deleted',
       })
     );
-    navigateToApp('/streams');
+    navigateToStreamsHome();
   }, [
     abortController.signal,
-    navigateToApp,
+    navigateToStreamsHome,
     overlays,
     streamName,
     streamsRepositoryClient,

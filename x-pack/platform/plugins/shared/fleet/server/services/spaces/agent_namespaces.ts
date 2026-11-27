@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import { ALL_SPACES_ID } from '../../../common/constants';
@@ -46,6 +47,39 @@ export async function agentsKueryNamespaceFilter(namespace?: string) {
   return namespace === DEFAULT_SPACE_ID
     ? DEFAULT_NAMESPACES_FILTER
     : `namespaces:(${namespace}) or namespaces:"*"`;
+}
+
+/**
+ * The agents of a namespace, as the query that {@link agentsKueryNamespaceFilter} stands for, for a
+ * request that is not a search by kuery. It is built from the namespace itself: reading a space id
+ * as KQL would take one like `null`, or one with a colon, for something else than a name.
+ */
+export async function agentsNamespaceQuery(
+  namespace?: string
+): Promise<QueryDslQueryContainer | undefined> {
+  const useSpaceAwareness = await isSpaceAwarenessEnabled();
+  // undefined or '*' both mean "all spaces" — omit the filter entirely
+  if (!useSpaceAwareness || !namespace || namespace === '*') {
+    return;
+  }
+  return namespace === DEFAULT_SPACE_ID
+    ? {
+        bool: {
+          should: [
+            { term: { namespaces: DEFAULT_SPACE_ID } },
+            { term: { namespaces: ALL_SPACES_ID } },
+            // an agent that is in no space is in the default one
+            { bool: { must_not: { exists: { field: 'namespaces' } } } },
+          ],
+          minimum_should_match: 1,
+        },
+      }
+    : {
+        bool: {
+          should: [{ term: { namespaces: namespace } }, { term: { namespaces: ALL_SPACES_ID } }],
+          minimum_should_match: 1,
+        },
+      };
 }
 
 /**

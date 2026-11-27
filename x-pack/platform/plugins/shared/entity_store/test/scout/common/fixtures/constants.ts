@@ -45,6 +45,7 @@ export const ENTITY_STORE_ROUTES = {
     STATUS: `${PUBLIC_BASE}/status`,
     START: `${PUBLIC_BASE}/start`,
     STOP: `${PUBLIC_BASE}/stop`,
+    UPDATE_API_KEY: `${PUBLIC_BASE}/update_api_key`,
     ENABLE_HISTORY_SNAPSHOT: `${PUBLIC_BASE}/history_snapshot/enable`,
     DISABLE_HISTORY_SNAPSHOT: `${PUBLIC_BASE}/history_snapshot/disable`,
     UNINSTALL: `${PUBLIC_BASE}/uninstall`,

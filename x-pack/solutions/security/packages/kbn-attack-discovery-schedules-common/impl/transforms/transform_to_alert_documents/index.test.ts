@@ -22,8 +22,8 @@ import {
 } from '../../fields/field_names';
 
 /**
- * An arbitrary producer identity. No production caller passes a
- * `generationSource` yet — this only exercises the opt-in mechanism.
+ * An arbitrary producer identity. Not a real producer: the AD Worker passes `watch_floor_ad_worker`.
+ * This only exercises the opt-in mechanism.
  */
 const TEST_GENERATION_SOURCE = 'test-producer';
 

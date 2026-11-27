@@ -42,12 +42,17 @@ export interface HuntReportExpectation {
    */
   pendingProposals?: number | { min: number };
   /**
-   * Whether report `evidence[]` and `last_hunted_at` are written. The hunt child writes evidence
-   * exactly when the coordinator result's `completed_successfully` is true (`write_evidence` in
-   * `hunt.yaml`): `complete` or `incomplete_final`, never `incomplete_retryable`. That is not the
-   * child's own `status`, which is `partial` for both incomplete kinds, so a hunt that retired a
-   * report with evidence marked incomplete still counts as written here.
-   * `iff_completed_successfully` is for rows where the hunt may legitimately end partial.
+   * Whether the report's hunt-once stamp (`last_hunted_at` on its `evidence[]` element) is written.
+   * The hunt child sends every finished run to the `write_hunt_evidence` route, which stamps when
+   * the run found a confirmed hit, whatever the completeness, or when the coordinator's
+   * `completed_successfully` is true (`complete` or `incomplete_final`). A retryable run with no
+   * hit is not stamped, so the report stays eligible; it may still record a coverage ledger, which
+   * is not a stamp. That is not the child's own `status`, which is `retired_incomplete` for a
+   * settled `incomplete_final` run (hit or not) and `partial` for a retryable run its write did
+   * not settle, a hit-bearing one included, so a hunt that stamped a report can still report
+   * `partial`.
+   * `iff_completed_successfully` is for rows where the hunt may legitimately end partial, and
+   * expects the stamp exactly under that rule.
    */
   evidenceWritten: boolean | 'iff_completed_successfully';
   /** Whether a schema-valid SSE attachment is expected on the Investigation. */
@@ -79,8 +84,9 @@ export interface HuntExpected {
   skipped?: string[];
   /**
    * When true, the CODE `Proposal Convergence` evaluator requires that actioned
-   * Proposals for the same subject (target plus criticality level, as packaging keys it)
-   * are minted once across this run's Investigations,
+   * Proposals for the same subject (the agent/process or identity packaging keys it
+   * by, plus the action workflow and process key where applicable) are minted once
+   * across this run's Investigations,
    * and that at least one converging Investigation (or the live Proposal's comment)
    * records the "Also raised by" / "no second Proposal" convergence text. Used by
    * multi-candidate rows that share principals across report ids.
@@ -98,9 +104,29 @@ export interface HuntExpected {
  */
 export type HuntFault = 'investigation_locked';
 
+/**
+ * How a row's CODE misses gate the run (see `assertCodeScoresPass`):
+ *  - `invariant`: a contract every subject model must hold (scope gate, fault handling, no
+ *    Proposal without a hit). A miss fails any model.
+ *  - `capability`: the pinned outcome needs the subject model to ground its Tier 2 query, so it
+ *    separates strong models from weak ones. A miss fails reference models only and is reported
+ *    for every other model.
+ * An untagged row is `invariant`.
+ */
+export type HuntGate = 'invariant' | 'capability';
+
+// The index signature keeps this assignable to the `Example` metadata constraint
+// (`Record<string, unknown>`); an interface has no implicit one.
+export interface HuntRowMetadata {
+  [key: string]: unknown;
+  gate?: HuntGate;
+}
+
 export interface HuntWatchExample {
   id: string;
   cohort: HuntCohort;
+  /** Forwarded to every evaluator by the executor, unlike `id`. */
+  metadata?: HuntRowMetadata | null;
   input: {
     spaceId: string;
     /** Named report ids for the manual trigger. */

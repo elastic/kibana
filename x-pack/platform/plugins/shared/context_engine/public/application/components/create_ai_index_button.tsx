@@ -10,27 +10,25 @@ import { getEbtProps } from '@kbn/ebt-click';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../common/telemetry';
-import { useNavigation } from '../hooks/use_navigation';
-import { CONTEXT_ENGINE_PATHS } from '../paths';
 
-export const CreateAiIndexButton = () => {
-  const { createContextEngineUrl } = useNavigation();
+interface CreateAiIndexButtonProps {
+  onClick: () => void;
+}
 
-  return (
-    <EuiButton
-      fill
-      iconType="plusCircle"
-      data-test-subj="contextCreateAiIndexButton"
-      href={createContextEngineUrl(CONTEXT_ENGINE_PATHS.create)}
-      {...getEbtProps({
-        element: CONTEXT_ENGINE_UI_EBT.element.aiIndexListPage,
-        action: CONTEXT_ENGINE_UI_EBT.action.aiIndexList.CREATE,
-      })}
-    >
-      <FormattedMessage
-        id="xpack.contextEngine.createAiIndexButton"
-        defaultMessage="Create AI Index"
-      />
-    </EuiButton>
-  );
-};
+export const CreateAiIndexButton = ({ onClick }: CreateAiIndexButtonProps) => (
+  <EuiButton
+    fill
+    iconType="plusCircle"
+    data-test-subj="contextCreateAiIndexButton"
+    onClick={onClick}
+    {...getEbtProps({
+      element: CONTEXT_ENGINE_UI_EBT.element.aiIndexListPage,
+      action: CONTEXT_ENGINE_UI_EBT.action.aiIndexList.CREATE,
+    })}
+  >
+    <FormattedMessage
+      id="xpack.contextEngine.createAiIndexButton"
+      defaultMessage="Create AI Index"
+    />
+  </EuiButton>
+);

@@ -1,5 +1,5 @@
 {
-  "sha1": "b8181541e1a1f9b1e2c6c196c31108aed016c72e",
+  "sha1": "6fd6b998d4c918e6f499b81039b7a1510f8d084b",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -9,12 +9,13 @@
       "title": "Interactive setup - enrollment token configures Kibana from an enrollment token",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@limit/except-fips"
       ],
       "location": {
         "file": "src/platform/plugins/private/interactive_setup/test/scout_interactive_setup_tls_enrollment_ui/ui/tests/enrollment_token.spec.ts",
-        "line": 37,
-        "column": 42
+        "line": 39,
+        "column": 22
       }
     }
   ]

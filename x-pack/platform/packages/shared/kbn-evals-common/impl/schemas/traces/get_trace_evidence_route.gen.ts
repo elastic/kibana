@@ -38,6 +38,13 @@ export const EvidenceToolCall = lazySchema(() =>
   z.object({
     tool_call_id: z.string().optional(),
     tool_id: z.string().optional(),
+    /**
+     * The agent's own note immediately before this call, when the source records one.
+     */
+    reasoning: z
+      .string()
+      .optional()
+      .describe("The agent's own note immediately before this call, when the source records one."),
     arguments: z.union([z.unknown()]).optional(),
     result: z.union([z.unknown()]).optional(),
   })

@@ -171,7 +171,7 @@ export const sloNameActionVariableDescription = i18n.translate(
 export const sloInstanceIdActionVariableDescription = i18n.translate(
   'xpack.slo.alerting.sloInstanceIdDescription',
   {
-    defaultMessage: 'The SLO instance id.',
+    defaultMessage: 'The SLO instance ID.',
   }
 );
 

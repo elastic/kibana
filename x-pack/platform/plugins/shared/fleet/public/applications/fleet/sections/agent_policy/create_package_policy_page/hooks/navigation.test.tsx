@@ -9,6 +9,8 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { renderHook } from '@testing-library/react';
 
+import type { EditPackagePolicyFrom } from '../types';
+
 import { useCancelAddPackagePolicy } from './navigation';
 
 const mockNavigateToApp = jest.fn();
@@ -34,11 +36,11 @@ jest.mock('../../../../hooks', () => ({
   useIntraAppState: jest.fn(() => undefined),
 }));
 
-const renderWithSearch = (search: string) =>
+const renderWithSearch = (search: string, from: EditPackagePolicyFrom = 'package') =>
   renderHook(
     () =>
       useCancelAddPackagePolicy({
-        from: 'package',
+        from,
         pkgkey: 'nginx-1.3.0',
         agentPolicyId: undefined,
       }),
@@ -57,6 +59,15 @@ describe('useCancelAddPackagePolicy', () => {
   });
 
   describe('cancelUrl', () => {
+    it.each([
+      'installed-integrations',
+      'copy-from-installed-integrations',
+      'upgrade-from-installed-integrations',
+    ] as const)('returns to Installed integrations from %s', (from) => {
+      const { result } = renderWithSearch('', from);
+      expect(result.current.cancelUrl).toBe('/installed?viewPolicies=nginx');
+    });
+
     it('uses returnPath/returnAppId to return to the Integrations catalog with flyout open', () => {
       const { result } = renderWithSearch(
         '?returnAppId=integrations&returnPath=%2Fbrowse%3Fcollection%3Dnginx'

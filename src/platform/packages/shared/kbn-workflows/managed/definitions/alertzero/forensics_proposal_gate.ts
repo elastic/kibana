@@ -11,8 +11,8 @@ import {
   ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
 } from './constants';
-import FORENSICS_PROPOSAL_GATE_YAML from './forensics_proposal_gate.yaml';
 import type { ManagedWorkflowDefinition } from '../../types';
+import { readManagedWorkflowYaml } from '../read_managed_workflow_yaml';
 
 export const ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW_ID =
   'system-security-forensics-proposal-gate';
@@ -35,5 +35,7 @@ export const ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW = {
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
   version: 5,
-  yaml: FORENSICS_PROPOSAL_GATE_YAML,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'forensics_proposal_gate.yaml');
+  },
 } as const satisfies ManagedWorkflowDefinition;

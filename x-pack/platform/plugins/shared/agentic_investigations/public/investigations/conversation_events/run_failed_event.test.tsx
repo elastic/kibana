@@ -14,7 +14,10 @@ import {
   INVESTIGATION_RUN_FAILED_EVENT_TYPE,
   type InvestigationRunFailedEventData,
 } from '../../../common/investigations/run_failure';
-import { investigationRunFailedEventUiDefinition } from './run_failed_event';
+import {
+  investigationRunFailedEventUiDefinition,
+  investigationRunTimedOutEventUiDefinition,
+} from './run_failed_event';
 import { registerInvestigationConversationEventUiDefinitions } from '.';
 
 const event: ConversationEvent<
@@ -77,5 +80,26 @@ describe('investigation run failure event', () => {
     expect(
       investigationRunFailedEventUiDefinition.getHeader?.(event, { conversationId: 'inv-1' })
     ).toMatchObject({ icon: 'warning', label: 'Investigation run failed' });
+  });
+});
+
+describe('investigation timeout event', () => {
+  it('registers a distinct warning and renders the original persisted text safely', () => {
+    const timeout = { ...event, type: 'investigation_run_timed_out' as const };
+    const { container } = render(
+      <I18nProvider>
+        {investigationRunTimedOutEventUiDefinition.render(timeout, { conversationId: 'inv-1' })}
+      </I18nProvider>
+    );
+    expect(
+      investigationRunTimedOutEventUiDefinition.getHeader?.(timeout, { conversationId: 'inv-1' })
+    ).toMatchObject({ icon: 'warning', label: 'Investigation run timed out' });
+    expect(screen.getByTestId('investigationRunFailedRequest').textContent).toBe(
+      event.data.request
+    );
+    expect(container.querySelector('script, manage')).toBeNull();
+    const register = jest.fn();
+    registerInvestigationConversationEventUiDefinitions({ register } as never);
+    expect(register).toHaveBeenCalledWith(investigationRunTimedOutEventUiDefinition);
   });
 });

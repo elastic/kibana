@@ -365,18 +365,18 @@ export class TimePickerPageObject extends FtrService {
       return !(await this.testSubjects.exists('superDatePickerAbsoluteDateInput'));
     });
 
-    const superDatePickerApplyButtonExists = await this.testSubjects.exists(
-      'superDatePickerApplyTimeButton'
+    // top nav renders `superDatePickerApplyTimeButton`, the query bar `querySubmitButton`
+    const submitButton = await this.testSubjects.waitForFirst(
+      ['superDatePickerApplyTimeButton', 'querySubmitButton'],
+      { timeout: 10_000 }
     );
-    if (superDatePickerApplyButtonExists) {
-      // Timepicker is in top nav
-      // Click super date picker apply button to apply time range
-      await this.testSubjects.click('superDatePickerApplyTimeButton');
-    } else {
-      // Timepicker is embedded in query bar
-      // click query bar submit button to apply time range
-      await this.testSubjects.click('querySubmitButton');
+    if (!submitButton) {
+      throw new Error(
+        'Neither the time picker apply button nor the query bar submit button rendered'
+      );
     }
+    // The picker re-renders as its date popover closes, so a bare resolve-and-click can be swallowed.
+    await this.testSubjects.clickWhenNotDisabled(submitButton);
   }
 
   public async isOff() {

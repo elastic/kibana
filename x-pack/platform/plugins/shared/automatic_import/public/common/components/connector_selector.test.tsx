@@ -11,7 +11,9 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
+import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { ConnectorSelector } from './connector_selector';
 import { ConnectorSetup } from './connector_setup';
 import { useLoadConnectors } from '@kbn/inference-connectors';
@@ -105,10 +107,18 @@ const TestProviders: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   </I18nProvider>
 );
 
+let testForm: FormHook;
+
 const FormWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { form } = useForm({
     defaultValue: { connectorId: '' },
+    schema: {
+      connectorId: {
+        validations: [{ validator: fieldValidators.emptyField('Connector required') }],
+      },
+    },
   });
+  testForm = form;
 
   return (
     <Form form={form}>
@@ -158,6 +168,35 @@ describe('ConnectorSelector', () => {
       expect(getByTestId('connector-selector')).toBeInTheDocument();
     });
 
+    it('should hide the control when no connectors exist', async () => {
+      mockUseLoadConnectors.mockReturnValue({
+        data: [],
+        isLoading: false,
+        refetch: mockRefetch,
+      });
+
+      const { queryByTestId } = await renderConnectorSelector();
+      expect(queryByTestId('connector-selector')).not.toBeInTheDocument();
+    });
+
+    it('should show an inline error when the connector fails validation but connectors exist', async () => {
+      mockUseLoadConnectors.mockReturnValue({
+        data: mockConnectors.map((connector) => ({ ...connector, isMissingSecrets: true })),
+        isLoading: false,
+        refetch: mockRefetch,
+      });
+
+      const { getByTestId, queryByText } = await renderConnectorSelector();
+      expect(queryByText('Connector required')).not.toBeInTheDocument();
+
+      await act(async () => {
+        await testForm.validateFields(['connectorId']);
+      });
+
+      expect(getByTestId('connector-selector')).toBeInTheDocument();
+      expect(queryByText('Connector required')).toBeInTheDocument();
+    });
+
     it('should show loading spinner when connectors are loading', async () => {
       mockUseLoadConnectors.mockReturnValue({
         data: mockConnectors,
@@ -167,55 +206,6 @@ describe('ConnectorSelector', () => {
 
       const { getByTestId } = await renderConnectorSelector();
       expect(getByTestId('connectorSelectorLoading')).toBeInTheDocument();
-    });
-
-    it('should show "Add connector" button when no connectors exist', async () => {
-      mockUseLoadConnectors.mockReturnValue({
-        data: [],
-        isLoading: false,
-        refetch: mockRefetch,
-      });
-
-      const { getByTestId } = await renderConnectorSelector();
-      expect(getByTestId('addNewConnectorButton')).toBeInTheDocument();
-    });
-
-    it('should disable Add connector when user cannot create connectors', async () => {
-      mockUseLoadConnectors.mockReturnValue({
-        data: [],
-        isLoading: false,
-        refetch: mockRefetch,
-      });
-
-      const base = createMockServices();
-      const servicesCannotCreate = {
-        ...base,
-        application: {
-          ...base.application,
-          capabilities: {
-            ...base.application.capabilities,
-            actions: {
-              ...(base.application.capabilities?.actions ?? {}),
-              save: false,
-            },
-          },
-        },
-      };
-
-      let result: ReturnType<typeof render>;
-      await act(async () => {
-        result = render(
-          <I18nProvider>
-            <KibanaContextProvider services={servicesCannotCreate}>
-              <FormWrapper>
-                <ConnectorSelector />
-              </FormWrapper>
-            </KibanaContextProvider>
-          </I18nProvider>
-        );
-      });
-
-      expect(result!.getByTestId('addNewConnectorButtonDisabled')).toBeDisabled();
     });
 
     it('should display the first connector name on the button', async () => {
@@ -255,6 +245,52 @@ describe('ConnectorSelector', () => {
         expect(getByTestId('connector-selector')).toHaveTextContent('My OpenAI Connector');
       });
     });
+
+    it('should switch to the default connector when the selected connector is removed', async () => {
+      const { getByTestId, rerender } = await renderConnectorSelector();
+      await waitFor(() => expect(testForm.getFields().connectorId.value).toBe('connector-1'));
+
+      mockUseLoadConnectors.mockReturnValue({
+        data: mockConnectors.slice(1),
+        isLoading: false,
+        refetch: mockRefetch,
+      });
+      rerender(
+        <TestProviders>
+          <FormWrapper>
+            <ConnectorSelector />
+          </FormWrapper>
+        </TestProviders>
+      );
+
+      await waitFor(() => expect(testForm.getFields().connectorId.value).toBe('connector-2'));
+      expect(getByTestId('connector-selector')).toHaveTextContent('My Bedrock Connector');
+    });
+
+    it('should clear the connector when the last connector is removed', async () => {
+      const { rerender } = await renderConnectorSelector();
+      await waitFor(() => expect(testForm.getFields().connectorId.value).toBe('connector-1'));
+
+      mockUseLoadConnectors.mockReturnValue({
+        data: [],
+        isLoading: false,
+        refetch: mockRefetch,
+      });
+      rerender(
+        <TestProviders>
+          <FormWrapper>
+            <ConnectorSelector />
+          </FormWrapper>
+        </TestProviders>
+      );
+
+      await waitFor(() => expect(testForm.getFields().connectorId.value).toBe(''));
+      let areFieldsValid = true;
+      await act(async () => {
+        ({ areFieldsValid } = await testForm.validateFields(['connectorId']));
+      });
+      expect(areFieldsValid).toBe(false);
+    });
   });
 
   describe('popover interactions', () => {
@@ -268,25 +304,6 @@ describe('ConnectorSelector', () => {
       await waitFor(() => {
         expect(queryByTestId('connectorSelectorPopover')).toBeInTheDocument();
       });
-    });
-  });
-
-  describe('connector creation', () => {
-    it('should open connector setup when "Add connector" is clicked with no connectors', async () => {
-      mockUseLoadConnectors.mockReturnValue({
-        data: [],
-        isLoading: false,
-        refetch: mockRefetch,
-      });
-
-      const { getByTestId, findByTestId } = await renderConnectorSelector();
-
-      await act(async () => {
-        fireEvent.click(getByTestId('addNewConnectorButton'));
-      });
-
-      const flyout = await findByTestId('connectorSetupFlyout');
-      expect(flyout).toBeInTheDocument();
     });
   });
 });

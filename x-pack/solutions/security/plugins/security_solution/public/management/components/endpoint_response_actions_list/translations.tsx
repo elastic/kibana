@@ -129,9 +129,6 @@ export const UX_MESSAGES = Object.freeze({
       defaultMessage: `Response actions history : {hostname}`,
       values: { hostname },
     }),
-  pageSubTitle: i18n.translate('xpack.securitySolution.responseActionsList.list.pageSubTitle', {
-    defaultMessage: 'View the history of response actions performed on hosts.',
-  }),
   fetchError: i18n.translate('xpack.securitySolution.responseActionsList.list.errorMessage', {
     defaultMessage: 'Error while retrieving response actions',
   }),

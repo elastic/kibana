@@ -318,6 +318,7 @@ export class AdHocTaskRunner implements CancellableTask {
       taskRunnerContext: this.context,
       taskInstance,
       ruleRunMetricsStore,
+      ruleResultService: this.ruleResult,
       apiKey: effectiveApiKey,
       apiKeyId,
       // Carry the UIAM key id so the connector tasks are visible to the API key invalidation

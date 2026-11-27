@@ -26,7 +26,6 @@ describe('NamePopoverContent', () => {
           description: 'desc',
           valueCellContent: () => <span>value cell content</span>,
         }}
-        cellActions={null}
       />
     );
     expect(screen.getByText('myField')).toBeInTheDocument();
@@ -43,7 +42,6 @@ describe('NamePopoverContent', () => {
           description: 'A description',
           valueCellContent: () => <span>value cell content</span>,
         }}
-        cellActions={null}
       />
     );
     expect(screen.getByText('A description')).toBeInTheDocument();
@@ -58,26 +56,9 @@ describe('NamePopoverContent', () => {
           value: 'val',
           valueCellContent: () => <span>value cell content</span>,
         }}
-        cellActions={null}
       />
     );
     expect(screen.queryByText('desc')).not.toBeInTheDocument();
-  });
-
-  it('renders cellActions if provided', () => {
-    render(
-      <NamePopoverContent
-        fieldName="fieldC"
-        fieldConfig={{
-          name: 'fieldC',
-          value: 'val',
-          description: 'desc',
-          valueCellContent: () => <span>value cell content</span>,
-        }}
-        cellActions={<button>ActionBtn</button>}
-      />
-    );
-    expect(screen.getByText('ActionBtn')).toBeInTheDocument();
   });
 
   it('renders FieldIcon when fieldConfig.type is provided', () => {
@@ -91,7 +72,6 @@ describe('NamePopoverContent', () => {
           description: 'desc',
           valueCellContent: () => <span>value cell content</span>,
         }}
-        cellActions={null}
       />
     );
     const icon = screen.getByTestId('fieldIcon');
@@ -108,7 +88,6 @@ describe('NamePopoverContent', () => {
           description: 'desc',
           valueCellContent: () => <span>value cell content</span>,
         }}
-        cellActions={null}
       />
     );
     expect(screen.queryByTestId('fieldIcon')).toBeNull();

@@ -10,7 +10,12 @@ import { stringify as yamlStringify } from 'yaml';
 import { CaseSeverity } from '@kbn/cases-plugin/common/types/domain';
 import { CASES_URL } from '@kbn/cases-plugin/common/constants';
 import { getPostCaseRequest } from '../../../../common/lib/mock';
-import { deleteAllCaseItems, createCase, getSpaceUrlPrefix } from '../../../../common/lib/api';
+import {
+  deleteAllCaseItems,
+  createCase,
+  getCaseSavedObjectsFromES,
+  getSpaceUrlPrefix,
+} from '../../../../common/lib/api';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { secOnly, secOnlySpacesAll, superUser } from '../../../../common/lib/authentication/users';
 
@@ -282,6 +287,62 @@ export default ({ getService }: FtrProviderContext): void => {
       );
 
       expect(createdCase.template?.id).to.eql(template.templateId);
+    });
+
+    describe('extract_observables_source', () => {
+      // The fixture owner has no auto-extract default, so the space default is `false`.
+      // The template value `true` differs from it, so the template value is the baseline.
+      const templateWithExtractObservables = {
+        name: 'Extract Observables Template',
+        fields: [],
+        settings: { extractObservables: true },
+      };
+
+      const getStoredSource = async (): Promise<string | undefined> => {
+        const res = await getCaseSavedObjectsFromES({ es });
+
+        expect(res.body.hits.hits.length).to.eql(1);
+        return res.body.hits.hits[0]._source?.cases!.extract_observables_source;
+      };
+
+      it('stores "template" when the request omits settings.extractObservables', async () => {
+        const template = await createTemplate(templateWithExtractObservables);
+
+        await createCase(supertest, {
+          ...getPostCaseRequest({ owner: OWNER, settings: { syncAlerts: true } }),
+          template: { id: template.templateId },
+        });
+
+        expect(await getStoredSource()).to.eql('template');
+      });
+
+      it('stores "template" when the request value equals the template value', async () => {
+        const template = await createTemplate(templateWithExtractObservables);
+
+        await createCase(supertest, {
+          ...getPostCaseRequest({
+            owner: OWNER,
+            settings: { syncAlerts: true, extractObservables: true },
+          }),
+          template: { id: template.templateId },
+        });
+
+        expect(await getStoredSource()).to.eql('template');
+      });
+
+      it('stores "explicit" when the request value differs from the template value', async () => {
+        const template = await createTemplate(templateWithExtractObservables);
+
+        await createCase(supertest, {
+          ...getPostCaseRequest({
+            owner: OWNER,
+            settings: { syncAlerts: true, extractObservables: false },
+          }),
+          template: { id: template.templateId },
+        });
+
+        expect(await getStoredSource()).to.eql('explicit');
+      });
     });
   });
 };

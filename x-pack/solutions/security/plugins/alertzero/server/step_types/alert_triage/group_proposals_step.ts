@@ -30,7 +30,7 @@ import {
   type GroupingHead,
 } from '../../alert_triage/group_proposals';
 import { buildPatternKeys, getField } from '../../alert_triage/pattern_key';
-import { buildProposalText, PROPOSAL_TEXT_FIELDS } from '../../alert_triage/proposal_text';
+import { buildProposalText } from '../../alert_triage/proposal_text';
 import { createInvestigationOpenChecker } from '../../services/proposals/dedup';
 import type { WorkflowExecutionReader } from '../report_worker_outcome/report_worker_outcome_step';
 import { loadAlertsByIds, readKeyHistory } from './ports';
@@ -63,7 +63,7 @@ const readHistory = async (
 };
 
 export interface GroupProposalsStepDependencies {
-  getProposals: () => ProposalsPluginStart;
+  getProposalsPlugin: () => ProposalsPluginStart;
   getWorkflowsManagement: () => WorkflowExecutionReader | undefined;
   getConversations: () => AgentBuilderPluginStart['conversations'];
   /** The kill switch: false makes every batch mint its own proposal, as before grouping. */
@@ -131,7 +131,7 @@ const createRuntime = async (
       message: 'No request available in workflow context',
     });
   }
-  const { getProposalsService, getProposalPrivileges } = deps.getProposals();
+  const { getProposalsService, getProposalPrivileges } = deps.getProposalsPlugin();
   const service = getProposalsService();
   const privileges = getProposalPrivileges();
   await privileges.assertCanRead(request);
@@ -174,8 +174,7 @@ const createRuntime = async (
       return isInvestigationOpen(conversationId);
     },
     revise: async (head, alertIds) => {
-      // Only the fields the keys and the text read: a proposal can hold up to 1,000 alerts.
-      const { alerts } = await loadAlertsByIds(contextManager, alertIds, PROPOSAL_TEXT_FIELDS);
+      const { alerts } = await loadAlertsByIds(contextManager, alertIds);
       const history = await readHistory(
         { contextManager, logger: deps.logger },
         spaceId,
@@ -233,7 +232,7 @@ const nonEmpty = (value: unknown): string | undefined =>
  * and a user is `user:<user.name>`. Matching by this id, not by display name, keeps a host that has
  * only `host.id`, and does not mix two hosts that share a name.
  */
-const entityIdsOf = (doc: Record<string, unknown>): string[] => {
+export const entityIdsOf = (doc: Record<string, unknown>): string[] => {
   const host = nonEmpty(getField(doc, 'host.id')) ?? nonEmpty(getField(doc, 'host.name'));
   const user = nonEmpty(getField(doc, 'user.name'));
   return [

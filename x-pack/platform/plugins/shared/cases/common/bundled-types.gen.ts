@@ -388,14 +388,14 @@ export const Settings = lazySchema(() =>
      */
     syncAlerts: z.boolean().describe('Turns alert syncing on or off.'),
     /**
-      * When true, observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments. When omitted on create, the space configuration default is used. Falls back to the owner's default when no space configuration exists: `true` for Security, `false` for Stack and Observability. Precedence: explicit value > template setting > space config > owner default. For owners that do not support observable extraction (currently Observability), an omitted value resolves to `false` regardless of the space configuration.
+      * When true, observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments. When omitted on create, the space configuration default is used. Falls back to the owner's default when no space configuration exists: `true` for Security, `false` for Stack and Observability. Precedence: explicit value > template setting > space config > owner default. Observable extraction is available only for Security cases. For Stack and Observability cases, a value that is not sent resolves to `false`, even if the template or space configuration says `true`. Sending `true` returns a 400 error unless the case already stores `true`.
 
       */
     extractObservables: z
       .boolean()
       .optional()
       .describe(
-        "When true, observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments. When omitted on create, the space configuration default is used. Falls back to the owner's default when no space configuration exists: `true` for Security, `false` for Stack and Observability. Precedence: explicit value > template setting > space config > owner default. For owners that do not support observable extraction (currently Observability), an omitted value resolves to `false` regardless of the space configuration.\n"
+        "When true, observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments. When omitted on create, the space configuration default is used. Falls back to the owner's default when no space configuration exists: `true` for Security, `false` for Stack and Observability. Precedence: explicit value > template setting > space config > owner default. Observable extraction is available only for Security cases. For Stack and Observability cases, a value that is not sent resolves to `false`, even if the template or space configuration says `true`. Sending `true` returns a 400 error unless the case already stores `true`.\n"
       ),
   })
 );
@@ -1342,14 +1342,14 @@ export const SetCaseConfigurationRequest = lazySchema(() =>
         'Custom fields case configuration. Deprecated. Use the field library (`/api/cases/field_definitions`) to manage field definitions and `extended_fields` on case create/update to set field values.\n'
       ),
     /**
-      * Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events. When omitted, defaults to the owner's default: `true` for Security, `false` for Stack and Observability. For owners that do not support observable extraction (currently Observability), setting this to `true` has no effect on case creation; new cases for those owners always use `false`.
+      * Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events. When omitted, defaults to the owner's default: `true` for Security, `false` for Stack and Observability. Observable extraction is available only for Security cases. For Stack and Observability cases, a value that is not sent resolves to `false`, and setting it to `true` returns a 400 error.
 
       */
     extractObservables: z
       .boolean()
       .optional()
       .describe(
-        "Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events. When omitted, defaults to the owner's default: `true` for Security, `false` for Stack and Observability. For owners that do not support observable extraction (currently Observability), setting this to `true` has no effect on case creation; new cases for those owners always use `false`.\n"
+        "Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events. When omitted, defaults to the owner's default: `true` for Security, `false` for Stack and Observability. Observable extraction is available only for Security cases. For Stack and Observability cases, a value that is not sent resolves to `false`, and setting it to `true` returns a 400 error.\n"
       ),
     owner: Owner,
     templates: Templates.optional(),
@@ -1465,14 +1465,14 @@ export const UpdateCaseConfigurationRequest = lazySchema(() =>
         'Custom fields case configuration. Deprecated. Use the field library (`/api/cases/field_definitions`) to manage field definitions and `extended_fields` on case create/update to set field values.\n'
       ),
     /**
-      * Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.
+      * Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events. Observable extraction is available only for Security cases. For Stack and Observability cases, changing it to `true` returns a 400 error. A request that keeps an already stored `true` is accepted.
 
       */
     extractObservables: z
       .boolean()
       .optional()
       .describe(
-        'Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.\n'
+        'Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events. Observable extraction is available only for Security cases. For Stack and Observability cases, changing it to `true` returns a 400 error. A request that keeps an already stored `true` is accepted.\n'
       ),
     templates: Templates.optional(),
     /**
@@ -1667,14 +1667,14 @@ export const TemplateWriteRequest = lazySchema(() =>
       ),
     owner: Owner,
     /**
-      * The template definition as a YAML string: case defaults (name, severity, category, tags, assignees, connector, settings) and a `fields` array of inline field definitions or `$ref` entries pointing into the owner's field library. Stored field values appear on cases under `extended_fields` keys shaped `<field_name>_as_<storage_type>`.
+      * The template definition as a YAML string: case defaults (name, severity, category, tags, assignees, connector, settings) and a `fields` array of inline field definitions or `$ref` entries pointing into the owner's field library. Stored field values appear on cases under `extended_fields` keys shaped `<field_name>_as_<storage_type>`. Observable extraction (`settings.extractObservables`) is available only for Security templates. For Stack and Observability templates, setting it to `true` returns a 400 error. An update that keeps an already stored `true` for the same owner is accepted.
 
       */
     definition: z
       .string()
       .max(30000)
       .describe(
-        "The template definition as a YAML string: case defaults (name, severity, category, tags, assignees, connector, settings) and a `fields` array of inline field definitions or `$ref` entries pointing into the owner's field library. Stored field values appear on cases under `extended_fields` keys shaped `<field_name>_as_<storage_type>`.\n"
+        "The template definition as a YAML string: case defaults (name, severity, category, tags, assignees, connector, settings) and a `fields` array of inline field definitions or `$ref` entries pointing into the owner's field library. Stored field values appear on cases under `extended_fields` keys shaped `<field_name>_as_<storage_type>`. Observable extraction (`settings.extractObservables`) is available only for Security templates. For Stack and Observability templates, setting it to `true` returns a 400 error. An update that keeps an already stored `true` for the same owner is accepted.\n"
       ),
     /**
      * A description of the template.
@@ -2183,7 +2183,7 @@ export const UnifiedAttachmentAttachmentId = lazySchema(() =>
 export type UnifiedAttachmentAttachmentId = z.infer<typeof UnifiedAttachmentAttachmentId>;
 
 /**
-  * The attachment's content. Required for comments, where `content` is the comment text (up to 30,000 characters).
+  * The attachment's content. Required for comments, where `content` is the comment text (up to 30,000 characters). In requests, it can be up to 524,288 characters when serialized as JSON and nest up to 30 levels deep.
 
   */
 export const UnifiedAttachmentData = lazySchema(() =>
@@ -2192,7 +2192,7 @@ export const UnifiedAttachmentData = lazySchema(() =>
 export type UnifiedAttachmentData = z.infer<typeof UnifiedAttachmentData>;
 
 /**
-  * Extra details about the attachment. For alerts, this is the alert's index and rule. Required for some types, such as `dashboard`.
+  * Extra details about the attachment. For alerts, this is the alert's index and rule. Required for some types, such as `dashboard`. In requests, it can be up to 524,288 characters when serialized as JSON and nest up to 30 levels deep.
 
   */
 export const UnifiedAttachmentMetadata = lazySchema(() =>

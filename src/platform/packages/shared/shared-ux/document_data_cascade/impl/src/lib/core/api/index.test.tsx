@@ -11,7 +11,9 @@ import React, { useSyncExternalStore } from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useExposePublicApi, type DataCascadeImplRef } from '.';
 import { DataCascadeProvider, type GroupNode, type LeafNode } from '../../../store_provider';
-import type { UseVirtualizerReturnType } from '../virtualizer';
+import type { VirtualizerInstanceType } from '../virtualizer';
+import { Virtualizer } from '@tanstack/react-virtual';
+import { createChildVirtualizerController } from '../virtualizer/child_controller';
 
 describe('useExposePublicApi', () => {
   it('should return the correct value', () => {
@@ -20,7 +22,11 @@ describe('useExposePublicApi', () => {
     };
 
     const { result } = renderHook(
-      () => useExposePublicApi(mockRefObject, { rows: [], enableStickyGroupHeader: false }),
+      () =>
+        useExposePublicApi(mockRefObject, {
+          rows: [],
+          enableStickyGroupHeader: false,
+        }),
       {
         wrapper: ({ children }) => (
           <DataCascadeProvider data={[]} cascadeGroups={[]}>
@@ -35,6 +41,60 @@ describe('useExposePublicApi', () => {
     expect(mockRefObject.current?.getUISnapshotStore).toBeDefined();
   });
 
+  it('does not publish intermediate root or child anchors while restoring', () => {
+    jest.useFakeTimers();
+    const ref = React.createRef<DataCascadeImplRef<GroupNode, LeafNode>>();
+    const controller = createChildVirtualizerController({ getRootVirtualizer: () => undefined });
+    const instance = new Virtualizer<Element, Element>({
+      count: 20,
+      estimateSize: () => 40,
+      getScrollElement: () => null,
+      observeElementOffset: jest.fn(),
+      observeElementRect: jest.fn(),
+      scrollToFn: jest.fn(),
+    });
+    const { result, rerender, unmount } = renderHook(
+      ({ isRestoring }) =>
+        useExposePublicApi(ref, {
+          rows: [],
+          enableStickyGroupHeader: false,
+          childController: controller,
+          isRestoring,
+        }),
+      {
+        initialProps: { isRestoring: true },
+        wrapper: ({ children }) => (
+          <DataCascadeProvider data={[]} cascadeGroups={[]}>
+            {children}
+          </DataCascadeProvider>
+        ),
+      }
+    );
+    const store = ref.current?.getUISnapshotStore();
+    const listener = jest.fn();
+    const unsubscribe = store?.subscribe(listener);
+    act(() => {
+      instance.scrollOffset = 200;
+      result.current.collectVirtualizerStateChanges(instance);
+      controller.connect('child', 5).reportState({ scrollAnchorItemIndex: 10 });
+      jest.advanceTimersByTime(200);
+    });
+    expect(listener).not.toHaveBeenCalled();
+    rerender({ isRestoring: false });
+    act(() => {
+      instance.scrollOffset = 400;
+      result.current.collectVirtualizerStateChanges(instance);
+      jest.advanceTimersByTime(200);
+    });
+    expect(listener).toHaveBeenCalledTimes(1);
+    expect(store?.getSnapshot().scrollOffset).toBe(400);
+    expect(store?.getSnapshot().connectedChildren.child.scrollAnchorItemIndex).toBe(10);
+    unsubscribe?.();
+    unmount();
+    controller.destroy();
+    jest.useRealTimers();
+  });
+
   describe('getUISnapshotStore', () => {
     it('should return a store snapshot with the correct initial state', () => {
       const mockRefObject: React.RefObject<DataCascadeImplRef<GroupNode, LeafNode>> = {
@@ -42,7 +102,11 @@ describe('useExposePublicApi', () => {
       };
 
       const { result } = renderHook(
-        () => useExposePublicApi(mockRefObject, { rows: [], enableStickyGroupHeader: false }),
+        () =>
+          useExposePublicApi(mockRefObject, {
+            rows: [],
+            enableStickyGroupHeader: false,
+          }),
         {
           wrapper: ({ children }) => (
             <DataCascadeProvider data={[]} cascadeGroups={[]}>
@@ -78,7 +142,11 @@ describe('useExposePublicApi', () => {
       };
 
       const { result } = renderHook(
-        () => useExposePublicApi(mockRefObject, { rows: [], enableStickyGroupHeader: false }),
+        () =>
+          useExposePublicApi(mockRefObject, {
+            rows: [],
+            enableStickyGroupHeader: false,
+          }),
         {
           wrapper: ({ children }) => (
             <DataCascadeProvider data={[]} cascadeGroups={[]}>
@@ -101,10 +169,11 @@ describe('useExposePublicApi', () => {
         range: { startIndex: 0, endIndex: 10 },
         scrollOffset: 100,
         isScrolling: false,
+        getTotalSize: () => 0,
         getVirtualItemForOffset: jest.fn().mockReturnValue({ index: 10 }),
         // it's fine to cast to unknown
         // because we only need a minimal implementation of the virtualizer instance for the test
-      } as unknown as UseVirtualizerReturnType;
+      } as unknown as VirtualizerInstanceType;
 
       // simulate changes in the virtualizer instance
       act(() => {
@@ -140,7 +209,11 @@ describe('useExposePublicApi', () => {
       };
 
       const { result } = renderHook(
-        () => useExposePublicApi(mockRefObject, { rows: [], enableStickyGroupHeader: false }),
+        () =>
+          useExposePublicApi(mockRefObject, {
+            rows: [],
+            enableStickyGroupHeader: false,
+          }),
         {
           wrapper: ({ children }) => (
             <DataCascadeProvider data={[]} cascadeGroups={[]}>
@@ -185,7 +258,7 @@ describe('useExposePublicApi', () => {
           scrollRect: { width: 0, height: 0 },
           getTotalSize: () => 0,
           getVirtualItemForOffset: jest.fn().mockReturnValue({ index: 10 }),
-        } as unknown as UseVirtualizerReturnType);
+        } as unknown as VirtualizerInstanceType);
       });
 
       await waitFor(() => {

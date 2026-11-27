@@ -221,6 +221,7 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
                 name="operator"
                 value={OPERATOR_TITLES.is}
                 data-test-subj={getTestId('operator')}
+                aria-label={ENTRY_PROPERTY_TITLES.operator}
                 readOnly
               />
             )}
@@ -241,6 +242,7 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
               onChange={handleValueUpdate}
               onBlur={handleValueOnBlur}
               data-test-subj={getTestId('value')}
+              aria-label={ENTRY_PROPERTY_TITLES.value}
             />
           </ConditionEntryCell>
         </InputItem>

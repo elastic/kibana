@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  ACTION_POLICY_ATTACHMENT_TYPE,
-  RULE_ATTACHMENT_TYPE,
-  type ActionPolicyAttachmentData,
-  type RuleAttachmentData,
-} from '@kbn/alerting-v2-schemas';
+import { ACTION_POLICY_ATTACHMENT_TYPE, RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import { expect } from '@playwright/test';
 import { tags } from '@kbn/scout';
 import { evaluate } from '../../src/evaluate';
@@ -27,7 +22,11 @@ import {
   assertActionPolicyWorkflowLinksAlertDetails,
   assertActionPolicyWorkflowLiquid,
 } from '../../src/assert_action_policy_workflow_liquid';
-import { getLatestAttachmentData } from '../../src/evaluators/expected_attachment';
+import {
+  assertNotificationDraftsComposed,
+  getNotificationDrafts,
+  requireDraft,
+} from '../../src/notification_drafts';
 
 evaluate.describe(
   'Alerting V2 rule-authoring skill - action policies (notifications)',
@@ -75,10 +74,12 @@ evaluate.describe(
                   ],
                   notExpectedSkills: [DETECTION_RULE_EDIT_SKILL_ID],
                   // The full notification flow also composes the rule and generates the
-                  // notification workflow before the policy is wired up.
+                  // notification workflow before the policy is wired up, and links them
+                  // with the routing-tag tool instead of setting tags by hand.
                   expectedToolIds: [
                     ALERTING_TOOL_IDS.manageActionPolicy,
                     ALERTING_TOOL_IDS.manageRule,
+                    ALERTING_TOOL_IDS.linkRuleAndActionPolicy,
                     WORKFLOW_GENERATION_TOOL_ID,
                   ],
                   expectRenderAttachment: [
@@ -86,43 +87,46 @@ evaluate.describe(
                     WORKFLOW_YAML_ATTACHMENT_TYPE,
                     ACTION_POLICY_ATTACHMENT_TYPE,
                   ],
-                  expectAttachmentData: (attachments) => {
-                    const rule = getLatestAttachmentData<RuleAttachmentData>(
-                      attachments,
-                      RULE_ATTACHMENT_TYPE
-                    );
-                    const workflow = getLatestAttachmentData<{
-                      workflowId?: string;
-                      yaml?: string;
-                    }>(attachments, WORKFLOW_YAML_ATTACHMENT_TYPE);
-                    const actionPolicy = getLatestAttachmentData<ActionPolicyAttachmentData>(
-                      attachments,
-                      ACTION_POLICY_ATTACHMENT_TYPE
-                    );
-
-                    const ruleId = rule?.id;
-                    const workflowId = workflow?.workflowId;
-
-                    expect(ruleId).toEqual(expect.any(String));
-                    expect(workflowId).toEqual(expect.any(String));
-                    expect(workflow?.yaml).toEqual(expect.any(String));
-                    expect(actionPolicy).toBeDefined();
+                  expectAttachmentData: {
+                    draftsComposed: (attachments) => {
+                      assertNotificationDraftsComposed(getNotificationDrafts(attachments), {
+                        requireWorkflowYaml: true,
+                      });
+                    },
                     // The policy is linked to the rule only through a shared routing tag.
-                    const routingTags = rule?.metadata?.routing_tags ?? [];
-                    const matcherTags = actionPolicy!.matcher?.tags ?? [];
-                    expect(matcherTags.length).toBeGreaterThan(0);
-                    expect(routingTags).toEqual(expect.arrayContaining(matcherTags));
-                    expect(actionPolicy!.destinations).toEqual([
-                      { type: 'workflow', id: workflowId },
-                    ]);
-
-                    const { workflow: parsedWorkflow } = assertActionPolicyWorkflowLiquid(
-                      workflow?.yaml
-                    );
-                    expect(parsedWorkflow.triggers.map((trigger) => trigger.type)).toEqual([
-                      'manual',
-                    ]);
-                    assertActionPolicyWorkflowLinksAlertDetails(parsedWorkflow);
+                    routingTagLinked: (attachments) => {
+                      const { rule, actionPolicy } = getNotificationDrafts(attachments);
+                      const routingTags = requireDraft(rule, 'rule').metadata?.routing_tags ?? [];
+                      const matcherTags =
+                        requireDraft(actionPolicy, 'action policy').matcher?.tags ?? [];
+                      expect(matcherTags.length).toBeGreaterThan(0);
+                      expect(routingTags).toEqual(expect.arrayContaining(matcherTags));
+                    },
+                    policyTargetsWorkflow: (attachments) => {
+                      const { workflow, actionPolicy } = getNotificationDrafts(attachments);
+                      expect(requireDraft(actionPolicy, 'action policy').destinations).toEqual([
+                        { type: 'workflow', id: requireDraft(workflow, 'workflow').workflowId },
+                      ]);
+                    },
+                    workflowLiquidValid: (attachments) => {
+                      assertActionPolicyWorkflowLiquid(
+                        getNotificationDrafts(attachments).workflow?.yaml
+                      );
+                    },
+                    workflowManualTrigger: (attachments) => {
+                      const { workflow: parsedWorkflow } = assertActionPolicyWorkflowLiquid(
+                        getNotificationDrafts(attachments).workflow?.yaml
+                      );
+                      expect(parsedWorkflow.triggers.map((trigger) => trigger.type)).toEqual([
+                        'manual',
+                      ]);
+                    },
+                    workflowLinksAlertDetails: (attachments) => {
+                      const { workflow: parsedWorkflow } = assertActionPolicyWorkflowLiquid(
+                        getNotificationDrafts(attachments).workflow?.yaml
+                      );
+                      assertActionPolicyWorkflowLinksAlertDetails(parsedWorkflow);
+                    },
                   },
                 },
               },
@@ -179,37 +183,41 @@ evaluate.describe(
                     WORKFLOW_YAML_ATTACHMENT_TYPE,
                     ACTION_POLICY_ATTACHMENT_TYPE,
                   ],
-                  expectAttachmentData: (attachments) => {
-                    const rule = getLatestAttachmentData<RuleAttachmentData>(
-                      attachments,
-                      RULE_ATTACHMENT_TYPE
-                    );
-                    const workflow = getLatestAttachmentData<{
-                      workflowId?: string;
-                      yaml?: string;
-                    }>(attachments, WORKFLOW_YAML_ATTACHMENT_TYPE);
-                    const actionPolicy = getLatestAttachmentData<ActionPolicyAttachmentData>(
-                      attachments,
-                      ACTION_POLICY_ATTACHMENT_TYPE
-                    );
-
-                    const ruleId = rule?.id;
-                    const workflowId = workflow?.workflowId;
-
-                    expect(ruleId).toEqual(expect.any(String));
-                    expect(workflowId).toEqual(expect.any(String));
-                    expect(actionPolicy).toBeDefined();
-                    expect(actionPolicy!.matcher?.tags ?? []).toEqual([]);
-                    expect(actionPolicy!.matcher?.expression ?? null).toBeNull();
-                    expect(actionPolicy!.destinations).toEqual([
-                      { type: 'workflow', id: workflowId },
-                    ]);
-                    expect(rule?.metadata?.routing_tags ?? []).toEqual([]);
-
-                    const { workflow: parsedWorkflow } = assertActionPolicyWorkflowLiquid(
-                      workflow?.yaml
-                    );
-                    assertActionPolicyWorkflowLinksAlertDetails(parsedWorkflow);
+                  expectAttachmentData: {
+                    draftsComposed: (attachments) => {
+                      assertNotificationDraftsComposed(getNotificationDrafts(attachments), {
+                        requireWorkflowYaml: false,
+                      });
+                    },
+                    policyIsCatchAll: (attachments) => {
+                      const { matcher } = requireDraft(
+                        getNotificationDrafts(attachments).actionPolicy,
+                        'action policy'
+                      );
+                      expect(matcher?.tags ?? []).toEqual([]);
+                      expect(matcher?.expression ?? null).toBeNull();
+                    },
+                    ruleNotTagged: (attachments) => {
+                      const rule = requireDraft(getNotificationDrafts(attachments).rule, 'rule');
+                      expect(rule.metadata?.routing_tags ?? []).toEqual([]);
+                    },
+                    policyTargetsWorkflow: (attachments) => {
+                      const { workflow, actionPolicy } = getNotificationDrafts(attachments);
+                      expect(requireDraft(actionPolicy, 'action policy').destinations).toEqual([
+                        { type: 'workflow', id: requireDraft(workflow, 'workflow').workflowId },
+                      ]);
+                    },
+                    workflowLiquidValid: (attachments) => {
+                      assertActionPolicyWorkflowLiquid(
+                        getNotificationDrafts(attachments).workflow?.yaml
+                      );
+                    },
+                    workflowLinksAlertDetails: (attachments) => {
+                      const { workflow: parsedWorkflow } = assertActionPolicyWorkflowLiquid(
+                        getNotificationDrafts(attachments).workflow?.yaml
+                      );
+                      assertActionPolicyWorkflowLinksAlertDetails(parsedWorkflow);
+                    },
                   },
                 },
               },

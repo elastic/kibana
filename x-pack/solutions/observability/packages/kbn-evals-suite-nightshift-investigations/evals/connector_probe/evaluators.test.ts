@@ -28,7 +28,7 @@ const output = (overrides: Partial<ConnectorProbeTaskOutput> = {}): ConnectorPro
   tool_call_trajectory: [
     {
       tool_id: 'nightshift_sandbox_view_file',
-      params: { path: '/workspace/elastic.md' },
+      params: { path: '/workspace/.connector-docs/elastic.md' },
       result: '',
     },
     {
@@ -96,5 +96,27 @@ describe('connector probe evaluators', () => {
     evaluate.mockClear();
     expect((await evaluator.evaluate(params(output({ execution_error: 'boom' })))).score).toBe(0);
     expect(evaluate).not.toHaveBeenCalled();
+  });
+
+  it('scores 0 without calling the judge when no connector query succeeded', async () => {
+    const evaluate = jest.fn().mockResolvedValue({ score: 1 });
+    const criteria = jest.fn(
+      (): Evaluator => ({ name: 'criteria', kind: 'LLM', direction: 'maximize', evaluate })
+    );
+    const evaluator = createReferenceBehaviourEvaluator({ criteria });
+    const failedSandbox = output({
+      tool_call_trajectory: [
+        {
+          tool_id: 'nightshift_sandbox_bash',
+          params: { command: 'curl ...', connector_id: 'telemetry' },
+          result: 'Error: Failed to execute sandbox command: 4 DEADLINE_EXCEEDED',
+        },
+        { tool_id: 'execute_api', params: { api: 'count' }, result: '{"count":0}' },
+      ],
+    });
+
+    expect((await evaluator.evaluate(params(failedSandbox))).score).toBe(0);
+    expect(evaluate).not.toHaveBeenCalled();
+    expect((await connectorUsedEvaluator.evaluate(params(failedSandbox))).score).toBe(0);
   });
 });

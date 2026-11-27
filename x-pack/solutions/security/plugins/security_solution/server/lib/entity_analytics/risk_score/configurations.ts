@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { FieldMap } from '@kbn/alerts-as-data-utils';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import { riskScoreBaseIndexName } from '../../../../common/entity_analytics/risk_engine';
@@ -213,63 +212,4 @@ export const getIndexPatternDataStream = (namespace: string): IIndexPatternStrin
 export const getIndexPatternLookup = (namespace: string): IIndexPatternString => ({
   template: `.entity_analytics.risk_score.lookup-${namespace}-index-template`,
   alias: `.entity_analytics.risk_score.lookup-${namespace}`,
-});
-
-export type TransformOptions = Omit<TransformPutTransformRequest, 'transform_id'>;
-
-/**
- * WARNING: We must increase the version when changing any configuration
- *
- * The risk engine starts the transforms executions after writing the documents to the risk score index.
- * So the transform don't need to run on a schedule.
- */
-export const getTransformOptions = ({
-  dest,
-  source,
-  namespace,
-}: {
-  dest: string;
-  source: string[];
-  namespace: string;
-}): Omit<TransformPutTransformRequest, 'transform_id'> => ({
-  dest: {
-    index: dest,
-  },
-  latest: {
-    sort: '@timestamp',
-    unique_key: [`host.name`, `user.name`, `service.name`],
-  },
-  source: {
-    index: source,
-    query: {
-      bool: {
-        filter: [
-          {
-            range: {
-              '@timestamp': {
-                // It prevents the transform from processing too much data on reinstall
-                gte: 'now-24h',
-              },
-            },
-          },
-        ],
-      },
-    },
-  },
-  frequency: '1h', // 1h is the maximum value
-  sync: {
-    time: {
-      delay: '0s', // It doesn't have any delay because the risk engine writes the documents to the index and schedules the transform synchronously.
-      field: '@timestamp',
-    },
-  },
-  settings: {
-    unattended: true, // In unattended mode, the transform retries indefinitely in case of an error
-  },
-  _meta: {
-    version: 3, // When this field is updated we automatically update the transform
-    managed: true, // Metadata that identifies the transform. It has no functionality
-    managed_by: 'security-entity-analytics', // Metadata that identifies the transform. It has no functionality
-    space_id: namespace, // Metadata that identifies the space where the transform is running. Helps in debugging as the original transformid could be hashed if longer than 64 characters
-  },
 });

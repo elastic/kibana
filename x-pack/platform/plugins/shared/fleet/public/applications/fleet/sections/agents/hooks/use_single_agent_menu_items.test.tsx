@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React from 'react';
+
 import type { Agent, AgentPolicy } from '../../../types';
 import { ExperimentalFeaturesService } from '../../../services';
 import type { LicenseService } from '../../../../../../common/services';
@@ -33,6 +35,7 @@ const mockCallbacks: SingleAgentMenuCallbacks = {
   onRequestDiagnosticsClick: jest.fn(),
   onChangeAgentPrivilegeLevelClick: jest.fn(),
   onUnenrollClick: jest.fn(),
+  onForceUnenrollClick: jest.fn(),
   onUninstallClick: jest.fn(),
   onRollbackClick: jest.fn(),
   onRestartClick: jest.fn(),
@@ -359,6 +362,58 @@ describe('useSingleAgentMenuItems', () => {
     });
   });
 
+  describe('View agent policy action', () => {
+    it('should enable view agent policy when user can read integration policies', () => {
+      mockedUseAuthz.mockReturnValue({
+        fleet: {
+          readAgents: true,
+          readAgentPolicies: true,
+        },
+        integrations: {
+          readIntegrationPolicies: true,
+        },
+      } as any);
+
+      const { result } = renderer.renderHook(() =>
+        useSingleAgentMenuItems({
+          agent: createMockAgent({ policy_id: 'policy-1' }),
+          agentPolicy: createMockAgentPolicy(),
+          callbacks: mockCallbacks,
+        })
+      );
+
+      const maintenance = result.current.find((item) => item.id === 'maintenance');
+      const viewPolicy = maintenance?.children?.find((item) => item.id === 'view-agent-policy');
+      expect(viewPolicy?.disabled).toBe(false);
+      expect(viewPolicy?.toolTipContent).toBeUndefined();
+    });
+
+    it('should disable view agent policy when user cannot read integration policies', () => {
+      mockedUseAuthz.mockReturnValue({
+        fleet: {
+          readAgents: true,
+          readAgentPolicies: true,
+        },
+        integrations: {
+          readIntegrationPolicies: false,
+        },
+      } as any);
+
+      const { result } = renderer.renderHook(() =>
+        useSingleAgentMenuItems({
+          agent: createMockAgent({ policy_id: 'policy-1' }),
+          agentPolicy: createMockAgentPolicy(),
+          callbacks: mockCallbacks,
+        })
+      );
+
+      const maintenance = result.current.find((item) => item.id === 'maintenance');
+      const viewPolicy = maintenance?.children?.find((item) => item.id === 'view-agent-policy');
+      expect(viewPolicy?.disabled).toBe(true);
+      expect(viewPolicy?.toolTipContent).toBeDefined();
+    });
+  });
+
   describe('Migrate action', () => {
     it('should include migrate in maintenance submenu for eligible agent', () => {
       const { result } = renderer.renderHook(() =>
@@ -423,10 +478,10 @@ describe('useSingleAgentMenuItems', () => {
       }
     });
 
-    it('should show Force unenroll when agent is unenrolling', () => {
+    it('should always label the unenroll item "Unenroll agent", even with an unenroll pending', () => {
       const { result } = renderer.renderHook(() =>
         useSingleAgentMenuItems({
-          agent: createMockAgent({ status: 'unenrolling' }),
+          agent: createMockAgent({ unenrollment_started_at: '2026-11-02T14:02:00Z' }),
           agentPolicy: createMockAgentPolicy(),
           callbacks: mockCallbacks,
         })
@@ -434,8 +489,143 @@ describe('useSingleAgentMenuItems', () => {
 
       const security = result.current.find((item) => item.id === 'security');
       const unenroll = security?.children?.find((item) => item.id === 'unenroll');
-      // The name should contain "Force unenroll" text (it's a ReactNode)
-      expect(unenroll).toBeDefined();
+      const { getByText } = renderer.render(<>{unenroll?.name}</>);
+
+      expect(getByText('Unenroll agent')).toBeInTheDocument();
+    });
+
+    it('should not disable the unenroll item when an unenroll is pending, but explain why', () => {
+      // Disabling would strand healthy agents: a replace-token re-enrolment leaves a stale
+      // `unenrollment_started_at` behind, so the predicate is true for agents that are fine.
+      const { result } = renderer.renderHook(() =>
+        useSingleAgentMenuItems({
+          agent: createMockAgent({ unenrollment_started_at: '2026-11-02T14:02:00Z' }),
+          agentPolicy: createMockAgentPolicy(),
+          callbacks: mockCallbacks,
+        })
+      );
+
+      const security = result.current.find((item) => item.id === 'security');
+      const unenroll = security?.children?.find((item) => item.id === 'unenroll');
+
+      expect(unenroll?.disabled).toBe(false);
+      expect(unenroll?.toolTipContent).toBeDefined();
+    });
+
+    it('should not explain anything when no unenroll is pending', () => {
+      const { result } = renderer.renderHook(() =>
+        useSingleAgentMenuItems({
+          agent: createMockAgent(),
+          agentPolicy: createMockAgentPolicy(),
+          callbacks: mockCallbacks,
+        })
+      );
+
+      const security = result.current.find((item) => item.id === 'security');
+      const unenroll = security?.children?.find((item) => item.id === 'unenroll');
+
+      expect(unenroll?.toolTipContent).toBeUndefined();
+    });
+
+    it('should not treat an acknowledged unenroll as pending', () => {
+      const { result } = renderer.renderHook(() =>
+        useSingleAgentMenuItems({
+          agent: createMockAgent({
+            unenrollment_started_at: '2026-11-02T14:02:00Z',
+            unenrolled_at: '2026-11-02T14:03:11Z',
+          }),
+          agentPolicy: createMockAgentPolicy(),
+          callbacks: mockCallbacks,
+        })
+      );
+
+      const security = result.current.find((item) => item.id === 'security');
+      const unenroll = security?.children?.find((item) => item.id === 'unenroll');
+
+      expect(unenroll?.toolTipContent).toBeUndefined();
+    });
+  });
+
+  describe('Force unenroll action', () => {
+    it('should include force unenroll in security submenu for non-managed policy', () => {
+      const { result } = renderer.renderHook(() =>
+        useSingleAgentMenuItems({
+          agent: createMockAgent(),
+          agentPolicy: createMockAgentPolicy({ is_managed: false }),
+          callbacks: mockCallbacks,
+        })
+      );
+
+      const security = result.current.find((item) => item.id === 'security');
+      const forceUnenroll = security?.children?.find((item) => item.id === 'force-unenroll');
+      const { getByText } = renderer.render(<>{forceUnenroll?.name}</>);
+
+      expect(getByText('Force unenroll')).toBeInTheDocument();
+    });
+
+    it('should NOT include force unenroll for managed policy', () => {
+      const { result } = renderer.renderHook(() =>
+        useSingleAgentMenuItems({
+          agent: createMockAgent(),
+          agentPolicy: createMockAgentPolicy({ is_managed: true }),
+          callbacks: mockCallbacks,
+        })
+      );
+
+      const security = result.current.find((item) => item.id === 'security');
+      expect(security?.children?.find((item) => item.id === 'force-unenroll')).toBeUndefined();
+    });
+
+    it('should stay enabled when an unenroll is pending', () => {
+      // This is the case force unenroll exists for, so it must not be gated on it.
+      const { result } = renderer.renderHook(() =>
+        useSingleAgentMenuItems({
+          agent: createMockAgent({ unenrollment_started_at: '2026-11-02T14:02:00Z' }),
+          agentPolicy: createMockAgentPolicy(),
+          callbacks: mockCallbacks,
+        })
+      );
+
+      const security = result.current.find((item) => item.id === 'security');
+      const forceUnenroll = security?.children?.find((item) => item.id === 'force-unenroll');
+
+      expect(forceUnenroll?.disabled).toBe(false);
+    });
+
+    it('should stay available for an agent whose policy no longer exists', () => {
+      // An undefined `agentPolicy` usually means the policy was not joined into the list, not that
+      // it is gone, so the item must not depend on it. A genuinely orphaned agent is a different
+      // case: the modal sends `revoke`, and only `force` tolerates a missing policy server-side.
+      const { result } = renderer.renderHook(() =>
+        useSingleAgentMenuItems({
+          agent: createMockAgent(),
+          agentPolicy: undefined,
+          callbacks: mockCallbacks,
+        })
+      );
+
+      const security = result.current.find((item) => item.id === 'security');
+      const forceUnenroll = security?.children?.find((item) => item.id === 'force-unenroll');
+
+      expect(forceUnenroll).toBeDefined();
+      expect(forceUnenroll?.disabled).toBe(false);
+    });
+
+    it('should call onForceUnenrollClick when clicked', () => {
+      const { result } = renderer.renderHook(() =>
+        useSingleAgentMenuItems({
+          agent: createMockAgent(),
+          agentPolicy: createMockAgentPolicy(),
+          callbacks: mockCallbacks,
+        })
+      );
+
+      const security = result.current.find((item) => item.id === 'security');
+      const forceUnenroll = security?.children?.find((item) => item.id === 'force-unenroll');
+      forceUnenroll?.onClick?.({} as React.MouseEvent);
+
+      expect(mockCallbacks.onForceUnenrollClick).toHaveBeenCalled();
+      expect(mockCallbacks.onUnenrollClick).not.toHaveBeenCalled();
     });
   });
 
@@ -518,6 +708,45 @@ describe('useSingleAgentMenuItems', () => {
       const security = result.current.find((item) => item.id === 'security');
       const privilegeChange = security?.children?.find((item) => item.id === 'remove-root');
       expect(privilegeChange).toBeUndefined();
+    });
+  });
+
+  describe('Restart action', () => {
+    const restartSupportedAgent = (overrides: Partial<Agent> = {}) =>
+      createMockAgent({
+        local_metadata: { elastic: { agent: { version: '9.6.0' } } },
+        ...overrides,
+      });
+
+    it('should enable restart when the agent has no pending restart', () => {
+      const { result } = renderer.renderHook(() =>
+        useSingleAgentMenuItems({
+          agent: restartSupportedAgent(),
+          agentPolicy: createMockAgentPolicy(),
+          callbacks: mockCallbacks,
+        })
+      );
+
+      const restartItem = result.current.find((item) => item.id === 'restart');
+      expect(restartItem).toBeDefined();
+      expect(restartItem?.disabled).toBe(false);
+      expect(restartItem?.toolTipContent).toBeUndefined();
+    });
+
+    it('should disable restart with a tooltip when the agent has a pending restart', () => {
+      const { result } = renderer.renderHook(() =>
+        useSingleAgentMenuItems({
+          agent: restartSupportedAgent({
+            pending_restart: { action_id: 'action-1', created_at: '2026-11-06T10:00:00.000Z' },
+          }),
+          agentPolicy: createMockAgentPolicy(),
+          callbacks: mockCallbacks,
+        })
+      );
+
+      const restartItem = result.current.find((item) => item.id === 'restart');
+      expect(restartItem?.disabled).toBe(true);
+      expect(restartItem?.toolTipContent).toBeDefined();
     });
   });
 

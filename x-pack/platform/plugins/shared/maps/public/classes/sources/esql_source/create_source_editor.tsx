@@ -9,13 +9,17 @@ import React, { useEffect, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
+import { DEFAULT_GRID_RESOLUTION } from '@kbn/geo-precision';
 import type { EuiSwitchEvent } from '@elastic/eui';
 import { EuiFormRow, EuiPanel, EuiSkeletonText, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
+import type { GRID_RESOLUTION } from '@kbn/geo-precision';
 import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
 import type { ESQLSourceDescriptor } from '../../../../common/descriptor_types';
 import { getHttp, getIndexPatternService } from '../../../kibana_services';
 import { ESQLEditor } from './esql_editor';
+import { GeoPrecisionResolutionEditor } from './geo_precision_resolution_editor';
+import { hasGeoPrecisionParam } from './esql_utils';
 import { NarrowByMapBounds, NarrowByTime } from './narrow_by_field';
 
 interface Props {
@@ -32,6 +36,7 @@ export function CreateSourceEditor(props: Props) {
   const [geoFields, setGeoFields] = useState<string[]>([]);
   const [narrowByGlobalSearch, setNarrowByGlobalSearch] = useState(true);
   const [narrowByGlobalTime, setNarrowByGlobalTime] = useState(true);
+  const [resolution, setResolution] = useState<GRID_RESOLUTION>(DEFAULT_GRID_RESOLUTION);
   const [narrowByMapBounds, setNarrowByMapBounds] = useState(true);
 
   useEffect(() => {
@@ -122,12 +127,21 @@ export function CreateSourceEditor(props: Props) {
               narrowByGlobalSearch,
               narrowByGlobalTime,
               narrowByMapBounds,
+              ...(hasGeoPrecisionParam(esql) ? { resolution } : {}),
             } as ESQLSourceDescriptor)
           : null;
       props.onSourceConfigChange(sourceConfig);
     },
     0,
-    [dateField, geoField, esql, narrowByGlobalSearch, narrowByGlobalTime, narrowByMapBounds]
+    [
+      dateField,
+      geoField,
+      esql,
+      narrowByGlobalSearch,
+      narrowByGlobalTime,
+      narrowByMapBounds,
+      resolution,
+    ]
   );
 
   return (
@@ -210,6 +224,10 @@ export function CreateSourceEditor(props: Props) {
                 }
               }}
             />
+
+            {hasGeoPrecisionParam(esql) && (
+              <GeoPrecisionResolutionEditor resolution={resolution} onChange={setResolution} />
+            )}
           </>
         )}
       </EuiSkeletonText>

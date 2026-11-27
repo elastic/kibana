@@ -8,7 +8,6 @@
  */
 
 import { createEmulatorFetch } from '../fetch/create_emulator_fetch';
-import { sampleBoundaryResponse } from './sample_response';
 
 const spec = {
   openapi: '3.0.3',
@@ -148,12 +147,13 @@ describe('sampleResponse', () => {
     expect(statusCalls.flatMap(({ responseViolations }) => responseViolations)).toEqual([]);
   });
 
-  it('answers at the schema bounds with sampleBoundaryResponse', async () => {
+  it("answers at the schema bounds with sampling: 'boundary', fixtures still winning", async () => {
     const { fetch: boundaryFetch, calls: boundaryCalls } = createEmulatorFetch({
       specs: [
         {
           ...spec,
           paths: {
+            '/report': spec.paths['/report'],
             '/monitors': {
               get: {
                 responses: {
@@ -182,16 +182,24 @@ describe('sampleResponse', () => {
           },
         },
       ],
-      respond: sampleBoundaryResponse,
+      sampling: 'boundary',
+      fixtures: [
+        {
+          operation: { method: 'get', path: '/report' },
+          response: { status: 200, body: { rows: 1 } },
+        },
+      ],
     });
 
     const response = await boundaryFetch('https://api.example.com/monitors');
+    const report = await boundaryFetch('https://api.example.com/report');
 
     expect(await response.json()).toEqual([
       { name: 'strin', priority: 5 },
       { name: 'strin', priority: 5 },
     ]);
     expect(boundaryCalls[0].responseViolations).toEqual([]);
+    expect(await report.json()).toEqual({ rows: 1 });
   });
 
   it('serves the first media type example that matches the schema, following refs', async () => {

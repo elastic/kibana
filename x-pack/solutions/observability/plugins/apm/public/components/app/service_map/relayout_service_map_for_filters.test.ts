@@ -12,6 +12,8 @@ import {
   applyServiceMapVisibility,
   type ServiceMapViewFilters,
 } from './apply_service_map_visibility';
+import { applyServiceMapLayout } from '../../shared/service_map/layout';
+import { NODE_HEIGHT, NODE_WIDTH } from './constants';
 import { applyServiceMapRelayoutForFilteredView } from './relayout_service_map_for_filters';
 
 const mkService = (
@@ -90,5 +92,142 @@ describe('applyServiceMapRelayoutForFilteredView', () => {
       'horizontal'
     );
     expect(out[0]!.position).toEqual({ x: 17, y: 42 });
+  });
+
+  describe('with an open group', () => {
+    const mkBox = (id: string): ServiceMapNode => ({
+      id,
+      type: 'serviceGroupBox',
+      position: { x: 0, y: 0 },
+      data: {
+        id,
+        label: id,
+        isService: false,
+        isServiceGroupBox: true,
+        groupKind: 'attribute',
+        memberServiceIds: [],
+        memberCount: 0,
+      },
+    });
+    const mkMember = (id: string, boxId: string, alertsCount: number): ServiceMapNode => ({
+      ...mkService(id, { x: 0, y: 0 }, alertsCount),
+      parentId: boxId,
+      extent: 'parent',
+    });
+
+    // Laid out the way the map does before any filter is applied.
+    const layOut = (nodes: ServiceMapNode[], edges: ServiceMapEdge[]) =>
+      applyServiceMapLayout(nodes, edges, { rankdir: 'LR' });
+
+    const alertFilters: ServiceMapViewFilters = {
+      ...DEFAULT_SERVICE_MAP_VIEW_FILTERS,
+      alertStatusFilter: [ALERT_STATUS_ACTIVE],
+    };
+
+    const getNode = (nodes: ServiceMapNode[], id: string) => nodes.find((n) => n.id === id)!;
+
+    it('shrinks the box to the members that pass the filter and keeps them inside it', () => {
+      const edges = [mkEdge('e1', 'm1', 'm2'), mkEdge('e2', 'm2', 'm3'), mkEdge('e3', 'x', 'm1')];
+      const nodes = layOut(
+        [
+          mkBox('g'),
+          mkMember('m1', 'g', 1),
+          mkMember('m2', 'g', 0),
+          mkMember('m3', 'g', 1),
+          mkService('x', { x: 0, y: 0 }, 1),
+        ],
+        edges
+      );
+
+      const { nodes: filtered } = applyServiceMapRelayoutForFilteredView(
+        nodes,
+        edges,
+        alertFilters,
+        'horizontal'
+      );
+
+      const box = getNode(filtered, 'g');
+      expect(box.hidden).toBe(false);
+      expect(getNode(filtered, 'm2').hidden).toBe(true);
+      expect(box.width).toBeLessThan(getNode(nodes, 'g').width!);
+
+      for (const id of ['m1', 'm3']) {
+        const member = getNode(filtered, id);
+        expect(member.hidden).toBe(false);
+        expect(member.parentId).toBe('g');
+        expect(member.position.x).toBeGreaterThanOrEqual(0);
+        expect(member.position.y).toBeGreaterThanOrEqual(0);
+        expect(member.position.x + NODE_WIDTH).toBeLessThanOrEqual(box.width!);
+        expect(member.position.y + NODE_HEIGHT).toBeLessThanOrEqual(box.height!);
+      }
+    });
+
+    it('keeps the box while one member passes the filter', () => {
+      const edges = [mkEdge('e1', 'm1', 'm2')];
+      const nodes = layOut([mkBox('g'), mkMember('m1', 'g', 0), mkMember('m2', 'g', 1)], edges);
+
+      const { nodes: filtered } = applyServiceMapRelayoutForFilteredView(
+        nodes,
+        edges,
+        alertFilters,
+        'horizontal'
+      );
+
+      expect(getNode(filtered, 'g').hidden).toBe(false);
+      expect(getNode(filtered, 'm1').hidden).toBe(true);
+      expect(getNode(filtered, 'm2').hidden).toBe(false);
+    });
+
+    it('hides the box when no member passes the filter, and lays out what is left', () => {
+      const edges = [mkEdge('e1', 'm1', 'm2'), mkEdge('e2', 'x', 'y')];
+      const nodes = layOut(
+        [
+          mkBox('g'),
+          mkMember('m1', 'g', 0),
+          mkMember('m2', 'g', 0),
+          mkService('x', { x: 0, y: 0 }, 1),
+          mkService('y', { x: 0, y: 0 }, 1),
+        ],
+        edges
+      );
+
+      const { nodes: filtered, edges: filteredEdges } = applyServiceMapRelayoutForFilteredView(
+        nodes,
+        edges,
+        alertFilters,
+        'horizontal'
+      );
+
+      expect(getNode(filtered, 'g').hidden).toBe(true);
+      expect(getNode(filtered, 'm1').hidden).toBe(true);
+      expect(getNode(filtered, 'm2').hidden).toBe(true);
+      expect(getNode(filtered, 'x').hidden).toBe(false);
+      expect(getNode(filtered, 'y').hidden).toBe(false);
+      expect(filteredEdges.find((e) => e.id === 'e1')!.hidden).toBe(true);
+      expect(filteredEdges.find((e) => e.id === 'e2')!.hidden).toBe(false);
+    });
+
+    it('keeps the box before its members', () => {
+      const edges = [mkEdge('e1', 'm1', 'm2')];
+      const nodes = layOut(
+        [
+          mkBox('g'),
+          mkMember('m1', 'g', 1),
+          mkMember('m2', 'g', 0),
+          mkService('x', { x: 0, y: 0 }, 1),
+        ],
+        edges
+      );
+
+      const { nodes: filtered } = applyServiceMapRelayoutForFilteredView(
+        nodes,
+        edges,
+        alertFilters,
+        'horizontal'
+      );
+
+      const ids = filtered.map(({ id }) => id);
+      expect(ids.indexOf('g')).toBeLessThan(ids.indexOf('m1'));
+    });
   });
 });

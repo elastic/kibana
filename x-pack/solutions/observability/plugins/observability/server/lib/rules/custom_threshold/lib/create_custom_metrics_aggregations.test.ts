@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable @kbn/compat/typescript-naming-convention */
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import type { DataViewBase } from '@kbn/es-query';
 import { Aggregators } from '../../../../../common/custom_threshold_rule/types';

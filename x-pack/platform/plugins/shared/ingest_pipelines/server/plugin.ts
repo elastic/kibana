@@ -13,6 +13,7 @@ import { handleEsError } from './shared_imports';
 import type { Dependencies } from './types';
 import {
   APP_CAPABILITIES,
+  APP_CLUSTER_READ_PRIVILEGE,
   APP_CLUSTER_REQUIRED_PRIVILEGE,
   MANAGE_PROCESSORS_CLUSTER_REQUIRED_PRIVILEGE,
   PLUGIN_ID,
@@ -37,8 +38,12 @@ export class IngestPipelinesPlugin implements Plugin<void, void, any, any> {
       },
       privileges: [
         {
-          ui: [APP_CAPABILITIES.manage],
+          ui: [APP_CAPABILITIES.read, APP_CAPABILITIES.manage],
           requiredClusterPrivileges: [APP_CLUSTER_REQUIRED_PRIVILEGE],
+        },
+        {
+          ui: [APP_CAPABILITIES.read],
+          requiredClusterPrivileges: [APP_CLUSTER_READ_PRIVILEGE],
         },
         {
           ui: [APP_CAPABILITIES.manageProcessors],

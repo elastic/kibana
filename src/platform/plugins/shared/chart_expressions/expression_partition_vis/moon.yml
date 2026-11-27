@@ -42,6 +42,8 @@ dependsOn:
   - '@kbn/react-kibana-context-theme'
   - '@kbn/field-formats-common'
   - '@kbn/visualizations-common'
+  - '@kbn/visualizations-components'
+  - '@kbn/palettes-components'
 tags:
   - plugin
   - prod

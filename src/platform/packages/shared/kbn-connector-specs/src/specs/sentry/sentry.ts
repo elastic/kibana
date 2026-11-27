@@ -65,6 +65,9 @@ const getOrgSlug = (ctx: ActionContext): string => {
   return encodeURIComponent(orgSlug);
 };
 
+const buildIssueUrl = (ctx: ActionContext, issueId: string): string =>
+  `${buildBaseUrl(ctx)}/organizations/${getOrgSlug(ctx)}/issues/${encodeURIComponent(issueId)}/`;
+
 function formatSentryError(action: string, error: unknown): Error {
   const err = error as AxiosError<{ detail?: string; error?: string }>;
   const detail = err.response?.data?.detail ?? err.response?.data?.error ?? err.message;
@@ -206,9 +209,7 @@ export const Sentry: ConnectorSpec = {
       input: SentryGetIssueInputSchema,
       handler: async (ctx, input: SentryGetIssueInput) => {
         try {
-          const response = await ctx.client.get<SentryIssue>(
-            `${buildBaseUrl(ctx)}/issues/${encodeURIComponent(input.issueId)}/`
-          );
+          const response = await ctx.client.get<SentryIssue>(buildIssueUrl(ctx, input.issueId));
           return projectIssue(response.data);
         } catch (error) {
           throw formatSentryError('getIssue', error);
@@ -228,7 +229,7 @@ export const Sentry: ConnectorSpec = {
           : { status: 'resolved' };
         try {
           const response = await ctx.client.put<SentryIssue>(
-            `${buildBaseUrl(ctx)}/issues/${encodeURIComponent(input.issueId)}/`,
+            buildIssueUrl(ctx, input.issueId),
             body
           );
           return projectIssue(response.data);
@@ -251,7 +252,7 @@ export const Sentry: ConnectorSpec = {
         }
         try {
           const response = await ctx.client.put<SentryIssue>(
-            `${buildBaseUrl(ctx)}/issues/${encodeURIComponent(input.issueId)}/`,
+            buildIssueUrl(ctx, input.issueId),
             body
           );
           return projectIssue(response.data);
@@ -269,10 +270,9 @@ export const Sentry: ConnectorSpec = {
       input: SentryUnresolveIssueInputSchema,
       handler: async (ctx, input: SentryUnresolveIssueInput) => {
         try {
-          const response = await ctx.client.put<SentryIssue>(
-            `${buildBaseUrl(ctx)}/issues/${encodeURIComponent(input.issueId)}/`,
-            { status: 'unresolved' }
-          );
+          const response = await ctx.client.put<SentryIssue>(buildIssueUrl(ctx, input.issueId), {
+            status: 'unresolved',
+          });
           return projectIssue(response.data);
         } catch (error) {
           throw formatSentryError('unresolveIssue', error);
@@ -288,10 +288,9 @@ export const Sentry: ConnectorSpec = {
       input: SentryAssignIssueInputSchema,
       handler: async (ctx, input: SentryAssignIssueInput) => {
         try {
-          const response = await ctx.client.put<SentryIssue>(
-            `${buildBaseUrl(ctx)}/issues/${encodeURIComponent(input.issueId)}/`,
-            { assignedTo: input.assignedTo }
-          );
+          const response = await ctx.client.put<SentryIssue>(buildIssueUrl(ctx, input.issueId), {
+            assignedTo: input.assignedTo,
+          });
           return projectIssue(response.data);
         } catch (error) {
           throw formatSentryError('assignIssue', error);
@@ -310,10 +309,9 @@ export const Sentry: ConnectorSpec = {
         if (input.cursor) params.cursor = input.cursor;
         if (input.full !== undefined) params.full = input.full;
         try {
-          const response = await ctx.client.get(
-            `${buildBaseUrl(ctx)}/issues/${encodeURIComponent(input.issueId)}/events/`,
-            { params }
-          );
+          const response = await ctx.client.get(`${buildIssueUrl(ctx, input.issueId)}events/`, {
+            params,
+          });
           return { events: response.data };
         } catch (error) {
           throw formatSentryError('listIssueEvents', error);
@@ -380,9 +378,7 @@ export const Sentry: ConnectorSpec = {
       input: SentryDeleteIssueInputSchema,
       handler: async (ctx, input: SentryDeleteIssueInput) => {
         try {
-          await ctx.client.delete(
-            `${buildBaseUrl(ctx)}/issues/${encodeURIComponent(input.issueId)}/`
-          );
+          await ctx.client.delete(buildIssueUrl(ctx, input.issueId));
           return { deleted: true, issueId: input.issueId };
         } catch (error) {
           throw formatSentryError('deleteIssue', error);

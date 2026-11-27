@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ThumbnailAttachmentPill } from '../../conversation_input/thumbnail_attachment_pill';
 import type { UserMessageThumbnail } from './use_user_message_thumbnails';
+import { ImagePreviewModal } from './image_preview_modal';
 
 export interface UserMessageImagesProps {
   thumbnails: UserMessageThumbnail[];
@@ -20,6 +21,8 @@ export const UserMessageImages: React.FC<UserMessageImagesProps> = ({
   thumbnails,
   hoveredImageName,
 }) => {
+  const [previewed, setPreviewed] = useState<UserMessageThumbnail | null>(null);
+
   if (thumbnails.length === 0) {
     return null;
   }
@@ -27,15 +30,26 @@ export const UserMessageImages: React.FC<UserMessageImagesProps> = ({
   return (
     <EuiFlexItem grow={false}>
       <EuiFlexGroup direction="row" wrap responsive={false} gutterSize="s">
-        {thumbnails.map(({ key, name, ...pillProps }) => (
-          <EuiFlexItem grow={false} key={key}>
-            <ThumbnailAttachmentPill
-              {...pillProps}
-              isHighlighted={hoveredImageName != null && hoveredImageName === name}
-            />
-          </EuiFlexItem>
-        ))}
+        {thumbnails.map((thumbnail) => {
+          const { key, name, ...pillProps } = thumbnail;
+          return (
+            <EuiFlexItem grow={false} key={key}>
+              <ThumbnailAttachmentPill
+                {...pillProps}
+                isHighlighted={hoveredImageName != null && hoveredImageName === name}
+                onClick={() => setPreviewed(thumbnail)}
+              />
+            </EuiFlexItem>
+          );
+        })}
       </EuiFlexGroup>
+      {previewed && (
+        <ImagePreviewModal
+          src={previewed.thumbnailUrl}
+          label={previewed.label}
+          onClose={() => setPreviewed(null)}
+        />
+      )}
     </EuiFlexItem>
   );
 };

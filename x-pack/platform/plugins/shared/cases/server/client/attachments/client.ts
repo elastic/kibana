@@ -15,7 +15,7 @@ import type { CasesClient } from '../client';
 
 import type { CasesClientInternal } from '../client_internal';
 import type { CasesClientArgs } from '../types';
-import { addComment } from './add';
+import { addComment, addCommentAndGetCase } from './add';
 import type {
   BulkCreateArgs,
   AddArgs,
@@ -31,13 +31,13 @@ import type {
   BulkDeleteFileArgs,
   AddFileArgs,
 } from './types';
-import { bulkCreate } from './bulk_create';
+import { bulkCreate, bulkCreateAndGetCase } from './bulk_create';
 import { deleteAll, deleteComment } from './delete';
 import { find, get, getAll, getAllDocumentsAttachedToCase } from './get';
 import { bulkGet } from './bulk_get';
-import { update } from './update';
+import { update, updateAndGetCase } from './update';
 import { bulkDeleteAttachments, bulkDeleteFileAttachments } from './bulk_delete';
-import { addFile } from './add_file';
+import { addFile, addFileAndGetCase } from './add_file';
 import { withUsageCounter } from '../usage_counters';
 
 /**
@@ -45,10 +45,22 @@ import { withUsageCounter } from '../usage_counters';
  */
 export interface AttachmentsSubClient {
   /**
-   * Adds an attachment to a case. Returns the case with comments.
+   * Adds an attachment to a case. Returns the created attachment, or the existing one when
+   * every referenced id is already on the case.
    */
-  add(params: AddArgs): Promise<Case>;
-  bulkCreate(params: BulkCreateArgs): Promise<Case>;
+  add(params: AddArgs): Promise<UnifiedAttachment>;
+  /**
+   * Adds an attachment to a case. Returns the case with all its attachments.
+   */
+  addAndGetCase(params: AddArgs): Promise<Case>;
+  /**
+   * Adds attachments to a case. Returns the created attachments.
+   */
+  bulkCreate(params: BulkCreateArgs): Promise<UnifiedAttachment[]>;
+  /**
+   * Adds attachments to a case. Returns the case with all its attachments.
+   */
+  bulkCreateAndGetCase(params: BulkCreateArgs): Promise<Case>;
   bulkGet(params: BulkGetArgs): Promise<BulkGetUnifiedAttachmentsResponse>;
   /**
    * Deletes all attachments associated with a single case.
@@ -81,19 +93,29 @@ export interface AttachmentsSubClient {
    */
   get(getArgs: GetArgs): Promise<UnifiedAttachment>;
   /**
-   * Full replace. The request must include every field. Returns the case with comments.
+   * Full replace. The request must include every field. Returns the updated attachment.
    */
-  update(updateArgs: UpdateArgs): Promise<Case>;
+  update(updateArgs: UpdateArgs): Promise<UnifiedAttachment>;
   /**
-   * Adds a file attachment to a case. Returns the case with comments.
+   * Full replace. The request must include every field. Returns the case with all its attachments.
    */
-  addFile(params: AddFileArgs): Promise<Case>;
+  updateAndGetCase(updateArgs: UpdateArgs): Promise<Case>;
+  /**
+   * Adds a file attachment to a case. Returns the created attachment.
+   */
+  addFile(params: AddFileArgs): Promise<UnifiedAttachment>;
+  /**
+   * Adds a file attachment to a case. Returns the case with all its attachments.
+   */
+  addFileAndGetCase(params: AddFileArgs): Promise<Case>;
 }
 
 // Keep this exhaustive so every new client method requires an explicit telemetry decision.
 const usageCounterByMethod = {
   add: 'add_attachment',
+  addAndGetCase: 'add_attachment',
   bulkCreate: 'bulk_create_attachments',
+  bulkCreateAndGetCase: 'bulk_create_attachments',
   bulkGet: null,
   deleteAll: 'delete_all_attachments',
   delete: 'delete_attachment',
@@ -104,7 +126,9 @@ const usageCounterByMethod = {
   getAll: null,
   get: null,
   update: 'update_attachment',
+  updateAndGetCase: 'update_attachment',
   addFile: 'add_file_attachment',
+  addFileAndGetCase: 'add_file_attachment',
 } as const satisfies Record<keyof AttachmentsSubClient, string | null>;
 
 /**
@@ -121,10 +145,20 @@ export const createAttachmentsSubClient = (
     add: withUsageCounter(usageCounterByMethod.add, clientArgs, (params: AddArgs) =>
       addComment(params, clientArgs)
     ),
+    addAndGetCase: withUsageCounter(
+      usageCounterByMethod.addAndGetCase,
+      clientArgs,
+      (params: AddArgs) => addCommentAndGetCase(params, clientArgs)
+    ),
     bulkCreate: withUsageCounter(
       usageCounterByMethod.bulkCreate,
       clientArgs,
       (params: BulkCreateArgs) => bulkCreate(params, clientArgs)
+    ),
+    bulkCreateAndGetCase: withUsageCounter(
+      usageCounterByMethod.bulkCreateAndGetCase,
+      clientArgs,
+      (params: BulkCreateArgs) => bulkCreateAndGetCase(params, clientArgs)
     ),
     bulkGet: (params: BulkGetArgs) => bulkGet(params, clientArgs, casesClient),
     delete: withUsageCounter(usageCounterByMethod.delete, clientArgs, (params: DeleteArgs) =>
@@ -153,8 +187,18 @@ export const createAttachmentsSubClient = (
     update: withUsageCounter(usageCounterByMethod.update, clientArgs, (params: UpdateArgs) =>
       update(params, clientArgs)
     ),
+    updateAndGetCase: withUsageCounter(
+      usageCounterByMethod.updateAndGetCase,
+      clientArgs,
+      (params: UpdateArgs) => updateAndGetCase(params, clientArgs)
+    ),
     addFile: withUsageCounter(usageCounterByMethod.addFile, clientArgs, (params: AddFileArgs) =>
       addFile(params, clientArgs, casesClient)
+    ),
+    addFileAndGetCase: withUsageCounter(
+      usageCounterByMethod.addFileAndGetCase,
+      clientArgs,
+      (params: AddFileArgs) => addFileAndGetCase(params, clientArgs, casesClient)
     ),
   };
 

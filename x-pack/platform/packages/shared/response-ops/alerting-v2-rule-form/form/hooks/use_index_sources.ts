@@ -16,16 +16,26 @@ interface UseIndexSourcesParams {
   http: HttpStart;
   application: ApplicationStart;
   getDatasets?: () => Promise<EsqlDatasetsResult>;
+  /** CPS project routing to list the sources with. */
+  projectRouting?: string;
 }
 
 const STALE_TIME = 30_000;
 
-export const useIndexSources = ({ http, application, getDatasets }: UseIndexSourcesParams) => {
+export const useIndexSources = ({
+  http,
+  application,
+  getDatasets,
+  projectRouting,
+}: UseIndexSourcesParams) => {
   const query = useQuery({
-    queryKey: [...ruleFormKeys.indexSources(), { withDatasets: Boolean(getDatasets) }],
+    queryKey: [
+      ...ruleFormKeys.indexSources(),
+      { withDatasets: Boolean(getDatasets), projectRouting },
+    ],
     queryFn: async () => {
       const [sourcesSettled, datasetsSettled] = await Promise.allSettled([
-        getESQLSources({ application, http }, undefined),
+        getESQLSources({ application, http }, undefined, undefined, undefined, projectRouting),
         getDatasets ? getDatasets() : Promise.resolve<EsqlDatasetsResult>({ datasets: [] }),
       ]);
 

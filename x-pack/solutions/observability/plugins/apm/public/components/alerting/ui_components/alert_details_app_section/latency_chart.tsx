@@ -9,7 +9,8 @@ import type { SettingsSpec, Theme } from '@elastic/charts';
 import type { EuiPanelProps, RecursivePartial } from '@elastic/eui';
 import type { ReactElement } from 'react';
 import React, { useMemo } from 'react';
-import { EuiFlexItem, EuiFlexGroup, EuiTitle } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiFlexItem, EuiFlexGroup, EuiTitle, useEuiFontSize } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { BoolQuery } from '@kbn/es-query';
 import type { EbtClickAttrsWithoutAction } from '@kbn/ebt-click';
@@ -70,6 +71,7 @@ export function LatencyChart({
   chartId = 'latencyChart',
   panelPaddingSize,
   chartSettings,
+  compactHeader = false,
 }: {
   // Optional so the chart can render outside an alert context (e.g. the service flyout);
   // without it the alert annotations are simply omitted.
@@ -112,10 +114,18 @@ export function LatencyChart({
   panelPaddingSize?: EuiPanelProps['paddingSize'];
   /** Elastic Charts settings overrides, e.g. to hide synced-cursor tooltips in narrow hosts. */
   chartSettings?: Partial<SettingsSpec>;
+  /**
+   * Keep the title and a compact aggregation select on one row, so the header is as
+   * tall as the sibling RED charts' headers in narrow hosts (e.g. the service flyout).
+   */
+  compactHeader?: boolean;
 }) {
   const {
     services: { uiSettings },
   } = useKibana();
+
+  // Line height of the `xs` EuiTitle below (EUI renders `xs` titles with the `m` font scale).
+  const { lineHeight: titleLineHeight } = useEuiFontSize('m');
 
   const preferred = usePreferredDataSourceAndBucketSize({
     start,
@@ -204,9 +214,17 @@ export function LatencyChart({
   return (
     <EuiFlexItem>
       <AnomalyChartPanel anomalyScore={anomaly?.score} paddingSize={panelPaddingSize}>
-        {/* wrap moves the controls onto their own line in narrow hosts (e.g. the
-            service flyout) instead of shrinking the title below its own width */}
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
+        {/* wrap moves the controls onto their own line in narrow hosts instead of
+            shrinking the title below its own width; compactHeader keeps a short
+            select on the title row */}
+        <EuiFlexGroup
+          alignItems="center"
+          gutterSize="s"
+          responsive={false}
+          wrap={!compactHeader}
+          justifyContent={compactHeader ? 'spaceBetween' : undefined}
+          data-test-subj="apmLatencyChartHeader"
+        >
           <EuiFlexItem grow={false}>
             <EuiTitle size="xs">
               <h2>
@@ -222,11 +240,26 @@ export function LatencyChart({
             </EuiFlexItem>
           )}
           {setLatencyAggregationType && (
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem
+              grow={false}
+              // The compressed select is taller than the title line; centering it in a
+              // title-tall slot (it overflows into the panel padding) keeps the header,
+              // and so the plot, at the same height as the sibling charts.
+              css={
+                compactHeader
+                  ? css`
+                      block-size: ${titleLineHeight};
+                      justify-content: center;
+                    `
+                  : undefined
+              }
+              data-test-subj="apmLatencyChartSelectContainer"
+            >
               <LatencyAggregationTypeSelect
                 latencyAggregationType={latencyAggregationType}
                 onChange={setLatencyAggregationType}
                 ebt={latencySelectEbt}
+                compact={compactHeader}
               />
             </EuiFlexItem>
           )}

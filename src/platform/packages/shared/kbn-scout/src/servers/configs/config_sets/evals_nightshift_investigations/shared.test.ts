@@ -12,14 +12,16 @@ import { join } from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ScoutServerConfig } from '../../../../types';
 
-// `src/` packages cannot import `@kbn/nightshift-shared` (x-pack), so read the flag from its source
-// to fail if it is renamed again without this config set following (see #292333).
-const NIGHTSHIFT_ENABLED_FLAG = /NIGHTSHIFT_ENABLED_FLAG = '([^']+)'/.exec(
-  readFileSync(
-    join(REPO_ROOT, 'x-pack/solutions/observability/packages/kbn-nightshift-shared/index.ts'),
-    'utf8'
-  )
-)?.[1];
+// `src/` packages cannot import `@kbn/nightshift-shared` (x-pack), so read the flags from its source
+// to fail if one is renamed again without this config set following (see #292333).
+const NIGHTSHIFT_SHARED_SOURCE = readFileSync(
+  join(REPO_ROOT, 'x-pack/solutions/observability/packages/kbn-nightshift-shared/index.ts'),
+  'utf8'
+);
+const readFlag = (constant: string) =>
+  new RegExp(`${constant} =\\s*'([^']+)'`).exec(NIGHTSHIFT_SHARED_SOURCE)?.[1];
+const NIGHTSHIFT_ENABLED_FLAG = readFlag('NIGHTSHIFT_ENABLED_FLAG');
+const NIGHTSHIFT_ONLINE_EVALS_PAUSED_FLAG = readFlag('NIGHTSHIFT_ONLINE_EVALS_PAUSED_FLAG');
 
 const SANDBOX_KIBANA_CONFIG = join(
   REPO_ROOT,
@@ -53,7 +55,9 @@ describe.each([
   beforeEach(() => {
     process.env = { ...originalEnv };
     delete process.env.NIGHTSHIFT_DATASETS;
-    delete process.env.NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG;
+    delete process.env.NIGHTSHIFT_CONNECTORS_KIBANA_CONFIG;
+    delete process.env.NIGHTSHIFT_DECISION_TREES;
+    delete process.env.NIGHTSHIFT_KNOWLEDGE;
     for (const key of Object.keys(process.env)) {
       if (key.startsWith('SANDBOX_')) delete process.env[key];
     }
@@ -72,7 +76,7 @@ describe.each([
   });
 
   // The config set must ignore NIGHTSHIFT_DATASETS: Scout is reused when only the selection changes.
-  it.each([undefined, 'synthetic-smoke', 'trace-only', 'all'])(
+  it.each([undefined, 'wiki-optimize', 'trace-only', 'all'])(
     'starts plain evals_tracing without the sandbox Kibana config (NIGHTSHIFT_DATASETS=%s)',
     (selection) => {
       const servers = loadServers(configPath, {
@@ -95,14 +99,21 @@ describe.each([
     expect(NIGHTSHIFT_ENABLED_FLAG).toBeTruthy();
     expect(args).toContain(`--feature_flags.overrides.${NIGHTSHIFT_ENABLED_FLAG}=true`);
     expect(args).toContain('--xpack.nightshift_investigations.enabled=true');
+    expect(args).toContain('--xpack.security.serviceAccounts.enabled=true');
     expect(args).toContain('--xpack.evals.enabled=true');
     expect(args).toContain('--xpack.evals.mode=full');
-    expect(args).toContain('--uiSettings.overrides.agentBuilder:experimentalFeatures=true');
     expect(args.filter((arg: string) => arg.startsWith('--config='))).toEqual([
       `--config=${join(__dirname, 'kibana.tracing.yml')}`,
       `--config=${SANDBOX_KIBANA_CONFIG}`,
     ]);
     expect(args.some((arg: string) => arg.includes('xpack.sandbox'))).toBe(false);
+  });
+
+  it('pauses online evals, so investigations are judged only by the suite', () => {
+    const args = loadServers(configPath, { SANDBOX_KIBANA_CONFIG }).kbnTestServer.serverArgs;
+
+    expect(NIGHTSHIFT_ONLINE_EVALS_PAUSED_FLAG).toBeTruthy();
+    expect(args).toContain(`--feature_flags.overrides.${NIGHTSHIFT_ONLINE_EVALS_PAUSED_FLAG}=true`);
   });
 
   it('fails fast when SANDBOX_KIBANA_CONFIG points at a missing file', () => {
@@ -118,8 +129,8 @@ describe.each([
     expect(servers.kbnTestServer.serverArgs).toContain('--xpack.task_manager.capacity=21');
   });
 
-  it('loads the optional telemetry YAML and keeps tracing exporter headers in the environment', () => {
-    const telemetryConfig = join(SANDBOX_KIBANA_CONFIG, '../kibana.telemetry.yml');
+  it('loads the optional connector set YAML and keeps tracing exporter headers in the environment', () => {
+    const connectorsConfig = join(SANDBOX_KIBANA_CONFIG, '../connector_sets/default.yml');
     const exporters = JSON.stringify([
       {
         http: {
@@ -130,32 +141,74 @@ describe.each([
     ]);
     const servers = loadServers(configPath, {
       SANDBOX_KIBANA_CONFIG,
-      NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG: telemetryConfig,
+      NIGHTSHIFT_CONNECTORS_KIBANA_CONFIG: connectorsConfig,
       TRACING_EXPORTERS: exporters,
     });
-    expect(servers.kbnTestServer.serverArgs).toContain(`--config=${telemetryConfig}`);
+    expect(servers.kbnTestServer.serverArgs).toContain(`--config=${connectorsConfig}`);
     expect(servers.kbnTestServer.serverArgs.join(' ')).not.toContain('trace-test-key');
     expect(servers.kbnTestServer.env?.NIGHTSHIFT_TRACING_EXPORTERS).toBe(exporters);
   });
 
-  it('keeps exporter headers out of smoke-only process arguments', () => {
+  it('keeps exporter headers out of sandbox-less process arguments', () => {
     const exporters = JSON.stringify([
-      { http: { url: 'https://traces.example.com', headers: { Authorization: 'smoke-key' } } },
+      { http: { url: 'https://traces.example.com', headers: { Authorization: 'tracing-key' } } },
     ]);
     const servers = loadServers(configPath, { TRACING_EXPORTERS: exporters });
-    expect(servers.kbnTestServer.serverArgs.join(' ')).not.toContain('smoke-key');
+    expect(servers.kbnTestServer.serverArgs.join(' ')).not.toContain('tracing-key');
     expect(servers.kbnTestServer.env?.NIGHTSHIFT_TRACING_EXPORTERS).toBe(exporters);
     expect(servers.kbnTestServer.serverArgs).toContain(
       `--config=${join(__dirname, 'kibana.tracing.yml')}`
     );
   });
 
-  it('fails fast when the telemetry YAML is missing', () => {
+  const knowledgeArgsFor = (env: Record<string, string> = {}) =>
+    loadServers(configPath, { SANDBOX_KIBANA_CONFIG, ...env }).kbnTestServer.serverArgs.filter(
+      (arg: string) =>
+        /nightshift_investigations\.(wiki|memory|decision_trees|learning)\./.test(arg)
+    );
+
+  // Decision trees default on and do not require Wiki, so leaving their flag out would turn them on.
+  it('keeps every knowledge system off without NIGHTSHIFT_KNOWLEDGE', () => {
+    expect(knowledgeArgsFor({ NIGHTSHIFT_DATASETS: 'reinforcement' })).toEqual([
+      '--xpack.nightshift_investigations.wiki.enabled=false',
+      '--xpack.nightshift_investigations.memory.enabled=false',
+      '--xpack.nightshift_investigations.decision_trees.enabled=false',
+    ]);
+  });
+
+  it('turns on only the selected knowledge systems and freezes learning', () => {
+    expect(knowledgeArgsFor({ NIGHTSHIFT_KNOWLEDGE: 'memory' })).toEqual([
+      '--xpack.nightshift_investigations.wiki.enabled=false',
+      '--xpack.nightshift_investigations.memory.enabled=true',
+      '--xpack.nightshift_investigations.decision_trees.enabled=false',
+      '--xpack.nightshift_investigations.learning.enabled=false',
+    ]);
+  });
+
+  it('runs decision trees without Wiki', () => {
+    expect(knowledgeArgsFor({ NIGHTSHIFT_KNOWLEDGE: 'decision-trees' })).toEqual([
+      '--xpack.nightshift_investigations.wiki.enabled=false',
+      '--xpack.nightshift_investigations.memory.enabled=false',
+      '--xpack.nightshift_investigations.decision_trees.enabled=true',
+      '--xpack.nightshift_investigations.learning.enabled=false',
+    ]);
+  });
+
+  // The live reinforcement mode waits on the post-run hook, which learning gates.
+  it('enables decision trees and keeps learning on when the reinforcement hook exported NIGHTSHIFT_DECISION_TREES', () => {
+    expect(knowledgeArgsFor({ NIGHTSHIFT_DECISION_TREES: 'true' })).toEqual([
+      '--xpack.nightshift_investigations.wiki.enabled=false',
+      '--xpack.nightshift_investigations.memory.enabled=false',
+      '--xpack.nightshift_investigations.decision_trees.enabled=true',
+    ]);
+  });
+
+  it('fails fast when the connector set YAML is missing', () => {
     expect(() =>
       loadServers(configPath, {
         SANDBOX_KIBANA_CONFIG,
-        NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG: '/missing.yml',
+        NIGHTSHIFT_CONNECTORS_KIBANA_CONFIG: '/missing.yml',
       })
-    ).toThrow('NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG references a missing file');
+    ).toThrow('NIGHTSHIFT_CONNECTORS_KIBANA_CONFIG references a missing file');
   });
 });

@@ -6,6 +6,7 @@
  */
 
 import { skippedResult } from '../../evaluator_utils';
+import { getQueries } from '../custom_content_output';
 import type { CustomContentEvaluator } from '../types';
 
 export const CUSTOM_CONTENT_EDIT_EVALUATOR_NAME = 'Custom Content Edit';
@@ -24,7 +25,15 @@ export const createEditEvaluator = (): CustomContentEvaluator => ({
       return skippedResult('This example is not an edit.');
     }
 
-    const { after, attachmentId, panelId, versionCount, baseline, followUpToolIds } = output;
+    const {
+      after,
+      attachmentId,
+      panelId,
+      versionCount,
+      baseline,
+      followUpToolIds,
+      followUpToolArgs,
+    } = output;
     if (followUpToolIds?.length === 0) {
       return {
         score: 0,
@@ -58,12 +67,16 @@ export const createEditEvaluator = (): CustomContentEvaluator => ({
       };
     }
 
-    const queryChanged = before.esql !== after.esql;
+    const queriesBefore = getQueries(before);
+    const queriesAfter = getQueries(after);
+    const queryChanged =
+      queriesBefore.length !== queriesAfter.length ||
+      queriesBefore.some((query, position) => query !== queriesAfter[position]);
     const templateChanged = before.template !== after.template;
 
     if (kind === 'style') {
       const checks = [
-        { name: 'kept the query', passed: !queryChanged },
+        { name: 'kept the queries', passed: !queryChanged },
         { name: 'changed the template', passed: templateChanged },
       ];
       const failed = checks.filter(({ passed }) => !passed).map(({ name }) => name);
@@ -72,19 +85,31 @@ export const createEditEvaluator = (): CustomContentEvaluator => ({
         label: failed.length === 0 ? 'style-edit' : 'style-edit-failed',
         explanation:
           failed.length === 0
-            ? 'The edit changed the template and kept the query.'
+            ? 'The edit changed the template and kept the queries.'
             : `A style edit should have: ${failed.join(', ')}.`,
         metadata: { queryChanged, templateChanged },
       };
     }
 
-    return queryChanged
+    if (!queryChanged) {
+      return {
+        score: 0,
+        label: 'data-edit-failed',
+        explanation: 'A data edit should have changed the query, but it is unchanged.',
+        metadata: { esql: after.esql, followUpToolArgs },
+      };
+    }
+
+    const touched = (expected?.unchangedQueries ?? []).filter(
+      (position) => queriesBefore[position] !== queriesAfter[position]
+    );
+    return touched.length === 0
       ? { score: 1, label: 'data-edit', explanation: 'The edit changed the query.' }
       : {
           score: 0,
-          label: 'data-edit-failed',
-          explanation: 'A data edit should have changed the query, but it is unchanged.',
-          metadata: { esql: after.esql },
+          label: 'data-edit-touched-other-queries',
+          explanation: `The edit changed queries it should have left alone: ${touched.join(', ')}.`,
+          metadata: { touched, before: queriesBefore, after: queriesAfter, followUpToolArgs },
         };
   },
 });

@@ -392,6 +392,159 @@ describe('EsAndUiamApiKeyStrategy', () => {
       );
     });
 
+    test('grants a single fresh UIAM key for the fake request Task Manager builds at run time (ApiKey essu_, no cloneApiKey option)', async () => {
+      const { strategy, coreStart, mockUiam } = createStrategy(ApiKeyType.ES);
+      const request = httpServerMock.createFakeKibanaRequest({
+        headers: { authorization: 'ApiKey essu_other-task-key' },
+      });
+      // What `api_key_utils` answers for this request: it carries an API key, and a fake request's
+      // key is always cloned because it belongs to another task.
+      hasApiKeyMock.mockReturnValue(true);
+      shouldCloneApiKeyFromRequestMock.mockReturnValue(true);
+      (coreStart.security.authc.getCurrentUser as jest.Mock).mockReturnValue(null);
+      (coreStart.security.authc.getPrincipal as jest.Mock).mockReturnValue(null);
+      mockUiam.grant.mockResolvedValueOnce({
+        id: 'runtime-uiam-id',
+        name: 'test',
+        api_key: 'essu_runtime-secret',
+      });
+
+      const tasks = [{ id: 'task-1', taskType: 'report', params: {}, state: {} }];
+      const result = await strategy.grantApiKeys(tasks, request, coreStart.security);
+
+      expect(createApiKeyMock).not.toHaveBeenCalled();
+      expect(mockUiam.grant).toHaveBeenCalledTimes(1);
+      expect(result.get('task-1')).toEqual({
+        uiamApiKey: 'essu_runtime-secret',
+        userScope: expect.objectContaining({
+          apiKeyId: 'runtime-uiam-id',
+          uiamApiKeyId: 'runtime-uiam-id',
+          apiKeyCreatedByUser: false,
+        }),
+      });
+    });
+
+    describe('fake request carrying a UIAM bearer token, without a principal', () => {
+      // The Actions inbound events route schedules workflows from a fake request it builds
+      // itself from Relay's UIAM service-account token. The route has authc disabled, so the
+      // request has no user and no principal, and `cloneApiKey` is no longer implied by the
+      // request being fake once clone vs grant follows the authorization scheme.
+      const tasks = [{ id: 'task-1', taskType: 'report', params: {}, state: {} }];
+      const relayRequest = () =>
+        httpServerMock.createFakeKibanaRequest({
+          headers: {
+            authorization: 'Bearer essu_service_account_token',
+            'x-client-authentication': 'relay-shared-secret',
+          },
+        });
+
+      const setUpRelay = () => {
+        const strategyAndMocks = createStrategy(ApiKeyType.ES);
+        const { coreStart } = strategyAndMocks;
+        (coreStart.security.authc.getCurrentUser as jest.Mock).mockReturnValue(null);
+        (coreStart.security.authc.getPrincipal as jest.Mock).mockReturnValue(null);
+        // A Bearer scheme is neither an API key nor cloneable, whatever the caller asked for.
+        hasApiKeyMock.mockReturnValue(false);
+        shouldCloneApiKeyFromRequestMock.mockReturnValue(false);
+        return strategyAndMocks;
+      };
+
+      test('grants only a UIAM key, even though the request cannot be cloned', async () => {
+        const { strategy, coreStart, mockUiam } = setUpRelay();
+        mockUiam.grant.mockResolvedValueOnce({
+          id: 'relay-uiam-id',
+          name: 'test',
+          api_key: 'essu_relay-secret',
+        });
+
+        const result = await strategy.grantApiKeys(tasks, relayRequest(), coreStart.security, {
+          cloneApiKey: true,
+        });
+
+        expect(createApiKeyMock).not.toHaveBeenCalled();
+        expect(mockUiam.grant).toHaveBeenCalledTimes(1);
+        expect(result.get('task-1')).toEqual({
+          uiamApiKey: 'essu_relay-secret',
+          userScope: expect.objectContaining({
+            apiKeyId: 'relay-uiam-id',
+            uiamApiKeyId: 'relay-uiam-id',
+            apiKeyCreatedByUser: false,
+          }),
+        });
+      });
+
+      test('fails the schedule with the UIAM error when the grant is refused, without falling back to an ES key', async () => {
+        const { strategy, coreStart, mockUiam } = setUpRelay();
+        const refusal = new Error('Unable to grant an API key for service account [relay]');
+        mockUiam.grant.mockRejectedValueOnce(refusal);
+
+        await expect(
+          strategy.grantApiKeys(tasks, relayRequest(), coreStart.security, { cloneApiKey: true })
+        ).rejects.toBe(refusal);
+        expect(createApiKeyMock).not.toHaveBeenCalled();
+      });
+
+      test('does not widen the branch to a real request with the same bearer token', async () => {
+        const { strategy, coreStart, mockUiam } = setUpRelay();
+        createApiKeyMock.mockResolvedValueOnce(
+          new Map([['task-1', { apiKey: 'es-key', apiKeyId: 'es-id' }]])
+        );
+        mockUiam.grant.mockResolvedValueOnce({
+          id: 'session-uiam-id',
+          name: 'test',
+          api_key: 'essu_session-secret',
+        });
+
+        const result = await strategy.grantApiKeys(
+          tasks,
+          httpServerMock.createKibanaRequest({
+            headers: { authorization: 'Bearer essu_session_token' },
+          }),
+          coreStart.security
+        );
+
+        // A real UIAM session request without `cloneApiKey` keeps the ES grant plus UIAM grant.
+        expect(createApiKeyMock).toHaveBeenCalledTimes(1);
+        expect(mockUiam.grant).toHaveBeenCalledTimes(1);
+        expect(result.get('task-1')).toEqual(
+          expect.objectContaining({ apiKey: 'es-key', uiamApiKey: 'essu_session-secret' })
+        );
+      });
+
+      test('still honours an explicit request for an ES key only', async () => {
+        const { strategy, coreStart, mockUiam } = setUpRelay();
+        createApiKeyMock.mockResolvedValueOnce(
+          new Map([['task-1', { apiKey: 'es-key', apiKeyId: 'es-id' }]])
+        );
+
+        await strategy.grantApiKeys(tasks, relayRequest(), coreStart.security, {
+          onEsKey: true,
+        });
+
+        expect(createApiKeyMock).toHaveBeenCalledTimes(1);
+        expect(mockUiam.grant).not.toHaveBeenCalled();
+      });
+
+      test('sends a fake request with a non-UIAM bearer token through the ES grant', async () => {
+        const { strategy, coreStart, mockUiam } = setUpRelay();
+        createApiKeyMock.mockResolvedValueOnce(
+          new Map([['task-1', { apiKey: 'es-key', apiKeyId: 'es-id' }]])
+        );
+
+        const result = await strategy.grantApiKeys(
+          tasks,
+          httpServerMock.createFakeKibanaRequest({
+            headers: { authorization: 'Bearer es-access-token' },
+          }),
+          coreStart.security
+        );
+
+        expect(createApiKeyMock).toHaveBeenCalledTimes(1);
+        expect(mockUiam.grant).not.toHaveBeenCalled();
+        expect(result.get('task-1')?.apiKey).toBe('es-key');
+      });
+    });
+
     describe('UIAM service account principals', () => {
       const serviceAccountRequest = () =>
         httpServerMock.createKibanaRequest({

@@ -21,6 +21,12 @@ import { RESOLUTION_RULE_CONFIGS } from '../..';
 import { runEsqlMatcherRule } from '../../matcher';
 import { runRelatedUserAliasResolution } from '../related_user_alias_resolution';
 import { CUSTOM_RULES_DEADLINE_MARGIN_MS, runCustomResolutionRules } from './custom_rules';
+import {
+  clearRuleFailure,
+  getBackoffUntil,
+  getConsecutiveFailures,
+  withRuleFailure,
+} from './rule_backoff';
 
 export const MAINTAINER_ID = 'automated-resolution';
 
@@ -71,6 +77,16 @@ export const automatedResolutionMaintainerConfig: RegisterEntityMaintainerConfig
       }
 
       const ruleState = state.rules[ruleConfig.id] ?? EMPTY_RULE_STATE;
+      const backoffUntil = getBackoffUntil(ruleState, Date.now());
+      if (backoffUntil) {
+        logger.debug(
+          `Skipping resolution rule '${ruleConfig.id}' after ${getConsecutiveFailures(
+            ruleState
+          )} failure(s) in a row; next attempt at ${backoffUntil}`
+        );
+        continue;
+      }
+
       const isMatcherBackfill =
         Boolean(ruleConfig.matcher) && ruleState.lastProcessedTimestamp == null;
       if (isMatcherBackfill) {
@@ -98,7 +114,7 @@ export const automatedResolutionMaintainerConfig: RegisterEntityMaintainerConfig
             index,
           });
         } else if (ruleConfig.kind === RESOLUTION_RULE_KINDS.RELATED_USER_ALIAS_RESOLUTION) {
-          ruleStates[ruleConfig.id] = await runRelatedUserAliasResolution({
+          const aliasState = await runRelatedUserAliasResolution({
             state: ruleState,
             esClient,
             logger,
@@ -107,6 +123,8 @@ export const automatedResolutionMaintainerConfig: RegisterEntityMaintainerConfig
             telemetry,
             index,
           });
+          // An aborted run returns the state it was given, which says nothing about success.
+          ruleStates[ruleConfig.id] = signal.aborted ? aliasState : clearRuleFailure(aliasState);
         } else {
           logger.warn(
             `Skipping resolution rule '${ruleConfig.id}': no matcher spec and unrecognized kind '${ruleConfig.kind}'`
@@ -116,7 +134,11 @@ export const automatedResolutionMaintainerConfig: RegisterEntityMaintainerConfig
 
         await esClient.indices.refresh({ index });
       } catch (error) {
-        logger.warn(`Resolution rule '${ruleConfig.id}' failed: ${error}`);
+        const failedState = withRuleFailure(ruleState, getErrorMessage(error), Date.now());
+        ruleStates[ruleConfig.id] = failedState;
+        logger.warn(
+          `Resolution rule '${ruleConfig.id}' failed: ${error}. Next attempt at ${failedState.nextAttemptAt}`
+        );
       }
     }
 

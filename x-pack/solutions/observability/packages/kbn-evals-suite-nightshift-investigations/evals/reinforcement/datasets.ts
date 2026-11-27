@@ -1,0 +1,133 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { readFileSync } from 'fs';
+import { lazySchema, z } from '@kbn/zod/v4';
+import type { EvaluationDataset, EvalsClient } from '@kbn/evals';
+import { investigationExampleSchema, type InvestigationExample } from '../investigation/types';
+import type { ReinforcementExample } from './types';
+
+/** The fields `runReinforcementExample` reads, so a malformed file fails at load, not mid-run. */
+const exampleSchema = lazySchema(() =>
+  z.object({
+    input: z.object({
+      question: z.string().min(1),
+      response: z.string(),
+      prior_tree: z.object({
+        tree_id: z.string().min(1),
+        version: z.number().int().min(1),
+        markdown: z.string().min(1),
+      }),
+      tool_calls: z.array(
+        z.object({
+          tool_id: z.string().min(1),
+          tool_call_id: z.string().min(1),
+          params: z.record(z.string(), z.unknown()),
+        })
+      ),
+      tool_results: z.array(
+        z.object({
+          tool_id: z.string().min(1),
+          tool_call_id: z.string().min(1),
+          results: z.array(z.unknown()),
+        })
+      ),
+    }),
+    metadata: z.object({
+      case_id: z.string().min(1),
+      source: z.string().default('traces-file'),
+      require_merge: z.boolean().optional(),
+    }),
+  })
+);
+
+const fileSchema = lazySchema(() =>
+  z.object({
+    examples: z.array(exampleSchema).min(1).max(20),
+  })
+);
+
+/**
+ * Full reinforcement rounds from `NIGHTSHIFT_REINFORCEMENT_TRACES_FILE`.
+ * The default run uses the committed reduced rounds instead of this file.
+ */
+export const loadReinforcementExamples = (
+  examplesFile = process.env.NIGHTSHIFT_REINFORCEMENT_TRACES_FILE
+): ReinforcementExample[] => {
+  if (!examplesFile) {
+    throw new Error(
+      'NIGHTSHIFT_REINFORCEMENT_TRACES_FILE is not set. The reinforcement micro-eval replays the committed Customer-0 rounds unless this file is provided.'
+    );
+  }
+  const file = fileSchema.parse(JSON.parse(readFileSync(examplesFile, 'utf8')));
+  return file.examples;
+};
+
+/** How many Customer-0 investigations the micro-eval runs. */
+export const REINFORCEMENT_EXAMPLE_LIMIT = 3;
+
+export const CUSTOMER0_REINFORCEMENT_DATASET = 'nightshift/customer0-manual-v2';
+
+/** The first few examples of a Customer-0 dataset, in stored order. Capped at five. */
+export const selectCustomer0Examples = <Example>(
+  examples: Example[],
+  limit = Number(process.env.NIGHTSHIFT_REINFORCEMENT_LIMIT ?? REINFORCEMENT_EXAMPLE_LIMIT)
+): Example[] => {
+  const count = Number.isFinite(limit)
+    ? Math.max(1, Math.min(5, Math.floor(limit)))
+    : REINFORCEMENT_EXAMPLE_LIMIT;
+  return examples.slice(0, count);
+};
+
+/**
+ * Each mode upserts its own dataset: an upsert deletes the examples it does not post, so a shared
+ * name would let one mode wipe another's examples and mix their experiments.
+ */
+const REPLAY_DATASET_NAME = 'nightshift/reinforcement-customer0';
+export const TRACES_FILE_DATASET_NAME = 'nightshift/reinforcement-customer0-traces-file';
+const LIVE_DATASET_NAME = 'nightshift/reinforcement-customer0-live';
+
+/** Replayed rounds: the committed ones, or a private export under its own dataset name. */
+export const reinforcementDataset = (
+  examples: ReinforcementExample[],
+  name = REPLAY_DATASET_NAME
+): EvaluationDataset<ReinforcementExample> => ({
+  name,
+  description:
+    'Recorded investigation rounds replayed through the decision-tree reinforcement agent.',
+  tags: ['nightshift', 'reinforcement', 'customer0'],
+  examples,
+});
+
+/**
+ * A few Customer-0 investigations. Reinforcement is the post-execution run the investigation
+ * already waits for; this dataset does not start a second one.
+ */
+export const customer0ReinforcementDataset = (
+  examples: InvestigationExample[]
+): EvaluationDataset<InvestigationExample> => ({
+  name: LIVE_DATASET_NAME,
+  description:
+    'Customer-0 investigations whose post-execution decision-tree reinforcement submit is graded.',
+  tags: ['nightshift', 'reinforcement', 'customer0'],
+  examples,
+});
+
+/** Loads a few examples from the golden Customer-0 dataset. Does not read `NIGHTSHIFT_EXAMPLES_FILE`. */
+export const loadCustomer0ReinforcementDataset = async (
+  client: Pick<EvalsClient, 'getDatasetByName'>,
+  datasetName = process.env.NIGHTSHIFT_REINFORCEMENT_DATASET ?? CUSTOMER0_REINFORCEMENT_DATASET
+): Promise<EvaluationDataset<InvestigationExample>> => {
+  const dataset = await client.getDatasetByName(datasetName);
+  if (!dataset) throw new Error(`Customer-0 dataset not found: ${datasetName}`);
+  const examples = z
+    .array(investigationExampleSchema.extend({ id: z.string().min(1) }))
+    .min(1)
+    .max(1_000)
+    .parse(dataset.examples);
+  return customer0ReinforcementDataset(selectCustomer0Examples(examples));
+};

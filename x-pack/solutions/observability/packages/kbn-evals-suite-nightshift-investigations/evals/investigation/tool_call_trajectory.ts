@@ -57,3 +57,11 @@ export const extractToolCallTrajectory = (
       result: renderResult(results),
     }))
   );
+
+/** The final message of the last round: the investigation's answer when it records no verdict. */
+export const extractFinalResponse = (
+  rounds: Array<Pick<ConversationRound, 'response'>>
+): string | undefined => {
+  const message = rounds.at(-1)?.response?.message;
+  return typeof message === 'string' && message.length > 0 ? message : undefined;
+};

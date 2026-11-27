@@ -7,14 +7,23 @@
 
 import { test } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
+import { FLAG_OFF_OVERRIDE, FLAG_RESET_OVERRIDE } from '../../feature_flag';
 import { DIGITAL_EXPERIENCE_DISABLED_WITH_UX_TAGS } from '../../tags';
 
 test.describe(
   'Digital Experience navigation when disabled',
   { tag: DIGITAL_EXPERIENCE_DISABLED_WITH_UX_TAGS },
   () => {
+    test.beforeAll(async ({ apiServices }) => {
+      await apiServices.core.settings(FLAG_OFF_OVERRIDE);
+    });
+
     test.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsViewer();
+    });
+
+    test.afterAll(async ({ apiServices }) => {
+      await apiServices.core.settings(FLAG_RESET_OVERRIDE);
     });
 
     test('keeps the legacy User Experience navigation', async ({ page, kbnUrl }) => {

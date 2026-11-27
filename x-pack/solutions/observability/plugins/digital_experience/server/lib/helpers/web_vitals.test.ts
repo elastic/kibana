@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { toDurationVital, toScoreVital, vitalStatsAggs } from './web_vitals';
+import { toDurationVital, toScoreVital, toWebVitals, vitalStatsAggs } from './web_vitals';
 
 const percentiles = (entries: Array<[number, number | null]>) => ({
   values: entries.map(([key, value]) => ({ key, value })),
@@ -66,5 +66,22 @@ describe('toScoreVital', () => {
 
     expect(p75).toBe(0.05);
     expect(ratings).toEqual({ good: 1, needsImprovement: 0, poor: 0 });
+  });
+});
+
+describe('toWebVitals', () => {
+  it('reads each vital from its aggregation, CLS as a score', () => {
+    const duration = vitalAggregation(10, 3100, 6, 9);
+    const score = vitalAggregation(4, 0.05, 4, 4);
+
+    expect(
+      toWebVitals({ lcp: duration, inp: duration, cls: score, fcp: duration, ttfb: duration })
+    ).toEqual({
+      lcp: toDurationVital(duration),
+      inp: toDurationVital(duration),
+      cls: toScoreVital(score),
+      fcp: toDurationVital(duration),
+      ttfb: toDurationVital(duration),
+    });
   });
 });

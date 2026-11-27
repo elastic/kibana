@@ -1,0 +1,55 @@
+{
+  "callTool": {
+    "config": {
+      "serverUrl": "https://dbc-0123abcd-4567.cloud.databricks.com/api/2.0/mcp/sql"
+    }
+  },
+  "executeStatement": {
+    "config": {
+      "serverUrl": "https://dbc-0123abcd-4567.cloud.databricks.com/api/2.0/mcp/sql"
+    }
+  },
+  "listTools": {
+    "config": {
+      "serverUrl": "https://dbc-0123abcd-4567.cloud.databricks.com/api/2.0/mcp/sql"
+    },
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/api/2.0/mcp/sql"
+      }
+    ]
+  },
+  "pollResponse": {
+    "config": {
+      "serverUrl": "https://dbc-0123abcd-4567.cloud.databricks.com/api/2.0/mcp/sql"
+    },
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/api/2.0/mcp/sql"
+      }
+    ]
+  },
+  "repairRun": {
+    "input": [
+      {
+        "rerunAllFailedTasks": true
+      },
+      {
+        "rerunAllFailedTasks": false
+      }
+    ]
+  },
+  "runQuery": {
+    "config": {
+      "serverUrl": "https://dbc-0123abcd-4567.cloud.databricks.com/api/2.0/mcp/sql"
+    },
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/api/2.0/mcp/sql"
+      }
+    ]
+  }
+}

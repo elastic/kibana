@@ -165,8 +165,11 @@ export class AgentBuilderApp {
 
   async deleteConversation(conversationId: string) {
     await this.page.testSubj.click(`agentBuilderSidebarConversation-${conversationId}`);
-    await this.page.testSubj.click('agentBuilderConversationTitleButton');
-    await this.page.testSubj.click('agentBuilderConversationDeleteButton');
+    await this.page.testSubj
+      .locator(`agentBuilderSidebarConversationRow-${conversationId}`)
+      .hover();
+    await this.page.testSubj.click(`agentBuilderSidebarConversationMenu-${conversationId}`);
+    await this.page.testSubj.click(`agentBuilderSidebarConversationDelete-${conversationId}`);
     await this.page.testSubj.click('confirmModalConfirmButton');
     await this.page.testSubj
       .locator(`agentBuilderSidebarConversation-${conversationId}`)
@@ -185,31 +188,16 @@ export class AgentBuilderApp {
   }
 
   async getConversationTitle(): Promise<string> {
-    const persisted = await this.page.testSubj
-      .locator('agentBuilderConversationTitleButton')
-      .count();
-    const selector =
-      persisted > 0 ? 'agentBuilderConversationTitleButton' : 'agentBuilderConversationTitle';
-    return this.page.testSubj.locator(selector).innerText();
+    return this.page.testSubj.locator('appHeaderTitle').innerText();
   }
 
   async renameConversation(newTitle: string): Promise<string> {
-    await this.page.testSubj.click('agentBuilderConversationTitleButton');
-    await this.page.testSubj.click('agentBuilderConversationRenameButton');
-    const input = this.page.testSubj.locator('renameConversationModalInput');
-    await input.click();
-    await this.page.testSubj.clearInput('renameConversationModalInput');
+    await this.page.testSubj.click('appHeaderTitleButton');
+    const input = this.page.testSubj.locator('appHeaderTitleInput');
     await input.fill(newTitle);
-    await this.page.testSubj.click('renameConversationModalSave');
+    await input.press('Enter');
     await this.page.waitForFunction(
-      (t) => {
-        const btn = document.querySelector(
-          '[data-test-subj="agentBuilderConversationTitleButton"]'
-        );
-        const h4 = document.querySelector('[data-test-subj="agentBuilderConversationTitle"]');
-        const text = (btn ?? h4)?.textContent ?? '';
-        return text.trim() === t;
-      },
+      (t) => document.querySelector('[data-test-subj="appHeaderTitle"]')?.textContent?.trim() === t,
       newTitle,
       { timeout: 60_000 }
     );

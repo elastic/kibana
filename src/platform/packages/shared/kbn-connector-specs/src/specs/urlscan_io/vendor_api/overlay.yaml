@@ -1,0 +1,36 @@
+overlay: 1.0.0
+info:
+  title: urlscan.io API corrections
+  version: 1.0.0
+actions:
+  - target: $.paths['/api/v1/search'].get
+    description: >-
+      Search still answers anonymous requests. https://docs.urlscan.io/changelog (October 1, 2026) says
+      searches by unauthenticated requests may be limited to recent scan history, and
+      https://docs.urlscan.io/pages/api-rate-limits gives them the scope ip-address. On 2026-11-25,
+      GET https://urlscan.io/api/v1/search/ without a key answered 200 with that scope. The spec requires
+      the API key on every operation.
+    update:
+      security:
+        - apikeyAuth: [read, write]
+        - {}
+  - target: $.paths['/api/v1/quotas'].get
+    description: >-
+      Quotas still answer anonymous requests. https://docs.urlscan.io/pages/api-rate-limits points to this
+      endpoint for current limits and gives unauthenticated requests the scope ip-address. On 2026-11-25,
+      GET https://urlscan.io/api/v1/quotas without a key answered 200 with that scope. The spec requires
+      the API key on every operation.
+    update:
+      security:
+        - apikeyAuth: [read, write]
+        - {}
+  - target: $.paths['/screenshots/{scanId}.png'].get
+    description: >-
+      Screenshots still answer anonymous requests. https://urlscan.io/blog/2026/03/18/api-auth-required/
+      makes only GET /api/v1/result/{scanId}/, GET /dom/{scanId}/ and GET /responses/{fileHash}/
+      authentication-only, and https://urlscan.io/docs/api/ fetches screenshots without a key
+      (curl https://urlscan.io/screenshots/$uuid.png). The spec requires the API key on every operation.
+    update:
+      security:
+        - apikeyAuth: [read, write]
+        - {}

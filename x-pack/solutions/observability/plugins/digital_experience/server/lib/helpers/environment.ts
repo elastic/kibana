@@ -11,12 +11,13 @@ import {
   SERVICE_ENVIRONMENT,
 } from '@kbn/apm-types';
 import { termQuery } from '@kbn/es-query';
+import { MAX_ENVIRONMENT_LENGTH } from '../constants';
 
 /**
  * Documents without an environment, as APM's `environmentQuery` defines them: the "Not defined"
  * sentinel APM writes, or none of `fields` set.
  */
-export const environmentNotDefinedFilter = (fields: string[]) => ({
+export const environmentNotDefinedFilter = (fields: readonly string[]) => ({
   bool: {
     should: [
       ...termQuery(SERVICE_ENVIRONMENT, ENVIRONMENT_NOT_DEFINED_VALUE),
@@ -27,7 +28,7 @@ export const environmentNotDefinedFilter = (fields: string[]) => ({
 });
 
 /** Documents of `environment` in any of `fields`; everything for all environments. */
-export const environmentFilter = (fields: string[], environment?: string) => {
+export const environmentFilter = (fields: readonly string[], environment?: string) => {
   if (!environment || environment === ENVIRONMENT_ALL_VALUE) {
     return { match_all: {} };
   }
@@ -49,4 +50,16 @@ export const environmentFilter = (fields: string[], environment?: string) => {
 export const withNotDefined = (environments: string[], notDefinedCount: number): string[] => {
   const names = environments.filter((name) => name !== ENVIRONMENT_NOT_DEFINED_VALUE);
   return notDefinedCount > 0 ? [...names, ENVIRONMENT_NOT_DEFINED_VALUE] : names;
+};
+
+/** Dedupes the environments into "Not defined" first, then the accepted names alphabetically. */
+export const sortEnvironments = (environments: Iterable<string>): string[] => {
+  const unique = new Set(environments);
+  const names = [...unique]
+    .filter((name) => name !== ENVIRONMENT_NOT_DEFINED_VALUE)
+    .filter((name) => name.length <= MAX_ENVIRONMENT_LENGTH)
+    .sort();
+  return unique.has(ENVIRONMENT_NOT_DEFINED_VALUE)
+    ? [ENVIRONMENT_NOT_DEFINED_VALUE, ...names]
+    : names;
 };

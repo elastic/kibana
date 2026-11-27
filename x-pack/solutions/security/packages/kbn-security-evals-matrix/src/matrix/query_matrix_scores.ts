@@ -64,7 +64,7 @@ export interface AggregatedDatasetScores {
 export interface AggregatedSuiteScores {
   suiteId: string;
   experimentId: string;
-  /** Every (experimentId, executionId) contributing to this row; sharded sweeps have one per VM. */
+  /** Every (experimentId, executionId) contributing to this row; sharded sweeps have one per shard. */
   executions?: Array<{ experimentId: string; executionId: string }>;
   /** Flat execution IDs for backwards compatibility / display. */
   executionIds?: string[];

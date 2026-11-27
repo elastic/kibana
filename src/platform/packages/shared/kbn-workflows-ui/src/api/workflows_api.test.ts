@@ -275,6 +275,17 @@ describe('WorkflowApi', () => {
     });
   });
 
+  describe('getLinkedRules', () => {
+    it('should call POST /internal/workflows/_linked_rules with ids', async () => {
+      await api.getLinkedRules(['w1', 'w2']);
+
+      expect(http.post).toHaveBeenCalledWith('/internal/workflows/_linked_rules', {
+        body: JSON.stringify({ ids: ['w1', 'w2'] }),
+        version: INTERNAL_VERSION,
+      });
+    });
+  });
+
   // ---------------------------------------------------------------------------
   // Execution operations
   // ---------------------------------------------------------------------------
@@ -521,6 +532,35 @@ describe('WorkflowApi', () => {
       expect(http.get).toHaveBeenCalledWith(
         '/internal/workflows/library/templates/slug%2Fwith%2Fslashes',
         { version: INTERNAL_VERSION }
+      );
+    });
+  });
+
+  describe('createWorkflowFromTemplateRemix', () => {
+    it('should call POST /internal/workflows/library/templates/{slug}/remix with the YAML and version', async () => {
+      await api.createWorkflowFromTemplateRemix({
+        yaml: 'name: Remixed',
+        template: { slug: 'ip-reputation-check', version: '1.2.0' },
+      });
+
+      expect(http.post).toHaveBeenCalledWith(
+        '/internal/workflows/library/templates/ip-reputation-check/remix',
+        {
+          body: JSON.stringify({ yaml: 'name: Remixed', version: '1.2.0' }),
+          version: INTERNAL_VERSION,
+        }
+      );
+    });
+
+    it('should encode the slug', async () => {
+      await api.createWorkflowFromTemplateRemix({
+        yaml: 'name: Remixed',
+        template: { slug: 'slug/with/slashes', version: '1.0.0' },
+      });
+
+      expect(http.post).toHaveBeenCalledWith(
+        '/internal/workflows/library/templates/slug%2Fwith%2Fslashes/remix',
+        expect.anything()
       );
     });
   });

@@ -15,11 +15,10 @@ import type { CoverageAtBase } from './test/vendor_api/exemptions';
 import { findLostCoverage, vendorApiExemptionsSchema } from './test/vendor_api/exemptions';
 import type { FoundConnector } from './test/vendor_api/find_connector';
 import { listConnectors } from './test/vendor_api/find_connector';
-import { updateVendorApi } from './test/vendor_api/update_vendor_api';
+import { updateVendorApi } from './test/vendor_api/record/update_vendor_api';
 
-const PACKAGE_DIR = path.resolve(__dirname, '..');
 const SPECS_DIR = path.join(__dirname, 'specs');
-const EXEMPTIONS = path.join(PACKAGE_DIR, 'vendor_api_exemptions.json');
+const EXEMPTIONS = path.join(__dirname, 'test', 'vendor_api', 'vendor_api_exemptions.json');
 const SCRIPT = 'node scripts/connector_vendor_api';
 const RECORDING_TIMEOUT = 120_000;
 
@@ -129,18 +128,21 @@ describe('vendor API contract', () => {
         if (!found) {
           throw new Error(`specs/${name}/vendor_api belongs to no connector in all_specs.ts`);
         }
+        const { id } = found.connector.metadata;
         const { changed, problems } = await updateVendorApi({
           connector: found.connector,
           directory: found.directory,
           check: true,
+          // Only a source without a snapshot is loaded, such as one `--inspect` just added.
           fetchText: async (url) => {
-            throw new Error(`The contract test runs offline, but tried to fetch ${url}`);
+            throw new Error(
+              `${url} has no snapshot, and the contract test runs offline; run ${SCRIPT} --connector ${id} and commit the result`
+            );
           },
           now: () => new Date(0),
           log: { info: () => {}, warning: () => {} },
         });
 
-        const { id } = found.connector.metadata;
         expect({
           problems,
           outOfDate: changed.map(

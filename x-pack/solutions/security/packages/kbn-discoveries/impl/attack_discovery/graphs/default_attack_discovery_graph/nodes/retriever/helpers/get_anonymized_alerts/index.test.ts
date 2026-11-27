@@ -208,6 +208,90 @@ describe('getAnonymizedAlerts', () => {
     expect(JSON.stringify(searchArg)).not.toContain('workflow_status');
   });
 
+  describe('when an ids filter has fewer ids than MIN_SIZE', () => {
+    const alertIds = ['alert-id-1', 'alert-id-2', 'alert-id-3', 'alert-id-4', 'alert-id-5'];
+
+    beforeEach(() => {
+      (getOpenAndAcknowledgedAlertsQuery as jest.Mock).mockImplementation(
+        ({ size: querySize }: { size: number }) => ({
+          index: [alertsIndexPattern],
+          query: { bool: { filter: [] } },
+          size: querySize,
+        })
+      );
+    });
+
+    it('searches for the ids instead of returning an empty array', async () => {
+      await getAnonymizedAlerts({
+        alertsIndexPattern,
+        esClient: mockEsClient,
+        filter: { ids: { values: alertIds } },
+        size: alertIds.length,
+      });
+
+      const searchArg = (mockEsClient.search as unknown as jest.Mock).mock.calls[0][0];
+
+      expect(searchArg.query).toEqual({ ids: { values: alertIds } });
+    });
+
+    it('sizes the search by the number of ids', async () => {
+      await getAnonymizedAlerts({
+        alertsIndexPattern,
+        esClient: mockEsClient,
+        filter: { ids: { values: alertIds } },
+        size: alertIds.length,
+      });
+
+      const searchArg = (mockEsClient.search as unknown as jest.Mock).mock.calls[0][0];
+
+      expect(searchArg.size).toBe(alertIds.length);
+    });
+
+    it('returns the transformed alerts', async () => {
+      const result = await getAnonymizedAlerts({
+        alertsIndexPattern,
+        esClient: mockEsClient,
+        filter: { ids: { values: alertIds } },
+        size: alertIds.length,
+      });
+
+      expect(result).toHaveLength(mockOpenAndAcknowledgedAlertsQueryResults.hits.hits.length);
+    });
+  });
+
+  it('sizes an ids search by the number of ids, not by the provided size', async () => {
+    (getOpenAndAcknowledgedAlertsQuery as jest.Mock).mockImplementation(
+      ({ size: querySize }: { size: number }) => ({
+        index: [alertsIndexPattern],
+        query: { bool: { filter: [] } },
+        size: querySize,
+      })
+    );
+
+    await getAnonymizedAlerts({
+      alertsIndexPattern,
+      esClient: mockEsClient,
+      filter: { ids: { values: ['alert-id-1', 'alert-id-2', 'alert-id-3'] } },
+      size: 100,
+    });
+
+    const searchArg = (mockEsClient.search as unknown as jest.Mock).mock.calls[0][0];
+
+    expect(searchArg.size).toBe(3);
+  });
+
+  it('returns an empty array without searching when the ids filter is empty', async () => {
+    const result = await getAnonymizedAlerts({
+      alertsIndexPattern,
+      esClient: mockEsClient,
+      filter: { ids: { values: [] } },
+      size,
+    });
+
+    expect(result).toEqual([]);
+    expect(mockEsClient.search).not.toHaveBeenCalled();
+  });
+
   it('returns the expected transformed (anonymized) raw data', async () => {
     const result = await getAnonymizedAlerts({
       alertsIndexPattern,

@@ -7,7 +7,6 @@
 
 import type { IndicesGetDataStreamResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { errors } from '@elastic/elasticsearch';
 import {
   DATA_STREAM_INDEX_NAMES_FILTER_PATH,
   getAllBackingIndicesByStream,
@@ -259,14 +258,7 @@ describe('getDataStreamsWithIndexNames', () => {
   const makeClient = (getDataStream: jest.Mock) =>
     ({ indices: { getDataStream } } as unknown as ElasticsearchClient);
 
-  const notFoundError = () =>
-    new errors.ResponseError({
-      statusCode: 404,
-      body: { error: { type: 'index_not_found_exception' } },
-      headers: {},
-      meta: {} as never,
-      warnings: [],
-    });
+  const skipMissingStreams = { querystring: { ignore_unavailable: true } };
 
   it('requests only the name and index names of every data stream', async () => {
     const getDataStream = jest.fn().mockResolvedValue({ data_streams: [{ name: 'logs-a' }] });
@@ -292,10 +284,10 @@ describe('getDataStreamsWithIndexNames', () => {
       streamName: 'logs-a',
     });
 
-    expect(getDataStream).toHaveBeenCalledWith({
-      name: 'logs-a',
-      filter_path: DATA_STREAM_INDEX_NAMES_FILTER_PATH,
-    });
+    expect(getDataStream).toHaveBeenCalledWith(
+      { name: ['logs-a'], filter_path: DATA_STREAM_INDEX_NAMES_FILTER_PATH },
+      skipMissingStreams
+    );
   });
 
   it('returns an empty list when the filtered response has no data_streams key', async () => {
@@ -307,12 +299,29 @@ describe('getDataStreamsWithIndexNames', () => {
     ).resolves.toEqual([]);
   });
 
-  it('returns an empty list when the named stream does not exist', async () => {
-    const getDataStream = jest.fn().mockRejectedValue(notFoundError());
+  it('returns an empty list when no named stream exists', async () => {
+    // With ignore_unavailable, Elasticsearch answers missing names with an empty body.
+    const getDataStream = jest.fn().mockResolvedValue({});
 
     await expect(
       getDataStreamsWithIndexNames({ esClient: makeClient(getDataStream), streamName: 'missing' })
     ).resolves.toEqual([]);
+  });
+
+  it('requests several named streams together without duplicates', async () => {
+    const getDataStream = jest.fn().mockResolvedValue({ data_streams: [{ name: 'logs-a' }] });
+
+    const result = await getDataStreamsWithIndexNames({
+      esClient: makeClient(getDataStream),
+      streamNames: ['logs-a', 'logs-b', 'logs-a'],
+    });
+
+    expect(getDataStream).toHaveBeenCalledTimes(1);
+    expect(getDataStream).toHaveBeenCalledWith(
+      { name: ['logs-a', 'logs-b'], filter_path: DATA_STREAM_INDEX_NAMES_FILTER_PATH },
+      skipMissingStreams
+    );
+    expect(result).toEqual([{ name: 'logs-a' }]);
   });
 
   it('rethrows any other error', async () => {

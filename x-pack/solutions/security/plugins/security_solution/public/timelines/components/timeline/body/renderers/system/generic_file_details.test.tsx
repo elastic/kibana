@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { render, screen } from '@testing-library/react';
 
 import { mockTimelineData, TestProviders } from '../../../../../../common/mock';
 import { mockEndgameCreationEvent } from '../../../../../../common/mock/mock_endgame_ecs_data';
 import { SystemGenericFileDetails, SystemGenericFileLine } from './generic_file_details';
-import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 import { CellActionsRenderer } from '../../../../../../common/components/cell_actions/cell_actions_renderer';
 
 jest.mock('../../../../../../common/lib/kibana');
@@ -51,23 +50,9 @@ describe('SystemGenericFileDetails', () => {
     (CellActionsRenderer as unknown as jest.Mock).mockImplementation(MockedCellActionsRenderer);
   });
 
-  const mount = useMountAppended();
-
   describe('rendering', () => {
     test('it renders the default SystemGenericDetails', () => {
-      const wrapper = shallow(
-        <SystemGenericFileDetails
-          scopeId="some_scope"
-          contextId="[contextid-123]"
-          text="[generic-text-123]"
-          data={mockTimelineData[29].ecs}
-        />
-      );
-      expect(wrapper).toMatchSnapshot();
-    });
-
-    test('it returns system rendering if the data does contain system data', () => {
-      const wrapper = mount(
+      render(
         <TestProviders>
           <SystemGenericFileDetails
             scopeId="some_scope"
@@ -77,13 +62,27 @@ describe('SystemGenericFileDetails', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(
+      expect(screen.getByText('[generic-text-123]')).toBeInTheDocument();
+    });
+
+    test('it returns system rendering if the data does contain system data', () => {
+      const { container } = render(
+        <TestProviders>
+          <SystemGenericFileDetails
+            scopeId="some_scope"
+            contextId="[contextid-123]"
+            text="[generic-text-123]"
+            data={mockTimelineData[29].ecs}
+          />
+        </TestProviders>
+      );
+      expect(container.textContent).toEqual(
         'Evan@zeek-london[generic-text-123](6278)with resultfailureSource128.199.212.120'
       );
     });
 
     test('it passes string value for processHashSha256', () => {
-      const wrapper = mount(
+      render(
         <TestProviders>
           <SystemGenericFileDetails
             scopeId="some_scope"
@@ -93,13 +92,13 @@ describe('SystemGenericFileDetails', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.find('SystemGenericFileLine').prop('processHashSha256')).toEqual(
-        'd4c97ed46046893141652e2ec0056a698f6445109949d7fcabbce331146889ee'
-      );
+      expect(
+        screen.getByText('d4c97ed46046893141652e2ec0056a698f6445109949d7fcabbce331146889ee')
+      ).toBeInTheDocument();
     });
 
     test('should passing correct scopeId to cell actions', () => {
-      mount(
+      render(
         <TestProviders>
           <SystemGenericFileDetails
             scopeId="some_scope"
@@ -121,7 +120,7 @@ describe('SystemGenericFileDetails', () => {
 
   describe('#SystemGenericFileLine', () => {
     test('it returns pretty output if you send in all your happy path data', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -166,13 +165,13 @@ describe('SystemGenericFileDetails', () => {
           </div>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         '[username-123]\\[userDomain-123]@[hostname-123]in[working-directory-123][generic-text-123][fileName-123]in[filePath-123]from its original path[fileExtOriginalPath][processName-123](123)[arg-1][arg-2][arg-3][some-title-123]with exit code-1[endgameExitCode-123]via parent process[processParentName-123][endgameParentProcessName-123](789)(456)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][fileHashSha256-123][processHashSha256-123][message-123]'
       );
     });
 
     test('it returns nothing if data is all null', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -217,11 +216,11 @@ describe('SystemGenericFileDetails', () => {
           </div>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('an unknown process');
+      expect(container.textContent).toEqual('an unknown process');
     });
 
     test('it can return only the host name', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -266,11 +265,11 @@ describe('SystemGenericFileDetails', () => {
           </div>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('[hostname-123]an unknown process');
+      expect(container.textContent).toEqual('[hostname-123]an unknown process');
     });
 
     test('it can return the host, message', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -315,11 +314,11 @@ describe('SystemGenericFileDetails', () => {
           </div>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('[hostname-123]an unknown process[message-123]');
+      expect(container.textContent).toEqual('[hostname-123]an unknown process[message-123]');
     });
 
     test('it can return the host, message, outcome', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -364,13 +363,13 @@ describe('SystemGenericFileDetails', () => {
           </div>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         '[hostname-123]an unknown processwith result[outcome-123][message-123]'
       );
     });
 
     test('it can return the host, message, outcome, packageName', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -415,13 +414,13 @@ describe('SystemGenericFileDetails', () => {
           </div>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         '[hostname-123]an unknown processwith result[outcome-123][packageName-123][message-123]'
       );
     });
 
     test('it can return the host, message, outcome, packageName, pacakgeSummary', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -466,13 +465,13 @@ describe('SystemGenericFileDetails', () => {
           </div>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         '[hostname-123]an unknown processwith result[outcome-123][packageName-123][packageSummary-123][message-123]'
       );
     });
 
     test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -517,13 +516,13 @@ describe('SystemGenericFileDetails', () => {
           </div>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         '[hostname-123]an unknown processwith result[outcome-123][packageName-123][packageVersion-123][packageSummary-123][message-123]'
       );
     });
 
     test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processExitCode', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -568,13 +567,13 @@ describe('SystemGenericFileDetails', () => {
           </div>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         '[hostname-123][processExecutable-123]with exit code-1with result[outcome-123][packageName-123][packageVersion-123][packageSummary-123][message-123]'
       );
     });
 
     test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion, processExecutable, processExitCode', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -619,13 +618,13 @@ describe('SystemGenericFileDetails', () => {
           </div>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         '[hostname-123][processExecutable-123]with exit code-1with result[outcome-123][packageName-123][packageVersion-123][packageSummary-123][message-123]'
       );
     });
 
     test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion, processExecutable, processExitCode, processHashSha256', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -670,13 +669,13 @@ describe('SystemGenericFileDetails', () => {
           </div>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         '[hostname-123][processExecutable-123]with exit code-1with result[outcome-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][message-123]'
       );
     });
 
     test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion, processExecutable, processExitCode, processHashSha256, processParentName', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -721,13 +720,13 @@ describe('SystemGenericFileDetails', () => {
           </div>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         '[hostname-123][processExecutable-123]with exit code-1via parent process[processParentName-123]with result[outcome-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][message-123]'
       );
     });
 
     test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion, processExecutable, processExitCode, processHashSha256, processParentName, processParentPid', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -772,13 +771,13 @@ describe('SystemGenericFileDetails', () => {
           </div>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         '[hostname-123][processExecutable-123]with exit code-1via parent process[processParentName-123](789)with result[outcome-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][message-123]'
       );
     });
 
     test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion, processExecutable, processExitCode, processHashSha256, processParentName, processParentPid, processPid', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -823,13 +822,13 @@ describe('SystemGenericFileDetails', () => {
           </div>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         '[hostname-123][processExecutable-123](123)with exit code-1via parent process[processParentName-123](789)with result[outcome-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][message-123]'
       );
     });
 
     test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion, processExecutable, processExitCode, processHashSha256, processParentName, processParentPid, processPid, processPpid, processName', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -874,13 +873,13 @@ describe('SystemGenericFileDetails', () => {
           </div>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         '[hostname-123][processName-123](123)with exit code-1via parent process[processParentName-123](789)(456)with result[outcome-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][message-123]'
       );
     });
 
     test('it can return the endgameExitCode, endgameParentProcessName, eventAction, host, message, outcome, packageName, pacakgeSummary, packageVersion, processExecutable, processExitCode, processHashSha256, processParentName, processParentPid, processPid, processPpid, processName, sshMethod', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -925,13 +924,13 @@ describe('SystemGenericFileDetails', () => {
           </div>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         '[hostname-123][processName-123](123)with exit code-1[endgameExitCode-123]via parent process[processParentName-123][endgameParentProcessName-123](789)(456)with result[outcome-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][message-123]'
       );
     });
 
     test('it can return the endgameExitCode, endgameParentProcessName, eventAction, host, message, outcome, packageName, pacakgeSummary, packageVersion, processExecutable, processExitCode, processHashSha256, processParentName, processParentPid, processPid, processPpid, processName, sshMethod, sshSignature', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -976,13 +975,13 @@ describe('SystemGenericFileDetails', () => {
           </div>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         '[hostname-123][processName-123](123)with exit code-1[endgameExitCode-123]via parent process[processParentName-123][endgameParentProcessName-123](789)(456)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][message-123]'
       );
     });
 
     test('it can return the endgameExitCode, endgameParentProcessName, eventAction, host, message, outcome, packageName, pacakgeSummary, packageVersion, processExecutable, processExitCode, processHashSha256, processParentName, processParentPid, processPid, processPpid, processName, sshMethod, sshSignature, text', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -1027,13 +1026,13 @@ describe('SystemGenericFileDetails', () => {
           </div>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         '[hostname-123][text-123][processName-123](123)with exit code-1[endgameExitCode-123]via parent process[processParentName-123][endgameParentProcessName-123](789)(456)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][message-123]'
       );
     });
 
     test('it can return the endgameExitCode, endgameParentProcessName, eventAction, host, message, outcome, packageName, pacakgeSummary, packageVersion, processExecutable, processExitCode, processHashSha256, processParentName, processParentPid, processPid, processPpid, processName, sshMethod, sshSignature, text, userDomain', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -1078,13 +1077,13 @@ describe('SystemGenericFileDetails', () => {
           </div>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         '\\[userDomain-123][hostname-123][text-123][processName-123](123)with exit code-1[endgameExitCode-123]via parent process[processParentName-123][endgameParentProcessName-123](789)(456)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][message-123]'
       );
     });
 
     test('it can return the endgameExitCode, endgameParentProcessName, eventAction, host, message, outcome, packageName, pacakgeSummary, packageVersion, processExecutable, processExitCode, processHashSha256, processParentName, processParentPid, processPid, processPpid, processName, sshMethod, sshSignature, text, userDomain, username', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -1129,13 +1128,13 @@ describe('SystemGenericFileDetails', () => {
           </div>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         '[username-123]\\[userDomain-123]@[hostname-123][text-123][processName-123](123)with exit code-1[endgameExitCode-123]via parent process[processParentName-123][endgameParentProcessName-123](789)(456)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][message-123]'
       );
     });
 
     test('it can return the endgameExitCode, endgameParentProcessName, eventAction, host, message, outcome, packageName, pacakgeSummary, packageVersion, processExecutable, processExitCode, processHashSha256, processParentName, processParentPid, processPid, processPpid, processName, sshMethod, sshSignature, text, userDomain, username, working-directory', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -1180,13 +1179,13 @@ describe('SystemGenericFileDetails', () => {
           </div>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         '[username-123]\\[userDomain-123]@[hostname-123]in[working-directory-123][text-123][processName-123](123)with exit code-1[endgameExitCode-123]via parent process[processParentName-123][endgameParentProcessName-123](789)(456)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][message-123]'
       );
     });
 
     test('it can return the endgameExitCode, endgameParentProcessName, eventAction, host, message, outcome, packageName, pacakgeSummary, packageVersion, processExecutable, processExitCode, processHashSha256, processParentName, processParentPid, processPid, processPpid, processName, sshMethod, sshSignature, text, userDomain, username, working-directory, process-title', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -1231,13 +1230,13 @@ describe('SystemGenericFileDetails', () => {
           </div>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         '[username-123]\\[userDomain-123]@[hostname-123]in[working-directory-123][text-123][processName-123](123)[process-title-123]with exit code-1[endgameExitCode-123]via parent process[processParentName-123][endgameParentProcessName-123](789)(456)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][message-123]'
       );
     });
 
     test('it can return the endgameExitCode, endgameParentProcessName, eventAction, host, message, outcome, packageName, pacakgeSummary, packageVersion, processExecutable, processExitCode, processHashSha256, processParentName, processParentPid, processPid, processPpid, processName, sshMethod, sshSignature, text, userDomain, username, working-directory, process-title, args', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -1282,13 +1281,13 @@ describe('SystemGenericFileDetails', () => {
           </div>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         '[username-123]\\[userDomain-123]@[hostname-123]in[working-directory-123][text-123][processName-123](123)[arg-1][arg-2][arg-3][process-title-123]with exit code-1[endgameExitCode-123]via parent process[processParentName-123][endgameParentProcessName-123](789)(456)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][message-123]'
       );
     });
 
     test('it renders a FileDraggable when endgameFileName and endgameFilePath are provided, but fileName and filePath are NOT provided', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -1333,11 +1332,13 @@ describe('SystemGenericFileDetails', () => {
           </div>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('[endgameFileName]in[endgameFilePath]an unknown process');
+      expect(container.textContent).toEqual(
+        '[endgameFileName]in[endgameFilePath]an unknown process'
+      );
     });
 
     test('it prefers to render fileName and filePath over endgameFileName and endgameFilePath respectfully when all of those fields are provided', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -1383,12 +1384,12 @@ describe('SystemGenericFileDetails', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual('[fileName]in[filePath]an unknown process');
+      expect(container.textContent).toEqual('[fileName]in[filePath]an unknown process');
     });
 
     ['file_create_event', 'created', 'file_delete_event', 'deleted'].forEach((eventAction) => {
       test(`it renders the text "via" when eventAction is ${eventAction}`, () => {
-        const wrapper = mount(
+        const { container } = render(
           <TestProviders>
             <div>
               <SystemGenericFileLine
@@ -1434,14 +1435,14 @@ describe('SystemGenericFileDetails', () => {
           </TestProviders>
         );
 
-        expect(wrapper.text().includes('via')).toBe(true);
+        expect(container.textContent.includes('via')).toBe(true);
       });
     });
 
     test('it does NOT render the text "via" when eventAction is not a allowlisted action', () => {
       const eventAction = 'a_non_allowlisted_event_action';
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -1487,13 +1488,13 @@ describe('SystemGenericFileDetails', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text().includes('via')).toBe(false);
+      expect(container.textContent.includes('via')).toBe(false);
     });
 
     test('it renders a ParentProcessDraggable when eventAction is NOT "process_stopped" and NOT "termination_event"', () => {
       const eventAction = 'something_else';
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -1539,7 +1540,7 @@ describe('SystemGenericFileDetails', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         'an unknown processvia parent process[endgameParentProcessName](456)'
       );
     });
@@ -1547,7 +1548,7 @@ describe('SystemGenericFileDetails', () => {
     test('it does NOT render a ParentProcessDraggable when eventAction is "process_stopped"', () => {
       const eventAction = 'process_stopped';
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -1593,13 +1594,13 @@ describe('SystemGenericFileDetails', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual('an unknown process');
+      expect(container.textContent).toEqual('an unknown process');
     });
 
     test('it does NOT render a ParentProcessDraggable when eventAction is "termination_event"', () => {
       const eventAction = 'termination_event';
 
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -1645,11 +1646,11 @@ describe('SystemGenericFileDetails', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual('an unknown process');
+      expect(container.textContent).toEqual('an unknown process');
     });
 
     test('it returns renders the message when showMessage is true', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -1695,11 +1696,11 @@ describe('SystemGenericFileDetails', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual('an unknown process[message]');
+      expect(container.textContent).toEqual('an unknown process[message]');
     });
 
     test('it does NOT render the message when showMessage is false', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -1745,11 +1746,11 @@ describe('SystemGenericFileDetails', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual('an unknown process');
+      expect(container.textContent).toEqual('an unknown process');
     });
 
     test('it renders a ProcessDraggableWithNonExistentProcess when endgamePid and endgameProcessName are provided, but processPid and processName are NOT provided', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -1795,11 +1796,11 @@ describe('SystemGenericFileDetails', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual('[endgameProcessName](789)');
+      expect(container.textContent).toEqual('[endgameProcessName](789)');
     });
 
     test('it prefers to render processName and processPid over endgameProcessName and endgamePid respectfully when all of those fields are provided', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -1845,11 +1846,11 @@ describe('SystemGenericFileDetails', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual('[processName](123)');
+      expect(container.textContent).toEqual('[processName](123)');
     });
 
     test('should passing correct scopeId to cell actions', () => {
-      mount(
+      render(
         <TestProviders>
           <SystemGenericFileLine
             scopeId="some_scope"

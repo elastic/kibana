@@ -20,8 +20,13 @@ import {
   OVERVIEW_STATUS_MAX_PER_PAGE,
 } from '../../common/constants/monitor_management';
 import { getAllLocations } from '../synthetics_service/get_all_locations';
-import type { PrivateLocation, ServiceLocation } from '../../common/runtime_types';
+import {
+  ScheduleUnit,
+  type PrivateLocation,
+  type ServiceLocation,
+} from '../../common/runtime_types';
 import { syntheticsMonitorAttributes } from '../../common/types/saved_objects';
+import { SCHEDULE_INTERVAL_FIELD, scheduleToSeconds } from '../../common/lib/schedule_to_time';
 import {
   jsonArrayFromString,
   MAX_DATE_RANGE_LENGTH,
@@ -256,7 +261,7 @@ export const parseArrayFilters = (
       operator: useLogicalAndFor.includes('locations') ? 'AND' : 'OR',
       attributes,
     }),
-    getSavedObjectKqlFilter({ field: 'schedule.number', values: schedules, attributes }),
+    getScheduleKqlFilter(schedules, attributes),
     getSavedObjectKqlFilter({ field: 'id', values: monitorQueryIds, attributes }),
     getSavedObjectKqlFilter({ field: 'config_id', values: configIds, attributes }),
   ]
@@ -300,6 +305,55 @@ export const getSavedObjectKqlFilter = ({
   }
 
   return `${fieldKey}:"${escapeQuotes(values)}"`;
+};
+
+/** `10s` and `10m` stay distinct. A bare number is minutes, matching older filter URLs. */
+export const parseScheduleFilterValue = (
+  value: string
+): { number: string; unit: ScheduleUnit } | undefined => {
+  const match = /^(\d+)([sm])?$/.exec(value);
+  if (!match) {
+    return undefined;
+  }
+  return {
+    number: match[1],
+    unit: match[2] === ScheduleUnit.SECONDS ? ScheduleUnit.SECONDS : ScheduleUnit.MINUTES,
+  };
+};
+
+export const scheduleBucketLabel = (key: string | number): string => {
+  const seconds = Number(key);
+  if (!Number.isFinite(seconds)) {
+    return String(key);
+  }
+  if (seconds > 0 && seconds % 60 === 0) {
+    return `${seconds / 60}m`;
+  }
+  return `${seconds}s`;
+};
+
+export const getScheduleKqlFilter = (
+  values?: string | string[],
+  attributes: string = syntheticsMonitorAttributes
+) => {
+  if (values === 'All' || (Array.isArray(values) && values.includes('All'))) {
+    return undefined;
+  }
+
+  const list = (Array.isArray(values) ? values : values ? [values] : []).flatMap((value) => {
+    const parsed = parseScheduleFilterValue(value);
+    return parsed ? [parsed] : [];
+  });
+  if (list.length === 0) {
+    return '';
+  }
+
+  const clauses = list.map(({ number, unit }) => {
+    const seconds = scheduleToSeconds({ number, unit });
+    return `${attributes}.${SCHEDULE_INTERVAL_FIELD}:${seconds}`;
+  });
+  const joined = clauses.join(' OR ');
+  return clauses.length > 1 ? `(${joined})` : joined;
 };
 
 export const parseLocationFilter = async (
@@ -376,7 +430,7 @@ export function parseMappingKey(key: string | undefined) {
   switch (key) {
     case 'schedule':
     case 'schedule.keyword':
-      return 'schedule.number';
+      return 'schedule_interval_seconds';
     case 'project_id.keyword':
       return 'project_id';
     case 'tags.keyword':

@@ -135,8 +135,8 @@ describe('MitreAttackDisplay', () => {
 
       const titles = screen.getAllByTestId('mitreFrameworkGroupTitle');
       expect(titles).toHaveLength(2);
-      expect(titles[0]).toHaveTextContent('MITRE ATT&CK');
-      expect(titles[1]).toHaveTextContent('MITRE ATLAS');
+      expect(titles[0]).toHaveTextContent('MITRE ATT&CK®');
+      expect(titles[1]).toHaveTextContent('MITRE ATLAS™');
     });
 
     it('renders the raw string for an unknown framework', () => {
@@ -152,7 +152,7 @@ describe('MitreAttackDisplay', () => {
       const missing = { ...fullThreat, framework: undefined } as unknown as Threat;
       render(<MitreAttackDisplay threat={[missing]} />);
 
-      expect(screen.getByTestId('mitreFrameworkGroupTitle')).toHaveTextContent('MITRE ATT&CK');
+      expect(screen.getByTestId('mitreFrameworkGroupTitle')).toHaveTextContent('MITRE ATT&CK®');
     });
   });
 });

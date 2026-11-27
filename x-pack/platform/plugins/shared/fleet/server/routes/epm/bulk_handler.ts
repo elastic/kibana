@@ -92,6 +92,7 @@ export const postBulkUpgradePackagesHandler: FleetRequestHandler<
       upgradePackagePolicies: request.body.upgrade_package_policies,
       force: request.body.force,
       prerelease: request.body.prerelease,
+      acknowledgeBreakingChanges: request.body.acknowledge_breaking_changes,
     },
     request
   );

@@ -18,6 +18,7 @@ project:
   sourceRoot: x-pack/solutions/security/plugins/security_solution_ess
 dependsOn:
   - '@kbn/core'
+  - '@kbn/app-header'
   - '@kbn/config-schema'
   - '@kbn/security-solution-plugin'
   - '@kbn/kibana-react-plugin'

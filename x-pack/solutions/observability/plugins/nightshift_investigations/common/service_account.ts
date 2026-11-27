@@ -5,41 +5,10 @@
  * 2.0.
  */
 
-/**
- * The Nightshift service accounts. There is one of each per deployment, shared by every space:
- * - `agent` runs investigations, their sandbox tools and their Agent Builder hooks.
- * - `automations` runs automation workflows, which start investigations.
- */
-export type NightshiftServiceAccountKind = 'agent' | 'automations';
-
-export const NIGHTSHIFT_SERVICE_ACCOUNT_KINDS: readonly NightshiftServiceAccountKind[] = [
-  'agent',
-  'automations',
-];
-
-/** The name each account is found and created by. */
-export const getNightshiftServiceAccountName = (kind: NightshiftServiceAccountKind): string =>
-  `nightshift_${kind}`;
-
-/**
- * The role an account holds. Nightshift never creates or changes these roles. On Serverless they
- * are elasticsearch-controller predefined roles, whose names must start with `_`. On stateful they
- * are named like the account and created by whoever sets up the deployment (see the README). The
- * roles cover every space; the per-space bound workflows decide where an account acts.
- */
-export const getNightshiftRoleName = (
-  kind: NightshiftServiceAccountKind,
-  { isServerless }: { isServerless: boolean }
-): string => {
-  const name = getNightshiftServiceAccountName(kind);
-  return isServerless ? `_${name}` : name;
-};
-
-/**
- * The ids of the accounts a space is set up with, as the service accounts backend assigned them:
- * `kibana/<name>` on stateful, a generated id on Serverless.
- */
-export type NightshiftServiceAccountIds = Record<NightshiftServiceAccountKind, string>;
+import type {
+  NightshiftServiceAccountIds,
+  NightshiftServiceAccountKind,
+} from '@kbn/nightshift-shared';
 
 /** The body of `POST /internal/nightshift/investigations/service_account/_enable`. */
 export interface EnableInvestigatorServiceAccountBody {
@@ -73,6 +42,19 @@ export interface NightshiftBoundWorkflowStatus {
 }
 
 /**
+ * An automation `_enable` could not bind to the automations account. It keeps running as the user
+ * who created it until it is saved again, or until setup runs again.
+ */
+export interface NightshiftUnboundAutomation {
+  /** Saved object id of the automation. */
+  id: string;
+  /** Its name, when the saved object has one. */
+  name?: string;
+  /** Why binding it failed. */
+  error: string;
+}
+
+/**
  * Whether Nightshift is set up in a space. A space is set up once its investigation entry point
  * is installed, enabled and bound to the Nightshift agent service account.
  */
@@ -97,4 +79,9 @@ export interface InvestigatorServiceAccountStatus {
   serviceAccounts: NightshiftServiceAccountInfo[];
   /** Every workflow `_enable` binds in the space, entry point included. */
   boundWorkflows: NightshiftBoundWorkflowStatus[];
+  /**
+   * Automations the setup could not bind, which still run as their author. Only `_enable` reports
+   * them, for the run that tried: reads of the status do not re-check every automation.
+   */
+  unboundAutomations?: NightshiftUnboundAutomation[];
 }

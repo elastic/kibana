@@ -13,7 +13,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiSuperDatePicker,
 } from '@elastic/eui';
 import {
   CHANGE_POINT_TYPES,
@@ -25,6 +24,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { DetectionDetailsFlyout } from '../../../components/entities/detection/detection_details_flyout';
 import { getChangePointLabel } from '../../../common/change_point';
 import { FilterPopover } from '../../../components/ui/filter_popover';
+import { NightshiftTimeRangePicker } from '../../../components/ui/time_range_picker';
 import { useDetectionById } from '../../../data/detections/use_detection_by_id';
 import { useDetectionsList } from '../../../data/detections/use_detections_list';
 import { useSourcesById } from '../../../data/sources/use_sources_by_id';
@@ -172,13 +172,11 @@ export const SignalsTab = ({
           </EuiFilterGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiSuperDatePicker
-            compressed
-            width="auto"
-            showUpdateButton={false}
+          <NightshiftTimeRangePicker
             start={timeRange.from}
             end={timeRange.to}
-            onTimeChange={({ start, end }) => onTimeRangeChange({ from: start, to: end })}
+            onChange={({ start, end }) => onTimeRangeChange({ from: start, to: end })}
+            showRefreshButton
             data-test-subj="nightshiftDetectionSignalsTimePicker"
           />
         </EuiFlexItem>

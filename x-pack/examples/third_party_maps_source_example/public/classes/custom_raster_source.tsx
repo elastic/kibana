@@ -111,7 +111,9 @@ export class CustomRasterSource implements IRasterSource {
     return false;
   }
 
-  renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> | null {
+  renderSourceSettingsEditor(
+    sourceEditorArgs: SourceEditorArgs<CustomRasterSourceDescriptor>
+  ): ReactElement<any> | null {
     return null;
   }
 

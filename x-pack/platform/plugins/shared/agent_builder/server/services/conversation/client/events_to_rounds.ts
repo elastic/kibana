@@ -16,12 +16,13 @@ import type {
   ExecutionTerminatedEvent,
   PromptResponseEvent,
   RoundInput,
-  UserMessageEvent,
+  MessageEvent,
 } from '@kbn/agent-builder-common';
 import {
   ConversationRoundStatus,
   EventActorType,
   TimelineEventType,
+  isMessageEvent,
   ZERO_MODEL_USAGE,
   answeredPromptRequestIds,
   interruptionOfTerminal,
@@ -89,7 +90,7 @@ export const eventsToRounds = (allEvents: ConversationEvent[]): ConversationRoun
     const trigger = triggerId ? byId.get(triggerId) : undefined;
 
     // exec_0 is triggered by a user_message; a resume execution by a prompt_response.
-    const isInitial = trigger?.type === TimelineEventType.userMessage;
+    const isInitial = trigger !== undefined && isMessageEvent(trigger);
     const isResume = trigger?.type === TimelineEventType.promptResponse;
     if (!isInitial && !isResume) {
       continue;
@@ -110,7 +111,7 @@ export const eventsToRounds = (allEvents: ConversationEvent[]): ConversationRoun
     const steps =
       stepEvents.length > 0 ? stepsFromEvents(stepEvents) : terminated?.data.steps ?? [];
 
-    const userMessage = isInitial ? (trigger as UserMessageEvent) : undefined;
+    const userMessage = isInitial ? (trigger as MessageEvent) : undefined;
     const resumeInput = isResume ? (trigger as PromptResponseEvent).data.input : undefined;
     const startedEvent = group.find((event) => event.type === TimelineEventType.executionStarted);
     const round: ConversationRound = {
@@ -225,11 +226,11 @@ const stepsFromEvents = (events: ExecutionStepEvent[]): ConversationRoundStep[] 
     .map((event) => event.data.step);
 };
 
-const toRoundInput = (userMessage: UserMessageEvent): RoundInput => userMessage.data;
+const toRoundInput = (userMessage: MessageEvent): RoundInput => userMessage.data;
 
-/** Round authorship carried by a `user_message` actor. */
+/** Round authorship carried by a message actor; an agent carries none. */
 export const authorAndOrigin = (
-  userMessage: UserMessageEvent
+  userMessage: MessageEvent
 ): Pick<ConversationRound, 'author' | 'origin'> => {
   const { actor } = userMessage;
   // Only user/external actors carry round authorship; origin is present for external actors only.

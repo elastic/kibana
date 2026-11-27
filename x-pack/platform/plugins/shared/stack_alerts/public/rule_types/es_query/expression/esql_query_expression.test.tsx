@@ -14,6 +14,7 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { httpServiceMock } from '@kbn/core/public/mocks';
+import { cpsPluginMock } from '@kbn/cps/public/mocks';
 import { EsqlQueryExpression, getTimeFilter } from './esql_query_expression';
 import type { EsQueryRuleParams } from '../types';
 import { SearchType } from '../types';
@@ -57,7 +58,6 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public/common', () => {
 
 jest.mock('@kbn/esql-utils', () => {
   return {
-    getESQLResults: jest.fn().mockResolvedValue({}),
     getIndexPattern: jest.fn(),
     getIndexPatternFromESQLQuery: jest.fn().mockReturnValue('index1'),
     getESQLTimeField: jest.fn().mockResolvedValue('@timestamp'),
@@ -69,7 +69,14 @@ jest.mock('@kbn/esql-utils', () => {
 });
 
 const mockHttp = httpServiceMock.createStartContract();
-const mockServices = { http: mockHttp, isServerless: false, uiSettings: { get: jest.fn() } };
+const mockCps = cpsPluginMock.createStartContract();
+const mockGetDefaultProjectRouting = jest.mocked(mockCps.cpsManager!.getDefaultProjectRouting);
+const mockServices = {
+  http: mockHttp,
+  isServerless: false,
+  uiSettings: { get: jest.fn() },
+  cps: mockCps,
+};
 jest.mock('../util', () => ({
   ...jest.requireActual('../util'),
   useTriggerUiActionServices: () => mockServices,
@@ -118,11 +125,11 @@ describe('EsqlQueryRuleTypeExpression', () => {
     hasExpressionValidationErrors.mockReturnValue(false);
     global.Date.now = jest.fn(() => fakeNow.getTime());
 
-    esqlUtilsMock.getESQLResults.mockResolvedValue({});
     esqlUtilsMock.getESQLTimeField.mockResolvedValue('@timestamp');
     esqlUtilsMock.getEsqlSourceColumns.mockResolvedValue(defaultSourceColumns);
     esqlUtilsMock.getSourceCommandQueryFromESQLQuery.mockImplementation((esql: string) => esql);
     esqlUtilsMock.getProjectRoutingFromEsqlQuery.mockReturnValue(undefined);
+    mockGetDefaultProjectRouting.mockReturnValue(undefined);
 
     triggersActionsCommonMock.getTimeFieldOptions.mockReturnValue([
       { value: '@timestamp', text: '@timestamp' },
@@ -166,6 +173,7 @@ describe('EsqlQueryRuleTypeExpression', () => {
   test('should pass projectRouting to the source columns and time field lookups when query contains SET project_routing', async () => {
     const mockProjectRouting = '_alias:my-project-id';
     getProjectRoutingFromEsqlQuery.mockReturnValue(mockProjectRouting);
+    mockGetDefaultProjectRouting.mockReturnValue('_alias:*');
 
     await act(async () => {
       render(
@@ -238,6 +246,46 @@ describe('EsqlQueryRuleTypeExpression', () => {
     await waitFor(() => expect(esqlUtilsMock.getEsqlSourceColumns).toHaveBeenCalled());
     expect(esqlUtilsMock.getEsqlSourceColumns).toHaveBeenCalledWith(
       expect.objectContaining({ esqlQuery: 'FROM my_index', projectRouting: undefined })
+    );
+  });
+
+  test('should fall back to the space default projectRouting when query has no SET project_routing', async () => {
+    getProjectRoutingFromEsqlQuery.mockReturnValue(undefined);
+    mockGetDefaultProjectRouting.mockReturnValue('_alias:*');
+
+    await act(async () => {
+      render(
+        <EsqlQueryExpression
+          unifiedSearch={unifiedSearchMock}
+          ruleInterval="1m"
+          ruleThrottle="1m"
+          alertNotifyWhen="onThrottleInterval"
+          ruleParams={{
+            ...defaultEsqlQueryExpressionParams,
+            esqlQuery: { esql: 'FROM my_index' },
+          }}
+          setRuleParams={() => {}}
+          setRuleProperty={() => {}}
+          errors={{ esqlQuery: [], timeField: [], timeWindowSize: [], groupBy: [] }}
+          data={dataMock}
+          dataViews={dataViewMock}
+          defaultActionGroupId=""
+          actionGroups={[]}
+          charts={chartsStartMock}
+          onChangeMetaData={() => {}}
+        />,
+        {
+          wrapper: AppWrapper,
+        }
+      );
+    });
+
+    await waitFor(() => expect(esqlUtilsMock.getEsqlSourceColumns).toHaveBeenCalled());
+    expect(esqlUtilsMock.getEsqlSourceColumns).toHaveBeenCalledWith(
+      expect.objectContaining({ projectRouting: '_alias:*' })
+    );
+    expect(esqlUtilsMock.getESQLTimeField).toHaveBeenCalledWith(
+      expect.objectContaining({ projectRouting: '_alias:*' })
     );
   });
 
@@ -409,10 +457,10 @@ describe('EsqlQueryRuleTypeExpression', () => {
   });
 
   test('should show success message if Test Query is successful', async () => {
-    const { getESQLResults } = esqlUtilsMock;
+    const esql = dataMock.search.esql as jest.Mock;
 
-    getESQLResults.mockResolvedValue({
-      response: {
+    esql.mockResolvedValue({
+      rawResponse: {
         type: 'datatable',
         columns: [
           { name: '@timestamp', type: 'date' },
@@ -445,7 +493,7 @@ describe('EsqlQueryRuleTypeExpression', () => {
     );
 
     fireEvent.click(screen.getByTestId('testQuery'));
-    await waitFor(() => expect(getESQLResults).toHaveBeenCalled());
+    await waitFor(() => expect(esql).toHaveBeenCalled());
 
     expect(screen.getByTestId('testQuerySuccess')).toBeInTheDocument();
     expect(screen.getByText('Query matched 1 documents in the last 15s.')).toBeInTheDocument();
@@ -453,10 +501,10 @@ describe('EsqlQueryRuleTypeExpression', () => {
   });
 
   test('should show grouped success message if Test Query is successful', async () => {
-    const { getESQLResults } = esqlUtilsMock;
+    const esql = dataMock.search.esql as jest.Mock;
 
-    getESQLResults.mockResolvedValue({
-      response: {
+    esql.mockResolvedValue({
+      rawResponse: {
         type: 'datatable',
         columns: [
           { name: '@timestamp', type: 'date' },
@@ -489,7 +537,7 @@ describe('EsqlQueryRuleTypeExpression', () => {
     );
 
     fireEvent.click(screen.getByTestId('testQuery'));
-    await waitFor(() => expect(getESQLResults).toHaveBeenCalled());
+    await waitFor(() => expect(esql).toHaveBeenCalled());
 
     expect(screen.getByTestId('testQuerySuccess')).toBeInTheDocument();
     expect(screen.getByText('Query returned 1 rows in the last 15s.')).toBeInTheDocument();
@@ -497,9 +545,9 @@ describe('EsqlQueryRuleTypeExpression', () => {
   });
 
   test('should show error message if Test Query is throws error', async () => {
-    const { getESQLResults } = esqlUtilsMock;
+    const esql = dataMock.search.esql as jest.Mock;
 
-    getESQLResults.mockRejectedValue('Error getting test results.!');
+    esql.mockRejectedValue('Error getting test results.!');
 
     const result = render(
       <EsqlQueryExpression
@@ -524,7 +572,7 @@ describe('EsqlQueryRuleTypeExpression', () => {
     );
 
     fireEvent.click(result.getByTestId('testQuery'));
-    await waitFor(() => expect(getESQLResults).toHaveBeenCalled());
+    await waitFor(() => expect(esql).toHaveBeenCalled());
 
     expect(result.queryByTestId('testQuerySuccess')).not.toBeInTheDocument();
     expect(result.getByTestId('testQueryError')).toBeInTheDocument();

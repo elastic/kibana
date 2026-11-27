@@ -8,7 +8,7 @@
 import { useCallback } from 'react';
 import { Position, useReactFlow } from '@xyflow/react';
 import { useEuiTheme } from '@elastic/eui';
-import { SERVICE_NODE_CIRCLE_SIZE } from '../../../../common/service_map/constants';
+import { SERVICE_NODE_SIZE } from '../../../../common/service_map/constants';
 
 /**
  * Hook that returns a function to compute adjusted edge endpoints.
@@ -39,14 +39,11 @@ export function useAdjustedEndpoint() {
         const { width, height } = node.measured;
 
         if (position === Position.Left || position === Position.Right) {
-          offset = Math.max(
-            ((width ?? 0) - SERVICE_NODE_CIRCLE_SIZE) / 2 + smallerSize,
-            wrapperInset
-          );
+          offset = Math.max(((width ?? 0) - SERVICE_NODE_SIZE) / 2 + smallerSize, wrapperInset);
         } else if (position === Position.Bottom) {
           const nodeHeight = height ?? 0;
           offset = Math.max(
-            nodeHeight - SERVICE_NODE_CIRCLE_SIZE / 2 - (wrapperInset - smallestSize) * 3,
+            nodeHeight - SERVICE_NODE_SIZE / 2 - (wrapperInset - smallestSize) * 3,
             wrapperInset
           );
         }

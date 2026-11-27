@@ -69,19 +69,43 @@ describe('useIndices', () => {
     );
   });
 
-  it('uses the search text in the indices pattern', async () => {
+  it('uses the search text in the indices pattern and excludes dot-prefixed names', async () => {
     const getIndices = jest.fn().mockResolvedValue([buildMatchedItem('logs-*')]);
     renderUseIndices({ search: 'log' }, getIndices);
 
     await waitFor(() =>
       expect(getIndices).toHaveBeenCalledWith({
-        pattern: '*log*',
+        pattern: '*log*,-.*',
         isRollupIndex: expect.any(Function),
       })
     );
   });
 
-  it('uses substring matching for explicit searches including dot-prefixed names', async () => {
+  it('trims the search text before building the pattern', async () => {
+    const getIndices = jest.fn().mockResolvedValue([]);
+    renderUseIndices({ search: '  log  ' }, getIndices);
+
+    await waitFor(() =>
+      expect(getIndices).toHaveBeenCalledWith({
+        pattern: '*log*,-.*',
+        isRollupIndex: expect.any(Function),
+      })
+    );
+  });
+
+  it('still excludes dot-prefixed names when the dot is not at the start of the search', async () => {
+    const getIndices = jest.fn().mockResolvedValue([]);
+    renderUseIndices({ search: 'logs.app' }, getIndices);
+
+    await waitFor(() =>
+      expect(getIndices).toHaveBeenCalledWith({
+        pattern: '*logs.app*,-.*',
+        isRollupIndex: expect.any(Function),
+      })
+    );
+  });
+
+  it('includes dot-prefixed names when the search starts with a dot', async () => {
     const getIndices = jest.fn().mockResolvedValue([buildMatchedItem('.ds-logs-default')]);
     renderUseIndices({ search: '.ds-logs' }, getIndices);
 
@@ -110,7 +134,58 @@ describe('useIndices', () => {
 
     expect(getIndices).not.toHaveBeenCalled();
     expect(result.current.isFetching).toBe(false);
+    expect(result.current.isInitialLoading).toBe(false);
     expect(result.current.indexNames).toEqual([]);
+  });
+
+  it('reports initial loading only until the first response arrives', async () => {
+    const getIndices = jest.fn().mockResolvedValue([buildMatchedItem('logs-a')]);
+    const { result } = renderUseIndices({ search: '' }, getIndices);
+
+    expect(result.current.isInitialLoading).toBe(true);
+
+    await waitFor(() => expect(result.current.isInitialLoading).toBe(false));
+    expect(result.current.indexNames).toEqual(['logs-a']);
+  });
+
+  it('does not report initial loading while refetching for a new search', async () => {
+    let resolveSearch!: (value: MatchedItem[]) => void;
+    const getIndices = jest.fn(({ pattern }: { pattern: string }) => {
+      if (pattern === '*logs*,-.*') {
+        return new Promise<MatchedItem[]>((resolve) => {
+          resolveSearch = resolve;
+        });
+      }
+      return Promise.resolve([buildMatchedItem('metrics-a')]);
+    });
+
+    const core = coreMock.createStart();
+    const data = dataPluginMock.createStartContract();
+    data.dataViews.getIndices = getIndices;
+    const services = { ...core, data };
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const wrapper = ({ children }: { children: React.ReactNode }) =>
+      React.createElement(
+        KibanaContextProvider,
+        { services },
+        React.createElement(QueryClientProvider, { client: queryClient }, children)
+      );
+
+    const searchRef = { current: '' };
+    const { result, rerender } = renderHook(() => useIndices({ search: searchRef.current }), {
+      wrapper,
+    });
+    await waitFor(() => expect(result.current.indexNames).toEqual(['metrics-a']));
+
+    searchRef.current = 'logs';
+    rerender();
+    await waitFor(() => expect(result.current.isFetching).toBe(true));
+
+    expect(result.current.isInitialLoading).toBe(false);
+    expect(result.current.indexNames).toEqual(['metrics-a']);
+
+    resolveSearch([buildMatchedItem('logs-a')]);
+    await waitFor(() => expect(result.current.indexNames).toEqual(['logs-a']));
   });
 
   it('returns all resource kinds when types is omitted', async () => {
@@ -147,6 +222,30 @@ describe('useIndices', () => {
     );
   });
 
+  it('drops excluded names before capping results', async () => {
+    const getIndices = jest
+      .fn()
+      .mockResolvedValue(
+        Array.from({ length: MAX_INDEX_SEARCH_RESULTS + 3 }, (_, index) =>
+          buildMatchedItem(`logs-${index}`)
+        )
+      );
+    const excluded = new Set(['logs-0', 'logs-1']);
+    const { result } = renderUseIndices(
+      { search: '', exclude: (name) => excluded.has(name) },
+      getIndices
+    );
+
+    await waitFor(() => expect(result.current.isFetching).toBe(false));
+
+    expect(result.current.indexNames).toHaveLength(MAX_INDEX_SEARCH_RESULTS);
+    expect(result.current.indexNames).not.toContain('logs-0');
+    expect(result.current.indexNames).not.toContain('logs-1');
+    expect(result.current.indexNames[MAX_INDEX_SEARCH_RESULTS - 1]).toBe(
+      `logs-${MAX_INDEX_SEARCH_RESULTS + 1}`
+    );
+  });
+
   it('filters results down to the given types', async () => {
     const getIndices = jest
       .fn()
@@ -169,7 +268,7 @@ describe('useIndices', () => {
     });
 
     const getIndices = jest.fn(({ pattern }: { pattern: string }) => {
-      if (pattern === '*a*') {
+      if (pattern === '*a*,-.*') {
         return pendingA;
       }
       return Promise.resolve([buildMatchedItem('b-match')]);

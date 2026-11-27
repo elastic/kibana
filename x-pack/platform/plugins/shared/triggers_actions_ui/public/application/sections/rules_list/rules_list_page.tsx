@@ -6,6 +6,7 @@
  */
 
 import React, { lazy, useEffect, useMemo } from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import { rulesAppDetailsRoute } from '@kbn/rule-data-utils';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import { i18n } from '@kbn/i18n';
@@ -136,6 +137,7 @@ export const RulesListContainer = () => {
         menu={rulesListMenu}
         docLink={docLink}
       />
+      <EuiSpacer size="m" />
       <RulesList
         rulesListKey="rules-page"
         showCreateRuleButtonInPrompt={true}

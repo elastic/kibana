@@ -220,4 +220,41 @@ describe('ScoutFailedTestReporter', () => {
       group: 'platform',
     });
   });
+
+  describe('onEnd contract', () => {
+    const runWithOneFailure = () => {
+      const hardFailure = createMockTestCase({ outcome: 'unexpected', title: 'hard failure' });
+      reporter.onBegin(createMockConfig(), createMockSuite([hardFailure]));
+      reporter.onTestEnd(hardFailure, createMockResult({ status: 'failed', retry: 0 }));
+    };
+
+    it('returns synchronously so the run is never waiting on a reporter hook', () => {
+      runWithOneFailure();
+
+      expect(reporter.onEnd(createMockFullResult())).toBeUndefined();
+    });
+
+    it('still writes the tracking file when the report artifact fails to save', () => {
+      runWithOneFailure();
+      jest.spyOn((reporter as any).report, 'save').mockImplementation(() => {
+        throw new Error('Save destination path already exists');
+      });
+      const concludeSpy = jest.spyOn((reporter as any).report, 'conclude');
+
+      expect(() => reporter.onEnd(createMockFullResult())).not.toThrow();
+      expect(trackerSaveSpy).toHaveBeenCalledTimes(1);
+      expect(concludeSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('concludes the report when the tracking file fails to save', () => {
+      runWithOneFailure();
+      trackerSaveSpy.mockImplementation(() => {
+        throw new Error('EACCES: permission denied');
+      });
+      const concludeSpy = jest.spyOn((reporter as any).report, 'conclude');
+
+      expect(() => reporter.onEnd(createMockFullResult())).not.toThrow();
+      expect(concludeSpy).toHaveBeenCalledTimes(1);
+    });
+  });
 });

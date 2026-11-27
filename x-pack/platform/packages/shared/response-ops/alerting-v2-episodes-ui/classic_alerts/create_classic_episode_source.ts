@@ -14,7 +14,7 @@ import {
   type LocatorHost,
 } from '@kbn/rule-data-utils';
 import type { EpisodeDataSource, SeverityExtension } from '../types/episode_data_source';
-import { classicActionExtensions } from './action_extensions';
+import { classicActionExtensions, getActionContext } from './action_extensions';
 import {
   EPISODE_SEVERITY_WARNING_LABEL,
   EPISODE_SEVERITY_MINOR_LABEL,
@@ -28,8 +28,9 @@ import { fetchClassicAlertsTags } from './apis/fetch_classic_tags';
 import { ELASTIC_SOURCE_ICON, CLASSIC_SOURCE_LABEL } from '../source_labels';
 import { resolveClassicRules } from './apis/resolve_classic_rules';
 import { fetchClassicSearchFields } from './apis/fetch_classic_search_fields';
-import { CLASSIC_ALERTS_HISTOGRAM_LIMIT, CLASSIC_EPISODE_SOURCE_ID } from './constants';
+import { CLASSIC_EPISODE_SOURCE_ID } from './constants';
 import { classicAlertQueryKeys } from './query_keys';
+import { useClassicWriteAccess } from './use_classic_write_access';
 
 export const CLASSIC_SEVERITY_EXTENSIONS: SeverityExtension[] = [
   {
@@ -96,28 +97,52 @@ export const createClassicEpisodeSource = ({
     };
   },
 
-  fetchHistogram: async ({ services, filterState, timeRange, breakdownField, abortSignal }) => {
-    const rows = await fetchClassicAlertsHistogram({
+  fetchHistogram: ({
+    services,
+    filterState,
+    timeRange,
+    breakdownField,
+    buckets,
+    nowMs,
+    abortSignal,
+  }) =>
+    fetchClassicAlertsHistogram({
       ruleTypeIds,
       services,
       filterState,
       timeRange,
       breakdownField,
+      buckets,
+      nowMs,
       abortSignal,
-    });
-
-    return { rows, isCapHit: rows.length >= CLASSIC_ALERTS_HISTOGRAM_LIMIT };
-  },
+    }),
 
   fetchTagOptions: ({ services, timeRange, abortSignal }) =>
     fetchClassicAlertsTags({ ruleTypeIds, services, timeRange, abortSignal }),
 
   resolveRules: ({ services, ids }) => resolveClassicRules({ ids, services }),
 
-  fetchSearchFields: ({ services, abortSignal }) =>
-    fetchClassicSearchFields({ ruleTypeIds, services, abortSignal }),
+  fetchSearchFields: ({ services, abortSignal, ruleTypeIds: scopedRuleTypeIds }) =>
+    fetchClassicSearchFields({
+      ruleTypeIds: scopedRuleTypeIds?.length ? scopedRuleTypeIds : ruleTypeIds,
+      services,
+      abortSignal,
+    }),
 
   actionExtensions: classicActionExtensions,
+
+  useWriteAccess: useClassicWriteAccess,
+
+  supportsConditionalSnooze: true,
+
+  getRuleTypeIds: (episodes) => {
+    const ids = new Set<string>();
+    for (const episode of episodes) {
+      const { ruleTypeId } = getActionContext(episode);
+      if (ruleTypeId) ids.add(ruleTypeId);
+    }
+    return [...ids];
+  },
 
   getRuleDetailsHref: (ruleId) =>
     `${host.appBasePath ?? `/app/${host.app}`}${host.pathPrefix}${getRuleDetailsRoute(ruleId)}`,

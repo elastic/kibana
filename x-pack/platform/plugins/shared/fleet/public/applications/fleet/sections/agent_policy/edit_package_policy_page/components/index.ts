@@ -6,3 +6,4 @@
  */
 
 export { UpgradeStatusCallout } from './upgrade';
+export { ManagedByOnboardingCallout } from './managed_by_onboarding_callout';

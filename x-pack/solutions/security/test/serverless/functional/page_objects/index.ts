@@ -6,7 +6,6 @@
  */
 
 import { pageObjects as svlPlatformPageObjects } from '@kbn/test-suites-xpack-platform/serverless/functional/page_objects';
-import { SvlSecLandingPageProvider } from './svl_sec_landing_page';
 import { CspSecurityCommonProvider } from './security_common';
 import { CspDashboardPageProvider } from '../../../cloud_security_posture_functional/page_objects/csp_dashboard_page';
 import { AddCisIntegrationFormPageProvider } from '../../../cloud_security_posture_functional/page_objects/add_cis_integration_form_page';
@@ -20,7 +19,6 @@ import { TimelinePageObject } from '../../../cloud_security_posture_functional/p
 export const pageObjects = {
   ...svlPlatformPageObjects,
   // Security Solution serverless FTR page objects
-  svlSecLandingPage: SvlSecLandingPageProvider,
   cloudPostureDashboard: CspDashboardPageProvider,
   cisAddIntegration: AddCisIntegrationFormPageProvider,
   cspSecurity: CspSecurityCommonProvider,

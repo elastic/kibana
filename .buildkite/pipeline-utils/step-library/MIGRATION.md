@@ -65,11 +65,6 @@ changed form, and the labels to use for a real build that exercises the suite.
   for cancel-on-gate, so its fragment must not be loaded with
   `cancelOnGateFailure`.
 - **`wait: ~`:** use `waitStep`, which keeps `wait: null`.
-- **A fragment uploaded directly by `pipeline.sh`** (`store_moon_cache.yml`)
-  never passes through `pipeline.ts`. Print its rendered document with
-  `renderSteps(steps, { header: true })` from a small script, and pipe that into
-  `buildkite-agent pipeline upload`.
-
 ## Transitional pieces
 
 - `header: true` exists because the remaining YAML fragments are still joined

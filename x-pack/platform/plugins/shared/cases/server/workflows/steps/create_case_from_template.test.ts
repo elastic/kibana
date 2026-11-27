@@ -176,6 +176,75 @@ describe('createCaseFromTemplateStepDefinition', () => {
     expect(create.mock.calls[0][0].settings).not.toHaveProperty('extractObservables');
   });
 
+  describe('legacy template with a stored extractObservables true', () => {
+    const buildLegacyContext = (owner: string) => {
+      const create = jest.fn().mockResolvedValue(createCaseResponseFixture);
+      const get = jest.fn().mockResolvedValue([
+        {
+          owner,
+          templates: [
+            {
+              key: 'triage_template',
+              name: 'Triage template',
+              caseFields: {
+                title: 'Template title',
+                description: 'Template description',
+                settings: { syncAlerts: false, extractObservables: true },
+              },
+            },
+          ],
+        },
+      ]);
+      const getCasesClient = jest.fn().mockResolvedValue({
+        configure: { get },
+        cases: { create },
+      } as unknown as CasesClient);
+
+      return { create, definition: createCaseFromTemplateStepDefinition(getCasesClient, false) };
+    };
+
+    it.each(['cases', 'observability'])(
+      'does not forward the template value for an owner that cannot store true (owner=%s)',
+      async (owner) => {
+        const { create, definition } = buildLegacyContext(owner);
+
+        await definition.handler(createContext({ case_template_id: 'triage_template', owner }));
+
+        expect(create.mock.calls[0][0].settings).toEqual({ syncAlerts: false });
+      }
+    );
+
+    it('still forwards an explicit true overwrite so cases.create rejects it', async () => {
+      const { create, definition } = buildLegacyContext('cases');
+
+      await definition.handler(
+        createContext({
+          case_template_id: 'triage_template',
+          owner: 'cases',
+          overwrites: { settings: { syncAlerts: false, extractObservables: true } },
+        })
+      );
+
+      expect(create.mock.calls[0][0].settings).toEqual({
+        syncAlerts: false,
+        extractObservables: true,
+      });
+    });
+
+    it('keeps the template value for the securitySolution owner', async () => {
+      const { create, definition } = buildLegacyContext('securitySolution');
+
+      await definition.handler(
+        createContext({ case_template_id: 'triage_template', owner: 'securitySolution' })
+      );
+
+      expect(create.mock.calls[0][0].settings).toEqual({
+        syncAlerts: false,
+        extractObservables: true,
+      });
+    });
+  });
+
   it('finds template across multiple configurations', async () => {
     const create = jest.fn().mockResolvedValue(createCaseResponseFixture);
     const get = jest.fn().mockResolvedValue([
@@ -680,6 +749,71 @@ describe('createCaseFromTemplateStepDefinition', () => {
         expect(createPayload.settings).toEqual(settings);
       }
     );
+
+    describe('with a stored extractObservables true in the template', () => {
+      const buildV2Context = (owner: string) => {
+        const create = jest.fn().mockResolvedValue(createCaseResponseFixture);
+        const getTemplate = jest.fn().mockResolvedValue(
+          buildTemplateSO(
+            {
+              name: 'Triage default title',
+              description: 'Triage default description',
+              settings: { syncAlerts: false, extractObservables: true },
+              fields: [],
+            },
+            { owner }
+          )
+        );
+        const getCasesClient = jest.fn().mockResolvedValue({
+          templates: { getTemplate },
+          configure: { get: jest.fn() },
+          cases: { create },
+        } as unknown as CasesClient);
+
+        return { create, definition: createCaseFromTemplateStepDefinition(getCasesClient, true) };
+      };
+
+      it.each(['cases', 'observability'])(
+        'does not forward the template value for an owner that cannot store true (owner=%s)',
+        async (owner) => {
+          const { create, definition } = buildV2Context(owner);
+
+          await definition.handler(createContext({ owner, case_template_id: 'triage_template' }));
+
+          expect(create.mock.calls[0][0].settings).toEqual({ syncAlerts: false });
+        }
+      );
+
+      it('still forwards an explicit true overwrite so cases.create rejects it', async () => {
+        const { create, definition } = buildV2Context('cases');
+
+        await definition.handler(
+          createContext({
+            owner: 'cases',
+            case_template_id: 'triage_template',
+            overwrites: { settings: { syncAlerts: false, extractObservables: true } },
+          })
+        );
+
+        expect(create.mock.calls[0][0].settings).toEqual({
+          syncAlerts: false,
+          extractObservables: true,
+        });
+      });
+
+      it('keeps the template value for the securitySolution owner', async () => {
+        const { create, definition } = buildV2Context('securitySolution');
+
+        await definition.handler(
+          createContext({ owner: 'securitySolution', case_template_id: 'triage_template' })
+        );
+
+        expect(create.mock.calls[0][0].settings).toEqual({
+          syncAlerts: false,
+          extractObservables: true,
+        });
+      });
+    });
 
     it('fails with a clear message when the template has no default title and no title overwrite is provided', async () => {
       const create = jest.fn();

@@ -61,9 +61,17 @@ describe('RenderPanelContext', () => {
     expect(mockComponentProps).toHaveBeenCalledWith(
       expect.objectContaining({
         savedTemplate: '<div>panel</div>',
-        esqlQuery: 'FROM logs',
+        esqlQueries: ['FROM logs'],
         embeddableId: 'panel-1',
       })
+    );
+  });
+
+  it('renders the additional queries the attachment carries', () => {
+    render(<RenderPanelContext data={makeData({ additional_esql_queries: ['FROM metrics'] })} />);
+
+    expect(mockComponentProps).toHaveBeenCalledWith(
+      expect.objectContaining({ esqlQueries: ['FROM logs', 'FROM metrics'] })
     );
   });
 
@@ -123,8 +131,6 @@ describe('RenderPanelContext', () => {
   it('renders a static panel with no query', () => {
     render(<RenderPanelContext data={makeData({ esql_query: undefined })} />);
 
-    expect(mockComponentProps).toHaveBeenCalledWith(
-      expect.objectContaining({ esqlQuery: undefined })
-    );
+    expect(mockComponentProps).toHaveBeenCalledWith(expect.objectContaining({ esqlQueries: [] }));
   });
 });

@@ -582,7 +582,7 @@ export const ALERTZERO_ALERT_TRIAGE_BATCH_GROUPED_EVENT: EventTypeOpts<AlertZero
         'Whether the batch created a conversation: one for each new proposal, and one for a failure that does not end the run (no verdicts, or some alerts without one). A batch that only joins proposals, or has no false positive to propose, creates none'
       ),
       fp_candidates_on_fallback: countField(
-        'False positives at or above the confidence floor that have no strict key, so they group by rule and detection only'
+        'False positives at or above the confidence floor whose wide key has no condition, so they group by rule and detection only'
       ),
       grouping: vocabularyField(
         'Whether the batch was grouped, or why not: supervised autonomy, the kill switch, a proposal lookup that returned fewer proposals than it matched, or nothing to propose',
@@ -722,7 +722,7 @@ export const ALERTZERO_HUNT_REPORT_COMPLETED_EVENT: EventTypeOpts<AlertZeroHuntR
     schema: {
       ...ENVELOPE_SCHEMA,
       closed_clean: flagField(
-        'Whether a clean run (no confirmed hit) closed the Investigation as benign'
+        'Whether a run with no confirmed hit closed the Investigation: as benign, or as `other` for a `retired_incomplete` run, which is true too although part of the report was never searched'
       ),
       coverage_kis_skipped: countField('Coverage knowledge items packaging did not write'),
       coverage_kis_written: countField(
@@ -747,7 +747,7 @@ export const ALERTZERO_HUNT_REPORT_COMPLETED_EVENT: EventTypeOpts<AlertZeroHuntR
         type: 'boolean',
         _meta: {
           description:
-            'Whether the hunt ran Tier 2 (behavioral queries); absent when the Worker did not pass it',
+            'Whether the hunt ran Behavior Hunt (behavioral queries); absent when the Worker did not pass it',
           optional: true,
         },
       },

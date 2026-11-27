@@ -93,13 +93,6 @@ export const resolvedPaymentEvent: SignificantEvent = {
   summary: 'Payment gateway timeout rates returned to their expected baseline.',
   severity: 'medium',
   confidence: 0.78,
-  investigations: [
-    {
-      workflow_execution_id: 'payment-investigation',
-      started_at: '2026-07-23T22:08:00.000Z',
-      completed_at: '2026-07-23T22:13:00.000Z',
-    },
-  ],
 };
 
 export const inactiveShippingEvent: SignificantEvent = {
@@ -213,17 +206,6 @@ export const checkoutFeature: Feature = {
     related_apm_service: 'checkout-api',
   },
 };
-
-export const completedInvestigation = {
-  workflow_execution_id: 'checkout-investigation',
-  started_at: '2026-07-24T09:45:00.000Z',
-  completed_at: '2026-07-24T09:51:00.000Z',
-} satisfies NonNullable<SignificantEvent['investigations']>[number];
-
-export const runningInvestigation = {
-  workflow_execution_id: 'checkout-investigation-running',
-  started_at: '2026-07-24T09:45:00.000Z',
-} satisfies NonNullable<SignificantEvent['investigations']>[number];
 
 export const entityWithoutEvidence: Feature = {
   ...checkoutFeature,

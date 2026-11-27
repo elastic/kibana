@@ -7,12 +7,18 @@
 
 import React from 'react';
 import { SiemMigrationsTranslatedRulesUpsellPage as SiemMigrationsTranslatedRulesUpsellPageCommon } from '@kbn/security-solution-upselling/pages/siem_migrations_translated_rules';
+import type { UpsellingPageProps } from '@kbn/security-solution-upselling/service';
+import { useKibana } from '../../common/services';
 import * as i18n from '../translations';
 
 export const SiemMigrationsTranslatedRulesUpsellPage = React.memo(
-  function SiemMigrationsTranslatedRulesUpsellPage() {
+  function SiemMigrationsTranslatedRulesUpsellPage({ appHeader }: UpsellingPageProps) {
+    const { docLinks } = useKibana().services;
+
     return (
       <SiemMigrationsTranslatedRulesUpsellPageCommon
+        appHeader={appHeader}
+        docLink={docLinks.links.securitySolution.siemMigrations}
         title={i18n.SIEM_MIGRATION_UPSELLING_TITLE('Complete')}
         upgradeMessage={i18n.SIEM_MIGRATION_RULES_PAGE_UPGRADE_LICENSE_MESSAGE}
       />

@@ -20,6 +20,7 @@ function generator({
   dockerCrossCompile,
   version,
   dockerTargetFilename,
+  skipDockerImageArchive,
   baseImageName,
   architecture,
 }: TemplateContext) {
@@ -28,6 +29,9 @@ function generator({
   const dockerTargetName = `${imageTag}${imageFlavor}:${tag}`;
   const dockerArchitecture = architecture === 'aarch64' ? 'linux/arm64' : 'linux/amd64';
   const dockerfileName = architecture === 'aarch64' ? 'Dockerfile.aarch64' : 'Dockerfile.x86_64';
+  const dockerSave = skipDockerImageArchive
+    ? ''
+    : `docker save ${dockerTargetName} | gzip -c > ${dockerTargetFilename}`;
   const dockerBuild = dockerCrossCompile
     ? `docker buildx build --platform ${dockerArchitecture} -t ${dockerTargetName} -f ${dockerfileName} . || exit 1;`
     : `docker build -t ${dockerTargetName} -f ${dockerfileName} . || exit 1;`;
@@ -70,7 +74,7 @@ function generator({
   echo "Building: kibana${imageFlavor}-docker"; \\
   ${dockerBuild}
 
-  docker save ${dockerTargetName} | gzip -c > ${dockerTargetFilename}
+  ${dockerSave}
 
   ${dockerPush} && docker image push ${dockerTargetName}
   exit 0

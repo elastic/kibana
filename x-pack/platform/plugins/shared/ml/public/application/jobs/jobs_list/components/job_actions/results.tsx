@@ -79,6 +79,7 @@ export const ResultLinks: FC<Props> = ({ jobs }) => {
           <EuiToolTip
             position="bottom"
             content={singleMetricDisabledMessageText ?? openJobsInSingleMetricViewerText}
+            disableScreenReaderOutput={singleMetricDisabledMessageText === undefined}
           >
             <EuiButtonIcon
               href={timeSeriesExplorerLink}

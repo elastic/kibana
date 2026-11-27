@@ -9,7 +9,6 @@ import { esql } from '@elastic/esql';
 import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import { normalizeTags } from '@kbn/alerting-v2-utils';
-import { queryResponseToRecords } from '../../services/query_service/query_response_to_records';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 
 /**
@@ -88,9 +87,7 @@ export const loadAlertActionStatesByEpisodeId = async ({
     | KEEP alert_id, last_ack_action, last_assignee_uid, last_tags
   `.toRequest();
 
-  const rows = queryResponseToRecords<RawAlertActionStateRow>(
-    await queryService.executeQuery({ query: query.query })
-  );
+  const rows = await queryService.executeQuery<RawAlertActionStateRow>({ query: query.query });
 
   return new Map(rows.map((row) => [row.alert_id, toAlertActionState(row)]));
 };

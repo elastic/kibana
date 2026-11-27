@@ -88,6 +88,7 @@ const minimalGenericFoldersOptions: BuildOptions = {
   targetCloudPlatforms: false,
   skipFipsProvider: false,
   skipServerless: false,
+  skipDockerImageArchive: false,
   tarZstd: false,
   withExamplePlugins: false,
   withTestPlugins: false,

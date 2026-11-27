@@ -28,6 +28,7 @@ interface RegisterRoutesParams {
   telemetryCollectionManager: TelemetryCollectionManagerPluginSetup;
   savedObjectsInternalClient$: Observable<SavedObjectsClient>;
   getSecurity: SecurityGetter;
+  getIsOptedInFromFeatureFlag: () => boolean | undefined;
 }
 
 export function registerRoutes(options: RegisterRoutesParams) {

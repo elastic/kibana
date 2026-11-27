@@ -14,13 +14,8 @@ import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
-import {
-  VEGA_API_PATH,
-  commonRouteConfig,
-  PUBLIC_API_VERSION,
-  VEGA_LIBRARY_ITEM_PARAMS_ID_DESCRIPTION,
-} from '../constants';
-import { isVegaApiEnabled } from '../is_vega_api_enabled';
+import { VEGA_API_PATH, VEGA_API_VERSION } from '../../../common/constants';
+import { commonRouteConfig, VEGA_LIBRARY_ITEM_PARAMS_ID_DESCRIPTION } from '../constants';
 import { deleteItem } from './delete';
 
 const deleteRequestParamsSchema = z.object({
@@ -36,12 +31,13 @@ export const registerDeleteRoute = (
     path: `${VEGA_API_PATH}/{id}`,
     summary: 'Delete a Vega library item',
     ...commonRouteConfig,
-    description: 'Deletes a Vega library item by its ID.',
+    description:
+      'Permanently deletes a Vega library item by its ID. Dashboards that link to the item by reference can no longer display the panel.',
   });
 
   deleteRoute.addVersion(
     {
-      version: PUBLIC_API_VERSION,
+      version: VEGA_API_VERSION,
       options: {
         oasOperationObject: async () =>
           (await import('../oas_examples')).deleteVegaOASOperationObject,
@@ -65,10 +61,6 @@ export const registerDeleteRoute = (
     },
     async (ctx, req, res) =>
       telemetryHandler(req, { usageCounter }, async () => {
-        const { core } = await ctx.resolve(['core']);
-        if (!(await isVegaApiEnabled(core.featureFlags))) {
-          return res.notFound();
-        }
         try {
           await deleteItem(ctx, req.params.id);
           return res.noContent();

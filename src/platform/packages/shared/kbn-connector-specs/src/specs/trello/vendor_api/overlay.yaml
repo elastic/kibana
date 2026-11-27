@@ -3,30 +3,35 @@ info:
   title: Trello REST API corrections
   version: 1.0.0
 actions:
-  # The spec defines the API key and token schemes, but every operation only allows OAuth2.
-  # Trello accepts key and token query parameters on all of them.
   - target: $.paths.*.*.security
+    description: >-
+      The spec defines the API key and token schemes, but every operation only allows OAuth2.
+      Trello accepts key and token query parameters on all of them.
     update:
       - APIKey: []
         APIToken: []
 
-  # GET /members/{id} accepts `me`, as Trello documents; the same id on /members/{id}/boards
-  # only allows a 24-hex ID.
   - target: $.paths['/members/{id}/boards'].get.parameters[?@.name == 'id'].schema
+    description: >-
+      GET /members/{id} accepts `me`, as Trello documents; the same id on /members/{id}/boards
+      only allows a 24-hex ID.
     remove: true
   - target: $.paths['/members/{id}/boards'].get.parameters[?@.name == 'id']
+    description: Accepts `me` as well as a 24-hex ID, as GET /members/{id} does.
     update:
       schema:
         oneOf:
           - $ref: '#/components/schemas/TrelloID'
           - type: string
 
-  # Trello reads parameters from a form body as well as from the query, which is what the
-  # connector sends; the spec only documents the query.
   - target: $.paths['/cards'].post.parameters[?@.name == 'idList']
+    description: >-
+      Trello reads parameters from a form body as well as from the query, which is what the
+      connector sends; the spec only documents the query.
     update:
       required: false
   - target: $.paths['/cards'].post
+    description: The form body the connector sends, as Trello accepts it.
     update:
       requestBody:
         content:
@@ -42,9 +47,11 @@ actions:
                 desc:
                   type: string
   - target: $.paths['/cards/{id}/actions/comments'].post.parameters[?@.name == 'text']
+    description: The comment text is sent in a form body; the spec only documents the query.
     update:
       required: false
   - target: $.paths['/cards/{id}/actions/comments'].post
+    description: The form body the connector sends, as Trello accepts it.
     update:
       requestBody:
         content:

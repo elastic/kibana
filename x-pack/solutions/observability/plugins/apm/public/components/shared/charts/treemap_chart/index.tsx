@@ -6,13 +6,12 @@
  */
 import React from 'react';
 import type { Datum } from '@elastic/charts';
-import { Chart, Partition, PartitionLayout, Settings } from '@elastic/charts';
+import { Chart, Partition, PartitionLayout, percentValueGetter, Settings } from '@elastic/charts';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { euiPaletteColorBlind, EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import { IconChartTreemap } from '@kbn/chart-icons';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { percentValueGetter } from '@elastic/charts/dist/chart_types/partition_chart/layout/config';
 import { isEmpty } from 'lodash';
 import type { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { ChartContainer } from '../chart_container';

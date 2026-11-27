@@ -6,11 +6,15 @@
  */
 import {
   getIndexPatternFromESQLQuery,
-  getESQLResults,
   formatESQLColumns,
   mapVariableToColumn,
 } from '@kbn/esql-utils';
-import { type AggregateQuery, buildEsQuery, isOfAggregateQueryType } from '@kbn/es-query';
+import {
+  type AggregateQuery,
+  buildEsQuery,
+  getTimeZoneFromSettings,
+  isOfAggregateQueryType,
+} from '@kbn/es-query';
 import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
 import { getEsQueryConfig, UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
@@ -51,12 +55,17 @@ export const buildDisplayRowsFromEsqlValues = ({
     return values;
   }
 
-  // Pre-compute which value column index each display column maps to (-1 if missing)
-  const valueIndexPerGridColumn = displayColumns.map((col) =>
-    valueColumns.findIndex((v) => v.name === col.name)
-  );
-  // For each row, pick values by index; fill null for columns with no data
-  return values.map((row) => valueIndexPerGridColumn.map((i) => (i >= 0 ? row[i] : null)));
+  // Columns with no values stay on the column list (`isNull`) and are left out of
+  // each row. Index by name so a different `columns` order still lines up.
+  const valueIndexByName = new Map<string, number>();
+  valueColumns.forEach(({ name }, index) => {
+    if (!valueIndexByName.has(name)) valueIndexByName.set(name, index);
+  });
+  const valueIndexPerGridColumn = displayColumns.flatMap(({ name }) => {
+    const index = valueIndexByName.get(name);
+    return index === undefined ? [] : [index];
+  });
+  return values.map((row) => valueIndexPerGridColumn.map((index) => row[index]));
 };
 
 const getDSLFilter = (
@@ -110,26 +119,32 @@ export const getGridAttrs = async (
 
   const filter = getDSLFilter(data.query, uiSettings, dataView.timeFieldName);
   const timezone = uiSettings.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ);
-  const results = await getESQLResults({
-    esqlQuery: query.esql,
-    search: data.search.search,
-    signal: abortController?.signal,
-    filter,
-    dropNullColumns: true,
-    timeRange: data.query.timefilter.timefilter.getAbsoluteTime(),
-    variables: esqlVariables,
-    timezone,
-    ...(approximation !== undefined ? { approximation } : {}),
-    includeColumnMetadata: true,
-  });
-
-  const { all_columns: allColumns = [], columns: valueColumns = [], values } = results.response;
+  const {
+    rawResponse: { all_columns: allColumns = [], columns: valueColumns = [], values },
+  } = await data.search.esql(
+    {
+      query: query.esql,
+      filter,
+      dropNullColumns: true,
+      columnMetadata: true,
+      timeZone: timezone ? getTimeZoneFromSettings(timezone) : undefined,
+      ...(approximation !== undefined ? { approximation } : {}),
+      kibanaQueryContext: {
+        timeRange: data.query.timefilter.timefilter.getAbsoluteTime(),
+        esqlVariables,
+      },
+    },
+    { abortSignal: abortController?.signal }
+  );
   // Use `all_columns` property if it exists in the payload,
   // which has all columns regardless if they have data or not
   const displayColumns = allColumns.length > 0 ? allColumns : valueColumns;
 
   const rows = buildDisplayRowsFromEsqlValues({ displayColumns, valueColumns, values });
-  const columns = formatESQLColumns(displayColumns);
+  const valueColumnNames = new Set(valueColumns.map(({ name }) => name));
+  const columns = formatESQLColumns(displayColumns).map((column) =>
+    valueColumnNames.has(column.name) ? column : { ...column, isNull: true }
+  );
 
   return {
     rows,

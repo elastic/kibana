@@ -49,12 +49,7 @@ export const ProposalsTrendChartRow: React.FC = () => {
   }
 
   return (
-    <EuiFlexGroup
-      gutterSize="s"
-      alignItems="stretch"
-      responsive={false}
-      data-test-subj="alertZeroProposalsTrendChartRow"
-    >
+    <EuiFlexGroup gutterSize="s" data-test-subj="alertZeroProposalsTrendChartRow">
       {TREND_CHART_PANELS.map(({ id, label, color }) => {
         return (
           <EuiFlexItem key={id}>
