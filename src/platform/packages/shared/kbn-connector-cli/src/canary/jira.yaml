@@ -1,0 +1,29 @@
+# Top-level shape confirmed against a live run on 2026-10-30. The test tenant returned no projects
+# (`values` was empty), so nothing below `values` is checked yet. Add `values.0.*` paths once the account can see one.
+#
+# `getProjects` also succeeds for anonymous callers (confirmed with deliberately bad credentials on 2026-11-04), so it
+# can't catch a broken credential. The `_test` case calls /rest/api/3/myself, which needs valid credentials.
+spec_id: .jira-cloud
+cases:
+  - action: _test
+    name: credentials are valid
+    input: {}
+    expect:
+      - path: $
+        type: object
+  - action: getProjects
+    input:
+      maxResults: 1
+    expect:
+      - path: self
+        type: string
+      - path: values
+        type: array
+      - path: maxResults
+        type: number
+      - path: startAt
+        type: number
+      - path: total
+        type: number
+      - path: isLast
+        type: boolean

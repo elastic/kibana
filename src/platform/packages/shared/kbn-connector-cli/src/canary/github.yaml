@@ -1,0 +1,34 @@
+# Expectations confirmed against a live run on 2026-10-30.
+spec_id: .github
+cases:
+  - action: getMe
+    input: {}
+    expect:
+      - path: login
+        type: string
+      - path: id
+        type: number
+      - path: profile_url
+        type: string
+      - path: details
+        type: object
+  - action: searchRepositories
+    input:
+      query: "repo:elastic/kibana"
+    expect:
+      - path: total_count
+        type: number
+      - path: incomplete_results
+        type: boolean
+      - path: items
+        type: array
+      - path: items.0.full_name
+        type: string
+      - path: items.0.html_url
+        type: string
+      - path: items.0.default_branch
+        type: string
+      - path: items.0.stargazers_count
+        type: number
+      - path: items.0.topics
+        type: array

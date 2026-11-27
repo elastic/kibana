@@ -25,20 +25,39 @@ interface ConnectorPayload {
 const DEFAULT_URLS = ['http://localhost:5601', 'https://localhost:5601'];
 const DEFAULT_AUTHS = ['elastic:changeme', 'elastic_serverless:changeme'];
 
+const DEFAULT_REQUEST_DEADLINE_MS = 30_000;
+
+/** `deadlineMs` (default 30s) bounds the whole request, unlike `options.timeout`, which only catches an idle socket. */
 function request(
   url: string,
   options: http.RequestOptions,
-  body?: string
+  body?: string,
+  deadlineMs: number = DEFAULT_REQUEST_DEADLINE_MS
 ): Promise<{ statusCode: number; data: string }> {
   return new Promise((resolve, reject) => {
     const isSsl = url.startsWith('https');
     const requestFn = isSsl ? https.request : http.request;
+    // Destroying the request also makes an in-flight response emit 'aborted', so the timeout error must win.
+    let timeoutError: Error | undefined;
+    const fail = (err: Error) => reject(timeoutError ?? err);
     const req = requestFn(url, { ...options, rejectUnauthorized: false }, (res) => {
       let data = '';
       res.on('data', (chunk) => (data += chunk));
       res.on('end', () => resolve({ statusCode: res.statusCode || 0, data }));
+      res.on('error', fail);
+      // A dropped connection ends the response without 'end' (and, depending on the Node version, without an error
+      // event), so an incomplete response must be rejected here.
+      res.on('close', () => {
+        if (!res.complete) fail(new Error('Connection closed before the response was complete'));
+      });
     });
-    req.on('error', reject);
+    req.on('error', fail);
+    // Armed only once `requestFn` has returned, so a synchronous throw leaves no timer behind.
+    const deadline = setTimeout(() => {
+      timeoutError = new Error(`Request timed out after ${deadlineMs}ms`);
+      req.destroy(timeoutError);
+    }, deadlineMs);
+    req.on('close', () => clearTimeout(deadline));
     if (body) req.write(body);
     req.end();
   });
@@ -133,6 +152,90 @@ export async function createConnector(
 
   if (statusCode < 200 || statusCode >= 300) {
     throw new Error(`Failed to create connector "${payload.name}" (HTTP ${statusCode}): ${data}`);
+  }
+
+  return JSON.parse(data);
+}
+
+/** Replaces the name, config and secrets of an existing connector; its type cannot change. */
+export async function updateConnector(
+  connection: KibanaConnection,
+  connectorId: string,
+  payload: Omit<ConnectorPayload, 'connector_type_id'>
+): Promise<{ id: string; name: string }> {
+  const body = JSON.stringify(payload);
+  const { statusCode, data } = await request(
+    `${connection.url}/api/actions/connector/${encodeURIComponent(connectorId)}`,
+    {
+      method: 'PUT',
+      headers: {
+        ...kibanaHeaders(connection.auth),
+        'Content-Length': String(Buffer.byteLength(body)),
+      },
+    },
+    body
+  );
+
+  if (statusCode < 200 || statusCode >= 300) {
+    throw new Error(`Failed to update connector "${payload.name}" (HTTP ${statusCode}): ${data}`);
+  }
+
+  return JSON.parse(data);
+}
+
+export interface ExecuteConnectorParams {
+  subAction: string;
+  subActionParams: Record<string, unknown>;
+}
+
+/** The body of `POST /api/actions/connector/{id}/_execute` (HTTP 200, even for connector errors). */
+export interface ExecuteConnectorResult {
+  connector_id: string;
+  status: 'ok' | 'error';
+  message?: string;
+  service_message?: string;
+  data?: unknown;
+  retry?: boolean | string | null;
+  errorSource?: 'user' | 'framework';
+  error_name?: string;
+  error_meta?: Record<string, unknown>;
+}
+
+/** Raised when Kibana itself rejects the execute request, as opposed to the connector reporting an error. */
+export class KibanaRequestError extends Error {
+  constructor(message: string, public readonly statusCode: number) {
+    super(message);
+    this.name = 'KibanaRequestError';
+  }
+}
+
+const DEFAULT_EXECUTE_TIMEOUT_MS = 60_000;
+
+export async function executeConnector(
+  connection: KibanaConnection,
+  connectorId: string,
+  params: ExecuteConnectorParams,
+  { timeoutMs = DEFAULT_EXECUTE_TIMEOUT_MS }: { timeoutMs?: number } = {}
+): Promise<ExecuteConnectorResult> {
+  const body = JSON.stringify({ params });
+  const { statusCode, data } = await request(
+    `${connection.url}/api/actions/connector/${encodeURIComponent(connectorId)}/_execute`,
+    {
+      method: 'POST',
+      headers: {
+        ...kibanaHeaders(connection.auth),
+        'Content-Length': String(Buffer.byteLength(body)),
+      },
+    },
+    body,
+    timeoutMs
+  );
+
+  if (statusCode < 200 || statusCode >= 300) {
+    throw new KibanaRequestError(
+      `Failed to execute connector "${connectorId}" (HTTP ${statusCode}): ${data}`,
+      statusCode
+    );
   }
 
   return JSON.parse(data);
