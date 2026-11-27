@@ -27,6 +27,8 @@ import {
   BROWSER_CONSOLE_ERRORS_ATTACHMENT,
   SCOUT_REPORT_OUTPUT_ROOT,
   ScoutTestTarget,
+  elasticCloudTargetFromEnv,
+  type ScoutElasticCloudTarget,
 } from '@kbn/scout-info';
 import {
   excapeHtmlCharacters,
@@ -53,6 +55,7 @@ export class ScoutFailedTestReporter implements Reporter {
   private readonly report: ScoutFailureReport;
   private readonly command: string;
   private readonly testTarget: string;
+  private readonly elasticCloud?: ScoutElasticCloudTarget;
   private failureTracker?: ScoutFailureTracker;
   private kibanaModule: TestFailure['kibanaModule'];
   /** Root suite captured in `onBegin`; walked in `onEnd` to identify tests that ended up flaky. */
@@ -70,6 +73,7 @@ export class ScoutFailedTestReporter implements Reporter {
     this.command = getRunCommand();
     this.testTarget =
       (ScoutTestTarget.tryFromEnv() || getTestTargetFromProcessArguments())?.tag || 'unknown';
+    this.elasticCloud = elasticCloudTargetFromEnv();
   }
 
   private getFileOwners(filePath: string): string[] {
@@ -153,6 +157,8 @@ export class ScoutFailedTestReporter implements Reporter {
       owner: this.getFileOwners(test.location.file),
       kibanaModule: this.kibanaModule,
       duration: result.duration,
+      startTime: result.startTime.toISOString(),
+      elasticCloud: this.elasticCloud,
       error: this.formatTestError(result),
       stdout: result.stdout ? parseStdout(result.stdout) : undefined,
       consoleErrors,

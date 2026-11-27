@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ScoutElasticCloudTarget } from '@kbn/scout-info';
+
 export interface TestFailure {
   id: string;
   suite: string;
@@ -22,6 +24,10 @@ export interface TestFailure {
     group: string;
   };
   duration: number;
+  /** When the attempt started, as an ISO timestamp. */
+  startTime?: string;
+  /** The Elastic Cloud project or deployment the run targeted. */
+  elasticCloud?: ScoutElasticCloudTarget;
   error: {
     message?: string;
     stack_trace?: string;
