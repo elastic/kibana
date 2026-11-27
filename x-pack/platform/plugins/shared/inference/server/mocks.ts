@@ -16,7 +16,6 @@ const createStartContractMock = (): jest.Mocked<InferenceServerStart> => {
     getConnectorById: jest.fn(),
     getClientWithoutRequest: jest.fn(),
     getConnectorByIdWithoutClientRequest: jest.fn(),
-    getInferenceEndpoints: jest.fn(),
     getInferenceEndpointById: jest.fn(),
     installTokenUsageDashboard: jest.fn(),
   };
