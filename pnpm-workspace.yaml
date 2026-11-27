@@ -8,7 +8,9 @@ autoInstallPeers: false
 strictPeerDependencies: false
 dedupePeerDependents: true
 verifyDepsBeforeRun: false
-storeDir: .pnpm-store
+# No storeDir: pnpm's default per-user store is shared by every checkout and git
+# worktree, so new worktrees install without downloading. CI keeps the store in
+# the workspace via pnpm_config_store_dir in .buildkite/scripts/common/env.sh.
 
 # Dependency build-script gate (formerly @kbn/yarn-install-scripts). pnpm runs a
 # dependency's install/postinstall only when it's set true below. strictDepBuilds
@@ -273,7 +275,6 @@ packages:
   - 'packages/kbn-dependency-ownership'
   - 'packages/kbn-dependency-usage'
   - 'packages/kbn-docs-utils'
-  - 'packages/kbn-eslint-config'
   - 'packages/kbn-eslint-plugin-alerting-v2'
   - 'packages/kbn-eslint-plugin-compat'
   - 'packages/kbn-eslint-plugin-disable'
@@ -902,6 +903,7 @@ packages:
   - 'src/platform/packages/shared/kbn-osquery-io-ts-types'
   - 'src/platform/packages/shared/kbn-otel-demo'
   - 'src/platform/packages/shared/kbn-otel-semantic-conventions'
+  - 'src/platform/packages/shared/kbn-oxfmt'
   - 'src/platform/packages/shared/kbn-palettes'
   - 'src/platform/packages/shared/kbn-palettes-components'
   - 'src/platform/packages/shared/kbn-profiler'
@@ -1219,6 +1221,7 @@ packages:
   - 'x-pack/examples/gen_ai_streaming_response_example'
   - 'x-pack/examples/lens_config_builder_example'
   - 'x-pack/examples/lens_embeddable_inline_editing_example'
+  - 'x-pack/examples/lens_exemplars_example'
   - 'x-pack/examples/screenshotting_example'
   - 'x-pack/examples/testing_embedded_lens'
   - 'x-pack/examples/third_party_lens_navigation_prompt'

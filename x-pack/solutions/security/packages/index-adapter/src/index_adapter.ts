@@ -54,7 +54,10 @@ export class IndexAdapter {
   protected installed: boolean;
   protected writeIndexOnly: boolean;
 
-  constructor(public readonly name: string, options: IndexAdapterParams) {
+  constructor(
+    public readonly name: string,
+    options: IndexAdapterParams
+  ) {
     this.installed = false;
     this.kibanaVersion = options.kibanaVersion;
     this.totalFieldsLimit = options.totalFieldsLimit ?? DEFAULT_FIELDS_LIMIT;

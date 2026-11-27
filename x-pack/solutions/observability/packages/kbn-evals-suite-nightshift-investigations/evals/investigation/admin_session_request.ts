@@ -9,7 +9,10 @@ const HEADERS = { 'kbn-xsrf': 'true', 'x-elastic-internal-origin': 'kibana' } as
 
 /** A failed request, carrying the status the service-account setup reads for `404` and `409`. */
 export class AdminSessionRequestError extends Error {
-  constructor(message: string, public readonly status: number) {
+  constructor(
+    message: string,
+    public readonly status: number
+  ) {
     super(message);
     this.name = 'AdminSessionRequestError';
   }

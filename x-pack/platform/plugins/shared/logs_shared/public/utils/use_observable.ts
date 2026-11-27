@@ -19,7 +19,7 @@ export const useLatest = <Value>(value: Value) => {
 export const useObservable = <
   OutputValue,
   OutputObservable extends Observable<OutputValue>,
-  InputValues extends Readonly<any[]>
+  InputValues extends Readonly<any[]>,
 >(
   createObservableOnce: (inputValues: Observable<InputValues>) => OutputObservable,
   inputValues: InputValues
@@ -38,7 +38,7 @@ export const useObservable = <
 export const useBehaviorSubject = <
   InputValue,
   OutputValue,
-  OutputObservable extends Observable<OutputValue>
+  OutputObservable extends Observable<OutputValue>,
 >(
   deriveObservableOnce: (input$: Observable<InputValue>) => OutputObservable,
   createInitialValue: () => InputValue

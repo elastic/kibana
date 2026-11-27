@@ -165,8 +165,8 @@ function throwAzureError(error: unknown): never {
     typeof err.response?.data === 'string'
       ? err.response.data
       : err.response?.data
-      ? JSON.stringify(err.response.data)
-      : '';
+        ? JSON.stringify(err.response.data)
+        : '';
   const detail = rawBody ? ` — ${rawBody}` : '';
 
   if (err.response?.status === 401) {

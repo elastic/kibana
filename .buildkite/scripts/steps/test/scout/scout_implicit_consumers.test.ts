@@ -13,7 +13,7 @@ import { expandWithImplicitConsumers } from './scout_implicit_consumers.ts';
 const WORKFLOWS_EXTENSIONS_MODULE = '@kbn/workflows-extensions';
 
 const createMockLog = (): ToolingLog =>
-  ({ info: jest.fn(), warning: jest.fn() } as unknown as ToolingLog);
+  ({ info: jest.fn(), warning: jest.fn() }) as unknown as ToolingLog;
 
 /**
  * Serves changed content from memory. Files missing from `files` are treated as deleted, and

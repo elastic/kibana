@@ -242,8 +242,9 @@ const SuggestionPreview = ({
               transform: none !important; // sass-lint:disable-line no-important
               ${euiFocusRing(euiThemeContext)};
             }
-            ${selected
-              ? `
+            ${
+              selected
+                ? `
               background-color: ${
                 euiTheme.colors.lightestShade
               } !important; // sass-lint:disable-line no-important
@@ -263,12 +264,15 @@ const SuggestionPreview = ({
                 transform: none !important; // sass-lint:disable-line no-important
               }
               `
-              : ''}
-            ${!wrapSuggestions
-              ? `
+                : ''
+            }
+            ${
+              !wrapSuggestions
+                ? `
                   width: 150px !important; // sass-lint:disable-line no-important
                 `
-              : ''}
+                : ''
+            }
           `}
           paddingSize="none"
           data-test-subj="lnsSuggestion"
@@ -680,8 +684,9 @@ export function SuggestionPanel({
           display: flex;
           padding-top: ${euiTheme.size.xs};
           padding-bottom: ${wrapSuggestions ? euiTheme.size.base : 0};
-          ${!wrapSuggestions
-            ? `
+          ${
+            !wrapSuggestions
+              ? `
                 mask-image: linear-gradient(
                   to right,
                   ${dangerAlpha10} 0%,
@@ -690,7 +695,8 @@ export function SuggestionPanel({
                   ${dangerAlpha10} 100%
                 );
               `
-            : ''}
+              : ''
+          }
         `}
       >
         {changesApplied ? renderSuggestionsUI() : renderApplyChangesPrompt()}

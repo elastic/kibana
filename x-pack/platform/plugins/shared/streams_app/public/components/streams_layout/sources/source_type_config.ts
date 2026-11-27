@@ -254,7 +254,10 @@ EOF`,
 
 export const SOURCE_TYPE_CONFIG_BY_TYPE = SOURCE_TYPE_CONFIGS.reduce<
   Record<SourceType, SourceTypeConfig>
->((configs, config) => {
-  configs[config.type] = config;
-  return configs;
-}, {} as Record<SourceType, SourceTypeConfig>);
+>(
+  (configs, config) => {
+    configs[config.type] = config;
+    return configs;
+  },
+  {} as Record<SourceType, SourceTypeConfig>
+);

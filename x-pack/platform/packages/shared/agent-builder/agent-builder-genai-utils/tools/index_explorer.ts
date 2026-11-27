@@ -357,7 +357,7 @@ export const indexExplorer = async ({
   const aliasCount = sources.aliases.length;
   const dataStreamCount = sources.data_streams.length;
   const datasetCount = includeDatasets ? sources.datasets.length : 0;
-  const viewCount = includeViews ? sources.views?.length ?? 0 : 0;
+  const viewCount = includeViews ? (sources.views?.length ?? 0) : 0;
   const totalCount = indexCount + aliasCount + dataStreamCount + datasetCount + viewCount;
 
   logger?.trace(
@@ -372,7 +372,7 @@ export const indexExplorer = async ({
         ...sources.aliases,
         ...sources.data_streams,
         ...(includeDatasets ? sources.datasets : []),
-        ...(includeViews ? sources.views ?? [] : []),
+        ...(includeViews ? (sources.views ?? []) : []),
       ].map((resource) => {
         return {
           type: resource.type,

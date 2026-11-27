@@ -492,7 +492,7 @@ export class CRUDClient {
                 status: value.status,
                 type: value.error?.type,
                 reason: value.error?.reason,
-              } as BulkObjectResponse)
+              }) as BulkObjectResponse
           )
       : [];
 

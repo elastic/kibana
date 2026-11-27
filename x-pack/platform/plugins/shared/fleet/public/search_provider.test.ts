@@ -649,7 +649,7 @@ describe('Package search provider', () => {
             title,
             version: '1.0.0',
             ...extra,
-          } as GetPackagesResponse['items'][number]);
+          }) as GetPackagesResponse['items'][number];
 
         const packages = [
           makePackage('aws', 'AWS', {

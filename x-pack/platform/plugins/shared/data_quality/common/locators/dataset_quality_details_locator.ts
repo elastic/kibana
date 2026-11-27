@@ -11,9 +11,7 @@ import { DATA_QUALITY_DETAILS_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import type { DataQualityLocatorDependencies } from './types';
 import { constructDatasetQualityDetailsLocatorPath } from './construct_dataset_quality_details_locator_path';
 
-export class DatasetQualityDetailsLocatorDefinition
-  implements LocatorDefinition<DataQualityDetailsLocatorParams>
-{
+export class DatasetQualityDetailsLocatorDefinition implements LocatorDefinition<DataQualityDetailsLocatorParams> {
   public readonly id = DATA_QUALITY_DETAILS_LOCATOR_ID;
 
   constructor(protected readonly deps: DataQualityLocatorDependencies) {}

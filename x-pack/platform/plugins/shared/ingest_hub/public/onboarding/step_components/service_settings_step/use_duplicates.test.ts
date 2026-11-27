@@ -52,7 +52,7 @@ const setup = ({
           enabledDataStreams: [],
           varsByDataStream: {},
           namespace: duplicateNamespace,
-        } as ServiceVars),
+        }) as ServiceVars,
       addDuplicate: jest.fn(),
       integrationName: 'aws-1',
       globalNamespace,

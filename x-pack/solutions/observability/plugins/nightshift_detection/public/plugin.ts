@@ -31,9 +31,12 @@ export interface NightshiftDetectionStartDependencies {
  * is true, so the page exists only where the engine does; `visibleIn: []` keeps it out of the nav
  * and search, so it is reached by URL only.
  */
-export class NightshiftDetectionPlugin
-  implements Plugin<void, void, object, NightshiftDetectionStartDependencies>
-{
+export class NightshiftDetectionPlugin implements Plugin<
+  void,
+  void,
+  object,
+  NightshiftDetectionStartDependencies
+> {
   constructor(private readonly context: PluginInitializerContext) {}
 
   public setup(core: CoreSetup<NightshiftDetectionStartDependencies>): void {

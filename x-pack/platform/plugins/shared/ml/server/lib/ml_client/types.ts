@@ -42,8 +42,10 @@ export interface MlInferTrainedModelRequest extends estypes.MlInferTrainedModelR
 }
 
 // @ts-expect-error TODO: fix after elasticsearch-js bump
-export interface MlClient
-  extends Omit<OrigMlClient, 'stopTrainedModelDeployment' | 'inferTrainedModel'> {
+export interface MlClient extends Omit<
+  OrigMlClient,
+  'stopTrainedModelDeployment' | 'inferTrainedModel'
+> {
   anomalySearch: ReturnType<typeof searchProvider>['anomalySearch'];
   updateTrainedModelDeployment: (
     payload: UpdateTrainedModelDeploymentRequest

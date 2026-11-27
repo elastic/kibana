@@ -62,7 +62,7 @@ const setBoundingRect = (
       y: top,
       width: right - left,
       height: bottom - top,
-    } as DOMRect);
+    }) as DOMRect;
 };
 
 const click = (target: Element, { ctrlKey = false, clientX = 0, clientY = 0 } = {}) => {

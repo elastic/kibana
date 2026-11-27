@@ -29,7 +29,7 @@ export type StepExposure = 'open' | 'internal' | 'managed_only';
 export interface CommonStepDefinition<
   InputSchema extends z.ZodType = z.ZodType,
   OutputSchema extends z.ZodType = z.ZodType,
-  ConfigSchema extends z.ZodObject = z.ZodObject
+  ConfigSchema extends z.ZodObject = z.ZodObject,
 > extends BaseStepDefinition<InputSchema, OutputSchema, ConfigSchema> {
   /** Which workflows the step is meant for. Defaults to `open`. See {@link StepExposure}. */
   exposure?: StepExposure;

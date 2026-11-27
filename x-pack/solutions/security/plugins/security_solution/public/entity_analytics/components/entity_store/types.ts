@@ -6,7 +6,7 @@
  */
 
 export enum EntitySourceTag {
-  'risk' = 'Risk',
-  'criticality' = 'Asset Criticality',
-  'events' = 'Events',
+  risk = 'Risk',
+  criticality = 'Asset Criticality',
+  events = 'Events',
 }

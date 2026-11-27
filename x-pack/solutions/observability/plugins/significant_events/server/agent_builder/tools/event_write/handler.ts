@@ -261,7 +261,7 @@ const decideStatuses = ({
       SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS.some((status) => status === latest.status);
     const signals =
       input.event_id === undefined || !isLive
-        ? input.signals ?? []
+        ? (input.signals ?? [])
         : mergeSignalsLatestPerRule(episodeHistory(priorDocs), input.signals ?? [], timestamp);
     const outcome = assessMembers(signals);
     const decision = decideLifecycle({
@@ -499,7 +499,7 @@ const holdDeactivatedReopens = async ({
     // read, since the closing version only copies the agent's last note. With no user deactivate
     // and a completed lookup, the closing version's note is the operator's, from the update route.
     // A failed lookup proves nothing, so it holds nothing.
-    const fullNote = (action ? action.reason : lookupFailed ? '' : closingNote ?? '').trim();
+    const fullNote = (action ? action.reason : lookupFailed ? '' : (closingNote ?? '')).trim();
     const note = fullNote.slice(0, MAX_HELD_NOTE_LENGTH);
     const truncated = fullNote.length > MAX_HELD_NOTE_LENGTH;
     // A close that says nothing gives the agent nothing to read, and neither does the automatic close

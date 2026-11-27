@@ -43,7 +43,7 @@ const toPayload = (
     groupHash,
     status,
     previousStatus,
-    severity: status === ALERT_EPISODE_STATUS.INACTIVE ? null : storedSeverity ?? null,
+    severity: status === ALERT_EPISODE_STATUS.INACTIVE ? null : (storedSeverity ?? null),
   },
   rule: { id: rule.id, name: rule.metadata.name, tags: [...(rule.metadata.tags ?? [])] },
   execution: { executionId, scheduledAt },

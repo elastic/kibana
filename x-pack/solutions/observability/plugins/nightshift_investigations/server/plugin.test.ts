@@ -37,7 +37,7 @@ const createSetupDeps = () =>
   ({
     share: { url: new MockUrlService() },
     taskManager: taskManagerMock.createSetup(),
-  } as unknown as NightshiftInvestigationsSetupDeps);
+  }) as unknown as NightshiftInvestigationsSetupDeps;
 
 describe('NightshiftInvestigationsPlugin setup', () => {
   it('registers the investigator and the assistant without connectors of their own', async () => {

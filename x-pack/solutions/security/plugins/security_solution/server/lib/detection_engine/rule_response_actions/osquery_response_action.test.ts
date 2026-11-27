@@ -22,7 +22,7 @@ const createMockAlert = (overrides: Partial<AlertWithAgent> = {}): AlertWithAgen
       space_ids: [DEFAULT_SPACE_ID],
     },
     ...overrides,
-  } as AlertWithAgent);
+  }) as AlertWithAgent;
 
 const createMockService = () => ({
   create: jest.fn().mockResolvedValue({}),

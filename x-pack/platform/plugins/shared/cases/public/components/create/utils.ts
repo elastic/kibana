@@ -148,7 +148,7 @@ export const createFormSerializer = (
     settings: {
       syncAlerts: syncAlerts ?? false,
       extractObservables: canStoreExtractObservablesTrue(currentConfiguration.owner)
-        ? extractObservables ?? getSpaceExtractObservables(currentConfiguration)
+        ? (extractObservables ?? getSpaceExtractObservables(currentConfiguration))
         : false,
     },
     owner: currentConfiguration.owner,
@@ -163,4 +163,4 @@ export const createFormSerializer = (
 export const getOwnerDefaultValue = (availableOwners: string[]) =>
   availableOwners.includes(GENERAL_CASES_OWNER)
     ? GENERAL_CASES_OWNER
-    : availableOwners[0] ?? GENERAL_CASES_OWNER;
+    : (availableOwners[0] ?? GENERAL_CASES_OWNER);

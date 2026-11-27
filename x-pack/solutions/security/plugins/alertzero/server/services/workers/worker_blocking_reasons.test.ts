@@ -14,7 +14,7 @@ import { createGetWorkerBlockingReasons } from './worker_blocking_reasons';
 const request = {} as KibanaRequest;
 
 const searchInferenceEndpointsReturning = (getForFeature: jest.Mock) =>
-  ({ endpoints: { getForFeature } } as unknown as SearchInferenceEndpointsPluginStart);
+  ({ endpoints: { getForFeature } }) as unknown as SearchInferenceEndpointsPluginStart;
 
 describe('createGetWorkerBlockingReasons', () => {
   it('has no reasons when the parent feature resolves at least one endpoint, in default mode', async () => {

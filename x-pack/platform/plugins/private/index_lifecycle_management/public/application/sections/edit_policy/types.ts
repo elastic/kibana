@@ -70,11 +70,7 @@ interface HotPhaseMetaFields extends ForcemergeFields, ShrinkFields, DownsampleF
 }
 
 interface WarmPhaseMetaFields
-  extends DataAllocationMetaFields,
-    MinAgeField,
-    ForcemergeFields,
-    ShrinkFields,
-    DownsampleFields {
+  extends DataAllocationMetaFields, MinAgeField, ForcemergeFields, ShrinkFields, DownsampleFields {
   enabled: boolean;
   warmPhaseOnRollover: boolean;
   readonlyEnabled: boolean;

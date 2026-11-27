@@ -19,7 +19,7 @@ const buildState = (timeline: Record<string, unknown>): State =>
         [timelineId]: timeline,
       },
     },
-  } as unknown as State);
+  }) as unknown as State;
 
 const enabledFilter = {
   meta: { disabled: false },

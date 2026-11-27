@@ -79,7 +79,7 @@ const createCoreStart = (spaces: SpaceFixture[]) =>
         }),
       }),
     },
-  } as unknown as CoreStart);
+  }) as unknown as CoreStart;
 
 const createEntityStore = (spaces: SpaceFixture[]) =>
   ({
@@ -90,7 +90,7 @@ const createEntityStore = (spaces: SpaceFixture[]) =>
         lastSuccessTimestamp: null,
       },
     ]),
-  } as unknown as EntityStoreStartContract);
+  }) as unknown as EntityStoreStartContract;
 
 const runTask = (spaces: SpaceFixture[], state = defaultState, logger = loggerMock.create()) =>
   runBackfillTask({

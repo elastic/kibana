@@ -87,8 +87,8 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnector
           currentStep === index
             ? 'current'
             : currentStep > index
-            ? 'complete'
-            : ('incomplete' as EuiStepStatus),
+              ? 'complete'
+              : ('incomplete' as EuiStepStatus),
       };
     });
     setStatus(statuses.reduce((acc: Record<string, EuiStepStatus>, i) => ({ ...acc, ...i }), {}));
@@ -125,10 +125,10 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnector
         nextStep === 2
           ? fields.step1
           : nextStep === 3
-          ? [...fields.step1, ...fields.step2]
-          : nextStep === 4
-          ? [...fields.step1, ...fields.step2, ...fields.step3]
-          : [];
+            ? [...fields.step1, ...fields.step2]
+            : nextStep === 4
+              ? [...fields.step1, ...fields.step2, ...fields.step3]
+              : [];
 
       return fieldsToValidate;
     },

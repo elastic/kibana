@@ -145,8 +145,8 @@ const buildNoHitClosureSummary = ({
     const unsearchedClause = nothingSearched
       ? ', but no search ran'
       : retired
-      ? ', but part of the report could not be searched'
-      : '';
+        ? ', but part of the report could not be searched'
+        : '';
     return `${found}${unsearchedClause}. Leaving the Investigation open: ${held}`;
   }
   if (!retired) {

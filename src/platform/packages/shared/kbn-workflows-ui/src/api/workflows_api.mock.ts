@@ -58,4 +58,4 @@ export const createMockWorkflowApi = (): MockWorkflowApi =>
     installTemplate: jest.fn(),
     installTemplateFromYaml: jest.fn(),
     createWorkflowFromTemplateRemix: jest.fn(),
-  } as unknown as MockWorkflowApi);
+  }) as unknown as MockWorkflowApi;

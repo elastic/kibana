@@ -25,6 +25,7 @@ dependsOn:
   - '@kbn/repo-packages'
   - '@kbn/projects-solutions-groups'
   - '@kbn/licensing-types'
+  - '@kbn/oxfmt'
 tags:
   - shared-common
   - package

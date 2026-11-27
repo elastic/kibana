@@ -14,9 +14,11 @@ export const pageTimingMeasurements = (summary: PageStepTimingsSummary): Measure
     timing: (['firstPage', 'laterPages'] as const).flatMap((name) =>
       groupMeasurements(name, summary[name])
     ),
-    counter: Object.entries(summary.counters).map(
-      ([name, value]): Measurement => ({ name, value, unit: 'count' })
-    ),
+    counter: Object.entries(summary.counters).map(([name, value]): Measurement => ({
+      name,
+      value,
+      unit: 'count',
+    })),
     paging:
       summary.stamped === undefined
         ? []
@@ -40,13 +42,11 @@ export const runHealthMeasurements = (health: RunHealthSummary): Measurement[] =
     ],
     eventLoop: [
       { name: 'process.eventLoop.utilization', value: health.eventLoop.utilization, unit: 'ratio' },
-      ...Object.entries(health.eventLoop.delayMs).map(
-        ([name, value]): Measurement => ({
-          name: `process.eventLoop.delay.${name}`,
-          value,
-          unit: 'ms',
-        })
-      ),
+      ...Object.entries(health.eventLoop.delayMs).map(([name, value]): Measurement => ({
+        name: `process.eventLoop.delay.${name}`,
+        value,
+        unit: 'ms',
+      })),
     ],
     gc: [
       { name: 'process.gc.count', value: health.gc.count, unit: 'count' },
@@ -56,9 +56,11 @@ export const runHealthMeasurements = (health: RunHealthSummary): Measurement[] =
       { name: 'concurrentRunsAtStart', value: health.concurrentRunsAtStart, unit: 'count' },
     ],
     memory: (['heapMb', 'rssMb', 'externalMb', 'arrayBuffersMb'] as const).flatMap((name) =>
-      Object.entries(health[name]).map(
-        ([point, value]): Measurement => ({ name: `process.${name}.${point}`, value, unit: 'MiBy' })
-      )
+      Object.entries(health[name]).map(([point, value]): Measurement => ({
+        name: `process.${name}.${point}`,
+        value,
+        unit: 'MiBy',
+      }))
     ),
   } satisfies Record<string, Measurement[]>;
   return measurements.memory.concat(

@@ -27,7 +27,7 @@ const createTaskWithSchedule = (
   id: string,
   schedule: unknown,
   status = 'idle'
-): ConcreteTaskInstance => ({ id, status, schedule } as unknown as ConcreteTaskInstance);
+): ConcreteTaskInstance => ({ id, status, schedule }) as unknown as ConcreteTaskInstance;
 
 const createTask = (id: string, interval: string, status = 'idle'): ConcreteTaskInstance =>
   createTaskWithSchedule(id, { interval }, status);

@@ -43,7 +43,7 @@ const asResponse = (mock: MockResponse): Response =>
     ok: mock.status >= 200 && mock.status < 300,
     json: mock.json ?? (async () => ({})),
     body: mock.body ?? null,
-  } as unknown as Response);
+  }) as unknown as Response;
 
 describe('deductive_client', () => {
   describe('createDeductiveSession', () => {

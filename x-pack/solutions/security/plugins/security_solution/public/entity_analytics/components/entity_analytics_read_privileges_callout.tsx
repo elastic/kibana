@@ -120,14 +120,12 @@ const getIndexMissingReadPrivileges = (
     : new Set(['read']);
 
   return Object.entries(index ?? {})
-    .map(
-      ([indexName, privs]): MissingIndexPrivileges => [
-        indexName,
-        Object.entries(privs)
-          .filter(([priv, authorized]) => !authorized && relevantPrivileges.has(priv))
-          .map(([priv]) => priv),
-      ]
-    )
+    .map(([indexName, privs]): MissingIndexPrivileges => [
+      indexName,
+      Object.entries(privs)
+        .filter(([priv, authorized]) => !authorized && relevantPrivileges.has(priv))
+        .map(([priv]) => priv),
+    ])
     .filter(([, missingPrivs]) => missingPrivs.length > 0);
 };
 

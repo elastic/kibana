@@ -236,7 +236,7 @@ export const getInlinePanelKindGuidance = (): string =>
 /** The resolution request of the kind with the given type. */
 type RequestForType<
   Type extends RequestPanelType,
-  Request = PanelResolutionRequest
+  Request = PanelResolutionRequest,
 > = Request extends { type: infer Types } ? (Type extends Types ? Request : never) : never;
 
 /**

@@ -252,7 +252,7 @@ export async function updateManagedIntegrationsPolicy(
     undefined,
     cloudConnector
       ? undefined
-      : authenticateAndDeployStep.existingSecretRefs ?? detectSecretRefs(existingGetResult.item),
+      : (authenticateAndDeployStep.existingSecretRefs ?? detectSecretRefs(existingGetResult.item)),
     getPolicyVarSettingsUpdate(policySettings, 'managed_integration', pkgVarNames)
   );
 

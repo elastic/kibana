@@ -395,7 +395,7 @@ describe('useAgentBasedDeploy — SO persistence', () => {
 
   describe('saving the instances with the deployment', () => {
     const service = (id: string) =>
-      ({ id, name: `${id} name`, showInUI: true } as unknown as AwsServiceMatrixEntry);
+      ({ id, name: `${id} name`, showInUI: true }) as unknown as AwsServiceMatrixEntry;
     const savedDuplicate = {
       instanceId: 'serviceA__dup-1',
       serviceId: 'serviceA',

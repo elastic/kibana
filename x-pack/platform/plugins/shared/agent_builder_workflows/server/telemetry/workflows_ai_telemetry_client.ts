@@ -25,7 +25,10 @@ export class WorkflowsAiTelemetryClient {
   private static readonly CONVERSATION_MAP_CAP = 1000;
   private lastValidationFailed = new Map<string, boolean>();
 
-  constructor(private readonly analytics: AnalyticsServiceSetup, private readonly logger: Logger) {
+  constructor(
+    private readonly analytics: AnalyticsServiceSetup,
+    private readonly logger: Logger
+  ) {
     analytics.registerEventType({
       eventType: WORKFLOWS_AI_EDIT_RESULT_EVENT_TYPE,
       schema: workflowsAiEditResultSchema,

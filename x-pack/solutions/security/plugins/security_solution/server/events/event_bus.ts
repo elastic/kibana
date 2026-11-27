@@ -22,7 +22,7 @@ import type {
 } from './types';
 
 export type SecuritySolutionEventBusListener<
-  TType extends SecuritySolutionDomainEventType = SecuritySolutionDomainEventType
+  TType extends SecuritySolutionDomainEventType = SecuritySolutionDomainEventType,
 > = (event: SecuritySolutionEventPayload<TType>) => void | Promise<void>;
 
 export class SecuritySolutionEventBus extends EventEmitter {

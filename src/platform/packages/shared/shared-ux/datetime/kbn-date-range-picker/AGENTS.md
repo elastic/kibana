@@ -18,11 +18,12 @@ Before running `node`/`pnpm` commands in agent shells, load nvm in the same comm
 # Unit tests
 pnpm test:jest src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker
 
-# Lint (ESLint) — check
-node scripts/eslint.js src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker
+# Lint (oxlint) — check
+node scripts/lint src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker
 
-# Lint (ESLint) + Format (Prettier) — fix
-node scripts/eslint.js --fix src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker
+# Lint (oxlint) + Format (oxfmt) — fix
+node scripts/lint --fix src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker
+node scripts/oxfmt src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker
 
 # Check types
 pnpm test:type_check --project src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/tsconfig.json

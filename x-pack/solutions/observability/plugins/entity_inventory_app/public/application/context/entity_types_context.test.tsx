@@ -22,12 +22,11 @@ const createClientMock = (
 
 const createWrapper =
   (inventoryApi: EntityInventoryApiClient) =>
-  ({ children }: { children: React.ReactNode }) =>
-    (
-      <KibanaContextProvider services={createAppServicesMock({ inventoryApi })}>
-        <EntityTypesProvider>{children}</EntityTypesProvider>
-      </KibanaContextProvider>
-    );
+  ({ children }: { children: React.ReactNode }) => (
+    <KibanaContextProvider services={createAppServicesMock({ inventoryApi })}>
+      <EntityTypesProvider>{children}</EntityTypesProvider>
+    </KibanaContextProvider>
+  );
 
 const renderUseEntityTypes = (inventoryApi: EntityInventoryApiClient) =>
   renderHook(() => useEntityTypes(), { wrapper: createWrapper(inventoryApi) });

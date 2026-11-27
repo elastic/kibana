@@ -132,12 +132,16 @@ export const AddToExistingEscalationForm = memo<AddToExistingEscalationFormProps
                   paddingSize="m"
                   css={css`
                     margin-bottom: ${euiTheme.size.s};
-                    ${isRowDisabled(escalation)
-                      ? `cursor: not-allowed; opacity: 0.6;`
-                      : `cursor: pointer;`}
-                    ${selectedId === escalation.id
-                      ? `border-color: ${euiTheme.colors.primary};`
-                      : ''}
+                    ${
+                      isRowDisabled(escalation)
+                        ? `cursor: not-allowed; opacity: 0.6;`
+                        : `cursor: pointer;`
+                    }
+                    ${
+                      selectedId === escalation.id
+                        ? `border-color: ${euiTheme.colors.primary};`
+                        : ''
+                    }
                   `}
                   onClick={() => !isRowDisabled(escalation) && setSelectedId(escalation.id)}
                   data-test-subj={`escalationModalEscalation-${escalation.id}`}

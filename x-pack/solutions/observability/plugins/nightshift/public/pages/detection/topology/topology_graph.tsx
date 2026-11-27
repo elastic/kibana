@@ -145,9 +145,11 @@ const TopologyNode = ({
           text-align: left;
           cursor: pointer;
           color: ${euiTheme.colors.textParagraph};
-          background: ${viewNode.unresolved
-            ? euiTheme.colors.backgroundBaseWarning
-            : euiTheme.colors.backgroundBasePlain};
+          background: ${
+            viewNode.unresolved
+              ? euiTheme.colors.backgroundBaseWarning
+              : euiTheme.colors.backgroundBasePlain
+          };
           border: ${euiTheme.border.thin};
           border-style: ${viewNode.unresolved ? 'dashed' : 'solid'};
           border-radius: ${euiTheme.border.radius.medium};
@@ -245,17 +247,15 @@ export function TopologyGraph({
   const flowNodes = useMemo(
     () =>
       layoutNodes(
-        model.nodes.map(
-          (viewNode): TopologyFlowNode => ({
-            id: viewNode.id,
-            type: 'topology',
-            position: { x: 0, y: 0 },
-            data: {
-              viewNode,
-              onSelect: (selection) => onSelect(selection),
-            },
-          })
-        ),
+        model.nodes.map((viewNode): TopologyFlowNode => ({
+          id: viewNode.id,
+          type: 'topology',
+          position: { x: 0, y: 0 },
+          data: {
+            viewNode,
+            onSelect: (selection) => onSelect(selection),
+          },
+        })),
         flowEdges
       ),
     [flowEdges, model.nodes, onSelect]
@@ -270,7 +270,7 @@ export function TopologyGraph({
         '--xy-controls-button-color': euiTheme.colors.textParagraph,
         '--xy-controls-button-color-hover': euiTheme.colors.textParagraph,
         '--xy-controls-button-border-color': euiTheme.colors.borderBasePlain,
-      } as React.CSSProperties),
+      }) as React.CSSProperties,
     [euiTheme]
   );
 

@@ -28,8 +28,8 @@ export interface PublishesEsql {
 export const apiPublishesEsql = (unknownApi: unknown): unknownApi is PublishesEsql =>
   Boolean(
     unknownApi &&
-      (unknownApi as PublishesEsql)?.esql$ !== undefined &&
-      (unknownApi as PublishesEsql)?.approximationApplied$ !== undefined
+    (unknownApi as PublishesEsql)?.esql$ !== undefined &&
+    (unknownApi as PublishesEsql)?.approximationApplied$ !== undefined
   );
 
 export function useHasEsqlPanel(parentApi: unknown): boolean {

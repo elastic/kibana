@@ -22,7 +22,7 @@ import { presentPolicyError } from '../../../../endpoint/services/policy_managem
 
 interface CreatePolicyToolOptions<
   TSchema extends z.ZodObject<z.ZodRawShape>,
-  TResult extends Record<string, unknown>
+  TResult extends Record<string, unknown>,
 > {
   endpointAppContextService: EndpointAppContextService;
   id: string;
@@ -39,7 +39,7 @@ interface CreatePolicyToolOptions<
 
 export const createPolicyTool = <
   TSchema extends z.ZodObject<z.ZodRawShape>,
-  TResult extends Record<string, unknown>
+  TResult extends Record<string, unknown>,
 >({
   endpointAppContextService,
   id,

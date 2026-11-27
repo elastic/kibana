@@ -129,8 +129,8 @@ export default function Embeddable(props: ExploratoryEmbeddableComponentProps) {
     queryName: series
       ? `${series.dataType}_${series.name}`
       : typeof title === 'string'
-      ? title
-      : 'Exp View embeddable query',
+        ? title
+        : 'Exp View embeddable query',
   });
 
   const actions = useActions({
@@ -281,8 +281,8 @@ const Wrapper = styled.div<{
           props.align === 'left'
             ? `flex-start;`
             : props.align === 'right'
-            ? `flex-end;`
-            : 'center;'};
+              ? `flex-end;`
+              : 'center;'};
       }
       justify-content: flex-end;
       &__container {

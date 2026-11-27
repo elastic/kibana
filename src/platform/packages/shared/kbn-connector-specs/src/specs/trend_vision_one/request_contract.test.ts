@@ -249,10 +249,10 @@ describe('TrendAI Vision One requests match the recorded vendor spec', () => {
         ...(data instanceof FormData
           ? []
           : Array.isArray(data)
-          ? data
-          : data
-          ? [data]
-          : []
+            ? data
+            : data
+              ? [data]
+              : []
         ).flatMap((item: Record<string, unknown>) =>
           Object.entries(item).map(([key, value]): ['body', string, unknown] => [
             'body',

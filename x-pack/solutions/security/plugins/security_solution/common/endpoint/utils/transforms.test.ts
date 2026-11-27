@@ -38,7 +38,7 @@ const createEsClient = (
       startTransform,
     },
     search: search ?? jest.fn().mockResolvedValue(metadataSearchResult(1)),
-  } as unknown as Client);
+  }) as unknown as Client;
 
 describe('startMetadataTransforms', () => {
   it('treats a transform task that already exists as already started', async () => {

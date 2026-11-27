@@ -55,9 +55,9 @@ describe('getIndicesForProductNames', () => {
       '.kibana_ai_product_doc_kibana-.multilingual-e5-small-elasticsearch',
       '.kibana_ai_product_doc_elasticsearch-.multilingual-e5-small-elasticsearch',
     ]);
-    expect(getIndicesForProductNames(['kibana', 'elasticsearch'], '.anyInferenceId')).toEqual([
-      '.kibana_ai_product_doc_kibana-.anyInferenceId',
-      '.kibana_ai_product_doc_elasticsearch-.anyInferenceId',
+    expect(getIndicesForProductNames(['kibana', 'elasticsearch'], '.any-inference-id')).toEqual([
+      '.kibana_ai_product_doc_kibana-.any-inference-id',
+      '.kibana_ai_product_doc_elasticsearch-.any-inference-id',
     ]);
   });
 });

@@ -10,9 +10,9 @@ import type { AgentPolicy, PackagePolicy } from '../types';
 import { policyHasFleetServer } from './agent_policies_helpers';
 
 const packagePolicy = (packageName: string) =>
-  ({ id: packageName, package: { name: packageName, title: packageName, version: '1.0.0' } } as
+  ({ id: packageName, package: { name: packageName, title: packageName, version: '1.0.0' } }) as
     | PackagePolicy
-    | PackagePolicy);
+    | PackagePolicy;
 
 const summary = (hasFleetServer: boolean): AgentPolicy['package_policies_summary'] => ({
   count: 1,

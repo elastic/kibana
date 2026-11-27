@@ -62,7 +62,7 @@ export const JourneyScreenshotDialog = ({
     timestamp,
   });
   const { url, loading, stepName, maxSteps } = imageResult?.[imgPath] ?? {};
-  const imgSrc = stepNumber === initialStepNumber ? initialImgSrc ?? url : url;
+  const imgSrc = stepNumber === initialStepNumber ? (initialImgSrc ?? url) : url;
 
   useEffect(() => {
     if (isOpen) {

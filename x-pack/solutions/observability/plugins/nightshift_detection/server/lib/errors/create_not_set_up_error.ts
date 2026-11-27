@@ -17,9 +17,9 @@ export function createNotSetUpError({
   return new EngineHttpError(
     serviceAccountsEnabled
       ? 'Nightshift is not set up in this space. A user with the manage_security cluster privilege and the Nightshift manage privilege must ' +
-        'set it up: POST /internal/nightshift/detection/service_account/_enable in this space.'
+          'set it up: POST /internal/nightshift/detection/service_account/_enable in this space.'
       : 'Nightshift is not set up in this space: service accounts are disabled in this deployment. ' +
-        'Set xpack.security.serviceAccounts.enabled: true, then set the space up.',
+          'Set xpack.security.serviceAccounts.enabled: true, then set the space up.',
     503
   );
 }

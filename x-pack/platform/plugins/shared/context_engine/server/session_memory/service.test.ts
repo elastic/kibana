@@ -298,7 +298,7 @@ describe('createSessionMemoryService', () => {
         id,
         '@timestamp': timestamp,
         ...overrides,
-      } as StoredSessionMemory);
+      }) as StoredSessionMemory;
     const input = {
       space: 'default',
       aiIndexId: 'ops-memory',

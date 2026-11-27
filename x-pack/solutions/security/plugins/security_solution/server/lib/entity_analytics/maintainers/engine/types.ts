@@ -252,8 +252,7 @@ interface StandardBuilderFields {
  * is also the entity.relationships key the parser writes to.
  */
 export interface StandardRelationshipIntegrationConfig
-  extends RelationshipIntegrationBase,
-    StandardBuilderFields {
+  extends RelationshipIntegrationBase, StandardBuilderFields {
   kind: 'standard';
   relationshipKey: EntityRelationshipKey;
 }
@@ -265,8 +264,7 @@ export interface StandardRelationshipIntegrationConfig
  * `relationshipKey` is required.
  */
 export interface BucketedRelationshipIntegrationConfig
-  extends RelationshipIntegrationBase,
-    StandardBuilderFields {
+  extends RelationshipIntegrationBase, StandardBuilderFields {
   kind: 'bucketed';
   bucketTargetByThreshold: BucketTargetByThresholdConfig;
 }

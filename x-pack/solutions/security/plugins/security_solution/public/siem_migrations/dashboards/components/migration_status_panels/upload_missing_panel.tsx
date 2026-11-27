@@ -55,8 +55,7 @@ export const DashboardMigrationsUploadMissingPanel =
 
 DashboardMigrationsUploadMissingPanel.displayName = 'DashboardMigrationsUploadMissingPanel';
 
-interface DashboardMigrationsUploadMissingPanelContentProps
-  extends DashboardMigrationsUploadMissingPanelProps {
+interface DashboardMigrationsUploadMissingPanelContentProps extends DashboardMigrationsUploadMissingPanelProps {
   missingResources: SiemMigrationResourceBase[];
 }
 const DashboardMigrationsUploadMissingPanelContent =

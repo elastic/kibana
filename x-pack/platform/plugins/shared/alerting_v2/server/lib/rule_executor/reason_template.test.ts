@@ -288,7 +288,7 @@ describe('buildDataContext', () => {
 });
 
 describe('applyReasons', () => {
-  const createEvent = (data: Record<string, unknown>) => ({ data } as AlertEventDocument);
+  const createEvent = (data: Record<string, unknown>) => ({ data }) as AlertEventDocument;
   const renderer = (renderRow: ReasonRenderer['render']): ReasonRenderer => ({
     render: renderRow,
   });

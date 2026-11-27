@@ -105,7 +105,7 @@ function visitRange(functionNode: KqlFunctionNode, context: Record<string, any>)
   const [leftRangeLiteral, operator, rightRangeLiteral] = functionNode.arguments as [
     KqlLiteralNode,
     string,
-    KqlLiteralNode
+    KqlLiteralNode,
   ];
 
   const { value: leftRangeValue, pathExists } = readContextPath(leftRangeLiteral.value, context);

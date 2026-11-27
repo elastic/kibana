@@ -132,7 +132,7 @@ const getRollupTotals = async (esClient: EsClient, sloId: string): Promise<Rollu
   const { total } = response.hits;
 
   return {
-    docCount: typeof total === 'number' ? total : total?.value ?? 0,
+    docCount: typeof total === 'number' ? total : (total?.value ?? 0),
     numerator: response.aggregations?.numerator.value ?? 0,
     denominator: response.aggregations?.denominator.value ?? 0,
     goodSlices: response.aggregations?.goodSlices.value ?? 0,

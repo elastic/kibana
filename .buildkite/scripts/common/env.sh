@@ -11,6 +11,8 @@ export XPACK_DIR="$KIBANA_DIR/x-pack"
 export CACHE_DIR="$HOME/.kibana"
 export ES_CACHE_DIR="$HOME/.es-snapshot-cache"
 export NODE_CACHE_DIR="${NODE_CACHE_DIR:-$HOME/.cache/node}"
+# Keep the pnpm store in the workspace; the agent image cache and bootstrap.sh expect it there
+export pnpm_config_store_dir="$KIBANA_DIR/.pnpm-store"
 PARENT_DIR="$(cd "$KIBANA_DIR/.."; pwd)"
 export PARENT_DIR
 export WORKSPACE="${WORKSPACE:-$PARENT_DIR}"

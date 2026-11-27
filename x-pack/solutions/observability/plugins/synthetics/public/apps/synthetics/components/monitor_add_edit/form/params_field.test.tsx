@@ -50,7 +50,7 @@ const toMonitor = (params: unknown): SyntheticsMonitor =>
     [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.BROWSER,
     [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.MULTISTEP,
     [ConfigKey.PARAMS]: params,
-  } as unknown as SyntheticsMonitor);
+  }) as unknown as SyntheticsMonitor;
 
 const ParamsForm = ({
   formRef,

@@ -3448,7 +3448,7 @@ describe('EditOutputFlyout', () => {
               endpoint,
               sending_queue: { enabled: true, sizer: 'items', queue_size: 1000, batch: {} },
             },
-          } as Output);
+          }) as Output;
 
         it('should compare it with the queue size on an endpoint that is not managed', () => {
           mockStartServices(false, 'https://managed.example.com');

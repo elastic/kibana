@@ -6,7 +6,10 @@
  */
 
 export class DeductiveError extends Error {
-  constructor(message: string, public readonly statusCode?: number) {
+  constructor(
+    message: string,
+    public readonly statusCode?: number
+  ) {
     super(message);
     this.name = 'DeductiveError';
   }

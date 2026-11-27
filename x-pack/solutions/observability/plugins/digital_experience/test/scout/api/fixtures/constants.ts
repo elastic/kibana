@@ -69,6 +69,12 @@ export const mobileCrashGroupsPath = (
     query
   );
 
+/** The app starts route of a mobile application in `TIME_RANGE`. */
+export const mobileAppStartsPath = (
+  serviceName: string,
+  query: Record<string, string> = {}
+): string => mobileRoutePath(serviceName, 'app_starts', query);
+
 export const APPLICATIONS_IN_TIME_RANGE_PATH = `${APPLICATIONS_PATH}?start=${TIME_RANGE.rangeFrom}&end=${TIME_RANGE.rangeTo}`;
 
 export const SESSIONS_ENABLE_PATH = 'internal/digital_experience/sessions/enable';

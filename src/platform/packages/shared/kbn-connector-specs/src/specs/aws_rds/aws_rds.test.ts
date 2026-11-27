@@ -28,7 +28,7 @@ describe('AwsRds', () => {
         ...config,
       },
       log: {},
-    } as unknown as ActionContext);
+    }) as unknown as ActionContext;
 
   const respondWithRows = (rows: unknown[], extra: Record<string, unknown> = {}) =>
     mockClient.post.mockResolvedValueOnce({

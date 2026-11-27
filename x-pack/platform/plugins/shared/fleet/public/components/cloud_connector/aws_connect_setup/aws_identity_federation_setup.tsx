@@ -620,8 +620,8 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
                       defaultMessage: 'Role ARN is required',
                     })
                   : roleArnFormatInvalid
-                  ? INVALID_ROLE_ARN_MESSAGE
-                  : undefined
+                    ? INVALID_ROLE_ARN_MESSAGE
+                    : undefined
               }
               fullWidth
             >
