@@ -14,11 +14,14 @@ export const EVIDENCE_MAX_CELL_LENGTH = 500;
 /** How long one evidence query may run, in milliseconds, before it is reported as timed out. */
 export const EVIDENCE_TIMEOUT_MS = 20_000;
 
+/** The longest error message that is kept, in UTF-16 code units. */
+export const EVIDENCE_MAX_MESSAGE_LENGTH = 500;
+
 /**
  * Why an evidence query gave no result. Closed so the judge's case and the activity log can tell the
  * three apart without parsing a message.
- * - `query_failed`: Elasticsearch rejected the query, a shard failed, or the response had no rows
- *   or columns to read. A shard failure is an error, never a result with fewer rows.
+ * - `query_failed`: Elasticsearch rejected the query, a shard failed, or the response was missing
+ *   its `columns` or `values`. A shard failure is an error, never a result with fewer rows.
  * - `timeout`: the query ran longer than its timeout.
  * - `aborted`: the caller's signal fired, for example because the run ended.
  */
@@ -51,7 +54,11 @@ export interface FoundEvidence {
   cells_truncated: boolean;
 }
 
-/** The query ran and returned no rows: a real negative, unlike an error. */
+/**
+ * The query ran and returned nothing to read: no rows, or rows whose every cell was null (an
+ * aggregate over no matches), which Elasticsearch returns with no columns. A real negative, unlike
+ * an error.
+ */
 export interface EmptyEvidence {
   result: 'empty';
 }
@@ -60,7 +67,10 @@ export interface EmptyEvidence {
 export interface ErroredEvidence {
   result: 'error';
   reason: EvidenceErrorReason;
-  /** What went wrong, for the activity log and the judge's case; at most 500 characters. */
+  /**
+   * What went wrong, for the activity log and the judge's case; at most
+   * {@link EVIDENCE_MAX_MESSAGE_LENGTH} code units.
+   */
   message: string;
 }
 

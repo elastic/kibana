@@ -8,11 +8,14 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { timeoutSignal } from '@kbn/std';
 import { getErrorMessage } from '../errors/get_error_message';
-import { EVIDENCE_MAX_CELL_LENGTH, EVIDENCE_MAX_ROWS, EVIDENCE_TIMEOUT_MS } from './evidence_types';
+import {
+  EVIDENCE_MAX_CELL_LENGTH,
+  EVIDENCE_MAX_MESSAGE_LENGTH,
+  EVIDENCE_MAX_ROWS,
+  EVIDENCE_TIMEOUT_MS,
+} from './evidence_types';
 import type { EvidenceCell, EvidenceResult, EvidenceRow } from './evidence_types';
 
-/** The longest error message that is kept. */
-const MAX_MESSAGE_LENGTH = 500;
 /** The largest delay `timeoutSignal` accepts; a larger one throws a `RangeError`. */
 const MAX_TIMEOUT_MS = 2 ** 31 - 1;
 
@@ -104,7 +107,8 @@ const toResult = (table: EsqlTable): EvidenceResult => {
       message: 'the response has no columns or no values',
     };
   }
-  if (values.length === 0) {
+  // With `drop_null_columns`, rows whose every cell is null come back with no columns at all.
+  if (values.length === 0 || columns.length === 0) {
     return { result: 'empty' };
   }
 
@@ -185,7 +189,7 @@ export const runEvidence = async ({
     return {
       result: 'error',
       reason: 'query_failed',
-      message: cutText(getErrorMessage(error), MAX_MESSAGE_LENGTH).text,
+      message: cutText(getErrorMessage(error), EVIDENCE_MAX_MESSAGE_LENGTH).text,
     };
   } finally {
     // So a query that settles early does not leave the deadline timer, or a listener, behind.

@@ -40,8 +40,6 @@ function hangUntilAborted(esClient: TestClient): void {
   );
 }
 
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 describe('runEvidence', () => {
   describe('found', () => {
     it('keeps the rows, keyed by column name, with neither flag set', async () => {
@@ -162,27 +160,22 @@ describe('runEvidence', () => {
   });
 
   describe('column names', () => {
-    it('keys a repeated name with the first unused suffix', async () => {
-      const esClient = createClient();
-      respondWith(esClient, table(['a', 'a'], [[1, 2]]));
-
-      const result = await runEvidence({ esClient, query: QUERY });
-
-      expect(result.result === 'found' && result.rows).toEqual([{ a: 1, a_2: 2 }]);
-    });
-
     it.each([
-      ['a, a_2, a', ['a', 'a_2', 'a'], ['a', 'a_2', 'a_3']],
-      ['a, a, a_2', ['a', 'a', 'a_2'], ['a', 'a_3', 'a_2']],
-    ])('never lets a suffix collide with a real column: %s', async (_title, names, keys) => {
-      const esClient = createClient();
-      respondWith(esClient, table(names, [[1, 2, 3]]));
+      ['a, a', ['a', 'a'], ['a', 'a_2'], [1, 2]],
+      ['a, a_2, a', ['a', 'a_2', 'a'], ['a', 'a_2', 'a_3'], [1, 2, 3]],
+      ['a, a, a_2', ['a', 'a', 'a_2'], ['a', 'a_3', 'a_2'], [1, 2, 3]],
+    ])(
+      'keys a repeated name with the first unused suffix, never a real column: %s',
+      async (_title, names, keys, values) => {
+        const esClient = createClient();
+        respondWith(esClient, table(names, [values]));
 
-      const result = await runEvidence({ esClient, query: QUERY });
+        const result = await runEvidence({ esClient, query: QUERY });
 
-      expect(result.result === 'found' && Object.keys(result.rows[0])).toEqual(keys);
-      expect(result.result === 'found' && Object.values(result.rows[0])).toEqual([1, 2, 3]);
-    });
+        expect(result.result === 'found' && Object.keys(result.rows[0])).toEqual(keys);
+        expect(result.result === 'found' && Object.values(result.rows[0])).toEqual(values);
+      }
+    );
 
     it('keeps a column named __proto__ as an ordinary key of the row', async () => {
       const esClient = createClient();
@@ -198,9 +191,13 @@ describe('runEvidence', () => {
   });
 
   describe('empty and malformed responses', () => {
-    it('reports no rows as empty', async () => {
+    it.each([
+      ['no rows', table(['message'], [])],
+      // What `drop_null_columns` returns for an aggregate over no matches, such as `STATS m = MAX(x)`.
+      ['rows whose every cell was null, so no column is left', table([], [[], []])],
+    ])('reports %s as empty', async (_title, response) => {
       const esClient = createClient();
-      respondWith(esClient, table(['message'], []));
+      respondWith(esClient, response);
 
       expect(await runEvidence({ esClient, query: QUERY })).toEqual({ result: 'empty' });
     });
@@ -328,24 +325,32 @@ describe('runEvidence', () => {
     });
 
     it('reports the abort when the caller aborted and the timeout fired too', async () => {
-      const esClient = createClient();
-      // Rejects only after both have fired, so the reason has to be picked between them.
-      esClient.esql.query.mockImplementation((async () => {
-        await wait(40);
-        throw new Error('socket closed');
-      }) as never);
-      const controller = new AbortController();
+      jest.useFakeTimers();
+      try {
+        const esClient = createClient();
+        // Rejects only after both have fired, so the reason has to be picked between them.
+        esClient.esql.query.mockImplementation(
+          (() =>
+            new Promise((_resolve, reject) => {
+              setTimeout(() => reject(new Error('socket closed')), 40);
+            })) as never
+        );
+        const controller = new AbortController();
 
-      const pending = runEvidence({
-        esClient,
-        query: QUERY,
-        abortSignal: controller.signal,
-        timeoutMs: 5,
-      });
-      await wait(20);
-      controller.abort();
+        const pending = runEvidence({
+          esClient,
+          query: QUERY,
+          abortSignal: controller.signal,
+          timeoutMs: 5,
+        });
+        await jest.advanceTimersByTimeAsync(20);
+        controller.abort();
+        await jest.advanceTimersByTimeAsync(40);
 
-      expect(await pending).toMatchObject({ result: 'error', reason: 'aborted' });
+        expect(await pending).toMatchObject({ result: 'error', reason: 'aborted' });
+      } finally {
+        jest.useRealTimers();
+      }
     });
 
     it('reports an abort-shaped error as query_failed when neither signal fired', async () => {
