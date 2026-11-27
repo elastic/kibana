@@ -5,16 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
@@ -88,38 +79,25 @@ export function ConfirmSourceActionModal({
   const { getTitle, body, confirmLabel } = ACTION_COPY[action];
 
   return (
-    <EuiModal
+    <EuiConfirmModal
       data-test-subj={`significantEventsAppSources-${action}-confirmModal`}
       aria-labelledby={titleId}
-      role="alertdialog"
-      onClose={onCancel}
-      maxWidth={448}
+      titleProps={{ id: titleId }}
+      title={getTitle(source.title)}
+      onCancel={onCancel}
+      onConfirm={onConfirm}
+      cancelButtonText={CANCEL_LABEL}
+      confirmButtonText={confirmLabel}
+      confirmButtonProps={getEbtProps({
+        action: NIGHTSHIFT_EBT_ACTIONS.CONFIRM_SOURCE_ACTION,
+        element: NIGHTSHIFT_EBT_ELEMENTS.SOURCE_ACTION_CONFIRM_MODAL,
+        detail: action,
+      })}
+      buttonColor="danger"
+      defaultFocusedButton="cancel"
+      isLoading={isLoading}
     >
-      <EuiModalHeader>
-        <EuiModalHeaderTitle id={titleId}>{getTitle(source.title)}</EuiModalHeaderTitle>
-      </EuiModalHeader>
-      <EuiModalBody>
-        <p>{body}</p>
-      </EuiModalBody>
-      <EuiModalFooter>
-        <EuiButtonEmpty autoFocus onClick={onCancel} data-test-subj="confirmModalCancelButton">
-          {CANCEL_LABEL}
-        </EuiButtonEmpty>
-        <EuiButton
-          fill
-          color="danger"
-          isLoading={isLoading}
-          onClick={onConfirm}
-          data-test-subj="confirmModalConfirmButton"
-          {...getEbtProps({
-            action: NIGHTSHIFT_EBT_ACTIONS.CONFIRM_SOURCE_ACTION,
-            element: NIGHTSHIFT_EBT_ELEMENTS.SOURCE_ACTION_CONFIRM_MODAL,
-            detail: action,
-          })}
-        >
-          {confirmLabel}
-        </EuiButton>
-      </EuiModalFooter>
-    </EuiModal>
+      <p>{body}</p>
+    </EuiConfirmModal>
   );
 }
