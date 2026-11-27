@@ -6,13 +6,14 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import { analyticsServiceMock } from '@kbn/core/server/mocks';
+import { analyticsServiceMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { ExecutionStatus } from '@kbn/workflows';
 import {
   DEFAULT_PROPOSAL_TITLE,
   PROPOSAL_ATTACHMENT_TYPE,
   type ListProposalsQuery,
+  PROPOSALS_INDEX_NAME,
 } from '@kbn/proposals-common';
 import type { ProposalDocument, ProposalsStorageClient } from '../storage/proposals_storage';
 import { IMPACT_RANK_FIELD } from '../storage/sort_ranks';
@@ -97,6 +98,7 @@ const createStorage = (document?: ProposalDocument) => {
 };
 
 const createWorkflowsApi = () => ({
+  cancelWorkflowExecution: jest.fn().mockResolvedValue(undefined),
   getWorkflow: jest.fn().mockResolvedValue({
     definition: {
       consts: {
@@ -144,6 +146,7 @@ const createService = (
   workflowsApi: ReturnType<typeof createWorkflowsApi> | null = createWorkflowsApi()
 ) => {
   const logger = loggerMock.create();
+  const esClient = elasticsearchServiceMock.createElasticsearchClient();
   const analytics = analyticsServiceMock.createAnalyticsServiceStart();
   const attachmentsClient = {
     create: jest.fn().mockResolvedValue({ id: 'attachment-1' }),
@@ -158,8 +161,10 @@ const createService = (
   return {
     getAttachmentsClient,
     resolveUser,
+    esClient,
     service: new ProposalsService({
       storage,
+      esClient,
       logger,
       analytics,
       getWorkflowsApi: () => (workflowsApi ?? undefined) as never,
@@ -2845,6 +2850,207 @@ describe('ProposalsService', () => {
       );
       await expect(service.findByWorkflowExecutionId('', SPACE_ID)).resolves.toBe(undefined);
       expect(storage.search).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('deleteByConversation', () => {
+    const mockScroll = (
+      esClient: ReturnType<typeof createService>['esClient'],
+      ...ids: Array<string | undefined>
+    ) => {
+      esClient.helpers.scrollDocuments.mockImplementation(async function* () {
+        for (const workflowExecutionId of ids) {
+          yield { workflowExecutionId };
+        }
+      } as never);
+    };
+
+    const mockKept = (
+      esClient: ReturnType<typeof createService>['esClient'],
+      supersededByIds: Record<string, string>,
+      existingIds: string[]
+    ) => {
+      esClient.helpers.scrollSearch.mockImplementation(async function* () {
+        yield {
+          body: {
+            hits: {
+              hits: Object.entries(supersededByIds).map(([id, supersededBy]) => ({
+                _id: id,
+                _source: { supersededBy },
+              })),
+            },
+          },
+        };
+      } as never);
+      esClient.mget.mockImplementation((async ({ ids }: { ids: string[] }) => ({
+        docs: ids.map((id) => ({
+          _id: id,
+          _index: PROPOSALS_INDEX_NAME,
+          found: existingIds.includes(id),
+        })),
+      })) as never);
+    };
+
+    it('deletes only the undecided proposals of the conversation in the space', async () => {
+      const { service, esClient } = createService(createStorage());
+      mockScroll(esClient);
+
+      await service.deleteByConversation('conversation-1', SPACE_ID, request);
+
+      expect(esClient.deleteByQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: PROPOSALS_INDEX_NAME,
+          query: {
+            bool: {
+              filter: [
+                { term: { spaceId: SPACE_ID } },
+                { term: { conversationId: 'conversation-1' } },
+              ],
+              must_not: [
+                { exists: { field: 'decision' } },
+                { exists: { field: 'gateReleasedAt' } },
+              ],
+            },
+          },
+        })
+      );
+    });
+
+    it('looks up the gate executions of the pending proposals of the conversation only', async () => {
+      const { service, esClient } = createService(createStorage());
+      mockScroll(esClient);
+
+      await service.deleteByConversation('conversation-1', SPACE_ID, request);
+
+      expect(esClient.helpers.scrollDocuments).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: PROPOSALS_INDEX_NAME,
+          query: {
+            bool: {
+              filter: [
+                { term: { spaceId: SPACE_ID } },
+                { term: { conversationId: 'conversation-1' } },
+                { term: { status: 'pending' } },
+                { exists: { field: 'workflowExecutionId' } },
+              ],
+              must_not: [{ exists: { field: 'gateReleasedAt' } }],
+            },
+          },
+        })
+      );
+    });
+
+    it('cancels each distinct gate execution of the pending proposals before deleting', async () => {
+      const { service, esClient, workflowsApi } = createService(createStorage());
+      mockScroll(esClient, 'exec-1', 'exec-2', 'exec-1', undefined);
+
+      await service.deleteByConversation('conversation-1', SPACE_ID, request);
+
+      expect(workflowsApi.cancelWorkflowExecution).toHaveBeenCalledTimes(2);
+      expect(workflowsApi.cancelWorkflowExecution).toHaveBeenCalledWith(
+        'exec-1',
+        SPACE_ID,
+        request
+      );
+      expect(workflowsApi.cancelWorkflowExecution).toHaveBeenCalledWith(
+        'exec-2',
+        SPACE_ID,
+        request
+      );
+      expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
+    });
+
+    it('still deletes the proposals when a gate execution cannot be cancelled', async () => {
+      const { service, esClient, workflowsApi, logger } = createService(createStorage());
+      mockScroll(esClient, 'exec-1');
+      workflowsApi.cancelWorkflowExecution.mockRejectedValue(new Error('boom'));
+
+      await service.deleteByConversation('conversation-1', SPACE_ID, request);
+
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('exec-1'));
+      expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
+    });
+
+    it('still deletes the proposals when the gate executions cannot be looked up', async () => {
+      const { service, esClient, workflowsApi } = createService(createStorage());
+      esClient.helpers.scrollDocuments.mockImplementation(async function* () {
+        throw new Error('boom');
+      } as never);
+
+      await service.deleteByConversation('conversation-1', SPACE_ID, request);
+
+      expect(workflowsApi.cancelWorkflowExecution).not.toHaveBeenCalled();
+      expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
+    });
+
+    it('warns when some proposals could not be deleted', async () => {
+      const { service, esClient, logger } = createService(createStorage());
+      esClient.deleteByQuery.mockResolvedValue({ failures: [{}, {}] } as never);
+
+      await service.deleteByConversation('conversation-1', SPACE_ID, request);
+
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('2 proposal(s)'));
+    });
+
+    it('clears supersededBy on kept proposals whose successor was deleted', async () => {
+      const { service, esClient } = createService(createStorage());
+      mockScroll(esClient);
+      mockKept(esClient, { 'kept-1': 'deleted-retry', 'kept-2': 'live-retry' }, ['live-retry']);
+
+      await service.deleteByConversation('conversation-1', SPACE_ID, request);
+
+      expect(esClient.helpers.scrollSearch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: {
+              filter: [
+                { term: { spaceId: SPACE_ID } },
+                { term: { conversationId: 'conversation-1' } },
+                { exists: { field: 'supersededBy' } },
+              ],
+            },
+          },
+        })
+      );
+      expect(esClient.updateByQuery).toHaveBeenCalledTimes(1);
+      expect(esClient.updateByQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: PROPOSALS_INDEX_NAME,
+          query: {
+            bool: {
+              filter: [{ term: { spaceId: SPACE_ID } }, { ids: { values: ['kept-1'] } }],
+            },
+          },
+          script: expect.objectContaining({ source: "ctx._source.remove('supersededBy')" }),
+        })
+      );
+    });
+
+    it('looks for deleted successors only after the delete', async () => {
+      const { service, esClient } = createService(createStorage());
+      mockScroll(esClient);
+      mockKept(esClient, { 'kept-1': 'deleted-retry' }, []);
+
+      await service.deleteByConversation('conversation-1', SPACE_ID, request);
+
+      const [deleteOrder] = esClient.deleteByQuery.mock.invocationCallOrder;
+      const [lookupOrder] = esClient.mget.mock.invocationCallOrder;
+      expect(lookupOrder).toBeGreaterThan(deleteOrder);
+    });
+
+    it('warns instead of failing when the successors cannot be cleared', async () => {
+      const { service, esClient, logger } = createService(createStorage());
+      mockScroll(esClient);
+      esClient.helpers.scrollSearch.mockImplementation(async function* () {
+        throw new Error('boom');
+      } as never);
+
+      await expect(
+        service.deleteByConversation('conversation-1', SPACE_ID, request)
+      ).resolves.toBeUndefined();
+
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('deleted successors'));
+      expect(esClient.updateByQuery).not.toHaveBeenCalled();
     });
   });
 

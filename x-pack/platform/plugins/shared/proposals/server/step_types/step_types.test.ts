@@ -11,7 +11,7 @@ import { createProposalStepInputSchema } from '@kbn/proposals-common';
 import { updateProposalStepInputSchema } from '@kbn/proposals-common';
 import type { ProposalsService } from '../services/proposals_service';
 import type { ProposalPrivilegesChecker } from '../services/check_proposal_privileges';
-import { ProposalForbiddenError } from '../services/errors';
+import { ProposalForbiddenError, ProposalNotFoundError } from '../services/errors';
 import { getCheckDecidePrivilegesStepDefinition } from './check_decide_privileges_step';
 import { getCloneProposalStepDefinition } from './clone_proposal_step';
 import { getCreateProposalStepDefinition } from './create_proposal_step';
@@ -993,6 +993,49 @@ describe('proposals.settleIncompleteProposal step', () => {
     getSettleIncompleteProposalStepDefinition({
       getProposalsService: () => service as unknown as ProposalsService,
     });
+
+  it('should settle nothing, and not fail, when the proposal was deleted', async () => {
+    const service = {
+      getLatestRevision: jest.fn().mockRejectedValue(new ProposalNotFoundError('proposal-1')),
+      get: jest.fn(),
+      update: jest.fn(),
+    };
+
+    const result = await settleDefinition(service).handler(
+      createContext({ proposalId: 'proposal-1', status: 'expired' })
+    );
+
+    expect(service.update).not.toHaveBeenCalled();
+    expect(result.output).toEqual({ proposalId: 'proposal-1', status: 'expired' });
+  });
+
+  it.each([
+    {
+      case: 'keeps the given status',
+      stored: { id: 'proposal-1', status: 'pending' },
+      input: { proposalId: 'proposal-1', status: 'expired' },
+      expected: 'expired',
+    },
+    {
+      case: 'keeps the computed failed status of a decided proposal',
+      stored: { id: 'proposal-1', status: 'executing', decision: 'approved' },
+      input: { proposalId: 'proposal-1' },
+      expected: 'failed',
+    },
+  ])(
+    'should settle nothing, and not fail, when the proposal is deleted before the write and $case',
+    async ({ stored, input, expected }) => {
+      const service = {
+        getLatestRevision: jest.fn().mockResolvedValue({ proposalId: 'proposal-1', revision: 1 }),
+        get: jest.fn().mockResolvedValue(stored),
+        update: jest.fn().mockRejectedValue(new ProposalNotFoundError('proposal-1')),
+      };
+
+      const result = await settleDefinition(service).handler(createContext(input));
+
+      expect(result.output).toEqual({ proposalId: 'proposal-1', status: expected });
+    }
+  );
 
   it('should adopt the live head before writing', async () => {
     const service = {

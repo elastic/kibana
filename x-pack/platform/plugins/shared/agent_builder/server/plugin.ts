@@ -368,6 +368,9 @@ export class AgentBuilderPlugin
         enableUpdatedTrigger: (optIn) => {
           this.conversationUpdatedOptIns.push(optIn);
         },
+        onConversationDeleted: (listener) => {
+          this.conversationEventBus.onConversationDeleted(listener);
+        },
       },
       callbacks: {
         registerConversationResolver: serviceSetups.callbacks.registerConversationResolver,

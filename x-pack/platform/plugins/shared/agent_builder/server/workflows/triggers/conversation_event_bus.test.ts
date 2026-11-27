@@ -112,3 +112,51 @@ describe('ConversationEventBus attachment events', () => {
     expect(metadataListener).not.toHaveBeenCalled();
   });
 });
+
+describe('ConversationEventBus conversation deleted events', () => {
+  const payload = { conversationId: 'conv-1', spaceId: 'default' };
+
+  it('waits for every listener before resolving', async () => {
+    const bus = createConversationEventBus();
+    const request = httpServerMock.createKibanaRequest();
+    let releaseListener: () => void = () => {};
+    const gate = new Promise<void>((resolve) => {
+      releaseListener = resolve;
+    });
+    let finished = false;
+    bus.onConversationDeleted(async () => {
+      await gate;
+      finished = true;
+    });
+
+    let resolved = false;
+    const emitPromise = bus.emitConversationDeleted(request, payload).then(() => {
+      resolved = true;
+    });
+
+    // let any already-settled work flush; the emit must still be pending on the gated listener
+    await new Promise((resolve) => setImmediate(resolve));
+    expect(resolved).toBe(false);
+    expect(finished).toBe(false);
+
+    releaseListener();
+    await emitPromise;
+
+    expect(finished).toBe(true);
+    expect(resolved).toBe(true);
+  });
+
+  it('keeps notifying the other listeners when one fails, and never rejects', async () => {
+    const bus = createConversationEventBus();
+    const request = httpServerMock.createKibanaRequest();
+    const survivor = jest.fn();
+    bus.onConversationDeleted(() => {
+      throw new Error('boom');
+    });
+    bus.onConversationDeleted(survivor);
+
+    await expect(bus.emitConversationDeleted(request, payload)).resolves.toBeUndefined();
+
+    expect(survivor).toHaveBeenCalledWith(request, payload);
+  });
+});

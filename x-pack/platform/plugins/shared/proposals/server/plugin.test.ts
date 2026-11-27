@@ -39,13 +39,13 @@ jest.mock('./routes/register_routes', () => ({
   registerRoutes: jest.fn(),
 }));
 
-const createContext = () =>
+const createContext = (logger = loggerMock.create()) =>
   ({
-    logger: { get: () => loggerMock.create() },
+    logger: { get: () => logger },
   } as unknown as ConstructorParameters<typeof ProposalsPlugin>[0]);
 
-const setupPlugin = () => {
-  const plugin = new ProposalsPlugin(createContext());
+const setupPlugin = (logger = loggerMock.create()) => {
+  const plugin = new ProposalsPlugin(createContext(logger));
   const coreSetup = coreMock.createSetup();
   const features = { registerKibanaFeature: jest.fn() };
   const workflowsExtensions = {
@@ -58,6 +58,7 @@ const setupPlugin = () => {
     attachments: { registerType: jest.fn() },
     tools: { register: jest.fn() },
     skills: { register: jest.fn() },
+    conversations: { onConversationDeleted: jest.fn() },
   };
 
   plugin.setup(
@@ -208,6 +209,37 @@ describe('ProposalsPlugin', () => {
       startPlugin(plugin);
 
       expect(initializeManagedWorkflows).toHaveBeenCalledTimes(1);
+    });
+
+    it('deletes the proposals of a deleted conversation through the registered listener, passing the request', async () => {
+      const { plugin, agentBuilder } = setupPlugin();
+      const { contract } = startPlugin(plugin);
+      const deleteByConversation = jest
+        .spyOn(contract.getProposalsService(), 'deleteByConversation')
+        .mockResolvedValue(undefined);
+      const [[listener]] = agentBuilder.conversations.onConversationDeleted.mock.calls;
+      const request = { id: 'request' };
+
+      await listener(request, { conversationId: 'conversation-1', spaceId: 'space-a' });
+
+      expect(deleteByConversation).toHaveBeenCalledTimes(1);
+      expect(deleteByConversation).toHaveBeenCalledWith('conversation-1', 'space-a', request);
+    });
+
+    it('swallows a proposal cleanup failure so the conversation delete is unaffected', async () => {
+      const logger = loggerMock.create();
+      const { plugin, agentBuilder } = setupPlugin(logger);
+      const { contract } = startPlugin(plugin);
+      jest
+        .spyOn(contract.getProposalsService(), 'deleteByConversation')
+        .mockRejectedValue(new Error('boom'));
+      const [[listener]] = agentBuilder.conversations.onConversationDeleted.mock.calls;
+
+      await expect(
+        listener({}, { conversationId: 'conversation-2', spaceId: 'default' })
+      ).resolves.toBeUndefined();
+
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('conversation-2'));
     });
 
     it('exposes the proposals service for in-process callers', () => {

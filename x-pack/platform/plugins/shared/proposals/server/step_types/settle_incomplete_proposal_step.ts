@@ -10,6 +10,7 @@ import {
   settleIncompleteProposalStatusSchema,
   settleIncompleteProposalStepCommonDefinition,
 } from '@kbn/proposals-common';
+import { ProposalNotFoundError } from '../services/errors/proposal_not_found_error';
 import type { ProposalsService } from '../services/proposals_service';
 import { parseStepInput } from './parse_step_input';
 import { toStepError } from './to_step_error';
@@ -29,11 +30,13 @@ export const getSettleIncompleteProposalStepDefinition = ({
   createServerStepDefinition({
     ...settleIncompleteProposalStepCommonDefinition,
     handler: async (context) => {
+      let settling: { proposalId: string; status?: 'failed' | 'expired' } | undefined;
       try {
         const input = parseStepInput(
           settleIncompleteProposalStepCommonDefinition.inputSchema,
           context.input
         );
+        settling = input;
         const workflowContext = context.contextManager.getContext();
         const spaceId = workflowContext.workflow.spaceId;
         const request = context.contextManager.getFakeRequest();
@@ -45,6 +48,8 @@ export const getSettleIncompleteProposalStepDefinition = ({
         const proposal = await service.get(latest.proposalId, spaceId, request);
 
         const status = input.status ?? (proposal.decision !== undefined ? 'failed' : 'expired');
+        // Kept so that a proposal deleted before the write still reports this status.
+        settling = { proposalId: input.proposalId, status };
 
         const updated = await service.update(
           {
@@ -68,6 +73,14 @@ export const getSettleIncompleteProposalStepDefinition = ({
           },
         };
       } catch (error) {
+        // The proposal was deleted with its conversation while the gate was parked, whether
+        // before the lookup or between the lookup and the write: nothing is left to settle, and
+        // failing would end an expired gate as a failed run.
+        if (error instanceof ProposalNotFoundError && settling !== undefined) {
+          return {
+            output: { proposalId: settling.proposalId, status: settling.status ?? 'expired' },
+          };
+        }
         throw toStepError(error, 'Failed to settle incomplete proposal');
       }
     },

@@ -95,6 +95,22 @@ export class ProposalsPlugin
       logger: this.logger,
     });
 
+    agentBuilder.conversations.onConversationDeleted(
+      async (request, { conversationId, spaceId }) => {
+        try {
+          await this.requireProposalsService().deleteByConversation(
+            conversationId,
+            spaceId,
+            request
+          );
+        } catch (error) {
+          this.logger.warn(
+            `Could not delete the proposals of deleted conversation [${conversationId}]: ${error}`
+          );
+        }
+      }
+    );
+
     // Lets an agent propose an action in its own conversation through the gate workflow.
     // Registered in setup but run only after start, so the service is resolved per call.
     agentBuilder.tools.register(
@@ -155,6 +171,7 @@ export class ProposalsPlugin
 
     this.proposalsService = new ProposalsService({
       storage,
+      esClient: coreStart.elasticsearch.client.asInternalUser,
       logger: this.logger,
       analytics: coreStart.analytics,
       getWorkflowsApi: () => this.requireWorkflowsApi(),
