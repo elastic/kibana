@@ -46,6 +46,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     };
 
+    // These rules are created with an Elasticsearch API key. When rules run with UIAM API keys,
+    // alerting adds a system tag to such a rule on its first run, so the count can be one higher.
+    const expectTagCount = (displayedCount: string, ruleTagCount: number) => {
+      const withoutSystemTag = ruleTagCount > 0 ? `${ruleTagCount}` : '';
+      expect([withoutSystemTag, `${ruleTagCount + 1}`]).toContain(displayedCount);
+    };
+
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
@@ -153,7 +160,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       expect(searchResults.length).toEqual(1);
       expect(searchResults[0].name).toEqual(`${rule1.name}APM Anomaly`);
       expect(searchResults[0].interval).toEqual('1 min');
-      expect(searchResults[0].tags).toEqual('2');
+      expectTagCount(searchResults[0].tags, 2);
       expect(searchResults[0].duration).toMatch(/\d{2,}:\d{2}/);
     });
 
@@ -184,7 +191,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         expect(searchResults.length).toEqual(1);
         expect(searchResults[0].name).toEqual(`${rule1.name}APM Anomaly`);
         expect(searchResults[0].interval).toEqual('1 min');
-        expect(searchResults[0].tags).toEqual('2');
+        expectTagCount(searchResults[0].tags, 2);
         expect(searchResults[0].duration).toMatch(/\d{2,}:\d{2}/);
       });
 
@@ -199,11 +206,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         expect(searchResultsAfterClear.length).toEqual(2);
         expect(searchResultsAfterClear[0].name).toEqual(`${rule1.name}APM Anomaly`);
         expect(searchResultsAfterClear[0].interval).toEqual('1 min');
-        expect(searchResultsAfterClear[0].tags).toEqual('2');
+        expectTagCount(searchResultsAfterClear[0].tags, 2);
         expect(searchResultsAfterClear[0].duration).toMatch(/\d{2,}:\d{2}/);
         expect(searchResultsAfterClear[1].name).toEqual(`${rule2.name}APM Anomaly`);
         expect(searchResultsAfterClear[1].interval).toEqual('1 min');
-        expect(searchResultsAfterClear[1].tags).toEqual('');
+        expectTagCount(searchResultsAfterClear[1].tags, 0);
         expect(searchResultsAfterClear[1].duration).toMatch(/\d{2,}:\d{2}/);
       });
     });
@@ -227,7 +234,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       expect(searchResults.length).toEqual(1);
       expect(searchResults[0].name).toEqual(`${rule1.name}APM Anomaly`);
       expect(searchResults[0].interval).toEqual('1 min');
-      expect(searchResults[0].tags).toEqual('3');
+      expectTagCount(searchResults[0].tags, 3);
       expect(searchResults[0].duration).toMatch(/\d{2,}:\d{2}/);
     });
 

@@ -17,6 +17,7 @@ import {
   BulkActionTypeEnum,
   BulkActionEditTypeEnum,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management';
+import type { BulkEditActionResults } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management';
 import { getCreateExceptionListDetectionSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { getCreateExceptionListItemMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_item_schema.mock';
@@ -45,6 +46,7 @@ import {
   getWebHookAction,
   installMockPrebuiltRules,
   removeServerGeneratedProperties,
+  stripMissingUiamApiKeyTag,
   updateUsername,
 } from '../../../utils';
 import { deleteAllExceptions } from '../../../../lists_and_exception_lists/utils';
@@ -3089,6 +3091,18 @@ export default ({ getService }: FtrProviderContext): void => {
       let createdRules: Array<Awaited<ReturnType<typeof createRule>>>;
       let createdRuleIds: string[];
 
+      // These rules are enabled, so they can run before the bulk action. Alerting tags a rule that
+      // has no UIAM API key when it runs, and the rules captured at creation predate that tag.
+      const withoutMissingUiamApiKeyTag = (
+        results: BulkEditActionResults
+      ): BulkEditActionResults => ({
+        ...results,
+        updated: results.updated.map((rule) => ({
+          ...rule,
+          tags: stripMissingUiamApiKeyTag(rule.tags),
+        })),
+      });
+
       const resetEverything = async () => {
         await deleteAllGaps(es);
         await deleteAllRules(supertest, log);
@@ -3187,7 +3201,7 @@ export default ({ getService }: FtrProviderContext): void => {
             .slice(0, 2)
             .map((event) => event.rule);
 
-          expect(body.attributes.results).toEqual({
+          expect(withoutMissingUiamApiKeyTag(body.attributes.results)).toEqual({
             updated: expect.arrayContaining(
               expectedUpdatedRules.map((expected) => expect.objectContaining(expected))
             ),
@@ -3317,7 +3331,7 @@ export default ({ getService }: FtrProviderContext): void => {
           );
 
           const expectedUpdatedRules = Object.values(generatedGapEvents).map((event) => event.rule);
-          expect(body.attributes.results).toEqual({
+          expect(withoutMissingUiamApiKeyTag(body.attributes.results)).toEqual({
             updated: expect.arrayContaining(
               expectedUpdatedRules.map((expected) => expect.objectContaining(expected))
             ),

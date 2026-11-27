@@ -6,6 +6,7 @@
  */
 
 import { omit } from 'lodash';
+import { MISSING_UIAM_API_KEY_TAG } from '@kbn/alerting-plugin/common';
 import { expect } from '@kbn/scout-oblt/api';
 import type { ApiClientFixture } from '@kbn/scout-oblt';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../common/constants/settings_defaults';
@@ -41,6 +42,12 @@ const OMIT_RULE_FIELDS = [
   'viewInAppRelativeUrl',
   'isSnoozedUntil',
 ];
+
+/** Drops the fields above and the system tag alerting adds to a rule that has no UIAM API key. */
+const toComparableRule = (rule: object) => {
+  const { tags = [], ...comparable } = omit(rule, OMIT_RULE_FIELDS) as { tags?: string[] };
+  return { ...comparable, tags: tags.filter((tag) => tag !== MISSING_UIAM_API_KEY_TAG) };
+};
 
 /**
  * Ported from FTR
@@ -136,11 +143,11 @@ apiTest.describe(
 
       const body = apiResponse.body as { statusRule: object; tlsRule: object };
 
-      expect(omit(body.statusRule, OMIT_RULE_FIELDS)).toStrictEqual(
-        omit(defaultAlertRules.statusRule, OMIT_RULE_FIELDS)
+      expect(toComparableRule(body.statusRule)).toStrictEqual(
+        toComparableRule(defaultAlertRules.statusRule)
       );
-      expect(omit(body.tlsRule, OMIT_RULE_FIELDS)).toStrictEqual(
-        omit(defaultAlertRules.tlsRule, OMIT_RULE_FIELDS)
+      expect(toComparableRule(body.tlsRule)).toStrictEqual(
+        toComparableRule(defaultAlertRules.tlsRule)
       );
     });
 

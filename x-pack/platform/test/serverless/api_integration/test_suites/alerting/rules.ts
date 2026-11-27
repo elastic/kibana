@@ -5,11 +5,27 @@
  * 2.0.
  */
 
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import { MISSING_UIAM_API_KEY_TAG } from '@kbn/alerting-plugin/common';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import type { InternalRequestHeader, RoleCredentials } from '../../../shared/services';
+
+// The action writes `{{rule.tags}}`, which renders the tags comma-separated. These rules are
+// created with an Elasticsearch API key, so when rules run with UIAM API keys alerting adds a
+// system tag to them on their first run.
+const getActionDocument = (hit: SearchHit) => {
+  const { tags, ...source } = omit(hit, '_source.date')._source as { tags: string };
+  return {
+    ...source,
+    tags: tags
+      .split(',')
+      .filter((tag) => tag !== MISSING_UIAM_API_KEY_TAG)
+      .join(','),
+  };
+};
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -134,7 +150,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(resp.hits.hits.length).to.be(1);
 
       const document = resp.hits.hits[0];
-      expect(omit(document, '_source.date')._source).to.eql({
+      expect(getActionDocument(document)).to.eql({
         alertActionGroup: 'query matched',
         alertId: 'query matched',
         instanceContextValue: '',
@@ -229,7 +245,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(resp.hits.hits.length).to.be(1);
 
       const document = resp.hits.hits[0];
-      expect(omit(document, '_source.date')._source).to.eql({
+      expect(getActionDocument(document)).to.eql({
         alertActionGroup: 'query matched',
         alertId: 'query matched',
         instanceContextValue: '',
@@ -271,7 +287,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(resp2.hits.hits.length).to.be(2);
 
       const document2 = resp2.hits.hits[0];
-      expect(omit(document2, '_source.date')._source).to.eql({
+      expect(getActionDocument(document2)).to.eql({
         alertActionGroup: 'query matched',
         alertId: 'query matched',
         instanceContextValue: '',
