@@ -36,7 +36,8 @@ const createWrapper = (): FC<PropsWithChildren<{}>> => {
 };
 
 const renderUseIntegrations = (enabled: boolean) =>
-  renderHook(() => useIntegrations({ enabled }), {
+  renderHook((props: { enabled: boolean }) => useIntegrations(props), {
+    initialProps: { enabled },
     wrapper: createWrapper(),
   });
 
@@ -74,8 +75,17 @@ describe('useIntegrations', () => {
   it('should stop loading when the integrations call does not answer within the timeout', async () => {
     httpGet.mockReturnValue(new Promise(() => {}));
 
-    const { result } = renderUseIntegrations(true);
+    // the page enables the query only once the indicators count resolves, which can take longer
+    // than the timeout: the timeout must still bound the call that starts afterwards
+    const { result, rerender } = renderUseIntegrations(false);
 
+    act(() => {
+      jest.advanceTimersByTime(INTEGRATIONS_CALL_TIMEOUT);
+    });
+
+    rerender({ enabled: true });
+
+    await waitFor(() => expect(httpGet).toHaveBeenCalled());
     expect(result.current.isLoading).toBeTruthy();
 
     act(() => {
