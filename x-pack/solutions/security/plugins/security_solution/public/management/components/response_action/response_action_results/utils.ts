@@ -10,6 +10,7 @@ import type {
   ActionDetails,
   ActionDetailsAgentState,
   MaybeImmutable,
+  ResponseActionExportedOutput,
 } from '../../../../../common/endpoint/types';
 
 /**
@@ -39,4 +40,24 @@ export const getAgentActionState = (
       errors: action.errors,
     }
   );
+};
+
+/**
+ * Returns where the agent's file was exported to (`outputs[agentId].content.exported`), or `undefined` if it wasn't.
+ */
+export const getExportedOutput = (
+  _action: MaybeImmutable<ActionDetails>,
+  agentId: string
+): ResponseActionExportedOutput | undefined => {
+  const action = _action as ActionDetails; // cast Just removes the Immutability
+  const content = action.outputs?.[agentId]?.content;
+
+  // `content` can be a string at runtime (ex. `text` outputs), so check it before reading `exported`
+  if (typeof content !== 'object' || content === null || !('exported' in content)) {
+    return undefined;
+  }
+
+  const { exported } = content;
+
+  return typeof exported === 'object' && exported !== null ? exported : undefined;
 };
