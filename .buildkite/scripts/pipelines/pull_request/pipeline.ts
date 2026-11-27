@@ -711,8 +711,8 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
       pipeline.push(evalsTrigger);
     }
 
-    // Same hand-off for the `ci:nightshift-evals` label, to `kibana-nightshift-evals-pr`. It needs no
-    // Kibana build, since nightshift-evals runs Kibana from source.
+    // Same hand-off for the `ci:nightshift-evals` label, to `kibana-nightshift-evals-pr`. It waits for
+    // `build` but does not use it: nightshift-evals runs Kibana from source.
     const nightshiftEvalsTrigger = getNightshiftEvalTriggerStep(GITHUB_PR_LABELS);
     if (nightshiftEvalsTrigger) {
       pipeline.push(nightshiftEvalsTrigger);

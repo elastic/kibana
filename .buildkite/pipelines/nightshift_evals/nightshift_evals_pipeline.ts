@@ -128,8 +128,9 @@ const hasNightshiftEvalLabel = (githubPrLabels: string): boolean =>
 
 /**
  * Command step that fires `kibana-nightshift-evals-pr`, or `null` without the start label.
- * Fire-and-forget: `soft_fail` keeps a trigger hiccup off the PR. It needs no Kibana build,
- * since nightshift-evals runs Kibana from source.
+ * Fire-and-forget: `soft_fail` keeps a trigger hiccup off the PR. It waits for `build` so a commit
+ * that does not build never starts the long run. The child does not use the build, since
+ * nightshift-evals runs Kibana from source.
  */
 export const getNightshiftEvalTriggerStep = (githubPrLabels: string): string | null => {
   if (!hasNightshiftEvalLabel(githubPrLabels)) {
@@ -139,6 +140,8 @@ export const getNightshiftEvalTriggerStep = (githubPrLabels: string): string | n
   return [
     `  - label: ':robot_face: Trigger Nightshift Evals'`,
     `    key: nightshift-evals-trigger`,
+    `    depends_on:`,
+    `      - build`,
     `    command: bash .buildkite/scripts/steps/nightshift_evals/trigger_pr.sh`,
     `    timeout_in_minutes: 10`,
     `    soft_fail: true`,

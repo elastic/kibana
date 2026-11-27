@@ -49,10 +49,10 @@ describe('nightshift_evals_pipeline', () => {
       expect(getNightshiftEvalTriggerStep(`foo, ${NIGHTSHIFT_EVAL_LABEL} ,bar`)).not.toBeNull();
     });
 
-    it('is soft-fail, needs no Kibana build and forwards no labels', () => {
+    it('is soft-fail, waits for the build and forwards no labels', () => {
       const [step] = parseSteps(getNightshiftEvalTriggerStep(NIGHTSHIFT_EVAL_LABEL) as string);
       expect(step.soft_fail).toBe(true);
-      expect(step.depends_on).toBeUndefined();
+      expect(step.depends_on).toEqual(['build']);
       expect(step.env).toBeUndefined();
       expect(step.command).toContain('trigger_pr.sh');
     });

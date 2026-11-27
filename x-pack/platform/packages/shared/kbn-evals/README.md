@@ -407,8 +407,9 @@ EVAL_SLACK_NOTIFICATION_CHANNEL=#my-test-channel
 #### Nightshift evals (`elastic/nightshift-evals`)
 
 A second, separate path runs the tasks of the `nightshift-evals` repo. It runs next to the
-suites above and does not change how they are selected. Kibana runs from source, so there is
-no Kibana build step.
+suites above and does not change how they are selected. Kibana runs from source, so the run
+builds no distributable. The trigger waits for the PR's build step, so a commit that does not
+build does not start the run.
 
 Add the label `ci:nightshift-evals` to a PR to start it. The label configures nothing. The run
 executes every task listed in `ci/tasks.yaml` of `nightshift-evals` (branch `main`, or
