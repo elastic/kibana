@@ -6,7 +6,7 @@
  */
 
 import { schema, type Type } from '@kbn/config-schema';
-import type { IRouter, KibanaRequest } from '@kbn/core/server';
+import type { IRouter, KibanaRequest, Logger } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
 import {
   AI_INDEX_API_VERSION,
@@ -135,11 +135,13 @@ const recallResponseSchema = () =>
 
 export const registerRecallRoutes = ({
   router,
+  logger,
   getRecallService,
   getAiIndexDataReadService,
   isMemoryEnabled,
 }: {
   router: IRouter;
+  logger: Logger;
   getRecallService: () => Promise<RecallService>;
   getAiIndexDataReadService: (params: GetAiIndexDataReadServiceParams) => AiIndexDataReadServiceApi;
   isMemoryEnabled: (request: KibanaRequest) => Promise<boolean>;
@@ -196,21 +198,21 @@ export const registerRecallRoutes = ({
         }
 
         const { elasticsearch, userProfile } = await ctx.core;
-        const resolvedUser = await resolveMemoryUser({
-          request,
-          userProfile,
-          requestedUserId: request.body.user_id,
-        });
-        if (!resolvedUser.ok) {
-          return response.forbidden({ body: { message: resolvedUser.error.message } });
-        }
-
-        const aiIndexDataReadService = getAiIndexDataReadService({
-          esClient: elasticsearch.client.asCurrentUser,
-          request,
-        });
-        const recallService = await getRecallService();
         try {
+          const resolvedUser = await resolveMemoryUser({
+            request,
+            userProfile,
+            requestedUserId: request.body.user_id,
+          });
+          if (!resolvedUser.ok) {
+            return response.forbidden({ body: { message: resolvedUser.error.message } });
+          }
+
+          const aiIndexDataReadService = getAiIndexDataReadService({
+            esClient: elasticsearch.client.asCurrentUser,
+            request,
+          });
+          const recallService = await getRecallService();
           const body = await recallService.recall(
             { aiIndexDataReadService },
             {
@@ -226,6 +228,7 @@ export const registerRecallRoutes = ({
               body: { message: formatEsError(error) },
             });
           }
+          logger.error(error instanceof Error ? error.stack ?? error.message : String(error));
           throw error;
         }
       })

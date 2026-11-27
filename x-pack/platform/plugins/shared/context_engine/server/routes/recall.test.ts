@@ -8,7 +8,11 @@
 import { errors } from '@elastic/elasticsearch';
 import type { Type } from '@kbn/config-schema';
 import type { IRouter, RequestHandler } from '@kbn/core/server';
-import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
+import {
+  elasticsearchServiceMock,
+  httpServerMock,
+  loggingSystemMock,
+} from '@kbn/core/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { registerRecallRoutes } from './recall';
 import {
@@ -69,6 +73,7 @@ describe('recall routes', () => {
   let getProfileId: jest.Mock<Promise<string | null>>;
   let authzResult: Record<string, boolean>;
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let readService: jest.Mocked<AiIndexDataReadServiceApi>;
   let getAiIndexDataReadService: jest.Mock<
     AiIndexDataReadServiceApi,
@@ -117,6 +122,7 @@ describe('recall routes', () => {
     getProfileId = jest.fn(async () => profileUid);
     authzResult = {};
     esClient = elasticsearchServiceMock.createElasticsearchClient();
+    logger = loggingSystemMock.createLogger();
     response = httpServerMock.createResponseFactory();
     readService = { query: jest.fn(), describe: jest.fn(), list: jest.fn(), search: jest.fn() };
     getAiIndexDataReadService = jest.fn((_params: GetAiIndexDataReadServiceParams) => readService);
@@ -137,7 +143,13 @@ describe('recall routes', () => {
       },
     } as unknown as IRouter;
 
-    registerRecallRoutes({ router, getRecallService, getAiIndexDataReadService, isMemoryEnabled });
+    registerRecallRoutes({
+      router,
+      logger,
+      getRecallService,
+      getAiIndexDataReadService,
+      isMemoryEnabled,
+    });
   });
 
   describe('registration', () => {
@@ -293,10 +305,25 @@ describe('recall routes', () => {
       expect(response.ok).toHaveBeenCalledTimes(1);
     });
 
-    it('rethrows when resolving the user profile fails', async () => {
-      getProfileId.mockRejectedValueOnce(new Error('profile activation failed'));
+    it('returns 429 when resolving the user profile hits an Elasticsearch 429', async () => {
+      getProfileId.mockRejectedValueOnce(esResponseError(429));
 
-      await expect(callRoute(aiIndexBody)).rejects.toThrow('profile activation failed');
+      await callRoute(aiIndexBody);
+
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 429,
+        body: { message: 'es_rejected_execution_exception: too many requests' },
+      });
+      expect(logger.error).not.toHaveBeenCalled();
+      expect(service.recall).not.toHaveBeenCalled();
+    });
+
+    it('logs and rethrows when resolving the user profile fails', async () => {
+      const error = new Error('profile activation failed');
+      getProfileId.mockRejectedValueOnce(error);
+
+      await expect(callRoute(aiIndexBody)).rejects.toThrow(error);
+      expect(logger.error).toHaveBeenCalledWith(error.stack);
       expect(service.recall).not.toHaveBeenCalled();
     });
   });
@@ -349,7 +376,7 @@ describe('recall routes', () => {
   });
 
   describe('errors from the service', () => {
-    it('returns 429 for an Elasticsearch 429', async () => {
+    it('returns 429 for an Elasticsearch 429 without logging an error', async () => {
       service.recall.mockRejectedValueOnce(esResponseError(429));
 
       await callRoute(aiIndexBody);
@@ -358,16 +385,18 @@ describe('recall routes', () => {
         statusCode: 429,
         body: { message: 'es_rejected_execution_exception: too many requests' },
       });
+      expect(logger.error).not.toHaveBeenCalled();
     });
 
     it.each([
       ['an Elasticsearch 400', esResponseError(400)],
       ['an Elasticsearch 503', esResponseError(503)],
       ['a generic error', new Error('cluster unavailable')],
-    ])('rethrows %s without forwarding its status', async (_name, error) => {
+    ])('logs and rethrows %s without forwarding its status', async (_name, error) => {
       service.recall.mockRejectedValueOnce(error);
 
       await expect(callRoute(aiIndexBody)).rejects.toThrow(error);
+      expect(logger.error).toHaveBeenCalledWith(error.stack);
       expect(response.customError).not.toHaveBeenCalled();
     });
   });
