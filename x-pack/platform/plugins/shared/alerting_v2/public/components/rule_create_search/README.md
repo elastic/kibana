@@ -14,7 +14,7 @@ Sections render in the order of `RULE_CREATE_SEARCH_SECTION_IDS`:
 
 ## Implementing a section
 
-Each section is a hook that takes the debounced, trimmed query and returns a `RuleCreateSearchSectionResult`:
+Each section is a hook that takes the trimmed query and returns a `RuleCreateSearchSectionResult`. Local sections filter immediately; remote sections (e.g. `universal.templates`) should debounce the query themselves so local results appear without delay:
 
 ```ts
 const useUniversalSearchSection = (query: string): RuleCreateSearchSectionResult => {
