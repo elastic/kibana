@@ -56,6 +56,7 @@ import {
   createNotificationServiceMock,
   createTemplatesServiceMock,
   createFieldDefinitionsServiceMock,
+  createObservableServiceMock,
 } from '../services/mocks';
 import { ConfigSchema } from '../config';
 import {
@@ -280,6 +281,7 @@ export const createCasesClientMockArgs = () => {
       notificationService: createNotificationServiceMock(),
       templatesService: createTemplatesServiceMock(),
       fieldDefinitionsService: createFieldDefinitionsServiceMock(),
+      observableService: createObservableServiceMock(),
     },
     authorization: createAuthorizationMock(),
     logger: loggingSystemMock.createLogger(),
