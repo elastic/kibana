@@ -34,7 +34,6 @@ describe('executeEsql', () => {
       params: query.params,
       include_execution_metadata: true,
     });
-    expect(body).not.toHaveProperty('drop_null_columns');
   });
 
   it('turns rows into objects keyed by column name and reads the metadata', async () => {

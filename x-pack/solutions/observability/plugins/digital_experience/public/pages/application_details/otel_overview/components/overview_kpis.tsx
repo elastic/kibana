@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { OverviewPercentile } from '../../../../../common/overview_filters';
 import type { ApplicationOverviewKpisResponse } from '../../../../../common/types/overview';
@@ -148,6 +149,27 @@ const kpiPanels = ({
 ];
 
 /**
+ * All the KPIs in a row while they fit, then four and three, and two per row on a narrow page, so
+ * a row is never left with a lone KPI that fills it. Measured in the width of the page, not of the
+ * window, as a flyout beside the page narrows it.
+ */
+const kpiGridCss = (gap: string) =>
+  css({
+    display: 'grid',
+    gap,
+    gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+    // The last of an odd number takes the row, as it would be alone on it.
+    '> :last-child:nth-child(odd)': { gridColumn: '1 / -1' },
+    '@container (min-width: 560px)': {
+      gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
+      '> :last-child:nth-child(odd)': { gridColumn: 'auto' },
+    },
+    '@container (min-width: 1050px)': {
+      gridTemplateColumns: 'repeat(7, minmax(0, 1fr))',
+    },
+  });
+
+/**
  * The Overview's headline metrics. With Compare on, each shows its change against the period of
  * equal length before the time range, colored by whether it went the better way.
  */
@@ -164,6 +186,7 @@ export function OverviewKpis({
   isComparing: boolean;
   isLoading: boolean;
 }) {
+  const { euiTheme } = useEuiTheme();
   const { formatNumber, formatKpiPercent } = useFormatters();
   const panels = kpiPanels({
     percentile,
@@ -173,16 +196,18 @@ export function OverviewKpis({
   });
 
   return (
-    <EuiFlexGroup gutterSize="m" wrap data-test-subj="digitalExperienceOverviewKpis">
-      {panels.map(({ kpi, ...panel }) => (
-        <ComparedKpiPanel
-          key={kpi}
-          {...panel}
-          value={kpis?.[kpi]}
-          isComparing={isComparing}
-          isLoading={isLoading}
-        />
-      ))}
-    </EuiFlexGroup>
+    <div css={{ containerType: 'inline-size' }}>
+      <div css={kpiGridCss(euiTheme.size.m)} data-test-subj="digitalExperienceOverviewKpis">
+        {panels.map(({ kpi, ...panel }) => (
+          <ComparedKpiPanel
+            key={kpi}
+            {...panel}
+            value={kpis?.[kpi]}
+            isComparing={isComparing}
+            isLoading={isLoading}
+          />
+        ))}
+      </div>
+    </div>
   );
 }

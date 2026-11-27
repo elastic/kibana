@@ -6,10 +6,14 @@
  */
 
 import React, { useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
   EuiAccordion,
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonGroup,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -20,6 +24,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
@@ -43,10 +48,83 @@ import {
   DIGITAL_EXPERIENCE_EBT_ACTIONS,
 } from '../../../../ebt_constants';
 import type { Formatters } from '../../../../hooks/use_formatters';
-import { FILTER_EBT_ELEMENTS, FILTER_LABELS } from './overview_filter_labels';
+import { usePersistedChoice } from '../../../../hooks/use_persisted_choice';
+import { FILTER_EBT_ELEMENTS, FILTER_LABELS, FILTER_NOTES } from './overview_filter_labels';
 
-/** Half the window on a narrow screen, never wider than this: the rows are short. */
-const FLYOUT_MAX_WIDTH = 640;
+/** The width of the flyout, in pixels, by mode: pushed, it takes less of the page beside it. */
+const DEFAULT_FLYOUT_WIDTHS = { overlay: 560, push: 320 } as const;
+const MIN_FLYOUT_WIDTH = 280;
+const MAX_FLYOUT_WIDTH = 900;
+/** The widths the user dragged the flyout to, by mode, kept across visits. */
+const FLYOUT_WIDTH_STORAGE_KEY = 'xpack.digitalExperience.overview.filtersFlyoutWidth';
+/** How long after the user stops dragging the width is stored. */
+const WIDTH_SAVE_DEBOUNCE_MS = 300;
+
+/**
+ * The heights of the app header above the page: its title row, and the whole header with the tabs.
+ * The header of the flyout beside the page has them, so the two titles and rules line up.
+ */
+const PAGE_HEADER_TITLE_ROW_HEIGHT = 52;
+const PAGE_HEADER_HEIGHT = 93;
+
+const clampWidth = (width: unknown, fallback: number): number =>
+  typeof width === 'number' && Number.isFinite(width)
+    ? Math.min(MAX_FLYOUT_WIDTH, Math.max(MIN_FLYOUT_WIDTH, width))
+    : fallback;
+
+/** Whether the flyout covers the page or pushes it aside, kept across visits; covers by default. */
+const FLYOUT_TYPE_STORAGE_KEY = 'xpack.digitalExperience.overview.filtersFlyoutType';
+const FLYOUT_TYPES = ['overlay', 'push'] as const;
+type FlyoutType = (typeof FLYOUT_TYPES)[number];
+
+/** The width of the flyout in `type` mode, and how to change it as the user drags the edge. */
+const useFlyoutWidth = (type: FlyoutType): [number, (width: number) => void] => {
+  const [saved, setSaved] = useLocalStorage<Partial<Record<FlyoutType, number>>>(
+    FLYOUT_WIDTH_STORAGE_KEY,
+    {}
+  );
+  const savedWidth = clampWidth(saved?.[type], DEFAULT_FLYOUT_WIDTHS[type]);
+  const [drag, setDrag] = useState<{ type: FlyoutType; width: number }>();
+  // A drag reports a width on every mouse move; what the user settled on is stored once, after.
+  useDebounce(
+    () => {
+      if (drag && drag.width !== clampWidth(saved?.[drag.type], -1)) {
+        setSaved({ ...saved, [drag.type]: drag.width });
+      }
+    },
+    WIDTH_SAVE_DEBOUNCE_MS,
+    [drag]
+  );
+  return [drag?.type === type ? drag.width : savedWidth, (width) => setDrag({ type, width })];
+};
+
+const FLYOUT_TYPE_LEGEND = i18n.translate(
+  'xpack.digitalExperience.overview.filtersFlyout.typeLegend',
+  { defaultMessage: 'Flyout mode' }
+);
+
+const FLYOUT_TYPE_OPTIONS = [
+  {
+    id: 'overlay',
+    label: i18n.translate('xpack.digitalExperience.overview.filtersFlyout.overlayLabel', {
+      defaultMessage: 'Overlay',
+    }),
+    iconType: 'layers',
+    'data-test-subj': 'digitalExperienceOverviewFiltersFlyoutOverlay',
+  },
+  {
+    id: 'push',
+    label: i18n.translate('xpack.digitalExperience.overview.filtersFlyout.pushLabel', {
+      defaultMessage: 'Push',
+    }),
+    iconType: 'menuRight',
+    'data-test-subj': 'digitalExperienceOverviewFiltersFlyoutPush',
+  },
+];
+
+const CLOSE_LABEL = i18n.translate('xpack.digitalExperience.overview.filtersFlyout.close', {
+  defaultMessage: 'Close',
+});
 
 const TITLE = i18n.translate('xpack.digitalExperience.overview.filtersFlyout.title', {
   defaultMessage: 'All filters',
@@ -83,6 +161,13 @@ export function AllFiltersFlyout({
     prefix: 'digitalExperienceOverviewFiltersFlyoutTitle',
   });
   const idPrefix = useGeneratedHtmlId({ prefix: 'digitalExperienceOverviewFiltersFlyout' });
+  const { euiTheme } = useEuiTheme();
+  const [flyoutType, setFlyoutType] = usePersistedChoice(
+    FLYOUT_TYPE_STORAGE_KEY,
+    FLYOUT_TYPES,
+    'overlay'
+  );
+  const [width, setWidth] = useFlyoutWidth(flyoutType);
 
   const isDirty = !isSameSelection(draft, filters);
   const hasDraft = OVERVIEW_FILTER_NAMES.some((name) => (draft[name] ?? []).length > 0);
@@ -105,16 +190,68 @@ export function AllFiltersFlyout({
   return (
     <EuiFlyout
       onClose={onClose}
-      size="m"
-      maxWidth={FLYOUT_MAX_WIDTH}
-      ownFocus
+      paddingSize="l"
+      resizable
+      // The close button is in the header, in the row of the mode toggle, rather than apart from it.
+      hideCloseButton
+      size={width}
+      minWidth={MIN_FLYOUT_WIDTH}
+      maxWidth={MAX_FLYOUT_WIDTH}
+      onResize={setWidth}
+      type={flyoutType}
+      // Pushed, the page beside it stays in use, so the focus is not held in the flyout.
+      ownFocus={flyoutType === 'overlay'}
+      // Pushed from a tablet up, so a window as narrow as a laptop split in two still gets it.
+      pushMinBreakpoint="m"
       aria-labelledby={flyoutTitleId}
       data-test-subj="digitalExperienceOverviewFiltersFlyout"
     >
-      <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
-          <h2 id={flyoutTitleId}>{TITLE}</h2>
-        </EuiTitle>
+      <EuiFlyoutHeader hasBorder css={{ blockSize: PAGE_HEADER_HEIGHT }}>
+        <EuiFlexGroup
+          alignItems="center"
+          justifyContent="spaceBetween"
+          gutterSize="s"
+          responsive={false}
+          // Up to the top edge of the flyout, over its padding, as the title row of the page is.
+          css={{
+            blockSize: PAGE_HEADER_TITLE_ROW_HEIGHT,
+            marginBlockStart: `calc(${euiTheme.size.l} * -1)`,
+          }}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="s">
+              <h2 id={flyoutTitleId}>{TITLE}</h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiButtonGroup
+                  isIconOnly
+                  buttonSize="compressed"
+                  legend={FLYOUT_TYPE_LEGEND}
+                  options={FLYOUT_TYPE_OPTIONS}
+                  idSelected={flyoutType}
+                  onChange={setFlyoutType}
+                  data-test-subj="digitalExperienceOverviewFiltersFlyoutType"
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  iconType="cross"
+                  color="text"
+                  aria-label={CLOSE_LABEL}
+                  onClick={onClose}
+                  data-test-subj="digitalExperienceOverviewFiltersFlyoutClose"
+                  {...getEbtProps({
+                    action: DIGITAL_EXPERIENCE_EBT_ACTIONS.CANCEL_FILTERS,
+                    element: APPLICATION_OVERVIEW_EBT_ELEMENTS.ALL_FILTERS_CANCEL,
+                  })}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         {OVERVIEW_FILTER_NAMES.map((name, filterIndex) => {
@@ -185,6 +322,18 @@ export function AllFiltersFlyout({
                     />
                   </>
                 )}
+                {FILTER_NOTES[name] !== undefined && (
+                  <>
+                    <EuiSpacer size="xs" />
+                    <EuiText
+                      size="xs"
+                      color="subdued"
+                      data-test-subj={`digitalExperienceOverviewFiltersFlyout-${name}Note`}
+                    >
+                      {FILTER_NOTES[name]}
+                    </EuiText>
+                  </>
+                )}
                 {isFull && (
                   <>
                     <EuiSpacer size="xs" />
@@ -202,6 +351,7 @@ export function AllFiltersFlyout({
         <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
+              size="s"
               flush="left"
               iconType="cross"
               isDisabled={!hasDraft}
@@ -221,6 +371,7 @@ export function AllFiltersFlyout({
             <EuiFlexGroup gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
+                  size="s"
                   onClick={onClose}
                   data-test-subj="digitalExperienceOverviewFiltersCancel"
                   {...getEbtProps({
@@ -235,6 +386,7 @@ export function AllFiltersFlyout({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
+                  size="s"
                   fill
                   isDisabled={!isDirty}
                   onClick={() => {

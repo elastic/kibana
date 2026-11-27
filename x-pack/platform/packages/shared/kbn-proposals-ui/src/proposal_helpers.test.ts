@@ -238,6 +238,27 @@ describe('getProposalDecision', () => {
     ).toMatchObject({ status: 'declined' });
   });
 
+  it('reports a decline by its formatted dismiss reason', () => {
+    expect(
+      getProposalDecision(
+        proposal({
+          decision: 'dismissed',
+          status: 'no_action',
+          dismissReason: 'no_reason',
+          rationale: 'Flag already off',
+        })
+      )
+    ).toMatchObject({ status: 'declined', reason: 'Flag already off' });
+  });
+
+  it('reports a decline without a dismiss reason by its rationale alone', () => {
+    expect(
+      getProposalDecision(
+        proposal({ decision: 'dismissed', status: 'no_action', rationale: 'Not needed' })
+      )
+    ).toMatchObject({ status: 'declined', reason: 'Not needed' });
+  });
+
   it("reports a failed action's error as its reason", () => {
     expect(
       getProposalDecision(

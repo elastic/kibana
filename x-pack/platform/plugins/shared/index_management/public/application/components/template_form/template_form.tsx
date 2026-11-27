@@ -322,6 +322,9 @@ export const TemplateForm = ({
             <StepLogisticsContainer
               isEditing={isEditing}
               isLegacy={indexTemplate._kbnMeta.isLegacy}
+              hasDataStreamOptions={Boolean(
+                dataStreamOptions && Object.keys(dataStreamOptions).length > 0
+              )}
             />
           </FormWizardStep>
 
@@ -355,7 +358,6 @@ export const TemplateForm = ({
           <FormWizardStep id={wizardSections.review.id} label={wizardSections.review.label}>
             <StepReviewContainer
               getTemplateData={buildTemplateObject(indexTemplate)}
-              dataStreamOptions={dataStreamOptions}
               onSaveBlockedChange={setIsReviewSaveBlocked}
             />
           </FormWizardStep>
