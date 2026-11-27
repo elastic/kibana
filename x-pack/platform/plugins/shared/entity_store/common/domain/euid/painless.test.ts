@@ -64,11 +64,19 @@ describe('conditionToPainless', () => {
     expect(conditionToPainless(condition)).toBe(`!(${nonEmpty('event.kind')})`);
   });
 
-  it('translates field includes predicate', () => {
+  const includes = (field: string, value: string) =>
+    `(doc.containsKey('${field}') && doc['${field}'].contains("${value}"))`;
+
+  it('translates field includes predicate to membership over all doc values', () => {
     const condition = { field: 'event.kind', includes: 'asset' };
-    expect(conditionToPainless(condition)).toBe(
-      `(${nonEmpty('event.kind')} && doc['event.kind'].value.contains("asset"))`
-    );
+    expect(conditionToPainless(condition)).toBe(includes('event.kind', 'asset'));
+  });
+
+  it('translates field includes predicate for _source to a check of every value', () => {
+    const condition = { field: 'event.kind', includes: 'asset' };
+    expect(
+      conditionToPainless(condition, { expressions: createSourceExpressions('ctx._source') })
+    ).toBe(`(__euid_src_has(__euid_root,'event.kind',['event','kind'],"asset"))`);
   });
 
   it('translates and condition', () => {
@@ -91,9 +99,7 @@ describe('conditionToPainless', () => {
       ],
     };
     expect(conditionToPainless(condition)).toBe(
-      `((${nonEmpty('event.kind')} && doc['event.kind'].value.contains("asset")) || ${nonEmpty(
-        'entity.id'
-      )})`
+      `(${includes('event.kind', 'asset')} || ${nonEmpty('entity.id')})`
     );
   });
 
@@ -130,10 +136,10 @@ describe('conditionToPainless', () => {
     };
     const result = conditionToPainless(condition);
     expect(result).toContain(nonEmpty('entity.id'));
-    expect(result).toContain(nonEmpty('event.category'));
-    expect(result).toContain('doc[\'event.category\'].value.contains("iam")');
-    expect(result).toContain('doc[\'event.type\'].value.contains("user")');
-    expect(result).toContain('doc[\'event.type\'].value.contains("creation")');
+    expect(result).toContain(includes('event.category', 'iam'));
+    expect(result).toContain(includes('event.type', 'user'));
+    expect(result).toContain(includes('event.type', 'creation'));
+    expect(result).not.toContain('.value.contains(');
     expect(result).toContain(' && ');
     expect(result).toContain(' || ');
   });
@@ -212,15 +218,13 @@ describe('conditionToPainless', () => {
     ).toBe('(entity_namespace == null || entity_namespace == "")');
   });
 
-  it('should use evaluated var for includes', () => {
+  it('should use equality on the evaluated var for includes', () => {
     expect(
       conditionToPainless(
         { field: 'entity.namespace', includes: 'okta' },
         { evaluatedVars: userEvaluatedVars }
       )
-    ).toBe(
-      'entity_namespace != null && entity_namespace != "" && entity_namespace.contains("okta")'
-    );
+    ).toBe('entity_namespace != null && entity_namespace == "okta"');
   });
 });
 
