@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-/* eslint-disable require-atomic-updates */
+/* eslint-disable @kbn/compat/eslint-require-atomic-updates */
 
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';

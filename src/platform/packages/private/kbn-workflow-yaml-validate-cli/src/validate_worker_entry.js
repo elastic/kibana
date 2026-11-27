@@ -9,7 +9,7 @@
 
 // Worker threads start a fresh module context that has not registered Kibana's
 // on-the-fly TypeScript transpiler, so install it before loading the TS worker.
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @kbn/compat/typescript-no-var-requires
 require('@kbn/setup-node-env');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @kbn/compat/typescript-no-var-requires
 require('./validate_worker');

@@ -23,7 +23,7 @@ const outerSeedProfile = process.env.SEED_PROFILE;
 process.env.SEED_PROFILE = 'parity';
 let chrysalisSeed: typeof import('./chrysalis_seed');
 jest.isolateModules(() => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
   chrysalisSeed = require('./chrysalis_seed');
 });
 const { seedChrysalisAlerts, cleanupChrysalisAlerts, ALERT_INDEX } = chrysalisSeed!;

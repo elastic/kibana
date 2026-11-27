@@ -6,11 +6,11 @@
  */
 
 require('@kbn/setup-node-env');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @kbn/compat/typescript-no-var-requires
 const { generate } = require('@kbn/openapi-generator');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @kbn/compat/typescript-no-var-requires
 const { REPO_ROOT } = require('@kbn/repo-info');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @kbn/compat/typescript-no-var-requires
 const { join, resolve } = require('path');
 
 const OSQUERY_ROOT = resolve(__dirname, '../..');
