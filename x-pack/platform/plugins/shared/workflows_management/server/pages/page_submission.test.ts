@@ -9,6 +9,7 @@ import type { PageTrigger } from '@kbn/workflows';
 import {
   getPageForm,
   isPageRequestVerified,
+  notFoundPage,
   PAGE_PHISHING_NOTICE,
   PAGE_SUBMITTED_QUERY,
   submitPage,
@@ -152,6 +153,14 @@ describe('submitPage', () => {
     expect(deps.executeWorkflowAsServiceAccount).not.toHaveBeenCalled();
     expect(result.html).toContain('role="alert"');
     expect(result.html).toContain('value="ab"');
+  });
+});
+
+describe('notFoundPage', () => {
+  it('renders the same body for every miss reason', () => {
+    const reasons = ['secret_mismatch', 'page_offline', 'pages_disabled', 'run_failed'] as const;
+    const bodies = new Set(reasons.map((reason) => notFoundPage(reason).html));
+    expect(bodies.size).toBe(1);
   });
 });
 

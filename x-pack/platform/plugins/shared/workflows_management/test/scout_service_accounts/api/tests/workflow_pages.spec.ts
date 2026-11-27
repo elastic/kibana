@@ -85,19 +85,41 @@ apiTest.describe(
     apiTest.afterAll(teardown);
 
     const internal = () => ({ ...getContext().headers, 'elastic-api-version': '1' });
-    const pageApi = (id: string) => `internal/workflows/workflow/${id}/pages/default`;
+    const pageApi = (id: string, spacePrefix = '') =>
+      `${spacePrefix}internal/workflows/workflow/${id}/pages/default`;
+
+    /** Creates a workflow in a named space. The caller disables it before it deletes the space. */
+    const createInSpace = async (apiClient: ApiClientFixture, space: string, yaml: string) => {
+      const id = `pages-space-${Date.now()}`;
+      const response = await apiClient.post(`s/${space}/api/workflows/workflow`, {
+        headers: getContext().headers,
+        body: { id, yaml },
+        responseType: 'json',
+      });
+      expect(response, JSON.stringify(response.body)).toHaveStatusCode(200);
+      return id;
+    };
 
     /** Creates a bound workflow with a page, publishes the page, and returns its public path. */
-    const createPublishedPage = async (apiClient: ApiClientFixture, yaml?: string) => {
+    const createPublishedPage = async (
+      apiClient: ApiClientFixture,
+      { yaml, space }: { yaml?: string; space?: string } = {}
+    ) => {
       const { accountId, create } = getContext();
-      const id = await create(apiClient, yaml ?? pageYaml(accountId));
-      const published = await apiClient.put(`${pageApi(id)}/access`, {
+      const spacePrefix = space ? `s/${space}/` : '';
+      const id = space
+        ? await createInSpace(apiClient, space, yaml ?? pageYaml(accountId))
+        : await create(apiClient, yaml ?? pageYaml(accountId));
+      const published = await apiClient.put(`${pageApi(id, spacePrefix)}/access`, {
         headers: internal(),
         body: { access: { level: 'secret_link' } },
         responseType: 'json',
       });
       expect(published, JSON.stringify(published.body)).toHaveStatusCode(200);
-      const page = await apiClient.get(pageApi(id), { headers: internal(), responseType: 'json' });
+      const page = await apiClient.get(pageApi(id, spacePrefix), {
+        headers: internal(),
+        responseType: 'json',
+      });
       expect(page).toHaveStatusCode(200);
       expect(page.body.status).toStrictEqual({ online: true, reasons: [] });
       return { id, path: (page.body.url as string).replace(/^\//, '') };
@@ -145,12 +167,21 @@ apiTest.describe(
         const secretA = pageA.path.split('/k/')[1];
         const space = `pages-isolation-${Date.now()}`;
         await kbnClient.spaces.create({ id: space, name: space });
+        let pageCId: string | undefined;
 
         try {
+          // The link of a page in a named space carries the space, and opens there.
+          const pageC = await createPublishedPage(apiClient, { space });
+          pageCId = pageC.id;
+          expect(pageC.path.startsWith(`s/${space}/pages/`)).toBe(true);
+          expect(await apiClient.get(pageC.path, { responseType: 'text' })).toHaveStatusCode(200);
+          const secretC = pageC.path.split('/k/')[1];
+
           for (const path of [
             `pages/${pageB.id}/default/k/${secretA}`,
             `pages/${pageA.id}/other/k/${secretA}`,
             `s/${space}/pages/${pageA.id}/default/k/${secretA}`,
+            `pages/${pageC.id}/default/k/${secretC}`,
           ]) {
             expect(await apiClient.get(path, { responseType: 'text' }), path).toHaveStatusCode(404);
             expect(await submit(apiClient, path, 'summary=Login+fails'), path).toHaveStatusCode(
@@ -158,6 +189,12 @@ apiTest.describe(
             );
           }
         } finally {
+          if (pageCId) {
+            await apiClient.put(`s/${space}/api/workflows/workflow/${pageCId}`, {
+              headers: getContext().headers,
+              body: { enabled: false },
+            });
+          }
           await kbnClient.spaces.delete(space);
         }
 
@@ -187,9 +224,8 @@ ${authenticationStep}  - name: echo
       message: "{{ inputs.summary }}"
 `
         );
-        const { id, path } = await createPublishedPage(
-          apiClient,
-          pageYaml(accountId, {
+        const { id, path } = await createPublishedPage(apiClient, {
+          yaml: pageYaml(accountId, {
             before: secretConsts,
             steps: `${waitStep}  - name: echo
     type: console
@@ -202,8 +238,8 @@ ${authenticationStep}  - name: echo
       inputs:
         summary: "{{ page.inputs.summary }}"
 ${authenticationStep}`,
-          })
-        );
+          }),
+        });
 
         const submitted = await submit(
           apiClient,
@@ -233,13 +269,12 @@ ${authenticationStep}`,
     apiTest('a queued page run keeps the service account', async ({ apiClient }) => {
       apiTest.setTimeout(RUN_TEST_TIMEOUT_MS * 2);
       const { accountId, wait } = getContext();
-      const { id, path } = await createPublishedPage(
-        apiClient,
-        pageYaml(accountId, {
+      const { id, path } = await createPublishedPage(apiClient, {
+        yaml: pageYaml(accountId, {
           settings: `  concurrency:\n    max: 1\n    strategy: queue\n    key: pages-queue-${Date.now()}\n`,
           steps: waitStep + authenticationStep,
-        })
-      );
+        }),
+      });
 
       expect(await submit(apiClient, path, 'summary=First')).toHaveStatusCode(303);
       await expect.poll(async () => (await listExecutions(apiClient, id)).length).toBe(1);
@@ -331,9 +366,17 @@ ${authenticationStep}`,
 
     apiTest('every offline state returns the same 404, never a 401', async ({ apiClient }) => {
       const { id, path } = await createPublishedPage(apiClient);
+      const bodies = new Set<string>();
       const expectNotFound = async (url: string) => {
-        expect(await apiClient.get(url, { responseType: 'text' })).toHaveStatusCode(404);
-        expect(await submit(apiClient, url, 'summary=Login+fails')).toHaveStatusCode(404);
+        const viewed = await apiClient.get(url, { responseType: 'text' });
+        const submitted = await apiClient.post(url, {
+          headers: FORM,
+          body: 'summary=Login+fails',
+          responseType: 'text',
+        });
+        expect(viewed).toHaveStatusCode(404);
+        expect(submitted).toHaveStatusCode(404);
+        bodies.add(viewed.body as string).add(submitted.body as string);
       };
       const setPage = async (change: 'enabled' | 'access', body: object) => {
         const response = await apiClient.put(`${pageApi(id)}/${change}`, {
@@ -362,6 +405,8 @@ ${authenticationStep}`,
       expect(disabled).toHaveStatusCode(200);
       await expectNotFound(path);
 
+      // One body for every miss, so a visitor can't tell a wrong secret from an offline page.
+      expect(bodies.size).toBe(1);
       expect(await listExecutions(apiClient, id)).toStrictEqual([]);
     });
 
@@ -377,11 +422,19 @@ ${authenticationStep}`,
 
       expect(newPath).not.toBe(path);
       expect(await apiClient.get(path, { responseType: 'text' })).toHaveStatusCode(404);
+      expect(await submit(apiClient, path, 'summary=Login+fails')).toHaveStatusCode(404);
       expect(await apiClient.get(newPath, { responseType: 'text' })).toHaveStatusCode(200);
+      expect(await listExecutions(apiClient, id)).toStrictEqual([]);
     });
 
     apiTest('the kill switch takes every page offline without a restart', async ({ apiClient }) => {
-      const { path } = await createPublishedPage(apiClient);
+      const { id, path } = await createPublishedPage(apiClient);
+      const settings = await apiClient.get('internal/kibana/global_settings', {
+        headers: getContext().headers,
+        responseType: 'json',
+      });
+      expect(settings).toHaveStatusCode(200);
+      const previous: boolean | null = settings.body.settings?.[PAGES_SETTING]?.userValue ?? null;
       const setKillSwitch = async (value: boolean | null) => {
         const response = await apiClient.post('internal/kibana/global_settings', {
           headers: getContext().headers,
@@ -394,10 +447,34 @@ ${authenticationStep}`,
       try {
         await setKillSwitch(false);
         expect(await apiClient.get(path, { responseType: 'text' })).toHaveStatusCode(404);
+        expect(await submit(apiClient, path, 'summary=Login+fails')).toHaveStatusCode(404);
       } finally {
-        await setKillSwitch(null);
+        await setKillSwitch(previous);
       }
       expect(await apiClient.get(path, { responseType: 'text' })).toHaveStatusCode(200);
+      expect(await listExecutions(apiClient, id)).toStrictEqual([]);
+    });
+
+    apiTest('a page with no inputs accepts an empty form', async ({ apiClient }) => {
+      const { accountId } = getContext();
+      const yaml = `name: Acknowledge
+enabled: true
+settings:
+  run_as: ${accountId}
+triggers:
+  - type: page
+    title: Acknowledge
+steps:
+  - name: echo
+    type: console
+    with:
+      message: acknowledged
+`;
+      const { path } = await createPublishedPage(apiClient, { yaml });
+
+      const response = await submit(apiClient, path, '');
+
+      expect(response).toHaveStatusCode(303);
     });
 
     apiTest('the status names a service account that does not exist', async ({ apiClient }) => {
