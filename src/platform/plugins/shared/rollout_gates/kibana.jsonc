@@ -1,0 +1,17 @@
+{
+  "type": "plugin",
+  "id": "@kbn/rollout-gates-plugin",
+  "owner": [
+    "@elastic/response-ops"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "rolloutGates",
+    "server": true,
+    "browser": false,
+    "configPath": [
+      "rolloutGates"
+    ]
+  }
+}
