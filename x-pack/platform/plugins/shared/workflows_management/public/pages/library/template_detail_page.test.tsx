@@ -78,7 +78,7 @@ describe('LibraryTemplateDetailPage', () => {
     jest.clearAllMocks();
     mockOnLoaded = undefined;
     mockShowGraphPreview = undefined;
-    mockUseTemplate.mockReturnValue({ error: null });
+    mockUseTemplate.mockReturnValue({ error: null, isLoadingError: false });
   });
 
   it('resets breadcrumbs to Library when the route slug changes', () => {
@@ -116,7 +116,7 @@ describe('LibraryTemplateDetailPage', () => {
 
   it('renders the not-found page when the template does not exist', () => {
     const services = buildEnabledServices();
-    mockUseTemplate.mockReturnValue({ error: createHttpFetchError(404) });
+    mockUseTemplate.mockReturnValue({ error: createHttpFetchError(404), isLoadingError: true });
 
     render(<LibraryTemplateDetailPage {...routeProps('no-such-template')} />, {
       wrapper: getTestProvider({ services }),
@@ -134,7 +134,7 @@ describe('LibraryTemplateDetailPage', () => {
 
   it('keeps the template detail for errors other than not found', () => {
     const services = buildEnabledServices();
-    mockUseTemplate.mockReturnValue({ error: createHttpFetchError(500) });
+    mockUseTemplate.mockReturnValue({ error: createHttpFetchError(500), isLoadingError: true });
 
     render(<LibraryTemplateDetailPage {...routeProps('first-template')} />, {
       wrapper: getTestProvider({ services }),

@@ -91,9 +91,10 @@ export const LibraryTemplateDetailPage = React.memo<LibraryTemplateDetailPagePro
 
   // Shares the query (and its cache entry) with `TemplateDetail`; read here so
   // a missing slug replaces the whole page rather than rendering inside it.
-  const { error: templateError } = useTemplate(isLibraryEnabled ? slug : undefined);
+  const templateQuery = useTemplate(isLibraryEnabled ? slug : undefined);
+  const { error: templateError } = templateQuery;
   // Reported here, not in `TemplateDetail`: a missing slug renders the not-found page instead.
-  useTemplateLoadFailedTelemetry(slug, templateError);
+  useTemplateLoadFailedTelemetry(slug, templateQuery);
 
   if (!isLibraryEnabled) {
     return <Redirect to="/" />;

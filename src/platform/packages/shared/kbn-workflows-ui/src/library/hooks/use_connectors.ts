@@ -8,10 +8,11 @@
  */
 
 import { useCallback } from 'react';
+import type { ActionConnector } from '@kbn/alerts-ui-shared';
 import { fetchConnectors } from '@kbn/alerts-ui-shared/src/common/apis';
 import type { HttpStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useQuery, useQueryClient } from '@kbn/react-query';
+import { useQuery, useQueryClient, type UseQueryResult } from '@kbn/react-query';
 
 const CONNECTORS_QUERY_KEY = ['workflows-library', 'connectors'];
 
@@ -34,21 +35,15 @@ export function useConnectors(connectorType: string) {
   });
 }
 
-/**
- * Returns a function that resolves the full connector list `useConnectors` caches. It reuses
- * the cached list or a request in flight, and fetches only when there's no list yet.
- */
-export function useLoadConnectors() {
-  const queryClient = useQueryClient();
+/** Observes the full connector list that the `useConnectors` pickers load, without fetching it. */
+export function useLoadedConnectors(): UseQueryResult<ActionConnector[]> {
   const { http } = useKibana<{ http: HttpStart }>().services;
-  return useCallback(
-    () =>
-      queryClient.ensureQueryData({
-        queryKey: CONNECTORS_QUERY_KEY,
-        queryFn: () => fetchConnectors({ http }),
-      }),
-    [queryClient, http]
-  );
+  return useQuery({
+    queryKey: CONNECTORS_QUERY_KEY,
+    queryFn: () => fetchConnectors({ http }),
+    // Disabled: it only receives what the pickers load, with their own retries.
+    enabled: false,
+  });
 }
 
 /** Invalidates the shared connector-list cache (e.g. after creating a connector). */

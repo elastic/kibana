@@ -28,10 +28,11 @@ describe('useTemplateLoadFailedTelemetry', () => {
   let analytics: ReturnType<typeof analyticsServiceMock.createAnalyticsServiceStart>;
   let queryClient: QueryClient;
 
-  const renderLoadFailed = (slug: string, error: unknown) =>
+  // A first load that failed by default; `isLoadingError: false` is a failed refetch.
+  const renderLoadFailed = (slug: string, error: unknown, isLoadingError = Boolean(error)) =>
     renderHook(
       ({ currentError }: { currentError: unknown }) =>
-        useTemplateLoadFailedTelemetry(slug, currentError),
+        useTemplateLoadFailedTelemetry(slug, { error: currentError, isLoadingError }),
       {
         initialProps: { currentError: error },
         wrapper: ({ children }) => (
@@ -84,6 +85,12 @@ describe('useTemplateLoadFailedTelemetry', () => {
     expect(analytics.reportEvent).toHaveBeenCalledWith('workflows_template_load_failed', {
       errorType: 'fetch_failed',
     });
+  });
+
+  it('reports nothing when a refetch fails after the template loaded', () => {
+    renderLoadFailed('triage-alerts', httpError(503), false);
+
+    expect(analytics.reportEvent).not.toHaveBeenCalled();
   });
 
   it('reports once per slug, even when a refetch fails again', () => {

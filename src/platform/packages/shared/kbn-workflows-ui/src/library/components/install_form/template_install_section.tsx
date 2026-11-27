@@ -16,8 +16,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import useUnmount from 'react-use/lib/useUnmount';
+import React, { useCallback, useMemo, useState } from 'react';
 import type { ApplicationStart, NotificationsStart } from '@kbn/core/public';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import { i18n } from '@kbn/i18n';
@@ -30,10 +29,8 @@ import { InstallForm } from './install_form';
 import { TemplateRequirements } from './template_requirements';
 import { useWorkflowsCapabilities } from '../../../hooks/use_workflows_capabilities';
 import type { WorkflowsCreateRouteState } from '../../../navigation';
-import { useLoadConnectors } from '../../hooks/use_connectors';
 import { type InstallSource, useInstallTemplate } from '../../hooks/use_install_template';
-import { useTemplateTelemetryFields } from '../../telemetry/template_telemetry_fields';
-import { useLibraryTelemetry } from '../../telemetry/use_library_telemetry';
+import { useTemplateSetupTelemetry } from '../../telemetry/use_template_setup_telemetry';
 
 /**
  * The two steps of the template detail view: the template's summary
@@ -65,13 +62,6 @@ export interface TemplateInstallSectionProps {
    */
   installMode?: 'catalog' | 'custom';
 }
-
-/** Connector types of every connector field in the form, required or optional. */
-const getConnectorTypes = (fields: InstallFormField[]): string[] => [
-  ...new Set(
-    fields.flatMap((field) => (field.inputType === 'connector' ? [field.connectorType] : []))
-  ),
-];
 
 const defaultsFromForm = (fields: InstallFormField[]): Record<string, unknown> =>
   Object.fromEntries(
@@ -158,72 +148,6 @@ export const TemplateInstallSection = React.memo<TemplateInstallSectionProps>(
       [onPreviewValuesChange, values]
     );
 
-    const telemetry = useLibraryTelemetry();
-    const templateTelemetry = useTemplateTelemetryFields(template, installMode);
-    const loadConnectors = useLoadConnectors();
-
-    // Once per template view: stepping back to the details and into setup again is one setup.
-    const isSetupReported = useRef(false);
-    const reportSetupOpened = useCallback(() => {
-      if (isSetupReported.current || !templateTelemetry) {
-        return;
-      }
-      isSetupReported.current = true;
-      const formFieldCount = fields.length;
-      // The connector types in an imported file are free text.
-      if (templateTelemetry.templateOrigin !== 'catalog') {
-        telemetry.reportTemplateSetupOpened(templateTelemetry, { formFieldCount });
-        return;
-      }
-      const connectorTypes = getConnectorTypes(fields);
-      if (connectorTypes.length === 0) {
-        telemetry.reportTemplateSetupOpened(templateTelemetry, {
-          formFieldCount,
-          connectorTypes,
-          connectorTypesExisting: [],
-        });
-        return;
-      }
-      // Reuses the list the setup step's connector pickers load, so this adds no request.
-      loadConnectors()
-        .then((connectors) => {
-          const connectorTypesExisting = connectorTypes.filter((connectorType) =>
-            connectors.some(({ actionTypeId }) => actionTypeId === connectorType)
-          );
-          telemetry.reportTemplateSetupOpened(templateTelemetry, {
-            formFieldCount,
-            connectorTypes,
-            connectorTypesExisting,
-          });
-        })
-        .catch(() => {
-          telemetry.reportTemplateSetupOpened(templateTelemetry, {
-            formFieldCount,
-            connectorTypes,
-          });
-        });
-    }, [fields, loadConnectors, telemetry, templateTelemetry]);
-
-    // Leaving the template after opening setup, without installing or remixing, abandons the
-    // setup. Best effort: closing the browser tab unmounts nothing.
-    const hasOpenedSetup = useRef(false);
-    const hasCompleted = useRef(false);
-    useEffect(() => {
-      if (step === 'setup') {
-        hasOpenedSetup.current = true;
-      }
-    }, [step]);
-    useUnmount(() => {
-      if (!hasOpenedSetup.current || hasCompleted.current || !templateTelemetry) {
-        return;
-      }
-      // The field names in an imported file are free text.
-      telemetry.reportTemplateSetupAbandoned(
-        templateTelemetry,
-        templateTelemetry.templateOrigin === 'catalog' ? Object.keys(clientErrors) : undefined
-      );
-    });
-
     const installSource = useMemo<InstallSource>(
       () =>
         installMode === 'custom'
@@ -232,9 +156,12 @@ export const TemplateInstallSection = React.memo<TemplateInstallSectionProps>(
       [installMode, template.raw, template.metadata.slug]
     );
 
-    const { mutate: installTemplate, isLoading: isInstalling } = useInstallTemplate(installSource, {
+    const {
+      mutate: installTemplate,
+      isLoading: isInstalling,
+      status: installStatus,
+    } = useInstallTemplate(installSource, {
       onSuccess: ({ workflowId }) => {
-        hasCompleted.current = true;
         notifications.toasts.addSuccess(
           i18n.translate('workflowsUi.library.install.successToast', {
             defaultMessage: 'Workflow created from "{name}"',
@@ -256,6 +183,15 @@ export const TemplateInstallSection = React.memo<TemplateInstallSectionProps>(
       },
     });
 
+    const { reportRemixClicked } = useTemplateSetupTelemetry({
+      template,
+      installMode,
+      fields,
+      step,
+      fieldErrors: clientErrors,
+      installStatus,
+    });
+
     const handleInstall = useCallback(() => {
       setInstallError(undefined);
       setServerErrors({});
@@ -269,11 +205,7 @@ export const TemplateInstallSection = React.memo<TemplateInstallSectionProps>(
     // defaults or `<name>` placeholders.
     const { slug: templateSlug, version: templateVersion } = template.metadata;
     const handleRemix = useCallback(() => {
-      // Remixing continues the setup in the editor, so it doesn't abandon it.
-      hasCompleted.current = true;
-      if (templateTelemetry) {
-        telemetry.reportTemplateRemixClicked(templateTelemetry, step);
-      }
+      reportRemixClicked();
       void application.navigateToApp(WORKFLOWS_APP_ID, {
         path: '/create',
         state: {
@@ -281,20 +213,9 @@ export const TemplateInstallSection = React.memo<TemplateInstallSectionProps>(
           template: { slug: templateSlug, version: templateVersion },
         } satisfies WorkflowsCreateRouteState,
       });
-    }, [
-      application,
-      previewYaml,
-      step,
-      telemetry,
-      templateSlug,
-      templateTelemetry,
-      templateVersion,
-    ]);
+    }, [application, previewYaml, reportRemixClicked, templateSlug, templateVersion]);
 
-    const handleSetup = useCallback(() => {
-      onStepChange('setup');
-      reportSetupOpened();
-    }, [onStepChange, reportSetupOpened]);
+    const handleSetup = useCallback(() => onStepChange('setup'), [onStepChange]);
 
     if (!canCreateWorkflow) {
       // Without the create privilege the install (and any secondary create

@@ -10,7 +10,7 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { useConnectors, useLoadConnectors } from './use_connectors';
+import { useConnectors, useLoadedConnectors } from './use_connectors';
 import { testQueryClientConfig } from '../../test_utils';
 
 const mockFetchConnectors = jest.fn();
@@ -21,59 +21,58 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: () => ({ services: { http: {} } }),
 }));
 
-const queryClient = new QueryClient(testQueryClientConfig);
-
-const wrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) =>
-  React.createElement(QueryClientProvider, { client: queryClient }, children);
-
 const connectors = [
   { id: 'slack-1', actionTypeId: '.slack' },
   { id: 'email-1', actionTypeId: '.email' },
 ];
 
-/** A picker for one connector type next to the loader, as on the setup step. */
-const usePickerAndLoader = () => ({
+const createWrapper = (queryClient: QueryClient): React.FC<React.PropsWithChildren<{}>> => {
+  const Wrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) =>
+    React.createElement(QueryClientProvider, { client: queryClient }, children);
+  return Wrapper;
+};
+
+/** A picker for one connector type next to the observer, as on the setup step. */
+const usePickerAndObserver = () => ({
   picker: useConnectors('.slack'),
-  loadConnectors: useLoadConnectors(),
+  observed: useLoadedConnectors(),
 });
 
-describe('useLoadConnectors', () => {
+describe('useLoadedConnectors', () => {
   beforeEach(() => {
     mockFetchConnectors.mockReset();
-    queryClient.clear();
   });
 
-  it('loads the connector list when there is none yet', async () => {
+  it('never requests the connector list itself', () => {
+    const { result } = renderHook(() => useLoadedConnectors(), {
+      wrapper: createWrapper(new QueryClient(testQueryClientConfig)),
+    });
+
+    expect(result.current.isFetchedAfterMount).toBe(false);
+    expect(mockFetchConnectors).not.toHaveBeenCalled();
+  });
+
+  it('receives the full list a picker loads, with no extra request', async () => {
     mockFetchConnectors.mockResolvedValue(connectors);
-    const { result } = renderHook(() => useLoadConnectors(), { wrapper });
+    const { result } = renderHook(usePickerAndObserver, {
+      wrapper: createWrapper(new QueryClient(testQueryClientConfig)),
+    });
 
-    await expect(result.current()).resolves.toEqual(connectors);
+    await waitFor(() => expect(result.current.observed.isFetchedAfterMount).toBe(true));
+    expect(result.current.observed.data).toEqual(connectors);
+    expect(result.current.picker.data).toEqual([connectors[0]]);
     expect(mockFetchConnectors).toHaveBeenCalledTimes(1);
   });
 
-  it('reuses the list a picker already loaded, without a request', async () => {
+  it("leaves the picker's retries in place", async () => {
+    mockFetchConnectors.mockRejectedValueOnce(new Error('Bad gateway'));
     mockFetchConnectors.mockResolvedValue(connectors);
-    const { result } = renderHook(usePickerAndLoader, { wrapper });
-    await waitFor(() => expect(result.current.picker.isSuccess).toBe(true));
+    // The app's client has no retry default: queries retry 3 times.
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retryDelay: 0 } } });
+    const { result } = renderHook(usePickerAndObserver, { wrapper: createWrapper(queryClient) });
 
-    await expect(result.current.loadConnectors()).resolves.toEqual(connectors);
-    expect(mockFetchConnectors).toHaveBeenCalledTimes(1);
-  });
-
-  it('joins the request a picker has in flight', async () => {
-    let resolveFetch: (value: typeof connectors) => void = () => {};
-    mockFetchConnectors.mockReturnValue(
-      new Promise((resolve) => {
-        resolveFetch = resolve;
-      })
-    );
-    const { result } = renderHook(usePickerAndLoader, { wrapper });
-    await waitFor(() => expect(mockFetchConnectors).toHaveBeenCalledTimes(1));
-
-    const loaded = result.current.loadConnectors();
-    resolveFetch(connectors);
-
-    await expect(loaded).resolves.toEqual(connectors);
-    expect(mockFetchConnectors).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(result.current.observed.isFetchedAfterMount).toBe(true));
+    expect(result.current.observed.status).toBe('success');
+    expect(mockFetchConnectors).toHaveBeenCalledTimes(2);
   });
 });

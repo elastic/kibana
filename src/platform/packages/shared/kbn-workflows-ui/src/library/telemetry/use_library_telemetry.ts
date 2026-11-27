@@ -13,10 +13,10 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type {
   TemplateImportFileErrorType,
   TemplateLink,
-  TemplateLoadErrorType,
+  TemplateLoadFailedEvent,
   TemplatePreviewView,
-  TemplateRemixClickedEvent,
   TemplateSetupOpenedEvent,
+  TemplateStep,
   TemplateTelemetryFields,
 } from './events';
 import {
@@ -40,20 +40,14 @@ export type TemplateSetupDetails = Pick<
 /** Reports the Workflow Template library browser events. Never throws. */
 export interface LibraryTelemetry {
   reportTemplateViewed(template: TemplateTelemetryFields): void;
-  reportTemplateLoadFailed(failure: {
-    errorType: TemplateLoadErrorType;
-    templateSlug?: string;
-  }): void;
+  reportTemplateLoadFailed(failure: TemplateLoadFailedEvent): void;
   reportTemplatePreviewChanged(
     template: TemplateTelemetryFields,
     previewView: TemplatePreviewView
   ): void;
   reportTemplateSetupOpened(template: TemplateTelemetryFields, setup: TemplateSetupDetails): void;
   reportTemplateSetupAbandoned(template: TemplateTelemetryFields, invalidFields?: string[]): void;
-  reportTemplateRemixClicked(
-    template: TemplateTelemetryFields,
-    step: TemplateRemixClickedEvent['step']
-  ): void;
+  reportTemplateRemixClicked(template: TemplateTelemetryFields, step: TemplateStep): void;
   reportTemplateImportOpened(): void;
   reportTemplateImportFileValidated(
     result: { success: true } | { success: false; errorType: TemplateImportFileErrorType }
@@ -75,6 +69,11 @@ const toTemplateFields = ({
   templateOrigin,
   ...(solutions ? { solutions } : {}),
 });
+
+// An imported file's form field names and connector types are free text, so only a catalog
+// template's are sent, whatever the caller passes.
+const isCatalogTemplate = ({ templateOrigin }: TemplateTelemetryFields): boolean =>
+  templateOrigin === 'catalog';
 
 export const createLibraryTelemetry = (
   analytics: Pick<AnalyticsServiceStart, 'reportEvent'> | undefined
@@ -101,17 +100,19 @@ export const createLibraryTelemetry = (
     reportTemplateSetupOpened: (
       template,
       { formFieldCount, connectorTypes, connectorTypesExisting }
-    ) =>
+    ) => {
+      const isCatalog = isCatalogTemplate(template);
       report(TEMPLATE_SETUP_OPENED_EVENT_TYPE, {
         ...toTemplateFields(template),
         formFieldCount,
-        ...(connectorTypes ? { connectorTypes } : {}),
-        ...(connectorTypesExisting ? { connectorTypesExisting } : {}),
-      }),
+        ...(isCatalog && connectorTypes ? { connectorTypes } : {}),
+        ...(isCatalog && connectorTypesExisting ? { connectorTypesExisting } : {}),
+      });
+    },
     reportTemplateSetupAbandoned: (template, invalidFields) =>
       report(TEMPLATE_SETUP_ABANDONED_EVENT_TYPE, {
         ...toTemplateFields(template),
-        ...(invalidFields ? { invalidFields } : {}),
+        ...(isCatalogTemplate(template) && invalidFields ? { invalidFields } : {}),
       }),
     reportTemplateRemixClicked: (template, step) =>
       report(TEMPLATE_REMIX_CLICKED_EVENT_TYPE, { ...toTemplateFields(template), step }),

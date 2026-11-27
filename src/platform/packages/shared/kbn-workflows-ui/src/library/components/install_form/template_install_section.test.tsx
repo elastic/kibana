@@ -31,19 +31,32 @@ jest.mock('../../../api/use_workflows_api', () => ({
   useWorkflowsApi: () => mockWorkflowApi,
 }));
 
-// The connector picker has its own test (it needs the services provider and
-// the connectors fetch); a button stub keeps this test self-contained.
-jest.mock('./connector_field', () => ({
-  ConnectorField: ({
-    onChange,
-    'data-test-subj': dataTestSubj,
-  }: {
-    onChange: (id: string) => void;
-    'data-test-subj'?: string;
-  }) => (
-    <button type="button" data-test-subj={dataTestSubj} onClick={() => onChange('connector-1')} />
-  ),
-}));
+// The connector picker has its own test (it needs the services provider); a
+// button stub keeps this test self-contained. Like the real picker, it loads the
+// connector list, which the setup telemetry waits for.
+jest.mock('./connector_field', () => {
+  const { useConnectors } = jest.requireActual('../../hooks/use_connectors');
+  return {
+    ConnectorField: ({
+      connectorType,
+      onChange,
+      'data-test-subj': dataTestSubj,
+    }: {
+      connectorType: string;
+      onChange: (id: string) => void;
+      'data-test-subj'?: string;
+    }) => {
+      useConnectors(connectorType);
+      return (
+        <button
+          type="button"
+          data-test-subj={dataTestSubj}
+          onClick={() => onChange('connector-1')}
+        />
+      );
+    },
+  };
+});
 
 // Same for the requirements summary (it resolves connector labels through the
 // services provider); its own test covers the rendering.
@@ -106,28 +119,33 @@ describe('TemplateInstallSection', () => {
 
   const PREVIEW_YAML = 'name: Demo Template\nsteps:\n  - name: demo_step\n    type: demo.run\n';
 
-  // Most assertions target the install form, so the setup step is the default.
-  const renderSection = ({
-    template = TEMPLATE,
-    step = 'setup',
-    installMode,
-  }: {
+  interface SectionOptions {
     template?: TemplateBody;
     step?: TemplateInstallStep;
     installMode?: 'catalog' | 'custom';
-  } = {}) =>
-    render(
-      <QueryClientProvider client={queryClient}>
-        <TemplateInstallSection
-          template={template}
-          step={step}
-          onStepChange={onStepChange}
-          onPreviewValuesChange={onPreviewValuesChange}
-          previewYaml={PREVIEW_YAML}
-          installMode={installMode}
-        />
-      </QueryClientProvider>
-    );
+    client?: QueryClient;
+  }
+
+  // Most assertions target the install form, so the setup step is the default.
+  const sectionElement = ({
+    template = TEMPLATE,
+    step = 'setup',
+    installMode,
+    client = queryClient,
+  }: SectionOptions = {}) => (
+    <QueryClientProvider client={client}>
+      <TemplateInstallSection
+        template={template}
+        step={step}
+        onStepChange={onStepChange}
+        onPreviewValuesChange={onPreviewValuesChange}
+        previewYaml={PREVIEW_YAML}
+        installMode={installMode}
+      />
+    </QueryClientProvider>
+  );
+
+  const renderSection = (options: SectionOptions = {}) => render(sectionElement(options));
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -137,6 +155,7 @@ describe('TemplateInstallSection', () => {
     onPreviewValuesChange = jest.fn();
     onStepChange = jest.fn();
     reportEvent = jest.fn();
+    mockFetchConnectors.mockResolvedValue([]);
     setCapabilities(true);
   });
 
@@ -278,28 +297,30 @@ describe('TemplateInstallSection', () => {
         { id: 'connector-1', actionTypeId: '.demo' },
         { id: 'connector-2', actionTypeId: '.other' },
       ]);
-      renderSection({ step: 'details' });
+      const { rerender } = renderSection({ step: 'details' });
+      expect(reportedEvents('workflows_template_setup_opened')).toEqual([]);
 
-      fireEvent.click(screen.getByTestId('workflowLibraryTemplateSetupButton'));
-      fireEvent.click(screen.getByTestId('workflowLibraryTemplateSetupButton'));
-
+      rerender(sectionElement({ step: 'setup' }));
       await waitFor(() =>
-        expect(reportedEvents('workflows_template_setup_opened')).toEqual([
-          {
-            ...TEMPLATE_FIELDS,
-            formFieldCount: 2,
-            connectorTypes: ['.demo'],
-            connectorTypesExisting: ['.demo'],
-          },
-        ])
+        expect(reportedEvents('workflows_template_setup_opened')).toHaveLength(1)
       );
+      rerender(sectionElement({ step: 'details' }));
+      rerender(sectionElement({ step: 'setup' }));
+
+      await waitFor(() => expect(mockFetchConnectors).toHaveBeenCalledTimes(2));
+      expect(reportedEvents('workflows_template_setup_opened')).toEqual([
+        {
+          ...TEMPLATE_FIELDS,
+          formFieldCount: 2,
+          connectorTypes: ['.demo'],
+          connectorTypesExisting: ['.demo'],
+        },
+      ]);
     });
 
     it('reports no existing connector types when the user has none of them', async () => {
       mockFetchConnectors.mockResolvedValue([{ id: 'connector-2', actionTypeId: '.other' }]);
-      renderSection({ step: 'details' });
-
-      fireEvent.click(screen.getByTestId('workflowLibraryTemplateSetupButton'));
+      renderSection({ step: 'setup' });
 
       await waitFor(() =>
         expect(reportedEvents('workflows_template_setup_opened')).toEqual([
@@ -315,9 +336,7 @@ describe('TemplateInstallSection', () => {
 
     it('leaves out the existing connector types when the connector list fails to load', async () => {
       mockFetchConnectors.mockRejectedValue(new Error('Forbidden'));
-      renderSection({ step: 'details' });
-
-      fireEvent.click(screen.getByTestId('workflowLibraryTemplateSetupButton'));
+      renderSection({ step: 'setup' });
 
       await waitFor(() =>
         expect(reportedEvents('workflows_template_setup_opened')).toEqual([
@@ -326,15 +345,93 @@ describe('TemplateInstallSection', () => {
       );
     });
 
-    it('reports an imported file without its connector types', () => {
-      renderSection({ step: 'details', installMode: 'custom' });
+    it('reports setup opened when the connector list loads, even back on the details step', async () => {
+      let resolveConnectors: (
+        connectors: Array<{ id: string; actionTypeId: string }>
+      ) => void = () => {};
+      mockFetchConnectors.mockReturnValue(
+        new Promise((resolve) => {
+          resolveConnectors = resolve;
+        })
+      );
+      const { rerender } = renderSection({ step: 'setup' });
+      rerender(sectionElement({ step: 'details' }));
 
-      fireEvent.click(screen.getByTestId('workflowLibraryTemplateSetupButton'));
+      resolveConnectors([{ id: 'connector-1', actionTypeId: '.demo' }]);
+
+      await waitFor(() =>
+        expect(reportedEvents('workflows_template_setup_opened')).toEqual([
+          {
+            ...TEMPLATE_FIELDS,
+            formFieldCount: 2,
+            connectorTypes: ['.demo'],
+            connectorTypesExisting: ['.demo'],
+          },
+        ])
+      );
+    });
+
+    it('keeps the connector pickers retrying a failed connector list', async () => {
+      mockFetchConnectors.mockRejectedValueOnce(new Error('Bad gateway'));
+      mockFetchConnectors.mockResolvedValue([{ id: 'connector-1', actionTypeId: '.demo' }]);
+      // The app's client has no retry default: queries retry 3 times.
+      const client = new QueryClient({ defaultOptions: { queries: { retryDelay: 0 } } });
+      renderSection({ step: 'setup', client });
+
+      await waitFor(() =>
+        expect(reportedEvents('workflows_template_setup_opened')).toEqual([
+          {
+            ...TEMPLATE_FIELDS,
+            formFieldCount: 2,
+            connectorTypes: ['.demo'],
+            connectorTypesExisting: ['.demo'],
+          },
+        ])
+      );
+      expect(mockFetchConnectors).toHaveBeenCalledTimes(2);
+    });
+
+    it('reports a form without connector fields at once, with empty connector types', () => {
+      const template: TemplateBody = {
+        ...TEMPLATE,
+        metadata: {
+          ...TEMPLATE.metadata,
+          install: { form: [{ name: 'max-age', inputType: 'number', default: 30 }] },
+        },
+      };
+      renderSection({ step: 'setup', template });
+
+      expect(reportedEvents('workflows_template_setup_opened')).toEqual([
+        { ...TEMPLATE_FIELDS, formFieldCount: 1, connectorTypes: [], connectorTypesExisting: [] },
+      ]);
+    });
+
+    it('reports an imported file at once, without its connector types', () => {
+      renderSection({ step: 'setup', installMode: 'custom' });
 
       expect(reportedEvents('workflows_template_setup_opened')).toEqual([
         { templateSlug: 'unresolved', templateOrigin: 'import', formFieldCount: 2 },
       ]);
-      expect(mockFetchConnectors).not.toHaveBeenCalled();
+    });
+
+    it('reports setup opened before setup abandoned when the user leaves before the connector list loads', () => {
+      mockFetchConnectors.mockReturnValue(new Promise(() => {}));
+      const { unmount } = renderSection({ step: 'setup' });
+
+      unmount();
+
+      expect(
+        reportEvent.mock.calls.filter(([type]) => type.startsWith('workflows_template_setup_'))
+      ).toEqual([
+        [
+          'workflows_template_setup_opened',
+          { ...TEMPLATE_FIELDS, formFieldCount: 2, connectorTypes: ['.demo'] },
+        ],
+        [
+          'workflows_template_setup_abandoned',
+          { ...TEMPLATE_FIELDS, invalidFields: ['demo-connector'] },
+        ],
+      ]);
     });
 
     it('reports setup abandoned with the invalid fields when the user leaves the setup step', () => {
@@ -362,6 +459,17 @@ describe('TemplateInstallSection', () => {
       fireEvent.click(screen.getByTestId('workflowLibraryInstallForm-field-demo-connector'));
       fireEvent.click(screen.getByTestId('workflowLibraryTemplateInstallButton'));
       await waitFor(() => expect(navigateToApp).toHaveBeenCalled());
+      unmount();
+
+      expect(reportedEvents('workflows_template_setup_abandoned')).toEqual([]);
+    });
+
+    it('reports no abandoned setup while the install is running', () => {
+      mockWorkflowApi.installTemplate.mockReturnValue(new Promise(() => {}));
+      const { unmount } = renderSection({ step: 'setup' });
+
+      fireEvent.click(screen.getByTestId('workflowLibraryInstallForm-field-demo-connector'));
+      fireEvent.click(screen.getByTestId('workflowLibraryTemplateInstallButton'));
       unmount();
 
       expect(reportedEvents('workflows_template_setup_abandoned')).toEqual([]);

@@ -117,6 +117,28 @@ describe('createLibraryTelemetry', () => {
     );
   });
 
+  it("never sends an imported file's field names or connector types", () => {
+    const imported: TemplateTelemetryFields = { templateSlug: 'custom', templateOrigin: 'import' };
+    const telemetry = createLibraryTelemetry(analytics);
+
+    telemetry.reportTemplateSetupOpened(imported, {
+      formFieldCount: 2,
+      connectorTypes: ['.acme-crm'],
+      connectorTypesExisting: [],
+    });
+    telemetry.reportTemplateSetupAbandoned(imported, ['acme-customer-id']);
+
+    expect(analytics.reportEvent).toHaveBeenNthCalledWith(1, 'workflows_template_setup_opened', {
+      ...imported,
+      formFieldCount: 2,
+    });
+    expect(analytics.reportEvent).toHaveBeenNthCalledWith(
+      2,
+      'workflows_template_setup_abandoned',
+      imported
+    );
+  });
+
   it('reports Remix with AI with the step it was clicked from', () => {
     createLibraryTelemetry(analytics).reportTemplateRemixClicked(TEMPLATE, 'setup');
 

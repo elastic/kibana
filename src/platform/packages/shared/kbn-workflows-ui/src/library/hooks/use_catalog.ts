@@ -14,7 +14,7 @@ import { type CatalogFilters, filterCatalog } from './filter_catalog';
 import { useWorkflowsApi } from '../../api/use_workflows_api';
 
 /** React Query key of the catalog `useCatalog` fetches. */
-export const CATALOG_QUERY_KEY = ['workflows-library', 'catalog'];
+export const CATALOG_QUERY_KEY = ['workflows-library', 'catalog'] as const;
 
 /**
  * Fetches the full Workflow Template Library catalog (cached across callers via

@@ -14,11 +14,7 @@ import type { Template, TemplateBody } from '@kbn/workflows-library';
 import type { LibraryTemplateOrigin, TemplateTelemetryFields } from './events';
 import { CATALOG_QUERY_KEY } from '../hooks/use_catalog';
 
-/**
- * Template fields for the events about a template. A catalog template's metadata comes from
- * the catalog. An imported file's slug and version are free text, so they're only sent when
- * the catalog lists them, with the rule the server applies to the template origin it stores.
- */
+/** Template fields for the events about a template, without any text from an imported file. */
 export const getTemplateTelemetryFields = (
   { metadata }: TemplateBody,
   templateOrigin: LibraryTemplateOrigin,
@@ -33,6 +29,8 @@ export const getTemplateTelemetryFields = (
     };
   }
 
+  // An imported file's slug and version are free text: they're only sent when the catalog lists
+  // them, the rule the server applies to the template origin it stores.
   if (!catalog) {
     return { templateSlug: UNRESOLVED_WORKFLOW_TEMPLATE_SLUG, templateOrigin };
   }
@@ -50,21 +48,26 @@ export const getTemplateTelemetryFields = (
   };
 };
 
-/**
- * Template fields for `template`, resolved once per template. `installMode` is how the page
- * installs it: `custom` for an imported file, which is checked against the catalog the
- * browser already loaded, without a request (the catalog page, where the file is picked,
- * loads it).
- */
-export const useTemplateTelemetryFields = (
+/** Template fields for `template`, resolved once per template; `custom` is an imported file. */
+export function useTemplateTelemetryFields(
+  template: TemplateBody,
+  installMode: 'catalog' | 'custom'
+): TemplateTelemetryFields;
+export function useTemplateTelemetryFields(
   template: TemplateBody | undefined,
   installMode: 'catalog' | 'custom'
-): TemplateTelemetryFields | undefined => {
+): TemplateTelemetryFields | undefined;
+export function useTemplateTelemetryFields(
+  template: TemplateBody | undefined,
+  installMode: 'catalog' | 'custom'
+): TemplateTelemetryFields | undefined {
   const queryClient = useQueryClient();
   return useMemo(() => {
     if (!template) {
       return undefined;
     }
+    // An imported file is checked against the catalog the browser already loaded, without a
+    // request: the catalog page, where the file is picked, loads it.
     return installMode === 'custom'
       ? getTemplateTelemetryFields(
           template,
@@ -73,4 +76,4 @@ export const useTemplateTelemetryFields = (
         )
       : getTemplateTelemetryFields(template, 'catalog', undefined);
   }, [template, installMode, queryClient]);
-};
+}

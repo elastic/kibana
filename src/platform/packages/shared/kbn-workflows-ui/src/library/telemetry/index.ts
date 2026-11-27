@@ -7,6 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { libraryTelemetryEventTypes } from './events';
+export { loadLibraryTelemetryEventTypes } from './load_event_types';
 export { type LibraryTelemetry, useLibraryTelemetry } from './use_library_telemetry';
 export { useTemplateLoadFailedTelemetry } from './use_template_load_failed_telemetry';

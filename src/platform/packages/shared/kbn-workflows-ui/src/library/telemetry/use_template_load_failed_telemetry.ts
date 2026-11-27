@@ -14,18 +14,24 @@ import { useLibraryTelemetry } from './use_library_telemetry';
 import { CATALOG_QUERY_KEY } from '../hooks/use_catalog';
 import { isTemplateNotFoundError } from '../hooks/use_template';
 
-/**
- * Reports a template page that can't show its template, once per slug. `error` is the
- * `useTemplate` error, which is only set once the request has failed after its retries.
- * The slug is sent only when the catalog the browser already loaded lists it.
- */
-export const useTemplateLoadFailedTelemetry = (slug: string | undefined, error: unknown): void => {
+/** The `useTemplate` result fields that tell whether the template failed to load. */
+export interface TemplateLoadResult {
+  error: unknown;
+  isLoadingError: boolean;
+}
+
+/** Reports, once per slug, a template page that can't show its template. */
+export const useTemplateLoadFailedTelemetry = (
+  slug: string | undefined,
+  { error, isLoadingError }: TemplateLoadResult
+): void => {
   const telemetry = useLibraryTelemetry();
   const queryClient = useQueryClient();
   const reportedSlug = useRef<string | undefined>();
 
   useEffect(() => {
-    if (!slug || !error || reportedSlug.current === slug) {
+    // Only a first load that failed after its retries: a failed refetch keeps the template.
+    if (!slug || !isLoadingError || reportedSlug.current === slug) {
       return;
     }
     reportedSlug.current = slug;
@@ -34,11 +40,12 @@ export const useTemplateLoadFailedTelemetry = (slug: string | undefined, error: 
       telemetry.reportTemplateLoadFailed({ errorType: 'template_not_found' });
       return;
     }
+    // The slug comes from the URL: it's sent only when the catalog the browser loaded lists it.
     const catalog = queryClient.getQueryData<Template[]>(CATALOG_QUERY_KEY);
     const isListed = catalog?.some((template) => template.slug === slug) ?? false;
     telemetry.reportTemplateLoadFailed({
       errorType: 'fetch_failed',
       ...(isListed ? { templateSlug: slug } : {}),
     });
-  }, [slug, error, telemetry, queryClient]);
+  }, [slug, error, isLoadingError, telemetry, queryClient]);
 };

@@ -10,7 +10,10 @@ import {
   ChangeHistoryTelemetryEventTypes,
 } from '@kbn/change-history-ui';
 import { analyticsServiceMock } from '@kbn/core/public/mocks';
-import { libraryTelemetryEventTypes, RUN_WORKFLOW_EXECUTED_EVENT_TYPE } from '@kbn/workflows-ui';
+import {
+  loadLibraryTelemetryEventTypes,
+  RUN_WORKFLOW_EXECUTED_EVENT_TYPE,
+} from '@kbn/workflows-ui';
 import { workflowsTelemetryEvents } from './events/workflows';
 import { TelemetryService } from './telemetry_service';
 
@@ -23,6 +26,7 @@ describe('TelemetryService', () => {
 
     await new Promise((resolve) => setImmediate(resolve));
 
+    const libraryTelemetryEventTypes = await loadLibraryTelemetryEventTypes();
     const expectedEventCount =
       workflowsTelemetryEvents.length +
       1 +
