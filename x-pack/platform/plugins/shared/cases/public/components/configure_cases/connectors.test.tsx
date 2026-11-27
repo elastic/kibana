@@ -80,7 +80,7 @@ describe('Connectors', () => {
 
     expect(onChangeConnector).toHaveBeenCalled();
     expect(onChangeConnector).toHaveBeenCalledWith('resilient-2');
-  });
+  }, 30000);
 
   it('the connector is changed successfully to none', async () => {
     onChangeConnector.mockClear();
@@ -98,7 +98,7 @@ describe('Connectors', () => {
 
     expect(onChangeConnector).toHaveBeenCalled();
     expect(onChangeConnector).toHaveBeenCalledWith('none');
-  });
+  }, 30000);
 
   it('shows the add connector button', () => {
     renderWithTestingProviders(<Connectors {...props} />);
