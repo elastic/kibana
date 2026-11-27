@@ -185,7 +185,7 @@ export const replaySession = ({
   );
   const brokenSegment =
     missingChunk && !packEvents && segments.length > 0
-      ? recoverable[Math.floor(random() * recoverable.length)] ?? -1
+      ? (recoverable[Math.floor(random() * recoverable.length)] ?? -1)
       : -1;
   const desktopViewport = pick(random, DESKTOP_VIEWPORTS);
 
@@ -204,6 +204,7 @@ export const replaySession = ({
       size,
       random,
       clickTimes: document.clickTimes.filter((time) => time > start),
+      repeatedClickTimes: document.repeatedClickTimes?.filter((time) => time > start),
       exceptionTimes: document.exceptionTimes.filter((time) => time >= start),
       // A chunk can only go missing from an event that was split
       minSnapshotBytes: isBroken ? maxChunkBytes * 2.5 : 0,

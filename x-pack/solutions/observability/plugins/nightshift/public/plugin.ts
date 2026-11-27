@@ -19,7 +19,10 @@ import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { BehaviorSubject, type Subscription } from 'rxjs';
 import type { AgenticInvestigationsPublicPluginSetup } from '@kbn/agentic-investigations-plugin/public';
 import { NIGHTSHIFT_APP_ROUTE } from '../common/constants';
-import { NightshiftSettingsLocatorDefinition } from '../common/locators';
+import {
+  NightshiftAutomationLocatorDefinition,
+  NightshiftSettingsLocatorDefinition,
+} from '../common/locators';
 import { FocusedSignificantEventService } from './chat/focused_significant_event_service';
 import type {
   NightshiftPublicSetup,
@@ -28,15 +31,12 @@ import type {
   NightshiftStartDependencies,
 } from './types';
 
-export class NightshiftPlugin
-  implements
-    Plugin<
-      NightshiftPublicSetup,
-      NightshiftPublicStart,
-      NightshiftSetupDependencies,
-      NightshiftStartDependencies
-    >
-{
+export class NightshiftPlugin implements Plugin<
+  NightshiftPublicSetup,
+  NightshiftPublicStart,
+  NightshiftSetupDependencies,
+  NightshiftStartDependencies
+> {
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({ visibleIn: [] }));
   private readonly focusedSignificantEventService = new FocusedSignificantEventService();
   private servicesSubscription?: Subscription;
@@ -68,6 +68,7 @@ export class NightshiftPlugin
     this.ensureEbtEvents = ensureEbtEvents;
 
     pluginsSetup.share.url.locators.create(new NightshiftSettingsLocatorDefinition());
+    pluginsSetup.share.url.locators.create(new NightshiftAutomationLocatorDefinition());
 
     if (pluginsSetup.agenticInvestigations) {
       this.registerSignificantEventFlyout(pluginsSetup.agenticInvestigations, startServicesPromise);

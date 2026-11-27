@@ -91,8 +91,8 @@ function WorkflowGraphEdgeInner(props: EdgeProps) {
       ? euiTheme.colors.danger
       : euiTheme.colors.borderBaseProminent
     : traversed
-    ? euiTheme.colors.success
-    : euiTheme.colors.borderBaseProminent;
+      ? euiTheme.colors.success
+      : euiTheme.colors.borderBaseProminent;
   const strokeDasharray = isFailure ? '6 3' : undefined;
   const strokeWidth = 1;
 

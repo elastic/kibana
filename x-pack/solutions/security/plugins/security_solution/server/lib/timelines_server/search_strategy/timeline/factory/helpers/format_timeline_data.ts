@@ -8,8 +8,8 @@
 import { get, has } from 'lodash/fp';
 import type { TimelineEdges, TimelineNonEcsData } from '@kbn/securitysolution-timeline-common';
 import type { EventHit, EventSource } from '@kbn/securitysolution-timeline-search-strategy';
-import { toStringArray } from '@kbn/timelines-plugin/common/utils/to_array';
-import { getDataFromFieldsHits } from '@kbn/timelines-plugin/common/utils/field_formatters';
+import { toStringArray } from '../../../../../../../common/utils/to_array';
+import { getDataFromFieldsHits } from '../../../../../../../common/utils/field_formatters';
 import { getTimestamp } from './get_timestamp';
 import { getNestedParentPath } from './get_nested_parent_path';
 import { buildObjectRecursive } from './build_object_recursive';

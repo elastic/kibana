@@ -59,6 +59,7 @@ const defaultActionsConfig: ActionsConfig = {
     ...defaultInboundEventsLimitConfigs,
   },
   connectorSigningKeys: { enabled: false },
+  catalog: { enabled: false },
 };
 
 describe('ensureUriAllowed', () => {
@@ -579,7 +580,7 @@ describe('getEARSSSLSettings', () => {
         ...defaultActionsConfig.auth,
         ears: { enabled: true, enableExperimental: false, ssl },
       },
-    } as ActionsConfig);
+    }) as ActionsConfig;
 
   test('returns verificationMode from the EARS ssl configuration', () => {
     let sslSettings = getActionsConfigurationUtilities(
@@ -1247,5 +1248,20 @@ describe('getEnabledEmailServices()', () => {
       },
     });
     expect(acu.getEnabledEmailServices()).toEqual(['*']);
+  });
+});
+
+describe('isCatalogEnabled()', () => {
+  test('returns false by default', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    expect(acu.isCatalogEnabled()).toBe(false);
+  });
+
+  test('returns true when catalog.enabled is true', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      catalog: { enabled: true },
+    });
+    expect(acu.isCatalogEnabled()).toBe(true);
   });
 });

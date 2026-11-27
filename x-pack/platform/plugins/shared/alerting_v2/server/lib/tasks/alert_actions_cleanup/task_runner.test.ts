@@ -17,7 +17,7 @@ const NOW = new Date('2026-10-15T12:00:00.000Z');
 const createConfig = (dataRetention: string) =>
   ({
     retention: { alertActions: { dispatcher: { dataRetention } } },
-  } as unknown as PluginConfig);
+  }) as unknown as PluginConfig;
 
 describe('AlertActionsCleanupTaskRunner', () => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();

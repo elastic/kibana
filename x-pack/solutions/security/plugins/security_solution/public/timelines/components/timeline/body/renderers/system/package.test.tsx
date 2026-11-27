@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { render, screen } from '@testing-library/react';
 
 import { TestProviders } from '../../../../../../common/mock';
-import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 import { Package } from './package';
 import { CellActionsRenderer } from '../../../../../../common/components/cell_actions/cell_actions_renderer';
 
@@ -37,25 +36,27 @@ describe('Package', () => {
   beforeEach(() => {
     (CellActionsRenderer as unknown as jest.Mock).mockImplementation(MockedCellActionsRenderer);
   });
-  const mount = useMountAppended();
-
   describe('rendering', () => {
-    test('it renders against shallow snapshot', () => {
-      const wrapper = shallow(
-        <Package
-          scopeId="some_scope"
-          contextId="[context-123]"
-          eventId="[event-123]"
-          packageName="package-name-123"
-          packageSummary="package-summary-123"
-          packageVersion="package-version-123"
-        />
+    test('it renders the package name, version and summary', () => {
+      render(
+        <TestProviders>
+          <Package
+            scopeId="some_scope"
+            contextId="[context-123]"
+            eventId="[event-123]"
+            packageName="package-name-123"
+            packageSummary="package-summary-123"
+            packageVersion="package-version-123"
+          />
+        </TestProviders>
       );
-      expect(wrapper).toMatchSnapshot();
+      expect(screen.getByText('package-name-123')).toBeInTheDocument();
+      expect(screen.getByText('package-version-123')).toBeInTheDocument();
+      expect(screen.getByText('package-summary-123')).toBeInTheDocument();
     });
 
     test('it returns null if all of the package information is null ', () => {
-      const wrapper = shallow(
+      const { container } = render(
         <Package
           scopeId="some_scope"
           contextId="[context-123]"
@@ -65,11 +66,11 @@ describe('Package', () => {
           packageVersion={null}
         />
       );
-      expect(wrapper.isEmptyRender()).toBeTruthy();
+      expect(container).toBeEmptyDOMElement();
     });
 
     test('it returns null if all of the package information is undefined ', () => {
-      const wrapper = shallow(
+      const { container } = render(
         <Package
           scopeId="some_scope"
           contextId="[context-123]"
@@ -79,11 +80,11 @@ describe('Package', () => {
           packageVersion={undefined}
         />
       );
-      expect(wrapper.isEmptyRender()).toBeTruthy();
+      expect(container).toBeEmptyDOMElement();
     });
 
     test('it returns just the package name', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <Package
@@ -97,11 +98,11 @@ describe('Package', () => {
           </div>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('[package-name-123]');
+      expect(container.textContent).toEqual('[package-name-123]');
     });
 
     test('it returns just the package name and package summary', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <Package
@@ -115,11 +116,11 @@ describe('Package', () => {
           </div>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('[package-name-123][package-summary-123]');
+      expect(container.textContent).toEqual('[package-name-123][package-summary-123]');
     });
 
     test('it returns just the package name, package summary, package version', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <div>
             <Package
@@ -133,13 +134,13 @@ describe('Package', () => {
           </div>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(
+      expect(container.textContent).toEqual(
         '[package-name-123][package-version-123][package-summary-123]'
       );
     });
 
     test('should passing correct scopeId to cell actions', () => {
-      mount(
+      render(
         <TestProviders>
           <div>
             <Package

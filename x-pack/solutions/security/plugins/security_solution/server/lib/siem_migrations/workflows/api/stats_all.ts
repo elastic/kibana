@@ -29,12 +29,22 @@ export const registerSiemWorkflowMigrationsStatsAllRoute = (
       },
       withLicense(
         async (
-          _context,
+          context,
           _req,
           res
         ): Promise<IKibanaResponse<GetAllWorkflowMigrationStatsResponse>> => {
-          logger.debug('Workflow migration stats are not implemented');
-          return res.ok({ body: [] });
+          try {
+            const ctx = await context.resolve(['securitySolution']);
+            const workflowMigrationsClient =
+              ctx.securitySolution.siemMigrations.getWorkflowsClient();
+
+            const allStats = await workflowMigrationsClient.task.getAllStats();
+
+            return res.ok({ body: allStats });
+          } catch (err) {
+            logger.error(err);
+            return res.badRequest({ body: err.message });
+          }
         }
       )
     );

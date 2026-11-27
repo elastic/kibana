@@ -26,7 +26,7 @@ const createCloudMock = (
     getPrivilegedUrls: jest.fn().mockResolvedValue({
       billingUrl: overrides.billingUrl,
     }),
-  } as unknown as CloudStart);
+  }) as unknown as CloudStart;
 
 const renderBadge = async (cloud: CloudStart) => {
   let result: ReturnType<typeof render>;

@@ -8,6 +8,7 @@
  */
 
 import type { OptionsListSelection } from '@kbn/controls-schemas';
+import { getFilterableFieldSpec } from '@kbn/data-source';
 import { getSelectionAsFieldType } from '../../../../../common/options_list';
 import type { initializeEditorStateManager } from '../editor_state_manager';
 import { OptionsListStrings } from '../options_list_strings';
@@ -32,7 +33,7 @@ export const deselectOption = ({
     return;
   }
 
-  const keyAsType = getSelectionAsFieldType(field, key);
+  const keyAsType = getSelectionAsFieldType(getFilterableFieldSpec(field), key);
 
   // delete from selections
   const selectedOptions = selectionsManager.api.selectedOptions$.getValue() ?? [];
@@ -76,7 +77,7 @@ export const makeSelection = ({
   const singleSelect = editorStateManager.api.singleSelect$.getValue();
 
   // the order of these checks matters, so be careful if rearranging them
-  const keyAsType = getSelectionAsFieldType(field, key);
+  const keyAsType = getSelectionAsFieldType(getFilterableFieldSpec(field), key);
   if (key === 'exists-option') {
     // if selecting exists, then deselect everything else
     selectionsManager.api.setExistsSelected(!existsSelected);

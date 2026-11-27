@@ -23,7 +23,7 @@ import { KIBANA_PROJECTS, type KibanaProject } from '@kbn/projects-solutions-gro
 const serverlessConfigSchema = schema.maybe(
   schema.oneOf(
     KIBANA_PROJECTS.map((projectName) => schema.literal(projectName)) as [
-      Type<KibanaProject> // This cast is needed because it's different to Type<T>[] :sight:
+      Type<KibanaProject>, // This cast is needed because it's different to Type<T>[] :sight:
     ]
   )
 );

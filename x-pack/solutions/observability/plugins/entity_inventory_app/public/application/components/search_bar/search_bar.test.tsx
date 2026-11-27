@@ -6,18 +6,17 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import { createMemoryHistory } from 'history';
 import moment from 'moment';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import type { Filter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { StatefulSearchBarProps } from '@kbn/unified-search-plugin/public';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import type { EntityInventoryEntityCategory } from '../../../types';
 import { ENTITY_INVENTORY_APP_NAME, ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS } from '../../constants';
-import { createPublicConfigMock } from '../../../mocks';
-import { EntityInventorySearchProvider } from '../../context/search_context';
+import { createPublicConfigMock, MockEntityInventoryProvider } from '../../../mocks';
 import { QUICK_RANGES } from './quick_ranges';
 import { MAX_TIME_RANGE_HINT, SEARCH_BAR_PLACEHOLDERS } from '../../translations';
 import { EntityInventorySearchBar } from './search_bar';
@@ -33,14 +32,17 @@ const MockSearchBar = jest.fn(({ dateRangeFrom, onQuerySubmit }: StatefulSearchB
   useEffect(() => setPickerFrom(dateRangeFrom), [dateRangeFrom]);
 
   return (
-    <button
-      data-test-subj="mockSearchBarPick7d"
-      data-picker-from={pickerFrom}
-      onClick={() => {
-        setPickerFrom('now-7d');
-        onQuerySubmit?.({ dateRange: { from: 'now-7d', to: 'now' } });
-      }}
-    />
+    <>
+      <button
+        data-test-subj="mockSearchBarPick7d"
+        data-picker-from={pickerFrom}
+        onClick={() => {
+          setPickerFrom('now-7d');
+          onQuerySubmit?.({ dateRange: { from: 'now-7d', to: 'now' } });
+        }}
+      />
+      <button data-test-subj="mockSearchBarDraft2h" onClick={() => setPickerFrom('now-2h')} />
+    </>
   );
 });
 
@@ -56,14 +58,18 @@ const renderSearchBar = (
   const unifiedSearch = unifiedSearchPluginMock.createStartContract();
   unifiedSearch.ui.SearchBar = MockSearchBar;
   const config = createPublicConfigMock({ timeRangeLimitDisabled });
-
-  return render(
-    <KibanaContextProvider services={{ ...coreMock.createStart(), unifiedSearch, config }}>
-      <EntityInventorySearchProvider entityCategory={entityCategory}>
-        <EntityInventorySearchBar />
-      </EntityInventorySearchProvider>
-    </KibanaContextProvider>
+  const services = { ...coreMock.createStart(), unifiedSearch, config };
+  const history = createMemoryHistory();
+  const searchBar = (category: EntityInventoryEntityCategory) => (
+    <MockEntityInventoryProvider entityCategory={category} services={services} history={history}>
+      <EntityInventorySearchBar />
+    </MockEntityInventoryProvider>
   );
+  const { rerender } = render(searchBar(entityCategory));
+
+  return {
+    changeCategory: (category: EntityInventoryEntityCategory) => rerender(searchBar(category)),
+  };
 };
 
 describe('EntityInventorySearchBar', () => {
@@ -148,22 +154,53 @@ describe('EntityInventorySearchBar', () => {
     );
   });
 
-  it('passes the clamped range back to the search bar after an over-limit submission', () => {
+  it('keeps the previous range in the search bar after an over-limit submission', () => {
     renderSearchBar();
+    const previousFrom = lastSearchBarProps().dateRangeFrom;
 
     fireEvent.click(screen.getByTestId('mockSearchBarPick7d'));
 
-    expect(lastSearchBarProps().dateRangeFrom).toBe('now-3d');
-    expect(screen.getByTestId('mockSearchBarPick7d')).toHaveAttribute('data-picker-from', 'now-3d');
+    expect(lastSearchBarProps().dateRangeFrom).toBe(previousFrom);
+    expect(screen.getByTestId('mockSearchBarPick7d')).toHaveAttribute(
+      'data-picker-from',
+      previousFrom
+    );
   });
 
-  it('resets the picker to the clamped range when the committed range did not change', () => {
+  it('resets the picker to the previous range when the same over-limit submission is repeated', () => {
     renderSearchBar();
+    const previousFrom = lastSearchBarProps().dateRangeFrom;
 
     fireEvent.click(screen.getByTestId('mockSearchBarPick7d'));
     fireEvent.click(screen.getByTestId('mockSearchBarPick7d'));
 
-    expect(screen.getByTestId('mockSearchBarPick7d')).toHaveAttribute('data-picker-from', 'now-3d');
+    expect(screen.getByTestId('mockSearchBarPick7d')).toHaveAttribute(
+      'data-picker-from',
+      previousFrom
+    );
+  });
+
+  it('shows the committed range again when the entity category changes', () => {
+    const { changeCategory } = renderSearchBar('hosts');
+    const committedFrom = lastSearchBarProps().dateRangeFrom;
+    fireEvent.click(screen.getByTestId('mockSearchBarDraft2h'));
+    expect(screen.getByTestId('mockSearchBarPick7d')).toHaveAttribute('data-picker-from', 'now-2h');
+
+    changeCategory('all');
+
+    expect(screen.getByTestId('mockSearchBarPick7d')).toHaveAttribute(
+      'data-picker-from',
+      committedFrom
+    );
+  });
+
+  it('keeps the draft of the picker while the entity category stays the same', () => {
+    const { changeCategory } = renderSearchBar('hosts');
+    fireEvent.click(screen.getByTestId('mockSearchBarDraft2h'));
+
+    changeCategory('hosts');
+
+    expect(screen.getByTestId('mockSearchBarPick7d')).toHaveAttribute('data-picker-from', 'now-2h');
   });
 
   it('updates the filters passed to the search bar', () => {
@@ -174,6 +211,6 @@ describe('EntityInventorySearchBar', () => {
       lastSearchBarProps().onFiltersUpdated?.(filters);
     });
 
-    expect(lastSearchBarProps().filters).toBe(filters);
+    expect(lastSearchBarProps().filters).toEqual(filters);
   });
 });

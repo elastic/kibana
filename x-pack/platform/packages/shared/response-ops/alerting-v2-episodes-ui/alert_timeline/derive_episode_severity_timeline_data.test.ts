@@ -16,7 +16,7 @@ const event = (timestamp: string, severity?: string, data?: string): EpisodeEven
     'episode.status': 'active',
     severity,
     data,
-  } as EpisodeEventRow);
+  }) as EpisodeEventRow;
 
 describe('deriveEpisodeSeverityTimelineData', () => {
   it('merges consecutive events with the same severity', () => {

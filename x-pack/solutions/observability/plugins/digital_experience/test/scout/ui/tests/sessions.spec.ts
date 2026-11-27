@@ -10,6 +10,7 @@ import { test } from '../fixtures';
 import {
   DETAILED_SESSION,
   FIREFOX_SESSIONS,
+  FRUSTRATED_SESSION,
   SESSION_COUNT,
   SESSIONS_APP,
   SESSIONS_TIME_RANGE,
@@ -35,14 +36,19 @@ test.describe('Digital Experience sessions', { tag: DIGITAL_EXPERIENCE_TAGS }, (
     page,
     pageObjects: { digitalExperience },
   }) => {
-    await digitalExperience.gotoApplications();
+    await digitalExperience.gotoApplications(SESSIONS_TIME_RANGE);
     await digitalExperience.applicationLink(SESSIONS_APP).click();
     await digitalExperience.sessionsTab.click();
 
     await expect(digitalExperience.sessionsTab).toHaveAttribute('aria-selected', 'true');
     await expect(page).toHaveURL(new RegExp(`/${SESSIONS_APP}/sessions\\?`));
-    // The list's 2021 range, before the mock sessions: the tab explains how sessions get there.
-    await expect(digitalExperience.sessionsEmpty).toContainText('session.id');
+    await expect(page).toHaveURL(
+      new RegExp(`rangeFrom=${encodeURIComponent(SESSIONS_TIME_RANGE.rangeFrom)}`)
+    );
+    await expect(page).toHaveURL(
+      new RegExp(`rangeTo=${encodeURIComponent(SESSIONS_TIME_RANGE.rangeTo)}`)
+    );
+    await expect(digitalExperience.sessionRow(DETAILED_SESSION.id)).toBeVisible();
   });
 
   test('filters, searches and pages through the sessions', async ({
@@ -90,6 +96,26 @@ test.describe('Digital Experience sessions', { tag: DIGITAL_EXPERIENCE_TAGS }, (
     });
   });
 
+  test('counts the frustrated sessions, and keeps only them with the Frustrated filter', async ({
+    page,
+    pageObjects: { digitalExperience },
+  }) => {
+    await digitalExperience.gotoSessions(SESSIONS_APP, { perPage: '10' }, SESSIONS_TIME_RANGE);
+
+    // The count and its share of the sessions run together in the text, so the count is not exact.
+    await expect(digitalExperience.sessionsKpi('withFrustration')).toContainText(
+      /Frustrated sessions\s*[1-9]/
+    );
+    await expect(digitalExperience.sessionsKpi('total')).toContainText(String(SESSION_COUNT));
+
+    await digitalExperience.sessionsFrustrationFilter.click();
+
+    await expect(digitalExperience.sessionsTable.rows).toHaveCount(1);
+    await expect(digitalExperience.sessionsKpi('total')).toContainText(/^Sessions\s*1$/);
+    await expect(digitalExperience.sessionRow(FRUSTRATED_SESSION.id)).toBeVisible();
+    await expect(page).toHaveURL(/withFrustration=true/);
+  });
+
   test('opens a session with its waterfall and journey, then goes back to the same list', async ({
     page,
     pageObjects: { digitalExperience },
@@ -102,10 +128,11 @@ test.describe('Digital Experience sessions', { tag: DIGITAL_EXPERIENCE_TAGS }, (
     await digitalExperience.sessionLink(DETAILED_SESSION.id).click();
 
     await test.step('summarizes the session', async () => {
-      await expect(digitalExperience.sessionSummary).toContainText(DETAILED_SESSION.user);
-      await expect(page.getByTestId('digitalExperienceSessionId')).toContainText(
-        DETAILED_SESSION.id
+      // Who and when are in the page header; the summary carries the session's own details.
+      await expect(page.getByTestId('digitalExperienceSessionUser')).toContainText(
+        DETAILED_SESSION.user
       );
+      await expect(digitalExperience.sessionSummary).toContainText(DETAILED_SESSION.id);
     });
 
     await test.step('draws a segment per page visit and marks the error', async () => {

@@ -18,13 +18,12 @@ import type { PageEnricher, RunContext, SortPageFetcher } from './types';
 
 const SPECS = Object.entries(QUERY_SPECS);
 
-const SORT_PAGE_FETCHERS = SPECS.flatMap(
-  ([id, spec]): Array<[string, SortPageFetcher]> =>
-    spec?.fetchSortPage ? [[id, spec.fetchSortPage]] : []
+const SORT_PAGE_FETCHERS = SPECS.flatMap(([id, spec]): Array<[string, SortPageFetcher]> =>
+  spec?.fetchSortPage ? [[id, spec.fetchSortPage]] : []
 );
 
-const COLUMN_ENRICHERS = SPECS.flatMap(
-  ([id, spec]): Array<[string, PageEnricher]> => (spec?.enricher ? [[id, spec.enricher]] : [])
+const COLUMN_ENRICHERS = SPECS.flatMap(([id, spec]): Array<[string, PageEnricher]> =>
+  spec?.enricher ? [[id, spec.enricher]] : []
 );
 
 const { enricher: alertsEnricher } = alertCountQuerySpec;
@@ -168,11 +167,9 @@ describe('entities grid query builders', () => {
           },
         ],
       ] as const)('runs the queries of %s', async (_name, overrides) => {
-        const runQuery = jest.fn(
-          async (_steps: readonly string[]): Promise<Row[]> => [
-            { 'entity.id': 'host:h-1', [sortField]: 3 },
-          ]
-        );
+        const runQuery = jest.fn(async (_steps: readonly string[]): Promise<Row[]> => [
+          { 'entity.id': 'host:h-1', [sortField]: 3 },
+        ]);
 
         await fetchSortPage({ ...BASE_ARGS, ...overrides }, { runQuery });
 
@@ -229,7 +226,8 @@ describe('entities grid query builders', () => {
 
     it('gives the rows of an alias to its resolved entity, and aggregates them', () => {
       expect(buildRollUpOverAliasesSteps(BASE_ARGS, AGGREGATIONS)).toEqual([
-        `| LOOKUP JOIN ${BASE_ARGS.concreteEntityIndexName} ON \`entity.id\``,
+        // Set to null first, so an index without the field still joins.
+        `| EVAL user.entity.id = TO_STRING(null)\n| LOOKUP JOIN ${BASE_ARGS.concreteEntityIndexName} ON \`entity.id\``,
         '| EVAL `entity.id` = COALESCE(entity.relationships.resolution.resolved_to, `entity.id`)',
         '| STATS last_at = MAX(last_at), total = SUM(total), high = SUM(high) BY `entity.id`',
       ]);
@@ -274,9 +272,8 @@ describe('entities grid query builders', () => {
 
     /** Answers the read of the aliases with `ALIAS`, and the other queries with `rows`. */
     const createRunner = (rows: Row[]) =>
-      jest.fn(
-        async (steps: readonly string[]): Promise<Row[]> =>
-          steps.join('\n').includes('resolved_to IN') ? [ALIAS] : rows
+      jest.fn(async (steps: readonly string[]): Promise<Row[]> =>
+        steps.join('\n').includes('resolved_to IN') ? [ALIAS] : rows
       );
 
     it.each([

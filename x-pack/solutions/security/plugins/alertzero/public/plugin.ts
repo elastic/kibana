@@ -54,15 +54,12 @@ const APP_TITLE = i18n.translate('xpack.alertzero.appTitle', {
   defaultMessage: 'AlertZero',
 });
 
-export class AlertZeroPublicPlugin
-  implements
-    Plugin<
-      AlertZeroPublicSetup,
-      AlertZeroPublicStart,
-      AlertZeroSetupDependencies,
-      AlertZeroStartDependencies
-    >
-{
+export class AlertZeroPublicPlugin implements Plugin<
+  AlertZeroPublicSetup,
+  AlertZeroPublicStart,
+  AlertZeroSetupDependencies,
+  AlertZeroStartDependencies
+> {
   private readonly config: AlertZeroClientConfig;
   private readonly isServerless: boolean;
   private readonly serverlessTierAvailable$ = new BehaviorSubject(false);
@@ -109,8 +106,8 @@ export class AlertZeroPublicPlugin
       // `deepLinks` for us, which is what removes the AlertZero nodes from the Security
       // navigation tree — those trees hold no check of their own.
       status: AppStatus.inaccessible,
+      // Not `classicSideNav`: the Classic nav lists AlertZero's pages as deep links (see `getAlertZeroDeepLinks`).
       visibleIn: ['projectSideNav', 'globalSearch'],
-      order: 101,
       // Initial deep links without capability filtering — capabilities are not available at
       // setup. `start()` emits an update via appUpdater$ once capabilities are known.
       deepLinks: getAlertZeroDeepLinks(),

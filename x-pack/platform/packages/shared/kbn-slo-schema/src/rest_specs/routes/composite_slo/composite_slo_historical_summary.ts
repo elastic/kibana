@@ -4,37 +4,40 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod';
-import {
-  compositeSloIdSchema,
-  compositeErrorBudgetSchema,
-  compositeStatusSchema,
-} from '../../../schema/composite_slo';
+import { z, lazySchema } from '@kbn/zod';
+import { errorBudgetSchema, statusSchema } from '../../../schema/common';
+import { sloIdSchema } from '../../../schema/slo';
 
-const compositeHistoricalSummarySchema = z.object({
-  date: z.string(),
-  status: compositeStatusSchema,
-  sliValue: z.number(),
-  errorBudget: compositeErrorBudgetSchema,
-});
-
-const fetchCompositeHistoricalSummaryParamsSchema = z.object({
-  body: z.object({
-    list: z.array(compositeSloIdSchema),
-  }),
-});
-
-const fetchCompositeHistoricalSummaryResponseSchema = z.array(
+const compositeHistoricalSummarySchema = lazySchema(() =>
   z.object({
-    compositeId: compositeSloIdSchema,
-    data: z.array(compositeHistoricalSummarySchema),
+    date: z.string(),
+    status: statusSchema,
+    sliValue: z.number(),
+    errorBudget: errorBudgetSchema,
   })
+);
+
+const fetchCompositeHistoricalSummaryParamsSchema = lazySchema(() =>
+  z.object({
+    body: z.object({
+      list: z.array(sloIdSchema),
+    }),
+  })
+);
+
+const fetchCompositeHistoricalSummaryResponseSchema = lazySchema(() =>
+  z.array(
+    z.object({
+      compositeId: sloIdSchema,
+      data: z.array(compositeHistoricalSummarySchema),
+    })
+  )
 );
 
 type FetchCompositeHistoricalSummaryParams = z.infer<
   typeof fetchCompositeHistoricalSummaryParamsSchema.shape.body
 >;
-type FetchCompositeHistoricalSummaryResponse = z.infer<
+type FetchCompositeHistoricalSummaryResponse = z.input<
   typeof fetchCompositeHistoricalSummaryResponseSchema
 >;
 

@@ -44,7 +44,7 @@ export const UsersAvatarsPanel: FC<UsersAvatarsPanelProps> = memo(
         <EuiToolTip
           position="top"
           content={userProfiles.map((user) => (
-            <div>{user ? user.user.email ?? user.user.username : UNKNOWN_USER_PROFILE_NAME}</div>
+            <div>{user ? (user.user.email ?? user.user.username) : UNKNOWN_USER_PROFILE_NAME}</div>
           ))}
           repositionOnScroll={true}
         >

@@ -26,6 +26,7 @@ import {
   getNightshiftInvestigationIdFromSearch,
   setNightshiftInvestigationIdParam,
 } from '../../../common/url_params';
+import { useIsMobile } from '../../../hooks/use_is_mobile';
 import { useKibana } from '../../../hooks/use_kibana';
 import { OnboardingIntroBanner } from './intro_banner';
 import type { IntroBannerDismissal } from '../../../components/use_intro_banner_dismissal';
@@ -113,16 +114,15 @@ export function NightshiftOnboarding({
   automationsHref,
   onFinish,
   introBannerDismissal,
-  onIntroBannerVisibilityChange,
 }: {
   latestInvestigation?: InvestigationSummary;
   automationsHref?: string;
   introBannerDismissal?: IntroBannerDismissal;
-  onIntroBannerVisibilityChange?: (visible: boolean | undefined) => void;
   /** "Skip this step" / Done on the last step. */
   onFinish: () => void;
 }): React.ReactElement {
   const { euiTheme } = useEuiTheme();
+  const isMobile = useIsMobile();
   const { agentBuilder } = useKibana().services;
   const history = useHistory();
   const { search } = useLocation();
@@ -162,20 +162,15 @@ export function NightshiftOnboarding({
   const step: OnboardingStepId = !isEnabled
     ? 'enable'
     : stepOverride === 'addData' || stepOverride === 'connectSources'
-    ? stepOverride
-    : !isConnected
-    ? 'addData'
-    : latestInvestigation && stepOverride !== 'investigate'
-    ? 'automate'
-    : 'investigate';
+      ? stepOverride
+      : !isConnected
+        ? 'addData'
+        : latestInvestigation && stepOverride !== 'investigate'
+          ? 'automate'
+          : 'investigate';
 
   const isIntroStep = step === 'enable' || step === 'addData' || step === 'connectSources';
   const introBannerVisible = isIntroStep && !introBannerDismissal?.isDismissed;
-  const isBannerVisibilityLoading = isInitialLoading || serviceAccount.isLoading;
-  useEffect(() => {
-    onIntroBannerVisibilityChange?.(isBannerVisibilityLoading ? undefined : introBannerVisible);
-    return () => onIntroBannerVisibilityChange?.(undefined);
-  }, [introBannerVisible, isBannerVisibilityLoading, onIntroBannerVisibilityChange]);
 
   const selectedInvestigationId = useMemo(
     () => getNightshiftInvestigationIdFromSearch(search),
@@ -344,14 +339,14 @@ export function NightshiftOnboarding({
     step === 'enable'
       ? ENABLE_SECTION_TITLE
       : step === 'addData'
-      ? ADD_DATA_TITLE
-      : step === 'connectSources'
-      ? CONNECT_SOURCES_TITLE
-      : step === 'investigate'
-      ? INVESTIGATE_SECTION_TITLE
-      : step === 'automate'
-      ? AUTOMATE_SECTION_TITLE
-      : undefined;
+        ? ADD_DATA_TITLE
+        : step === 'connectSources'
+          ? CONNECT_SOURCES_TITLE
+          : step === 'investigate'
+            ? INVESTIGATE_SECTION_TITLE
+            : step === 'automate'
+              ? AUTOMATE_SECTION_TITLE
+              : undefined;
 
   return (
     <EuiFlexGroup
@@ -383,7 +378,7 @@ export function NightshiftOnboarding({
       <div
         css={css`
           display: grid;
-          grid-template-columns: minmax(0, 1fr) 280px;
+          grid-template-columns: ${isMobile ? 'minmax(0, 1fr)' : 'minmax(0, 1fr) 280px'};
           gap: ${euiTheme.size.base};
           align-items: start;
         `}

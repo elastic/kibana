@@ -6,3 +6,7 @@
  */
 
 export const SEARCH_BOOST_APP_ID = 'search_boost';
+
+export const PROFILES_API_PATH = '/internal/search_boost/profiles';
+
+export const RULES_API_PATH = '/internal/search_boost/rules';

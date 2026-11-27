@@ -37,18 +37,20 @@ export const StepLayout: React.FC<StepLayoutProps> = ({
 
   const rowStyles = css`
     color: ${isExpanded ? euiTheme.colors.textParagraph : euiTheme.colors.textDisabled};
-    ${isClickable
-      ? `
+    ${
+      isClickable
+        ? `
         cursor: pointer;
         &:hover {
           color: ${euiTheme.colors.textParagraph};
         }
       `
-      : ''}
+        : ''
+    }
   `;
 
   const expansionStyles = css`
-    padding-top: ${euiTheme.size.s};
+    padding-top: ${euiTheme.size.base};
   `;
 
   return (

@@ -27,6 +27,7 @@ import type { IBasePath } from './base_path';
 import type { IStaticAssets } from './static_assets';
 import type { ICspConfig } from './csp';
 import type { GetAuthState, IsAuthenticated } from './auth_state';
+import type { IAuthHeadersStorage } from './auth_headers';
 import type { SessionStorageCookieOptions, SessionStorageFactory } from './session_storage';
 import type { ApiVersion } from './versioning';
 import type { KibanaRequest } from './router';
@@ -216,7 +217,7 @@ export interface HttpSelfService {
  * @public
  */
 export interface HttpServicePreboot<
-  DefaultRequestHandlerType extends RequestHandlerContextBase = RequestHandlerContextBase
+  DefaultRequestHandlerType extends RequestHandlerContextBase = RequestHandlerContextBase,
 > {
   /**
    * Provides ability to acquire `preboot` {@link IRouter} instance for a particular top-level path and register handler
@@ -336,7 +337,7 @@ export interface HttpServicePreboot<
  * @public
  */
 export interface HttpServiceSetup<
-  DefaultRequestHandlerType extends RequestHandlerContextBase = RequestHandlerContextBase
+  DefaultRequestHandlerType extends RequestHandlerContextBase = RequestHandlerContextBase,
 > {
   /**
    * Creates cookie based session storage factory {@link SessionStorageFactory}
@@ -383,10 +384,11 @@ export interface HttpServiceSetup<
    * A handler should return a state to associate with the incoming request.
    * The state can be retrieved later via http.auth.get(..)
    * Only one AuthenticationHandler can be registered. See {@link AuthenticationHandler}.
+   * Lets the authentication owner read current credentials and store renewed headers.
    *
    * @param handler {@link AuthenticationHandler} - function to perform authentication.
    */
-  registerAuth: (handler: AuthenticationHandler) => void;
+  registerAuth: (handler: AuthenticationHandler) => IAuthHeadersStorage;
 
   /**
    * To define custom logic after Auth interceptor did make sure a user has access to the requested resource.
@@ -445,7 +447,7 @@ export interface HttpServiceSetup<
    * @public
    */
   createRouter: <
-    Context extends DefaultRequestHandlerType = DefaultRequestHandlerType
+    Context extends DefaultRequestHandlerType = DefaultRequestHandlerType,
   >() => IRouter<Context>;
 
   /**
@@ -478,7 +480,7 @@ export interface HttpServiceSetup<
    */
   registerRouteHandlerContext: <
     Context extends DefaultRequestHandlerType,
-    ContextName extends keyof Omit<Context, 'resolve'>
+    ContextName extends keyof Omit<Context, 'resolve'>,
   >(
     contextName: ContextName,
     provider: IContextProvider<Context, ContextName>

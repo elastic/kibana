@@ -49,7 +49,7 @@ describe('Endpoint Exceptions API validations', () => {
         osTypes,
         tags,
         entries,
-      } as unknown as CreateExceptionListItemOptions);
+      }) as unknown as CreateExceptionListItemOptions;
 
     const pathEntry = (value: string): CreateExceptionListItemOptions['entries'] => [
       { field: 'process.executable.caseless', type: 'match', operator: 'included', value },
@@ -184,7 +184,7 @@ describe('Endpoint Exceptions API validations', () => {
   //  API TESTS FOR THIS ARTIFACT TYPE SHOULD BE COVERED WITH INTEGRATION TESTS.
   //  ADD THEM HERE:
   //
-  //  `x-pack/solutions/security/test/security_solution_api_integration/test_suites/edr_workflows`
+  //  `x-pack/solutions/security/test_suites/test-suites-security-solution-apis/test_suites/edr_workflows`
   //
   // -----------------------------------------------------------------------------
 });

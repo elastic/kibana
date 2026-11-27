@@ -36,6 +36,8 @@ export default function actionsTests({ loadTestFile, getService }: FtrProviderCo
     loadTestFile(require.resolve('./execute_unsecured_action'));
     loadTestFile(require.resolve('./get_all_unsecured_actions'));
     loadTestFile(require.resolve('./check_registered_connector_types'));
+    // runs before the circuit breaker suite, which can leave the action task queue full
+    loadTestFile(require.resolve('./connector_not_found'));
     loadTestFile(require.resolve('./max_queued_actions_circuit_breaker'));
 
     loadTestFile(require.resolve('./single_file_connector_types/create'));

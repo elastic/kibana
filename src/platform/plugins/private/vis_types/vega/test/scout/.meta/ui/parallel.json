@@ -1,20 +1,9 @@
 {
-  "sha1": "fcc50bd4fc6977c1810b43f21f3e736e10f1d686",
+  "sha1": "907648b71f3d069d8ac81dc138d78015579d49d2",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "fb6a28fdbf970dc-aa40d033d190e40",
-      "title": "Enable the Vega as code feature flag",
-      "expectedStatus": "passed",
-      "tags": [],
-      "location": {
-        "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 7,
-        "column": 1
-      }
-    },
     {
       "id": "fb6a28fdbf970dc-91c1b7602a9ab49",
       "title": "Setup Vega tests data",
@@ -22,8 +11,8 @@
       "tags": [],
       "location": {
         "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 15,
-        "column": 5
+        "line": 7,
+        "column": 1
       }
     },
     {
@@ -128,17 +117,6 @@
         "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/vega_library_editor.spec.ts",
         "line": 126,
         "column": 43
-      }
-    },
-    {
-      "id": "824a1c0d9b29284-19d3e3fbdec443e",
-      "title": "Reset the Vega as code feature flag",
-      "expectedStatus": "passed",
-      "tags": [],
-      "location": {
-        "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/global.teardown.ts",
-        "line": 7,
-        "column": 1
       }
     }
   ]

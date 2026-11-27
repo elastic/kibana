@@ -59,7 +59,7 @@ const mockFile = (caseIds: string[]) =>
       fileKind: constructFileKindIdByOwner('securitySolution'),
       meta: { caseIds, owner: ['securitySolution'] },
     },
-  } as unknown as File);
+  }) as unknown as File;
 
 describe('doNotExistOnCaseMessage', () => {
   it('names a single attachment', () => {

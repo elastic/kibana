@@ -14,7 +14,7 @@ import { saveHistoryFilters } from './history_filter_storage';
 export const DEFAULT_START_DATE = 'now-24h';
 export const DEFAULT_END_DATE = 'now';
 
-const VALID_SOURCES: readonly SourceFilter[] = ['live', 'rule', 'scheduled'];
+const VALID_SOURCES: readonly SourceFilter[] = ['live', 'rule', 'workflow', 'scheduled'];
 
 export type SortDirection = 'asc' | 'desc';
 
@@ -80,7 +80,7 @@ const parseSortDirection = (
 const parseString = (value: string | Array<string | null> | null | undefined): string => {
   if (!value) return '';
 
-  return Array.isArray(value) ? value[0] ?? '' : value;
+  return Array.isArray(value) ? (value[0] ?? '') : value;
 };
 
 export const parseHistoryUrlParams = (search: string): HistoryUrlFilters => {

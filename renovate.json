@@ -413,7 +413,13 @@
       "matchDepNames": [
         "monaco-yaml",
         "monaco-editor",
-        "monaco-promql"
+        "monaco-promql",
+        "@codemirror/autocomplete",
+        "@codemirror/language",
+        "@codemirror/lint",
+        "@codemirror/state",
+        "@codemirror/view",
+        "@lezer/common"
       ],
       "reviewers": ["team:appex-sharedux"],
       "matchBaseBranches": ["main"],
@@ -461,8 +467,7 @@
       "matchDepNames": ["redux-toolkit-v1"],
       "reviewers": [
         "team:kibana-dashboards",
-        "team:security-investigations",
-        "team:security-threat-hunting"
+        "team:security-investigations"
       ],
       "matchBaseBranches": ["main"],
       "enabled": true,
@@ -536,7 +541,7 @@
     {
       "groupName": "@elastic/contextual-security-apps dependencies",
       "matchDepNames": [
-        "@mswjs/http-middleware",
+        "@msw/serve",
         "@types/byte-size",
         "byte-size",
         "msw",
@@ -654,7 +659,8 @@
         "diff",
         "fastest-levenshtein",
         "usng.js",
-        "react-reverse-portal"
+        "react-reverse-portal",
+        "tabbable"
       ],
       "reviewers": ["team:kibana-discover"],
       "matchBaseBranches": ["main"],
@@ -793,7 +799,8 @@
         "elastic-apm-node",
         "@elastic/apm-rum",
         "@elastic/apm-rum-react",
-        "@elastic/apm-rum-core"
+        "@elastic/apm-rum-core",
+        "@elastic/opentelemetry-browser"
       ],
       "reviewers": ["team:kibana-core"],
       "matchBaseBranches": ["main"],
@@ -951,21 +958,6 @@
       "enabled": true
     },
     {
-      "groupName": "prettier",
-      "matchDepNames": [
-        "prettier",
-        "eslint-plugin-prettier",
-        "eslint-config-prettier",
-        "@types/prettier"
-      ],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Operations"],
-      "minimumReleaseAge": "14 days",
-      "allowedVersions": "<3.0",
-      "enabled": true
-    },
-    {
       "groupName": "eslint",
       "matchDepNames": [
         "@typescript-eslint/eslint-plugin",
@@ -979,15 +971,11 @@
         "@eslint-community/eslint-plugin-eslint-comments",
         "eslint-plugin-formatjs",
         "eslint-plugin-import",
-        "eslint-plugin-jest",
-        "eslint-plugin-jsx-a11y",
         "eslint-plugin-mocha",
         "eslint-plugin-no-unsanitized",
         "eslint-plugin-n",
         "eslint-plugin-playwright",
         "eslint-plugin-react",
-        "eslint-plugin-react-hooks",
-        "eslint-plugin-react-perf",
         "eslint-plugin-testing-library",
         "@types/eslint"
       ],
@@ -1691,11 +1679,11 @@
       "matchDepNames": ["adm-zip"],
       "reviewers": [
         "team:siem-conduit",
-        "team:security-threat-hunting",
+        "team:security-investigations",
         "team:security-data-engineering"
       ],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:security-siem-conduit", "Team:Threat Hunting"],
+      "addLabels": ["Team:security-siem-conduit", "Team:Security Investigations"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -1754,9 +1742,9 @@
     {
       "groupName": "css-box-model",
       "matchDepNames": ["css-box-model"],
-      "reviewers": ["team:security-investigations", "team:security-threat-hunting"],
+      "reviewers": ["team:security-investigations"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Security Investigations", "Team:Threat Hunting"],
+      "addLabels": ["Team:Security Investigations"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -1783,11 +1771,10 @@
       "matchDepNames": ["typescript-fsa-reducers"],
       "reviewers": [
         "team:security-investigations",
-        "team:security-entity-analytics",
-        "team:security-threat-hunting"
+        "team:security-entity-analytics"
       ],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Security Investigations", "Team:Entity Analytics", "Team:Threat Hunting"],
+      "addLabels": ["Team:Security Investigations", "Team:Entity Analytics"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -2125,14 +2112,6 @@
       "enabled": true
     },
     {
-      "groupName": "hdr-histogram-js",
-      "matchDepNames": ["hdr-histogram-js"],
-      "reviewers": ["team:obs-signals-metrics-team"],
-      "matchBaseBranches": ["main"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
       "groupName": "@appland/sql-parser",
       "matchDepNames": ["@appland/sql-parser"],
       "reviewers": ["team:security-defend-workflows"],
@@ -2189,9 +2168,9 @@
     {
       "groupName": "langsmith",
       "matchDepNames": ["langsmith"],
-      "reviewers": ["team:security-threat-hunting"],
+      "reviewers": ["team:security-investigations"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Threat Hunting"],
+      "addLabels": ["Team:Security Investigations"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -2313,10 +2292,9 @@
       "groupName": "OpenTelemetry modules",
       "matchDepNames": [
         "@grpc/grpc-js",
-        "@elastic/opentelemetry-node",
         "@opentelemetry/api",
-        "@opentelemetry/api-logs",
         "@opentelemetry/context-async-hooks",
+        "@opentelemetry/core",
         "@opentelemetry/exporter-logs-otlp-grpc",
         "@opentelemetry/exporter-logs-otlp-http",
         "@opentelemetry/exporter-logs-otlp-proto",
@@ -2331,8 +2309,12 @@
         "@opentelemetry/instrumentation-http",
         "@opentelemetry/instrumentation-undici",
         "@opentelemetry/otlp-exporter-base",
+        "@opentelemetry/otlp-grpc-exporter-base",
         "@opentelemetry/otlp-transformer",
+        "@opentelemetry/resources",
         "@opentelemetry/sdk-logs",
+        "@opentelemetry/sdk-metrics",
+        "@opentelemetry/sdk-trace",
         "@opentelemetry/semantic-conventions"
       ],
       "reviewers": [
@@ -2442,7 +2424,7 @@
     },
     {
       "groupName": "oxlint",
-      "matchDepNames": ["oxlint", "@oxlint/plugins"],
+      "matchDepNames": ["oxlint", "@oxlint/plugins", "oxfmt"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
@@ -2515,9 +2497,9 @@
     {
       "groupName": "xml Format Util",
       "matchDepNames": ["xml-formatter"],
-      "reviewers": ["team:security-threat-hunting"],
+      "reviewers": ["team:security-investigations"],
       "matchBaseBranches": ["main"],
-      "labels": ["Team:Threat Hunting", "release_note:skip", "backport:skip"],
+      "labels": ["Team:Security Investigations", "release_note:skip", "backport:skip"],
       "minimumReleaseAge": "60 days",
       "enabled": true
     },
@@ -2577,6 +2559,15 @@
       "enabled": true
     },
     {
+      "groupName": "ioredis",
+      "matchDepNames": ["ioredis"],
+      "reviewers": ["team:response-ops"],
+      "matchBaseBranches": ["main"],
+      "addLabels": ["Team:ResponseOps"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
       "groupName": "mssql",
       "matchDepNames": ["mssql", "@types/mssql"],
       "reviewers": ["team:response-ops"],
@@ -2610,6 +2601,11 @@
       "addLabels": ["Team:EUI"],
       "minimumReleaseAge": "14 days",
       "enabled": true
+    },
+    {
+      "description": "Replacement PRs rebase on every Renovate run and never pass CI without manual code changes",
+      "matchUpdateTypes": ["replacement"],
+      "enabled": false
     }
   ],
   "customManagers": [

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TimeRange } from '../../entities_grid/common';
+import type { TimeRange } from '../../queries/time_range';
 import { GROUP_FIRST_SEEN_COLUMN, buildNewEntityTileHead } from './new_entity_query';
 import {
   SERIES_BUCKET_COLUMN,

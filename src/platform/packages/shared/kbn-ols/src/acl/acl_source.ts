@@ -54,7 +54,7 @@ export const normalizeAclSource = (
       type: toKeywords(root.get(`${ACL_FIELD}.owner.type`)),
       id: toKeywords(root.get(`${ACL_FIELD}.owner.id`)),
     },
-    general_access: toKeywords(root.get(`${ACL_FIELD}.general_access`)),
+    general: { access: toKeywords(root.get(`${ACL_FIELD}.general.access`)) },
     entries: entries.map(toStoredEntry).filter(hasEntryValue),
   };
 
@@ -62,7 +62,7 @@ export const normalizeAclSource = (
     acl.version.length > 0 ||
     acl.owner.type.length > 0 ||
     acl.owner.id.length > 0 ||
-    acl.general_access.length > 0 ||
+    acl.general.access.length > 0 ||
     acl.entries.length > 0;
   return hasValue ? acl : undefined;
 };
@@ -79,13 +79,18 @@ export const normalizeAclSource = (
 export const toAclSource = (acl: StoredAcl): Record<string, unknown> => {
   const source: Record<string, unknown> = {};
   setField(source, 'version', acl.version);
-  setField(source, 'general_access', acl.general_access);
 
   const owner: Record<string, unknown> = {};
   setField(owner, 'type', acl.owner.type);
   setField(owner, 'id', acl.owner.id);
   if (Object.keys(owner).length > 0) {
     source.owner = owner;
+  }
+
+  const general: Record<string, unknown> = {};
+  setField(general, 'access', acl.general.access);
+  if (Object.keys(general).length > 0) {
+    source.general = general;
   }
 
   if (acl.entries.length > 0) {

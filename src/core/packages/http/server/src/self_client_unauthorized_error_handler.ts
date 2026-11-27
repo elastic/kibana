@@ -36,8 +36,7 @@ export interface HttpSelfUnauthorizedErrorHandlerRetryParams {
 /**
  * @public
  */
-export interface HttpSelfUnauthorizedErrorHandlerRetryResult
-  extends HttpSelfUnauthorizedErrorHandlerRetryParams {
+export interface HttpSelfUnauthorizedErrorHandlerRetryResult extends HttpSelfUnauthorizedErrorHandlerRetryParams {
   type: 'retry';
 }
 

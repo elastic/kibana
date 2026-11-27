@@ -1337,6 +1337,42 @@ describe('PackageInstaller', () => {
       expect(productDocClient.setUninstalled).toHaveBeenCalledTimes(1);
       expect(productDocClient.setUninstalled).toHaveBeenCalledWith('kibana', undefined);
     });
+
+    it('does not delete any index when the inference id would expand to multiple indices', async () => {
+      await expect(
+        packageInstaller.uninstallPackage({
+          productName: 'kibana',
+          inferenceId: `${defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL},.kibana_9.6.0_001`,
+        })
+      ).rejects.toThrow('inferenceId must be');
+
+      expect(esClient.indices.delete).not.toHaveBeenCalled();
+      expect(productDocClient.setUninstalled).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('uninstallSecurityLabs', () => {
+    it('deletes the single Security Labs index for the inference id', async () => {
+      const inferenceId = defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL;
+      await packageInstaller.uninstallSecurityLabs({ inferenceId });
+
+      expect(esClient.indices.delete).toHaveBeenCalledTimes(1);
+      expect(esClient.indices.delete).toHaveBeenCalledWith(
+        { index: getSecurityLabsIndexName(inferenceId) },
+        expect.objectContaining({ ignore: [404] })
+      );
+    });
+
+    it('does not delete any index when the inference id would expand to multiple indices', async () => {
+      await expect(
+        packageInstaller.uninstallSecurityLabs({
+          inferenceId: `${defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL},.kibana_9.6.0_001`,
+        })
+      ).rejects.toThrow('inferenceId must be');
+
+      expect(esClient.indices.delete).not.toHaveBeenCalled();
+      expect(productDocClient.setSecurityLabsUninstalled).not.toHaveBeenCalled();
+    });
   });
 
   describe('uninstallAll', () => {

@@ -8,14 +8,14 @@ The time range picker is limited to the last 3 days. Set `xpack.entityInventoryA
 
 ## Results table
 
-The app loads `GET /internal/entity_inventory/types` once per app mount (`EntityTypesProvider`, again on a reload or a retry, not on a page change). Each page renders one collapsible section per entity type of the page, in response order, titled by the type's `name`. Each section requests its own `_list` by type id and has its own loading, error and empty states; the header counts the listed entities, with a `+` when the list is truncated. The Hosts and Kubernetes pages list `host` and `k8s.deployment` today. All resources lists every type of the `types` response.
+The app loads `GET /internal/entity_inventory/types` once per app mount (`EntityTypesProvider`, again on a reload or a retry, not on a page change). Each page renders one collapsible section per entity type of the page, in response order, titled by the type's `name`. Each section requests its own `_list` by type id once it is in view or within 200px of the edge of the area the page scrolls in (always, where the browser has no `IntersectionObserver`), and not before: until then it shows the loading skeleton and no count. A loaded list is kept when the section scrolls away. A change of the time range, or a refresh, refetches the sections near the viewport; a section that is away from it, loaded or not, catches up when it comes back. Each section has its own loading, error and empty states; the header counts the listed entities, with a `+` when the list is truncated. The Hosts and Kubernetes pages list `host` and `k8s.deployment` today. All resources lists every type of the `types` response.
 
 The states, from the top of the results area down:
 
 - While `types` loads, the page shows a spinner and no sections. When `types` fails, the page shows one error with a retry and no sections, on every page. A type a page asks for that `types` does not return shows "not available" and is never listed.
 - While a section loads its first `_list`, or retries a failed one, it shows a table skeleton. A later load keeps the rows up under a progress bar; a failed load replaces them, the count and the source errors with an error and a retry.
 - When any section shows a truncated list with rows, one warning callout above the sections names the row limit (`MAX_LIST_LIMIT`, 9,999) and each truncated type.
-- When some sources failed, a warning icon in the section header lists them in its tooltip; the table stays up. With no rows, the empty state says the result may be incomplete. The response's `unavailableColumns` are not shown.
+- When some sources failed or returned partial results, a warning icon in the section header lists them in its tooltip; the table stays up. With no rows, the empty state says the result may be incomplete. The response's `unavailableColumns` are not shown.
 
 > [!WARNING]
 > The list limit is 9,999, not 10,000. ES|QL [returns at most 10,000 rows by default](https://www.elastic.co/docs/reference/query-languages/esql/limitations#result-set-size-limit), so the server queries one row more than requested to detect a cut list. `MAX_LIST_LIMIT` holds the number; do not hardcode it.

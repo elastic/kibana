@@ -47,6 +47,7 @@ export interface Run {
   triggeredBy?: string;
   executedBy?: string;
   executedByDisplayName?: string;
+  runsAsServiceAccount?: boolean;
   title?: string;
   message?: string;
   investigationId?: string;
@@ -223,7 +224,8 @@ const StatusPill = ({
         color: ${colors.textParagraph};
         font-size: ${euiTheme.font.scale.s * euiTheme.base}px;
         font-weight: ${isSelected ? euiTheme.font.weight.bold : euiTheme.font.weight.medium};
-        transition: background ${euiTheme.animation.fast} ease,
+        transition:
+          background ${euiTheme.animation.fast} ease,
           border-color ${euiTheme.animation.fast} ease;
         &:hover,
         &:focus-visible {
@@ -638,7 +640,7 @@ export const RunHistory = ({
                       <EuiText size="xs" color="subdued" className="eui-textTruncate">
                         {run.status === 'skipped'
                           ? getSkippedRunSummary(run, labels.trigger)
-                          : run.error ?? automationName}
+                          : (run.error ?? automationName)}
                       </EuiText>
                     </button>
                   ))}

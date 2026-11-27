@@ -10,7 +10,10 @@ import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { EXTENDED_TIMEOUT } from '..';
 
 export class ProfilingSettingsPage {
-  constructor(public readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
+  constructor(
+    public readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {}
 
   async goto() {
     await this.page.goto(`${this.kbnUrl.app('profiling')}/settings`);

@@ -10,4 +10,7 @@
 // oxlint resolves `files`, `ignorePatterns`, and `jsPlugins` paths relative to this file, so
 // the entry must stay at the repo root. The typed config lives in `.oxlint/`, which has its
 // own tsconfig.json; this entry is JS so the root TS project does not have to include it.
-export { default } from './.oxlint/index.mts';
+import config from './.oxlint/index.mts';
+import { forPass } from './.oxlint/passes.mts';
+
+export default forPass(config, process.env.OXLINT_PASS);

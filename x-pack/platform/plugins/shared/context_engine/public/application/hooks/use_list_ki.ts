@@ -10,6 +10,7 @@ import { useQuery } from '@kbn/react-query';
 import { useEffect } from 'react';
 import { DEFAULT_KI_PAGE_SIZE } from '../../../common/constants';
 import type { KiStatus } from '../../../common/ki_lifecycle_status';
+import type { KiListSort } from '../../../common/ki_list_sort';
 import type { KiTypeCount } from '../../../common/http_api/ai_indices';
 import type { ListKisResponse } from '../../../common/http_api/knowledge_indicators';
 import { listKis } from '../api/knowledge_indicators';
@@ -21,10 +22,15 @@ interface UseListKiArgs {
   aiIndexId: string | undefined;
   size?: number;
   type?: string;
+  /** Leaves out these types (KIs without a type stay in). Used by the "Other" section. */
+  excludeTypes?: readonly string[];
   query?: string;
-  status?: KiStatus[];
+  status?: readonly KiStatus[];
+  sort?: KiListSort;
   enabled?: boolean;
   notifyOnError?: boolean;
+  /** Failed request retries. Leave it out for the query client's default. */
+  retry?: number;
 }
 
 export interface KiListSummary {
@@ -38,6 +44,8 @@ interface UseListKiResult {
   summary: KiListSummary;
   isLoading: boolean;
   isFetching: boolean;
+  /** The shown data belongs to the previous filters while the new request runs. */
+  isPreviousData: boolean;
   error: Error | undefined;
   refetch: () => void;
 }
@@ -46,17 +54,31 @@ export const useListKi = ({
   aiIndexId,
   size = DEFAULT_KI_PAGE_SIZE,
   type,
+  excludeTypes,
   query,
   status,
+  sort,
   enabled = true,
   notifyOnError = false,
+  retry,
 }: UseListKiArgs): UseListKiResult => {
   const {
     services: { http, notifications },
   } = useKibana();
 
-  const { data, isLoading, isFetching, error, refetch } = useQuery<ListKisResponse, Error>({
-    queryKey: contextEngineQueryKeys.aiIndex.listKi(aiIndexId ?? '', size, type, query, status),
+  const { data, isLoading, isFetching, isPreviousData, error, refetch } = useQuery<
+    ListKisResponse,
+    Error
+  >({
+    queryKey: contextEngineQueryKeys.aiIndex.listKi(
+      aiIndexId ?? '',
+      size,
+      type,
+      query,
+      status,
+      sort,
+      excludeTypes
+    ),
     queryFn: ({ signal }) => {
       if (!aiIndexId) {
         throw new Error('AI index id is required');
@@ -65,13 +87,16 @@ export const useListKi = ({
         aiIndexId,
         size,
         ...(type !== undefined ? { type } : {}),
+        ...(excludeTypes !== undefined ? { excludeTypes: [...excludeTypes] } : {}),
         ...(query !== undefined ? { query } : {}),
         ...(status !== undefined ? { status: [...status] } : {}),
+        ...(sort !== undefined ? { sort } : {}),
         signal,
       });
     },
     enabled: enabled && aiIndexId !== undefined,
     keepPreviousData: true,
+    ...(retry !== undefined ? { retry } : {}),
   });
 
   useEffect(() => {
@@ -82,7 +107,7 @@ export const useListKi = ({
     const toastMessage = getErrorMessage(error);
     notifications.toasts.addError(error, {
       title: i18n.translate('xpack.contextEngine.listKi.loadErrorTitle', {
-        defaultMessage: 'Unable to load Knowledge Indicators',
+        defaultMessage: 'Unable to load Knowledge documents',
       }),
       ...(toastMessage ? { toastMessage } : {}),
     });
@@ -97,6 +122,7 @@ export const useListKi = ({
     },
     isLoading,
     isFetching,
+    isPreviousData,
     error: error ?? undefined,
     refetch,
   };

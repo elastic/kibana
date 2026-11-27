@@ -285,7 +285,7 @@ export class DataGrid {
     );
     await buttonGroup.waitFor({ state: 'visible' });
 
-    const selectedButton = buttonGroup.locator('.euiButtonGroupButton-isSelected');
+    const selectedButton = buttonGroup.getByRole('button', { pressed: true });
     await selectedButton.waitFor({ state: 'visible' });
 
     return (await selectedButton.innerText()).trim() as DataGridRowHeight;
@@ -544,8 +544,8 @@ export class DataGrid {
         const decoration = textDecoration.includes('line-through')
           ? ('removed' as const)
           : textDecoration.includes('underline')
-          ? ('added' as const)
-          : undefined;
+            ? ('added' as const)
+            : undefined;
         return { decoration, value: (el as HTMLElement).innerText.trim() };
       });
     }, colIndex - 1);

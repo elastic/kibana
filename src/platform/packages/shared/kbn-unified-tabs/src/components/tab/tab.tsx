@@ -190,6 +190,7 @@ export const Tab: React.FC<TabProps> = (props) => {
     item,
     tabsSizeConfig,
     fontWeight,
+    isUnsaved,
   });
 
   useEffect(() => {
@@ -393,13 +394,15 @@ function getTabContainerCss(
       color: ${euiTheme.colors.text};
     }
 
-    ${!isSelected
-      ? `
+    ${
+      !isSelected
+        ? `
       &:hover .unifiedTabs__tabLabelText {
         color: ${euiTheme.colors.primary};
       }
     `
-      : ''}
+        : ''
+    }
 
     &:hover,
     &:focus-within {

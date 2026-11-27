@@ -74,8 +74,8 @@ const summarize = (event: AgentBuilderTimelineEvent): string | undefined => {
       );
     case TimelineEventType.executionTerminated:
       return event.data.outcome.type === 'responded'
-        ? readString(event.data.outcome.response.message) ??
-            TIMELINE_EVENT_LABELS.executionCompleted
+        ? (readString(event.data.outcome.response.message) ??
+            TIMELINE_EVENT_LABELS.executionCompleted)
         : TIMELINE_EVENT_LABELS.promptRequested;
     case TimelineEventType.executionFailed:
       return TIMELINE_EVENT_LABELS.executionFailed(event.data.error.message);
@@ -121,7 +121,6 @@ const toTimelineEvents = (events: Conversation['events']): TimelineEvent[] =>
  *
  * The field names intentionally duplicate the constants from `agentic_investigations/common`
  * (which cannot be imported from this package without crossing a plugin boundary).
- * See the comment at the top of `escalation_flyout_header.tsx` for the authoritative source.
  */
 export const conversationToEscalationHeader = (
   conversation: Conversation

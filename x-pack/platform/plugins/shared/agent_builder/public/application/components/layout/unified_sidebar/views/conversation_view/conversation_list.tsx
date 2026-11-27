@@ -32,7 +32,7 @@ import { DraggableConversationItem } from './draggable_conversation_item';
 
 const newConversationLabel = i18n.translate(
   'xpack.agentBuilder.sidebar.conversation.newConversation',
-  { defaultMessage: 'New conversation' }
+  { defaultMessage: 'New chat' }
 );
 
 interface ConversationListProps {

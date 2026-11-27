@@ -40,11 +40,13 @@ import {
 import { getNamespaceError } from './instance_namespace_field';
 import {
   getReroutePermissions,
+  parseCustomFields,
   supportsPolicySetting,
   type PolicySettings,
 } from '../../common/policy_settings';
 import {
   getConditionErrors,
+  getCustomFieldsErrors,
   getDescriptionError,
   getIntegrationNameError,
   getProxyUrlError,
@@ -196,10 +198,10 @@ export function isServiceConfigIncomplete(
     let activeInputs = dsVars.enabledInputs.length
       ? dsVars.enabledInputs
       : isSingleDs
-      ? service.inputs ?? dsInfo?.inputs ?? []
-      : dsInfo?.defaultEnabledInputs?.length
-      ? dsInfo.defaultEnabledInputs
-      : dsInfo?.inputs?.slice(0, 1) ?? [];
+        ? (service.inputs ?? dsInfo?.inputs ?? [])
+        : dsInfo?.defaultEnabledInputs?.length
+          ? dsInfo.defaultEnabledInputs
+          : (dsInfo?.inputs?.slice(0, 1) ?? []);
     const dsView = makeDsView(service, dsId);
     // Stored input selections outlive a method switch. Under ECF only the inputs ECF can route
     // count (WAF: S3 only); a selection left over from agent-based (e.g. CloudWatch only) would
@@ -220,7 +222,7 @@ export function isServiceConfigIncomplete(
         getRequiredTextFields(dsView, inp, selections).some((f) => {
           const meta = resolveFieldMeta(dsView, inp, f);
           const raw = dsVars.varsByInput?.[inp]?.[f];
-          const effective = meta ? toTyped(raw, meta) : raw ?? '';
+          const effective = meta ? toTyped(raw, meta) : (raw ?? '');
           if (Array.isArray(effective)) return effective.length === 0;
           return typeof effective === 'string' && effective.trim() === '';
         })
@@ -509,7 +511,7 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       const merged = mergeVarsByDataStream(current.varsByDataStream, newVarsByDataStream);
       // Only a duplicate has a namespace of its own; an original always follows the global one.
       const isDuplicate = instances.some((i) => i.instanceId === instanceId && i.isDuplicate);
-      const ownNamespace = isDuplicate ? instanceNamespace ?? current.namespace : undefined;
+      const ownNamespace = isDuplicate ? (instanceNamespace ?? current.namespace) : undefined;
       const serviceVars: Record<string, ServiceVars> = {
         ...((persisted?.serviceVars ?? {}) as Record<string, ServiceVars>),
         [instanceId]: {
@@ -680,6 +682,38 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     ? getReroutePermissionsError(reroutePermissions)
     : undefined;
 
+  // The custom fields reach the policies of the services that get one, like the reroute
+  // permissions, so with only ECF-only services under managed integration they would do nothing.
+  // Elsewhere the field is hidden, so a value left over from another method or selection must not
+  // block Continue.
+  const isCustomFieldsSupported = useMemo(
+    () =>
+      supportsPolicySetting('global_data_tags', deploymentMethod) &&
+      instances.some((inst) => {
+        const service = awsServicesMap?.get(inst.serviceId);
+        return !!service && supportsIntegrationSettings(service, deploymentMethod);
+      }),
+    [instances, awsServicesMap, deploymentMethod]
+  );
+  // Selected services that are deployed through ECF, whose templates take no custom fields.
+  const hasServicesIgnoringCustomFields = useMemo(
+    () =>
+      isCustomFieldsSupported &&
+      instances.some((inst) => {
+        const service = awsServicesMap?.get(inst.serviceId);
+        return !!service && !supportsIntegrationSettings(service, deploymentMethod);
+      }),
+    [isCustomFieldsSupported, instances, awsServicesMap, deploymentMethod]
+  );
+  const customFields = useMemo(
+    () => parseCustomFields(policySettings.global_data_tags),
+    [policySettings.global_data_tags]
+  );
+  const customFieldsErrors = useMemo(
+    () => (isCustomFieldsSupported ? getCustomFieldsErrors(customFields) : undefined),
+    [isCustomFieldsSupported, customFields]
+  );
+
   const isReady = useMemo(
     () =>
       !!globalRegion.trim() &&
@@ -689,7 +723,8 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       !namespaceError &&
       !proxyUrlError &&
       !conditionErrors &&
-      !reroutePermissionsError,
+      !reroutePermissionsError &&
+      !customFieldsErrors,
     [
       globalRegion,
       incompleteInstances,
@@ -699,6 +734,7 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       proxyUrlError,
       conditionErrors,
       reroutePermissionsError,
+      customFieldsErrors,
     ]
   );
 
@@ -749,6 +785,10 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     isReroutePermissionsSupported,
     reroutePermissions,
     reroutePermissionsError,
+    isCustomFieldsSupported,
+    hasServicesIgnoringCustomFields,
+    customFields,
+    customFieldsErrors,
     bareNamePackage,
     instances,
     filteredInstances,

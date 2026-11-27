@@ -32,12 +32,12 @@ describe('getStructuredAnswerPrompt', () => {
               id: type,
               validate: (input: unknown) => ({ valid: true, data: input }),
               format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
-            } as any),
+            }) as any,
         }),
       },
       configuration: {
         instructions: '',
-        capabilities: { attachmentTools: true, apiTools: true },
+        capabilities: { attachmentTools: true, apiTools: true, bashTool: true },
       },
       skills: [],
       run: {
@@ -75,12 +75,12 @@ describe('getStructuredAnswerPrompt', () => {
               id: type,
               validate: (input: unknown) => ({ valid: true, data: input }),
               format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
-            } as any),
+            }) as any,
         }),
       },
       configuration: {
         instructions: '',
-        capabilities: { attachmentTools: true, apiTools: true },
+        capabilities: { attachmentTools: true, apiTools: true, bashTool: true },
       },
       skills: [],
       run: {
@@ -119,10 +119,13 @@ describe('getStructuredAnswerPrompt', () => {
           attachments: [],
           attachmentTypes: [],
           attachmentStateManager: createAttachmentStateManager([], {
-            getTypeDefinition: (type: string) => ({ id: type } as any),
+            getTypeDefinition: (type: string) => ({ id: type }) as any,
           }),
         },
-        configuration: { instructions: '', capabilities: { attachmentTools, apiTools: true } },
+        configuration: {
+          instructions: '',
+          capabilities: { attachmentTools, apiTools: true, bashTool: true },
+        },
         skills: [],
         run: {
           steps: [],

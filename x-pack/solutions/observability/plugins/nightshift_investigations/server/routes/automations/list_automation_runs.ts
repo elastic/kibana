@@ -8,6 +8,7 @@
 import { serverUnavailable } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { SLACK_MESSAGE_EVENT_ID } from '@kbn/connector-specs';
 import { MANUAL_AUTOMATION_TRIGGER_SOURCE } from '../../../common/automation_run';
 import { mapRunStatus, SKIP_REASONS } from './map_run_status';
 import { TRIGGER_STEP_IDS } from './count_skipped_runs';
@@ -112,12 +113,12 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
     const runs = executions.results.map((exec) => {
       const startedStep =
         (exec.triggeredBy === 'alerting.v1.alertStatusChanged'
-          ? alertSteps.get(exec.id) ?? legacyAlertSteps.get(exec.id)
+          ? (alertSteps.get(exec.id) ?? legacyAlertSteps.get(exec.id))
           : exec.triggeredBy === 'alerting.alertStatusChanged'
-          ? alertV2Steps.get(exec.id)
-          : exec.triggeredBy === 'slack2.message'
-          ? slackSteps.get(exec.id)
-          : undefined) ?? defaultSteps.get(exec.id);
+            ? alertV2Steps.get(exec.id)
+            : exec.triggeredBy === SLACK_MESSAGE_EVENT_ID
+              ? slackSteps.get(exec.id)
+              : undefined) ?? defaultSteps.get(exec.id);
       const recoveredStep = recoveredAlertSteps.get(exec.id) ?? recoveredAlertV2Steps.get(exec.id);
       const isRecoveryFollowUp = startedStep === undefined && recoveredStep !== undefined;
       const step = startedStep ?? recoveredStep;
@@ -147,6 +148,7 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
         triggeredBy:
           exec.triggeredBy === MANUAL_AUTOMATION_TRIGGER_SOURCE ? 'manual' : exec.triggeredBy,
         executedBy: exec.executedBy,
+        runsAsServiceAccount: exec.effectiveIdentity?.type === 'service_account',
         title,
         message: getString(input['message']) ?? getString(input['instructions']),
         investigationId: getString(output['investigation_id']),
@@ -180,10 +182,10 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
         ...run,
         executedByDisplayName:
           run.triggeredBy === 'manual' && run.executedBy
-            ? displayNames.get(run.executedBy) ??
+            ? (displayNames.get(run.executedBy) ??
               (run.executedBy.startsWith('u_') || run.executedBy === 'unknown'
                 ? undefined
-                : run.executedBy)
+                : run.executedBy))
             : undefined,
       })),
       total: executions.total,

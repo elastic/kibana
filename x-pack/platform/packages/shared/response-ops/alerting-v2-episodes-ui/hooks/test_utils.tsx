@@ -16,6 +16,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
+import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
@@ -34,7 +35,7 @@ export const createMockSpaces = (): jest.Mocked<SpacesPluginStart> => {
 export const createMockUiSettings = (): IUiSettingsClient =>
   ({
     get: jest.fn(() => 'YYYY-MM-DD HH:mm:ss'),
-  } as unknown as IUiSettingsClient);
+  }) as unknown as IUiSettingsClient;
 
 export const createMockUnifiedDocViewer = (): UnifiedDocViewerStart =>
   ({
@@ -43,11 +44,24 @@ export const createMockUnifiedDocViewer = (): UnifiedDocViewerStart =>
         { id: 'doc_view_table', render: () => <div data-test-subj="mock-doc-viewer-table" /> },
       ],
     },
-  } as unknown as UnifiedDocViewerStart);
+  }) as unknown as UnifiedDocViewerStart;
+
+const createMockApplication = () => {
+  const application = applicationServiceMock.createStartContract();
+  return {
+    ...application,
+    // Existing add-to-chat tests treat a started Agent Builder as enough to show the action.
+    capabilities: {
+      ...application.capabilities,
+      agentBuilder: { show: true },
+    },
+  };
+};
 
 export const createMockServices = (
   overrides: Partial<AlertEpisodeDetailsServices> = {}
 ): AlertEpisodeDetailsServices => ({
+  application: createMockApplication(),
   data: dataPluginMock.createStartContract(),
   dataViews: dataViewPluginMocks.createStartContract(),
   expressions: expressionsPluginMock.createStartContract(),
@@ -85,4 +99,4 @@ export const createMockRule = (overrides: Partial<RuleResponse> = {}): RuleRespo
     metadata: { name: 'Rule 1' },
     query: { base: 'FROM logs' },
     ...overrides,
-  } as RuleResponse);
+  }) as RuleResponse;

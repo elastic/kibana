@@ -63,21 +63,15 @@ export const LazyCspFindingsVulnerabilityFlyout = lazy(
 );
 export const LazyCspFindingsVulnerabilityFlyoutHeader = lazy(
   () =>
-    import(
-      './pages/vulnerabilities/vulnerabilities_finding_flyout/vulnerability_finding_right/header'
-    )
+    import('./pages/vulnerabilities/vulnerabilities_finding_flyout/vulnerability_finding_right/header')
 );
 export const LazyCspFindingsVulnerabilityFlyoutBody = lazy(
   () =>
-    import(
-      './pages/vulnerabilities/vulnerabilities_finding_flyout/vulnerability_finding_right/content'
-    )
+    import('./pages/vulnerabilities/vulnerabilities_finding_flyout/vulnerability_finding_right/content')
 );
 export const LazyCspFindingsVulnerabilityFlyoutFooter = lazy(
   () =>
-    import(
-      './pages/vulnerabilities/vulnerabilities_finding_flyout/vulnerability_finding_right/footer'
-    )
+    import('./pages/vulnerabilities/vulnerabilities_finding_flyout/vulnerability_finding_right/footer')
 );
 
 // Shared "take action" control (create detection rule) without the flyout footer chrome, so
@@ -93,15 +87,12 @@ const CspRouter = (props: CspRouterProps) => (
   </Suspense>
 );
 
-export class CspPlugin
-  implements
-    Plugin<
-      CspClientPluginSetup,
-      CspClientPluginStart,
-      CspClientPluginSetupDeps,
-      CspClientPluginStartDeps
-    >
-{
+export class CspPlugin implements Plugin<
+  CspClientPluginSetup,
+  CspClientPluginStart,
+  CspClientPluginSetupDeps,
+  CspClientPluginStartDeps
+> {
   private isCloudEnabled?: boolean;
   private config: CSPUIConfigType;
   private experimentalFeatures: ExperimentalFeatures;

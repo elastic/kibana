@@ -459,6 +459,44 @@ describe('EsqlSource', () => {
     });
   });
 
+  describe('getEmptyColumnNames', () => {
+    it('returns the names of the columns marked as empty, in column order', async () => {
+      const source = await EsqlSource.create({
+        query: 'FROM logs-*',
+        resultColumns: [
+          { ...makeColumn('empty_a', 'string'), isNull: true },
+          makeColumn('host', 'string'),
+          { ...makeColumn('empty_b', 'string'), isNull: true },
+        ],
+      });
+
+      expect(source.getEmptyColumnNames()).toEqual(['empty_a', 'empty_b']);
+    });
+
+    it('returns an empty list when no column is empty', async () => {
+      const source = await EsqlSource.create({
+        query: 'FROM logs-*',
+        resultColumns: [makeColumn('host', 'string')],
+      });
+
+      expect(source.getEmptyColumnNames()).toEqual([]);
+    });
+
+    it('follows the columns given to withColumns', async () => {
+      const original = await EsqlSource.create({
+        query: 'FROM logs-*',
+        resultColumns: [makeColumn('host', 'string')],
+      });
+      const updated = original.withColumns([
+        makeColumn('host', 'string'),
+        { ...makeColumn('empty', 'string'), isNull: true },
+      ]);
+
+      expect(original.getEmptyColumnNames()).toEqual([]);
+      expect(updated.getEmptyColumnNames()).toEqual(['empty']);
+    });
+  });
+
   describe('withColumns', () => {
     it('returns a new instance with the same identity and updated result columns', async () => {
       const originalCols = [makeColumn('message', 'string')];
@@ -696,7 +734,7 @@ describe('EsqlSource', () => {
         post: jest.fn(async (path: string) =>
           path === TIMEFIELD_ROUTE ? { timeField: '@timestamp' } : { columns: [] }
         ),
-      } as unknown as HttpStart);
+      }) as unknown as HttpStart;
 
     it('skips the time field request when set to false', async () => {
       const http = createHttp();
@@ -761,7 +799,7 @@ describe('EsqlSource', () => {
         post: jest.fn(async (path: string) =>
           path === TIMEFIELD_ROUTE ? { timeField: '@timestamp' } : { columns: [] }
         ),
-      } as unknown as HttpStart);
+      }) as unknown as HttpStart;
 
     it('resolves the time field without requesting the schema', async () => {
       const http = createHttp();
@@ -846,7 +884,7 @@ describe('EsqlSource', () => {
                 ],
               }
         ),
-      } as unknown as HttpStart);
+      }) as unknown as HttpStart;
 
     const bodyPostedTo = (http: HttpStart, route: string) =>
       JSON.parse(
@@ -890,7 +928,7 @@ describe('EsqlSource', () => {
           const { query } = JSON.parse(body) as { query: string };
           return { columns: (schemas[query] ?? []).map((name) => ({ name, esType: 'keyword' })) };
         }),
-      } as unknown as HttpStart);
+      }) as unknown as HttpStart;
 
     const names = (columns: ReadonlyArray<{ name: string }>) => columns.map(({ name }) => name);
 

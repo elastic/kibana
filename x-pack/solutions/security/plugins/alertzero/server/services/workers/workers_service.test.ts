@@ -23,7 +23,10 @@ import {
   getManagedWorkflowDefinition,
   SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
-import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
+import type {
+  ManagedWorkflowStatus,
+  PluginScopedManagedWorkflowsApi,
+} from '@kbn/workflows/server/types';
 import { ThreatIntelSupplyService } from '../threat_intel_supply';
 import type { SupplyDocumentStates } from '../threat_intel_supply/keyed_supply_store.mock';
 import {
@@ -56,7 +59,7 @@ const agentBuilderWithSkill = (present: boolean): AgentBuilderPluginStart =>
         ),
       })),
     },
-  } as unknown as AgentBuilderPluginStart);
+  }) as unknown as AgentBuilderPluginStart;
 
 interface PersistentWorkerDocument {
   id: string;
@@ -123,7 +126,7 @@ const createPersistentHarness = () => {
       managedBy: document ? 'alertzero' : null,
       storedVersion: document ? 1 : null,
       registryVersion: 1,
-      storedHash: document ? 'stored' : null,
+      storedHash: document ? 'registry' : null,
       registryHash: 'registry',
     };
   });
@@ -765,6 +768,54 @@ describe('WorkersService', () => {
     expect(worker?.workflowId).toBeNull();
   });
 
+  describe('workflowOutdated', () => {
+    const statusReport = (id: string, status: ManagedWorkflowStatus) => ({
+      status,
+      workflowId: reportedWorkflowId(id, SPACE),
+      definitionId: id,
+      spaceId: SPACE,
+      installed: status !== 'missing',
+      enabled: status === 'missing' ? null : status !== 'disabled',
+      valid: status === 'missing' ? null : status !== 'invalid',
+      managedBy: status === 'missing' || status === 'not_managed' ? null : 'alertzero',
+      storedVersion: status === 'missing' ? null : 1,
+      registryVersion: 1,
+      storedHash: status === 'missing' ? null : status === 'drifted' ? 'stored' : 'registry',
+      registryHash: 'registry',
+    });
+
+    it.each([
+      ['drifted', true],
+      ['intact', false],
+      ['disabled', false],
+      ['invalid', false],
+      ['missing', false],
+      ['not_managed', false],
+    ] as const)('reads a %s copy as %s', async (status, expected) => {
+      const harness = createPersistentHarness();
+      (harness.managedWorkflows.getWorkflowStatus as jest.Mock).mockResolvedValue(
+        statusReport(TRIAGE, status)
+      );
+
+      const worker = await harness.createService().get(TRIAGE, request, SPACE);
+
+      expect(worker?.workflowOutdated).toBe(expected);
+    });
+
+    it('lists only the drifted Worker as outdated', async () => {
+      const harness = createPersistentHarness();
+      (harness.managedWorkflows.getWorkflowStatus as jest.Mock).mockImplementation(
+        async (id: string) => statusReport(id, id === TRIAGE ? 'drifted' : 'intact')
+      );
+
+      const { workers } = await harness.createService().list(request, SPACE);
+
+      expect(workers.map(({ id, workflowOutdated }) => [id, workflowOutdated])).toEqual(
+        WORKERS_WITHOUT_FORENSIC_SKILL.map((id) => [id, id === TRIAGE])
+      );
+    });
+  });
+
   it('projects skills from the installed workflow definition when the worker is installed', async () => {
     const harness = createPersistentHarness();
     const service = harness.createService();
@@ -1355,11 +1406,11 @@ describe('WorkersService', () => {
         assertHardGate: jest.fn(async () => undefined),
         ensureSupplyForSpace: jest.fn(async () => undefined),
         teardownSupplyForSpace: jest.fn(async () => undefined),
-      } as unknown as ThreatIntelSupplyService & {
+      }) as unknown as ThreatIntelSupplyService & {
         assertHardGate: jest.Mock;
         ensureSupplyForSpace: jest.Mock;
         teardownSupplyForSpace: jest.Mock;
-      });
+      };
 
     const makeHuntService = (
       harness: ReturnType<typeof createPersistentHarness>,
@@ -1773,8 +1824,8 @@ describe('WorkersService', () => {
         logger: loggingSystemMock.createLogger() as Logger,
         getEsClient: async () => createHardGateEsClient(row.hardGateOk !== false),
         enumerateSpaceIds: async () => ['default', SPACE_A, SPACE_B],
-        getInference: () => ({ getDefaultConnector: jest.fn() } as unknown as InferenceServerStart),
-        getUiSettingsClient: () => ({ get: jest.fn() } as unknown as IUiSettingsClient),
+        getInference: () => ({ getDefaultConnector: jest.fn() }) as unknown as InferenceServerStart,
+        getUiSettingsClient: () => ({ get: jest.fn() }) as unknown as IUiSettingsClient,
       });
       const service = new WorkersService(
         harness.management,
@@ -1798,9 +1849,10 @@ describe('WorkersService', () => {
         harness.updateWorkflow.mockRejectedValueOnce(new Error('enable write failed'));
       }
 
-      const result = await (row.operation === 'enable'
-        ? service.update(HUNT, ENABLE, SPACE_A, request)
-        : service.update(HUNT, { enabled: false }, SPACE_A, request)
+      const result = await (
+        row.operation === 'enable'
+          ? service.update(HUNT, ENABLE, SPACE_A, request)
+          : service.update(HUNT, { enabled: false }, SPACE_A, request)
       ).then(
         (outcome) =>
           outcome.outcome === 'blocked' ? `blocked: ${outcome.reason}` : outcome.outcome,
@@ -1905,6 +1957,69 @@ describe('WorkersService Hunt index coverage', () => {
         state: 'degraded',
         stateReason: `The sweep at 2026-10-28 10:00 UTC running as ${ACCOUNT} could not see any index in this space's default data view`,
       });
+    });
+
+    it('says only hidden or alerts indices were found when the sweep skipped nothing else', async () => {
+      const { service, mocks } = await setup();
+      finishedSweep(mocks, {
+        ...blockedScope('blocked:empty_universe'),
+        missing: [],
+        policy_skipped: ['.siem-signals-x'],
+      });
+
+      const hunt = await huntOf(service);
+
+      expect(hunt).toMatchObject({
+        state: 'degraded',
+        stateReason: `The sweep at 2026-10-28 10:00 UTC found only hidden or alerts indices in this space's default data view, which Hunt does not search`,
+      });
+    });
+
+    it('keeps the hidden-indices reason when the route supplies the now-empty universe', async () => {
+      const { service, mocks } = await setup();
+      finishedSweep(mocks, {
+        ...blockedScope('blocked:empty_universe'),
+        missing: [],
+        policy_skipped: ['.siem-signals-x'],
+      });
+
+      const { workers } = await service.list(request, SPACE, async () => []);
+
+      expect(workers.find(({ id }) => id === HUNT)?.stateReason).toContain(
+        'found only hidden or alerts indices'
+      );
+    });
+
+    it('keeps the could-not-see reason when skipped and missing entries are both present', async () => {
+      const { service, mocks } = await setup();
+      finishedSweep(mocks, {
+        ...blockedScope('blocked:empty_universe'),
+        missing: ['custom-1'],
+        policy_skipped: ['.siem-signals-x'],
+      });
+
+      const hunt = await huntOf(service);
+
+      expect(hunt?.stateReason).toContain('could not see any index');
+    });
+
+    it('is not degraded by a sweep that hunted with skipped names', async () => {
+      const { service, mocks } = await setup();
+      finishedSweep(mocks, {
+        status: 'ok',
+        resolution: 'universe',
+        index_patterns: ['logs-*'],
+        missing: ['custom-edr-1'],
+        policy_skipped: ['.siem-signals-x'],
+        report_matches: [],
+        actionable_indices: [],
+        window: { from: '2026-01-01T00:00:00.000Z', to: '2026-01-31T00:00:00.000Z' },
+        row_limit: 25,
+      });
+
+      const hunt = await huntOf(service);
+
+      expect(hunt?.state).not.toBe('degraded');
     });
 
     it('is degraded with the resolve reason after a blocked:discovery_failed sweep', async () => {

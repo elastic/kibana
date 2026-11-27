@@ -135,9 +135,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should show category grid lines', async function () {
         await visEditor.toggleGridCategoryLines();
         await visEditor.clickGo();
-        const gridLines: Array<{ x: number; y: number }> = await visChart.getGridLines(
-          xyChartSelector
-        );
+        const gridLines: Array<{ x: number; y: number }> =
+          await visChart.getGridLines(xyChartSelector);
         // FLAKY relaxing as depends on chart size/browser size and produce differences between local and CI
         // The objective here is to check whenever the grid lines are rendered, not the exact quantity
         expect(gridLines.length).to.be.greaterThan(0);
@@ -150,9 +149,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visEditor.setGridValueAxis('ValueAxis-2');
         await visEditor.toggleGridCategoryLines();
         await visEditor.clickGo();
-        const gridLines: Array<{ x: number; y: number }> = await visChart.getGridLines(
-          xyChartSelector
-        );
+        const gridLines: Array<{ x: number; y: number }> =
+          await visChart.getGridLines(xyChartSelector);
         // FLAKY relaxing as depends on chart size/browser size and produce differences between local and CI
         // The objective here is to check whenever the grid lines are rendered, not the exact quantity
         expect(gridLines.length).to.be.greaterThan(0);

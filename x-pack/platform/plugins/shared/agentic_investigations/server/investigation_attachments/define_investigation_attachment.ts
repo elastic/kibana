@@ -34,7 +34,7 @@ import { hashInvestigationAttachmentId } from './doc_id';
 export interface InvestigationAttachmentConfig<
   TType extends string,
   TSettings extends IndexStorageSettings,
-  TStored extends StoredInvestigationAttachment
+  TStored extends StoredInvestigationAttachment,
 > {
   /** Agent Builder attachment type id. Must be on Agent Builder's builtin attachment allow-list. */
   type: TType;
@@ -96,7 +96,7 @@ export interface InvestigationAttachmentWrite<TStored extends StoredInvestigatio
  */
 export interface InvestigationAttachmentDefinition<
   TType extends string,
-  TStored extends StoredInvestigationAttachment
+  TStored extends StoredInvestigationAttachment,
 > {
   type: TType;
   /** Whether the write paths hide the conversation attachment from the chat. */
@@ -148,7 +148,7 @@ export interface InvestigationAttachmentDefinition<
 export const defineInvestigationAttachment = <
   TType extends string,
   TSettings extends IndexStorageSettings,
-  TStored extends StoredInvestigationAttachment & Partial<StorageDocumentOf<TSettings>>
+  TStored extends StoredInvestigationAttachment & Partial<StorageDocumentOf<TSettings>>,
 >(
   config: InvestigationAttachmentConfig<TType, TSettings, TStored>
 ): InvestigationAttachmentDefinition<TType, TStored> => {

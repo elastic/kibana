@@ -20,6 +20,7 @@ import {
   getModelReleaseDate,
   getProviderOptions,
   getRegionOptions,
+  getTaskTypeCategoryLabel,
   modelMatchesRegionOption,
   MODEL_TYPE_FILTERS,
   type EisDisplayOptions,
@@ -91,9 +92,9 @@ const sortModels = (models: GroupedModel[], sort: FindItemsParams['sort']): Grou
   }
 
   if (sort?.field === EIS_TYPE_SORT_FIELD) {
-    return [...models].sort(
-      (a, b) => a.categories.join(', ').localeCompare(b.categories.join(', ')) * direction
-    );
+    const getTypeLabel = ({ categories }: GroupedModel) =>
+      categories.map(getTaskTypeCategoryLabel).join(', ');
+    return [...models].sort((a, b) => getTypeLabel(a).localeCompare(getTypeLabel(b)) * direction);
   }
 
   if (sort?.field === EIS_RELEASED_SORT_FIELD || sort?.field === EIS_END_OF_LIFE_SORT_FIELD) {

@@ -1,0 +1,5 @@
+{
+  "blog_v3": { "blog_sources": { "$in_query": { "title": "Security Labs" } } },
+  "threat_command": {},
+  "reports": {}
+}

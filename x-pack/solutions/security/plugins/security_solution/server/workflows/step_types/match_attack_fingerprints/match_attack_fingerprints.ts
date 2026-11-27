@@ -7,6 +7,7 @@
 
 import type { QueryDslQueryContainer, SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { ATTACK_FINGERPRINT_AI_INDEX_DEST } from '@kbn/alertzero-plugin/common/ai_indices';
 import { asSpaceId } from '@kbn/core-spaces-common';
 import { isNotFoundError } from '@kbn/es-errors';
 import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
@@ -35,8 +36,7 @@ import {
   uniqueSorted,
 } from './cluster';
 
-export const ATTACK_FINGERPRINT_AI_INDEX_ID = 'security-attack-fingerprints';
-export const ATTACK_FINGERPRINT_INDEX = `ai-index-idx-${ATTACK_FINGERPRINT_AI_INDEX_ID}`;
+export const ATTACK_FINGERPRINT_INDEX = ATTACK_FINGERPRINT_AI_INDEX_DEST.value;
 export const ATTACK_FINGERPRINT_TYPE = 'security.attack_fingerprint';
 export const ATTACK_FINGERPRINT_TAG = 'consumer:attack-discovery';
 
@@ -345,7 +345,7 @@ const toStored = (hit: {
     return undefined;
   }
   return {
-    id: typeof source.id === 'string' ? source.id : hit._id ?? '',
+    id: typeof source.id === 'string' ? source.id : (hit._id ?? ''),
     investigationId,
     alertIds: asStringList(attributes.alert_ids),
     analyzedAlertIds:
@@ -578,8 +578,8 @@ const extensionDoc = (
   const incoming = withholdAlertIds
     ? []
     : limitToAnalyzed
-    ? sharedIds(span.alertIds, analyzedIdsOf(current))
-    : span.alertIds;
+      ? sharedIds(span.alertIds, analyzedIdsOf(current))
+      : span.alertIds;
   const alertIds = uniqueSorted([...current.alertIds, ...incoming]);
   const storedIds = new Set(current.alertIds);
   const added = uniqueSorted(incoming).filter((id) => !storedIds.has(id)).length;

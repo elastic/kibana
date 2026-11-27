@@ -22,7 +22,10 @@ export interface CompositeSLORepository {
 }
 
 export class DefaultCompositeSLORepository implements CompositeSLORepository {
-  constructor(private soClient: SavedObjectsClientContract, private logger: Logger) {}
+  constructor(
+    private soClient: SavedObjectsClientContract,
+    private logger: Logger
+  ) {}
 
   async create(compositeSlo: CompositeSLODefinition): Promise<CompositeSLODefinition> {
     const existingResponse = await this.soClient.find<StoredCompositeSLODefinition>({
@@ -35,7 +38,7 @@ export class DefaultCompositeSLORepository implements CompositeSLORepository {
       throw new SLOIdConflict(`Composite SLO [${compositeSlo.id}] already exists`);
     }
 
-    const toStore = storedCompositeSloDefinitionSchema.parse(compositeSlo);
+    const toStore = storedCompositeSloDefinitionSchema.encode(compositeSlo);
     await this.soClient.create<StoredCompositeSLODefinition>(SO_SLO_COMPOSITE_TYPE, toStore);
 
     return compositeSlo;
@@ -53,7 +56,7 @@ export class DefaultCompositeSLORepository implements CompositeSLORepository {
     }
 
     const existingSavedObjectId = findResponse.saved_objects[0].id;
-    const toStore = storedCompositeSloDefinitionSchema.parse(compositeSlo);
+    const toStore = storedCompositeSloDefinitionSchema.encode(compositeSlo);
     await this.soClient.create<StoredCompositeSLODefinition>(SO_SLO_COMPOSITE_TYPE, toStore, {
       id: existingSavedObjectId,
       overwrite: true,
@@ -118,7 +121,7 @@ export class DefaultCompositeSLORepository implements CompositeSLORepository {
     const result = compositeSloDefinitionSchema.safeParse(stored);
 
     if (!result.success) {
-      this.logger.debug(`Invalid stored composite SLO with id [${stored.id}]`);
+      this.logger.debug(`Invalid stored composite SLO with ID [${stored.id}]`);
       return undefined;
     }
 

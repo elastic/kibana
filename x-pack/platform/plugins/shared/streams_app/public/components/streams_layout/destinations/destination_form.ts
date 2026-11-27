@@ -57,8 +57,8 @@ const getS3Errors = (s3: S3DestinationFormData): S3FieldsErrors => {
     bucket: !bucket
       ? 'required'
       : bucket.length < S3_BUCKET_MIN_LENGTH || bucket.length > S3_BUCKET_MAX_LENGTH
-      ? 'invalid'
-      : undefined,
+        ? 'invalid'
+        : undefined,
     accessKeyId: s3.accessKeyId.trim() ? undefined : 'required',
     secretAccessKey: s3.secretAccessKey.trim() ? undefined : 'required',
   };
@@ -346,13 +346,22 @@ const ERROR_FIELD_PATHS: Record<DestinationCreationFormField, readonly FormField
 export const getVisibleDestinationFormErrors = ({
   errors,
   touchedFields,
+  dirtyFields,
   isSubmitted,
 }: {
   errors: DestinationCreationFormErrors;
   touchedFields: object;
+  dirtyFields?: object;
   isSubmitted: boolean;
 }): DestinationCreationFormErrors =>
-  getVisibleFormErrors({ errors, touchedFields, isSubmitted, fieldPaths: ERROR_FIELD_PATHS });
+  getVisibleFormErrors({
+    errors,
+    touchedFields,
+    dirtyFields,
+    revealWhenDirty: ['destinationName'],
+    isSubmitted,
+    fieldPaths: ERROR_FIELD_PATHS,
+  });
 
 export const canSubmitDestinationForm = ({
   formData,

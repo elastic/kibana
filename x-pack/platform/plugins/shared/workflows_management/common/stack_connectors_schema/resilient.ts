@@ -1,0 +1,59 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+/**
+ * This was generated based on x-pack/platform/plugins/shared/stack_connectors/server/connector_types/resilient/schema.ts
+ * and will be deprecated once connectors will expose their schemas
+ */
+
+import { lazySchema, z } from '@kbn/zod/v4';
+
+// Resilient connector parameter schemas for different sub-actions
+export const ResilientCreateIncidentParamsSchema = lazySchema(() =>
+  z.object({
+    incident: z.object({
+      name: z.string(),
+      description: z.string().optional(),
+      incidentTypes: z.array(z.number()).optional(),
+      severityCode: z.number().optional(),
+    }),
+  })
+);
+
+export const ResilientUpdateIncidentParamsSchema = lazySchema(() =>
+  z.object({
+    incident: z.object({
+      name: z.string().optional(),
+      description: z.string().optional(),
+      incidentTypes: z.array(z.number()).optional(),
+      severityCode: z.number().optional(),
+    }),
+    incidentId: z.string(),
+  })
+);
+
+export const ResilientAddCommentParamsSchema = lazySchema(() =>
+  z.object({
+    incidentId: z.string(),
+    comment: z.object({
+      text: z.string(),
+    }),
+  })
+);
+
+// Resilient connector response schema
+export const ResilientIncidentResponseSchema = lazySchema(() =>
+  z.object({
+    id: z.number(),
+    name: z.string(),
+    description: z.string().optional(),
+    discovered_date: z.number(),
+    create_date: z.number(),
+    severity_code: z.number().optional(),
+    incident_type_ids: z.array(z.number()).optional(),
+  })
+);

@@ -184,9 +184,9 @@ function isFullyQualified(
 ): xDomain is { min: number; max: number; minInterval: number } {
   return Boolean(
     xDomain &&
-      typeof xDomain.min === 'number' &&
-      typeof xDomain.max === 'number' &&
-      xDomain.minInterval
+    typeof xDomain.min === 'number' &&
+    typeof xDomain.max === 'number' &&
+    xDomain.minInterval
   );
 }
 

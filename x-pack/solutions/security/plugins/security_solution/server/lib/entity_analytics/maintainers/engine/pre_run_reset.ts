@@ -58,7 +58,7 @@ const hasRepopulatableSource = async (
       transportOpts
     );
     const total = result.hits.total;
-    const count = typeof total === 'number' ? total : total?.value ?? 0;
+    const count = typeof total === 'number' ? total : (total?.value ?? 0);
     return count > 0;
   } catch (err) {
     if (isIndexNotFound(err)) {

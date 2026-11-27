@@ -1,0 +1,157 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import {
+  createTracedEsClientMock,
+  esqlResponse,
+} from '../../lib/create_digital_experience_traced_es_client.test_helpers';
+import { getMobileKpis } from './get_mobile_kpis';
+
+const HOUR = 60 * 60 * 1000;
+
+describe('getMobileKpis', () => {
+  it('has no data, and no values, without mobile documents', async () => {
+    const { client, esClient } = createTracedEsClientMock();
+    client.esql.query.mockResolvedValue(
+      esqlResponse([{ docs: 0, sessions: 0, users: 0, exceptions: 0 }])
+    );
+
+    const kpis = await getMobileKpis({
+      esClient,
+      filters: { serviceName: 'shop-mobile' },
+      start: 0,
+      end: HOUR,
+    });
+
+    expect(kpis.hasData).toBe(false);
+    expect(kpis.errorRate.value).toBeNull();
+    expect(kpis.coldStart).toEqual({
+      value: null,
+      previous: null,
+      delta: null,
+      count: 0,
+      previousCount: 0,
+    });
+  });
+
+  it('compares the average cold and warm start with the previous period, with their counts', async () => {
+    const { client, esClient } = createTracedEsClientMock();
+    client.esql.query
+      .mockResolvedValueOnce(
+        esqlResponse([
+          {
+            docs: 20,
+            sessions: 4,
+            users: 2,
+            exceptions: 0,
+            cold_start: 2000,
+            cold_starts: 3,
+            warm_start: 400,
+            warm_starts: 2,
+          },
+        ])
+      )
+      // No warm start in the previous period: ES|QL drops the columns that are null in every row
+      .mockResolvedValueOnce(
+        esqlResponse([
+          { docs: 10, sessions: 2, users: 2, exceptions: 0, cold_start: 1500, cold_starts: 2 },
+        ])
+      )
+      .mockResolvedValue(esqlResponse([]));
+
+    const kpis = await getMobileKpis({
+      esClient,
+      filters: { serviceName: 'shop-mobile' },
+      start: HOUR,
+      end: 2 * HOUR,
+    });
+
+    expect(kpis.coldStart).toEqual({
+      value: 2000,
+      previous: 1500,
+      delta: 500,
+      count: 3,
+      previousCount: 2,
+    });
+    expect(kpis.warmStart).toEqual({
+      value: 400,
+      previous: null,
+      delta: null,
+      count: 2,
+      previousCount: 0,
+    });
+  });
+
+  it('compares the period with the previous one on the OS, and lists the picker options', async () => {
+    const { client, esClient } = createTracedEsClientMock();
+    client.esql.query
+      .mockResolvedValueOnce(esqlResponse([{ docs: 20, sessions: 4, users: 2, exceptions: 2 }]))
+      .mockResolvedValueOnce(esqlResponse([{ docs: 10, sessions: 2, users: 2, exceptions: 0 }]))
+      .mockResolvedValueOnce(
+        esqlResponse([
+          { sessions: 4, release: '1.0.0' },
+          { sessions: 3, release: '1.1.0' },
+        ])
+      )
+      .mockResolvedValueOnce(
+        esqlResponse([
+          { sessions: 3, os_name: 'iOS', platform: 'ios' },
+          { sessions: 1, os_name: 'iPadOS', platform: 'ios' },
+          { sessions: 1, os_name: null, platform: 'android' },
+        ])
+      )
+      .mockResolvedValueOnce(esqlResponse([{ docs: 20, 'service.environment': 'production' }]));
+
+    const kpis = await getMobileKpis({
+      esClient,
+      filters: { serviceName: 'shop-mobile', osName: 'iOS' },
+      start: HOUR,
+      end: 2 * HOUR,
+      environment: 'production',
+    });
+
+    expect(kpis).toEqual(
+      expect.objectContaining({
+        hasData: true,
+        sessions: { value: 4, previous: 2, delta: 2 },
+        users: { value: 2, previous: 2, delta: 0 },
+        errorRate: { value: 0.5, previous: 0, delta: 0.5 },
+        // The picker options, with the sessions their queries count.
+        releases: [
+          { key: '1.0.0', count: 4 },
+          { key: '1.1.0', count: 3 },
+        ],
+        osNames: [
+          { key: 'iOS', count: 3 },
+          { key: 'iPadOS', count: 1 },
+        ],
+        platforms: ['android', 'ios'],
+        environments: ['production'],
+      })
+    );
+    // No crash-free sessions until a crash is defined (#64), rather than a value that's always empty.
+    expect(kpis).not.toHaveProperty('crashFreeSessions');
+    const [[currentRequest], [previousRequest], [releasesRequest], [osRequest]] =
+      client.esql.query.mock.calls;
+    // The previous period has the same length and ends, exclusive, where the range starts.
+    expect(previousRequest.filter).toEqual({
+      bool: {
+        filter: [
+          { range: { '@timestamp': { gte: 0, lt: HOUR, format: 'epoch_millis' } } },
+          expect.anything(),
+        ],
+      },
+    });
+    // The routes send the values as params.
+    expect(currentRequest.params).toEqual([{ service_name: 'shop-mobile' }, { os_name: 'iOS' }]);
+    // The releases are those of the OS; the OS names are all of them.
+    expect(releasesRequest.params).toEqual([{ service_name: 'shop-mobile' }, { os_name: 'iOS' }]);
+    expect(osRequest.params).toEqual([{ service_name: 'shop-mobile' }]);
+    // The page builds its Discover query from its URL, so the response has none.
+    expect(kpis).not.toHaveProperty('esql');
+  });
+});

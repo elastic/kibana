@@ -161,8 +161,10 @@ interface NodeDefinitionCommon<LinkId extends AppDeepLinkId, Id extends string> 
   badgeType?: BadgeType;
 }
 
-interface ChromeNavigationNodeCommon
-  extends Omit<NodeDefinitionCommon<AppDeepLinkId, string>, 'link' | 'cloudLink'> {
+interface ChromeNavigationNodeCommon extends Omit<
+  NodeDefinitionCommon<AppDeepLinkId, string>,
+  'link' | 'cloudLink'
+> {
   id: string;
   /** Path in the tree of the node */
   path: string;
@@ -209,7 +211,7 @@ export interface ChromeSetProjectBreadcrumbsParams {
 export type StandardNodeDefinition<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
-  ChildrenId extends string = Id
+  ChildrenId extends string = Id,
 > = NodeDefinitionCommon<LinkId, Id> & {
   renderAs?: never;
   children?: Array<
@@ -224,13 +226,13 @@ export type StandardNodeDefinition<
 /** Allowed only under `panelOpener.children`. */
 export type PanelOpenerChildDefinition<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
-  Id extends string = string
+  Id extends string = string,
 > = StandardNodeDefinition<LinkId, Id, Id>;
 
 export type RootNodePanelOpenerDefinition<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
-  ChildrenId extends string = Id
+  ChildrenId extends string = Id,
 > = NodeDefinitionCommon<LinkId, Id> & {
   renderAs: 'panelOpener';
   children?: Array<PanelOpenerChildDefinition<LinkId, ChildrenId>>;
@@ -240,7 +242,7 @@ export type RootNodePanelOpenerDefinition<
 export type RootNodeDefinition<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
-  ChildrenId extends string = Id
+  ChildrenId extends string = Id,
 > =
   | StandardNodeDefinition<LinkId, Id, ChildrenId>
   | RootNodePanelOpenerDefinition<LinkId, Id, ChildrenId>;
@@ -256,7 +258,7 @@ export type RootNodeDefinition<
 export type NodeDefinition<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
-  ChildrenId extends string = Id
+  ChildrenId extends string = Id,
 > = RootNodeDefinition<LinkId, Id, ChildrenId>;
 
 /**
@@ -267,7 +269,7 @@ export type NodeDefinition<
 export interface NavigationTreeDefinition<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
-  ChildrenId extends string = Id
+  ChildrenId extends string = Id,
 > {
   /**
    * Main content of the navigation.
@@ -304,7 +306,7 @@ export interface ProjectNavigationLinkItem {
   isExternal?: boolean;
 }
 
-/** One titled list inside a hover registration. */
+/** One titled supplementary list registered against a navigation target. */
 export interface ProjectNavigationLinkList {
   /** Unique within the registration. Rendered ids are `${id}:${item.id}`. */
   id: string;
@@ -313,8 +315,9 @@ export interface ProjectNavigationLinkList {
 }
 
 /**
- * Everything one feature contributes to an existing deep link's hover popover. One per target.
- * Chrome attaches this to primary and footer hover only, not More.
+ * Everything one feature contributes to an existing deep link's supplementary navigation. One per
+ * target. Chrome attaches the lists to primary and footer items, where they render in the hover
+ * popover and in an existing side panel, but not in More.
  */
 export interface ProjectNavigationLinks {
   id: string;
@@ -340,6 +343,12 @@ export interface SolutionNavigationDefinition<LinkId extends AppDeepLinkId = App
   navigationTree$: Observable<NavigationTreeDefinition<LinkId>>;
   /** Optional icon for the solution navigation to render in the select dropdown. */
   icon?: IconType;
+  /**
+   * Id of the plugin that owns this navigation tree. When provided, Core (in development builds)
+   * attributes the tree's `link` references to this plugin so implicit navigation dependencies can
+   * be cross-checked against the plugin's manifest (see https://github.com/elastic/kibana/issues/66682).
+   */
+  ownerPluginId?: string;
 }
 
 export type SolutionNavigationDefinitions = {

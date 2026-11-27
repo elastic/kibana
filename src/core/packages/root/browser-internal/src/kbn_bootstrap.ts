@@ -12,6 +12,7 @@ import type { InjectedMetadata } from '@kbn/core-injected-metadata-common-intern
 import { KBN_LOAD_MARKS } from './events';
 import { CoreSystem } from './core_system';
 import { ApmSystem } from './apm_system';
+import { EdotBrowserSystem } from './edot_browser_system';
 
 import { LOAD_BOOTSTRAP_START } from './events';
 
@@ -33,16 +34,25 @@ export async function __kbnBootstrap__() {
     injectedMetadata.basePath
   );
 
+  const edotBrowserSystem = new EdotBrowserSystem(
+    injectedMetadata.edotBrowserConfig,
+    injectedMetadata.version
+  );
+
+  // Not awaited: a stalled optional chunk must not block Core startup.
+  // eslint-disable-next-line no-console
+  edotBrowserSystem.setup().catch(console.warn);
+
   await Promise.all([
     // eslint-disable-next-line no-console
     apmSystem.setup().catch(console.warn),
     i18n.getIsInitialized()
       ? Promise.resolve()
       : injectedMetadata.i18n.translationsUrl === null
-      ? Promise.resolve(i18n.initDefault())
-      : i18n.load(injectedMetadata.i18n.translationsUrl).catch((error) => {
-          i18nError = error;
-        }),
+        ? Promise.resolve(i18n.initDefault())
+        : i18n.load(injectedMetadata.i18n.translationsUrl).catch((error) => {
+            i18nError = error;
+          }),
   ]);
 
   const isDomStorageDisabled = () => {

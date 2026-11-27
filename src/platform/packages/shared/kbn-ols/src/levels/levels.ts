@@ -14,20 +14,21 @@
 export const ACL_LEVELS = ['none', 'view', 'use', 'edit', 'manage'] as const;
 
 /**
- * One of the {@link ACL_LEVELS}.
+ * An access value: `none`, `view`, `use`, `edit`, or `manage`. General access and entries each take
+ * a subset of these values ({@link GeneralAccess}, {@link EntryAccess}).
  */
-export type AclLevel = (typeof ACL_LEVELS)[number];
+export type AclAccess = (typeof ACL_LEVELS)[number];
 
 /**
- * Level that general access can take, which applies to everyone who can reach the object. It can
+ * Value that general access can take, which applies to everyone who can reach the object. It can
  * never be `manage`.
  */
-export type GeneralAccessLevel = Exclude<AclLevel, 'manage'>;
+export type GeneralAccess = Exclude<AclAccess, 'manage'>;
 
 /**
- * Level that an entry can grant to a named principal. It can never be `none`.
+ * Access that an entry can grant to a named principal. It can never be `none`.
  */
-export type EntryLevel = Exclude<AclLevel, 'none'>;
+export type EntryAccess = Exclude<AclAccess, 'none'>;
 
 const LEVEL_RANKS: ReadonlyMap<string, number> = new Map(
   ACL_LEVELS.map((level, rank) => [level, rank])
@@ -39,7 +40,7 @@ const LEVEL_RANKS: ReadonlyMap<string, number> = new Map(
  * @param value The value to check, for example one read from a stored ACL.
  * @returns `true` when the value is one of the {@link ACL_LEVELS}.
  */
-export const isAclLevel = (value: string): value is AclLevel => LEVEL_RANKS.has(value);
+export const isAclLevel = (value: string): value is AclAccess => LEVEL_RANKS.has(value);
 
 /**
  * Checks whether a value is a level that general access can take.
@@ -47,7 +48,7 @@ export const isAclLevel = (value: string): value is AclLevel => LEVEL_RANKS.has(
  * @param value The value to check.
  * @returns `true` when the value is a known level other than `manage`.
  */
-export const isGeneralAccessLevel = (value: string): value is GeneralAccessLevel =>
+export const isGeneralAccessLevel = (value: string): value is GeneralAccess =>
   value !== 'manage' && isAclLevel(value);
 
 /**
@@ -56,7 +57,7 @@ export const isGeneralAccessLevel = (value: string): value is GeneralAccessLevel
  * @param value The value to check.
  * @returns `true` when the value is a known level other than `none`.
  */
-export const isEntryLevel = (value: string): value is EntryLevel =>
+export const isEntryLevel = (value: string): value is EntryAccess =>
   value !== 'none' && isAclLevel(value);
 
 /**
@@ -67,7 +68,7 @@ export const isEntryLevel = (value: string): value is EntryLevel =>
  * @returns A negative number when `a` is lower than `b`, zero when they are equal, and a positive
  * number when `a` is higher.
  */
-export const compareLevels = (a: AclLevel, b: AclLevel) =>
+export const compareLevels = (a: AclAccess, b: AclAccess) =>
   (LEVEL_RANKS.get(a) ?? 0) - (LEVEL_RANKS.get(b) ?? 0);
 
 /**
@@ -77,7 +78,7 @@ export const compareLevels = (a: AclLevel, b: AclLevel) =>
  * @param b The second level.
  * @returns `a` when it is at least as high as `b`, otherwise `b`.
  */
-export const maxLevel = (a: AclLevel, b: AclLevel) => (compareLevels(a, b) >= 0 ? a : b);
+export const maxLevel = (a: AclAccess, b: AclAccess) => (compareLevels(a, b) >= 0 ? a : b);
 
 /**
  * Returns the lowest of the stored values that the type allows, ignoring every other value. A
@@ -87,7 +88,7 @@ export const maxLevel = (a: AclLevel, b: AclLevel) => (compareLevels(a, b) >= 0 
  * @param allowed The levels the type allows for that field.
  * @returns The lowest allowed level among `values`, or `undefined` when none of them is allowed.
  */
-export const lowestAllowed = <T extends AclLevel>(
+export const lowestAllowed = <T extends AclAccess>(
   values: readonly string[],
   allowed: readonly T[]
 ) => {

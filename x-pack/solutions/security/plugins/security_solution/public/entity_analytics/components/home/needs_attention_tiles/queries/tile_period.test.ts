@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { TimeRange } from '../../entities_grid/common';
-import { buildLookback } from '../../entities_grid/queries/esql';
-import { TIME_RANGE_DAYS, buildPeriodCondition } from './tile_period';
+import { TIME_RANGE_DAYS, buildLookback, type TimeRange } from '../../queries/time_range';
+import { buildPeriodCondition } from './tile_period';
 
 const RANGES: TimeRange[] = ['24h', '7d', '30d'];
 

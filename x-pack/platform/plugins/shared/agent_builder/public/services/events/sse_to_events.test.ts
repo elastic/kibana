@@ -33,7 +33,7 @@ const executionStarted = (executionId = EXECUTION_ID): ChatEvent =>
     execution_id: executionId,
     trigger_event_id: `${ROUND_ID}::user_message`,
     data: { trigger_type: 'user_message' },
-  } as ChatEvent);
+  }) as ChatEvent;
 
 const executionTerminated = (executionId = EXECUTION_ID): ChatEvent =>
   ({
@@ -49,7 +49,7 @@ const executionTerminated = (executionId = EXECUTION_ID): ChatEvent =>
       time_to_last_token: 20,
       outcome: { type: 'responded', response: { message: 'all done' } },
     },
-  } as ChatEvent);
+  }) as ChatEvent;
 
 const executionFailed = (): ChatEvent =>
   ({
@@ -60,7 +60,7 @@ const executionFailed = (): ChatEvent =>
     execution_id: EXECUTION_ID,
     trigger_event_id: `${ROUND_ID}::user_message`,
     data: { error: { code: 'internalError', message: 'boom' }, time_to_last_token: 20 },
-  } as ChatEvent);
+  }) as ChatEvent;
 
 const executionAborted = (): ChatEvent =>
   ({
@@ -71,16 +71,16 @@ const executionAborted = (): ChatEvent =>
     execution_id: EXECUTION_ID,
     trigger_event_id: `${ROUND_ID}::user_message`,
     data: { aborted_by: { source: 'api' }, time_to_last_token: 20 },
-  } as ChatEvent);
+  }) as ChatEvent;
 
 const chunk = (text: string): ChatEvent =>
-  ({ type: ChatEventType.messageChunk, data: { message_id: 'm1', text_chunk: text } } as ChatEvent);
+  ({ type: ChatEventType.messageChunk, data: { message_id: 'm1', text_chunk: text } }) as ChatEvent;
 
 const toolCall = (toolCallId: string): ChatEvent =>
   ({
     type: ChatEventType.toolCall,
     data: { tool_call_id: toolCallId, tool_id: 'my_tool', params: { q: 1 } },
-  } as ChatEvent);
+  }) as ChatEvent;
 
 const fold = (...events: ChatEvent[]): LiveEventsState =>
   events.reduce(sseToEvents, emptyLiveEventsState());
@@ -124,6 +124,47 @@ describe('sseToEvents', () => {
       executionTerminatedEventId(ROUND_ID, 0),
     ]);
     expect(streamingEvent(state)?.data.message).toBe('Hello');
+  });
+
+  it('ignores model reasoning chunks and appends a step for model reasoning, keeping later step ids in sequence', () => {
+    const state = fold(
+      executionStarted(),
+      {
+        type: ChatEventType.modelReasoningChunk,
+        data: { message_id: 'm1', text_chunk: 'Let me think.' },
+      } as ChatEvent,
+      {
+        type: ChatEventType.modelReasoning,
+        data: { message_id: 'm1', reasoning: 'Let me think.', tool_call_group_id: 'g1' },
+      } as ChatEvent,
+      toolCall('t1')
+    );
+
+    expect(ids(state)).toEqual([
+      `${EXECUTION_ID}::execution_started`,
+      executionStepEventId(ROUND_ID, 0, 0),
+      executionStepEventId(ROUND_ID, 0, 1),
+    ]);
+    expect(stepOf(state, executionStepEventId(ROUND_ID, 0, 0))).toEqual({
+      type: ConversationRoundStepType.modelReasoning,
+      reasoning: 'Let me think.',
+      tool_call_group_id: 'g1',
+    });
+    expect(stepAt(state, executionStepEventId(ROUND_ID, 0, 1))?.tool_call_id).toBe('t1');
+  });
+
+  it('moves the answer written so far into a step when the run reads a message after it', () => {
+    const interim = {
+      type: ChatEventType.interimAnswer,
+      data: { message: 'first answer' },
+    } as ChatEvent;
+    const state = fold(executionStarted(), chunk('first answer'), interim, chunk('second'));
+
+    expect(stepOf(state, executionStepEventId(ROUND_ID, 0, 0))).toEqual({
+      type: ConversationRoundStepType.interimAnswer,
+      message: 'first answer',
+    });
+    expect(streamingEvent(state)?.data.message).toBe('second');
   });
 
   it('patches the same step event through tool call, progress and result', () => {

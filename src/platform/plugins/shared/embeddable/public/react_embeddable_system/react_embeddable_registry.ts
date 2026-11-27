@@ -27,7 +27,7 @@ let isSetupComplete = false;
  */
 export const registerEmbeddablePublicDefinition = <
   SerializedState extends object = object,
-  Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>
+  Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>,
 >(
   type: string,
   getEmbeddableDefinition: () => Promise<EmbeddablePublicDefinition<SerializedState, Api>>
@@ -59,11 +59,11 @@ export const registerEmbeddablePublicDefinition = <
 
 export const getEmbeddableDefinition = async <
   SerializedState extends object = object,
-  Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>
+  Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>,
 >(
   key: string
 ): Promise<EmbeddablePublicDefinition<SerializedState, Api> | undefined> => {
-  return registry[key]?.();
+  return registry[key]?.() as Promise<EmbeddablePublicDefinition<SerializedState, Api> | undefined>;
 };
 
 export function closeSetup() {

@@ -28,6 +28,7 @@ import {
   deleteIndexTemplate,
   reindex,
 } from '../../infra/elasticsearch';
+import { signalRequestOptions } from '../../infra/elasticsearch/signal_request_options';
 import {
   getLegacySecurityComponentTemplateName,
   getLegacySecurityUpdatesComponentTemplateName,
@@ -79,6 +80,10 @@ async function entityAliasExists(
     await esClient.indices.getAlias({ name: alias }, { signal });
     return true;
   } catch (err) {
+    // An aborted lookup says nothing about the alias
+    if (signal?.aborted) {
+      throw err;
+    }
     if (!strict) {
       return false;
     }
@@ -130,22 +135,33 @@ export async function hasCollidingNeutralNamespaceAssets(
  */
 export async function isConcreteIndexOrDataStream(
   esClient: ElasticsearchClient,
-  name: string
+  name: string,
+  signal?: AbortSignal
 ): Promise<boolean> {
   try {
-    const { data_streams: dataStreams } = await esClient.indices.getDataStream({ name });
+    const { data_streams: dataStreams } = await esClient.indices.getDataStream(
+      { name },
+      ...signalRequestOptions(signal)
+    );
     if (dataStreams.some((dataStream) => dataStream.name === name)) {
       return true;
     }
-  } catch {
-    // Not a data stream (or not found).
+  } catch (error) {
+    // Not a data stream (or not found), unless the request was aborted.
+    if (signal?.aborted) {
+      throw error;
+    }
   }
 
   try {
-    const indices = await esClient.indices.get({ index: name });
+    const indices = await esClient.indices.get({ index: name }, ...signalRequestOptions(signal));
     // When `name` is only an alias, the response is keyed by concrete index names.
     return Object.hasOwn(indices, name);
-  } catch {
+  } catch (error) {
+    // Missing, unless the request was aborted.
+    if (signal?.aborted) {
+      throw error;
+    }
     return false;
   }
 }

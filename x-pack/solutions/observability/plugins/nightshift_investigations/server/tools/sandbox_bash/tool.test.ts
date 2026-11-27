@@ -121,6 +121,7 @@ describe('sandbox bash tool — connector credentials', () => {
       env: { CONNECTOR_HEADER_AUTHORIZATION: GITHUB_TOKEN, CONNECTOR_CONFIG_URL: 'https://gh' },
       secretValues: [GITHUB_TOKEN],
       secretEnvKeys: [{ key: 'CONNECTOR_HEADER_AUTHORIZATION', allowed_hosts: ['api.github.com'] }],
+      allowedHosts: ['api.github.com'],
     });
 
   it('resolves the connector for the calling user and passes its credentials to the command', async () => {
@@ -154,29 +155,98 @@ describe('sandbox bash tool — connector credentials', () => {
     expect(env.FOO).toBe('bar');
   });
 
-  it('sends the connector header keys as secrets bound to the connector hosts', async () => {
-    const { run, runCommand } = setup({ resolveConnectorCredentials: resolved() });
+  it('allows connector hosts while keeping header secrets bound only to those hosts', async () => {
+    const { run, runCommand } = setup({
+      resolveConnectorCredentials: resolved(),
+      allowedHosts: ['other.example.com'],
+    });
 
     await run({ connector_id: 'connector-1' });
 
     expect(runCommand.mock.calls[0][0].secret_env_keys).toEqual([
       { key: 'CONNECTOR_HEADER_AUTHORIZATION', allowed_hosts: ['api.github.com'] },
     ]);
+    expect(runCommand.mock.calls[0][0].allowed_hosts).toEqual([
+      'other.example.com',
+      'api.github.com',
+    ]);
   });
 
-  it('passes space egress firewall rules in allowed_hosts when configured on the space', async () => {
+  it('allows connector hosts without auth headers', async () => {
+    const resolveConnectorCredentials: ResolveConnectorCredentials = async () => ({
+      env: { CONNECTOR_CONFIG_URL: 'https://api.example.com' },
+      secretValues: [],
+      secretEnvKeys: [],
+      allowedHosts: ['api.example.com'],
+    });
+    const { run, runCommand } = setup({ resolveConnectorCredentials });
+
+    await run({ connector_id: 'connector-1' });
+
+    expect(runCommand.mock.calls[0][0].allowed_hosts).toEqual(['api.example.com']);
+    expect(runCommand.mock.calls[0][0]).not.toHaveProperty('secret_env_keys');
+  });
+
+  it('deduplicates space and connector hosts while preserving space firewall rules', async () => {
     const { run, runCommand } = setup({
       resolveConnectorCredentials: resolved(),
-      allowedHosts: ['allow pypi.org GET,HEAD /simple/', 'deny api.github.com POST /gists'],
+      allowedHosts: [
+        'allow * pypi.org GET,HEAD /simple/',
+        'deny * api.github.com POST /gists',
+        'api.github.com',
+      ],
     });
 
     await run({ connector_id: 'connector-1' });
 
     expect(runCommand.mock.calls[0][0].allowed_hosts).toEqual([
-      'allow pypi.org GET,HEAD /simple/',
-      'deny api.github.com POST /gists',
+      'allow * pypi.org GET,HEAD /simple/',
+      'deny * api.github.com POST /gists',
+      'api.github.com',
     ]);
   });
+
+  it.each([
+    { rule: 'allow https api.github.com:8443 GET /repos', authenticated: true, append: false },
+    { rule: 'allow http api.github.com POST /gists', authenticated: false, append: false },
+    { rule: 'allow https *.github.com:443 GET /repos', authenticated: true, append: false },
+    { rule: 'allow * *.github.com:8443 * /repos', authenticated: false, append: false },
+    { rule: '*.github.com', authenticated: false, append: false },
+    { rule: 'allow https *.api.github.com:443 GET /repos', authenticated: false, append: true },
+    { rule: 'allow https *.notgithub.com GET /repos', authenticated: true, append: true },
+    { rule: 'deny https api.github.com:443 POST /gists', authenticated: true, append: true },
+    { rule: 'deny * *.github.com:8443 * /repos', authenticated: false, append: true },
+  ])(
+    'preserves host-level policy $rule (authenticated=$authenticated)',
+    async ({ rule, authenticated, append }) => {
+      const secretEnvKeys = authenticated
+        ? [{ key: 'CONNECTOR_HEADER_AUTHORIZATION', allowed_hosts: ['api.github.com'] }]
+        : [];
+      const env: Record<string, string> = authenticated
+        ? { CONNECTOR_HEADER_AUTHORIZATION: GITHUB_TOKEN }
+        : {};
+      const { run, runCommand } = setup({
+        allowedHosts: [rule],
+        resolveConnectorCredentials: async () => ({
+          env,
+          secretValues: authenticated ? [GITHUB_TOKEN] : [],
+          secretEnvKeys,
+          allowedHosts: ['api.github.com'],
+        }),
+      });
+
+      await run({ connector_id: 'connector-1' });
+
+      expect(runCommand.mock.calls[0][0].allowed_hosts).toEqual(
+        append ? [rule, 'api.github.com'] : [rule]
+      );
+      if (authenticated) {
+        expect(runCommand.mock.calls[0][0].secret_env_keys).toEqual(secretEnvKeys);
+      } else {
+        expect(runCommand.mock.calls[0][0]).not.toHaveProperty('secret_env_keys');
+      }
+    }
+  );
 
   it('logs the error and returns a structured tool error without running the command when getHostsForCommand rejects', async () => {
     const { run, runCommand, sandboxAllowlistClient, logger } = setup();
@@ -197,16 +267,24 @@ describe('sandbox bash tool — connector credentials', () => {
     );
     expect(runCommand).not.toHaveBeenCalled();
   });
-  it('passes no credentials without a connector_id', async () => {
-    const resolveConnectorCredentials = resolved();
-    const { run, runCommand } = setup({ resolveConnectorCredentials });
+  it.each([{ allowedHosts: [] }, { allowedHosts: ['allow * pypi.org GET,HEAD /simple/'] }])(
+    'retains space-only egress policy $allowedHosts without a connector_id',
+    async ({ allowedHosts }) => {
+      const resolveConnectorCredentials = resolved();
+      const { run, runCommand } = setup({ resolveConnectorCredentials, allowedHosts });
 
-    await run({});
+      await run({});
 
-    expect(resolveConnectorCredentials).not.toHaveBeenCalled();
-    expect(runCommand.mock.calls[0][0].env).not.toHaveProperty('CONNECTOR_HEADER_AUTHORIZATION');
-    expect(runCommand.mock.calls[0][0]).not.toHaveProperty('secret_env_keys');
-  });
+      expect(resolveConnectorCredentials).not.toHaveBeenCalled();
+      expect(runCommand.mock.calls[0][0].env).not.toHaveProperty('CONNECTOR_HEADER_AUTHORIZATION');
+      expect(runCommand.mock.calls[0][0]).not.toHaveProperty('secret_env_keys');
+      if (allowedHosts.length > 0) {
+        expect(runCommand.mock.calls[0][0].allowed_hosts).toEqual(allowedHosts);
+      } else {
+        expect(runCommand.mock.calls[0][0]).not.toHaveProperty('allowed_hosts');
+      }
+    }
+  );
 
   it('redacts the secret from stdout and stderr of a successful command', async () => {
     const { run, runCommand } = setup({ resolveConnectorCredentials: resolved() });
@@ -311,6 +389,7 @@ describe('sandbox bash tool — output size', () => {
       env: { CONNECTOR_HEADER_AUTHORIZATION: GITHUB_TOKEN },
       secretValues: [GITHUB_TOKEN],
       secretEnvKeys: [],
+      allowedHosts: [],
     });
     const { run, writeFiles } = setup({ stdout, resolveConnectorCredentials });
 

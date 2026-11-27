@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { BULK_FILTER_MAX_RESOURCES, BULK_QUERY_SAMPLE_SIZE } from '@kbn/alerting-v2-schemas';
+import type { RuleChangeHistorySnapshot } from '@kbn/alerting-v2-schemas';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { createConfigServiceMock } from '../services/config_service/config_service.mock';
@@ -31,7 +32,9 @@ import type {
 import { createRuleEventPublisher } from '../events/rule_event_publisher/rule_event_publisher.mock';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import { ArtifactTypeRegistry, registerBuiltinArtifactTypes } from '../artifact_types';
+import { BuilderTypeRegistry, registerBuiltinBuilderTypes } from '../builder_types';
 import type { CreateRulesClientOptions } from './types';
+import { createRuleChangesHistoryClientMock } from '../rule_changes_history/rule_changes_history_client.mock';
 import { RulesClient } from './rules_client';
 import type { CreateRuleParams } from './types';
 import { ALERTING_LOG_CODES } from '../errors/error_codes';
@@ -100,6 +103,8 @@ describe('RulesClient', () => {
   let rulesSavedObjectService: RulesSavedObjectServiceMock;
   let ruleEventPublisher: RuleEventPublisher;
   let artifactTypeRegistry: ArtifactTypeRegistry;
+  let ruleChangesHistoryClient: ReturnType<typeof createRuleChangesHistoryClientMock>;
+  let builderTypeRegistry: BuilderTypeRegistry;
 
   beforeAll(() => {
     jest.useFakeTimers().setSystemTime(new Date('2025-01-01T00:00:00.000Z'));
@@ -111,7 +116,10 @@ describe('RulesClient', () => {
     rulesSavedObjectService = createRulesSavedObjectServiceMock();
     artifactTypeRegistry = new ArtifactTypeRegistry();
     registerBuiltinArtifactTypes(artifactTypeRegistry);
+    builderTypeRegistry = new BuilderTypeRegistry();
+    registerBuiltinBuilderTypes(builderTypeRegistry);
     ({ publisher: ruleEventPublisher } = createRuleEventPublisher());
+    ruleChangesHistoryClient = createRuleChangesHistoryClientMock();
     jest.spyOn(ruleEventPublisher, 'emitRuleCreated');
     jest.spyOn(ruleEventPublisher, 'emitRuleUpdated');
     jest.spyOn(ruleEventPublisher, 'emitRuleDeleted');
@@ -155,7 +163,14 @@ describe('RulesClient', () => {
         ruleEvents: { enabled: false, dataRetention: '90d' },
         alertActions: { dispatcher: { enabled: false, dataRetention: '90d' } },
       },
-      dispatcher: { paused: false, run: { timeout: '1m', alerts: { max: 10000 } } },
+      dispatcher: {
+        paused: false,
+        run: {
+          timeout: '1m',
+          alerts: { max: 10000 },
+          hydration: { maxResponseSize: ByteSizeValue.parse('50mb') },
+        },
+      },
       rules: {
         minimumScheduleInterval: '1m',
         maxScheduledPerMinute: 400,
@@ -179,7 +194,9 @@ describe('RulesClient', () => {
       ruleEventPublisher,
       loggerService,
       artifactTypeRegistry,
-      { actor: 'user', options: rulesClientOptions }
+      { actor: 'user', options: rulesClientOptions },
+      ruleChangesHistoryClient,
+      builderTypeRegistry
     );
   }
 
@@ -226,6 +243,58 @@ describe('RulesClient', () => {
       );
     });
 
+    it('persists and returns the reason', async () => {
+      const client = createClient();
+      const reason = { template: 'CPU on {{data.host.name}} is high: {{data.avg_cpu}}' };
+
+      const res = await client.createRule({
+        data: { ...baseCreateData, id: 'rule-id-1', reason },
+      });
+
+      expect(rulesSavedObjectService.bulkCreate).toHaveBeenCalledWith([
+        expect.objectContaining({ attrs: expect.objectContaining({ reason }) }),
+      ]);
+      expect(res.reason).toEqual(reason);
+    });
+
+    it('rejects an unknown builder type', async () => {
+      const client = createClient();
+
+      await expect(
+        client.createRule({
+          data: {
+            ...baseCreateData,
+            metadata: { name: 'rule-1', builder: { type: 'not-a-builder' } },
+          },
+        })
+      ).rejects.toMatchObject({
+        isBoom: true,
+        data: { code: ALERTING_ERROR_CODES.BUILDER_TYPE_UNKNOWN },
+      });
+      expect(rulesSavedObjectService.bulkCreate).not.toHaveBeenCalled();
+    });
+
+    it('stores a registered builder type', async () => {
+      const client = createClient();
+
+      await client.createRule({
+        data: {
+          ...baseCreateData,
+          id: 'threshold-rule',
+          metadata: { name: 'rule-1', builder: { type: 'threshold' } },
+        },
+      });
+
+      expect(rulesSavedObjectService.bulkCreate).toHaveBeenCalledWith([
+        expect.objectContaining({
+          id: 'threshold-rule',
+          attrs: expect.objectContaining({
+            metadata: expect.objectContaining({ builder_type: 'threshold' }),
+          }),
+        }),
+      ]);
+    });
+
     it('stores the server-provided template without returning it', async () => {
       const client = createClient();
 
@@ -257,25 +326,24 @@ describe('RulesClient', () => {
       ).rejects.toMatchObject({ output: { statusCode: 400 } });
     });
 
-    it('creates a disabled rule SO and does not schedule a task when options.enabled is false', async () => {
+    it('creates a disabled rule SO and does not schedule a task when the body sets enabled=false', async () => {
       const client = createClient();
 
       const res = await client.createRule({
-        data: { ...baseCreateData, id: 'rule-id-disabled' },
-        options: { enabled: false },
+        data: { ...baseCreateData, id: 'rule-id-body-disabled', enabled: false },
       });
 
       expect(rulesSavedObjectService.bulkCreate).toHaveBeenCalledWith([
         expect.objectContaining({
-          id: 'rule-id-disabled',
+          id: 'rule-id-body-disabled',
           attrs: expect.objectContaining({ enabled: false }),
         }),
       ]);
       expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
-      expect(res).toEqual(expect.objectContaining({ id: 'rule-id-disabled', enabled: false }));
+      expect(res).toEqual(expect.objectContaining({ id: 'rule-id-body-disabled', enabled: false }));
     });
 
-    it('defaults to an enabled rule when options.enabled is omitted', async () => {
+    it('defaults to an enabled rule when the body omits enabled', async () => {
       const client = createClient();
 
       const res = await client.createRule({
@@ -553,6 +621,53 @@ describe('RulesClient', () => {
       expect(res.items.map((rule) => rule.id)).toEqual(['rule-a', 'rule-b']);
     });
 
+    it('fails only the items with an unknown builder type and persists the registered ones', async () => {
+      const client = createClient();
+      mockBulkCreateEcho();
+      getRuleExecutorTaskIdMock.mockImplementation(
+        ({ ruleId }: { ruleId: string }) => `task:${ruleId}`
+      );
+
+      const res = await client.bulkCreateRules({
+        items: [
+          {
+            ...baseCreateData,
+            id: 'rule-known',
+            metadata: { name: 'known', builder: { type: 'threshold' } },
+          },
+          {
+            ...baseCreateData,
+            id: 'rule-unknown',
+            metadata: { name: 'unknown', builder: { type: 'not-a-builder' } },
+          },
+        ],
+      });
+
+      expect(rulesSavedObjectService.bulkCreate).toHaveBeenCalledWith([
+        expect.objectContaining({
+          id: 'rule-known',
+          attrs: expect.objectContaining({
+            metadata: expect.objectContaining({ builder_type: 'threshold' }),
+          }),
+        }),
+      ]);
+      expect(taskManager.bulkSchedule).toHaveBeenCalledWith(
+        [expect.objectContaining({ params: expect.objectContaining({ ruleId: 'rule-known' }) })],
+        expect.anything()
+      );
+      expect(res.items.map((rule) => rule.id)).toEqual(['rule-known']);
+      expect(res.errors).toEqual([
+        expect.objectContaining({
+          index: 1,
+          id: 'rule-unknown',
+          error: expect.objectContaining({
+            code: ALERTING_ERROR_CODES.BUILDER_TYPE_UNKNOWN,
+            details: { builder_type: 'not-a-builder' },
+          }),
+        }),
+      ]);
+    });
+
     it('maps saved object attributes from the service into the API response', async () => {
       const client = createClient();
       getRuleExecutorTaskIdMock.mockImplementation(
@@ -581,6 +696,32 @@ describe('RulesClient', () => {
           metadata: expect.objectContaining({ name: 'from-so' }),
         })
       );
+    });
+
+    it('persists and returns the reason of each rule', async () => {
+      const client = createClient();
+      mockBulkCreateEcho();
+      getRuleExecutorTaskIdMock.mockImplementation(
+        ({ ruleId }: { ruleId: string }) => `task:${ruleId}`
+      );
+      const reason = { template: 'CPU on {{data.host.name}} is high: {{data.avg_cpu}}' };
+
+      const res = await client.bulkCreateRules({
+        items: [
+          { ...baseCreateData, id: 'rule-a', metadata: { name: 'rule-a' }, reason },
+          { ...baseCreateData, id: 'rule-b', metadata: { name: 'rule-b' } },
+        ],
+      });
+
+      expect(rulesSavedObjectService.bulkCreate).toHaveBeenCalledWith([
+        expect.objectContaining({ id: 'rule-a', attrs: expect.objectContaining({ reason }) }),
+        expect.objectContaining({
+          id: 'rule-b',
+          attrs: expect.not.objectContaining({ reason: expect.anything() }),
+        }),
+      ]);
+      expect(res.items[0].reason).toEqual(reason);
+      expect(res.items[1].reason).toBeUndefined();
     });
 
     it('does not schedule tasks when every rule is disabled', async () => {
@@ -1006,6 +1147,33 @@ describe('RulesClient', () => {
       });
     });
 
+    it.each([
+      [
+        'replaces the stored reason',
+        { reason: { template: 'new reason' } },
+        { template: 'new reason' },
+      ],
+      ['clears the stored reason when it is null', { reason: null }, undefined],
+      [
+        'preserves the stored reason when it is omitted',
+        { schedule: { every: '5m' } },
+        { template: 'old reason {{data.host.name}}' },
+      ],
+    ])('%s', async (_name, data, expectedReason) => {
+      const client = createClient();
+      rulesSavedObjectService.get.mockResolvedValueOnce({
+        attributes: { ...baseSoAttrs, reason: { template: 'old reason {{data.host.name}}' } },
+        version: 'WzEsMV0=',
+        id: 'rule-id-1',
+      });
+
+      const res = await client.updateRule({ id: 'rule-id-1', data });
+
+      const { attrs } = rulesSavedObjectService.update.mock.calls[0][0];
+      expect(attrs.reason).toEqual(expectedReason);
+      expect(res.reason).toEqual(expectedReason);
+    });
+
     it('does not schedule the executor task when updating a disabled rule', async () => {
       const client = createClient();
 
@@ -1059,6 +1227,83 @@ describe('RulesClient', () => {
       });
 
       expect(res.metadata.description).toBe('New description');
+    });
+
+    it('allows a name-only update of a rule whose builder type is no longer registered', async () => {
+      const client = createClient();
+
+      rulesSavedObjectService.get.mockResolvedValueOnce({
+        attributes: {
+          ...baseSoAttrs,
+          metadata: { ...baseSoAttrs.metadata, builder_type: 'not-a-builder' },
+        },
+        version: 'WzEsMV0=',
+        id: 'rule-id-unknown-builder',
+      });
+      rulesSavedObjectService.update.mockResolvedValueOnce({ id: 'rule-id-unknown-builder' });
+
+      await client.updateRule({
+        id: 'rule-id-unknown-builder',
+        data: { metadata: { description: 'Rename only' } },
+      });
+
+      expect(rulesSavedObjectService.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'rule-id-unknown-builder',
+          attrs: expect.objectContaining({
+            metadata: expect.objectContaining({ builder_type: 'not-a-builder' }),
+          }),
+        })
+      );
+    });
+
+    it('rejects an update that sets an unregistered builder type', async () => {
+      const client = createClient();
+
+      rulesSavedObjectService.get.mockResolvedValueOnce({
+        attributes: baseSoAttrs,
+        version: 'WzEsMV0=',
+        id: 'rule-id-set-unknown-builder',
+      });
+
+      await expect(
+        client.updateRule({
+          id: 'rule-id-set-unknown-builder',
+          data: { metadata: { builder: { type: 'not-a-builder' } } },
+        })
+      ).rejects.toMatchObject({
+        isBoom: true,
+        data: { code: ALERTING_ERROR_CODES.BUILDER_TYPE_UNKNOWN },
+      });
+      expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
+    });
+
+    it('allows an update that clears the builder type', async () => {
+      const client = createClient();
+
+      rulesSavedObjectService.get.mockResolvedValueOnce({
+        attributes: {
+          ...baseSoAttrs,
+          metadata: { ...baseSoAttrs.metadata, builder_type: 'threshold' },
+        },
+        version: 'WzEsMV0=',
+        id: 'rule-id-clear-builder',
+      });
+      rulesSavedObjectService.update.mockResolvedValueOnce({ id: 'rule-id-clear-builder' });
+
+      await client.updateRule({
+        id: 'rule-id-clear-builder',
+        data: { metadata: { builder: null } },
+      });
+
+      expect(rulesSavedObjectService.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'rule-id-clear-builder',
+          attrs: expect.objectContaining({
+            metadata: expect.not.objectContaining({ builder_type: 'threshold' }),
+          }),
+        })
+      );
     });
 
     it('keeps an imported artifact reference on an update that does not touch artifacts', async () => {
@@ -1736,6 +1981,59 @@ describe('RulesClient', () => {
         expect(res.created).toBe(false);
       });
 
+      it.each([
+        ['clears the stored reason when the body omits it', undefined],
+        ['replaces the stored reason with the one in the body', { template: 'new reason' }],
+      ])('%s', async (_name, expectedReason) => {
+        const client = createClient();
+        const existingDoc = {
+          id: 'rule-id-1',
+          attributes: { ...baseSoAttrs, reason: { template: 'old reason {{data.host.name}}' } },
+          version: 'WzEsMV0=',
+        };
+        rulesSavedObjectService.get
+          .mockResolvedValueOnce(existingDoc)
+          .mockResolvedValueOnce(existingDoc);
+        rulesSavedObjectService.update.mockResolvedValueOnce({ id: 'rule-id-1' });
+
+        const res = await client.upsertRule({
+          id: 'rule-id-1',
+          data: { ...baseCreateData, ...(expectedReason ? { reason: expectedReason } : {}) },
+        });
+
+        const { attrs } = rulesSavedObjectService.update.mock.calls[0][0];
+        expect(attrs.reason).toEqual(expectedReason);
+        expect(res.rule.reason).toEqual(expectedReason);
+      });
+
+      it('rejects an unknown builder type without updating or scheduling', async () => {
+        const client = createClient();
+        const existingDoc = {
+          id: 'rule-id-1',
+          attributes: baseSoAttrs,
+          version: 'WzEsMV0=',
+        };
+        rulesSavedObjectService.get
+          .mockResolvedValueOnce(existingDoc)
+          .mockResolvedValueOnce(existingDoc);
+
+        await expect(
+          client.upsertRule({
+            id: 'rule-id-1',
+            data: {
+              ...baseCreateData,
+              metadata: { name: 'rule-1', builder: { type: 'not-a-builder' } },
+            },
+          })
+        ).rejects.toMatchObject({
+          isBoom: true,
+          data: { code: ALERTING_ERROR_CODES.BUILDER_TYPE_UNKNOWN },
+        });
+
+        expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
+        expect(ensureRuleExecutorTaskScheduledMock).not.toHaveBeenCalled();
+      });
+
       it('keeps the existing template', async () => {
         const client = createClient();
         const existingDoc = {
@@ -2013,6 +2311,139 @@ describe('RulesClient', () => {
       });
 
       expect(rulesSavedObjectService.get).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('restoreRule', () => {
+    const snapshot = {
+      ...baseCreateData,
+      metadata: { name: 'restored' },
+      id: 'rule-id-1',
+      version: 2,
+      enabled: true,
+      created_by: { profile_uid: 'snapshot-creator' },
+      created_at: '2024-01-01T00:00:00.000Z',
+      updated_by: { profile_uid: 'snapshot-updater' },
+      updated_at: '2024-02-01T00:00:00.000Z',
+    };
+
+    const mockSnapshot = (ruleSnapshot: RuleChangeHistorySnapshot = snapshot) => {
+      ruleChangesHistoryClient.getRuleSnapshot.mockResolvedValueOnce({
+        ruleId: 'rule-id-1',
+        snapshot: ruleSnapshot,
+      });
+    };
+
+    const mockExistingRule = (overrides: Partial<RuleSavedObjectAttributes> = {}) => {
+      rulesSavedObjectService.get.mockResolvedValueOnce({
+        id: 'rule-id-1',
+        attributes: {
+          ...baseSoAttrs,
+          version: 5,
+          enabled: false,
+          createdBy: { profile_uid: 'current-creator' },
+          createdAt: '2024-06-01T00:00:00.000Z',
+          metadata: { name: 'current', template: { id: 'template-1' } },
+          ...overrides,
+        },
+        version: 'WzEsMV0=',
+      });
+      rulesSavedObjectService.update.mockResolvedValueOnce({ id: 'rule-id-1' });
+    };
+
+    it('applies the snapshot configuration and enabled state, bumps the version and keeps creation and template', async () => {
+      const client = createClient();
+      mockExistingRule();
+
+      mockSnapshot();
+      const rule = await client.restoreRule({ changeId: 'change-1' });
+
+      expect(rulesSavedObjectService.update).toHaveBeenCalledWith({
+        id: 'rule-id-1',
+        attrs: expect.objectContaining({
+          metadata: expect.objectContaining({ name: 'restored', template: { id: 'template-1' } }),
+          version: 6,
+          enabled: true,
+          createdBy: { profile_uid: 'current-creator' },
+          createdAt: '2024-06-01T00:00:00.000Z',
+          updatedBy: { profile_uid: 'elastic_profile_uid' },
+          updatedAt: '2025-01-01T00:00:00.000Z',
+        }),
+        version: 'WzEsMV0=',
+        references: [],
+      });
+      expect(rule).toEqual(
+        expect.objectContaining({
+          id: 'rule-id-1',
+          version: 6,
+          enabled: true,
+          metadata: expect.objectContaining({ name: 'restored' }),
+        })
+      );
+      expect(ruleChangesHistoryClient.getRuleSnapshot).toHaveBeenCalledWith({
+        eventId: 'change-1',
+      });
+      expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith(expect.any(Object), [
+        expect.objectContaining({
+          ruleId: 'rule-id-1',
+          rule,
+          prevRule: expect.objectContaining({ version: 5 }),
+        }),
+      ]);
+    });
+
+    it('throws RULE_CHANGE_NOT_FOUND without reading the rule when the change does not exist', async () => {
+      const client = createClient();
+      ruleChangesHistoryClient.getRuleSnapshot.mockRejectedValueOnce(
+        Boom.notFound('Rule change with event id "missing" not found', {
+          code: ALERTING_ERROR_CODES.RULE_CHANGE_NOT_FOUND,
+        })
+      );
+
+      await expect(client.restoreRule({ changeId: 'missing' })).rejects.toMatchObject({
+        output: { statusCode: 404 },
+        data: { code: ALERTING_ERROR_CODES.RULE_CHANGE_NOT_FOUND },
+      });
+      expect(rulesSavedObjectService.get).not.toHaveBeenCalled();
+      expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
+    });
+
+    it('throws RULE_NOT_FOUND when the rule was deleted', async () => {
+      const client = createClient();
+      rulesSavedObjectService.get.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError(RULE_SAVED_OBJECT_TYPE, 'rule-id-1')
+      );
+
+      mockSnapshot();
+      await expect(client.restoreRule({ changeId: 'change-1' })).rejects.toMatchObject({
+        output: { statusCode: 404 },
+        data: { code: ALERTING_ERROR_CODES.RULE_NOT_FOUND },
+      });
+    });
+
+    it('throws INVALID_RULE_DATA when the snapshot has keys the current schema does not know', async () => {
+      const client = createClient();
+
+      const snapshotWithFutureField = { ...snapshot, future_field: true };
+      mockSnapshot(snapshotWithFutureField);
+
+      await expect(client.restoreRule({ changeId: 'change-1' })).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        data: { code: ALERTING_ERROR_CODES.INVALID_RULE_DATA, details: { context: 'restore' } },
+      });
+      expect(rulesSavedObjectService.get).not.toHaveBeenCalled();
+    });
+
+    it('throws IMMUTABLE_FIELDS_CHANGED when the snapshot kind differs from the rule', async () => {
+      const client = createClient();
+      mockExistingRule({ kind: 'signal', recovery: undefined, no_data: undefined });
+
+      mockSnapshot();
+      await expect(client.restoreRule({ changeId: 'change-1' })).rejects.toMatchObject({
+        output: { statusCode: 409 },
+        data: { code: ALERTING_ERROR_CODES.IMMUTABLE_FIELDS_CHANGED },
+      });
+      expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
     });
   });
 
@@ -3283,9 +3714,9 @@ describe('RulesClient', () => {
     // Minimal BulkUpdateTaskResult builder for the task-manager mock: `tasks`
     // are the rotated task ids, `errors` the per-task failures.
     const rotationResult = (rotatedTaskIds: string[]) =>
-      ({ tasks: rotatedTaskIds.map((id) => ({ id })), errors: [] } as unknown as Awaited<
+      ({ tasks: rotatedTaskIds.map((id) => ({ id })), errors: [] }) as unknown as Awaited<
         ReturnType<typeof taskManager.bulkUpdateSchedules>
-      >);
+      >;
 
     it('rotates the executor task API key and stamps audit metadata', async () => {
       const client = createClient();
@@ -4978,7 +5409,7 @@ describe('RulesClient', () => {
         rulesSavedObjectService.getTotalScheduledPerMinute.mockResolvedValueOnce(1);
 
         await expect(
-          client.createRule({ data: baseCreateData, options: { enabled: false } })
+          client.createRule({ data: { ...baseCreateData, enabled: false } })
         ).resolves.toBeDefined();
 
         expect(rulesSavedObjectService.bulkCreate).toHaveBeenCalled();

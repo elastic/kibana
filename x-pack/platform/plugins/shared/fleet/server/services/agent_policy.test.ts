@@ -6,7 +6,11 @@
  */
 import apm from 'elastic-apm-node';
 import { SpanStatusCode, trace } from '@opentelemetry/api';
-import { tracing } from '@elastic/opentelemetry-node/sdk';
+import {
+  InMemorySpanExporter,
+  SimpleSpanProcessor,
+  TracerProvider,
+} from '@opentelemetry/sdk-trace';
 import type { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { of } from 'rxjs';
 
@@ -214,13 +218,13 @@ function mockPackagePolicySOs(
 
 let mockedLogger: jest.Mocked<Logger>;
 
-let otelExporter: tracing.InMemorySpanExporter;
-let otelProvider: tracing.BasicTracerProvider;
+let otelExporter: InMemorySpanExporter;
+let otelProvider: TracerProvider;
 
 beforeAll(() => {
-  otelExporter = new tracing.InMemorySpanExporter();
-  otelProvider = new tracing.BasicTracerProvider({
-    spanProcessors: [new tracing.SimpleSpanProcessor(otelExporter)],
+  otelExporter = new InMemorySpanExporter();
+  otelProvider = new TracerProvider({
+    spanProcessors: [new SimpleSpanProcessor({ exporter: otelExporter })],
   });
   trace.setGlobalTracerProvider(otelProvider);
 });
@@ -2838,6 +2842,46 @@ describe('Agent policy', () => {
       esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     });
 
+    it('should not copy denied overrides stored before they were rejected', async () => {
+      const basePolicy = {
+        id: 'source-policy',
+        name: 'source',
+        namespace: 'default',
+        is_managed: false,
+        overrides: {
+          receivers: { otlp: {} },
+          'service.pipelines': {},
+          'agent.download.timeout': '2h',
+        },
+      } as unknown as AgentPolicy;
+      const getSpy = jest
+        .spyOn(agentPolicyService, 'get')
+        .mockResolvedValueOnce(basePolicy)
+        .mockResolvedValueOnce({ ...basePolicy, id: 'copied-policy' });
+      const createSpy = jest
+        .spyOn(agentPolicyService, 'create')
+        .mockResolvedValue({ ...basePolicy, id: 'copied-policy' });
+      const deploySpy = jest.spyOn(agentPolicyService, 'deployPolicy').mockResolvedValue();
+
+      try {
+        await agentPolicyService.copy(soClient, esClient, 'source-policy', { name: 'copy' });
+
+        expect(createSpy).toHaveBeenCalledWith(
+          soClient,
+          esClient,
+          expect.objectContaining({
+            name: 'copy',
+            overrides: { 'agent.download.timeout': '2h' },
+          }),
+          undefined
+        );
+      } finally {
+        getSpy.mockRestore();
+        createSpy.mockRestore();
+        deploySpy.mockRestore();
+      }
+    });
+
     it('should throw error for agent policy which has managed package policy', async () => {
       mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
         {
@@ -2938,7 +2982,8 @@ describe('Agent policy', () => {
             policy_ids: ['mocked'],
           },
         ],
-        expect.anything()
+        // The new agent policy has no agents to check
+        expect.objectContaining({ acknowledgeAgentVersionIncompatibility: true })
       );
       expect(mockedPackagePolicyService.bulkUpdate).toHaveBeenCalledWith(
         expect.anything(),
@@ -2950,7 +2995,8 @@ describe('Agent policy', () => {
             policy_id: 'policy_1',
             policy_ids: ['policy_1', 'policy_2', 'mocked'],
           },
-        ]
+        ],
+        { acknowledgeAgentVersionIncompatibility: true }
       );
     });
 

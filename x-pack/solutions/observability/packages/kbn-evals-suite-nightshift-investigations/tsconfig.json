@@ -17,6 +17,7 @@
     "@kbn/inference-common",
     "@kbn/inference-tracing",
     "@kbn/repo-info",
+    "@kbn/fs",
     "@kbn/nightshift-decision-trees",
     "@kbn/nightshift-investigations-plugin",
     "@kbn/nightshift-shared",
@@ -26,6 +27,8 @@
     "@kbn/zod",
     "@kbn/config",
     "@kbn/config-schema",
-    "@kbn/std"
+    "@kbn/std",
+    "@kbn/dev-cli-runner",
+    "@kbn/dev-cli-errors"
   ]
 }

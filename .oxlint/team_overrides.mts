@@ -95,7 +95,6 @@ export const teamOverrides: OxlintOverride[] = [
    */
   {
     files: [
-      '**/.eslintrc.js',
       'packages/kbn-eslint-plugin-eslint/**/*',
       'x-pack/gulpfile.js',
       'x-pack/scripts/*.js',
@@ -290,6 +289,7 @@ export const teamOverrides: OxlintOverride[] = [
       'x-pack/platform/packages/shared/kbn-elastic-assistant-common/**/*.{test,mock,test_helper}.{ts,tsx}',
       'x-pack/platform/packages/shared/kbn-langchain/**/*.{test,mock,test_helper}.{ts,tsx}',
       'x-pack/solutions/security/packages/**/*.{test,mock,test_helper}.{ts,tsx}',
+      'x-pack/solutions/security/packages/kbn-test-suites-xpack-security-endpoint/**',
       'x-pack/solutions/security/plugins/security_solution/**/*.{test,mock,test_helper}.{ts,tsx}',
       'x-pack/solutions/security/plugins/security_solution_ess/**/*.{test,mock,test_helper}.{ts,tsx}',
       'x-pack/solutions/security/plugins/security_solution_serverless/**/*.{test,mock,test_helper}.{ts,tsx}',
@@ -315,6 +315,7 @@ export const teamOverrides: OxlintOverride[] = [
       'x-pack/platform/plugins/shared/cases/**/*.{ts,tsx}',
       'src/platform/packages/shared/kbn-cell-actions/**/*.{ts,tsx}',
     ],
+    excludeFiles: ['x-pack/solutions/security/packages/kbn-test-suites-xpack-security-endpoint/**'],
     rules: {
       '@typescript-eslint/no-this-alias': 'error',
       '@typescript-eslint/no-explicit-any': 'error',
@@ -338,6 +339,7 @@ export const teamOverrides: OxlintOverride[] = [
       'x-pack/solutions/security/packages/data-stream-adapter/**/*.{js,mjs,ts,tsx}',
       'src/platform/packages/shared/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
     ],
+    excludeFiles: ['x-pack/solutions/security/packages/kbn-test-suites-xpack-security-endpoint/**'],
     rules: {
       complexity: 'warn',
       'no-undef': 'off',
@@ -925,9 +927,9 @@ export const teamOverrides: OxlintOverride[] = [
    */
   {
     files: [
-      'src/platform/plugins/shared/workflows_management/**/*.{js,mjs,ts,tsx}',
-      'src/platform/plugins/shared/workflows_execution_engine/**/*.{js,mjs,ts,tsx}',
-      'src/platform/plugins/shared/workflows_extensions/**/*.{js,mjs,ts,tsx}',
+      'x-pack/platform/plugins/shared/workflows_management/**/*.{js,mjs,ts,tsx}',
+      'x-pack/platform/plugins/shared/workflows_execution_engine/**/*.{js,mjs,ts,tsx}',
+      'x-pack/platform/plugins/shared/workflows_extensions/**/*.{js,mjs,ts,tsx}',
       'src/platform/packages/shared/kbn-workflows/**/*.{js,mjs,ts,tsx}',
       'src/platform/packages/shared/kbn-workflows-ui/**/*.{js,mjs,ts,tsx}',
     ],
@@ -1011,9 +1013,9 @@ export const teamOverrides: OxlintOverride[] = [
    */
   {
     files: [
-      'src/platform/plugins/shared/workflows_management/**/*.{test,mock,test_helper}.{ts,tsx}',
-      'src/platform/plugins/shared/workflows_execution_engine/**/*.{test,mock,test_helper}.{ts,tsx}',
-      'src/platform/plugins/shared/workflows_extensions/**/*.{test,mock,test_helper}.{ts,tsx}',
+      'x-pack/platform/plugins/shared/workflows_management/**/*.{test,mock,test_helper}.{ts,tsx}',
+      'x-pack/platform/plugins/shared/workflows_execution_engine/**/*.{test,mock,test_helper}.{ts,tsx}',
+      'x-pack/platform/plugins/shared/workflows_extensions/**/*.{test,mock,test_helper}.{ts,tsx}',
       'src/platform/packages/shared/kbn-workflows/**/*.{test,mock,test_helper}.{ts,tsx}',
       'src/platform/packages/shared/kbn-workflows-ui/**/*.{test,mock,test_helper}.{ts,tsx}',
     ],
@@ -1036,6 +1038,27 @@ export const teamOverrides: OxlintOverride[] = [
    * Code inside .buildkite runs separately from everything else in CI, before bootstrap, with Node. It needs a few tweaks because of this.
    */
   { files: ['.buildkite/**/*.{cjs,js,mjs,ts}'], rules: { 'no-console': 'off' } },
+  /**
+   * Pipeline scripts print the generated pipeline to stdout, which is uploaded to Buildkite as yaml.
+   */
+  {
+    files: [
+      '.buildkite/scripts/pipelines/evals_pr/pipeline.ts',
+      '.buildkite/scripts/pipelines/pull_request/pipeline.ts',
+      '.buildkite/scripts/pipelines/static_checks/pipeline.ts',
+    ],
+    rules: {
+      '@kbn/compat/eslint-no-restricted-syntax': [
+        'error',
+        {
+          selector:
+            "CallExpression[callee.object.name='console'][callee.property.name!=/^(warn|error)$/]",
+          message:
+            'Debug logging to stdout in this file will attempt to upload the log message as yaml to buildkite, which might result in pipeline syntax error. Use emitPipeline() to upload steps, or log to stderr.',
+        },
+      ],
+    },
+  },
   /**
    * Repository tooling packages run outside the standard application bundles and need a few targeted lint overrides.
    */

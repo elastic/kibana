@@ -366,8 +366,8 @@ export function ServiceFlyoutOverview() {
 
   const isFiltersPending = Boolean(
     selectedTransaction &&
-      !selectedTransaction.isFiltersStale &&
-      !isSameListFilters(selectedTransaction.filters, liveTransactionFilters)
+    !selectedTransaction.isFiltersStale &&
+    !isSameListFilters(selectedTransaction.filters, liveTransactionFilters)
   );
 
   const onTransactionClick = useCallback(
@@ -543,6 +543,7 @@ export function ServiceFlyoutOverview() {
                 latencyAggregationType={latencyAggregationType}
                 onChange={setLatencyAggregationType}
                 ebt={{ element: SERVICE_FLYOUT_EBT_ELEMENTS.CHART_CONTROLS }}
+                compact
               />
             ),
             projectRouting,

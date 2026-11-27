@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getCompositeSLOParamsSchema } from '@kbn/slo-schema';
+import { getCompositeSLOParamsSchema, getCompositeSLOResponseSchema } from '@kbn/slo-schema';
 import { DefaultBurnRatesClient, DefaultSummaryClient, GetCompositeSLO } from '../../services';
 import { createCompositeSloServerRoute } from './create_composite_slo_server_route';
 
@@ -18,6 +18,9 @@ export const getCompositeSLORoute = createCompositeSloServerRoute({
     },
   },
   params: getCompositeSLOParamsSchema,
+  responses: {
+    200: { description: 'Successful request', body: () => getCompositeSLOResponseSchema },
+  },
   handler: async ({ params, logger, request, getScopedClients }) => {
     const { scopedClusterClient, repository, compositeRepository, spaceId } =
       await getScopedClients({

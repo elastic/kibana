@@ -94,7 +94,7 @@ const rowStyles = ({ euiTheme }: UseEuiTheme) => ({
     align-items: center;
     box-sizing: border-box;
     inline-size: 100%;
-    padding: ${euiTheme.size.base};
+    padding: ${euiTheme.size.m} ${euiTheme.size.base};
     border: 0;
     background: transparent;
     color: inherit;
@@ -116,7 +116,7 @@ const rowStyles = ({ euiTheme }: UseEuiTheme) => ({
   text: css`
     display: flex;
     flex-direction: column;
-    gap: ${euiTheme.size.xs};
+    gap: ${euiTheme.size.xxs};
     min-inline-size: 0;
   `,
   title: css`
@@ -164,7 +164,7 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
     const openModal = useCallback(() => setIsModalOpen(true), []);
     const closeModal = useCallback(() => setIsModalOpen(false), []);
 
-    const approvalPhase: ApprovalPhase = decision ? decision.status : isSubmitting ?? 'pending';
+    const approvalPhase: ApprovalPhase = decision ? decision.status : (isSubmitting ?? 'pending');
 
     const badge = getApprovalOutcomeBadge(approvalPhase) ?? PENDING_BADGE;
 

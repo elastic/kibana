@@ -29,4 +29,24 @@ describe('buildCountQuery', () => {
       'FROM logs-* | WHERE @timestamp >= "1970-01-01T00:00:00.100Z" AND @timestamp <= "1970-01-01T00:00:00.200Z" | STATS total = COUNT(*)'
     );
   });
+
+  it('counts only documents holding populatedField', () => {
+    expect(buildCountQuery({ index: 'logs-*', populatedField: 'message' })).toBe(
+      'FROM logs-* | WHERE message IS NOT NULL | STATS total = COUNT(*)'
+    );
+  });
+
+  it('applies populatedField on a dotted field after the time range and KQL', () => {
+    expect(
+      buildCountQuery({
+        index: 'logs-*',
+        start: 100,
+        end: 200,
+        kql: 'service.name : "foo"',
+        populatedField: 'body.text',
+      })
+    ).toBe(
+      'FROM logs-* | WHERE @timestamp >= "1970-01-01T00:00:00.100Z" AND @timestamp <= "1970-01-01T00:00:00.200Z" | WHERE KQL("service.name : \\"foo\\"") | WHERE body.text IS NOT NULL | STATS total = COUNT(*)'
+    );
+  });
 });

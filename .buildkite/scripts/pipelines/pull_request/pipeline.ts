@@ -7,14 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint "no-restricted-syntax": [
-            "error",
-            {
-                "selector": "CallExpression[callee.object.name='console'][callee.property.name!=/^(warn|error)$/]",
-                "message": "Debug logging to stdout in this file will attempt to upload the log message as yaml to buildkite, which might result in pipeline syntax error. Use emitPipeline() to upload steps, or log to stderr."
-            }
-        ] */
-
 import { runPreBuild } from './pre_build.ts';
 import { postFrequentCancellationsTip } from './frequent_cancellations_tip.ts';
 import { getEvalTriggerStep } from '../../../pipelines/evals/eval_pipeline.ts';
@@ -130,6 +122,13 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
       strategy: 'git',
       includeDownstream: true,
       ignoreUncategorizedChanges: true,
+      // limits.yml and docs inside @kbn/rspack-optimizer cannot affect Storybook builds.
+      ignorePatterns: [
+        '**/README*',
+        '**/*.md',
+        '**/CHANGELOG*',
+        'packages/kbn-rspack-optimizer/limits.yml',
+      ],
       changedFiles: prChanges.flatMap((change) =>
         change.previous_filename ? [change.filename, change.previous_filename] : [change.filename]
       ),
@@ -691,7 +690,14 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
 
     // On matching labels, hand LLM evals to the dedicated `kibana-evals-pr-llm-evals` pipeline via a
     // fire-and-forget trigger step (not inline) so their runtime is off the PR's critical path.
-    const evalsTrigger = getEvalTriggerStep(GITHUB_PR_LABELS);
+    const evalsTrigger = getEvalTriggerStep(
+      GITHUB_PR_LABELS,
+      prChanges.flatMap((change) =>
+        change.previous_filename ? [change.filename, change.previous_filename] : [change.filename]
+      ),
+      // GitHub lists at most 3,000 files for a PR (see `doAnyChangesMatch`).
+      prChanges.length >= 3000
+    );
     if (evalsTrigger) {
       pipeline.push(evalsTrigger);
     }
@@ -735,8 +741,8 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
       GITHUB_PR_LABELS.includes('ci:workflow-oom-test') ||
       // Scout suite: changes to its own Scout tests must still trigger it.
       (await doAnyChangesMatch([
-        /^src\/platform\/plugins\/shared\/workflows_management\/common\/schema/,
-        /^src\/platform\/plugins\/shared\/workflows_management\/server\/.*internal_actions/,
+        /^x-pack\/platform\/plugins\/shared\/workflows_management\/common\/schema/,
+        /^x-pack\/platform\/plugins\/shared\/workflows_management\/server\/.*internal_actions/,
         /^src\/platform\/packages\/shared\/workflows\//,
         /^\.buildkite\/pipeline-utils\/step-library\/steps\/workflows_oom_testing\.ts/,
         /^\.buildkite\/scripts\/steps\/test\/scout\/workflows_oom_testing\.sh/,

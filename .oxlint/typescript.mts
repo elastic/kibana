@@ -42,7 +42,6 @@ export const typescriptRules: DummyRuleMap = {
   '@typescript-eslint/no-namespace': 'error',
   // '@typescript-eslint/no-undef': 'error',
   // '@typescript-eslint/no-unsafe-function-type': 'error',
-  // '@typescript-eslint/no-var-requires': 'error',
   // '@typescript-eslint/no-wrapper-object-types': 'error',
   '@typescript-eslint/prefer-function-type': 'error',
   '@typescript-eslint/unified-signatures': 'error',
@@ -56,7 +55,7 @@ export const typescriptRules: DummyRuleMap = {
   // ],
 };
 
-/** `@kbn/eslint-config`'s TypeScript-only rules. */
+/** TypeScript-only rules, ported from the former `@kbn/eslint-config`. */
 export const typescriptOverrides: OxlintOverride[] = [
   {
     files: ['**/*.{ts,tsx}'],
@@ -79,6 +78,7 @@ export const typescriptOverrides: OxlintOverride[] = [
         'error',
         { default: ['public-static-field', 'static-field', 'instance-field'] },
       ],
+      '@kbn/compat/typescript-no-var-requires': 'error',
       '@kbn/compat/typescript-naming-convention': [
         'error',
         {

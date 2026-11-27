@@ -15,11 +15,8 @@ import { isMissingIndexError } from '../../is_missing_index_error';
 import { useTileQueryInputs } from './use_tile_query_inputs';
 import { EMPTY_ENTITY_IDS } from '../data';
 import { buildEntitiesWithAnomaliesCountQuery } from '../queries/entities_with_anomalies_query';
-import {
-  EMPTY_ENTITY_FILTERS,
-  type EntityFilters,
-  type TimeRange,
-} from '../../entities_grid/common';
+import type { TimeRange } from '../../queries/time_range';
+import { EMPTY_ENTITY_FILTERS, type EntityFilters } from '../../entities_grid/common';
 import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
 import { isTileQueryTimeout, retryUnlessTimedOut, runWithTileTimeout } from './tile_query_timeout';
 
@@ -91,8 +88,8 @@ export const useEntitiesWithAnomaliesCount = ({
       const entityIds: string[] = Array.isArray(rawIds)
         ? (rawIds as string[]).filter(Boolean)
         : typeof rawIds === 'string' && rawIds
-        ? [rawIds]
-        : [];
+          ? [rawIds]
+          : [];
       return { count, entityIds };
     },
     {
@@ -116,7 +113,7 @@ export const useEntitiesWithAnomaliesCount = ({
     // True only when the count query returned a result. A skipped, failed, timed-out or no-access
     // count is not a genuine 0, so the tile must not show `count` (0) for it.
     hasCount: shownResult !== undefined && !error && !indexError,
-    entityIds: isFetching ? EMPTY_ENTITY_IDS : shownResult?.entityIds ?? EMPTY_ENTITY_IDS,
+    entityIds: isFetching ? EMPTY_ENTITY_IDS : (shownResult?.entityIds ?? EMPTY_ENTITY_IDS),
     // A query that can never run (skipped, no index, no job) is not loading: react-query reports a
     // disabled query with no data as loading for ever.
     isLoading:

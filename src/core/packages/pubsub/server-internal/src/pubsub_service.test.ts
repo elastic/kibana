@@ -10,17 +10,12 @@
 import { AsyncLocalStorage } from 'async_hooks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { createTestEnv, getEnvOptions } from '@kbn/config-mocks';
-import { defineTopic } from '@kbn/core-pubsub-server';
+import { defineTopic, PUBSUB_MAX_ID_LENGTH } from '@kbn/core-pubsub-server';
 import type { PubSubEvent, PubSubEventInit, Topic } from '@kbn/core-pubsub-server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { scopeConsumerName } from './consumer_name';
 import type { InternalPubSubStart } from './internal_contracts';
-import {
-  PUBSUB_MAX_DATA_BYTES,
-  PUBSUB_MAX_ID_LENGTH,
-  PUBSUB_MAX_PENDING_EVENTS,
-  PubSubService,
-} from './pubsub_service';
+import { PUBSUB_MAX_DATA_BYTES, PUBSUB_MAX_PENDING_EVENTS, PubSubService } from './pubsub_service';
 
 const PLUGIN = 'ordersPlugin';
 

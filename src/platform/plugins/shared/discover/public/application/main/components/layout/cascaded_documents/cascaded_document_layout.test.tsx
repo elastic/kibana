@@ -34,7 +34,7 @@ const mockGetUISnapshotStore = jest.fn().mockReturnValue(null);
 const mockDataCascadeRefObject = { getUISnapshotStore: mockGetUISnapshotStore };
 
 jest.mock('@kbn/shared-ux-document-data-cascade', () => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
   const ReactLib = require('react');
   const actual = jest.requireActual('@kbn/shared-ux-document-data-cascade');
   const MockDataCascade = ReactLib.forwardRef(function MockDataCascade(
@@ -91,7 +91,7 @@ const defaultQueryMeta: ESQLStatsQueryMeta = {
 };
 
 jest.mock('./blocks', () => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
   const ReactLib = require('react');
   const actual = jest.requireActual('./blocks');
   return {
@@ -119,7 +119,7 @@ const createMockFetcher = (): CascadedDocumentsFetcher =>
   ({
     fetchCascadedDocuments: jest.fn().mockResolvedValue([]),
     cancelFetch: jest.fn(),
-  } as unknown as CascadedDocumentsFetcher);
+  }) as unknown as CascadedDocumentsFetcher;
 
 const createWrapper = async (overrides?: Partial<CascadedDocumentsContext>) => {
   const esqlQuery: AggregateQuery = { esql: 'FROM logs | STATS count() BY category' };

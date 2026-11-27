@@ -64,4 +64,4 @@ paths:
                   result:
                     $ref: '../components/hunt.schema.yaml#/components/schemas/HuntForThreatResult'
         '409':
-          description: The hunt scope is blocked (nothing in the default data view is visible to this hunt)
+          description: The hunt scope is blocked (nothing in the default data view is visible to this hunt, it has no searchable pattern, or resolving it failed)

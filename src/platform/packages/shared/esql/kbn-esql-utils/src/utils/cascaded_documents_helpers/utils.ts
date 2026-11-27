@@ -12,10 +12,14 @@ import { type DataView } from '@kbn/data-views-plugin/public';
 import { Builder, isFunctionExpression, mutate } from '@elastic/esql';
 import type { EsqlQuery } from '@elastic/esql';
 import type { ESQLFunction, ESQLCommand, ESQLLiteral } from '@elastic/esql/types';
-import type { FieldSummary } from '@kbn/esql-language/src/commands/registry/types';
+import type { FieldSummary } from '@kbn/esql-language';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { getFieldDefinitionFromArg, type Terminal } from '../esql_fields_utils';
-import { getQuerySummaryPerCommandType, getSummaryPerCommand } from '../get_query_summary';
+import {
+  createQuerySummaryContext,
+  getQuerySummaryPerCommandType,
+  getSummaryPerCommand,
+} from '../get_query_summary';
 import { PARAM_TYPES_NO_NEED_IMPLICIT_STRING_CASTING } from '../append_to_query/utils';
 
 // list of stats functions we support for grouping in the cascade experience
@@ -137,13 +141,20 @@ export function getStatsCommandAtIndexSummary(esqlQuery: EsqlQuery, commandIndex
     return null;
   }
 
-  const summarizedStatsCommand = getSummaryPerCommand(esqlQuery.src, declarationCommand);
+  const summarizedStatsCommand = getSummaryPerCommand(
+    esqlQuery.src,
+    declarationCommand,
+    createQuerySummaryContext(esqlQuery.ast, esqlQuery.src)
+  );
 
   // Transform to map format for easy access
-  const groupingsMap = Array.from(summarizedStatsCommand.grouping ?? []).reduce((acc, grouping) => {
-    acc[grouping.field] = grouping;
-    return acc;
-  }, {} as Record<string, FieldSummary>);
+  const groupingsMap = Array.from(summarizedStatsCommand.grouping ?? []).reduce(
+    (acc, grouping) => {
+      acc[grouping.field] = grouping;
+      return acc;
+    },
+    {} as Record<string, FieldSummary>
+  );
 
   const aggregatesMap = Array.from(summarizedStatsCommand.aggregates ?? []).reduce(
     (acc, aggregate) => {
@@ -185,7 +196,7 @@ export function getFieldParamDefinition(
 
 export function getStatsGroupFieldType<
   T extends FieldSummary | undefined,
-  R = T extends FieldSummary ? string : undefined
+  R = T extends FieldSummary ? string : undefined,
 >(groupByFields: T): R {
   if (!groupByFields) {
     return undefined as R;

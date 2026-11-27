@@ -76,7 +76,7 @@ const makeContext = (pool: unknown, config = makeConfig()): ActionContext =>
     config,
     log: { info: jest.fn(), debug: jest.fn(), error: jest.fn() },
     getClient: jest.fn().mockResolvedValue(pool),
-  } as unknown as ActionContext);
+  }) as unknown as ActionContext;
 
 const rowsOf = (count: number) => Array.from({ length: count }, (_, id) => ({ id }));
 
@@ -369,6 +369,8 @@ describe('AzureSql', () => {
       "SELECT [it's] DELETE FROM Customers",
       "SELECT 'it''s' DELETE FROM Customers",
       'SELECT 1 /* a /* b */ */ DELETE FROM Customers',
+      // SQL Server ends a line comment at a bare CR, so the DROP runs even though it looks commented out.
+      'SELECT 1 -- note\rDROP TABLE dbo.Customers',
     ])('still rejects a write hidden by comments or quoting: %j', async (sql) => {
       const { pool } = makePool({});
       const ctx = makeContext(pool);

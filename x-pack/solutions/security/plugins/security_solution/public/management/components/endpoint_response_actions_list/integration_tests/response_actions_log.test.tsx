@@ -586,6 +586,37 @@ describe('Response actions history', () => {
       expect(expandedButtons).toEqual([1, 3, 5]);
     });
 
+    describe('and when used in the page view (details are kept in the URL)', () => {
+      beforeEach(async () => {
+        useGetEndpointActionListMock.mockReturnValue({
+          ...getBaseMockedActionList(),
+          data: await getActionListMock({ actionCount: 13 }),
+        });
+      });
+
+      it('should remove `withOutputs` from the URL when an expanded row is collapsed', async () => {
+        render({ isFlyout: false });
+        const { getAllByTestId, queryByTestId } = renderResult;
+
+        await user.click(getAllByTestId(`${testPrefix}-expand-button`)[1]);
+        expect(new URLSearchParams(history.location.search).has('withOutputs')).toBe(true);
+
+        await user.click(getAllByTestId(`${testPrefix}-expand-button`)[1]);
+
+        expect(queryByTestId(`${testPrefix}-details-tray`)).toBeNull();
+        expect(new URLSearchParams(history.location.search).has('withOutputs')).toBe(false);
+      });
+
+      it('should not touch the URL when used in the flyout', async () => {
+        render({ isFlyout: true });
+        const { getAllByTestId } = renderResult;
+
+        await user.click(getAllByTestId(`${testPrefix}-expand-button`)[1]);
+
+        expect(history.location.search).not.toContain('withOutputs');
+      });
+    });
+
     it('should contain relevant details in each expanded row', async () => {
       render();
       const { getAllByTestId } = renderResult;
@@ -1251,8 +1282,8 @@ describe('Response actions history', () => {
                           command === 'get-file'
                             ? 'ra_get-file_error_not-found'
                             : command === 'scan'
-                            ? 'ra_scan_error_invalid-input'
-                            : 'non_existing_code_for_test',
+                              ? 'ra_scan_error_invalid-input'
+                              : 'non_existing_code_for_test',
                       },
                     },
                   } as Pick<ActionDetails, 'outputs'>)
@@ -1415,8 +1446,8 @@ describe('Response actions history', () => {
                       command === 'get-file'
                         ? 'ra_get-file_error_not-found'
                         : command === 'scan'
-                        ? 'ra_scan_error_invalid-input'
-                        : 'non_existing_code_for_test',
+                          ? 'ra_scan_error_invalid-input'
+                          : 'non_existing_code_for_test',
                     content: undefined,
                   },
                 },
@@ -1427,8 +1458,8 @@ describe('Response actions history', () => {
                       command === 'get-file'
                         ? 'ra_get-file_error_invalid-input'
                         : command === 'scan'
-                        ? 'ra_scan_error_invalid-input'
-                        : 'non_existing_code_for_test',
+                          ? 'ra_scan_error_invalid-input'
+                          : 'non_existing_code_for_test',
                     content: undefined,
                   },
                 },

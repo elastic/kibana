@@ -14,7 +14,7 @@ time (the Kibana inbox UI, a Slack action, the agent-builder execution view, and
 raw API all resolve the **same** `source_id`). Today the respond flow in
 `x-pack/platform/plugins/shared/inbox/server/routes/actions/respond_to_action.ts` →
 `InboxActionRegistry.respondTo` → `createWorkflowsInboxProvider.respond`
-(`src/platform/plugins/shared/workflows_management/server/inbox/workflows_inbox_provider.ts`)
+(`x-pack/platform/plugins/shared/workflows_management/server/inbox/workflows_inbox_provider.ts`)
 guards against **stale** responses and now prevents a **concurrent** loser from
 scheduling a second resume:
 
@@ -124,7 +124,7 @@ Replace the current `Promise<boolean>` with a structured result when loser attem
 recorded:
 
 ```ts
-// src/platform/plugins/shared/workflows_management/server/services/workflow_execution_query_service.ts
+// x-pack/platform/plugins/shared/workflows_management/server/services/workflow_execution_query_service.ts
 export interface MarkStepAsRespondedResult {
   /** False when the step doc was not found (already terminated / wrong space). */
   updated: boolean;
@@ -188,7 +188,7 @@ Add an optional, nullable `outcome` to the `InboxAction` schema
             `response_mode` (human vs timeout).
 ```
 
-Regenerate `.gen.ts` (`pnpm openapi:generate` in `kbn-inbox-common`, then eslint --fix the
+Regenerate `.gen.ts` (`pnpm openapi:generate` in `kbn-inbox-common`, then lint --fix and oxfmt the
 generated files — see plugin README §"Regenerating OpenAPI schemas"). Thread `outcome`
 through `toInboxHistoryAction` (`to_inbox_action.ts`):
 - winner row → `outcome: 'applied'`,
@@ -268,7 +268,8 @@ Integration/race (optional but recommended):
   step doc and asserting exactly one `won: true`, one `lost_race` 409, and a single
   `hitl.respondedAt`.
 
-Validation gates (per repo rules): `node scripts/eslint --fix $(git diff --name-only)`,
+Validation gates (per repo rules): `node scripts/lint --fix $(git diff --name-only)`,
+`node scripts/oxfmt $(git diff --name-only)`,
 `node scripts/type_check --project …` for `kbn-inbox-common`, `inbox`, and
 `workflows_management`, `node scripts/i18n_check --fix`, and jest for all touched suites.
 

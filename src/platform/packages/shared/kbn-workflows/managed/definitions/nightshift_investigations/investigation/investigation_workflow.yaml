@@ -242,6 +242,7 @@ steps:
         investigation_execution_id: '{{ execution.id }}'
         # `${{ }}` passes a missing optional value as undefined; `{{ }}` would pass an empty string.
         entry_point: '${{ inputs.context.entry_point }}'
-        alert_rule_type: '${{ inputs.context.alerts[0].rule_type_id }}'
+        # A recovery round's context has no `alerts`; it carries the rule type as `alert_rule_type`.
+        alert_rule_type: '${{ inputs.context.alerts[0].rule_type_id | default: inputs.context.alert_rule_type }}'
     on-failure:
       continue: true

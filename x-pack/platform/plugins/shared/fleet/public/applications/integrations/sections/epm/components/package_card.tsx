@@ -270,17 +270,19 @@ export function PackageCard({
 
           [class*='euiCard__description'] {
             flex-grow: 1;
-            ${descriptionLineClamp
-              ? installationStatusVisible
-                ? getLineClampStyles(1) // Show only one line of description if installation status is shown
-                : getLineClampStyles(descriptionLineClamp)
-              : ''}
+            ${
+              descriptionLineClamp
+                ? installationStatusVisible
+                  ? getLineClampStyles(1) // Show only one line of description if installation status is shown
+                  : getLineClampStyles(descriptionLineClamp)
+                : ''
+            }
           }
 
           [class*='euiCard__titleButton'] {
-            width: ${installationStatusVisible
-              ? `calc(100% - ${theme.euiTheme.base * 4}px)`
-              : '100%'};
+            width: ${
+              installationStatusVisible ? `calc(100% - ${theme.euiTheme.base * 4}px)` : '100%'
+            };
             ${getLineClampStyles(titleLineClamp)}
           }
 
@@ -295,10 +297,10 @@ export function PackageCard({
         title={
           titleLineClamp ? (
             <EuiToolTip content={displayTitle} position="top" display="block">
-              <CardTitle title={displayTitle} titleBadge={titleBadge} />
+              <CardTitle title={displayTitle} titleBadge={titleBadge} titleSize={titleSize} />
             </EuiToolTip>
           ) : (
-            <CardTitle title={displayTitle} titleBadge={titleBadge} />
+            <CardTitle title={displayTitle} titleBadge={titleBadge} titleSize={titleSize} />
           )
         }
         titleSize={titleSize}
@@ -332,9 +334,9 @@ export function PackageCard({
           gutterSize="xs"
           wrap={true}
           css={css`
-            width: ${installationStatusVisible
-              ? `calc(100% - ${theme.euiTheme.base * 4}px)`
-              : '100%'};
+            width: ${
+              installationStatusVisible ? `calc(100% - ${theme.euiTheme.base * 4}px)` : '100%'
+            };
             overflow-x: hidden;
             text-overflow: ellipsis;
 
@@ -363,29 +365,32 @@ export function PackageCard({
   );
 }
 
-const CardTitle = React.memo<Pick<IntegrationCardItem, 'title' | 'titleBadge'>>(
-  ({ title, titleBadge }) => {
-    if (!titleBadge) {
-      return title;
-    }
-    return (
-      <EuiFlexGroup
-        direction="row"
-        alignItems="flexStart"
-        justifyContent="spaceBetween"
-        gutterSize="s"
-        responsive={false}
-      >
-        <EuiFlexItem>
-          <EuiTitle>
-            <h3>{title}</h3>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>{titleBadge}</EuiFlexItem>
-      </EuiFlexGroup>
-    );
+const CardTitle = React.memo<
+  Required<Pick<IntegrationCardItem, 'titleSize'>> &
+    Pick<IntegrationCardItem, 'title' | 'titleBadge'>
+>(({ title, titleBadge, titleSize }) => {
+  if (!titleBadge) {
+    return title;
   }
-);
+  return (
+    <EuiFlexGroup
+      direction="row"
+      alignItems="flexStart"
+      justifyContent="spaceBetween"
+      gutterSize="s"
+      responsive={false}
+    >
+      <EuiFlexItem>
+        {/* Same size as the card title, otherwise the badge variant renders much taller and pushes
+              the content below (e.g. the variant-count badge) out of the card's max height. */}
+        <EuiTitle size={titleSize}>
+          <h3>{title}</h3>
+        </EuiTitle>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>{titleBadge}</EuiFlexItem>
+    </EuiFlexGroup>
+  );
+});
 
 function quickstartBadge(isQuickstart: boolean): { label: string; color: 'accent' } | undefined {
   return isQuickstart

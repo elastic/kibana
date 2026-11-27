@@ -40,6 +40,19 @@ interface Props {
   onOpenInDiscover?: () => void;
 }
 
+const formatPropertyValue = (value: unknown): string | undefined => {
+  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+    return String(value);
+  }
+
+  if (
+    Array.isArray(value) &&
+    value.every((item) => typeof item === 'string' || typeof item === 'number')
+  ) {
+    return value.join(', ');
+  }
+};
+
 export function KnowledgeIndicatorFeatureDetailsContent({
   feature,
   getSourceTitle,
@@ -72,13 +85,14 @@ export function KnowledgeIndicatorFeatureDetailsContent({
         title: DETAILS_PROPERTIES_LABEL,
         description: (
           <EuiText size="s">
-            {Object.entries(feature.properties)
-              .filter(([, value]) => typeof value === 'string')
-              .map(([key, value]) => (
+            {Object.entries(feature.properties).map(([key, value]) => {
+              const formattedValue = formatPropertyValue(value);
+              return formattedValue === undefined ? null : (
                 <EuiText size="s" key={key}>
-                  <strong>{key}</strong> {value as string}
+                  <strong>{key}</strong> {formattedValue}
                 </EuiText>
-              ))}
+              );
+            })}
           </EuiText>
         ),
       },
@@ -135,7 +149,7 @@ export function KnowledgeIndicatorFeatureDetailsContent({
           {listItems.map((item, index) => (
             <React.Fragment key={item.title}>
               <EuiDescriptionList
-                type="column"
+                type="responsiveColumn"
                 columnWidths={[1, 2]}
                 compressed
                 listItems={[item]}

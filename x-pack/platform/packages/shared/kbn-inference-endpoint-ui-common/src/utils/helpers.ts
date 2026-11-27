@@ -6,9 +6,10 @@
  */
 
 import type { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { omitBy } from 'lodash';
 import { isEmpty } from 'lodash/fp';
 import { FieldType } from '../types/types';
-import type { Config, ConfigEntryView, InferenceProvider } from '../types/types';
+import type { Config, ConfigEntryView, InferenceEndpoint, InferenceProvider } from '../types/types';
 import type { OverrideFieldsContentType } from '../types/dynamic_config/types';
 import * as LABELS from '../translations';
 import {
@@ -52,6 +53,28 @@ export const generateInferenceEndpointId = (config: Config) => {
   return inferenceEndpointId;
 };
 
+const isEmptyFieldValue = (value: unknown): boolean =>
+  value === null || value === undefined || value === '';
+
+export const omitEmptyFieldValues = (inferenceEndpoint: InferenceEndpoint): InferenceEndpoint => {
+  const { config, secrets } = inferenceEndpoint;
+  const { providerConfig, taskTypeConfig } = config;
+  const { providerSecrets } = secrets;
+
+  return {
+    ...inferenceEndpoint,
+    config: {
+      ...config,
+      ...(providerConfig && { providerConfig: omitBy(providerConfig, isEmptyFieldValue) }),
+      ...(taskTypeConfig && { taskTypeConfig: omitBy(taskTypeConfig, isEmptyFieldValue) }),
+    },
+    secrets: {
+      ...secrets,
+      ...(providerSecrets && { providerSecrets: omitBy(providerSecrets, isEmptyFieldValue) }),
+    },
+  };
+};
+
 export const getNonEmptyValidator = (
   requiredFieldsSchema: ConfigEntryView[],
   validationEventHandler: (fieldsWithErrors: ConfigEntryView[]) => void,
@@ -73,8 +96,8 @@ export const getNonEmptyValidator = (
             const fieldLocation = isSecrets
               ? PROVIDER_SECRETS
               : field.location === TASK_SETTINGS
-              ? TASK_TYPE_CONFIG
-              : PROVIDER_CONFIG;
+                ? TASK_TYPE_CONFIG
+                : PROVIDER_CONFIG;
             if (path.includes(fieldLocation)) {
               if (
                 !configData[field.key] ||

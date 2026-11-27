@@ -28,8 +28,10 @@ export interface AlertsResponse {
   timeout: boolean;
 }
 
-export interface AlertSearchResponse<Hit = {}, Aggregations = {} | undefined>
-  extends AlertsResponse {
+export interface AlertSearchResponse<
+  Hit = {},
+  Aggregations = {} | undefined,
+> extends AlertsResponse {
   _shards: {
     total: number;
     successful: number;

@@ -67,15 +67,12 @@ interface FeatureFlagDefinition {
   fn: (enabled: boolean) => boolean | Promise<boolean>;
 }
 
-export class ElasticAssistantPlugin
-  implements
-    Plugin<
-      ElasticAssistantPluginSetup,
-      ElasticAssistantPluginStart,
-      ElasticAssistantPluginSetupDependencies,
-      ElasticAssistantPluginStartDependencies
-    >
-{
+export class ElasticAssistantPlugin implements Plugin<
+  ElasticAssistantPluginSetup,
+  ElasticAssistantPluginStart,
+  ElasticAssistantPluginSetupDependencies,
+  ElasticAssistantPluginStartDependencies
+> {
   private readonly logger: Logger;
   private assistantService: AIAssistantService | undefined;
   private pluginStop$: Subject<void>;
@@ -237,6 +234,8 @@ export class ElasticAssistantPlugin
       registerCallback: (callbackId: CallbackIds, callback: Function) => {
         return appContextService.registerCallback(callbackId, callback);
       },
+      ensureSpaceResources: async (spaceId: string) =>
+        (await this.assistantService?.ensureSpaceResources(spaceId)) ?? false,
     };
   }
 

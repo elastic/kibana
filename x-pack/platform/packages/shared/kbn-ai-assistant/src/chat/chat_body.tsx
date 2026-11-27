@@ -200,9 +200,9 @@ export function ChatBody({
 
   const isLoading = Boolean(
     connectors.loading ||
-      knowledgeBase.status.loading ||
-      state === ChatState.Loading ||
-      conversation.loading
+    knowledgeBase.status.loading ||
+    state === ChatState.Loading ||
+    conversation.loading
   );
 
   let title = conversation.value?.conversation.title || initialTitle;

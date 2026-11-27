@@ -46,10 +46,13 @@ export const applyPenalty = (result: PenaltyInput): number => {
     ground_truth_verdict === 'contradicted'
       ? Math.min(score, 1)
       : score >= 3 && !allMatch
-      ? 2
-      : score;
+        ? 2
+        : score;
   return isHallucination(result) ? Math.max(0, consistent - 1) : consistent;
 };
+
+/** The grade an investigation needs for `alert_outcome_rca_accuracy` to pass. */
+const PASS_GRADE = 3;
 
 const toScores = ({
   effective,
@@ -70,8 +73,8 @@ const toScores = ({
   },
   {
     name: 'alert_outcome_rca_accuracy',
-    score: effective >= 3 ? 1 : 0,
-    label: `score=${effective}/3`,
+    score: effective >= PASS_GRADE ? 1 : 0,
+    label: `score=${effective}/3 pass=${PASS_GRADE}/3`,
     explanation: capExplanation(reasoning),
   },
   {

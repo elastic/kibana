@@ -19,9 +19,9 @@ export function checkChartAvailability({
 }): boolean {
   return Boolean(
     chart &&
-      dataSource &&
-      dataSource.id &&
-      !dataSource.isRollup() &&
-      (dataSource.kind === 'esql' || dataSource.isTimeBased())
+    dataSource &&
+    dataSource.id &&
+    !dataSource.isRollup() &&
+    (dataSource.kind === 'esql' || dataSource.isTimeBased())
   );
 }

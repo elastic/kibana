@@ -25,6 +25,11 @@ export interface AddArgs {
    * toUnifiedAttachmentRequest.
    */
   comment: UnifiedAttachmentPayload;
+  /**
+   * Overrides the attachmentType reported on the cases.attachmentsAdded workflow trigger.
+   * Defaults to the type of `comment`.
+   */
+  triggerAttachmentType?: string;
 }
 
 export interface BulkCreateArgs {

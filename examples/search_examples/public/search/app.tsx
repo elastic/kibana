@@ -47,11 +47,10 @@ import { lastValueFrom } from 'rxjs';
 import { PLUGIN_ID, PLUGIN_NAME, SERVER_SEARCH_ROUTE_PATH } from '../../common';
 import type { IMyStrategyResponse } from '../../common/types';
 
-interface SearchExamplesAppDeps
-  extends Pick<
-    CoreStart,
-    'notifications' | 'http' | 'analytics' | 'i18n' | 'theme' | 'userProfile'
-  > {
+interface SearchExamplesAppDeps extends Pick<
+  CoreStart,
+  'notifications' | 'http' | 'analytics' | 'i18n' | 'theme' | 'userProfile'
+> {
   navigation: NavigationPublicPluginStart;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
@@ -218,7 +217,7 @@ export const SearchExamplesApp = ({
     });
 
     // Fetch next page
-    if (result.pagination.hasNextPage) {
+    if (result.pagination.hasNextPage()) {
       const nextPage = await result.pagination.nextPage();
       void nextPage;
     }

@@ -34,7 +34,7 @@ import {
   SSE_TIER1_HIT_BULLET_PREFIX,
   SSE_TIER2_HIT_BULLET_PREFIX,
 } from '../../../../../common/sse_view';
-import { splitRemoteCluster, stripBackingPrefix } from '../../../../../common/remote_cluster';
+import { isDotPrefixedIndex, splitRemoteCluster } from '../../../../../common/remote_cluster';
 import type { HuntCoordinatorCoreResult } from '../hunt_coordinator';
 import { clausesOf, type HuntFilterClause } from '../tier2/report_grounding';
 import { HostOrigins, toEntityOrigin } from './host_origin';
@@ -297,12 +297,14 @@ const buildEntities = (
 
   const tier2Entities = scopedBehaviors(result, onlyTechniqueId).flatMap(
     (behavior): SseEntityRef[] => [
-      ...(behavior.affected_hosts ?? []).map(
-        (host): SseEntityRef => ({ field: 'host.name', value: host })
-      ),
-      ...(behavior.affected_users ?? []).map(
-        (user): SseEntityRef => ({ field: 'user.name', value: user })
-      ),
+      ...(behavior.affected_hosts ?? []).map((host): SseEntityRef => ({
+        field: 'host.name',
+        value: host,
+      })),
+      ...(behavior.affected_users ?? []).map((user): SseEntityRef => ({
+        field: 'user.name',
+        value: user,
+      })),
     ]
   );
 
@@ -347,8 +349,7 @@ const hostOrigins = (result: HuntCoordinatorCoreResult, onlyTechniqueId?: string
  * backing prefix first so `.ds-logs-aws...` is not mistaken for a hidden index and
  * `remote:.alerts-...` is not mistaken for an event index.
  */
-const isAlertsIndex = (name: string): boolean =>
-  splitRemoteCluster(stripBackingPrefix(name)).index.startsWith('.');
+const isAlertsIndex = (name: string): boolean => isDotPrefixedIndex(name);
 
 /**
  * Every alert exit ramp is pinned to this space's local alerts alias, so an alert on a
@@ -777,8 +778,8 @@ const buildChrome = ({
   const title = behavior?.title
     ? behavior.title.slice(0, 512)
     : huntResult.has_confirmed_hit
-    ? `Hunt confirmed for ${reportId}`.slice(0, 512)
-    : `Hunt complete for ${reportId}`.slice(0, 512);
+      ? `Hunt confirmed for ${reportId}`.slice(0, 512)
+      : `Hunt complete for ${reportId}`.slice(0, 512);
 
   const confidence = behavior?.confidence ?? (huntResult.has_confirmed_hit ? 0.7 : 0.3);
   const severity: SeverityLevel = behavior?.severity

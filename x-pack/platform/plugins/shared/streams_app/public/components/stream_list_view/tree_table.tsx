@@ -26,12 +26,10 @@ import { css } from '@emotion/css';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import type { QualityIndicators } from '@kbn/dataset-quality-plugin/common';
 import {
-  Streams,
   type RootStreamName,
   LOGS_ROOT_STREAM_NAME,
   ROOT_STREAM_NAMES,
   isRoot,
-  isDraftStream,
 } from '@kbn/streams-schema';
 import useAsync from 'react-use/lib/useAsync';
 import type { WiredStreamsStatus } from '@kbn/streams-plugin/public';
@@ -80,19 +78,12 @@ import {
   STREAM_TYPE_FILTER_LABEL,
   STREAM_TYPE_CLASSIC_LABEL,
   STREAM_TYPE_WIRED_LABEL,
-  STREAM_TYPE_QUERY_LABEL,
   DATA_QUALITY_FILTER_LABEL,
   DATA_QUALITY_GOOD_LABEL,
   DATA_QUALITY_DEGRADED_LABEL,
   DATA_QUALITY_POOR_LABEL,
 } from './translations';
-import {
-  DeprecatedLogsBadge,
-  DiscoverBadgeButton,
-  DraftStreamBadge,
-  QueryStreamBadge,
-  TechnicalPreviewBadge,
-} from '../stream_badges';
+import { DeprecatedLogsBadge, DiscoverBadgeButton, TechnicalPreviewBadge } from '../stream_badges';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -147,7 +138,7 @@ export function StreamsTreeTable({
     {
       groupTotalCountByTimestamp: true,
       getCanReadFailureStore: (streamName: string | undefined) =>
-        streamName ? privilegeMap.get(streamName) ?? false : hasFailureStoreAccess,
+        streamName ? (privilegeMap.get(streamName) ?? false) : hasFailureStoreAccess,
       numDataPoints: STREAMS_HISTOGRAM_NUM_DATA_POINTS,
       fetchIngestionDocCounts: true,
     }
@@ -163,30 +154,39 @@ export function StreamsTreeTable({
     if (!totalDocsResult.value) {
       return {} as Record<string, number>;
     }
-    return totalDocsResult.value.reduce((acc, { stream, count }) => {
-      acc[stream] = count;
-      return acc;
-    }, {} as Record<string, number>);
+    return totalDocsResult.value.reduce(
+      (acc, { stream, count }) => {
+        acc[stream] = count;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
   }, [totalDocsResult.value]);
 
   const failedByStream = React.useMemo(() => {
     if (!failedDocsResult.value) {
       return {} as Record<string, number>;
     }
-    return failedDocsResult.value.reduce((acc, { stream, count }) => {
-      acc[stream] = count;
-      return acc;
-    }, {} as Record<string, number>);
+    return failedDocsResult.value.reduce(
+      (acc, { stream, count }) => {
+        acc[stream] = count;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
   }, [failedDocsResult.value]);
 
   const degradedByStream = React.useMemo(() => {
     if (!degradedDocsResult.value) {
       return {} as Record<string, number>;
     }
-    return degradedDocsResult.value.reduce((acc, { stream, count }) => {
-      acc[stream] = count;
-      return acc;
-    }, {} as Record<string, number>);
+    return degradedDocsResult.value.reduce(
+      (acc, { stream, count }) => {
+        acc[stream] = count;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
   }, [degradedDocsResult.value]);
 
   const qualityByStream = React.useMemo(() => {
@@ -426,7 +426,6 @@ export function StreamsTreeTable({
                 options={[
                   { key: 'classic', label: STREAM_TYPE_CLASSIC_LABEL },
                   { key: 'wired', label: STREAM_TYPE_WIRED_LABEL },
-                  { key: 'query', label: STREAM_TYPE_QUERY_LABEL },
                 ]}
                 onChange={handleTypeFilterChange}
               />
@@ -521,8 +520,6 @@ export function StreamsTreeTable({
                         min-width: 0;
                       `}
                     >
-                      {Streams.QueryStream.Definition.is(item.stream) && <QueryStreamBadge />}
-                      {isDraftStream(item.stream) && <DraftStreamBadge />}
                       <EuiLink
                         data-test-subj={`streamsNameLink-${item.stream.name}`}
                         href={router.link('/{key}', {
@@ -545,21 +542,18 @@ export function StreamsTreeTable({
                       >
                         <EuiHighlight search={searchText}>{item.stream.name}</EuiHighlight>
                       </EuiLink>
-                      {(ROOT_STREAM_NAMES.includes(item.stream.name as RootStreamName) ||
-                        Streams.QueryStream.Definition.is(item.stream) ||
-                        (Streams.WiredStream.Definition.is(item.stream) &&
-                          isDraftStream(item.stream))) && <TechnicalPreviewBadge />}
-                      {item.stream.name === LOGS_ROOT_STREAM_NAME &&
-                        !Streams.QueryStream.Definition.is(item.stream) && (
-                          <DeprecatedLogsBadge
-                            openFlyout={openFlyout}
-                            hasNewStreams={getLegacyLogsStatus(wiredStreamsStatus).hasNewStreams}
-                          />
-                        )}
+                      {ROOT_STREAM_NAMES.includes(item.stream.name as RootStreamName) && (
+                        <TechnicalPreviewBadge />
+                      )}
+                      {item.stream.name === LOGS_ROOT_STREAM_NAME && (
+                        <DeprecatedLogsBadge
+                          openFlyout={openFlyout}
+                          hasNewStreams={getLegacyLogsStatus(wiredStreamsStatus).hasNewStreams}
+                        />
+                      )}
                       {isRoot(item.stream.name) &&
                         item.stream.name !== LOGS_ROOT_STREAM_NAME &&
-                        !item.data_stream &&
-                        !Streams.QueryStream.Definition.is(item.stream) && (
+                        !item.data_stream && (
                           <EuiToolTip
                             position="right"
                             content={i18n.translate(
@@ -712,9 +706,6 @@ export function StreamsTreeTable({
               dataType: 'number',
               width: '220px',
               render: (_: unknown, item: TableRow) => {
-                if (isDraftStream(item.stream) || Streams.QueryStream.Definition.is(item.stream)) {
-                  return '-';
-                }
                 return (
                   <RetentionColumn
                     lifecycle={item.effective_lifecycle!}
@@ -739,14 +730,9 @@ export function StreamsTreeTable({
               sortable: false,
               dataType: 'string',
               render: (_: unknown, item: TableRow) => {
-                const hasDataStream =
-                  !!item.data_stream || Streams.QueryStream.Definition.is(item.stream);
-                if (Streams.QueryStream.Definition.is(item.stream)) {
-                  return <DiscoverBadgeButton hasDataStream={hasDataStream} stream={item.stream} />;
-                }
                 return (
                   <DiscoverBadgeButton
-                    hasDataStream={hasDataStream}
+                    hasDataStream={!!item.data_stream}
                     indexMode={item.data_stream?.index_mode ?? 'standard'}
                     stream={item.stream}
                   />

@@ -85,13 +85,13 @@ describe('getActiveItems', () => {
     expect(result.secondaryItem).toBeNull();
   });
 
-  it('keeps the primary active when only a popover row matches', () => {
-    const withPopover: NavigationStructure = {
+  it('keeps the primary active when only a supplementary row matches', () => {
+    const withSupplementarySections: NavigationStructure = {
       ...navigation,
       primaryItems: [
         {
           ...navigation.primaryItems[1],
-          popoverSections: [
+          supplementarySections: [
             {
               id: 'recent',
               items: [createSecondary('recent-dashboard', 'Recent')],
@@ -101,9 +101,11 @@ describe('getActiveItems', () => {
       ],
     };
 
-    expect(getActiveItems(withPopover, 'dashboards').primaryItem?.id).toBe('dashboards');
-    expect(getActiveItems(withPopover, 'dashboards').secondaryItem).toBeNull();
-    expect(getActiveItems(withPopover, 'recent-dashboard')).toEqual({
+    expect(getActiveItems(withSupplementarySections, 'dashboards').primaryItem?.id).toBe(
+      'dashboards'
+    );
+    expect(getActiveItems(withSupplementarySections, 'dashboards').secondaryItem).toBeNull();
+    expect(getActiveItems(withSupplementarySections, 'recent-dashboard')).toEqual({
       primaryItem: null,
       secondaryItem: null,
     });

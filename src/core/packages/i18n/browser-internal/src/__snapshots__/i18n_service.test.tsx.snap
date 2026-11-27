@@ -314,7 +314,8 @@ exports[`#start() returns \`Context\` component 1`] = `
     \\"euiKeyboardShortcuts.copyDescription\\": \\"Copy the focused cell value\\",
     \\"euiKeyboardShortcuts.copyTitle\\": \\"C\\",
     \\"euiFlyoutMenu.maximize\\": \\"Maximize\\",
-    \\"euiFlyoutMenu.restore\\": \\"Restore\\"
+    \\"euiFlyoutMenu.restore\\": \\"Restore\\",
+    \\"euiExpression.invalid\\": \\"Invalid expression\\"
   }
 }"
 `;

@@ -44,7 +44,7 @@ export const CommentsLayer = () => {
   const pending = useCommentsState((state) => state.pending);
   const notice = useCommentsState((state) => state.notice);
   const guided = useCommentsState(({ guide, comments }) =>
-    guide ? comments.find(({ id }) => id === guide.id) ?? null : null
+    guide ? (comments.find(({ id }) => id === guide.id) ?? null) : null
   );
 
   useEffect(() => {

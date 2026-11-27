@@ -34,6 +34,7 @@ type EventsWriteItemResult =
       written: false;
       reason:
         | 'existing_active_event'
+        | 'rule_held_by_event'
         | 'bulk_error'
         | 'duplicate_in_batch'
         | 'superseded'
@@ -117,7 +118,7 @@ const mergeComputedFields = (
     event_id: result.event_id,
     ...(result.status !== undefined ? { status: result.status } : {}),
     ...(result.severity !== undefined ? { severity: result.severity } : {}),
-  } as SignificantEvent);
+  }) as SignificantEvent;
 
 /**
  * Extract events from `events_write` tool call steps for continuation seeding.

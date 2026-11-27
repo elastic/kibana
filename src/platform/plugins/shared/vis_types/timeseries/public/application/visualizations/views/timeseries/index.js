@@ -207,7 +207,7 @@ export const TimeSeries = ({
               color: backgroundColor,
             },
             legend: {
-              labelOptions: { maxLines: truncateLegend ? maxLegendLines ?? 1 : 0 },
+              labelOptions: { maxLines: truncateLegend ? (maxLegendLines ?? 1) : 0 },
             },
           },
         ]}

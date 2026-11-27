@@ -14,11 +14,8 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import { useTileQueryInputs } from './use_tile_query_inputs';
 import { buildAlertBasedTilesQuery } from '../queries/entities_with_alerts_query';
 import { EMPTY_ENTITY_IDS } from '../data';
-import {
-  EMPTY_ENTITY_FILTERS,
-  type EntityFilters,
-  type TimeRange,
-} from '../../entities_grid/common';
+import type { TimeRange } from '../../queries/time_range';
+import { EMPTY_ENTITY_FILTERS, type EntityFilters } from '../../entities_grid/common';
 import { isMissingIndexError } from '../../is_missing_index_error';
 import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
 import { isTileQueryTimeout, retryUnlessTimedOut, runWithTileTimeout } from './tile_query_timeout';
@@ -145,11 +142,11 @@ export const useAlertBasedTiles = ({
     hasCount: shownResult !== undefined && !error && !indexError,
     severeAlertsEntityIds: isFetching
       ? EMPTY_ENTITY_IDS
-      : shownResult?.severeAlertsEntityIds ?? EMPTY_ENTITY_IDS,
+      : (shownResult?.severeAlertsEntityIds ?? EMPTY_ENTITY_IDS),
     watchlistedCount: shownResult?.watchlistedCount ?? 0,
     watchlistedEntityIds: isFetching
       ? EMPTY_ENTITY_IDS
-      : shownResult?.watchlistedEntityIds ?? EMPTY_ENTITY_IDS,
+      : (shownResult?.watchlistedEntityIds ?? EMPTY_ENTITY_IDS),
     // A query that can never run (no index, failed inputs) is not loading: react-query reports a
     // disabled query with no data as loading for ever.
     isLoading: isIndexLoading || (isEnabled && Boolean(query) && (isLoading || isFetching)),

@@ -154,7 +154,7 @@ export const LEGACY_EVENT_LOG_ACTIONS = {
 export interface AlertingServerSetup {
   registerConnectorAdapter<
     RuleActionParams extends ConnectorAdapterParams = ConnectorAdapterParams,
-    ConnectorParams extends ConnectorAdapterParams = ConnectorAdapterParams
+    ConnectorParams extends ConnectorAdapterParams = ConnectorAdapterParams,
   >(
     adapter: ConnectorAdapter<RuleActionParams, ConnectorParams>
   ): void;
@@ -166,7 +166,7 @@ export interface AlertingServerSetup {
     InstanceContext extends AlertInstanceContext = AlertInstanceContext,
     ActionGroupIds extends string = never,
     RecoveryActionGroupId extends string = never,
-    AlertData extends RuleAlertData = never
+    AlertData extends RuleAlertData = never,
   >(
     ruleType: RuleType<
       Params,
@@ -532,7 +532,7 @@ export class AlertingPlugin {
       },
       registerConnectorAdapter: <
         RuleActionParams extends ConnectorAdapterParams = ConnectorAdapterParams,
-        ConnectorParams extends ConnectorAdapterParams = ConnectorAdapterParams
+        ConnectorParams extends ConnectorAdapterParams = ConnectorAdapterParams,
       >(
         adapter: ConnectorAdapter<RuleActionParams, ConnectorParams>
       ) => {
@@ -546,7 +546,7 @@ export class AlertingPlugin {
         InstanceContext extends AlertInstanceContext = never,
         ActionGroupIds extends string = never,
         RecoveryActionGroupId extends string = never,
-        AlertData extends RuleAlertData = never
+        AlertData extends RuleAlertData = never,
       >(
         ruleType: RuleType<
           Params,

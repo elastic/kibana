@@ -361,7 +361,7 @@ describe('TelemetryService', () => {
 
   describe('isOptedIn$', () => {
     const serverConfig = (optIn: boolean | null): TelemetryPluginConfig =>
-      ({ optIn } as TelemetryPluginConfig);
+      ({ optIn }) as TelemetryPluginConfig;
 
     it('withholds the injected default and emits the first value resolved from the server', async () => {
       // Default injected at page render says opted-in...
@@ -427,7 +427,7 @@ describe('TelemetryService', () => {
 
   describe('canSendTelemetry$', () => {
     const serverConfig = (optIn: boolean | null): TelemetryPluginConfig =>
-      ({ optIn } as TelemetryPluginConfig);
+      ({ optIn }) as TelemetryPluginConfig;
 
     it('emits true when opted in and not in screenshot mode', async () => {
       const telemetryService = mockTelemetryService({ isScreenshotMode: false });

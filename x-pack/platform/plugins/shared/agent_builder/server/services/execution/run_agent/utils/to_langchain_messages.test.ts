@@ -42,6 +42,7 @@ import type { ProcessedConversation } from './prepare_conversation';
 import { attachmentTypeInstructions } from '../prompts/utils/attachments';
 import {
   T0,
+  T1,
   abortedExec0Timeline,
   attachmentEventFixture,
   completedRoundTimeline,
@@ -51,6 +52,8 @@ import {
   pausedRoundTimeline,
   pausedThenInterruptedResumeTimeline,
   processedCustomEventFixture,
+  terminatedExecutionEvents,
+  userMessageEvent,
   roundsOfTimeline,
   timelineFromRounds,
   type ProcessedConversationRound,
@@ -123,7 +126,7 @@ describe('prepareMessages', () => {
             id: type,
             validate: (input: unknown) => ({ valid: true, data: input }),
             format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
-          } as any),
+          }) as any,
       }),
       ...parts,
     };
@@ -957,17 +960,15 @@ describe('prepareMessages', () => {
 
       // Custom transformer that modifies all results from a tool call
       const customTransformer: ToolCallResultTransformer = jest.fn(async (toolCallArg) => {
-        return toolCallArg.results.map(
-          (result): ToolResult => ({
-            tool_result_id: result.tool_result_id,
-            type: ToolResultType.other,
-            data: {
-              ...(result.data as Record<string, unknown>),
-              transformedBy: 'custom',
-              toolId: toolCallArg.tool_id,
-            },
-          })
-        );
+        return toolCallArg.results.map((result): ToolResult => ({
+          tool_result_id: result.tool_result_id,
+          type: ToolResultType.other,
+          data: {
+            ...(result.data as Record<string, unknown>),
+            transformedBy: 'custom',
+            toolId: toolCallArg.tool_id,
+          },
+        }));
       });
 
       const result = await prepareMessages({
@@ -1444,6 +1445,33 @@ describe('prepareMessages', () => {
       expect(String(messages[0].content)).toContain('note');
       expect(String(messages[0].content).match(/<conversation_event /g)).toHaveLength(1);
     });
+
+    it('renders a steer its run never read as earlier context, not a user turn', async () => {
+      const unread = {
+        id: 'steer-1',
+        type: TimelineEventType.userMessage,
+        created_at: T0,
+        actor: { type: 'user', id: 'u', username: 'sid' },
+        data: makeRoundInput('use a table'),
+        unread_steer: true,
+      } as unknown as ProcessedTimelineEvent;
+      const messages = await prepareMessages({
+        conversation: {
+          timeline: [unread],
+          nextInput: makeRoundInput('next'),
+          attachmentTypes: [],
+          attachmentStateManager: createAttachmentStateManager([], {
+            getTypeDefinition: () => undefined,
+          }),
+        } as ProcessedConversation,
+      });
+      expect(messages).toHaveLength(2);
+      const content = String(messages[0].content);
+      expect(content).toContain('<system_notice>');
+      expect(content).toContain('ended before reading it');
+      expect(content).toContain('<user_message>use a table</user_message>');
+      expect(String(messages[1].content)).toBe('next');
+    });
   });
 
   describe('background execution notices (from round steps)', () => {
@@ -1455,7 +1483,7 @@ describe('prepareMessages', () => {
         response: { message: 'Background result' },
         completed_at: { round_id: 'round-1' },
         ...overrides,
-      } as ConversationRoundStep);
+      }) as ConversationRoundStep;
 
     it('injects system notice for background execution complete step', async () => {
       const round = createRound({
@@ -1737,16 +1765,16 @@ describe('prepareMessages — relevant_skills replay', () => {
             id: type,
             validate: (input: unknown) => ({ valid: true, data: input }),
             format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
-          } as any),
+          }) as any,
       }),
-    } as ProcessedConversation);
+    }) as ProcessedConversation;
 
   const relevantSkillsStep = (skills: Array<Record<string, unknown>>): ConversationRoundStep =>
     ({
       type: ConversationRoundStepType.relevantSkills,
       source: 'implicit',
       skills,
-    } as unknown as ConversationRoundStep);
+    }) as unknown as ConversationRoundStep;
 
   it('replays a relevant_skills step as a <relevant_skills> user notification', async () => {
     const result = await prepareMessages({
@@ -1970,6 +1998,38 @@ describe('prepareMessages — multi-execution (HITL) timelines', () => {
       expect(types.at(-2)).toBe('human');
       expect(String(messages.at(-2)?.content)).toContain('<system_notice>');
       expect(String(messages.at(-1)?.content)).toContain('bye');
+    });
+
+    it('renders a steer read by an interrupted run with its text, in that round', async () => {
+      const delivered: ConversationRoundStep = {
+        type: ConversationRoundStepType.deliveredMessage,
+        event_id: 'read',
+        author: { type: 'user', id: 'u1' },
+        is_run_owner: true,
+        message: 'text of read',
+        delivered_at: T0,
+        cycle: 1,
+      } as ConversationRoundStep;
+      const events: TimelineEvent[] = [
+        ...failedExec0Timeline('r1', [delivered], T0),
+        userMessageEvent('r2', T1),
+        ...terminatedExecutionEvents({
+          roundId: 'r2',
+          createdAt: T1,
+          steps: [],
+          outcome: { type: 'responded', response: { message: 'done' } },
+        }),
+      ];
+
+      const messages = await prepareMessages({
+        conversation: conversationOf(processedTimeline(events)),
+      });
+
+      const contents = messages.map((message) => String(message.content));
+      expect(contents.filter((content) => content.includes('text of read'))).toHaveLength(1);
+      expect(contents.findIndex((content) => content.includes('text of read'))).toBeLessThan(
+        contents.findIndex((content) => content.includes('done'))
+      );
     });
 
     it('end to end: a confirmation-blocked call + prompt_response + failed setup-window resume renders the call as interrupted', async () => {

@@ -11,7 +11,7 @@ import { rgba } from 'polished';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { DraggableChildrenFn, DraggingStyle, NotDraggingStyle } from '@hello-pangea/dnd';
 import { Draggable, Droppable } from '@hello-pangea/dnd';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { useDispatch } from 'react-redux-v7';
 
 import {
@@ -71,18 +71,20 @@ const DroppableContainer = styled.div`
   height: auto !important;
 
   .${IS_DRAGGING_CLASS_NAME} &:hover {
-    background-color: ${({ theme }) => rgba(theme.eui.euiColorSuccess, 0.2)} !important;
+    background-color: ${({ theme }) => rgba(theme.euiTheme.colors.success, 0.2)} !important;
   }
 `;
 
 const Parens = styled.span`
-  color: ${({ theme }) => theme.eui.euiColorMediumShade};
+  color: ${({ theme }) => theme.euiTheme.colors.mediumShade};
   font-size: 32px;
   padding: 2px;
   user-select: none;
 `;
 
-const AndOrBadgeContainer = styled.div<{ hideBadge: boolean }>`
+const AndOrBadgeContainer = styled('div', {
+  shouldForwardProp: (prop) => prop !== 'hideBadge',
+})<{ hideBadge: boolean }>`
   span {
     visibility: ${({ hideBadge }) => (hideBadge ? 'hidden' : 'inherit')};
   }
@@ -285,8 +287,8 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
                 deleteProvider={handleDeleteProvider}
                 field={
                   index > 0
-                    ? dataProvider.queryMatch.displayField ?? dataProvider.queryMatch.field
-                    : group[0].queryMatch.displayField ?? group[0].queryMatch.field
+                    ? (dataProvider.queryMatch.displayField ?? dataProvider.queryMatch.field)
+                    : (group[0].queryMatch.displayField ?? group[0].queryMatch.field)
                 }
                 kqlQuery={index > 0 ? dataProvider.kqlQuery : group[0].kqlQuery}
                 isEnabled={index > 0 ? dataProvider.enabled : group[0].enabled}
@@ -295,8 +297,8 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
                 onDataProviderEdited={handleDataProviderEdited}
                 operator={
                   index > 0
-                    ? dataProvider.queryMatch.operator ?? IS_OPERATOR
-                    : group[0].queryMatch.operator ?? IS_OPERATOR
+                    ? (dataProvider.queryMatch.operator ?? IS_OPERATOR)
+                    : (group[0].queryMatch.operator ?? IS_OPERATOR)
                 }
                 register={dataProvider}
                 providerId={index > 0 ? group[0].id : dataProvider.id}

@@ -153,7 +153,7 @@ const createMockWorkflowsManagement = ({
       ) => lookups.map(() => ({ status: 'fulfilled' as const, value: workflows }))
     ),
     getClient: jest.fn(() => ({ bulkScheduleWorkflow })),
-  } as unknown as jest.Mocked<WorkflowsServerPluginSetup['management']>);
+  }) as unknown as jest.Mocked<WorkflowsServerPluginSetup['management']>;
 
 function buildDispatcherService(deps: {
   queryService: QueryServiceContract;
@@ -175,7 +175,11 @@ function buildDispatcherService(deps: {
     ),
     new FetchSuppressionsStep(deps.queryService),
     new ApplySuppressionStep(),
-    new HydrateAlertDataStep(deps.queryService),
+    new HydrateAlertDataStep(
+      deps.queryService,
+      createDispatcherConfigService(),
+      createDispatcherTelemetryMock()
+    ),
     new FetchRulesStep(deps.rulesSoService),
     new ApplyMaintenanceWindowStep(deps.maintenanceWindowService),
     new FetchPoliciesStep(deps.npSoService),

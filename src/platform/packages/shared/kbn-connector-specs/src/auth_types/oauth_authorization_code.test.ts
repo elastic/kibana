@@ -27,7 +27,7 @@ const makeCtx = (getToken: jest.Mock): AuthContext =>
     getToken,
     proxySettings: undefined,
     sslSettings: { verificationMode: 'full' as const },
-  } as unknown as AuthContext);
+  }) as unknown as AuthContext;
 
 describe('OAuthAuthorizationCode.configure', () => {
   describe('tokenEndpointAuthMethod based on useBasicAuth', () => {

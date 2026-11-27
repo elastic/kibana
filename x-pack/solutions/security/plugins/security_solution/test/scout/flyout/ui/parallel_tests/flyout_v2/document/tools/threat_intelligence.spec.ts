@@ -77,27 +77,31 @@ spaceTest.describe(
   () => {
     let ruleName: string;
 
-    spaceTest.beforeAll(async ({ scoutSpace }) => {
+    // Playwright charges hook time to the test timeout, so the fixture is built once outside it.
+    spaceTest.beforeAll(async ({ apiServices, esClient, scoutSpace }) => {
       // A per-space threat index keeps parallel workers from reading each other's indicators.
-      const { unlabeled, raw, latest, altLabelRaw, altLabelLatest } = indexNames(scoutSpace.id);
+      const { source, unlabeled, raw, latest, altLabelRaw, altLabelLatest } = indexNames(
+        scoutSpace.id
+      );
       await scoutSpace.uiSettings.set({
         [THREAT_INDEX_SETTING]: [unlabeled, raw, latest, altLabelRaw, altLabelLatest],
       });
-    });
 
-    spaceTest.beforeEach(async ({ browserAuth, apiServices, esClient, scoutSpace }) => {
       await createThreatIntelFixture(esClient, apiServices, scoutSpace.id);
 
       ruleName = `${CUSTOM_QUERY_RULE.name}_${scoutSpace.id}_${Date.now()}`;
       await apiServices.detectionRule.createCustomQueryRule({
         ...CUSTOM_QUERY_RULE,
         name: ruleName,
-        index: [indexNames(scoutSpace.id).source],
+        index: [source],
       });
+    });
+
+    spaceTest.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsPlatformEngineer();
     });
 
-    spaceTest.afterEach(async ({ apiServices, esClient, scoutSpace }) => {
+    spaceTest.afterAll(async ({ apiServices, esClient, scoutSpace }) => {
       await apiServices.detectionRule.deleteAll();
       await apiServices.detectionAlerts.deleteAll();
       const { source, unlabeled, raw, latest, altLabelRaw, altLabelLatest } = indexNames(
@@ -107,9 +111,6 @@ spaceTest.describe(
         index: [source, unlabeled, raw, latest, altLabelRaw, altLabelLatest],
         ignore_unavailable: true,
       });
-    });
-
-    spaceTest.afterAll(async ({ scoutSpace }) => {
       await scoutSpace.uiSettings.unset(THREAT_INDEX_SETTING);
     });
 

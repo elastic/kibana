@@ -54,6 +54,42 @@ apiTest.describe('Bulk create rules API', { tag: testData.API_ENGINE_TAG }, () =
     expect(stored.items).toHaveLength(2);
   });
 
+  apiTest('create: items default to enabled unless enabled=false', async ({ apiClient }) => {
+    const response = await apiClient.post(BULK_CREATE_URL, {
+      headers: writerHeaders,
+      body: {
+        items: [
+          buildCreateRuleData({ metadata: { name: 'bulk-default' } }),
+          { ...buildCreateRuleData({ metadata: { name: 'bulk-off' } }), enabled: false },
+        ],
+      },
+    });
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.errors).toStrictEqual([]);
+
+    const enabledByName = Object.fromEntries(
+      response.body.items.map((rule: { metadata: { name: string }; enabled: boolean }) => [
+        rule.metadata.name,
+        rule.enabled,
+      ])
+    );
+    expect(enabledByName).toStrictEqual({ 'bulk-default': true, 'bulk-off': false });
+  });
+
+  apiTest(
+    'validation: rejects a non-boolean enabled, like single create',
+    async ({ apiClient }) => {
+      const response = await apiClient.post(BULK_CREATE_URL, {
+        headers: writerHeaders,
+        body: {
+          items: [{ ...buildCreateRuleData({ metadata: { name: 'bad-enabled' } }), enabled: 'no' }],
+        },
+      });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
+    }
+  );
+
   apiTest(
     'create: should report RULE_ALREADY_EXISTS for colliding ids and still create the rest',
     async ({ apiClient, apiServices }) => {
@@ -82,6 +118,36 @@ apiTest.describe('Bulk create rules API', { tag: testData.API_ENGINE_TAG }, () =
       expect(response.body.errors[0]).toMatchObject({
         id: 'existing-bulk-id',
         error: { code: 'RULE_ALREADY_EXISTS' },
+      });
+    }
+  );
+
+  apiTest(
+    'create: should report BUILDER_TYPE_UNKNOWN per item under 200 and still create the rest',
+    async ({ apiClient }) => {
+      const response = await apiClient.post(BULK_CREATE_URL, {
+        headers: writerHeaders,
+        body: {
+          items: [
+            {
+              ...buildCreateRuleData({
+                metadata: { name: 'unknown-builder', builder: { type: 'not-a-builder' } },
+              }),
+              id: 'bulk-unknown-builder',
+            },
+            buildCreateRuleData({
+              metadata: { name: 'known-builder', builder: { type: 'threshold' } },
+            }),
+          ],
+        },
+      });
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.items).toHaveLength(1);
+      expect(response.body.items[0].metadata.name).toBe('known-builder');
+      expect(response.body.errors).toHaveLength(1);
+      expect(response.body.errors[0]).toMatchObject({
+        id: 'bulk-unknown-builder',
+        error: { code: 'BUILDER_TYPE_UNKNOWN' },
       });
     }
   );

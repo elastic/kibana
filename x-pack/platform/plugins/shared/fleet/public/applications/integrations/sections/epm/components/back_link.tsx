@@ -60,8 +60,8 @@ export function BackLink({ queryParams, integrationsPath, collectionTitle }: Pro
         values: { collectionTitle: resolvedCollectionTitle },
       })
     : !returnPath || returnPath.includes('/configurations/integrations')
-    ? BACK_TO_INTEGRATIONS
-    : BACK_TO_SELECTION;
+      ? BACK_TO_INTEGRATIONS
+      : BACK_TO_SELECTION;
 
   const hasReturnParams = Boolean(returnAppId && returnPath);
 

@@ -17,7 +17,7 @@ const createConfigurationUtilities = (isEarsExperimentalEnabled = false) =>
     getWebhookSettings: () => ({ ssl: { pfx: { enabled: true } } }),
     isEarsEnabled: () => false,
     isEarsExperimentalEnabled: () => isEarsExperimentalEnabled,
-  } as unknown as ActionsConfigurationUtilities);
+  }) as unknown as ActionsConfigurationUtilities;
 
 const stubWithAction = createSpec({
   metadata: {

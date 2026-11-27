@@ -212,6 +212,71 @@ apiTest.describe.serial(
       }
     );
 
+    // The scope resolves with `ignore_unavailable`, so a concrete unqualified name that exists on
+    // the linked project only is kept, and one that exists nowhere is dropped from the search.
+    apiTest(
+      'keeps a concrete unqualified name that only the linked project has',
+      async ({ apiClient }) => {
+        await setDefaultIndexInSpace({
+          apiClient,
+          headers: adminHeaders,
+          spaceId: SPACE,
+          patterns: [LINKED_ONLY_STREAM],
+        });
+        try {
+          const response = await apiClient.get(spaceUrl(HUNT_INDEX_SCOPE_URL, SPACE), {
+            headers: adminHeaders,
+            responseType: 'json',
+          });
+
+          expect(response.statusCode).toBe(200);
+          const scope = response.body as HuntIndexScopeResponse;
+          expect(scope.status).not.toBe('blocked');
+          expect(scope.index_patterns).toContain(LINKED_ONLY_STREAM);
+          expect(scope.missing).not.toContain(LINKED_ONLY_STREAM);
+        } finally {
+          await setDefaultIndexInSpace({
+            apiClient,
+            headers: adminHeaders,
+            spaceId: SPACE,
+            patterns: ['logs-*', CUSTOM_PATTERN],
+          });
+        }
+      }
+    );
+
+    apiTest(
+      'keeps an absent concrete name in the list instead of blocking the scope',
+      async ({ apiClient }) => {
+        const absent = `custom-absent-cps-${RUN}`;
+        await setDefaultIndexInSpace({
+          apiClient,
+          headers: adminHeaders,
+          spaceId: SPACE,
+          patterns: ['logs-*', absent],
+        });
+        try {
+          const response = await apiClient.get(spaceUrl(HUNT_INDEX_SCOPE_URL, SPACE), {
+            headers: adminHeaders,
+            responseType: 'json',
+          });
+
+          expect(response.statusCode).toBe(200);
+          const scope = response.body as HuntIndexScopeResponse;
+          expect(scope.status).not.toBe('blocked');
+          expect(scope.missing).toContain(absent);
+          expect(scope.index_patterns).toContain(absent);
+        } finally {
+          await setDefaultIndexInSpace({
+            apiClient,
+            headers: adminHeaders,
+            spaceId: SPACE,
+            patterns: ['logs-*', CUSTOM_PATTERN],
+          });
+        }
+      }
+    );
+
     // The fix honours the space setting rather than fanning out everywhere: with origin-only
     // routing the resolve still fails with `no_matching_project_exception`.
     apiTest(

@@ -58,7 +58,12 @@ export const registerCompareExperimentsRoute = ({
       },
       async (context, request, response) => {
         try {
-          const { type, baseline_id: idBaseline, target_id: idTarget } = request.query;
+          const {
+            type,
+            baseline_id: idBaseline,
+            target_id: idTarget,
+            repetition_policy: repetitionPolicy,
+          } = request.query;
 
           if (idBaseline === idTarget) {
             return response.badRequest({
@@ -93,11 +98,11 @@ export const registerCompareExperimentsRoute = ({
           const totalHitsBaseline =
             typeof responseBaseline.hits.total === 'number'
               ? responseBaseline.hits.total
-              : responseBaseline.hits.total?.value ?? 0;
+              : (responseBaseline.hits.total?.value ?? 0);
           const totalHitsTarget =
             typeof responseTarget.hits.total === 'number'
               ? responseTarget.hits.total
-              : responseTarget.hits.total?.value ?? 0;
+              : (responseTarget.hits.total?.value ?? 0);
           const truncatedBaseline = totalHitsBaseline > MAX_SCORES_PER_EXPERIMENT;
           const truncatedTarget = totalHitsTarget > MAX_SCORES_PER_EXPERIMENT;
 
@@ -136,6 +141,7 @@ export const registerCompareExperimentsRoute = ({
               body: {
                 results: [],
                 pairing: {
+                  repetitionPolicy,
                   totalPairs: 0,
                   skippedMissingPairs: 0,
                   skippedNullScores: 0,
@@ -154,21 +160,33 @@ export const registerCompareExperimentsRoute = ({
             overlappingSet.has(s.example.dataset.id)
           );
 
-          const { pairs, skippedMissingPairs, skippedNullScores } = pairScores(
-            filteredTarget,
-            filteredBaseline
-          );
-          const results = compareScores(pairs);
+          const { pairs, skippedMissingPairs, skippedNullScores, rejectedSlices, repetitions } =
+            pairScores(filteredTarget, filteredBaseline, repetitionPolicy);
+
+          if (pairs.length === 0 && rejectedSlices.length > 0) {
+            const names = rejectedSlices.map((s) => `${s.datasetName} / ${s.evaluatorName}`);
+            return response.badRequest({
+              body: {
+                message: `repetition_policy=median needs scores in [0, 1]. Every paired slice has a score outside that range: ${names.join(
+                  ', '
+                )}.`,
+              },
+            });
+          }
+
+          const results = compareScores(pairs, repetitions);
 
           return response.ok({
             body: {
               results,
               pairing: {
+                repetitionPolicy,
                 totalPairs: pairs.length,
                 skippedMissingPairs,
                 skippedNullScores,
                 truncatedBaseline,
                 truncatedTarget,
+                ...(rejectedSlices.length > 0 && { rejectedSlices }),
               },
             },
           });

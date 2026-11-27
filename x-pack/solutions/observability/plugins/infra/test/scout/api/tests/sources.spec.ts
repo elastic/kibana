@@ -114,6 +114,7 @@ apiTest.describe(
         expect(configuration?.metricAlias).toBe('metrics-*');
         expect(configuration?.anomalyThreshold).toBe(50);
         expect(status?.metricIndicesExist).toBe(true);
+        expect(status?.metricIndicesStatus).toBe('available');
       }
     );
 
@@ -146,6 +147,7 @@ apiTest.describe(
         expect(updatedAt ?? 0).toBeGreaterThan(createdAt || 0);
         expect(configuration?.metricAlias).toBe('metrics-*');
         expect(status?.metricIndicesExist).toBe(true);
+        expect(status?.metricIndicesStatus).toBe('available');
       }
     );
 
@@ -168,6 +170,7 @@ apiTest.describe(
       expect(body.source.configuration?.metricAlias).toBe(DEFAULT_METRIC_ALIAS);
       expect(body.source.status).toBeDefined();
       expect(body.source.status?.metricIndicesExist).toBe(true);
+      expect(body.source.status?.metricIndicesStatus).toBe('available');
     });
 
     apiTest('GET source hasData by id should just work', async ({ apiClient }) => {

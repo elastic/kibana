@@ -54,7 +54,7 @@ describe('createSignificantEventSmlType', () => {
     jest
       .mocked(RuleEventsClient)
       .mockImplementation(
-        () => ({ findLatestPaginated, findLatestByEventId } as unknown as RuleEventsClient)
+        () => ({ findLatestPaginated, findLatestByEventId }) as unknown as RuleEventsClient
       );
   });
 

@@ -54,7 +54,7 @@ import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import {
   EntitySourceValue,
   toEntitySourceArray,
-} from '../../../../flyout/entity_details/shared/components/entity_source_value';
+} from '../../../../flyout_v2/entity/shared/components/entity_source_value';
 
 import type { CriticalityLevelWithUnassigned } from '../../../../../common/entity_analytics/asset_criticality/types';
 import { AssetCriticalityBadge } from '../../asset_criticality';
@@ -266,11 +266,14 @@ export const EntitiesDataTable = ({
   const [persistedSettings, setPersistedSettings] = useLocalStorage<UnifiedDataTableSettings>(
     columnsSettingsLocalStorageKey,
     {
-      columns: DEFAULT_COLUMNS.reduce((columnSettings, column) => {
-        const columnDefaultSettings = column.width ? { width: column.width } : {};
-        const newColumn = { [column.id]: columnDefaultSettings };
-        return { ...columnSettings, ...newColumn };
-      }, {} as UnifiedDataTableSettings['columns']),
+      columns: DEFAULT_COLUMNS.reduce(
+        (columnSettings, column) => {
+          const columnDefaultSettings = column.width ? { width: column.width } : {};
+          const newColumn = { [column.id]: columnDefaultSettings };
+          return { ...columnSettings, ...newColumn };
+        },
+        {} as UnifiedDataTableSettings['columns']
+      ),
     }
   );
 

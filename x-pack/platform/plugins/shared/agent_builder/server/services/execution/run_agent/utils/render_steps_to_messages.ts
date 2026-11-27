@@ -18,7 +18,9 @@ import type {
 import {
   isAskUserQuestionStep,
   isBackgroundAgentCompleteStep,
+  isDeliveredMessageStep,
   isInjectedContextStep,
+  isInterimAnswerStep,
   isPreExecutionWorkflowStep,
   isReasoningStep,
   isRelevantSkillsStep,
@@ -37,6 +39,7 @@ import { generateXmlTree } from '@kbn/agent-builder-genai-utils/tools/utils/form
 import type { HandoverParams, PromptImageResolver } from '../prompts/types';
 import {
   createCycleLimitSystemMessage,
+  formatDeliveredMessageNotice,
   formatHandover,
   formatRetryNotice,
   formatSubagentRosterNotice,
@@ -440,6 +443,10 @@ const renderSteps = async (
     }
     if (isBackgroundAgentCompleteStep(step)) {
       messages.push(createUserMessage(formatSystemNotice(step)));
+    } else if (isDeliveredMessageStep(step)) {
+      messages.push(createUserMessage(formatDeliveredMessageNotice(step)));
+    } else if (isInterimAnswerStep(step)) {
+      messages.push(new AIMessage({ content: step.message }));
     } else if (isSubagentRosterUpdatedStep(step)) {
       messages.push(createUserMessage(formatSubagentRosterNotice(step.roster)));
     } else if (isRelevantSkillsStep(step)) {

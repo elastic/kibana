@@ -17,6 +17,7 @@
 
 import { useMemo } from 'react';
 import type { estypes } from '@elastic/elasticsearch';
+import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
@@ -392,7 +393,9 @@ const buildEcsQuery = (args: KpiQueryArgs): string | undefined => {
 };
 
 // Pull each KEEP column by name (not position); all-nulls for an empty response.
-export const parseKpiRow = (response: estypes.EsqlAsyncQueryResponse): HostsKpis => {
+export const parseKpiRow = (
+  response: Pick<ESQLSearchResponse, 'columns' | 'values'>
+): HostsKpis => {
   const columns = response.columns ?? [];
   const row = response.values?.[0];
   if (!row || columns.length === 0) {
@@ -512,7 +515,7 @@ export const useHostsKpisEsql = (): UseHostsKpisResult => {
   const hasQuery = Boolean(esqlQuery);
 
   return {
-    kpis: hasQuery ? result ?? EMPTY_KPIS : EMPTY_KPIS,
+    kpis: hasQuery ? (result ?? EMPTY_KPIS) : EMPTY_KPIS,
     loading,
     error: hasQuery ? error : undefined,
   };

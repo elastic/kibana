@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { AddConnectorFlyout } from './add_connector_flyout';
 import {
   actionType,
@@ -37,6 +37,27 @@ const setup = (options: Parameters<typeof mockKibanaServices>[0] = {}) => {
 };
 
 describe('AddConnectorFlyout', () => {
+  const originalInnerWidth = window.innerWidth;
+
+  afterEach(() => {
+    window.innerWidth = originalInnerWidth;
+  });
+
+  it('labels the create action with text on a desktop', async () => {
+    setup();
+
+    expect(await screen.findByTestId('.http-create')).toHaveTextContent('Create connector');
+  });
+
+  it('shrinks the create action to an icon on a phone, keeping its accessible name', async () => {
+    window.innerWidth = 390;
+    setup();
+
+    const createButton = await screen.findByTestId('.http-create');
+    expect(createButton).not.toHaveTextContent('Create connector');
+    expect(createButton).toHaveAttribute('aria-label', expect.stringContaining('Create connector'));
+  });
+
   it('lists the sandbox-capable types with how many connectors each has', async () => {
     setup();
 
@@ -131,9 +152,11 @@ describe('AddConnectorFlyout', () => {
     expect(await screen.findByTestId('addConnectorFlyoutStub')).toBeInTheDocument();
     const props = (getAddConnectorFlyout.mock.calls as unknown as Array<[unknown]>)[0][0] as {
       initialConnector: { actionTypeId: string };
+      onTestConnector: unknown;
       onConnectorCreated: (connector: { id: string; name: string }) => void;
     };
     expect(props.initialConnector).toEqual({ actionTypeId: '.github' });
+    expect(props.onTestConnector).toEqual(expect.any(Function));
     props.onConnectorCreated({ id: 'gh', name: 'gh' });
     await waitFor(() =>
       expect(agents.addConnectorToAgent).toHaveBeenCalledWith({
@@ -144,10 +167,39 @@ describe('AddConnectorFlyout', () => {
     expect(screen.getByTestId('nightshiftAddConnectorFlyout')).toBeInTheDocument();
   });
 
+  it('opens the type of a created connector instead of confirming with a toast', async () => {
+    const { getAddConnectorFlyout, agents, toasts } = setup();
+    await waitFor(() => expect(screen.getByTestId('.http-create')).toBeEnabled());
+    expect(screen.getByTestId('.http-toggle')).toHaveAttribute('aria-expanded', 'false');
+
+    fireEvent.click(screen.getByTestId('.http-create'));
+
+    expect(await screen.findByTestId('addConnectorFlyoutStub')).toBeInTheDocument();
+    const calls = getAddConnectorFlyout.mock.calls as unknown as Array<
+      [{ onConnectorCreated: (connector: { id: string; name: string }) => void }]
+    >;
+    act(() => calls[calls.length - 1][0].onConnectorCreated({ id: 'h3', name: 'h3' }));
+    await waitFor(() => expect(agents.addConnectorToAgent).toHaveBeenCalled());
+
+    await waitFor(() =>
+      expect(screen.getByTestId('.http-toggle')).toHaveAttribute('aria-expanded', 'true')
+    );
+    expect(toasts.addSuccess).not.toHaveBeenCalled();
+  });
+
   it('locks Create connector without permission to create connectors', async () => {
     setup({ capabilities: { show: true, save: false, delete: true } });
 
     expect(await screen.findByTestId('.github-create')).toBeDisabled();
+    expect(screen.queryByTestId('.github-createDisabledReason')).not.toBeInTheDocument();
+  });
+
+  it('spells out why Create connector is locked on a phone, where there is no hover', async () => {
+    window.innerWidth = 390;
+    setup({ capabilities: { show: true, save: false, delete: true } });
+
+    expect(await screen.findByTestId('.github-create')).toBeDisabled();
+    expect(screen.getByTestId('.github-createDisabledReason')).toBeVisible();
   });
 
   it('locks Enable when the user cannot edit the agent', async () => {

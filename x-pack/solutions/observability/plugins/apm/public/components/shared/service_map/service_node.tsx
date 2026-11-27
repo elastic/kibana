@@ -28,7 +28,8 @@ import {
   IDLE_NODE_OPACITY,
   NODE_BORDER_WIDTH_DEFAULT,
   NODE_BORDER_WIDTH_SELECTED,
-  SERVICE_NODE_CIRCLE_SIZE,
+  NODE_LABEL_MAX_WIDTH,
+  SERVICE_NODE_SIZE,
 } from '../../../../common/service_map/constants';
 import { asDuration, asPercent } from '../../../../common/utils/formatters';
 import { NodeLabel } from './node_label';
@@ -73,8 +74,8 @@ export const ServiceNode = memo(
         borderColor: hasScore
           ? getSeverityColor(score)
           : selected
-          ? euiTheme.colors.primary
-          : euiTheme.colors.mediumShade,
+            ? euiTheme.colors.primary
+            : euiTheme.colors.mediumShade,
         borderWidth: selected
           ? `${NODE_BORDER_WIDTH_SELECTED}px`
           : `${NODE_BORDER_WIDTH_DEFAULT}px`,
@@ -154,8 +155,8 @@ export const ServiceNode = memo(
 
     const containerStyles = css`
       position: relative;
-      width: ${SERVICE_NODE_CIRCLE_SIZE}px;
-      height: ${SERVICE_NODE_CIRCLE_SIZE}px;
+      width: ${SERVICE_NODE_SIZE}px;
+      height: ${SERVICE_NODE_SIZE}px;
     `;
 
     const handleStyles = css`
@@ -163,8 +164,8 @@ export const ServiceNode = memo(
     `;
 
     const circleStyles = css`
-      width: ${SERVICE_NODE_CIRCLE_SIZE}px;
-      height: ${SERVICE_NODE_CIRCLE_SIZE}px;
+      width: ${SERVICE_NODE_SIZE}px;
+      height: ${SERVICE_NODE_SIZE}px;
       border-radius: 50%;
       border: ${borderWidth} solid ${borderColor};
       background: ${euiTheme.colors.backgroundBasePlain};
@@ -176,19 +177,21 @@ export const ServiceNode = memo(
       cursor: ${isInteractive ? 'pointer' : 'default'};
       pointer-events: all;
 
-      ${isInteractive &&
-      css`
-        &:focus-visible {
-          outline: ${euiTheme.border.width.thick} solid ${euiTheme.colors.primary};
-          outline-offset: ${euiTheme.size.xxs};
-        }
+      ${
+        isInteractive &&
+        css`
+          &:focus-visible {
+            outline: ${euiTheme.border.width.thick} solid ${euiTheme.colors.primary};
+            outline-offset: ${euiTheme.size.xxs};
+          }
 
-        [data-id]:focus &,
-        [data-id]:focus-visible & {
-          outline: ${euiTheme.border.width.thick} solid ${euiTheme.colors.primary};
-          outline-offset: ${euiTheme.size.xxs};
-        }
-      `}
+          [data-id]:focus &,
+          [data-id]:focus-visible & {
+            outline: ${euiTheme.border.width.thick} solid ${euiTheme.colors.primary};
+            outline-offset: ${euiTheme.size.xxs};
+          }
+        `
+      }
     `;
 
     const iconStyles = css`
@@ -200,7 +203,7 @@ export const ServiceNode = memo(
 
     const badgesRowStyles = css`
       pointer-events: none;
-      max-width: 220px;
+      max-width: ${NODE_LABEL_MAX_WIDTH}px;
       justify-content: center;
     `;
 
@@ -248,7 +251,7 @@ export const ServiceNode = memo(
             >
               {showStats ? (
                 <FailureRing
-                  size={SERVICE_NODE_CIRCLE_SIZE - 2 * NODE_BORDER_WIDTH_SELECTED}
+                  size={SERVICE_NODE_SIZE - 2 * NODE_BORDER_WIDTH_SELECTED}
                   failedRate={data.stats?.failedTransactionRate}
                   requestCount={data.stats?.requestCount}
                 >

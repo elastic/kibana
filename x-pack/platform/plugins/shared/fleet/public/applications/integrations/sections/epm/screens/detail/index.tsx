@@ -34,6 +34,7 @@ import { appendReturnParams } from '../../components/return_params';
 import {
   ADD_INTEGRATION_CONFIGURABLE_PACKAGES,
   isAssetOnlyIntegrationPackage,
+  isPackageFipsIncompatible,
   isPackagePrerelease,
   splitPkgKey,
   packageToPackagePolicyInputs,
@@ -184,6 +185,7 @@ export function Detail() {
 
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isCustomPackage, setIsCustomPackage] = useState(false);
+  const [isFipsIncompatiblePackage, setIsFipsIncompatiblePackage] = useState(false);
 
   // Package info state
   const [packageInfo, setPackageInfo] = useState<PackageInfo | null>(null);
@@ -231,10 +233,12 @@ export function Detail() {
         ? AddIntegrationButtonDisabledReason.VERSION_MISMATCH
         : AddIntegrationButtonDisabledReason.OUTDATED_VERSION
       : !userCanInstallPackages
-      ? missingSecurityConfiguration
-        ? AddIntegrationButtonDisabledReason.MISSING_SECURITY
-        : AddIntegrationButtonDisabledReason.MISSING_PRIVILEGES
-      : undefined;
+        ? missingSecurityConfiguration
+          ? AddIntegrationButtonDisabledReason.MISSING_SECURITY
+          : AddIntegrationButtonDisabledReason.MISSING_PRIVILEGES
+        : isFipsIncompatiblePackage
+          ? AddIntegrationButtonDisabledReason.FIPS_INCOMPATIBLE
+          : undefined;
 
   // A preselected agent policy stays on the Fleet wizard, which is the only flow that can
   // honour it.
@@ -382,6 +386,11 @@ export function Detail() {
             }
           : packageInfoResponse;
       setPackageInfo(filteredPackageInfo);
+      // computed on the unfiltered response: the filter above strips the non FIPS templates
+      setIsFipsIncompatiblePackage(
+        !!isFipsEnabled &&
+          isPackageFipsIncompatible(packageInfoResponse.policy_templates, packageInfoResponse.name)
+      );
       setIsCustomPackage(
         (packageInfoResponse?.installationInfo?.install_source &&
           CUSTOM_INTEGRATION_SOURCES.includes(
@@ -424,10 +433,10 @@ export function Detail() {
   const baseIntegrationsPath = fromCollection
     ? getPath('integration_collection', { groupId: fromCollection.groupId })
     : fromIntegrations === 'updates_available'
-    ? getPath('integrations_installed_updates_available')
-    : fromIntegrations === 'installed'
-    ? getPath('integrations_installed')
-    : getPath('integrations_all');
+      ? getPath('integrations_installed_updates_available')
+      : fromIntegrations === 'installed'
+        ? getPath('integrations_installed')
+        : getPath('integrations_all');
 
   const fromIntegrationsPath = fromCollection
     ? baseIntegrationsPath
@@ -447,8 +456,8 @@ export function Detail() {
     const installedSpaceId = pkgInstallationInfo?.installed_kibana_space_id;
     const kibanaAssets =
       !installedSpaceId || installedSpaceId === spaceId
-        ? pkgInstallationInfo?.installed_kibana ?? []
-        : pkgInstallationInfo?.additional_spaces_installed_kibana?.[spaceId ?? 'default'] ?? [];
+        ? (pkgInstallationInfo?.installed_kibana ?? [])
+        : (pkgInstallationInfo?.additional_spaces_installed_kibana?.[spaceId ?? 'default'] ?? []);
     return kibanaAssets.filter((a) => a.type === KibanaSavedObjectType.alert && a.deferred === true)
       .length;
   }, [pkgInstallationInfo, spaceId]);
@@ -790,7 +799,7 @@ export function Detail() {
                   ]),
             ].map((item, index) => (
               <EuiFlexItem grow={false} key={index} data-test-subj={item['data-test-subj']}>
-                {item.isDivider ?? false ? (
+                {(item.isDivider ?? false) ? (
                   <Divider data-test-subj="headerDivider" />
                 ) : item.label ? (
                   <EuiDescriptionList className="eui-textRight" compressed textStyle="reverse">
@@ -1025,12 +1034,42 @@ export function Detail() {
     </>
   ) : undefined;
 
+  const fipsCallout = isFipsIncompatiblePackage ? (
+    <>
+      <KbnWarningCallout
+        announceOnMount
+        title={
+          <FormattedMessage
+            id="xpack.fleet.epm.packageDetailsFipsIncompatibleCalloutTitle"
+            defaultMessage="This integration is not FIPS compliant"
+          />
+        }
+        text={
+          <FormattedMessage
+            id="xpack.fleet.epm.packageDetailsFipsIncompatibleCalloutDescription"
+            defaultMessage="It cannot be added on a FIPS-enabled deployment. Existing integration policies will fail to deploy and can be deleted."
+          />
+        }
+        data-test-subj="fipsIncompatibleCallout"
+      />
+      <EuiSpacer />
+    </>
+  ) : undefined;
+
+  const topContent =
+    securityCallout || fipsCallout ? (
+      <>
+        {securityCallout}
+        {fipsCallout}
+      </>
+    ) : undefined;
+
   return (
     <WithHeaderLayout
       leftColumn={headerLeftContent}
       rightColumn={headerRightContent}
       rightColumnGrow={false}
-      topContent={securityCallout}
+      topContent={topContent}
       tabs={headerTabs}
       tabsCss={`
         margin-left: calc(${getIconPanelWidth(theme.euiTheme.size.base, theme.euiTheme.size.xl)}px +

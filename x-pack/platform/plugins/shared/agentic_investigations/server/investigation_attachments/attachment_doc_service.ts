@@ -66,7 +66,7 @@ export interface WrittenInvestigationAttachment<TStored extends StoredInvestigat
 }
 
 export interface InvestigationAttachmentDocServiceOptions<
-  TStored extends StoredInvestigationAttachment
+  TStored extends StoredInvestigationAttachment,
 > {
   /** Agent Builder attachment type, used in error messages. */
   type: string;

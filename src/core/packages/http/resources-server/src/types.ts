@@ -28,11 +28,6 @@ export interface HttpResourcesRenderOptions {
    * All HTML pages are already pre-configured with `content-security-policy` header that cannot be overridden.
    * */
   headers?: ResponseHeaders;
-  /**
-   * @internal
-   * This is only used for integration tests that allow us to verify which config keys are exposed to the browser.
-   */
-  includeExposedConfigKeys?: boolean;
 }
 
 /**
@@ -89,7 +84,7 @@ export type HttpResourcesRequestHandler<
   P = unknown,
   Q = unknown,
   B = unknown,
-  Context extends RequestHandlerContext = RequestHandlerContext
+  Context extends RequestHandlerContext = RequestHandlerContext,
 > = RequestHandler<P, Q, B, Context, 'get', KibanaResponseFactory & HttpResourcesServiceToolkit>;
 
 /**

@@ -39,14 +39,17 @@ import {
   useFitToContent,
   ReBroadcastMouseDownEvents,
   usePersistHoverContentWidget,
+  FullScreenDisplay,
   globalMonacoStyleOverrides,
 } from './mods';
 import { styles } from './editor.styles';
 
 export type { CodeEditorScope };
 
-export interface CodeEditorProps
-  extends Pick<ReactMonacoEditorProps, 'overflowWidgetsContainerZIndexOverride'> {
+export interface CodeEditorProps extends Pick<
+  ReactMonacoEditorProps,
+  'overflowWidgetsContainerZIndexOverride'
+> {
   /** Width of editor. Defaults to 100%. */
   width?: string | number;
 
@@ -310,10 +313,9 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       : ReactMonacoEditor;
   }, []);
 
-  const { FullScreenDisplay, FullScreenButton, isFullScreen, setIsFullScreen, onKeyDown } =
-    useFullScreen({
-      allowFullScreen,
-    });
+  const { FullScreenButton, isFullScreen, setIsFullScreen, onKeyDown } = useFullScreen({
+    allowFullScreen,
+  });
 
   const persistHoverContentWidget = usePersistHoverContentWidget();
   const wireHoverContentPersistence = useCallback(
@@ -689,7 +691,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       <Global styles={globalMonacoStyleOverrides} />
       {scopedStyles !== undefined && <Global styles={scopedStyles} />}
       {accessibilityOverlayEnabled && renderPrompt()}
-      <FullScreenDisplay>
+      <FullScreenDisplay isFullScreen={isFullScreen}>
         {allowFullScreen || isCopyable ? (
           <div
             css={

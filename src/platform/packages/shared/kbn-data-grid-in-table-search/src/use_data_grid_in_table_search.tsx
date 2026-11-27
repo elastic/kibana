@@ -22,14 +22,16 @@ import { getActiveMatchCss } from './get_active_match_css';
 
 export type InTableSearchScrollToCell = UseInTableSearchControlProps['scrollToCell'];
 
-export interface UseDataGridInTableSearchProps
-  extends Pick<UseInTableSearchControlProps, 'rows' | 'visibleColumns'> {
+export interface UseDataGridInTableSearchProps extends Pick<
+  UseInTableSearchControlProps,
+  'rows' | 'visibleColumns'
+> {
   enableInTableSearch?: boolean;
   dataGridWrapper: HTMLElement | null;
   dataGridRef: React.RefObject<EuiDataGridRefProps | null>;
   /**
-   * Overrides how the grid is scrolled to the active match. Required when the grid uses
-   * `renderCustomGridBody`, since EUI's `scrollToItem` is a no-op without its virtualized body.
+   * Overrides how the grid scrolls to the active in-table search match. Provide this together with
+   * `renderCustomGridBody`, since EUI's built-in `scrollToItem` only works with its own virtualized body.
    */
   scrollToCell?: InTableSearchScrollToCell;
   /** Additional hosts containing table controls rendered outside the grid wrapper. */
@@ -135,7 +137,7 @@ export const useDataGridInTableSearch = (
     (element: HTMLElement) =>
       Boolean(
         dataGridWrapper?.contains(element) ||
-          additionalSearchScopeElements?.some((scope) => scope.contains(element))
+        additionalSearchScopeElements?.some((scope) => scope.contains(element))
       ),
     [dataGridWrapper, additionalSearchScopeElements]
   );

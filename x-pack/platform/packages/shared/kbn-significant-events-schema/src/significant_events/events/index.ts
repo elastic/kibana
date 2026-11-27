@@ -30,6 +30,13 @@ export const operatorFallbackAssessmentNote = (status: 'active' | 'inactive'): s
     values: { status },
   });
 
+/** Note recorded when an event takes the severity its investigation gave it. */
+export const severitySyncAssessmentNote = (severity: string): string =>
+  i18n.translate('xpack.significantEvents.events.severitySyncAssessmentNote', {
+    defaultMessage: 'Severity set to {severity} by its investigation.',
+    values: { severity },
+  });
+
 export const SIGNIFICANT_EVENT_STATUS_OPTIONS = [
   ALERT_EPISODE_STATUS.ACTIVE,
   ALERT_EPISODE_STATUS.RECOVERING,

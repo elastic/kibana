@@ -207,7 +207,7 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
         : {}),
       searchQuery: buildEsQuery(
         dataView,
-        isEsqlQuery ? [] : query ?? [],
+        isEsqlQuery ? [] : (query ?? []),
         filters,
         uiSettings ? getEsQueryConfig(uiSettings) : undefined
       ),
@@ -269,6 +269,8 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
     BAR_TARGET,
     undefined,
     panelTimeRange,
+    undefined,
+    undefined,
     undefined,
     esqlDocumentScope,
     MAX_HISTOGRAM_BARS
@@ -437,7 +439,7 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
               earliest,
               latest,
               intervalMs,
-              search: search.search,
+              search,
               timeRange: esTimeRange,
               filter: timeFilter,
               signal: abortSignal,
@@ -531,7 +533,7 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
     toasts,
     isEsqlQuery,
     query,
-    search.search,
+    search,
   ]);
 
   useEffect(() => {

@@ -24,9 +24,16 @@ import {
 } from './render_retry';
 
 const NOW = Date.parse('2026-10-14T12:00:00Z');
+const CLAIMED_RUN_AT = new Date(NOW - 5 * 60_000);
 const noJitter = () => 0.5;
 const decide = (error: unknown, state = {}, attempts = 1) =>
-  decideRenderRetry(error, state, { attempts, maxAttempts: 3 }, NOW, noJitter);
+  decideRenderRetry(
+    error,
+    state,
+    { attempts, maxAttempts: 3, claimedRunAt: CLAIMED_RUN_AT },
+    NOW,
+    noJitter
+  );
 
 describe('decideRenderRetry', () => {
   it('leaves errors that did not come from page-render-service to the usual handling', () => {
@@ -34,11 +41,11 @@ describe('decideRenderRetry', () => {
     expect(decide(new QueueTimeoutError())).toBeUndefined();
   });
 
-  it('hands a report waiting for capacity straight back, as queuing', () => {
+  it('hands a report waiting for capacity back at its claimed runAt, keeping its queue place', () => {
     expect(decide(new RenderServiceSaturatedError(), { unavailableRuns: 1 })).toEqual({
       action: RenderRetryAction.HAND_BACK,
       reason: RenderRetryReason.SATURATED,
-      runAt: new Date(NOW),
+      runAt: CLAIMED_RUN_AT,
       state: { unavailableRuns: 1, queued: true },
     });
   });
@@ -105,7 +112,7 @@ describe('decideRenderRetry', () => {
         decideRenderRetry(
           new RenderFailedError(),
           {},
-          { attempts: 1, maxAttempts: 3 },
+          { attempts: 1, maxAttempts: 3, claimedRunAt: CLAIMED_RUN_AT },
           NOW,
           () => random
         ) as { runAt: Date }

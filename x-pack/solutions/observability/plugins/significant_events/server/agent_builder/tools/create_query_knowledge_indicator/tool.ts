@@ -21,7 +21,8 @@ import { createSignificantEventsAvailability } from '../significant_events_avail
 import { getSourceWriteConflictMetadata } from '../../../lib/errors/source_write_conflict_error';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import { getWorkflowExecutionIdFromRequest } from '../../../lib/telemetry/ebt/workflow_execution_id';
-import { trackTelemetryBestEffort } from '../bulk_write';
+import { trackTelemetryBestEffort } from '../../../lib/telemetry/track_telemetry_best_effort';
+import { reportToolFailure, toTelemetryErrorMessage } from '../tool_failure';
 import { createQueryKnowledgeIndicatorToolHandler } from './handler';
 import {
   loadSourceCatalog,
@@ -165,12 +166,15 @@ export function createQueryKnowledgeIndicatorTool({
         };
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error';
-        logger.error(`Error running ki_query_create: ${message}`);
-        if (error instanceof Error) {
-          logger.debug(error.stack ?? error.message);
-        } else {
-          logger.debug(String(error));
-        }
+        const failure = reportToolFailure({
+          error,
+          toolId: SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_CREATE_QUERY_TOOL_ID,
+          errorLogMessage: `Error running ki_query_create: ${message}`,
+          logger,
+          telemetry,
+          request,
+          runContext: context.runContext,
+        });
 
         trackTelemetryBestEffort({
           logger,
@@ -184,8 +188,7 @@ export function createQueryKnowledgeIndicatorTool({
                 success: false,
                 source_id: sourceId,
                 space_id: request.spaceId,
-                ...(queryInput.id !== undefined ? { knowledge_indicator_id: queryInput.id } : {}),
-                error_message: message,
+                error_message: toTelemetryErrorMessage(failure, message),
               },
               request
             ),

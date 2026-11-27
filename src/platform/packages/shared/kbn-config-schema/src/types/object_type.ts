@@ -23,8 +23,8 @@ export type TypeOrLazyType = Type<any> | (() => Type<any>);
 export type TypeOf<RT extends TypeOrLazyType> = RT extends () => Type<any>
   ? ReturnType<RT>['type']
   : RT extends Type<any>
-  ? RT['type']
-  : never;
+    ? RT['type']
+    : never;
 
 type OptionalProperties<Base extends Props> = Pick<
   Base,
@@ -196,12 +196,15 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
     const extendedProps = Object.entries({
       ...this.props,
       ...newProps,
-    }).reduce((memo, [key, value]) => {
-      if (value !== null && value !== undefined) {
-        (memo as Record<string, unknown>)[key] = value;
-      }
-      return memo;
-    }, {} as ExtendedProps<P, NP>);
+    }).reduce(
+      (memo, [key, value]) => {
+        if (value !== null && value !== undefined) {
+          (memo as Record<string, unknown>)[key] = value;
+        }
+        return memo;
+      },
+      {} as ExtendedProps<P, NP>
+    );
 
     const extendedOptions = {
       ...this.options,
@@ -254,7 +257,7 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
   }
 
   validateKey(key: string, value: any) {
-    if (!this.props[key]) {
+    if (!Object.prototype.hasOwnProperty.call(this.props, key)) {
       throw new Error(`${key} is not a valid part of this schema`);
     }
     const { value: validatedValue, error } = this.props[key].getSchema().validate(value);

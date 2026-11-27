@@ -129,6 +129,29 @@ describe('FieldValueSelection', () => {
     expect(visibleOptions.find(({ label }) => label === 'b')?.append).not.toBeNull();
   });
 
+  it('uses the option tooltip as the accessible name of its info icon', () => {
+    const wrapper = mount(
+      <EuiThemeProvider>
+        <FieldValueSelection
+          label="Resource type"
+          values={[{ label: 'HTML', count: 1, tooltip: 'HTML documents' }]}
+          onChange={() => {}}
+          selectedValue={[]}
+          loading={false}
+          setQuery={() => {}}
+        />
+      </EuiThemeProvider>
+    );
+
+    wrapper.find('button[data-test-subj="fieldValueSelectionBtn"]').simulate('click');
+
+    const visibleOptions = (wrapper.find(EuiSelectableList).props() as any)
+      .visibleOptions as Array<{ label: string; append: React.ReactElement }>;
+    const iconTip = mount(<EuiThemeProvider>{visibleOptions[0].append}</EuiThemeProvider>);
+
+    expect(iconTip.find('[aria-label="HTML documents"]').exists()).toBe(true);
+  });
+
   describe('when suggestions change while the popover is open', () => {
     const renderWithValues = (suggestions: Array<{ label: string; count: number }>) => (
       <FieldValueSelection

@@ -21,6 +21,7 @@ import type {
   EmbeddableApiContext,
   HasEditCapabilities,
   HasParentApi,
+  CanCancelRequests,
   HasType,
   PublishesUnifiedSearch,
   PublishingSubject,
@@ -57,8 +58,7 @@ export type MlEmbeddableTypes =
  * Common API for all ML embeddables
  */
 export interface MlEmbeddableBaseApi<StateType extends object = object>
-  extends DefaultEmbeddableApi<StateType>,
-    PublishesTimeRange {}
+  extends DefaultEmbeddableApi<StateType>, PublishesTimeRange {}
 
 export type MlEntity = Record<string, MlEntityField['fieldValue']>;
 
@@ -70,7 +70,7 @@ export interface AnomalySwimlaneServices {
 export type AnomalySwimlaneEmbeddableServices = [
   CoreStart,
   MlDependencies,
-  AnomalySwimlaneServices
+  AnomalySwimlaneServices,
 ];
 
 export type EditSwimLaneActionApi = HasType<AnomalySwimLaneEmbeddableType> &
@@ -105,6 +105,7 @@ export interface AnomalyChartsDataLoadingApi {
 export type AnomalyChartsApi = AnomalyChartsComponentApi & AnomalyChartsDataLoadingApi;
 
 export type AnomalyChartsEmbeddableApi = MlEmbeddableBaseApi<AnomalyChartsEmbeddableState> &
+  CanCancelRequests &
   PublishesDataSources<DataView> &
   PublishesWritableTitle &
   HasEditCapabilities &
@@ -146,6 +147,7 @@ export interface AnomalyChartsAttachmentApi extends AnomalyChartsApi {
  */
 export type SingleMetricViewerEmbeddableApi =
   MlEmbeddableBaseApi<SingleMetricViewerEmbeddableState> &
+    CanCancelRequests &
     PublishesWritableTitle &
     HasEditCapabilities &
     SingleMetricViewerComponentApi;
@@ -202,7 +204,7 @@ export type AnomalyChartsEmbeddableServices = [CoreStart, MlDependencies, Anomal
 export type SingleMetricViewerEmbeddableServices = [
   CoreStart,
   MlDependencies,
-  SingleMetricViewerServices
+  SingleMetricViewerServices,
 ];
 export interface EditAnomalyChartsPanelContext {
   embeddable: AnomalyChartsEmbeddableApi;
@@ -219,5 +221,5 @@ export type MappedEmbeddableTypeOf<TEmbeddableType extends MlEmbeddableTypes> =
   TEmbeddableType extends AnomalyExplorerChartsEmbeddableType
     ? AnomalyChartsEmbeddableState
     : TEmbeddableType extends AnomalySingleMetricViewerEmbeddableType
-    ? SingleMetricViewerEmbeddableState
-    : unknown;
+      ? SingleMetricViewerEmbeddableState
+      : unknown;

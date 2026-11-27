@@ -91,6 +91,27 @@ const CODES = Object.freeze({
     }
   ),
 
+  /** `data.credentials` missing, malformed or still an unresolved secret reference */
+  'ra_get-file_error_credential': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.getFile.credentialError',
+    { defaultMessage: 'The storage credential for the export was missing or invalid' }
+  ),
+
+  /** `parameters.export` is not the id of a provider in the policy */
+  'ra_get-file_error_export-provider-not-found': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.getFile.exportProviderNotFound',
+    { defaultMessage: "The export provider was not found in the host's Elastic Defend policy" }
+  ),
+
+  /** the storage service returned 403: wrong key, expired SAS or network rules */
+  'ra_get-file_error_export-denied': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.getFile.exportDenied',
+    {
+      defaultMessage:
+        "The storage service rejected the upload. Check the export provider's account key and the storage account's network rules",
+    }
+  ),
+
   // -----------------------------------------------------------------
   // SUSPEND-PROCESS CODES
   // -----------------------------------------------------------------
@@ -530,6 +551,27 @@ const CODES = Object.freeze({
   'ra_memory-dump_error_not-enough-free-space': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.memoryDump.insufficientDiskSpaceError',
     { defaultMessage: 'Host does not have sufficient disk space to capture a memory dump' }
+  ),
+
+  // DEV: `data.credentials` missing, malformed or still an unresolved secret reference
+  'ra_memory-dump_error_credential': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.memoryDump.credentialError',
+    { defaultMessage: 'The storage credential for the export was missing or invalid' }
+  ),
+
+  // DEV: `parameters.export` is not the id of a provider in the policy
+  'ra_memory-dump_error_export-provider-not-found': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.memoryDump.exportProviderNotFound',
+    { defaultMessage: "The export provider was not found in the host's Elastic Defend policy" }
+  ),
+
+  // DEV: the storage service returned 403: wrong key, expired SAS or network rules
+  'ra_memory-dump_error_export-denied': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.memoryDump.exportDenied',
+    {
+      defaultMessage:
+        "The storage service rejected the upload. Check the export provider's account key and the storage account's network rules",
+    }
   ),
 
   // -----------------------------------------------------------------

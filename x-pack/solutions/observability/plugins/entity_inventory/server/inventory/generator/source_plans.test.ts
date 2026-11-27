@@ -86,7 +86,6 @@ describe('planSources', () => {
   it('gives a source without attributes an empty attribute list', () => {
     const [plan] = planSources(withSources([{ indexPattern: 'metrics-*' }]), [NO_TIME_SERIES]);
     expect(plan.attributes).toEqual([]);
-    expect(plan).not.toHaveProperty('filter');
   });
 
   it('throws when the probes do not match the sources', () => {
@@ -107,10 +106,9 @@ describe('planSources', () => {
 
   it(`throws when the definition expands to more than ${MAX_QUERY_PLANS} plans`, () => {
     // Built directly: the store's schema caps sources at 16, below the plan budget.
-    const sources = Array.from(
-      { length: MAX_QUERY_PLANS + 1 },
-      (_, index): DynamicSource => ({ indexPattern: `metrics-${index}-*` })
-    );
+    const sources = Array.from({ length: MAX_QUERY_PLANS + 1 }, (_, index): DynamicSource => ({
+      indexPattern: `metrics-${index}-*`,
+    }));
     const probes = sources.map(() => NO_TIME_SERIES);
     expect(() => planSources(withSources(sources), probes)).toThrow(InventoryDefinitionError);
     expect(() => planSources(withSources(sources), probes)).toThrow(
@@ -151,10 +149,9 @@ describe('planSources', () => {
 
   it('counts the plans after the split against the budget', () => {
     const half = MAX_QUERY_PLANS / 2;
-    const sources = Array.from(
-      { length: half + 1 },
-      (_, index): DynamicSource => ({ indexPattern: `metrics-${index}-*` })
-    );
+    const sources = Array.from({ length: half + 1 }, (_, index): DynamicSource => ({
+      indexPattern: `metrics-${index}-*`,
+    }));
     expect(
       planSources(
         withSources(sources.slice(0, half)),

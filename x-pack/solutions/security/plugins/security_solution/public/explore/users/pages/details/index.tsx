@@ -79,10 +79,10 @@ import {
   type EntityStoreRecord,
 } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import { ObservedDataSection as UserObservedDataSection } from '../../../../flyout_v2/entity/shared/components/observed_data_section';
-import { USER_PANEL_OBSERVED_USER_QUERY_ID } from '../../../../flyout/entity_details/user_right';
+import { USER_PANEL_OBSERVED_USER_QUERY_ID } from '../../../../flyout_v2/entity/user/main/constants';
 import { useObservedUser } from '../../../../flyout_v2/entity/user/main/hooks/use_observed_user';
 import { buildRiskScoreStateFromEntityRecord } from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
-import { NO_CORRESPONDING_ENTITY_EXISTS } from '../../../../flyout/entity_details/shared/translations';
+import { NO_CORRESPONDING_ENTITY_EXISTS } from '../../../../flyout_v2/entity/shared/translations';
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
 import type { UserItem } from '../../../../../common/search_strategy';
 import type { Entity } from '../../../../../common/api/entity_analytics';
@@ -137,7 +137,7 @@ const UserDetailsAssetCriticalitySection: React.FC<{
     <AssetCriticalityAccordion
       entity={{ name: detailName, type: EntityType.user }}
       onChange={onCriticalityChange}
-      entityRecord={entityStoreV2Enabled ? observedUserEntityRecord ?? undefined : undefined}
+      entityRecord={entityStoreV2Enabled ? (observedUserEntityRecord ?? undefined) : undefined}
       criticalityFromEntityStore={
         entityStoreV2Enabled && observedUserEntityRecord
           ? storeRecord?.asset?.criticality
@@ -463,16 +463,16 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
                         setQuery={setQuery}
                         refetch={
                           entityStoreV2Enabled
-                            ? observedUser.refetchEntityStore ??
+                            ? (observedUser.refetchEntityStore ??
                               observedUser.refetchObservedDetails ??
-                              refetch
+                              refetch)
                             : refetch
                         }
                         inspect={
                           entityStoreV2Enabled
-                            ? entityFromStoreResult?.inspect ??
+                            ? (entityFromStoreResult?.inspect ??
                               observedUser.observedDetailsInspect ??
-                              inspect
+                              inspect)
                             : inspect
                         }
                         userName={detailName}
@@ -484,12 +484,12 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
                         riskScoreState={userRiskScoreStateFromEntityStore}
                         firstSeenFromEntityStore={
                           entityStoreV2Enabled
-                            ? observedUser.firstSeen?.date ?? undefined
+                            ? (observedUser.firstSeen?.date ?? undefined)
                             : undefined
                         }
                         lastSeenFromEntityStore={
                           entityStoreV2Enabled
-                            ? observedUser.lastSeen?.date ?? undefined
+                            ? (observedUser.lastSeen?.date ?? undefined)
                             : undefined
                         }
                       />
@@ -548,7 +548,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
               type={UsersType.details}
               setQuery={setQuery}
               entityRecord={
-                entityStoreV2Enabled ? observedUser.entityRecord ?? undefined : undefined
+                entityStoreV2Enabled ? (observedUser.entityRecord ?? undefined) : undefined
               }
               filterQuery={stringifiedUserDetailsIdentityFilterQuery}
               usersDetailsPagePath={usersDetailsPagePath}

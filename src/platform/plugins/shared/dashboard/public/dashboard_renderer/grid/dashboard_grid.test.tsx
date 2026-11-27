@@ -36,7 +36,7 @@ jest.mock('uuid', () => ({
 
 jest.mock('./dashboard_grid_item', () => {
   return {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
     DashboardGridItem: require('react').forwardRef(
       (props: DashboardGridItemProps, ref: HTMLDivElement) => {
         const dashboardApi = mockUseDashboardApi();
@@ -50,8 +50,8 @@ jest.mock('./dashboard_grid_item', () => {
           expandedPanelId === undefined
             ? 'regularPanel'
             : expandedPanelId === props.id
-            ? 'expandedPanel'
-            : 'hiddenPanel'
+              ? 'expandedPanel'
+              : 'hiddenPanel'
         } ${focusedPanelId ? (focusedPanelId === props.id ? 'focusedPanel' : 'blurredPanel') : ''}`;
 
         return (

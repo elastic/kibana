@@ -106,9 +106,9 @@ export const IndexModal: React.FunctionComponent<IndexModalProps> = ({
           <WarningModalStep
             warnings={
               modalStep === 'confirmReadonly'
-                ? reindexState.reindexWarnings?.filter(
+                ? (reindexState.reindexWarnings?.filter(
                     ({ flow: warningFlow }) => warningFlow === 'readonly'
-                  ) ?? []
+                  ) ?? [])
                 : []
             }
             meta={reindexState.meta}

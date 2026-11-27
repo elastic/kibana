@@ -226,6 +226,182 @@ describe('sanitizeSvg', () => {
     expect(resultStr).not.toContain('data');
   });
 
+  it('should keep <use> elements that reference a symbol in the same document', () => {
+    const svg =
+      '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">' +
+      '<defs><symbol id="A" viewBox="0 0 10 10"><path d="M0 0h10v10z"/></symbol></defs>' +
+      '<use xlink:href="#A" width="10" height="10"/><use href="#A" x="10"/></svg>';
+    const result = sanitizeSvg(Buffer.from(svg)).toString('utf8');
+
+    expect(result).toContain('<symbol id="A"');
+    expect(result).toContain('<use xlink:href="#A" width="10" height="10"');
+    expect(result).toContain('<use href="#A" x="10"');
+  });
+
+  it('should keep references to ids outside ASCII', () => {
+    const result = sanitizeSvg(
+      Buffer.from('<svg><defs><path id="café" d="M0 0h1v1z"/></defs><use href="#café"/></svg>')
+    ).toString('utf8');
+
+    expect(result).toContain('<use href="#café"');
+  });
+
+  it('should keep same-document references only on <use> and gradients', () => {
+    const result = sanitizeSvg(
+      Buffer.from(
+        '<svg><linearGradient id="g"/><linearGradient id="h" href="#g"/><path id="p" d="M0 0h1"/>' +
+          '<use href="#p"/><a href="#p"><rect/></a><filter id="f"><feImage href="#p"/></filter>' +
+          '<image href="#p"/></svg>'
+      )
+    ).toString('utf8');
+
+    expect(result).toContain('<use href="#p"');
+    expect(result).toContain('<linearGradient id="h" href="#g"');
+    expect(result).not.toMatch(/<(a|feImage|image)\b[^>]*href=/);
+  });
+
+  describe('<use> limits', () => {
+    const countKeptUses = (svg: string): number =>
+      sanitizeSvg(Buffer.from(svg))
+        .toString('utf8')
+        .match(/<use [^>]*href="/g)?.length ?? 0;
+
+    it('removes references to a <use> or to an element that contains one', () => {
+      expect(
+        countKeptUses(
+          '<svg><path id="shape" d="M0 0h1v1z"/><use id="u1" href="#shape"/><use href="#u1"/>' +
+            '<g id="group"><use href="#shape"/></g><use href="#group"/></svg>'
+        )
+      ).toBe(2);
+    });
+
+    it('removes references to an ancestor of the <use>', () => {
+      expect(countKeptUses('<svg><g id="loop"><use href="#loop"/></g></svg>')).toBe(0);
+    });
+
+    it('removes references to ids that match no element', () => {
+      expect(
+        countKeptUses(
+          '<svg><path id="a.b" d="M0 0h1v1z"/><use href="#a%2Eb"/><use href="#missing"/></svg>'
+        )
+      ).toBe(0);
+    });
+
+    it('checks the element the id names after sanitization, not a decoy that sanitization removes', () => {
+      for (const decoy of ['<script id="L1"></script>', '<unknown id="L1"></unknown>']) {
+        expect(
+          countKeptUses(
+            `<svg><path id="shape" d="M0 0h1v1z"/><use href="#L1"/>${decoy}` +
+              '<g id="L1"><use href="#shape"/><use href="#shape"/></g></svg>'
+          )
+        ).toBe(2);
+      }
+    });
+
+    it('charges an href and a matching xlink:href fallback once', () => {
+      const svg =
+        `<svg xmlns:xlink="http://www.w3.org/1999/xlink"><g id="group">${'<rect/>'.repeat(
+          999
+        )}</g>` + `${'<use href="#group" xlink:href="#group"/>'.repeat(10)}</svg>`;
+
+      expect(countKeptUses(svg)).toBe(10);
+    });
+
+    it('removes both hrefs when they name different targets and one is not allowed', () => {
+      expect(
+        countKeptUses(
+          '<svg xmlns:xlink="http://www.w3.org/1999/xlink"><path id="shape" d="M0 0h1v1z"/>' +
+            '<g id="group"><use href="#shape"/></g><use href="#shape" xlink:href="#group"/></svg>'
+        )
+      ).toBe(1);
+    });
+
+    it('does not charge a <use> whose hrefs are removed', () => {
+      const svg =
+        `<svg xmlns:xlink="http://www.w3.org/1999/xlink"><g id="group">${'<rect/>'.repeat(
+          999
+        )}</g>` +
+        `<g id="nested"><use/></g>${'<use href="#group"/>'.repeat(9)}` +
+        '<use href="#group" xlink:href="#nested"/><use href="#group"/></svg>';
+
+      expect(countKeptUses(svg)).toBe(10);
+    });
+
+    it('keeps at most 256 references', () => {
+      const svg = `<svg><path id="shape" d="M0 0h1v1z"/>${'<use href="#shape"/>'.repeat(
+        300
+      )}</svg>`;
+
+      expect(countKeptUses(svg)).toBe(256);
+    });
+
+    it('stops keeping references once they would copy more than 10,000 elements', () => {
+      const svg =
+        `<svg><g id="group">${'<rect/>'.repeat(999)}</g>` +
+        `${'<use href="#group"/>'.repeat(
+          11
+        )}<path id="shape" d="M0 0h1v1z"/><use href="#shape"/></svg>`;
+
+      expect(countKeptUses(svg)).toBe(10);
+    });
+  });
+
+  it('should keep base64 raster images embedded in <image>', () => {
+    const png =
+      'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+    const svg =
+      '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">' +
+      `<image width="1" height="1" href="${png}"/><image xlink:href="${png}"/></svg>`;
+    const result = sanitizeSvg(Buffer.from(svg)).toString('utf8');
+
+    expect(result).toContain(`<image width="1" height="1" href="${png}"`);
+    expect(result).toContain(`<image xlink:href="${png}"`);
+  });
+
+  it('should drop SMIL animations that could rewrite an href', () => {
+    const result = sanitizeSvg(
+      Buffer.from(
+        '<svg><path id="p" d="M0 0h1"/><use href="#p"><set attributeName="href" to="javascript:alert(1)"/>' +
+          '<animate attributeName="href" values="javascript:alert(1)"/>' +
+          '<animateTransform attributeName="xlink:href" values="javascript:alert(1)"/></use></svg>'
+      )
+    ).toString('utf8');
+
+    expect(result).not.toMatch(/<(set|animate)\b/);
+    expect(result).not.toMatch(/attributeName="[^"]*href/i);
+  });
+
+  it('should remove hrefs that are not same-document references or embedded raster images', () => {
+    for (const href of [
+      'https://evil.com/icon.svg#A',
+      '//evil.com/icon.png',
+      'icon.svg#A',
+      'javascript:alert(1)', // eslint-disable-line no-script-url
+      ' javascript:alert(1)',
+      '#A" onload="alert(1)',
+      'data:image/svg+xml;base64,PHN2Zz48L3N2Zz4=',
+      'data:image/png,not-base64',
+      'data:text/html;base64,PHNjcmlwdD48L3NjcmlwdD4=',
+    ]) {
+      const svg =
+        '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">' +
+        `<use href='${href}'/><use xlink:href='${href}'/><image href='${href}'/><a href='${href}'><rect/></a></svg>`;
+      const result = sanitizeSvg(Buffer.from(svg)).toString('utf8');
+
+      expect(result).not.toContain('href');
+    }
+  });
+
+  it('should only keep raster data URIs on <image>', () => {
+    const png = 'data:image/png;base64,iVBORw0KGgo=';
+    const svg =
+      '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">' +
+      `<use href="${png}"/><feImage href="${png}"/><a href="${png}"><rect/></a></svg>`;
+    const result = sanitizeSvg(Buffer.from(svg)).toString('utf8');
+
+    expect(result).not.toContain('href');
+  });
+
   it('should handle non-base64 strings that look like base64', () => {
     // This looks like base64 but doesn't decode to valid SVG
     const fakeSvg = 'AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=';
@@ -731,7 +907,7 @@ describe('sanitizeSvg style inlining', () => {
       expect(child).toMatch(/cx="9"/);
       expect(child).toMatch(/r="5"/);
       expect(child).toMatch(/gradientUnits="userSpaceOnUse"/);
-      expect(child).not.toContain('href');
+      expect(child).toContain('xlink:href="#base"');
       expect(linear.match(/<stop /g)).toHaveLength(2);
       expect(linear).toMatch(/gradientUnits="userSpaceOnUse"/);
       expect(linear).not.toMatch(/\b(cx|r)=/);
@@ -749,7 +925,7 @@ describe('sanitizeSvg style inlining', () => {
       expect(result).toMatch(/<rect class="a"[^>]*fill="url\(#child\)"/);
       expect(child).toMatch(/x1="3"/);
       expect(child).toMatch(/gradientUnits="userSpaceOnUse"/);
-      expect(child).not.toContain('href');
+      expect(child).toContain('xlink:href="#base.v1"');
     });
 
     it('falls back when a gradient inherits through an href that finds no element', () => {
@@ -785,8 +961,8 @@ describe('sanitizeSvg style inlining', () => {
         '<svg><style>.a{fill:url(#missing)}.b{fill:#f00}</style><rect class="a"/><rect class="b"/></svg>',
         '<svg><defs><style>.a{fill:url(#empty)}</style><linearGradient id="empty"/></defs><rect class="a"/></svg>',
         '<svg xmlns:xlink="http://www.w3.org/1999/xlink"><defs><style>.a{clip-path:url(#clip)}</style>' +
-          '<path id="shape" d="M0 0h5v5z"/><clipPath id="clip"><use xlink:href="#shape" x="5"/></clipPath>' +
-          '</defs><rect class="a"/></svg>',
+          '<path id="shape" d="M0 0h5v5z"/><use id="inner" xlink:href="#shape"/>' +
+          '<clipPath id="clip"><use xlink:href="#inner" x="5"/></clipPath></defs><rect class="a"/></svg>',
       ]) {
         expect(sanitize(svg)).toEqual(sanitizeWithoutStyles(svg));
       }
@@ -823,8 +999,9 @@ describe('sanitizeSvg style inlining', () => {
     it('falls back when sanitization removes part of a referenced clip path', () => {
       const svg =
         '<svg xmlns:xlink="http://www.w3.org/1999/xlink"><defs><style>.a{clip-path:url(#clip)}</style>' +
-        '<rect id="shape" width="5" height="10"/><clipPath id="clip"><rect width="5" height="10"/>' +
-        '<use xlink:href="#shape" x="5"/></clipPath></defs><rect class="a" width="20" height="10"/></svg>';
+        '<rect id="shape" width="5" height="10"/><use id="inner" xlink:href="#shape"/>' +
+        '<clipPath id="clip"><rect width="5" height="10"/><use xlink:href="#inner" x="5"/></clipPath>' +
+        '</defs><rect class="a" width="20" height="10"/></svg>';
 
       expect(sanitize(svg)).toEqual(sanitizeWithoutStyles(svg));
     });
@@ -876,10 +1053,41 @@ describe('sanitizeSvg style inlining', () => {
     it('falls back when a referenced element depends on one that sanitization empties', () => {
       const svg =
         '<svg xmlns:xlink="http://www.w3.org/1999/xlink"><defs><style>.a{clip-path:url(#outer)}</style>' +
-        '<rect id="shape" width="20" height="20"/>' +
-        '<clipPath id="inner"><use xlink:href="#shape" x="1"/></clipPath>' +
+        '<rect id="shape" width="20" height="20"/><use id="nested" xlink:href="#shape"/>' +
+        '<clipPath id="inner"><use xlink:href="#nested" x="1"/></clipPath>' +
         '<clipPath id="outer"><rect width="20" height="20" clip-path="url(#inner)"/></clipPath>' +
         '</defs><rect class="a" width="20" height="20"/></svg>';
+
+      expect(sanitize(svg)).toEqual(sanitizeWithoutStyles(svg));
+    });
+
+    it('keeps styles that apply a clip path built from a positioned <use>', () => {
+      const result = sanitize(
+        '<svg xmlns:xlink="http://www.w3.org/1999/xlink"><defs><style>.a{clip-path:url(#clip)}</style>' +
+          '<rect id="shape" width="5" height="10"/><clipPath id="clip"><rect width="5" height="10"/>' +
+          '<use xlink:href="#shape" x="5"/></clipPath></defs><rect class="a" width="20" height="10"/></svg>'
+      );
+
+      expect(result).toMatch(/<rect class="a"[^>]*clip-path="url\(#clip\)"/);
+      expect(elementMarkup(result, 'clipPath', 'clip')).toContain('<use xlink:href="#shape" x="5"');
+    });
+
+    it('keeps styles when a referenced clip path contains a <use> that never had an href', () => {
+      const result = sanitize(
+        '<svg><defs><style>.a{clip-path:url(#clip)}.b{fill:#f00}</style><clipPath id="clip">' +
+          '<rect width="5" height="10"/><use x="5"/></clipPath></defs>' +
+          '<rect class="a b" width="20" height="10"/></svg>'
+      );
+
+      expect(result).toMatch(/<rect class="a b"[^>]*clip-path="url\(#clip\)"/);
+      expect(result).toMatch(/<rect class="a b"[^>]*fill="#f00"/);
+    });
+
+    it('falls back when a clip path uses a <use> that does not reference a shape', () => {
+      const svg =
+        '<svg xmlns:xlink="http://www.w3.org/1999/xlink"><defs><style>.a{clip-path:url(#clip)}</style>' +
+        '<g id="group"><rect width="5" height="5"/></g><clipPath id="clip"><use xlink:href="#group" x="5"/>' +
+        '</clipPath></defs><rect class="a" width="20" height="10"/></svg>';
 
       expect(sanitize(svg)).toEqual(sanitizeWithoutStyles(svg));
     });

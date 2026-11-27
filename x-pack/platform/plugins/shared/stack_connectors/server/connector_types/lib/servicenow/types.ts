@@ -217,6 +217,15 @@ export interface ServiceNowError {
 
 export type ResponseError = AxiosError<ServiceNowError>;
 
+/**
+ * The errors `addServiceMessageToError` accepts: an axios error, a `ServiceNowApiError`,
+ * or a plain `Error`.
+ */
+export interface ServiceError extends Error {
+  code?: string;
+  response?: AxiosResponse<ServiceNowError>;
+}
+
 export interface ErrorMessageFormat {
   error: string;
   reason: string;
@@ -311,8 +320,7 @@ export interface AddEventApiHandlerArgs extends ExternalServiceApiHandlerArgs<Ex
   params: ExecutorSubActionAddEventParams;
 }
 
-export interface GetCommonFieldsHandlerArgsITOM
-  extends ExternalServiceApiHandlerArgs<ExternalServiceITOM> {
+export interface GetCommonFieldsHandlerArgsITOM extends ExternalServiceApiHandlerArgs<ExternalServiceITOM> {
   params: ExecutorSubActionGetChoicesParams;
 }
 

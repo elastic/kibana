@@ -55,14 +55,14 @@ const savedObjectFor = (
     type: 'exception-list',
     updated_at: list.updated_at,
     version: list._version,
-  } as unknown as SavedObject<ExceptionListSoSchema>);
+  }) as unknown as SavedObject<ExceptionListSoSchema>;
 
 const notFoundSavedObject = (id: string): SavedObject<ExceptionListSoSchema> =>
   ({
     error: { error: 'Not Found', message: 'Not found', statusCode: 404 },
     id,
     type: 'exception-list',
-  } as unknown as SavedObject<ExceptionListSoSchema>);
+  }) as unknown as SavedObject<ExceptionListSoSchema>;
 
 const errorSavedObject = (
   id: string,
@@ -73,7 +73,7 @@ const errorSavedObject = (
     error: { error: 'Saved object error', message, statusCode },
     id,
     type: 'exception-list',
-  } as unknown as SavedObject<ExceptionListSoSchema>);
+  }) as unknown as SavedObject<ExceptionListSoSchema>;
 
 describe('bulkDeleteExceptionList', () => {
   afterEach(() => {

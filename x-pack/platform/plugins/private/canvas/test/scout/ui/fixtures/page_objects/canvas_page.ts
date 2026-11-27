@@ -75,7 +75,10 @@ export class CanvasPage {
   /** The "Generate" button inside the PDF reports share panel. */
   public readonly generateReportButton: Locator;
 
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {
     this.workpadListItems = this.page.testSubj.locator(
       'canvasWorkpadTable > canvasWorkpadTableWorkpad'
     );
@@ -371,13 +374,6 @@ export class CanvasPage {
   async saveLensAndReturn() {
     await this.page.testSubj.locator('lnsApp_saveAndReturnButton').click();
     await this.page.testSubj.locator('lnsApp').waitFor({ state: 'hidden' });
-  }
-
-  /** Click "Save and return" in the Visualize editor and wait for Canvas to take over again. */
-  async saveVisualizeAndReturn() {
-    const saveAndReturn = this.page.testSubj.locator('visualizesaveAndReturnButton');
-    await saveAndReturn.click({ timeout: 20_000 });
-    await saveAndReturn.waitFor({ state: 'hidden' });
   }
 
   /** Delete the currently selected element via the workpad edit menu. */

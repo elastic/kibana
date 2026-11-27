@@ -45,6 +45,7 @@ const EmbeddableFieldStatsTableWrapper = (
     searchString,
     extendedColumns,
     progress,
+    cancelled,
     overallStats,
     overallStatsProgress,
     setLastRefresh,
@@ -75,7 +76,7 @@ const EmbeddableFieldStatsTableWrapper = (
               item={item}
               dataView={props.dataView}
               combinedQuery={{ searchQueryLanguage, searchString }}
-              onAddFilter={props.isInteractive ?? true ? onAddFilter : undefined}
+              onAddFilter={(props.isInteractive ?? true) ? onAddFilter : undefined}
               totalDocuments={props.totalDocuments}
             />
           );
@@ -111,7 +112,7 @@ const EmbeddableFieldStatsTableWrapper = (
       extendedColumns={extendedColumns}
       showPreviewByDefault={props?.showPreviewByDefault}
       onChange={onTableUpdate}
-      loading={progress < 100}
+      loading={progress < 100 && !cancelled}
       overallStatsRunning={overallStatsProgress.isRunning}
       totalCount={totalCount}
       renderFieldName={props.renderFieldName}

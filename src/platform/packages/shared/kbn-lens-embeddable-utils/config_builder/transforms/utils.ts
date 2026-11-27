@@ -793,7 +793,8 @@ function extraQueryFromAPIState(state: LensApiConfig): Query | undefined {
   // ES|QL queries live exclusively on the text-based datasource layers
   // (written by the layer transforms); the top-level slot only carries the
   // chart-scoped KQL/Lucene filter from the API `query` field.
-  if ('query' in state && state.query) {
+  // An empty KQL or Lucene expression filters nothing, so neither it nor its language is stored.
+  if ('query' in state && state.query?.expression.length) {
     return queryToLensState(state.query satisfies LensApiFilterType);
   }
   return undefined;
@@ -805,7 +806,7 @@ export const filtersAndQueryToLensState = (
 ) => {
   const query = extraQueryFromAPIState(state);
   const convertedFilters = state.filters
-    ? toStoredFilters(state.filters as AsCodeFilter[]) ?? []
+    ? (toStoredFilters(state.filters as AsCodeFilter[]) ?? [])
     : [];
   const { filters: extractedFilters, references: extractedReferences } = extractFilterReferences(
     convertedFilters,
@@ -822,22 +823,22 @@ export const filtersAndQueryToLensState = (
 export type DeepMutable<T> = T extends (...args: never[]) => unknown
   ? T // don't mutate functions
   : T extends ReadonlyArray<infer U>
-  ? DeepMutable<U>[] // handle readonly arrays
-  : T extends object
-  ? {
-      -readonly [P in keyof T]: DeepMutable<T[P]>;
-    }
-  : T;
+    ? DeepMutable<U>[] // handle readonly arrays
+    : T extends object
+      ? {
+          -readonly [P in keyof T]: DeepMutable<T[P]>;
+        }
+      : T;
 
 export type DeepPartial<T> = T extends (...args: never[]) => unknown
   ? T // don't mutate functions
   : T extends ReadonlyArray<infer U>
-  ? DeepPartial<U>[] // handle readonly arrays
-  : T extends object
-  ? {
-      [P in keyof T]?: DeepPartial<T[P]>;
-    }
-  : T;
+    ? DeepPartial<U>[] // handle readonly arrays
+    : T extends object
+      ? {
+          [P in keyof T]?: DeepPartial<T[P]>;
+        }
+      : T;
 
 export function nonNullable<T>(v: T): v is NonNullable<T> {
   return v != null;

@@ -23,11 +23,10 @@ import {
 import { getEuiCellActions } from '../../../doc_viewer_table/table_grid/eui_data_grid_adapter';
 import type { AttributeField } from './attributes_overview';
 
-interface AttributesTableProps
-  extends Pick<
-    DocViewRenderProps,
-    'hit' | 'dataView' | 'filter' | 'onAddColumn' | 'onRemoveColumn' | 'columns'
-  > {
+interface AttributesTableProps extends Pick<
+  DocViewRenderProps,
+  'hit' | 'dataView' | 'filter' | 'onAddColumn' | 'onRemoveColumn' | 'columns'
+> {
   dataSource: DataSource | undefined;
   fields: AttributeField[];
   searchTerm: string;
@@ -89,36 +88,39 @@ export const AttributesTable = ({
     [toasts, filter]
   );
 
-  const gridColumns: EuiDataGridProps['columns'] = [
-    {
-      id: 'name',
-      displayAsText: i18n.translate('unifiedDocViewer.docView.attributes.table.nameColumn', {
-        defaultMessage: 'Field',
-      }),
-      actions: false,
-      visibleCellActions: 3,
-      cellActions: getEuiCellActions({
-        definitions: fieldCellActionDefinitions,
-        rows,
-        getRowId: ({ name }) => name,
-        columnId: 'name',
-      }),
-    },
-    {
-      id: 'value',
-      displayAsText: i18n.translate('unifiedDocViewer.docView.attributes.table.valueColumn', {
-        defaultMessage: 'Value',
-      }),
-      actions: false,
-      visibleCellActions: 3,
-      cellActions: getEuiCellActions({
-        definitions: fieldValueCellActionDefinitions,
-        rows,
-        getRowId: ({ name }) => name,
-        columnId: 'value',
-      }),
-    },
-  ];
+  const gridColumns = useMemo<EuiDataGridProps['columns']>(
+    () => [
+      {
+        id: 'name',
+        displayAsText: i18n.translate('unifiedDocViewer.docView.attributes.table.nameColumn', {
+          defaultMessage: 'Field',
+        }),
+        actions: false,
+        visibleCellActions: 3,
+        cellActions: getEuiCellActions({
+          definitions: fieldCellActionDefinitions,
+          rows,
+          getRowId: ({ name }) => name,
+          columnId: 'name',
+        }),
+      },
+      {
+        id: 'value',
+        displayAsText: i18n.translate('unifiedDocViewer.docView.attributes.table.valueColumn', {
+          defaultMessage: 'Value',
+        }),
+        actions: false,
+        visibleCellActions: 3,
+        cellActions: getEuiCellActions({
+          definitions: fieldValueCellActionDefinitions,
+          rows,
+          getRowId: ({ name }) => name,
+          columnId: 'value',
+        }),
+      },
+    ],
+    [fieldCellActionDefinitions, fieldValueCellActionDefinitions, rows]
+  );
 
   return (
     <EuiDataGrid

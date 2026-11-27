@@ -35,7 +35,7 @@ interface ParsedDefinition {
  * (the alias wins when present); for inline entries it is `name`.
  */
 const effectiveFieldName = (field: FieldDefinition): string | undefined =>
-  field.$ref !== undefined ? field.name ?? field.$ref : field.name;
+  field.$ref !== undefined ? (field.name ?? field.$ref) : field.name;
 
 /**
  * Same matching rule as `effectiveFieldName`, but operating on a yaml-library AST node
@@ -46,7 +46,7 @@ const yamlEntryEffectiveName = (item: YAMLMap<unknown, unknown>): string | undef
   const refNode = item.get('$ref', true);
   const name = isScalar(nameNode) ? String(nameNode.value) : undefined;
   const ref = isScalar(refNode) ? String(refNode.value) : undefined;
-  return ref !== undefined ? name ?? ref : name;
+  return ref !== undefined ? (name ?? ref) : name;
 };
 
 /**

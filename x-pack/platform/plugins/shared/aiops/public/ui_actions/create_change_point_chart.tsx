@@ -69,9 +69,8 @@ export function createAddChangePointChartAction(
           focusedPanelId: context.embeddable.uuid,
         },
         loadContent: async ({ closeFlyout }) => {
-          const { EmbeddableChangePointUserInput } = await import(
-            '../embeddables/change_point_chart/change_point_config_input'
-          );
+          const { EmbeddableChangePointUserInput } =
+            await import('../embeddables/change_point_chart/change_point_config_input');
           return (
             <EmbeddableChangePointUserInput
               coreStart={coreStart}

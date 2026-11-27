@@ -33,15 +33,13 @@ export const useLayoutStyles = () => {
       --dashboardActivePanelBorderStyle: ${euiTheme.border.width.thick} solid
         ${euiTheme.colors.vis.euiColorVis0};
 
-      --dashboardHoverActionsActivePanelBoxShadow--singleWrapper: 0 0 0
-        ${euiTheme.border.width.thin} ${euiTheme.colors.vis.euiColorVis0};
-
       .kbnGridSection--targeted {
         background-position: top calc((var(--kbnGridGutterSize) / 2) * -1px) left
           calc((var(--kbnGridGutterSize) / 2) * -1px);
         background-size: calc((var(--kbnGridColumnWidth) + var(--kbnGridGutterSize)) * 1px)
           calc((var(--kbnGridRowHeight) + var(--kbnGridGutterSize)) * 1px);
-        background-image: ${getRadialGradient('top left')}, ${getRadialGradient('top right')},
+        background-image:
+          ${getRadialGradient('top left')}, ${getRadialGradient('top right')},
           ${getRadialGradient('bottom left')}, ${getRadialGradient('bottom right')};
         background-origin: content-box;
       }
@@ -109,11 +107,8 @@ export const useLayoutStyles = () => {
       }
 
       .kbnGridPanel--active {
-        // overwrite the border style on panels + hover actions for active panels
+        // overwrite the border style on panels for active panels
         --hoverActionsBorderStyle: var(--dashboardActivePanelBorderStyle);
-        --hoverActionsSingleWrapperBoxShadowStyle: var(
-          --dashboardHoverActionsActivePanelBoxShadow--singleWrapper
-        );
 
         // prevent the hover actions transition when active to prevent "blip" on resize
         .embPanel__hoverActions {

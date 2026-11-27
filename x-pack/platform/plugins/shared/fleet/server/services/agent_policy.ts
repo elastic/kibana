@@ -46,6 +46,7 @@ import {
   policyHasEndpointSecurity,
   policyHasFleetServer,
   policyHasSyntheticsIntegration,
+  sanitizeAgentPolicyOverrides,
   validateFleetSavedObjectId,
 } from '../../common/services';
 
@@ -997,7 +998,7 @@ class AgentPolicyService {
     const filter =
       hideAgentlessFilter && userFilter
         ? `(${hideAgentlessFilter}) AND (${userFilter})`
-        : hideAgentlessFilter ?? userFilter;
+        : (hideAgentlessFilter ?? userFilter);
     let agentPoliciesSO;
     try {
       agentPoliciesSO = await soClient.find<AgentPolicySOAttributes>({
@@ -1210,31 +1211,41 @@ class AgentPolicyService {
       }
     }
 
+    const copiedAttributes = pick(baseAgentPolicy, [
+      'namespace',
+      'monitoring_enabled',
+      'inactivity_timeout',
+      'unenroll_timeout',
+      'agent_features',
+      'overrides',
+      'data_output_id',
+      'monitoring_output_id',
+      'download_source_id',
+      'download_source_ids',
+      'fleet_server_host_id',
+      'supports_agentless',
+      'global_data_tags',
+      'agentless',
+      'monitoring_pprof_enabled',
+      'monitoring_http',
+      'monitoring_diagnostics',
+    ]);
+    // Policies saved before the OpenTelemetry collector keys were denied may still hold them in
+    // `overrides`: do not carry them into the new policy.
+    if (copiedAttributes.overrides) {
+      const { overrides, removedKeys } = sanitizeAgentPolicyOverrides(copiedAttributes.overrides);
+      if (removedKeys.length > 0) {
+        logger.warn(
+          `Not copying disallowed overrides [${removedKeys.join(', ')}] of agent policy [${id}]`
+        );
+      }
+      copiedAttributes.overrides = overrides;
+    }
+
     const newAgentPolicy = await this.create(
       soClient,
       esClient,
-      {
-        ...pick(baseAgentPolicy, [
-          'namespace',
-          'monitoring_enabled',
-          'inactivity_timeout',
-          'unenroll_timeout',
-          'agent_features',
-          'overrides',
-          'data_output_id',
-          'monitoring_output_id',
-          'download_source_id',
-          'download_source_ids',
-          'fleet_server_host_id',
-          'supports_agentless',
-          'global_data_tags',
-          'agentless',
-          'monitoring_pprof_enabled',
-          'monitoring_http',
-          'monitoring_diagnostics',
-        ]),
-        ...newAgentPolicyProps,
-      },
+      { ...copiedAttributes, ...newAgentPolicyProps },
       options
     );
 
@@ -1269,6 +1280,8 @@ class AgentPolicyService {
           {
             ...options,
             bumpRevision: false,
+            // The new agent policy has no agents yet, so none can stop collecting data
+            acknowledgeAgentVersionIncompatibility: true,
           }
         );
       }
@@ -1279,7 +1292,10 @@ class AgentPolicyService {
           ...packagePolicy,
           policy_ids: [...packagePolicy.policy_ids, newAgentPolicy.id],
         }));
-        await packagePolicyService.bulkUpdate(soClient, esClient, updatedSharedPackagePolicies);
+        await packagePolicyService.bulkUpdate(soClient, esClient, updatedSharedPackagePolicies, {
+          // The new agent policy has no agents yet, so none can stop collecting data
+          acknowledgeAgentVersionIncompatibility: true,
+        });
       }
     }
 
@@ -2080,20 +2096,27 @@ class AgentPolicyService {
           );
 
           if (bulkResponse.errors) {
-            const erroredDocuments = bulkResponse.items.reduce((acc, item, idx) => {
-              const value: estypes.BulkResponseItem | undefined = item.index;
-              if (!value || !value.error) {
-                return acc;
-              }
+            const erroredDocuments = bulkResponse.items.reduce(
+              (acc, item, idx) => {
+                const value: estypes.BulkResponseItem | undefined = item.index;
+                if (!value || !value.error) {
+                  return acc;
+                }
 
-              const policy = fleetServerPolicies[idx];
-              acc.push({
-                bulkItem: value,
-                policyId: policy?.policy_id,
-                revisionIdx: policy?.revision_idx,
-              });
-              return acc;
-            }, [] as Array<{ bulkItem: estypes.BulkResponseItem; policyId?: string; revisionIdx?: number }>);
+                const policy = fleetServerPolicies[idx];
+                acc.push({
+                  bulkItem: value,
+                  policyId: policy?.policy_id,
+                  revisionIdx: policy?.revision_idx,
+                });
+                return acc;
+              },
+              [] as Array<{
+                bulkItem: estypes.BulkResponseItem;
+                policyId?: string;
+                revisionIdx?: number;
+              }>
+            );
 
             const errorMessage = `Failed to deploy ${
               erroredDocuments.length
@@ -2332,7 +2355,7 @@ class AgentPolicyService {
     soClient: SavedObjectsClientContract,
     id: string,
     agentVersion: string,
-    options?: { standalone: boolean; redactProxySecrets?: boolean }
+    options?: { standalone: boolean; redactSecrets?: boolean }
   ): Promise<string | null> {
     const fullAgentPolicy = await getFullAgentPolicy(soClient, id, options);
     if (fullAgentPolicy) {
@@ -2384,7 +2407,7 @@ class AgentPolicyService {
       standalone?: boolean;
       agentPolicy?: AgentPolicy;
       agentVersion?: string;
-      redactProxySecrets?: boolean;
+      redactSecrets?: boolean;
       spaceId?: string;
     }
   ): Promise<FullAgentPolicy | null> {
@@ -2865,9 +2888,8 @@ class AgentPolicyService {
     if (agentPolicy?.is_protected) {
       const uninstallTokenService = appContextService.getUninstallTokenService();
 
-      const uninstallTokenError = await uninstallTokenService?.checkTokenValidityForPolicy(
-        policyId
-      );
+      const uninstallTokenError =
+        await uninstallTokenService?.checkTokenValidityForPolicy(policyId);
 
       if (uninstallTokenError) {
         throw new FleetError(

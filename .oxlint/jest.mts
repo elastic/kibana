@@ -11,9 +11,11 @@ import type { DummyRuleMap, OxlintOverride } from 'oxlint';
 
 export const jestRules: DummyRuleMap = {
   'jest/no-focused-tests': 'error',
+  // Jest 30 removes the matcher aliases (`toBeCalled`, `toThrowError`, ...)
+  'jest/no-alias-methods': 'error',
 };
 
-/** `@kbn/eslint-config`'s Jest rules. */
+/** Jest rules, ported from the former `@kbn/eslint-config`. */
 export const jestOverrides: OxlintOverride[] = [
   {
     files: ['**/*.{test,test.mocks,mock}.{js,mjs,ts,tsx}', '**/__mocks__/**/*.{js,mjs,ts,tsx}'],

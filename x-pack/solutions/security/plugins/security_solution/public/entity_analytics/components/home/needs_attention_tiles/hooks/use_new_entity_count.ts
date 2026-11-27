@@ -14,7 +14,8 @@ import { useTileQueryInputs } from './use_tile_query_inputs';
 import { EMPTY_ENTITY_IDS } from '../data';
 import { buildNewEntityCountQuery } from '../queries/new_entity_query';
 import { EMPTY_ENTITY_FILTERS } from '../../entities_grid/common';
-import type { EntityFilters, TimeRange } from '../../entities_grid/common';
+import type { TimeRange } from '../../queries/time_range';
+import type { EntityFilters } from '../../entities_grid/common';
 import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
 import { isTileQueryTimeout, retryUnlessTimedOut, runWithTileTimeout } from './tile_query_timeout';
 
@@ -75,8 +76,8 @@ export const useNewEntityCount = ({
         entityIds: Array.isArray(rawIds)
           ? (rawIds as string[]).filter(Boolean)
           : typeof rawIds === 'string' && rawIds
-          ? [rawIds]
-          : [],
+            ? [rawIds]
+            : [],
       };
     },
     {
@@ -98,7 +99,7 @@ export const useNewEntityCount = ({
     // True only when the count query returned a result. A skipped, failed, timed-out or no-access
     // count is not a genuine 0, so the tile must not show `count` (0) for it.
     hasCount: shownResult !== undefined && !error && !indexError,
-    entityIds: isFetching ? EMPTY_ENTITY_IDS : shownResult?.entityIds ?? EMPTY_ENTITY_IDS,
+    entityIds: isFetching ? EMPTY_ENTITY_IDS : (shownResult?.entityIds ?? EMPTY_ENTITY_IDS),
     // A query that can never run (no index, failed inputs) is not loading: react-query reports a
     // disabled query with no data as loading for ever.
     isLoading: isIndexLoading || (isEnabled && (isLoading || isFetching)),

@@ -35,7 +35,10 @@ export interface SLODefinitionRepository {
 }
 
 export class DefaultSLODefinitionRepository implements SLODefinitionRepository {
-  constructor(private soClient: SavedObjectsClientContract, private logger: Logger) {}
+  constructor(
+    private soClient: SavedObjectsClientContract,
+    private logger: Logger
+  ) {}
 
   async create(slo: SLODefinition): Promise<SLODefinition> {
     const { storedSLO, references } = this.toStoredSLO(slo);
@@ -186,7 +189,7 @@ export class DefaultSLODefinitionRepository implements SLODefinitionRepository {
     });
 
     if (!result.success) {
-      this.logger.debug(`Invalid stored SLO with id [${storedSLO.id}]`);
+      this.logger.debug(`Invalid stored SLO with ID [${storedSLO.id}]`);
       return undefined;
     }
 

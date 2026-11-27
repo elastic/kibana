@@ -14,9 +14,9 @@ describe('editMonitorNavigatorParams', () => {
     expect((await getLocation({ configId: 'abc' })).path).toBe('/edit-monitor/abc');
   });
 
-  it('combines spaceId and packagePolicyId into one query string', async () => {
-    expect(
-      (await getLocation({ configId: 'abc', spaceId: 'team-a', packagePolicyId: 'abc-loc' })).path
-    ).toBe('/edit-monitor/abc?spaceId=team-a&packagePolicyId=abc-loc');
+  it('appends spaceId to the query string when provided', async () => {
+    expect((await getLocation({ configId: 'abc', spaceId: 'team-a' })).path).toBe(
+      '/edit-monitor/abc?spaceId=team-a'
+    );
   });
 });

@@ -22,8 +22,7 @@ import type {
 /**
  * @internal
  */
-export interface PointInTimeFinderDependencies
-  extends SavedObjectsCreatePointInTimeFinderDependencies {
+export interface PointInTimeFinderDependencies extends SavedObjectsCreatePointInTimeFinderDependencies {
   logger: Logger;
   internalOptions?: SavedObjectsFindInternalOptions;
 }
@@ -40,9 +39,10 @@ export type CreatePointInTimeFinderFn = <T = unknown, A = unknown>(
 /**
  * @internal
  */
-export class PointInTimeFinder<T = unknown, A = unknown>
-  implements ISavedObjectsPointInTimeFinder<T, A>
-{
+export class PointInTimeFinder<T = unknown, A = unknown> implements ISavedObjectsPointInTimeFinder<
+  T,
+  A
+> {
   readonly #log: Logger;
   readonly #client: SavedObjectsPointInTimeFinderClient;
   readonly #findOptions: SavedObjectsFindOptions & { perPage: number };

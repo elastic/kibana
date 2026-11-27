@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TimeRange } from '../../entities_grid/common';
+import type { TimeRange } from '../../queries/time_range';
 import type { TilePeriod } from './tile_period';
 import { SERIES_BUCKET_COLUMN } from './tile_series_window';
 

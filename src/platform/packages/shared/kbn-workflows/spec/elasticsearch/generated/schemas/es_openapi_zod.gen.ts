@@ -91,18 +91,23 @@ export const types_query_dsl_wrapper_query = types_query_dsl_query_base.and(z.ob
 
 export const types_multi_term_query_rewrite = z.string();
 
-export const types_query_dsl_wildcard_query = types_query_dsl_query_base.and(z.object({
-    case_insensitive: z.optional(z.boolean().register(z.globalRegistry, {
-        description: 'Allows case insensitive matching of the pattern with the indexed field values when set to true. Default is false which means the case sensitivity of matching depends on the underlying field’s mapping.'
+export const types_query_dsl_wildcard_query = z.union([
+    types_query_dsl_query_base.and(z.object({
+        case_insensitive: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'Allows case insensitive matching of the pattern with the indexed field values when set to true. Default is false which means the case sensitivity of matching depends on the underlying field’s mapping.'
+        })),
+        rewrite: z.optional(types_multi_term_query_rewrite),
+        value: z.optional(z.string().register(z.globalRegistry, {
+            description: 'Wildcard pattern for terms you wish to find in the provided field. Required, when wildcard is not set.'
+        })),
+        wildcard: z.optional(z.string().register(z.globalRegistry, {
+            description: 'Wildcard pattern for terms you wish to find in the provided field. Required, when value is not set.'
+        }))
     })),
-    rewrite: z.optional(types_multi_term_query_rewrite),
-    value: z.optional(z.string().register(z.globalRegistry, {
+    z.string().register(z.globalRegistry, {
         description: 'Wildcard pattern for terms you wish to find in the provided field. Required, when wildcard is not set.'
-    })),
-    wildcard: z.optional(z.string().register(z.globalRegistry, {
-        description: 'Wildcard pattern for terms you wish to find in the provided field. Required, when value is not set.'
-    }))
-}));
+    })
+]);
 
 export const types_token_pruning_config = z.object({
     tokens_freq_ratio_threshold: z.optional(z.number().register(z.globalRegistry, {
@@ -144,10 +149,13 @@ export const types_script_language = z.union([
     z.string()
 ]);
 
-export const types_mapping_runtime_field_fetch_fields = z.object({
-    field: types_field,
-    format: z.optional(z.string())
-});
+export const types_mapping_runtime_field_fetch_fields = z.union([
+    z.object({
+        field: types_field,
+        format: z.optional(z.string())
+    }),
+    types_field
+]);
 
 export const types_mapping_runtime_field_type = z.enum([
     'boolean',
@@ -177,7 +185,7 @@ export const global_search_types_suggester = z.object({
     text: z.optional(z.string().register(z.globalRegistry, {
         description: 'Global suggest text, to avoid repetition when the same text is used in several suggesters'
     }))
-});
+}).and(z.record(z.string(), z.unknown()));
 
 export const types_sliced_scroll = z.object({
     field: z.optional(types_field),
@@ -218,15 +226,13 @@ export const types_field_value = z.union([
 ]);
 
 export const types_query_dsl_term_query = z.union([
-    z.string().register(z.globalRegistry, {
-        description: 'Short query syntax for match query'
-    }),
     types_query_dsl_query_base.and(z.object({
         value: types_field_value,
         case_insensitive: z.optional(z.boolean().register(z.globalRegistry, {
             description: 'Allows ASCII case insensitive matching of the value with the indexed field values when set to `true`.\nWhen `false`, the case sensitivity of matching depends on the underlying field’s mapping.'
         }))
-    }))
+    })),
+    types_field_value
 ]);
 
 export const types_query_dsl_sparse_vector_query = types_query_dsl_query_base.and(z.object({
@@ -245,9 +251,13 @@ export const types_query_dsl_sparse_vector_query = types_query_dsl_query_base.an
     inference_id: z.optional(types_id)
 })));
 
-export const types_query_dsl_span_term_query = types_query_dsl_query_base.and(z.object({
-    value: types_field_value
-}));
+export const types_query_dsl_span_term_query = z.union([
+    types_query_dsl_query_base.and(z.object({
+        value: types_field_value,
+        term: z.optional(types_field_value)
+    })),
+    types_field_value
+]);
 
 /**
  * Can only be used as a clause in a span_near query.
@@ -344,7 +354,7 @@ export const types_query_dsl_shape_query = types_query_dsl_query_base.and(z.obje
     ignore_unmapped: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'When set to `true` the query ignores an unmapped field and will not match any documents.'
     }))
-}));
+})).and(z.record(z.string(), z.unknown()));
 
 export const types_query_dsl_semantic_query = types_query_dsl_query_base.and(z.object({
     field: z.string().register(z.globalRegistry, {
@@ -419,13 +429,18 @@ export const types_fields = z.union([
     z.array(types_field)
 ]);
 
-export const global_search_types_source_filter = z.object({
-    exclude_vectors: z.optional(z.boolean().register(z.globalRegistry, {
-        description: 'If `true`, vector fields are excluded from the returned source.\n\nThis option takes precedence over `includes`: any vector field will\nremain excluded even if it matches an `includes` rule.'
-    })),
-    excludes: z.optional(types_fields),
-    includes: z.optional(types_fields)
-});
+export const global_search_types_source_filter = z.union([
+    z.object({
+        exclude_vectors: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `true`, vector fields are excluded from the returned source.\n\nThis option takes precedence over `includes`: any vector field will\nremain excluded even if it matches an `includes` rule.'
+        })),
+        excludes: z.optional(types_fields),
+        includes: z.optional(types_fields),
+        exclude: z.optional(types_fields),
+        include: z.optional(types_fields)
+    }),
+    types_fields
+]);
 
 /**
  * Defines how to fetch a source. Fetching can be disabled entirely, or the source can be filtered.
@@ -458,18 +473,18 @@ export const global_search_types_highlighter_type = z.union([
 
 export const global_search_types_highlighter_encoder = z.enum(['default', 'html']);
 
-/**
- * A reference to a field with formatting instructions on how to return the value
- */
-export const types_query_dsl_field_and_format = z.object({
-    field: types_field,
-    format: z.optional(z.string().register(z.globalRegistry, {
-        description: 'The format in which the values are returned.'
-    })),
-    include_unmapped: z.optional(z.boolean())
-}).register(z.globalRegistry, {
-    description: 'A reference to a field with formatting instructions on how to return the value'
-});
+export const types_query_dsl_field_and_format = z.union([
+    z.object({
+        field: types_field,
+        format: z.optional(z.string().register(z.globalRegistry, {
+            description: 'The format in which the values are returned.'
+        })),
+        include_unmapped: z.optional(z.boolean())
+    }).register(z.globalRegistry, {
+        description: 'A reference to a field with formatting instructions on how to return the value'
+    }),
+    types_field
+]);
 
 export const types_name = z.string();
 
@@ -564,21 +579,26 @@ export const types_aggregations_t_test_type = z.enum([
     'heteroscedastic'
 ]);
 
-export const types_query_dsl_regexp_query = types_query_dsl_query_base.and(z.object({
-    case_insensitive: z.optional(z.boolean().register(z.globalRegistry, {
-        description: 'Allows case insensitive matching of the regular expression value with the indexed field values when set to `true`.\nWhen `false`, case sensitivity of matching depends on the underlying field’s mapping.'
+export const types_query_dsl_regexp_query = z.union([
+    types_query_dsl_query_base.and(z.object({
+        case_insensitive: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'Allows case insensitive matching of the regular expression value with the indexed field values when set to `true`.\nWhen `false`, case sensitivity of matching depends on the underlying field’s mapping.'
+        })),
+        flags: z.optional(z.string().register(z.globalRegistry, {
+            description: 'Enables optional operators for the regular expression.'
+        })),
+        max_determinized_states: z.optional(z.number().register(z.globalRegistry, {
+            description: 'Maximum number of automaton states required for the query.'
+        })),
+        rewrite: z.optional(types_multi_term_query_rewrite),
+        value: z.string().register(z.globalRegistry, {
+            description: 'Regular expression for terms you wish to find in the provided field.'
+        })
     })),
-    flags: z.optional(z.string().register(z.globalRegistry, {
-        description: 'Enables optional operators for the regular expression.'
-    })),
-    max_determinized_states: z.optional(z.number().register(z.globalRegistry, {
-        description: 'Maximum number of automaton states required for the query.'
-    })),
-    rewrite: z.optional(types_multi_term_query_rewrite),
-    value: z.string().register(z.globalRegistry, {
+    z.string().register(z.globalRegistry, {
         description: 'Regular expression for terms you wish to find in the provided field.'
     })
-}));
+]);
 
 export const types_query_dsl_rank_feature_function = z.record(z.string(), z.unknown());
 
@@ -776,15 +796,20 @@ export const types_query_dsl_query_string_query = types_query_dsl_query_base.and
     type: z.optional(types_query_dsl_text_query_type)
 }));
 
-export const types_query_dsl_prefix_query = types_query_dsl_query_base.and(z.object({
-    rewrite: z.optional(types_multi_term_query_rewrite),
-    value: z.string().register(z.globalRegistry, {
+export const types_query_dsl_prefix_query = z.union([
+    types_query_dsl_query_base.and(z.object({
+        rewrite: z.optional(types_multi_term_query_rewrite),
+        value: z.string().register(z.globalRegistry, {
+            description: 'Beginning characters of terms you wish to find in the provided field.'
+        }),
+        case_insensitive: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'Allows ASCII case insensitive matching of the value with the indexed field values when set to `true`.\nDefault is `false` which means the case sensitivity of matching depends on the underlying field’s mapping.'
+        }))
+    })),
+    z.string().register(z.globalRegistry, {
         description: 'Beginning characters of terms you wish to find in the provided field.'
-    }),
-    case_insensitive: z.optional(z.boolean().register(z.globalRegistry, {
-        description: 'Allows ASCII case insensitive matching of the value with the indexed field values when set to `true`.\nDefault is `false` which means the case sensitivity of matching depends on the underlying field’s mapping.'
-    }))
-}));
+    })
+]);
 
 export const types_query_dsl_pinned_doc = z.object({
     _id: types_id,
@@ -1004,65 +1029,77 @@ export const types_query_dsl_more_like_this_query = types_query_dsl_query_base.a
     version_type: z.optional(types_version_type)
 }));
 
-export const types_query_dsl_match_phrase_prefix_query = types_query_dsl_query_base.and(z.object({
-    analyzer: z.optional(z.string().register(z.globalRegistry, {
-        description: 'Analyzer used to convert text in the query value into tokens.'
+export const types_query_dsl_match_phrase_prefix_query = z.union([
+    types_query_dsl_query_base.and(z.object({
+        analyzer: z.optional(z.string().register(z.globalRegistry, {
+            description: 'Analyzer used to convert text in the query value into tokens.'
+        })),
+        max_expansions: z.optional(z.number().register(z.globalRegistry, {
+            description: 'Maximum number of terms to which the last provided term of the query value will expand.'
+        })),
+        query: z.string().register(z.globalRegistry, {
+            description: 'Text you wish to find in the provided field.'
+        }),
+        slop: z.optional(z.number().register(z.globalRegistry, {
+            description: 'Maximum number of positions allowed between matching tokens.'
+        })),
+        zero_terms_query: z.optional(types_query_dsl_zero_terms_query)
     })),
-    max_expansions: z.optional(z.number().register(z.globalRegistry, {
-        description: 'Maximum number of terms to which the last provided term of the query value will expand.'
-    })),
-    query: z.string().register(z.globalRegistry, {
+    z.string().register(z.globalRegistry, {
         description: 'Text you wish to find in the provided field.'
-    }),
-    slop: z.optional(z.number().register(z.globalRegistry, {
-        description: 'Maximum number of positions allowed between matching tokens.'
-    })),
-    zero_terms_query: z.optional(types_query_dsl_zero_terms_query)
-}));
+    })
+]);
 
-export const types_query_dsl_match_phrase_query = types_query_dsl_query_base.and(z.object({
-    analyzer: z.optional(z.string().register(z.globalRegistry, {
-        description: 'Analyzer used to convert the text in the query value into tokens.'
+export const types_query_dsl_match_phrase_query = z.union([
+    types_query_dsl_query_base.and(z.object({
+        analyzer: z.optional(z.string().register(z.globalRegistry, {
+            description: 'Analyzer used to convert the text in the query value into tokens.'
+        })),
+        query: z.string().register(z.globalRegistry, {
+            description: 'Query terms that are analyzed and turned into a phrase query.'
+        }),
+        slop: z.optional(z.number().register(z.globalRegistry, {
+            description: 'Maximum number of positions allowed between matching tokens.'
+        })),
+        zero_terms_query: z.optional(types_query_dsl_zero_terms_query)
     })),
-    query: z.string().register(z.globalRegistry, {
+    z.string().register(z.globalRegistry, {
         description: 'Query terms that are analyzed and turned into a phrase query.'
-    }),
-    slop: z.optional(z.number().register(z.globalRegistry, {
-        description: 'Maximum number of positions allowed between matching tokens.'
-    })),
-    zero_terms_query: z.optional(types_query_dsl_zero_terms_query)
-}));
+    })
+]);
 
 export const types_query_dsl_match_none_query = types_query_dsl_query_base.and(z.record(z.string(), z.unknown()));
 
-export const types_query_dsl_match_bool_prefix_query = types_query_dsl_query_base.and(z.object({
-    analyzer: z.optional(z.string().register(z.globalRegistry, {
-        description: 'Analyzer used to convert the text in the query value into tokens.'
+export const types_query_dsl_match_bool_prefix_query = z.union([
+    types_query_dsl_query_base.and(z.object({
+        analyzer: z.optional(z.string().register(z.globalRegistry, {
+            description: 'Analyzer used to convert the text in the query value into tokens.'
+        })),
+        fuzziness: z.optional(types_fuzziness),
+        fuzzy_rewrite: z.optional(types_multi_term_query_rewrite),
+        fuzzy_transpositions: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'If `true`, edits for fuzzy matching include transpositions of two adjacent characters (for example, `ab` to `ba`).\nCan be applied to the term subqueries constructed for all terms but the final term.'
+        })),
+        max_expansions: z.optional(z.number().register(z.globalRegistry, {
+            description: 'Maximum number of terms to which the query will expand.\nCan be applied to the term subqueries constructed for all terms but the final term.'
+        })),
+        minimum_should_match: z.optional(types_minimum_should_match),
+        operator: z.optional(types_query_dsl_operator),
+        prefix_length: z.optional(z.number().register(z.globalRegistry, {
+            description: 'Number of beginning characters left unchanged for fuzzy matching.\nCan be applied to the term subqueries constructed for all terms but the final term.'
+        })),
+        query: z.string().register(z.globalRegistry, {
+            description: 'Terms you wish to find in the provided field.\nThe last term is used in a prefix query.'
+        })
     })),
-    fuzziness: z.optional(types_fuzziness),
-    fuzzy_rewrite: z.optional(types_multi_term_query_rewrite),
-    fuzzy_transpositions: z.optional(z.boolean().register(z.globalRegistry, {
-        description: 'If `true`, edits for fuzzy matching include transpositions of two adjacent characters (for example, `ab` to `ba`).\nCan be applied to the term subqueries constructed for all terms but the final term.'
-    })),
-    max_expansions: z.optional(z.number().register(z.globalRegistry, {
-        description: 'Maximum number of terms to which the query will expand.\nCan be applied to the term subqueries constructed for all terms but the final term.'
-    })),
-    minimum_should_match: z.optional(types_minimum_should_match),
-    operator: z.optional(types_query_dsl_operator),
-    prefix_length: z.optional(z.number().register(z.globalRegistry, {
-        description: 'Number of beginning characters left unchanged for fuzzy matching.\nCan be applied to the term subqueries constructed for all terms but the final term.'
-    })),
-    query: z.string().register(z.globalRegistry, {
+    z.string().register(z.globalRegistry, {
         description: 'Terms you wish to find in the provided field.\nThe last term is used in a prefix query.'
     })
-}));
+]);
 
 export const types_query_dsl_match_all_query = types_query_dsl_query_base.and(z.record(z.string(), z.unknown()));
 
 export const types_query_dsl_match_query = z.union([
-    z.string().register(z.globalRegistry, {
-        description: 'Short query syntax for match query'
-    }),
     types_query_dsl_query_base.and(z.object({
         analyzer: z.optional(z.string().register(z.globalRegistry, {
             description: 'Analyzer used to convert the text in the query value into tokens.'
@@ -1093,7 +1130,12 @@ export const types_query_dsl_match_query = z.union([
             z.boolean()
         ]),
         zero_terms_query: z.optional(types_query_dsl_zero_terms_query)
-    }))
+    })),
+    z.union([
+        z.string(),
+        z.number(),
+        z.boolean()
+    ])
 ]);
 
 export const types_query_dsl_intervals_wildcard = z.object({
@@ -1175,7 +1217,7 @@ export const types_query_dsl_geo_shape_query = types_query_dsl_query_base.and(z.
     ignore_unmapped: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Set to `true` to ignore an unmapped field and not match any documents for this query.\nSet to `false` to throw an exception if the field is not mapped.'
     }))
-}));
+})).and(z.record(z.string(), z.unknown()));
 
 export const types_query_dsl_geo_validation_method = z.enum([
     'coerce',
@@ -1186,7 +1228,7 @@ export const types_query_dsl_geo_validation_method = z.enum([
 export const types_query_dsl_geo_polygon_query = types_query_dsl_query_base.and(z.object({
     validation_method: z.optional(types_query_dsl_geo_validation_method),
     ignore_unmapped: z.optional(z.boolean())
-}));
+})).and(z.record(z.string(), z.unknown()));
 
 /**
  * A map hex cell (H3) reference
@@ -1219,7 +1261,7 @@ export const types_query_dsl_geo_distance_query = types_query_dsl_query_base.and
     ignore_unmapped: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Set to `true` to ignore an unmapped field and not match any documents for this query.\nSet to `false` to throw an exception if the field is not mapped.'
     }))
-}));
+})).and(z.record(z.string(), z.unknown()));
 
 export const types_query_dsl_geo_execution = z.enum(['memory', 'indexed']);
 
@@ -1229,26 +1271,33 @@ export const types_query_dsl_geo_bounding_box_query = types_query_dsl_query_base
     ignore_unmapped: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'Set to `true` to ignore an unmapped field and not match any documents for this query.\nSet to `false` to throw an exception if the field is not mapped.'
     }))
-}));
+})).and(z.record(z.string(), z.unknown()));
 
-export const types_query_dsl_fuzzy_query = types_query_dsl_query_base.and(z.object({
-    max_expansions: z.optional(z.number().register(z.globalRegistry, {
-        description: 'Maximum number of variations created.'
+export const types_query_dsl_fuzzy_query = z.union([
+    types_query_dsl_query_base.and(z.object({
+        max_expansions: z.optional(z.number().register(z.globalRegistry, {
+            description: 'Maximum number of variations created.'
+        })),
+        prefix_length: z.optional(z.number().register(z.globalRegistry, {
+            description: 'Number of beginning characters left unchanged when creating expansions.'
+        })),
+        rewrite: z.optional(types_multi_term_query_rewrite),
+        transpositions: z.optional(z.boolean().register(z.globalRegistry, {
+            description: 'Indicates whether edits include transpositions of two adjacent characters (for example `ab` to `ba`).'
+        })),
+        fuzziness: z.optional(types_fuzziness),
+        value: z.union([
+            z.string(),
+            z.number(),
+            z.boolean()
+        ])
     })),
-    prefix_length: z.optional(z.number().register(z.globalRegistry, {
-        description: 'Number of beginning characters left unchanged when creating expansions.'
-    })),
-    rewrite: z.optional(types_multi_term_query_rewrite),
-    transpositions: z.optional(z.boolean().register(z.globalRegistry, {
-        description: 'Indicates whether edits include transpositions of two adjacent characters (for example `ab` to `ba`).'
-    })),
-    fuzziness: z.optional(types_fuzziness),
-    value: z.union([
+    z.union([
         z.string(),
         z.number(),
         z.boolean()
     ])
-}));
+]);
 
 export const types_query_dsl_function_score_mode = z.enum([
     'multiply',
@@ -1318,7 +1367,7 @@ export const types_query_dsl_date_decay_function = types_query_dsl_decay_functio
 
 export const types_query_dsl_decay_function_base = z.object({
     multi_value_mode: z.optional(types_query_dsl_multi_value_mode)
-});
+}).and(z.record(z.string(), z.unknown()));
 
 export const types_query_dsl_untyped_decay_function = types_query_dsl_decay_function_base.and(z.record(z.string(), z.unknown()));
 
@@ -1422,14 +1471,17 @@ export const types_query_dsl_combined_fields_query = types_query_dsl_query_base.
     zero_terms_query: z.optional(types_query_dsl_combined_fields_zero_terms)
 }));
 
-export const types_query_dsl_common_terms_query = types_query_dsl_query_base.and(z.object({
-    analyzer: z.optional(z.string()),
-    cutoff_frequency: z.optional(z.number()),
-    high_freq_operator: z.optional(types_query_dsl_operator),
-    low_freq_operator: z.optional(types_query_dsl_operator),
-    minimum_should_match: z.optional(types_minimum_should_match),
-    query: z.string()
-}));
+export const types_query_dsl_common_terms_query = z.union([
+    types_query_dsl_query_base.and(z.object({
+        analyzer: z.optional(z.string()),
+        cutoff_frequency: z.optional(z.number()),
+        high_freq_operator: z.optional(types_query_dsl_operator),
+        low_freq_operator: z.optional(types_query_dsl_operator),
+        minimum_should_match: z.optional(types_minimum_should_match),
+        query: z.string()
+    })),
+    z.string()
+]);
 
 /**
  * Base type for bucket aggregations. These aggregations also accept sub-aggregations.
@@ -2285,7 +2337,10 @@ export const types_shard_failure = z.object({
     reason: types_error_cause,
     shard: z.optional(z.number()),
     status: z.optional(z.string()),
-    primary: z.optional(z.boolean())
+    primary: z.optional(z.boolean()),
+    _index: z.optional(types_index_name),
+    _node: z.optional(z.string()),
+    _shard: z.optional(z.number())
 });
 
 export const types_shard_statistics = z.object({
@@ -3536,7 +3591,8 @@ export const types_analysis_stop_token_filter = types_analysis_token_filter_base
 
 export const types_analysis_stemmer_token_filter = types_analysis_token_filter_base.and(z.object({
     type: z.enum(['stemmer']),
-    language: z.optional(z.string())
+    language: z.optional(z.string()),
+    name: z.optional(z.string())
 }));
 
 export const types_analysis_stemmer_override_token_filter = types_analysis_token_filter_base.and(z.object({
@@ -3813,6 +3869,12 @@ export const types_analysis_hunspell_token_filter = types_analysis_token_filter_
     }),
     longest_only: z.optional(z.boolean().register(z.globalRegistry, {
         description: 'If `true`, only the longest stemmed version of each token is included in the output. If `false`, all stemmed versions of the token are included. Defaults to `false`.'
+    })),
+    lang: z.optional(z.string().register(z.globalRegistry, {
+        description: 'Locale directory used to specify the `.aff` and `.dic` files for a Hunspell dictionary.'
+    })),
+    language: z.optional(z.string().register(z.globalRegistry, {
+        description: 'Locale directory used to specify the `.aff` and `.dic` files for a Hunspell dictionary.'
     }))
 }));
 
@@ -6131,17 +6193,20 @@ export const types_mapping_runtime_field = z.object({
     type: types_mapping_runtime_field_type
 });
 
-export const types_script = z.object({
-    get source() {
-        return z.optional(z.lazy((): any => types_script_source));
-    },
-    id: z.optional(types_id),
-    params: z.optional(z.record(z.string(), z.record(z.string(), z.unknown())).register(z.globalRegistry, {
-        description: 'Specifies any named parameters that are passed into the script as variables.\nUse parameters instead of hard-coded values to decrease compile time.'
-    })),
-    lang: z.optional(types_script_language),
-    options: z.optional(z.record(z.string(), z.string()))
-});
+export const types_script = z.union([
+    z.object({
+        get source() {
+            return z.optional(z.lazy((): any => types_script_source));
+        },
+        id: z.optional(types_id),
+        params: z.optional(z.record(z.string(), z.unknown()).register(z.globalRegistry, {
+            description: 'Specifies any named parameters that are passed into the script as variables.\nUse parameters instead of hard-coded values to decrease compile time.'
+        })),
+        lang: z.optional(types_script_language),
+        options: z.optional(z.record(z.string(), z.string()))
+    }),
+    z.string()
+]);
 
 export const types_mapping_runtime_fields = z.record(z.string(), types_mapping_runtime_field);
 
@@ -6722,14 +6787,14 @@ export const types_geo_distance_sort = z.object({
     order: z.optional(types_sort_order),
     unit: z.optional(types_distance_unit),
     nested: z.optional(types_nested_sort_value)
-});
+}).and(z.record(z.string(), z.unknown()));
 
 export const types_sort_options = z.object({
     _score: z.optional(types_score_sort),
     _doc: z.optional(types_score_sort),
     _geo_distance: z.optional(types_geo_distance_sort),
     _script: z.optional(types_script_sort)
-});
+}).and(z.record(z.string(), z.unknown()));
 
 export const types_sort_combinations = z.union([
     types_field,
@@ -6788,7 +6853,12 @@ export const types_aggregations_aggregation_container = z.object({
             description: 'Sub-aggregations for this aggregation.\nOnly applies to bucket aggregations.'
         }));
     },
-    meta: z.optional(types_metadata)
+    meta: z.optional(types_metadata),
+    get aggs() {
+        return z.optional(z.record(z.string(), z.lazy((): any => types_aggregations_aggregation_container)).register(z.globalRegistry, {
+            description: 'Sub-aggregations for this aggregation.\nOnly applies to bucket aggregations.'
+        }));
+    }
 }).and(z.lazy(() => z.object({
     get adjacency_matrix() {
         return z.optional(z.lazy((): any => types_aggregations_adjacency_matrix_aggregation));
@@ -6948,6 +7018,9 @@ export const types_aggregations_aggregation_container = z.object({
     },
     get variable_width_histogram() {
         return z.optional(z.lazy((): any => types_aggregations_variable_width_histogram_aggregation));
+    },
+    get frequent_items() {
+        return z.optional(z.lazy((): any => types_aggregations_frequent_item_sets_aggregation));
     }
 })));
 
@@ -7039,6 +7112,9 @@ export const global_search_types_search_request_body = z.object({
     runtime_mappings: z.optional(types_mapping_runtime_fields),
     stats: z.optional(z.array(z.string()).register(z.globalRegistry, {
         description: 'The stats groups to associate with the search.\nEach group maintains a statistics aggregation for its associated searches.\nYou can retrieve these stats using the indices stats API.'
+    })),
+    aggs: z.optional(z.record(z.string(), types_aggregations_aggregation_container).register(z.globalRegistry, {
+        description: 'Defines the aggregations that are run as part of the search request.'
     }))
 });
 
@@ -8869,7 +8945,7 @@ export const indices_types_index_settings = z.object({
     'indexing.slowlog': z.optional(indices_types_indexing_slowlog_settings),
     indexing_pressure: z.optional(indices_types_indexing_pressure),
     store: z.optional(indices_types_storage)
-});
+}).and(z.record(z.string(), z.unknown()));
 
 export const types_aggregations_top_hits_aggregate = types_aggregations_aggregate_base.and(z.lazy(() => z.object({
     get hits() {
@@ -9692,6 +9768,9 @@ export const search = z.object({
     runtime_mappings: z.optional(types_mapping_runtime_fields),
     stats: z.optional(z.array(z.string()).register(z.globalRegistry, {
         description: 'The stats groups to associate with the search.\nEach group maintains a statistics aggregation for its associated searches.\nYou can retrieve these stats using the indices stats API.'
+    })),
+    aggs: z.optional(z.record(z.string(), types_aggregations_aggregation_container).register(z.globalRegistry, {
+        description: 'Defines the aggregations that are run as part of the search request.'
     }))
 });
 

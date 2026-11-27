@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z, isoDateTime } from '@kbn/zod/v4';
+import { z, isoDateTime, lazySchema } from '@kbn/zod/v4';
 import {
   MAX_TEMPLATE_KEY_LENGTH,
   MAX_TEMPLATE_NAME_LENGTH,
@@ -135,53 +135,55 @@ export type Template = z.infer<typeof TemplateSchema>;
 /**
  * Parsed template definition
  */
-export const ParsedTemplateDefinitionSchema = z.object({
-  /**
-   * Top-level case defaults applied when creating a case from this template.
-   *
-   * Template identity (name/description/tags) is intentionally NOT part of the definition — it lives
-   * on the template saved object attributes and is edited in the render panel's "Template details"
-   * section, never in the YAML. See template_form_layout / TemplateMetadataForm.
-   *
-   * `name` is the default case title and is the single field for it (legacy top-level `title` is
-   * canonicalized to `name` before validation — see normalize_template_case_defaults). Every case
-   * default here is optional — the only thing required to create a template is the template identity
-   * name, which lives on the saved-object attributes (edited in "Template details"), not in this
-   * YAML. Like the other case defaults below, `name` stays lenient and accepts `null` (an empty YAML
-   * value, e.g. `name:` with no value): a cleared title must behave like the other cleared case
-   * defaults and not fail validation. A provided string must still be non-empty (`.min(1)`).
-   */
-  name: z.string().min(1).max(MAX_TITLE_LENGTH).nullable().optional(),
-  // Case-default values are optional. The runtime schema intentionally stays lenient and still
-  // accepts `null` (an empty YAML value / legacy "no default"): it validates migrated and
-  // already-stored definitions, not just newly-authored editor YAML. `buildTemplateYaml` emits
-  // `category: null` for legacy configs, and templates persisted by the old editor may carry a
-  // stored `null` — tightening this would silently drop those on migration and throw on read. The
-  // editor UI is what prevents authoring `null` (severity offers only concrete values; select
-  // controls drop nullish options), so new definitions never introduce it. Downstream merges treat
-  // `null` and an absent key identically (`??` / truthy checks).
-  description: z.string().nullable().optional(),
-  tags: z.array(z.string()).optional(),
-  severity: z.enum(['low', 'medium', 'high', 'critical']).nullable().optional(),
-  category: z.string().nullable().optional(),
-  assignees: CaseUserProfilesSchema.optional(),
-  /**
-   * Default connector pre-selected when creating a case from this template (`name` resolved from
-   * `id` at create time). A first-class case concept, separate from the `fields` system.
-   */
-  connector: CaseConnectorWithoutNameSchema.optional(),
-  /** Default case settings (syncAlerts / extractObservables) applied when creating a case. */
-  settings: TemplateSettingsSchema.optional(),
-  fields: z.array(FieldSchema).refine(
-    (fields) => {
-      const fieldNames = new Set(
-        fields.map((field) => (isRefField(field) ? field.name ?? field.$ref : field.name))
-      );
-      return fieldNames.size === fields.length;
-    },
-    { message: 'Field names must be unique.' }
-  ),
-});
+export const ParsedTemplateDefinitionSchema = lazySchema(() =>
+  z.object({
+    /**
+     * Top-level case defaults applied when creating a case from this template.
+     *
+     * Template identity (name/description/tags) is intentionally NOT part of the definition — it lives
+     * on the template saved object attributes and is edited in the render panel's "Template details"
+     * section, never in the YAML. See template_form_layout / TemplateMetadataForm.
+     *
+     * `name` is the default case title and is the single field for it (legacy top-level `title` is
+     * canonicalized to `name` before validation — see normalize_template_case_defaults). Every case
+     * default here is optional — the only thing required to create a template is the template identity
+     * name, which lives on the saved-object attributes (edited in "Template details"), not in this
+     * YAML. Like the other case defaults below, `name` stays lenient and accepts `null` (an empty YAML
+     * value, e.g. `name:` with no value): a cleared title must behave like the other cleared case
+     * defaults and not fail validation. A provided string must still be non-empty (`.min(1)`).
+     */
+    name: z.string().min(1).max(MAX_TITLE_LENGTH).nullable().optional(),
+    // Case-default values are optional. The runtime schema intentionally stays lenient and still
+    // accepts `null` (an empty YAML value / legacy "no default"): it validates migrated and
+    // already-stored definitions, not just newly-authored editor YAML. `buildTemplateYaml` emits
+    // `category: null` for legacy configs, and templates persisted by the old editor may carry a
+    // stored `null` — tightening this would silently drop those on migration and throw on read. The
+    // editor UI is what prevents authoring `null` (severity offers only concrete values; select
+    // controls drop nullish options), so new definitions never introduce it. Downstream merges treat
+    // `null` and an absent key identically (`??` / truthy checks).
+    description: z.string().nullable().optional(),
+    tags: z.array(z.string()).optional(),
+    severity: z.enum(['low', 'medium', 'high', 'critical']).nullable().optional(),
+    category: z.string().nullable().optional(),
+    assignees: CaseUserProfilesSchema.optional(),
+    /**
+     * Default connector pre-selected when creating a case from this template (`name` resolved from
+     * `id` at create time). A first-class case concept, separate from the `fields` system.
+     */
+    connector: CaseConnectorWithoutNameSchema.optional(),
+    /** Default case settings (syncAlerts / extractObservables) applied when creating a case. */
+    settings: TemplateSettingsSchema.optional(),
+    fields: z.array(FieldSchema).refine(
+      (fields) => {
+        const fieldNames = new Set(
+          fields.map((field) => (isRefField(field) ? (field.name ?? field.$ref) : field.name))
+        );
+        return fieldNames.size === fields.length;
+      },
+      { message: 'Field names must be unique.' }
+    ),
+  })
+);
 
 export type ParsedTemplateDefinition = z.infer<typeof ParsedTemplateDefinitionSchema>;
 

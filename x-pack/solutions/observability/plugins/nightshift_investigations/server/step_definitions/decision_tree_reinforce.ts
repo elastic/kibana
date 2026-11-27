@@ -43,7 +43,7 @@ const SUBMIT_ARGUMENTS_JSON_LIMIT = 100_000;
 
 /** The reinforcement round's Agent Builder trace, when tracing recorded one. */
 export const agentTraceId = (traceId: string | string[] | undefined): string | undefined => {
-  const ids = (typeof traceId === 'string' ? [traceId] : traceId ?? []).filter(
+  const ids = (typeof traceId === 'string' ? [traceId] : (traceId ?? [])).filter(
     (id) => id.length > 0
   );
   return ids.at(-1);

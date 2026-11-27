@@ -147,9 +147,8 @@ apiTest.describe(
           workflowId,
           { triggeredBy: ACTION_POLICY_TRIGGER }
         );
-        const { context, stepExecutions } = await apiServices.alertingV2.workflows.getExecution(
-          executionId
-        );
+        const { context, stepExecutions } =
+          await apiServices.alertingV2.workflows.getExecution(executionId);
         const { alerts } = (context?.inputs as { payload: { alerts: DispatchedAlert[] } }).payload;
         expect(alerts).toHaveLength(HOSTS.length);
 

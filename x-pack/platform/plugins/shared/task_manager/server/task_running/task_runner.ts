@@ -70,6 +70,7 @@ import {
 import type { TaskManagerConfig } from '../config';
 import type { ApiKeyStrategy } from '../api_key_strategy';
 import { taskManagerUiamTelemetry } from '../otel/uiam_telemetry';
+import { taskManagerMetricsTelemetry } from '../otel/task_metrics_telemetry';
 import { TaskValidator } from '../task_validator';
 import { getRetryDate, getTimeout } from '../lib/get_retry_at';
 import { getNextRunAt, getRRuleScheduleDurationMs } from '../lib/get_next_run_at';
@@ -442,12 +443,9 @@ export class TaskManagerRunner implements TaskRunner {
           executionUuid: this.uuid,
         });
 
-        this.onTaskEvent(
-          asTaskManagerStatEvent(
-            'runDelay',
-            asOk(getTaskDelayInSeconds(this.instance.task.scheduledAt))
-          )
-        );
+        const runDelaySeconds = getTaskDelayInSeconds(this.instance.task.scheduledAt);
+        this.onTaskEvent(asTaskManagerStatEvent('runDelay', asOk(runDelaySeconds)));
+        taskManagerMetricsTelemetry.recordTaskRunDelay(runDelaySeconds);
 
         // For long running tasks, update retryAt on an interval to allow for quicker task recovery
         const stopUpdatingLongRunningTasks =
@@ -586,8 +584,8 @@ export class TaskManagerRunner implements TaskRunner {
             err instanceof Error
               ? String(err)
               : typeof err === 'object' && err !== null
-              ? JSON.stringify(err)
-              : String(err);
+                ? JSON.stringify(err)
+                : String(err);
           this.logger.error(`Task ${this} failed: ${errorMessage}`, {
             tags: [this.taskType, this.instance.task.id, 'task-run-failed', `${errorSource}-error`],
             error: { stack_trace: err instanceof Error ? err.stack : undefined },
@@ -925,7 +923,7 @@ export class TaskManagerRunner implements TaskRunner {
           );
           const updatedTaskSchedule = scheduleChangedDuringRun
             ? this.instance.task.schedule
-            : reschedule ?? this.instance.task.schedule;
+            : (reschedule ?? this.instance.task.schedule);
           const nextRunAtForSchedule = (schedule?: IntervalSchedule | RruleSchedule) =>
             getNextRunAt(
               {
@@ -1040,10 +1038,10 @@ export class TaskManagerRunner implements TaskRunner {
     return fieldUpdates.status === TaskStatus.Failed
       ? TaskRunResult.Failed
       : fieldUpdates.status === TaskStatus.ShouldDelete
-      ? TaskRunResult.Deleted
-      : hasTaskRunFailed
-      ? TaskRunResult.SuccessRescheduled
-      : TaskRunResult.RetryScheduled;
+        ? TaskRunResult.Deleted
+        : hasTaskRunFailed
+          ? TaskRunResult.SuccessRescheduled
+          : TaskRunResult.RetryScheduled;
   }
 
   private async processResultWhenDone(): Promise<TaskRunResult> {

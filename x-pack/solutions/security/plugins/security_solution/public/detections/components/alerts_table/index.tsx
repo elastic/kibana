@@ -16,7 +16,7 @@ import type {
 } from '@kbn/response-ops-alerts-table/types';
 import { ALERT_BUILDING_BLOCK_TYPE, AlertConsumers } from '@kbn/rule-data-utils';
 import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import {
@@ -37,10 +37,10 @@ import { PROJECT_ROUTING } from '@kbn/cps-utils';
 import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry';
 import { PageScope } from '../../../data_view_manager/constants';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { getDocumentIdentity } from './get_document_identity';
 import { documentFlyoutHistoryKey } from '../../../flyout_v2/shared/constants/flyout_history';
 import { PaginatedDocumentFlyout } from '../../../flyout_v2/document/pagination/paginated_document_flyout';
 import { usePaginatedFlyout } from '../../../flyout_v2/document/pagination/use_paginated_flyout';
-import type { ScopedPaginationSlice } from '../../../flyout_v2/document/pagination/types';
 import { createCellActionRenderer } from '../../../flyout_v2/shared/components/cell_actions';
 import { useAlertsContext } from './alerts_context';
 import { useBulkActionsByTableType } from '../../hooks/trigger_actions_alert_table/use_bulk_actions';
@@ -140,8 +140,10 @@ const EuiDataGridContainer = styled.div<GridContainerProps>`
   width: 100%;
 `;
 
-interface AlertTableProps
-  extends SetOptional<SecurityAlertsTableProps, 'id' | 'ruleTypeIds' | 'query'> {
+interface AlertTableProps extends SetOptional<
+  SecurityAlertsTableProps,
+  'id' | 'ruleTypeIds' | 'query'
+> {
   inputFilters?: Filter[];
   tableType?: TableId;
   pageScope?: PageScope;
@@ -287,7 +289,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
         fontSize: 's',
         header: 'underline',
         stripes: isEventRenderedView,
-      } as EuiDataGridStyle),
+      }) as EuiDataGridStyle,
     [isEventRenderedView]
   );
 
@@ -599,12 +601,12 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
       isEventRenderedView
         ? `${DEFAULT_DATA_GRID_HEIGHT}px`
         : /*
-         * We keep fixed height in Event rendered because of the row height issue
-         * as mentioned here
-         */
-        count > 20
-        ? `${DEFAULT_DATA_GRID_HEIGHT}px`
-        : undefined,
+           * We keep fixed height in Event rendered because of the row height issue
+           * as mentioned here
+           */
+          count > 20
+          ? `${DEFAULT_DATA_GRID_HEIGHT}px`
+          : undefined,
     [count, isEventRenderedView]
   );
 
@@ -690,10 +692,5 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
     </FullWidthFlexGroupTable>
   );
 };
-
-const getDocumentIdentity = (alert: Alert): Partial<ScopedPaginationSlice> => ({
-  flyoutDocumentId: alert._id,
-  flyoutDocumentIndexName: alert._index,
-});
 
 export const AlertsTable = memo(AlertsTableComponent);

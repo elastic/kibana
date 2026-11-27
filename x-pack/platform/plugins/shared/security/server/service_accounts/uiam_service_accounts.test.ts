@@ -497,7 +497,7 @@ describe('UiamServiceAccounts', () => {
 
       await expect(
         serviceAccounts.create(createMockRequest('Bearer essu_my_token'), createParams)
-      ).rejects.toThrowError('upstream exploded');
+      ).rejects.toThrow('upstream exploded');
       expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining('Failed to create service account [nightshift-relay]')
       );
@@ -1223,7 +1223,7 @@ describe('UiamServiceAccounts', () => {
 
         await expect(
           serviceAccounts.createFakeRequest({ serviceAccountId: 'service-account-id' })
-        ).rejects.toThrowError('Error occurred during service account token exchange');
+        ).rejects.toThrow('Error occurred during service account token exchange');
       });
 
       it('rejects when the exchange response contains an empty token', async () => {
@@ -1231,7 +1231,7 @@ describe('UiamServiceAccounts', () => {
 
         await expect(
           serviceAccounts.createFakeRequest({ serviceAccountId: 'service-account-id' })
-        ).rejects.toThrowError('Error occurred during service account token exchange');
+        ).rejects.toThrow('Error occurred during service account token exchange');
       });
 
       // The token carries the account's roles, so an account that fills UIAM's role limits with
@@ -1256,7 +1256,7 @@ describe('UiamServiceAccounts', () => {
 
         await expect(
           serviceAccounts.createFakeRequest({ serviceAccountId: 'service-account-id' })
-        ).rejects.toThrowError('Error occurred during service account token exchange');
+        ).rejects.toThrow('Error occurred during service account token exchange');
       });
 
       it.each([408, 429, 500, 502, 503, 504])(
@@ -1321,19 +1321,19 @@ describe('UiamServiceAccounts', () => {
       });
 
       it.each([
-        'ECONNREFUSED',
-        'ECONNRESET',
-        'ECONNABORTED',
-        'EPIPE',
-        'EAI_AGAIN',
-        'ETIMEDOUT',
-        'ENETUNREACH',
-        'EHOSTUNREACH',
-        'UND_ERR_CONNECT_TIMEOUT',
-        'UND_ERR_HEADERS_TIMEOUT',
-        'UND_ERR_BODY_TIMEOUT',
-        'UND_ERR_SOCKET',
-      ])('retries transport failure %s from fetch', async (code) => {
+        ['ECONNREFUSED', true],
+        ['EAI_AGAIN', true],
+        ['ENETUNREACH', true],
+        ['EHOSTUNREACH', true],
+        ['UND_ERR_CONNECT_TIMEOUT', true],
+        ['ECONNRESET', false],
+        ['ECONNABORTED', false],
+        ['EPIPE', false],
+        ['ETIMEDOUT', false],
+        ['UND_ERR_HEADERS_TIMEOUT', false],
+        ['UND_ERR_BODY_TIMEOUT', false],
+        ['UND_ERR_SOCKET', false],
+      ])('retries transport failure %s from fetch (not sent: %s)', async (code, notSent) => {
         const cause = new TypeError('fetch failed', {
           cause: Object.assign(new Error('transport failure'), { code }),
         });
@@ -1343,9 +1343,35 @@ describe('UiamServiceAccounts', () => {
         ).rejects.toMatchObject({
           cause,
           retryable: true,
+          notSent,
           statusCode: undefined,
           message: 'Error occurred during service account token exchange.',
         });
+        expect(mockUiam.exchangeServiceAccountToken).toHaveBeenCalledTimes(notSent ? 2 : 1);
+      });
+
+      it('recovers from a connection failure with one immediate retry', async () => {
+        mockUiam.exchangeServiceAccountToken.mockRejectedValueOnce(
+          new TypeError('fetch failed', {
+            cause: Object.assign(new Error('connect timeout'), { code: 'UND_ERR_CONNECT_TIMEOUT' }),
+          })
+        );
+
+        const request = await serviceAccounts.createFakeRequest({
+          serviceAccountId: 'service-account-id',
+        });
+
+        expect(mockUiam.exchangeServiceAccountToken).toHaveBeenCalledTimes(2);
+        expect(request.headers.authorization).toBe('Bearer essu_token_1');
+      });
+
+      it('leaves the retry to the caller when UIAM answers with an error', async () => {
+        mockUiam.exchangeServiceAccountToken.mockRejectedValueOnce(Boom.serverUnavailable());
+
+        await expect(
+          serviceAccounts.createFakeRequest({ serviceAccountId: 'service-account-id' })
+        ).rejects.toMatchObject({ retryable: true });
+        expect(mockUiam.exchangeServiceAccountToken).toHaveBeenCalledTimes(1);
       });
 
       it.each(['ENOTFOUND', 'CERT_HAS_EXPIRED', 'UNABLE_TO_VERIFY_LEAF_SIGNATURE', 'UNCLASSIFIED'])(

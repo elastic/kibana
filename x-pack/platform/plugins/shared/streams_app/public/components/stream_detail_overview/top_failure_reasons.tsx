@@ -67,7 +67,7 @@ export function TopFailureReasons({
       try {
         response = await executeEsqlQuery({
           query: buildTopFailureReasonsEsql(streamName),
-          search: data.search.search,
+          search: data.search,
           signal,
           start: ts.start,
           end: ts.end,
@@ -87,14 +87,12 @@ export function TopFailureReasons({
 
       return response.values
         .filter((row) => row[errorTypeIdx] != null)
-        .map(
-          (row): FailureReason => ({
-            errorType: String(row[errorTypeIdx]),
-            count: (row[countIdx] as number) ?? 0,
-          })
-        );
+        .map((row): FailureReason => ({
+          errorType: String(row[errorTypeIdx]),
+          count: (row[countIdx] as number) ?? 0,
+        }));
     },
-    [streamName, canReadFailureStore, failedDocs, data.search.search, uiSettings],
+    [streamName, canReadFailureStore, failedDocs, data.search, uiSettings],
     { withTimeRange: true, withRefresh: true }
   );
 

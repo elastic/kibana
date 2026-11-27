@@ -48,6 +48,17 @@ const buildRawConnectorType = (id: string) => ({
   supported_feature_ids: ['contextEngine'],
 });
 
+const typeDisplayName = (actionTypeId: string) => `Type ${actionTypeId}`;
+
+const buildExpectedDataConnector = (connector: {
+  id: string;
+  name: string;
+  actionTypeId: string;
+}) => ({
+  ...connector,
+  actionTypeName: typeDisplayName(connector.actionTypeId),
+});
+
 const buildSupportedTypesResponse = () => SUPPORTED_TYPE_IDS.map(buildRawConnectorType);
 
 const mockHttpGet = (
@@ -147,8 +158,12 @@ describe('useDataConnectors', () => {
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     expect(result.current.connectors).toEqual([
-      { id: 'gd-1', name: 'Google Drive', actionTypeId: '.google_drive' },
-      { id: 'gh-1', name: 'GitHub', actionTypeId: '.github' },
+      buildExpectedDataConnector({
+        id: 'gd-1',
+        name: 'Google Drive',
+        actionTypeId: '.google_drive',
+      }),
+      buildExpectedDataConnector({ id: 'gh-1', name: 'GitHub', actionTypeId: '.github' }),
     ]);
   });
 
@@ -167,11 +182,13 @@ describe('useDataConnectors', () => {
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     expect(result.current.connectors).toEqual(
-      SUPPORTED_TYPE_IDS.map((connectorTypeId, index) => ({
-        id: `connector-${index}`,
-        name: `Connector ${connectorTypeId}`,
-        actionTypeId: connectorTypeId,
-      }))
+      SUPPORTED_TYPE_IDS.map((connectorTypeId, index) =>
+        buildExpectedDataConnector({
+          id: `connector-${index}`,
+          name: `Connector ${connectorTypeId}`,
+          actionTypeId: connectorTypeId,
+        })
+      )
     );
   });
 
@@ -187,7 +204,11 @@ describe('useDataConnectors', () => {
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     expect(result.current.connectors).toEqual([
-      { id: 'gd-empty-name', name: 'gd-empty-name', actionTypeId: '.google_drive' },
+      buildExpectedDataConnector({
+        id: 'gd-empty-name',
+        name: 'gd-empty-name',
+        actionTypeId: '.google_drive',
+      }),
     ]);
   });
 
@@ -206,6 +227,40 @@ describe('useDataConnectors', () => {
     expect(result.current.connectorNameById.get('gd-1')).toBe('Google Drive');
     expect(result.current.connectorNameById.get('gh-1')).toBe('GitHub');
     expect(result.current.connectorNameById.get('unknown-id')).toBeUndefined();
+  });
+
+  it('connectorActionTypeById maps each connector id to its action type id', async () => {
+    const core = coreMock.createStart();
+    mockHttpGet(core, {
+      connectors: [
+        buildRawConnector({ id: 'gd-1', name: 'Google Drive', connector_type_id: '.google_drive' }),
+        buildRawConnector({ id: 'gh-1', name: 'GitHub', connector_type_id: '.github' }),
+      ],
+    });
+    const { result } = renderDataConnectors(core);
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.connectorActionTypeById.get('gd-1')).toBe('.google_drive');
+    expect(result.current.connectorActionTypeById.get('gh-1')).toBe('.github');
+    expect(result.current.connectorActionTypeById.get('unknown-id')).toBeUndefined();
+  });
+
+  it('connectorTypeNameById maps each connector id to its action type display name', async () => {
+    const core = coreMock.createStart();
+    mockHttpGet(core, {
+      connectors: [
+        buildRawConnector({ id: 'gd-1', name: 'Google Drive', connector_type_id: '.google_drive' }),
+        buildRawConnector({ id: 'gh-1', name: 'GitHub', connector_type_id: '.github' }),
+      ],
+    });
+    const { result } = renderDataConnectors(core);
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.connectorTypeNameById.get('gd-1')).toBe(typeDisplayName('.google_drive'));
+    expect(result.current.connectorTypeNameById.get('gh-1')).toBe(typeDisplayName('.github'));
+    expect(result.current.connectorTypeNameById.get('unknown-id')).toBeUndefined();
   });
 
   it('returns isError and an empty connectors array when the connectors request rejects', async () => {

@@ -6,12 +6,13 @@
  */
 import { z, lazySchema } from '@kbn/zod';
 
+import { MAX_KEYWORD_LENGTH } from '../../schema/limits';
 import { sloIdSchema } from '../../schema/slo';
 
 const bulkDeleteParamsSchema = lazySchema(() =>
   z.object({
     body: z.object({
-      list: z.array(sloIdSchema).describe('An array of SLO Definition id'),
+      list: z.array(sloIdSchema).describe('An array of SLO definition IDs'),
     }),
   })
 );
@@ -19,7 +20,10 @@ const bulkDeleteParamsSchema = lazySchema(() =>
 const bulkDeleteStatusParamsSchema = lazySchema(() =>
   z.object({
     path: z.object({
-      taskId: z.string().describe('The task id of the bulk delete operation'),
+      taskId: z
+        .string()
+        .max(MAX_KEYWORD_LENGTH)
+        .describe('The task ID of the bulk delete operation'),
     }),
   })
 );

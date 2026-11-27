@@ -214,12 +214,14 @@ const providersConfigSchema = schema.object(
   }
 );
 
+export const DEFAULT_COOKIE_NAME = 'sid';
+
 export const ConfigSchema = schema.object({
   loginAssistanceMessage: schema.string({ defaultValue: '' }),
   showInsecureClusterWarning: schema.boolean({ defaultValue: true }),
   loginHelp: schema.maybe(schema.string()),
   showNavLinks: schema.boolean({ defaultValue: true }),
-  cookieName: schema.string({ defaultValue: 'sid' }),
+  cookieName: schema.string({ defaultValue: DEFAULT_COOKIE_NAME }),
   encryptionKey: schema.conditional(
     schema.contextRef('dist'),
     true,
@@ -336,6 +338,10 @@ export const ConfigSchema = schema.object({
         }
       },
     }),
+  }),
+
+  authz: schema.object({
+    ols: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
   }),
 
   // Setting only allowed in the Serverless offering
@@ -614,7 +620,7 @@ function getSessionConfig(session: RawConfigType['session'], providers: Provider
         [session.idleTimeout, providerSessionConfig?.idleTimeout],
         [session.lifespan, providerSessionConfig?.lifespan],
       ].map(([globalTimeout, providerTimeout]) => {
-        const timeout = providerTimeout === undefined ? globalTimeout ?? null : providerTimeout;
+        const timeout = providerTimeout === undefined ? (globalTimeout ?? null) : providerTimeout;
         return timeout && timeout.asMilliseconds() > 0 ? timeout : null;
       });
 

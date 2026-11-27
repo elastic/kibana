@@ -48,7 +48,6 @@ export const FTR_EXCLUDED_MODULES: ReadonlySet<string> = new Set([
   '@kbn/dependency-ownership',
 
   // Lint
-  '@kbn/eslint-config',
   '@kbn/eslint-plugin-alerting-v2',
   '@kbn/eslint-plugin-disable',
   '@kbn/eslint-plugin-eslint',
@@ -94,8 +93,7 @@ export const FTR_IRRELEVANT_PATHS: readonly string[] = [
   '**/CODEOWNERS',
   'OWNERS',
   '**/OWNERS',
-  '**/.eslintrc*',
-  '**/.prettierrc*',
+  '**/.oxfmtrc*',
   '.mise.toml',
   '.river/**',
   '**/.i18nrc.json',
@@ -114,6 +112,8 @@ export const FTR_IRRELEVANT_PATHS: readonly string[] = [
   '**/*.webp',
   // Scout (Playwright) test trees never affect FTR, whichever module owns them.
   '**/test/scout{_*,}/**',
+  // Enforced in Build Kibana Distribution; cannot affect FTR runtime.
+  'packages/kbn-rspack-optimizer/limits.yml',
 ];
 
 /**

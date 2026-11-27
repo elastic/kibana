@@ -19,6 +19,7 @@ export interface ActionsPublicPluginSetup {
   isEarsEnabled: boolean;
   isEarsExperimentalEnabled: boolean;
   isInboundEventsEnabled: boolean;
+  isCatalogEnabled?: boolean;
 }
 
 export interface Config {
@@ -44,6 +45,7 @@ export interface Config {
   inboundEvents?: {
     enabled: boolean;
   };
+  catalog?: { enabled: boolean };
 }
 
 export class Plugin implements CorePlugin<ActionsPublicPluginSetup> {
@@ -53,6 +55,7 @@ export class Plugin implements CorePlugin<ActionsPublicPluginSetup> {
   private readonly earsEnabled: boolean;
   private readonly earsExperimentalEnabled: boolean;
   private readonly inboundEventsEnabled: boolean;
+  private readonly catalogEnabled: boolean;
 
   constructor(ctx: PluginInitializerContext<Config>) {
     const config = ctx.config.get();
@@ -62,6 +65,7 @@ export class Plugin implements CorePlugin<ActionsPublicPluginSetup> {
     this.earsEnabled = config.auth?.ears?.enabled ?? true;
     this.earsExperimentalEnabled = config.auth?.ears?.enableExperimental ?? false;
     this.inboundEventsEnabled = config.inboundEvents?.enabled ?? true;
+    this.catalogEnabled = config.catalog?.enabled ?? false;
   }
 
   public setup(): ActionsPublicPluginSetup {
@@ -73,6 +77,7 @@ export class Plugin implements CorePlugin<ActionsPublicPluginSetup> {
       isEarsEnabled: this.earsEnabled,
       isEarsExperimentalEnabled: this.earsExperimentalEnabled,
       isInboundEventsEnabled: this.inboundEventsEnabled,
+      isCatalogEnabled: this.catalogEnabled,
     };
   }
 

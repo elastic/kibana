@@ -13,6 +13,7 @@ import {
   createNightshiftInvestigationsRepositoryClient,
   type NightshiftInvestigationsRepositoryClient,
 } from './api';
+import { registerInvestigationsWorkflowSteps } from './workflows/steps';
 import { registerInvestigationsWorkflowTriggers } from './workflows/triggers';
 
 export interface NightshiftInvestigationsPublicSetupDeps {
@@ -26,19 +27,17 @@ export interface NightshiftInvestigationsPublicStart {
   investigationsClient: NightshiftInvestigationsRepositoryClient;
 }
 
-export class NightshiftInvestigationsPublicPlugin
-  implements
-    Plugin<
-      NightshiftInvestigationsPublicSetup,
-      NightshiftInvestigationsPublicStart,
-      NightshiftInvestigationsPublicSetupDeps
-    >
-{
+export class NightshiftInvestigationsPublicPlugin implements Plugin<
+  NightshiftInvestigationsPublicSetup,
+  NightshiftInvestigationsPublicStart,
+  NightshiftInvestigationsPublicSetupDeps
+> {
   setup(
     _core: CoreSetup,
     { share, workflowsExtensions }: NightshiftInvestigationsPublicSetupDeps
   ): NightshiftInvestigationsPublicSetup {
     registerInvestigationsWorkflowTriggers(workflowsExtensions);
+    registerInvestigationsWorkflowSteps(workflowsExtensions);
 
     share.url.locators.create(new InvestigationLocatorDefinition());
   }

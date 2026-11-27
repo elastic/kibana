@@ -137,13 +137,14 @@ export function createWorkloadAggregator({
     MAX_SCHEDULE_DENSITY_BUCKETS
   );
 
-  const totalNumTaskDefinitions = taskDefinitions.getAllTypes().length;
-  const taskTypeTermAggSize = Math.min(totalNumTaskDefinitions, 10000);
-
   return combineLatest([timer(0, refreshInterval), elasticsearchAndSOAvailability$]).pipe(
     filter(([, areElasticsearchAndSOAvailable]) => areElasticsearchAndSOAvailable),
-    mergeMap(() =>
-      taskStore.aggregate({
+    mergeMap(() => {
+      // Read each cycle: task types can be registered after Task Manager starts.
+      const totalNumTaskDefinitions = taskDefinitions.getAllTypes().length;
+      const taskTypeTermAggSize = Math.min(totalNumTaskDefinitions, 10000);
+
+      return taskStore.aggregate({
         aggs: {
           taskType: {
             terms: { size: taskTypeTermAggSize, field: 'task.taskType' },
@@ -200,14 +201,14 @@ export function createWorkloadAggregator({
             },
           },
         },
-      })
-    ),
+      });
+    }),
     map((result) => {
       const {
         aggregations,
         hits: { total },
       } = result;
-      const count = typeof total === 'number' ? total : total?.value ?? 0;
+      const count = typeof total === 'number' ? total : (total?.value ?? 0);
 
       if (!hasAggregations(aggregations)) {
         throw new Error(`Invalid workload: ${JSON.stringify(result)}`);

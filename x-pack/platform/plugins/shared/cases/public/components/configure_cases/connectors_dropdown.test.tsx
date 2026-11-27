@@ -6,19 +6,16 @@
  */
 
 import React from 'react';
-import type { ReactWrapper, ComponentType } from 'enzyme';
-import { mount } from 'enzyme';
-import { EuiSuperSelect } from '@elastic/eui';
-import { render, screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import type { Props } from './connectors_dropdown';
 import { ConnectorsDropdown } from './connectors_dropdown';
-import { TestProviders } from '../../common/mock';
+import { renderWithTestingProviders } from '../../common/mock';
 import { connectors } from './__mock__';
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 describe('ConnectorsDropdown', () => {
-  let wrapper: ReactWrapper;
   const props: Props = {
     disabled: false,
     connectors,
@@ -27,237 +24,91 @@ describe('ConnectorsDropdown', () => {
     selectedConnector: 'none',
   };
 
-  beforeAll(() => {
-    wrapper = mount(<ConnectorsDropdown {...props} />, {
-      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
-    });
-  });
-
   test('it renders', () => {
-    expect(wrapper.find('[data-test-subj="dropdown-connectors"]').first().exists()).toBe(true);
+    renderWithTestingProviders(<ConnectorsDropdown {...props} />);
+    expect(screen.getByTestId('dropdown-connectors')).toBeInTheDocument();
   });
 
-  test('it formats the connectors correctly', () => {
-    const selectProps = wrapper.find(EuiSuperSelect).props();
+  test('it formats the connectors correctly', async () => {
+    renderWithTestingProviders(<ConnectorsDropdown {...props} />);
 
-    expect(selectProps.options).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "data-test-subj": "dropdown-connector-no-connector",
-          "inputDisplay": <EuiFlexGroup
-            alignItems="center"
-            gutterSize="none"
-            responsive={false}
-          >
-            <EuiFlexItem
-              grow={false}
-            >
-              <EuiIcon
-                aria-hidden={true}
-                css="unknown styles"
-                size="m"
-                type="minusCircle"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <span
-                data-test-subj="dropdown-connector-no-connector-label"
-              >
-                No connector selected
-              </span>
-            </EuiFlexItem>
-          </EuiFlexGroup>,
-          "value": "none",
-        },
-        Object {
-          "data-test-subj": "dropdown-connector-servicenow-1",
-          "inputDisplay": <EuiFlexGroup
-            alignItems="center"
-            gutterSize="s"
-            responsive={false}
-          >
-            <EuiFlexItem
-              grow={false}
-            >
-              <EuiIcon
-                aria-hidden={true}
-                css="unknown styles"
-                size="m"
-                type="logoSecurity"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem
-              grow={false}
-            >
-              <span>
-                My SN connector
-              </span>
-            </EuiFlexItem>
-          </EuiFlexGroup>,
-          "value": "servicenow-1",
-        },
-        Object {
-          "data-test-subj": "dropdown-connector-resilient-2",
-          "inputDisplay": <EuiFlexGroup
-            alignItems="center"
-            gutterSize="s"
-            responsive={false}
-          >
-            <EuiFlexItem
-              grow={false}
-            >
-              <EuiIcon
-                aria-hidden={true}
-                css="unknown styles"
-                size="m"
-                type="logoSecurity"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem
-              grow={false}
-            >
-              <span>
-                My Resilient connector
-              </span>
-            </EuiFlexItem>
-          </EuiFlexGroup>,
-          "value": "resilient-2",
-        },
-        Object {
-          "data-test-subj": "dropdown-connector-jira-1",
-          "inputDisplay": <EuiFlexGroup
-            alignItems="center"
-            gutterSize="s"
-            responsive={false}
-          >
-            <EuiFlexItem
-              grow={false}
-            >
-              <EuiIcon
-                aria-hidden={true}
-                css="unknown styles"
-                size="m"
-                type="logoSecurity"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem
-              grow={false}
-            >
-              <span>
-                Jira
-              </span>
-            </EuiFlexItem>
-          </EuiFlexGroup>,
-          "value": "jira-1",
-        },
-        Object {
-          "data-test-subj": "dropdown-connector-servicenow-sir",
-          "inputDisplay": <EuiFlexGroup
-            alignItems="center"
-            gutterSize="s"
-            responsive={false}
-          >
-            <EuiFlexItem
-              grow={false}
-            >
-              <EuiIcon
-                aria-hidden={true}
-                css="unknown styles"
-                size="m"
-                type="logoSecurity"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem
-              grow={false}
-            >
-              <span>
-                My Connector SIR
-              </span>
-            </EuiFlexItem>
-          </EuiFlexGroup>,
-          "value": "servicenow-sir",
-        },
-        Object {
-          "data-test-subj": "dropdown-connector-servicenow-uses-table-api",
-          "inputDisplay": <EuiFlexGroup
-            alignItems="center"
-            gutterSize="s"
-            responsive={false}
-          >
-            <EuiFlexItem
-              grow={false}
-            >
-              <EuiIcon
-                aria-hidden={true}
-                css="unknown styles"
-                size="m"
-                type="logoSecurity"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem
-              grow={false}
-            >
-              <span>
-                My deprecated SN connector
-                 (deprecated)
-              </span>
-            </EuiFlexItem>
-            <EuiFlexItem
-              grow={false}
-            >
-              <EuiIconTip
-                aria-label="This connector is deprecated. Update it, or create a new one."
-                color="warning"
-                content="This connector is deprecated. Update it, or create a new one."
-                css="unknown styles"
-                size="m"
-                type="warning"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>,
-          "value": "servicenow-uses-table-api",
-        },
-      ]
-    `);
+    await userEvent.click(screen.getByTestId('dropdown-connectors'));
+
+    const expectedOptions = [
+      { id: 'dropdown-connector-no-connector', text: 'No connector selected' },
+      { id: 'dropdown-connector-servicenow-1', text: 'My SN connector' },
+      { id: 'dropdown-connector-resilient-2', text: 'My Resilient connector' },
+      { id: 'dropdown-connector-jira-1', text: 'Jira' },
+      { id: 'dropdown-connector-servicenow-sir', text: 'My Connector SIR' },
+      {
+        id: 'dropdown-connector-servicenow-uses-table-api',
+        text: 'My deprecated SN connector (deprecated)',
+      },
+    ];
+
+    const options = await screen.findAllByRole('option');
+    expect(options).toHaveLength(expectedOptions.length);
+
+    expectedOptions.forEach(({ id, text }, index) => {
+      expect(options[index]).toHaveAttribute('data-test-subj', id);
+      expect(options[index]).toHaveTextContent(text);
+    });
+
+    expect(
+      within(options[5]).getByText('This connector is deprecated. Update it, or create a new one.')
+    ).toBeInTheDocument();
+  });
+
+  test.each([
+    ['dropdown-connector-no-connector', 'none'],
+    ['dropdown-connector-servicenow-1', 'servicenow-1'],
+    ['dropdown-connector-resilient-2', 'resilient-2'],
+    ['dropdown-connector-jira-1', 'jira-1'],
+    ['dropdown-connector-servicenow-sir', 'servicenow-sir'],
+    ['dropdown-connector-servicenow-uses-table-api', 'servicenow-uses-table-api'],
+  ])('it calls onChange with the connector id when selecting %s', async (testSubj, id) => {
+    const onChange = jest.fn();
+    renderWithTestingProviders(
+      <ConnectorsDropdown {...props} onChange={onChange} selectedConnector="other" />
+    );
+
+    // the EUI popover panel is `pointer-events: none` while it animates open
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
+    await user.click(screen.getByTestId('dropdown-connectors'));
+    await user.click(await screen.findByTestId(testSubj));
+
+    expect(onChange).toHaveBeenCalledWith(id);
   });
 
   test('it disables the dropdown', () => {
-    const newWrapper = mount(<ConnectorsDropdown {...props} disabled={true} />, {
-      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
-    });
+    renderWithTestingProviders(<ConnectorsDropdown {...props} disabled={true} />);
 
-    expect(
-      newWrapper.find('[data-test-subj="dropdown-connectors"]').first().prop('disabled')
-    ).toEqual(true);
+    expect(screen.getByTestId('dropdown-connectors')).toBeDisabled();
   });
 
   test('it loading correctly', () => {
-    const newWrapper = mount(<ConnectorsDropdown {...props} isLoading={true} />, {
-      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
-    });
+    renderWithTestingProviders(<ConnectorsDropdown {...props} isLoading={true} />);
 
-    expect(
-      newWrapper.find('[data-test-subj="dropdown-connectors"]').first().prop('isLoading')
-    ).toEqual(true);
+    expect(screen.getByRole('progressbar')).toBeInTheDocument();
+  });
+
+  test('it does not show a loading indicator when not loading', () => {
+    renderWithTestingProviders(<ConnectorsDropdown {...props} />);
+
+    expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
   });
 
   test('it selects the correct connector', () => {
-    const newWrapper = mount(<ConnectorsDropdown {...props} selectedConnector={'servicenow-1'} />, {
-      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
-    });
+    renderWithTestingProviders(
+      <ConnectorsDropdown {...props} selectedConnector={'servicenow-1'} />
+    );
 
-    expect(
-      newWrapper
-        .find('[data-test-subj="dropdown-connectors"]')
-        .first()
-        .text()
-        .includes('My SN connector')
-    ).toBeTruthy();
+    expect(screen.getByTestId('dropdown-connectors')).toHaveTextContent('My SN connector');
   });
 
   test('it does not throw when accessing the icon if the connector type is not registered', () => {
     expect(() =>
-      mount(
+      renderWithTestingProviders(
         <ConnectorsDropdown
           {...props}
           connectors={[
@@ -267,28 +118,28 @@ describe('ConnectorsDropdown', () => {
               name: 'None',
             }),
           ]}
-        />,
-        {
-          wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
-        }
+        />
       )
     ).not.toThrow();
   });
 
-  test('it shows the deprecated tooltip when the connector is deprecated', () => {
-    render(<ConnectorsDropdown {...props} selectedConnector="servicenow-uses-table-api" />, {
-      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-    });
+  test('it shows the deprecated tooltip when the connector is deprecated', async () => {
+    renderWithTestingProviders(
+      <ConnectorsDropdown {...props} selectedConnector="servicenow-uses-table-api" />
+    );
 
-    const tooltips = screen.getAllByText(
+    await userEvent.hover(
+      screen.getByText('This connector is deprecated. Update it, or create a new one.')
+    );
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(
       'This connector is deprecated. Update it, or create a new one.'
     );
-    expect(tooltips[0]).toBeInTheDocument();
   });
 
-  test('it shows the deprecated tooltip when the connector is deprecated by configuration', () => {
+  test('it shows the deprecated tooltip when the connector is deprecated by configuration', async () => {
     const connector = connectors[0];
-    render(
+    renderWithTestingProviders(
       <ConnectorsDropdown
         {...props}
         connectors={[
@@ -298,13 +149,15 @@ describe('ConnectorsDropdown', () => {
           },
         ]}
         selectedConnector={connector.id}
-      />,
-      { wrapper: ({ children }) => <TestProviders>{children}</TestProviders> }
+      />
     );
 
-    const tooltips = screen.getAllByText(
+    await userEvent.hover(
+      screen.getByText('This connector is deprecated. Update it, or create a new one.')
+    );
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(
       'This connector is deprecated. Update it, or create a new one.'
     );
-    expect(tooltips[0]).toBeInTheDocument();
   });
 });

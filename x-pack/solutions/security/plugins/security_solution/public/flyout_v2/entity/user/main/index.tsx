@@ -38,14 +38,14 @@ import { Header } from './header';
 import { Content } from './content';
 import { Footer } from './footer';
 import { useObservedUser } from './hooks/use_observed_user';
-import { useManagedUser } from '../../../../flyout/entity_details/shared/hooks/use_managed_user';
+import { useManagedUser } from '../../shared/hooks/use_managed_user';
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import {
   buildRiskScoreStateFromEntityRecord,
   getHeaderRiskLevel,
 } from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
 import { useNewEntityAnalyticsPage } from '../../../../entity_analytics/hooks/use_new_entity_analytics_page';
-import { isEntityGroupView } from '../../../../flyout/entity_details/shared/entity_store_group_utils';
+import { isEntityGroupView } from '../../shared/utils/entity_store_group_utils';
 import {
   useEntityFromStore,
   type EntityStoreRecord,
@@ -57,13 +57,10 @@ import {
   type IdentityFields,
 } from '../../../../flyout/document_details/shared/utils';
 import { USER_PANEL_RISK_SCORE_QUERY_ID } from './constants';
-import {
-  useEntityPanelTabs,
-  TABLE_TAB_ID,
-} from '../../../../flyout/entity_details/shared/hooks/use_entity_panel_tabs';
-import { EntityPanelHeaderTabs } from '../../../../flyout/entity_details/shared/components/entity_panel_tabs';
-import { EntityStoreTableTab } from '../../../../flyout/entity_details/shared/components/entity_store_table_tab';
-import { EntitySummaryGrid } from '../../../../flyout/entity_details/shared/components/entity_summary_grid';
+import { useEntityPanelTabs, TABLE_TAB_ID } from '../../shared/hooks/use_entity_panel_tabs';
+import { EntityPanelHeaderTabs } from '../../shared/components/entity_panel_tabs';
+import { EntityStoreTableTab } from '../../shared/components/entity_store_table_tab';
+import { EntitySummaryGrid } from '../../shared/components/entity_summary_grid';
 import type { EntityViewMode } from '../../../../../common/entity_analytics/entity_store/resolution_group';
 
 export interface UserProps {
@@ -242,16 +239,16 @@ export const User: FC<UserProps> = memo(function User({
   useQueryInspector({
     deleteQuery,
     inspect: useEntityStoreInspectForRisk
-      ? entityFromStoreResult?.inspect ?? null
+      ? (entityFromStoreResult?.inspect ?? null)
       : inspectRiskScore,
-    loading: useEntityStoreInspectForRisk ? entityFromStoreResult?.isLoading ?? false : loading,
+    loading: useEntityStoreInspectForRisk ? (entityFromStoreResult?.isLoading ?? false) : loading,
     queryId: USER_PANEL_RISK_SCORE_QUERY_ID,
-    refetch: useEntityStoreInspectForRisk ? entityFromStoreResult?.refetch ?? noop : refetch,
+    refetch: useEntityStoreInspectForRisk ? (entityFromStoreResult?.refetch ?? noop) : refetch,
     setQuery,
   });
 
   const entityFromStore: EntityStoreRecord | undefined = entityStoreV2Enabled
-    ? observedUser.entityRecord ?? undefined
+    ? (observedUser.entityRecord ?? undefined)
     : undefined;
   const riskScoreStateFromStore =
     entityStoreV2Enabled && observedUser.entityRecord
@@ -516,7 +513,9 @@ export const User: FC<UserProps> = memo(function User({
             recalculatingScore={recalculatingScore}
             onAssetCriticalityChange={onAssetCriticalityChanged}
             isPreviewMode={false}
-            entityRecord={entityStoreV2Enabled ? observedUser.entityRecord ?? undefined : undefined}
+            entityRecord={
+              entityStoreV2Enabled ? (observedUser.entityRecord ?? undefined) : undefined
+            }
             aliasRecords={aliasRecords}
             noEntityInStore={noEntityInStore}
             isEntityRecordLoading={entityStoreV2Enabled && entityFromStoreResult.isLoading}

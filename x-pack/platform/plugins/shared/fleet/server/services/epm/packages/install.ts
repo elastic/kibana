@@ -584,8 +584,8 @@ async function installPackageFromRegistry({
           force
             ? 'force flag'
             : allowOutdatedVersion
-            ? 'allow_outdated_version flag'
-            : `install type ${installType}`
+              ? 'allow_outdated_version flag'
+              : `install type ${installType}`
         }`
       );
     }
@@ -676,7 +676,7 @@ function assertFipsCompatibleOrThrow(
 ) {
   if (
     !appContextService.getIsFipsEnabled() ||
-    !isPackageFipsIncompatible(packageInfo.policy_templates)
+    !isPackageFipsIncompatible(packageInfo.policy_templates, packageInfo.name)
   ) {
     return;
   }

@@ -41,6 +41,7 @@ import {
 import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import type { SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plugin/common';
 import type { OperationMetadata, DatasourcePublicAPI, DatasourceLayers } from '@kbn/lens-common';
+import { LENS_XY_HIDE_ENDZONES_DEFAULT } from '@kbn/lens-common';
 import type {
   XYVisualizationState,
   YConfig,
@@ -303,8 +304,8 @@ export const buildXYExpression = (
     legendSize: state.legend.isInside
       ? undefined
       : state.legend.position === Position.Top || state.legend.position === Position.Bottom
-      ? LegendSize.AUTO
-      : state.legend.legendSize ?? LENS_DEFAULT_LEGEND_SIZE,
+        ? LegendSize.AUTO
+        : (state.legend.legendSize ?? LENS_DEFAULT_LEGEND_SIZE),
     layout: state.legend.layout,
     horizontalAlignment:
       state.legend.horizontalAlignment && state.legend.isInside
@@ -356,7 +357,7 @@ export const buildXYExpression = (
     pointVisibility: state.pointVisibility ?? PointVisibilityOptions.AUTO,
     areaFill: state.areaFill ?? defaultAreaFill,
     valueLabels: state.valueLabels ?? 'hide',
-    hideEndzones: state.hideEndzones ?? false,
+    hideEndzones: state.hideEndzones ?? LENS_XY_HIDE_ENDZONES_DEFAULT,
     addTimeMarker:
       (isTimeChart(validDataLayers, { datasourceLayers }) && state.showCurrentTimeMarker) ?? false,
     yAxisConfigs: [...yAxisConfigsToExpression(yAxisConfigs)],
@@ -481,9 +482,9 @@ const dataLayerToExpression = (
 
   const isHistogramDimension = Boolean(
     xAxisOperation &&
-      xAxisOperation.isBucketed &&
-      xAxisOperation.scale &&
-      xAxisOperation.scale !== 'ordinal'
+    xAxisOperation.isBucketed &&
+    xAxisOperation.scale &&
+    xAxisOperation.scale !== 'ordinal'
   );
 
   const dataFromType = layer.seriesType.split('_');
@@ -536,10 +537,10 @@ const dataLayerToExpression = (
       ? layer.colorMapping
         ? JSON.stringify(layer.colorMapping)
         : !layer.palette
-        ? JSON.stringify(
-            getColorMappingDefaults({ defaultPaletteId: getDefaultPalette(layer.seriesType) })
-          )
-        : undefined
+          ? JSON.stringify(
+              getColorMappingDefaults({ defaultPaletteId: getDefaultPalette(layer.seriesType) })
+            )
+          : undefined
       : undefined,
   });
 

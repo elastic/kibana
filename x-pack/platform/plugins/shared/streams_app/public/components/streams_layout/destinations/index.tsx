@@ -17,6 +17,7 @@ import { useDestinationsTable } from './destinations_context';
 import { getDestinationIndices } from './destination_models';
 import { getDestinationTypeLabel } from './destination_type_config';
 import type { DestinationViewModel } from './types';
+import { sourceConnectedDestinationIds } from '../sources/source_models';
 import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 import { UnitReadOnlyCallout } from '../unit_read_only_callout';
 
@@ -49,6 +50,7 @@ export const DestinationsTab = () => {
     closeCreateModal,
     deleteDestination,
     isUnitSaving,
+    unitDefinition,
   } = destinationsController;
   const {
     v2: { manage: canManage },
@@ -82,8 +84,8 @@ export const DestinationsTab = () => {
             ...(destination.type === 'elasticsearch'
               ? [...getDestinationIndices(destination), destination.mode]
               : destination.type === 's3'
-              ? [destination.bucket]
-              : [destination.endpoint, ...Object.values(destination.indexBySignal)]),
+                ? [destination.bucket]
+                : [destination.endpoint, ...Object.values(destination.indexBySignal)]),
             destination.signals.join(' '),
             getDestinationTypeLabel(destination.type),
           ]
@@ -163,6 +165,7 @@ export const DestinationsTab = () => {
             resolvedIndicesStatus={resolvedIndicesStatus}
             resolvedIndicesError={resolvedIndicesError}
             destinationDetailRefs={destinationDetailRefs}
+            sourceConnectedDestinationIds={sourceConnectedDestinationIds(unitDefinition)}
             onShowDestinationDetail={showDestinationDetail}
             onHideDestinationDetail={hideDestinationDetail}
             hasActiveFilters={query.trim().length > 0 || selectedTypes.length > 0}

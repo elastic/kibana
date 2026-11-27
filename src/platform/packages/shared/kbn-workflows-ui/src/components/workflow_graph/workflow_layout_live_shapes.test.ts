@@ -52,7 +52,7 @@ const workflow = (steps: Step[], triggerTypes = ['manual']): WorkflowYaml =>
     enabled: true,
     triggers: triggerTypes.map((type) => ({ type, enabled: true })),
     steps,
-  } as unknown as WorkflowYaml);
+  }) as unknown as WorkflowYaml;
 
 const UUID_LABEL = 'f4f436c8-5c4a-4f61-b0cc-9e0d2a7b1c35';
 
@@ -63,17 +63,7 @@ interface Shape {
   readonly widthBudget?: number;
 }
 
-const mergeStep = (name: string, body: Step[]): Step => ({ name, type: 'merge', steps: body });
-
 const SHAPES: readonly Shape[] = [
-  {
-    // Not in the live library, but valid: a merge body shares its rows with the fork after it.
-    name: 'merge body followed by a fork',
-    workflow: workflow([
-      mergeStep('combine', [http('merge_one'), http('merge_two')]),
-      ifStep('gate', [http('then_step')], [http('else_step')]),
-    ]),
-  },
   {
     // zoom-get-meeting, teams-list: every else holds the next if, so each level adds a column.
     name: 'nested else cascade',

@@ -11,6 +11,7 @@ import type { CoreService, CoreContext } from '@kbn/core-base-browser-internal';
 import type { PluginName, PluginOpaqueId } from '@kbn/core-base-common';
 import type { InjectedMetadataPlugin } from '@kbn/core-injected-metadata-common-internal';
 import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-browser-internal';
+import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal-types';
 import { PluginWrapper } from './plugin';
 import {
   createPluginInitializerContext,
@@ -40,9 +41,10 @@ export interface InternalPluginsServiceStart {
  *
  * @internal
  */
-export class PluginsService
-  implements CoreService<InternalPluginsServiceSetup, InternalPluginsServiceStart>
-{
+export class PluginsService implements CoreService<
+  InternalPluginsServiceSetup,
+  InternalPluginsServiceStart
+> {
   private readonly runtimeResolver = new RuntimePluginContractResolver();
   /** Plugin wrappers in topological order. */
   private readonly plugins = new Map<PluginName, PluginWrapper<unknown, unknown>>();
@@ -50,7 +52,10 @@ export class PluginsService
 
   private readonly satupPlugins: PluginName[] = [];
 
-  constructor(private readonly coreContext: CoreContext, plugins: InjectedMetadataPlugin[]) {
+  constructor(
+    private readonly coreContext: CoreContext,
+    plugins: InjectedMetadataPlugin[]
+  ) {
     // Generate opaque ids
     const opaqueIds = new Map<PluginName, PluginOpaqueId>(plugins.map((p) => [p.id, Symbol(p.id)]));
 
@@ -165,6 +170,7 @@ export class PluginsService
         opaqueIdToPluginId: new Map<PluginOpaqueId, PluginName>(
           [...this.plugins].map(([pluginName, plugin]) => [plugin.opaqueId, pluginName])
         ),
+        getNavTrees: () => (deps.chrome as InternalChromeStart).project.getNavTreeDependencies(),
       });
     }
 

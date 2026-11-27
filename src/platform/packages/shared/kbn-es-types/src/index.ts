@@ -19,6 +19,7 @@ import type {
   ESQLSearchParams,
   ChangePointType,
 } from './search';
+import type { EsqlQueryProfile, EsqlProfileDriver, EsqlProfilePlan } from './esql_profile';
 
 export type ESFilter = estypes.QueryDslQueryContainer;
 // For now, we also accept with body to unblock the migration to without body.
@@ -39,7 +40,7 @@ export interface ESSearchOptions {
 export type ESSearchResponse<
   TDocument = unknown,
   TSearchRequest extends ESSearchRequest = ESSearchRequest,
-  TOptions extends { restTotalHitsAsInt: boolean } = { restTotalHitsAsInt: false }
+  TOptions extends { restTotalHitsAsInt: boolean } = { restTotalHitsAsInt: false },
 > = InferSearchResponseOf<TDocument, TSearchRequest, TOptions>;
 
 // `fields` parameter from a search request (estypes.SearchRequest)
@@ -54,5 +55,8 @@ export type {
   ESQLRow,
   ESQLSearchResponse,
   ESQLSearchParams,
+  EsqlQueryProfile,
+  EsqlProfileDriver,
+  EsqlProfilePlan,
   ChangePointType,
 };

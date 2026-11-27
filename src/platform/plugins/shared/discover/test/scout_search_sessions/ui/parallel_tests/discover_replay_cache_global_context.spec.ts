@@ -28,8 +28,7 @@ const STORED_TIME_DASHBOARD = 'Replay stored time';
 const UNSTORED_TIME_DASHBOARD = 'Replay unstored time';
 const PINNED_FILTER = { field: 'extension.raw', operator: 'is', value: 'jpg' } as const;
 
-// Failing: See https://github.com/elastic/kibana/issues/305534
-spaceTest.describe.skip(
+spaceTest.describe(
   'Discover replay cache with a changed global context',
   { tag: '@local-stateful-classic' },
   () => {

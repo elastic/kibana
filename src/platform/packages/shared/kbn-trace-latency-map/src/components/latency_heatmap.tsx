@@ -34,6 +34,7 @@ import type { ChartCell } from '../geometry/plot_calibration';
 import type { PlotArea } from '../geometry/map_geometry';
 import type { LatencyMapColors } from '../hooks/use_latency_map_colors';
 import { CellDetails } from './cell_details';
+import { getInteractionHint } from './unit_text';
 
 /** Room, in pixels, a label of the duration axis needs, to leave blanks between them. */
 const Y_LABEL_PX = 18;
@@ -44,12 +45,16 @@ export interface LatencyHeatmapProps {
   stats: DurationStats;
   unit: LatencyMapUnit;
   sampled: boolean;
+  /** A click on a cell does something, so the tooltip may say so. */
+  canClick: boolean;
   timeZone?: string;
   colors: LatencyMapColors;
   /** The cells of the failed spans alone. */
   failedOnly: boolean;
   /** Height of the chart, in pixels; it takes the width of its container. */
   height: number;
+  /** Room kept right of the plot, in pixels: the band labels draw there, over the overlay. */
+  rightMargin?: number;
   /** The cells to draw as selected: the selection, the region being moved, the keyboard's. */
   highlight?: CellRange;
   /** What a screen reader hears of the chart. */
@@ -94,10 +99,12 @@ export const LatencyHeatmap = React.memo(function LatencyHeatmap({
   stats,
   unit,
   sampled,
+  canClick,
   timeZone,
   colors,
   failedOnly,
   height,
+  rightMargin = 0,
   highlight,
   summary,
   onBrush,
@@ -121,7 +128,7 @@ export const LatencyHeatmap = React.memo(function LatencyHeatmap({
   const theme = useMemo<PartialTheme>(
     () => ({
       // So that the plot starts where `GRID_ORIGIN` says, whatever the base theme is.
-      chartMargins: { top: LAYOUT.plotTopMargin, right: 0, bottom: 0, left: 0 },
+      chartMargins: { top: LAYOUT.plotTopMargin, right: rightMargin, bottom: 0, left: 0 },
       chartPaddings: { top: 0, right: 0, bottom: 0, left: 0 },
       // The panel of the host shows through.
       background: { color: 'transparent' },
@@ -136,7 +143,8 @@ export const LatencyHeatmap = React.memo(function LatencyHeatmap({
         },
         xAxisLabel: { visible: true, fontSize: 10 },
         yAxisLabel: { visible: true, fontSize: 10, width: LAYOUT.yAxisLabelWidth },
-        // The region is tinted and outlined; the rest of the map is not covered.
+        // The region is tinted and outlined; the rest of the map is veiled by the overlay, as the
+        // chart's own mask does not leave the selection out of it.
         brushMask: { visible: false },
         brushArea: {
           visible: true,
@@ -149,7 +157,7 @@ export const LatencyHeatmap = React.memo(function LatencyHeatmap({
         brushTool: { visible: false },
       },
     }),
-    [colors]
+    [colors, rightMargin]
   );
 
   // The chart gives its tooltip its own cell, with the time and row; the counts are ours.
@@ -174,14 +182,16 @@ export const LatencyHeatmap = React.memo(function LatencyHeatmap({
               maxDuration={rowToDuration(datum.y + 1, stats)}
               spans={datum.spans}
               failed={datum.failed}
+              failedOnly={failedOnly}
               unit={unit}
               sampled={sampled}
+              hint={getInteractionHint(unit, canClick)}
               timeZone={timeZone}
             />
           </EuiPanel>
         );
       },
-    [dataByCell, timeGrid, stats, unit, sampled, timeZone]
+    [dataByCell, timeGrid, stats, unit, sampled, failedOnly, canClick, timeZone]
   );
 
   const handleBrush: BrushEndListener = (event) => {

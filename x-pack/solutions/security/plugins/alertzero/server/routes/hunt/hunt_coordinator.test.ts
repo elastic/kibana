@@ -102,7 +102,7 @@ const makeDeps = ({
       ({
         getInference: () => ({}),
         getSearchInferenceEndpoints: () => undefined,
-      } as unknown as ReturnType<RouteDependencies['getHuntServices']>),
+      }) as unknown as ReturnType<RouteDependencies['getHuntServices']>,
     getAgentBuilderAttachments: () => {
       if (!agentBuilderStarted) {
         throw new Error(
@@ -185,12 +185,12 @@ type FieldsMissingFromSchema<Service, Schema> = Service extends readonly (infer 
     ? FieldsMissingFromSchema<ServiceItem, SchemaItem>
     : never
   : Service extends object
-  ? {
-      [K in keyof Service]-?: [PropOf<Schema, K>] extends [never]
-        ? K
-        : FieldsMissingFromSchema<NonNullable<Service[K]>, NonNullable<PropOf<Schema, K>>>;
-    }[keyof Service]
-  : never;
+    ? {
+        [K in keyof Service]-?: [PropOf<Schema, K>] extends [never]
+          ? K
+          : FieldsMissingFromSchema<NonNullable<Service[K]>, NonNullable<PropOf<Schema, K>>>;
+      }[keyof Service]
+    : never;
 
 type AssertNever<T extends never> = T;
 
@@ -229,6 +229,17 @@ describe('registerHuntCoordinatorRoute', () => {
     expect(uiSettingsGet).toHaveBeenCalledWith(SECURITY_SOLUTION_DEFAULT_INDEX_ID);
     expect(paramsOf().indexPatterns).toEqual(patterns);
     expect(paramsOf()).not.toHaveProperty('technology');
+  });
+
+  it('hands the filtered universe and the skipped list to the coordinator', async () => {
+    const { handler, context } = makeDeps({
+      indexPatterns: ['logs-*', '.alerts-security.alerts-default'],
+    });
+
+    await handler(context, requestFor(), httpServerMock.createResponseFactory());
+
+    expect(paramsOf().indexPatterns).toEqual(['logs-*']);
+    expect(paramsOf().policySkippedPatterns).toEqual(['.alerts-security.alerts-default']);
   });
 
   it('runs against the request space, not the default one', async () => {

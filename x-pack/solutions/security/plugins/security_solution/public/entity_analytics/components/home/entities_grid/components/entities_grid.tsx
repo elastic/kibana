@@ -43,7 +43,8 @@ import type { ReadAccess } from '../grid_columns';
 import { useEntityAnalyticsUrlState } from '../hooks/use_entity_analytics_url_state';
 import { useGridLoadTelemetry } from '../hooks/use_grid_load_telemetry';
 import { RISK_SCORE_NORM_FIELD } from '../common';
-import type { RowsMode, SortDir, TimeRange } from '../common';
+import type { TimeRange } from '../../queries/time_range';
+import type { RowsMode, SortDir } from '../common';
 
 const gridContainerCss = css`
   block-size: 100%;
@@ -308,7 +309,7 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
 
   // The table is only filtered by the first entities of a tile that has more: say how many of the
   // tile's entities it shows. The numbers wait for the table's own total, like the plain one.
-  const toolbarTotal = total == null ? undefined : cappedTile?.total ?? total;
+  const toolbarTotal = total == null ? undefined : (cappedTile?.total ?? total);
   const shown = cappedTile ? total : isAtLoadLimit ? rows.length : undefined;
   const limitNote = useMemo(
     () =>

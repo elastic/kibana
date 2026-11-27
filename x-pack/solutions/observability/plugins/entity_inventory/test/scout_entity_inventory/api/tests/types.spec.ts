@@ -15,12 +15,15 @@ const SPACE_ID = `entity-inventory-types-${randomUUID()}`;
 // Every registered type with a `dynamic` block: the entity store's built-in `host` and this plugin's own.
 const INVENTORY_TYPES = ['host', 'k8s.deployment'];
 const K8S_DEPLOYMENT_IDENTITY_FIELDS = ['kubernetes.namespace', 'kubernetes.deployment.name'];
+const K8S_DEPLOYMENT_SUGGESTED_FILTERS = ['k8s.cluster.name', 'kubernetes.namespace'];
+const HOST_SUGGESTED_FILTERS = ['os.type', 'cloud.provider'];
 
 interface InventoryTypeResponse {
   type: string;
   name: string;
   identityFields: string[];
-  columns: Array<{ name: string; kind: string }>;
+  columns: Array<{ name: string; kind: string; label?: string }>;
+  suggestedFilters: string[];
   sources: Array<{ indexPattern: string; filter?: string }>;
 }
 
@@ -54,7 +57,39 @@ apiTest.describe(
       expect(k8sDeployment?.name).toBe('K8s Deployment');
       expect(k8sDeployment?.identityFields).toStrictEqual(K8S_DEPLOYMENT_IDENTITY_FIELDS);
       expect(k8sDeployment?.columns[0].name).toBe('entity.id');
+      expect(k8sDeployment?.suggestedFilters).toStrictEqual(K8S_DEPLOYMENT_SUGGESTED_FILTERS);
       expect(k8sDeployment?.sources).toHaveLength(2);
+    });
+
+    apiTest('returns the labels of the k8s.deployment columns', async ({ apiClient }) => {
+      const response = await apiClient.get(TYPES_PATH, {
+        headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(200);
+      const { types }: { types: InventoryTypeResponse[] } = response.body;
+      const columns = types.find(({ type }) => type === 'k8s.deployment')?.columns ?? [];
+      const labels = Object.fromEntries(columns.map(({ name, label }) => [name, label]));
+
+      expect(labels['entity.id']).toBe('ID');
+      expect(labels['kubernetes.namespace']).toBe('Namespace');
+      expect(labels['k8s.cluster.name']).toBe('Cluster');
+      expect(labels['kubernetes.deployment.name']).toBeUndefined();
+      expect(labels.last_seen).toBe('Last seen');
+    });
+
+    apiTest('returns the suggested filters of the built-in host', async ({ apiClient }) => {
+      const response = await apiClient.get(TYPES_PATH, {
+        headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(200);
+      const { types }: { types: InventoryTypeResponse[] } = response.body;
+      expect(types.find(({ type }) => type === 'host')?.suggestedFilters).toStrictEqual(
+        HOST_SUGGESTED_FILTERS
+      );
     });
 
     apiTest('returns every type with a dynamic block', async ({ apiClient }) => {

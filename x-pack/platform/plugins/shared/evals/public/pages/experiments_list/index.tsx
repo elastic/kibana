@@ -35,6 +35,7 @@ import { EvaluatorModelsBadge } from '../../components/evaluator_models_badge';
 import { resolvePrUrl } from '../../utils/pr_url';
 import { CopyableDetail } from './copyable_detail';
 import { LinkDetail } from './link_detail';
+import { pickBaselineAndTarget } from './pick_baseline_and_target';
 import * as i18n from './translations';
 
 const ExperimentRowDetails: React.FC<{ item: EvaluationExperimentSummary }> = ({ item }) => {
@@ -197,8 +198,8 @@ export const ExperimentsListPage: React.FC = () => {
         render: (_name: string | null | undefined, item: EvaluationExperimentSummary) => {
           const isSuiteRun = !!item.suite_id;
           const displayName = isSuiteRun
-            ? item.suite_id ?? item.experiment_name ?? item.experiment_id.slice(0, 12)
-            : item.experiment_name ?? item.experiment_id.slice(0, 12);
+            ? (item.suite_id ?? item.experiment_name ?? item.experiment_id.slice(0, 12))
+            : (item.experiment_name ?? item.experiment_id.slice(0, 12));
           const tooltipId = item.execution_id ?? item.experiment_id;
           const detailHref = history.createHref({
             pathname: `/experiments/${encodeURIComponent(item.experiment_id)}`,
@@ -321,10 +322,11 @@ export const ExperimentsListPage: React.FC = () => {
   const handleCompare = useCallback(() => {
     if (!canCompare) return;
     const [a, b] = selectedExperiments;
+    const { baseline, target } = pickBaselineAndTarget(a, b);
     // Rows are aggregated by execution id, so always compare execution-vs-execution;
     // the row's `experiment_id` isn't on the score docs and would filter to a 404.
-    const baselineId = a.execution_id ?? a.experiment_id;
-    const targetId = b.execution_id ?? b.experiment_id;
+    const baselineId = baseline.execution_id ?? baseline.experiment_id;
+    const targetId = target.execution_id ?? target.experiment_id;
     const params = new URLSearchParams({
       type: 'execution',
       baseline: baselineId,

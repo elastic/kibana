@@ -482,6 +482,13 @@
                 "format": "int32",
                 "type": "integer"
               },
+              "confidential_compute_type": {
+                "enum": [
+                  "CONFIDENTIAL_COMPUTE_TYPE_NONE",
+                  "SEV_SNP"
+                ],
+                "type": "string"
+              },
               "first_on_demand": {
                 "default": 1,
                 "format": "int32",
@@ -901,6 +908,13 @@
                   "boot_disk_size": {
                     "format": "int32",
                     "type": "integer"
+                  },
+                  "confidential_compute_type": {
+                    "enum": [
+                      "CONFIDENTIAL_COMPUTE_TYPE_NONE",
+                      "SEV_SNP"
+                    ],
+                    "type": "string"
                   },
                   "first_on_demand": {
                     "default": 1,
@@ -2770,6 +2784,13 @@
                                   "format": "int32",
                                   "type": "integer"
                                 },
+                                "confidential_compute_type": {
+                                  "enum": [
+                                    "CONFIDENTIAL_COMPUTE_TYPE_NONE",
+                                    "SEV_SNP"
+                                  ],
+                                  "type": "string"
+                                },
                                 "first_on_demand": {
                                   "default": 1,
                                   "format": "int32",
@@ -3370,6 +3391,13 @@
                                     "format": "int32",
                                     "type": "integer"
                                   },
+                                  "confidential_compute_type": {
+                                    "enum": [
+                                      "CONFIDENTIAL_COMPUTE_TYPE_NONE",
+                                      "SEV_SNP"
+                                    ],
+                                    "type": "string"
+                                  },
                                   "first_on_demand": {
                                     "default": 1,
                                     "format": "int32",
@@ -3591,6 +3619,14 @@
                                   "clients"
                                 ],
                                 "type": "object"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "serverless_compute": {
+                            "properties": {
+                              "policy_id": {
+                                "type": "string"
                               }
                             },
                             "type": "object"
@@ -3887,6 +3923,27 @@
                         "quartz_cron_expression": {
                           "type": "string"
                         },
+                        "sql_condition": {
+                          "properties": {
+                            "sql_query_id": {
+                              "type": "string"
+                            },
+                            "trigger_mode": {
+                              "enum": [
+                                "QUERY_RETURNS_ROWS",
+                                "RESULT_VALUE_CHANGES"
+                              ],
+                              "type": "string"
+                            },
+                            "warehouse_id": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "warehouse_id"
+                          ],
+                          "type": "object"
+                        },
                         "timezone_id": {
                           "type": "string"
                         }
@@ -4034,6 +4091,167 @@
                     "tasks": {
                       "items": {
                         "properties": {
+                          "ai_function_task": {
+                            "properties": {
+                              "ai_classify": {
+                                "properties": {
+                                  "enable_confidence_scores": {
+                                    "type": "boolean"
+                                  },
+                                  "enable_rationales": {
+                                    "type": "boolean"
+                                  },
+                                  "inline_labels": {
+                                    "properties": {
+                                      "labels": {
+                                        "items": {
+                                          "properties": {
+                                            "description": {
+                                              "type": "string"
+                                            },
+                                            "name": {
+                                              "type": "string"
+                                            }
+                                          },
+                                          "required": [
+                                            "name"
+                                          ],
+                                          "type": "object"
+                                        },
+                                        "maxItems": 10,
+                                        "type": "array"
+                                      }
+                                    },
+                                    "required": [
+                                      "labels"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  "instructions": {
+                                    "type": "string"
+                                  },
+                                  "multilabel": {
+                                    "type": "boolean"
+                                  },
+                                  "version": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "version"
+                                ],
+                                "type": "object"
+                              },
+                              "ai_extract": {
+                                "properties": {
+                                  "enable_citations": {
+                                    "type": "boolean"
+                                  },
+                                  "enable_confidence_scores": {
+                                    "type": "boolean"
+                                  },
+                                  "instructions": {
+                                    "type": "string"
+                                  },
+                                  "mode": {
+                                    "enum": [
+                                      "MODE_PRECISION"
+                                    ],
+                                    "type": "string"
+                                  },
+                                  "schema": {
+                                    "type": "string"
+                                  },
+                                  "version": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "version"
+                                ],
+                                "type": "object"
+                              },
+                              "ai_parse_document": {
+                                "properties": {
+                                  "description_element_types": {
+                                    "items": {
+                                      "enum": [
+                                        "DESCRIPTION_ELEMENT_TYPE_ALL",
+                                        "DESCRIPTION_ELEMENT_TYPE_FIGURE"
+                                      ],
+                                      "type": "string"
+                                    },
+                                    "maxItems": 1,
+                                    "type": "array"
+                                  },
+                                  "image_output_path": {
+                                    "type": "string"
+                                  },
+                                  "page_range": {
+                                    "type": "string"
+                                  },
+                                  "version": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "version"
+                                ],
+                                "type": "object"
+                              },
+                              "delta_table": {
+                                "properties": {
+                                  "input_column": {
+                                    "type": "string"
+                                  },
+                                  "merge_key_columns": {
+                                    "items": {
+                                      "type": "string"
+                                    },
+                                    "maxItems": 3,
+                                    "type": "array"
+                                  },
+                                  "table_name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "table_name",
+                                  "input_column"
+                                ],
+                                "type": "object"
+                              },
+                              "output": {
+                                "properties": {
+                                  "catalog": {
+                                    "type": "string"
+                                  },
+                                  "schema": {
+                                    "type": "string"
+                                  },
+                                  "table": {
+                                    "type": "string"
+                                  }
+                                },
+                                "type": "object"
+                              },
+                              "volume": {
+                                "properties": {
+                                  "volume_path": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "volume_path"
+                                ],
+                                "type": "object"
+                              }
+                            },
+                            "required": [
+                              "output"
+                            ],
+                            "type": "object"
+                          },
                           "ai_runtime_task": {
                             "properties": {
                               "deployments": {
@@ -4457,6 +4675,167 @@
                               },
                               "task": {
                                 "properties": {
+                                  "ai_function_task": {
+                                    "properties": {
+                                      "ai_classify": {
+                                        "properties": {
+                                          "enable_confidence_scores": {
+                                            "type": "boolean"
+                                          },
+                                          "enable_rationales": {
+                                            "type": "boolean"
+                                          },
+                                          "inline_labels": {
+                                            "properties": {
+                                              "labels": {
+                                                "items": {
+                                                  "properties": {
+                                                    "description": {
+                                                      "type": "string"
+                                                    },
+                                                    "name": {
+                                                      "type": "string"
+                                                    }
+                                                  },
+                                                  "required": [
+                                                    "name"
+                                                  ],
+                                                  "type": "object"
+                                                },
+                                                "maxItems": 10,
+                                                "type": "array"
+                                              }
+                                            },
+                                            "required": [
+                                              "labels"
+                                            ],
+                                            "type": "object"
+                                          },
+                                          "instructions": {
+                                            "type": "string"
+                                          },
+                                          "multilabel": {
+                                            "type": "boolean"
+                                          },
+                                          "version": {
+                                            "type": "string"
+                                          }
+                                        },
+                                        "required": [
+                                          "version"
+                                        ],
+                                        "type": "object"
+                                      },
+                                      "ai_extract": {
+                                        "properties": {
+                                          "enable_citations": {
+                                            "type": "boolean"
+                                          },
+                                          "enable_confidence_scores": {
+                                            "type": "boolean"
+                                          },
+                                          "instructions": {
+                                            "type": "string"
+                                          },
+                                          "mode": {
+                                            "enum": [
+                                              "MODE_PRECISION"
+                                            ],
+                                            "type": "string"
+                                          },
+                                          "schema": {
+                                            "type": "string"
+                                          },
+                                          "version": {
+                                            "type": "string"
+                                          }
+                                        },
+                                        "required": [
+                                          "version"
+                                        ],
+                                        "type": "object"
+                                      },
+                                      "ai_parse_document": {
+                                        "properties": {
+                                          "description_element_types": {
+                                            "items": {
+                                              "enum": [
+                                                "DESCRIPTION_ELEMENT_TYPE_ALL",
+                                                "DESCRIPTION_ELEMENT_TYPE_FIGURE"
+                                              ],
+                                              "type": "string"
+                                            },
+                                            "maxItems": 1,
+                                            "type": "array"
+                                          },
+                                          "image_output_path": {
+                                            "type": "string"
+                                          },
+                                          "page_range": {
+                                            "type": "string"
+                                          },
+                                          "version": {
+                                            "type": "string"
+                                          }
+                                        },
+                                        "required": [
+                                          "version"
+                                        ],
+                                        "type": "object"
+                                      },
+                                      "delta_table": {
+                                        "properties": {
+                                          "input_column": {
+                                            "type": "string"
+                                          },
+                                          "merge_key_columns": {
+                                            "items": {
+                                              "type": "string"
+                                            },
+                                            "maxItems": 3,
+                                            "type": "array"
+                                          },
+                                          "table_name": {
+                                            "type": "string"
+                                          }
+                                        },
+                                        "required": [
+                                          "table_name",
+                                          "input_column"
+                                        ],
+                                        "type": "object"
+                                      },
+                                      "output": {
+                                        "properties": {
+                                          "catalog": {
+                                            "type": "string"
+                                          },
+                                          "schema": {
+                                            "type": "string"
+                                          },
+                                          "table": {
+                                            "type": "string"
+                                          }
+                                        },
+                                        "type": "object"
+                                      },
+                                      "volume": {
+                                        "properties": {
+                                          "volume_path": {
+                                            "type": "string"
+                                          }
+                                        },
+                                        "required": [
+                                          "volume_path"
+                                        ],
+                                        "type": "object"
+                                      }
+                                    },
+                                    "required": [
+                                      "output"
+                                    ],
+                                    "type": "object"
+                                  },
                                   "ai_runtime_task": {
                                     "properties": {
                                       "deployments": {
@@ -5227,6 +5606,13 @@
                                           "boot_disk_size": {
                                             "format": "int32",
                                             "type": "integer"
+                                          },
+                                          "confidential_compute_type": {
+                                            "enum": [
+                                              "CONFIDENTIAL_COMPUTE_TYPE_NONE",
+                                              "SEV_SNP"
+                                            ],
+                                            "type": "string"
                                           },
                                           "first_on_demand": {
                                             "default": 1,
@@ -6411,6 +6797,13 @@
                                     "format": "int32",
                                     "type": "integer"
                                   },
+                                  "confidential_compute_type": {
+                                    "enum": [
+                                      "CONFIDENTIAL_COMPUTE_TYPE_NONE",
+                                      "SEV_SNP"
+                                    ],
+                                    "type": "string"
+                                  },
                                   "first_on_demand": {
                                     "default": 1,
                                     "format": "int32",
@@ -6817,6 +7210,33 @@
                           },
                           "resolved_values": {
                             "properties": {
+                              "ai_function_task": {
+                                "properties": {
+                                  "delta_table": {
+                                    "properties": {
+                                      "input_column": {
+                                        "type": "string"
+                                      },
+                                      "merge_key_columns": {
+                                        "items": {
+                                          "type": "string"
+                                        },
+                                        "maxItems": 3,
+                                        "type": "array"
+                                      },
+                                      "table_name": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "table_name",
+                                      "input_column"
+                                    ],
+                                    "type": "object"
+                                  }
+                                },
+                                "type": "object"
+                              },
                               "condition_task": {
                                 "properties": {
                                   "left": {
@@ -7425,9 +7845,76 @@
                     },
                     "trigger_info": {
                       "properties": {
+                        "job_completion": {
+                          "properties": {
+                            "completed_jobs": {
+                              "items": {
+                                "properties": {
+                                  "completion_time": {
+                                    "type": "string"
+                                  },
+                                  "job_id": {
+                                    "type": "string"
+                                  },
+                                  "run_id": {
+                                    "type": "string"
+                                  },
+                                  "termination_code": {
+                                    "enum": [
+                                      "SUCCESS",
+                                      "CANCELED",
+                                      "DRIVER_ERROR",
+                                      "CLUSTER_ERROR",
+                                      "REPOSITORY_CHECKOUT_FAILED",
+                                      "INVALID_CLUSTER_REQUEST",
+                                      "WORKSPACE_RUN_LIMIT_EXCEEDED",
+                                      "FEATURE_DISABLED",
+                                      "CLUSTER_REQUEST_LIMIT_EXCEEDED",
+                                      "STORAGE_ACCESS_ERROR",
+                                      "RUN_EXECUTION_ERROR",
+                                      "UNAUTHORIZED_ERROR",
+                                      "LIBRARY_INSTALLATION_ERROR",
+                                      "MAX_CONCURRENT_RUNS_EXCEEDED",
+                                      "MAX_SPARK_CONTEXTS_EXCEEDED",
+                                      "RESOURCE_NOT_FOUND",
+                                      "INVALID_RUN_CONFIGURATION",
+                                      "INTERNAL_ERROR",
+                                      "CLOUD_FAILURE",
+                                      "MAX_JOB_QUEUE_SIZE_EXCEEDED",
+                                      "SKIPPED",
+                                      "USER_CANCELED",
+                                      "BUDGET_POLICY_LIMIT_EXCEEDED",
+                                      "DISABLED",
+                                      "SUCCESS_WITH_FAILURES",
+                                      "BREAKING_CHANGE"
+                                    ],
+                                    "type": "string"
+                                  },
+                                  "workspace_id": {
+                                    "type": "string"
+                                  }
+                                },
+                                "type": "object"
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "type": "object"
+                        },
                         "run_id": {
                           "format": "int64",
                           "type": "integer"
+                        },
+                        "sql_condition": {
+                          "properties": {
+                            "condition_evaluation_satisfied": {
+                              "type": "boolean"
+                            },
+                            "condition_evaluation_sql_statement_id": {
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
                         }
                       },
                       "type": "object"
@@ -7466,6 +7953,40 @@
               "application/json": {
                 "schema": {
                   "properties": {
+                    "ai_function_task_output": {
+                      "properties": {
+                        "estimated_time_remaining": {
+                          "type": "string"
+                        },
+                        "failed_row_count": {
+                          "format": "int64",
+                          "type": "integer"
+                        },
+                        "output_table": {
+                          "properties": {
+                            "catalog": {
+                              "type": "string"
+                            },
+                            "schema": {
+                              "type": "string"
+                            },
+                            "table": {
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "succeeded_row_count": {
+                          "format": "int64",
+                          "type": "integer"
+                        },
+                        "total_row_count": {
+                          "format": "int64",
+                          "type": "integer"
+                        }
+                      },
+                      "type": "object"
+                    },
                     "alert_output": {
                       "properties": {
                         "alert_state": {
@@ -7962,6 +8483,13 @@
                                     "boot_disk_size": {
                                       "format": "int32",
                                       "type": "integer"
+                                    },
+                                    "confidential_compute_type": {
+                                      "enum": [
+                                        "CONFIDENTIAL_COMPUTE_TYPE_NONE",
+                                        "SEV_SNP"
+                                      ],
+                                      "type": "string"
                                     },
                                     "first_on_demand": {
                                       "default": 1,
@@ -8563,6 +9091,13 @@
                                         "format": "int32",
                                         "type": "integer"
                                       },
+                                      "confidential_compute_type": {
+                                        "enum": [
+                                          "CONFIDENTIAL_COMPUTE_TYPE_NONE",
+                                          "SEV_SNP"
+                                        ],
+                                        "type": "string"
+                                      },
                                       "first_on_demand": {
                                         "default": 1,
                                         "format": "int32",
@@ -8784,6 +9319,14 @@
                                       "clients"
                                     ],
                                     "type": "object"
+                                  }
+                                },
+                                "type": "object"
+                              },
+                              "serverless_compute": {
+                                "properties": {
+                                  "policy_id": {
+                                    "type": "string"
                                   }
                                 },
                                 "type": "object"
@@ -9077,6 +9620,27 @@
                             "quartz_cron_expression": {
                               "type": "string"
                             },
+                            "sql_condition": {
+                              "properties": {
+                                "sql_query_id": {
+                                  "type": "string"
+                                },
+                                "trigger_mode": {
+                                  "enum": [
+                                    "QUERY_RETURNS_ROWS",
+                                    "RESULT_VALUE_CHANGES"
+                                  ],
+                                  "type": "string"
+                                },
+                                "warehouse_id": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "warehouse_id"
+                              ],
+                              "type": "object"
+                            },
                             "timezone_id": {
                               "type": "string"
                             }
@@ -9224,6 +9788,167 @@
                         "tasks": {
                           "items": {
                             "properties": {
+                              "ai_function_task": {
+                                "properties": {
+                                  "ai_classify": {
+                                    "properties": {
+                                      "enable_confidence_scores": {
+                                        "type": "boolean"
+                                      },
+                                      "enable_rationales": {
+                                        "type": "boolean"
+                                      },
+                                      "inline_labels": {
+                                        "properties": {
+                                          "labels": {
+                                            "items": {
+                                              "properties": {
+                                                "description": {
+                                                  "type": "string"
+                                                },
+                                                "name": {
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "required": [
+                                                "name"
+                                              ],
+                                              "type": "object"
+                                            },
+                                            "maxItems": 10,
+                                            "type": "array"
+                                          }
+                                        },
+                                        "required": [
+                                          "labels"
+                                        ],
+                                        "type": "object"
+                                      },
+                                      "instructions": {
+                                        "type": "string"
+                                      },
+                                      "multilabel": {
+                                        "type": "boolean"
+                                      },
+                                      "version": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "version"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  "ai_extract": {
+                                    "properties": {
+                                      "enable_citations": {
+                                        "type": "boolean"
+                                      },
+                                      "enable_confidence_scores": {
+                                        "type": "boolean"
+                                      },
+                                      "instructions": {
+                                        "type": "string"
+                                      },
+                                      "mode": {
+                                        "enum": [
+                                          "MODE_PRECISION"
+                                        ],
+                                        "type": "string"
+                                      },
+                                      "schema": {
+                                        "type": "string"
+                                      },
+                                      "version": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "version"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  "ai_parse_document": {
+                                    "properties": {
+                                      "description_element_types": {
+                                        "items": {
+                                          "enum": [
+                                            "DESCRIPTION_ELEMENT_TYPE_ALL",
+                                            "DESCRIPTION_ELEMENT_TYPE_FIGURE"
+                                          ],
+                                          "type": "string"
+                                        },
+                                        "maxItems": 1,
+                                        "type": "array"
+                                      },
+                                      "image_output_path": {
+                                        "type": "string"
+                                      },
+                                      "page_range": {
+                                        "type": "string"
+                                      },
+                                      "version": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "version"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  "delta_table": {
+                                    "properties": {
+                                      "input_column": {
+                                        "type": "string"
+                                      },
+                                      "merge_key_columns": {
+                                        "items": {
+                                          "type": "string"
+                                        },
+                                        "maxItems": 3,
+                                        "type": "array"
+                                      },
+                                      "table_name": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "table_name",
+                                      "input_column"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  "output": {
+                                    "properties": {
+                                      "catalog": {
+                                        "type": "string"
+                                      },
+                                      "schema": {
+                                        "type": "string"
+                                      },
+                                      "table": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "type": "object"
+                                  },
+                                  "volume": {
+                                    "properties": {
+                                      "volume_path": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "volume_path"
+                                    ],
+                                    "type": "object"
+                                  }
+                                },
+                                "required": [
+                                  "output"
+                                ],
+                                "type": "object"
+                              },
                               "ai_runtime_task": {
                                 "properties": {
                                   "deployments": {
@@ -9647,6 +10372,167 @@
                                   },
                                   "task": {
                                     "properties": {
+                                      "ai_function_task": {
+                                        "properties": {
+                                          "ai_classify": {
+                                            "properties": {
+                                              "enable_confidence_scores": {
+                                                "type": "boolean"
+                                              },
+                                              "enable_rationales": {
+                                                "type": "boolean"
+                                              },
+                                              "inline_labels": {
+                                                "properties": {
+                                                  "labels": {
+                                                    "items": {
+                                                      "properties": {
+                                                        "description": {
+                                                          "type": "string"
+                                                        },
+                                                        "name": {
+                                                          "type": "string"
+                                                        }
+                                                      },
+                                                      "required": [
+                                                        "name"
+                                                      ],
+                                                      "type": "object"
+                                                    },
+                                                    "maxItems": 10,
+                                                    "type": "array"
+                                                  }
+                                                },
+                                                "required": [
+                                                  "labels"
+                                                ],
+                                                "type": "object"
+                                              },
+                                              "instructions": {
+                                                "type": "string"
+                                              },
+                                              "multilabel": {
+                                                "type": "boolean"
+                                              },
+                                              "version": {
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": [
+                                              "version"
+                                            ],
+                                            "type": "object"
+                                          },
+                                          "ai_extract": {
+                                            "properties": {
+                                              "enable_citations": {
+                                                "type": "boolean"
+                                              },
+                                              "enable_confidence_scores": {
+                                                "type": "boolean"
+                                              },
+                                              "instructions": {
+                                                "type": "string"
+                                              },
+                                              "mode": {
+                                                "enum": [
+                                                  "MODE_PRECISION"
+                                                ],
+                                                "type": "string"
+                                              },
+                                              "schema": {
+                                                "type": "string"
+                                              },
+                                              "version": {
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": [
+                                              "version"
+                                            ],
+                                            "type": "object"
+                                          },
+                                          "ai_parse_document": {
+                                            "properties": {
+                                              "description_element_types": {
+                                                "items": {
+                                                  "enum": [
+                                                    "DESCRIPTION_ELEMENT_TYPE_ALL",
+                                                    "DESCRIPTION_ELEMENT_TYPE_FIGURE"
+                                                  ],
+                                                  "type": "string"
+                                                },
+                                                "maxItems": 1,
+                                                "type": "array"
+                                              },
+                                              "image_output_path": {
+                                                "type": "string"
+                                              },
+                                              "page_range": {
+                                                "type": "string"
+                                              },
+                                              "version": {
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": [
+                                              "version"
+                                            ],
+                                            "type": "object"
+                                          },
+                                          "delta_table": {
+                                            "properties": {
+                                              "input_column": {
+                                                "type": "string"
+                                              },
+                                              "merge_key_columns": {
+                                                "items": {
+                                                  "type": "string"
+                                                },
+                                                "maxItems": 3,
+                                                "type": "array"
+                                              },
+                                              "table_name": {
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": [
+                                              "table_name",
+                                              "input_column"
+                                            ],
+                                            "type": "object"
+                                          },
+                                          "output": {
+                                            "properties": {
+                                              "catalog": {
+                                                "type": "string"
+                                              },
+                                              "schema": {
+                                                "type": "string"
+                                              },
+                                              "table": {
+                                                "type": "string"
+                                              }
+                                            },
+                                            "type": "object"
+                                          },
+                                          "volume": {
+                                            "properties": {
+                                              "volume_path": {
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": [
+                                              "volume_path"
+                                            ],
+                                            "type": "object"
+                                          }
+                                        },
+                                        "required": [
+                                          "output"
+                                        ],
+                                        "type": "object"
+                                      },
                                       "ai_runtime_task": {
                                         "properties": {
                                           "deployments": {
@@ -10417,6 +11303,13 @@
                                               "boot_disk_size": {
                                                 "format": "int32",
                                                 "type": "integer"
+                                              },
+                                              "confidential_compute_type": {
+                                                "enum": [
+                                                  "CONFIDENTIAL_COMPUTE_TYPE_NONE",
+                                                  "SEV_SNP"
+                                                ],
+                                                "type": "string"
                                               },
                                               "first_on_demand": {
                                                 "default": 1,
@@ -11601,6 +12494,13 @@
                                         "format": "int32",
                                         "type": "integer"
                                       },
+                                      "confidential_compute_type": {
+                                        "enum": [
+                                          "CONFIDENTIAL_COMPUTE_TYPE_NONE",
+                                          "SEV_SNP"
+                                        ],
+                                        "type": "string"
+                                      },
                                       "first_on_demand": {
                                         "default": 1,
                                         "format": "int32",
@@ -12007,6 +12907,33 @@
                               },
                               "resolved_values": {
                                 "properties": {
+                                  "ai_function_task": {
+                                    "properties": {
+                                      "delta_table": {
+                                        "properties": {
+                                          "input_column": {
+                                            "type": "string"
+                                          },
+                                          "merge_key_columns": {
+                                            "items": {
+                                              "type": "string"
+                                            },
+                                            "maxItems": 3,
+                                            "type": "array"
+                                          },
+                                          "table_name": {
+                                            "type": "string"
+                                          }
+                                        },
+                                        "required": [
+                                          "table_name",
+                                          "input_column"
+                                        ],
+                                        "type": "object"
+                                      }
+                                    },
+                                    "type": "object"
+                                  },
                                   "condition_task": {
                                     "properties": {
                                       "left": {
@@ -12615,9 +13542,76 @@
                         },
                         "trigger_info": {
                           "properties": {
+                            "job_completion": {
+                              "properties": {
+                                "completed_jobs": {
+                                  "items": {
+                                    "properties": {
+                                      "completion_time": {
+                                        "type": "string"
+                                      },
+                                      "job_id": {
+                                        "type": "string"
+                                      },
+                                      "run_id": {
+                                        "type": "string"
+                                      },
+                                      "termination_code": {
+                                        "enum": [
+                                          "SUCCESS",
+                                          "CANCELED",
+                                          "DRIVER_ERROR",
+                                          "CLUSTER_ERROR",
+                                          "REPOSITORY_CHECKOUT_FAILED",
+                                          "INVALID_CLUSTER_REQUEST",
+                                          "WORKSPACE_RUN_LIMIT_EXCEEDED",
+                                          "FEATURE_DISABLED",
+                                          "CLUSTER_REQUEST_LIMIT_EXCEEDED",
+                                          "STORAGE_ACCESS_ERROR",
+                                          "RUN_EXECUTION_ERROR",
+                                          "UNAUTHORIZED_ERROR",
+                                          "LIBRARY_INSTALLATION_ERROR",
+                                          "MAX_CONCURRENT_RUNS_EXCEEDED",
+                                          "MAX_SPARK_CONTEXTS_EXCEEDED",
+                                          "RESOURCE_NOT_FOUND",
+                                          "INVALID_RUN_CONFIGURATION",
+                                          "INTERNAL_ERROR",
+                                          "CLOUD_FAILURE",
+                                          "MAX_JOB_QUEUE_SIZE_EXCEEDED",
+                                          "SKIPPED",
+                                          "USER_CANCELED",
+                                          "BUDGET_POLICY_LIMIT_EXCEEDED",
+                                          "DISABLED",
+                                          "SUCCESS_WITH_FAILURES",
+                                          "BREAKING_CHANGE"
+                                        ],
+                                        "type": "string"
+                                      },
+                                      "workspace_id": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "type": "object"
+                                  },
+                                  "type": "array"
+                                }
+                              },
+                              "type": "object"
+                            },
                             "run_id": {
                               "format": "int64",
                               "type": "integer"
+                            },
+                            "sql_condition": {
+                              "properties": {
+                                "condition_evaluation_satisfied": {
+                                  "type": "boolean"
+                                },
+                                "condition_evaluation_sql_statement_id": {
+                                  "type": "string"
+                                }
+                              },
+                              "type": "object"
                             }
                           },
                           "type": "object"
@@ -13301,6 +14295,13 @@
                                         "format": "int32",
                                         "type": "integer"
                                       },
+                                      "confidential_compute_type": {
+                                        "enum": [
+                                          "CONFIDENTIAL_COMPUTE_TYPE_NONE",
+                                          "SEV_SNP"
+                                        ],
+                                        "type": "string"
+                                      },
                                       "first_on_demand": {
                                         "default": 1,
                                         "format": "int32",
@@ -13901,6 +14902,13 @@
                                           "format": "int32",
                                           "type": "integer"
                                         },
+                                        "confidential_compute_type": {
+                                          "enum": [
+                                            "CONFIDENTIAL_COMPUTE_TYPE_NONE",
+                                            "SEV_SNP"
+                                          ],
+                                          "type": "string"
+                                        },
                                         "first_on_demand": {
                                           "default": 1,
                                           "format": "int32",
@@ -14122,6 +15130,14 @@
                                         "clients"
                                       ],
                                       "type": "object"
+                                    }
+                                  },
+                                  "type": "object"
+                                },
+                                "serverless_compute": {
+                                  "properties": {
+                                    "policy_id": {
+                                      "type": "string"
                                     }
                                   },
                                   "type": "object"
@@ -14415,6 +15431,27 @@
                               "quartz_cron_expression": {
                                 "type": "string"
                               },
+                              "sql_condition": {
+                                "properties": {
+                                  "sql_query_id": {
+                                    "type": "string"
+                                  },
+                                  "trigger_mode": {
+                                    "enum": [
+                                      "QUERY_RETURNS_ROWS",
+                                      "RESULT_VALUE_CHANGES"
+                                    ],
+                                    "type": "string"
+                                  },
+                                  "warehouse_id": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "warehouse_id"
+                                ],
+                                "type": "object"
+                              },
                               "timezone_id": {
                                 "type": "string"
                               }
@@ -14562,6 +15599,167 @@
                           "tasks": {
                             "items": {
                               "properties": {
+                                "ai_function_task": {
+                                  "properties": {
+                                    "ai_classify": {
+                                      "properties": {
+                                        "enable_confidence_scores": {
+                                          "type": "boolean"
+                                        },
+                                        "enable_rationales": {
+                                          "type": "boolean"
+                                        },
+                                        "inline_labels": {
+                                          "properties": {
+                                            "labels": {
+                                              "items": {
+                                                "properties": {
+                                                  "description": {
+                                                    "type": "string"
+                                                  },
+                                                  "name": {
+                                                    "type": "string"
+                                                  }
+                                                },
+                                                "required": [
+                                                  "name"
+                                                ],
+                                                "type": "object"
+                                              },
+                                              "maxItems": 10,
+                                              "type": "array"
+                                            }
+                                          },
+                                          "required": [
+                                            "labels"
+                                          ],
+                                          "type": "object"
+                                        },
+                                        "instructions": {
+                                          "type": "string"
+                                        },
+                                        "multilabel": {
+                                          "type": "boolean"
+                                        },
+                                        "version": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "version"
+                                      ],
+                                      "type": "object"
+                                    },
+                                    "ai_extract": {
+                                      "properties": {
+                                        "enable_citations": {
+                                          "type": "boolean"
+                                        },
+                                        "enable_confidence_scores": {
+                                          "type": "boolean"
+                                        },
+                                        "instructions": {
+                                          "type": "string"
+                                        },
+                                        "mode": {
+                                          "enum": [
+                                            "MODE_PRECISION"
+                                          ],
+                                          "type": "string"
+                                        },
+                                        "schema": {
+                                          "type": "string"
+                                        },
+                                        "version": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "version"
+                                      ],
+                                      "type": "object"
+                                    },
+                                    "ai_parse_document": {
+                                      "properties": {
+                                        "description_element_types": {
+                                          "items": {
+                                            "enum": [
+                                              "DESCRIPTION_ELEMENT_TYPE_ALL",
+                                              "DESCRIPTION_ELEMENT_TYPE_FIGURE"
+                                            ],
+                                            "type": "string"
+                                          },
+                                          "maxItems": 1,
+                                          "type": "array"
+                                        },
+                                        "image_output_path": {
+                                          "type": "string"
+                                        },
+                                        "page_range": {
+                                          "type": "string"
+                                        },
+                                        "version": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "version"
+                                      ],
+                                      "type": "object"
+                                    },
+                                    "delta_table": {
+                                      "properties": {
+                                        "input_column": {
+                                          "type": "string"
+                                        },
+                                        "merge_key_columns": {
+                                          "items": {
+                                            "type": "string"
+                                          },
+                                          "maxItems": 3,
+                                          "type": "array"
+                                        },
+                                        "table_name": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "table_name",
+                                        "input_column"
+                                      ],
+                                      "type": "object"
+                                    },
+                                    "output": {
+                                      "properties": {
+                                        "catalog": {
+                                          "type": "string"
+                                        },
+                                        "schema": {
+                                          "type": "string"
+                                        },
+                                        "table": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "type": "object"
+                                    },
+                                    "volume": {
+                                      "properties": {
+                                        "volume_path": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "volume_path"
+                                      ],
+                                      "type": "object"
+                                    }
+                                  },
+                                  "required": [
+                                    "output"
+                                  ],
+                                  "type": "object"
+                                },
                                 "ai_runtime_task": {
                                   "properties": {
                                     "deployments": {
@@ -14985,6 +16183,167 @@
                                     },
                                     "task": {
                                       "properties": {
+                                        "ai_function_task": {
+                                          "properties": {
+                                            "ai_classify": {
+                                              "properties": {
+                                                "enable_confidence_scores": {
+                                                  "type": "boolean"
+                                                },
+                                                "enable_rationales": {
+                                                  "type": "boolean"
+                                                },
+                                                "inline_labels": {
+                                                  "properties": {
+                                                    "labels": {
+                                                      "items": {
+                                                        "properties": {
+                                                          "description": {
+                                                            "type": "string"
+                                                          },
+                                                          "name": {
+                                                            "type": "string"
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "name"
+                                                        ],
+                                                        "type": "object"
+                                                      },
+                                                      "maxItems": 10,
+                                                      "type": "array"
+                                                    }
+                                                  },
+                                                  "required": [
+                                                    "labels"
+                                                  ],
+                                                  "type": "object"
+                                                },
+                                                "instructions": {
+                                                  "type": "string"
+                                                },
+                                                "multilabel": {
+                                                  "type": "boolean"
+                                                },
+                                                "version": {
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "required": [
+                                                "version"
+                                              ],
+                                              "type": "object"
+                                            },
+                                            "ai_extract": {
+                                              "properties": {
+                                                "enable_citations": {
+                                                  "type": "boolean"
+                                                },
+                                                "enable_confidence_scores": {
+                                                  "type": "boolean"
+                                                },
+                                                "instructions": {
+                                                  "type": "string"
+                                                },
+                                                "mode": {
+                                                  "enum": [
+                                                    "MODE_PRECISION"
+                                                  ],
+                                                  "type": "string"
+                                                },
+                                                "schema": {
+                                                  "type": "string"
+                                                },
+                                                "version": {
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "required": [
+                                                "version"
+                                              ],
+                                              "type": "object"
+                                            },
+                                            "ai_parse_document": {
+                                              "properties": {
+                                                "description_element_types": {
+                                                  "items": {
+                                                    "enum": [
+                                                      "DESCRIPTION_ELEMENT_TYPE_ALL",
+                                                      "DESCRIPTION_ELEMENT_TYPE_FIGURE"
+                                                    ],
+                                                    "type": "string"
+                                                  },
+                                                  "maxItems": 1,
+                                                  "type": "array"
+                                                },
+                                                "image_output_path": {
+                                                  "type": "string"
+                                                },
+                                                "page_range": {
+                                                  "type": "string"
+                                                },
+                                                "version": {
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "required": [
+                                                "version"
+                                              ],
+                                              "type": "object"
+                                            },
+                                            "delta_table": {
+                                              "properties": {
+                                                "input_column": {
+                                                  "type": "string"
+                                                },
+                                                "merge_key_columns": {
+                                                  "items": {
+                                                    "type": "string"
+                                                  },
+                                                  "maxItems": 3,
+                                                  "type": "array"
+                                                },
+                                                "table_name": {
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "required": [
+                                                "table_name",
+                                                "input_column"
+                                              ],
+                                              "type": "object"
+                                            },
+                                            "output": {
+                                              "properties": {
+                                                "catalog": {
+                                                  "type": "string"
+                                                },
+                                                "schema": {
+                                                  "type": "string"
+                                                },
+                                                "table": {
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "type": "object"
+                                            },
+                                            "volume": {
+                                              "properties": {
+                                                "volume_path": {
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "required": [
+                                                "volume_path"
+                                              ],
+                                              "type": "object"
+                                            }
+                                          },
+                                          "required": [
+                                            "output"
+                                          ],
+                                          "type": "object"
+                                        },
                                         "ai_runtime_task": {
                                           "properties": {
                                             "deployments": {
@@ -15755,6 +17114,13 @@
                                                 "boot_disk_size": {
                                                   "format": "int32",
                                                   "type": "integer"
+                                                },
+                                                "confidential_compute_type": {
+                                                  "enum": [
+                                                    "CONFIDENTIAL_COMPUTE_TYPE_NONE",
+                                                    "SEV_SNP"
+                                                  ],
+                                                  "type": "string"
                                                 },
                                                 "first_on_demand": {
                                                   "default": 1,
@@ -16939,6 +18305,13 @@
                                           "format": "int32",
                                           "type": "integer"
                                         },
+                                        "confidential_compute_type": {
+                                          "enum": [
+                                            "CONFIDENTIAL_COMPUTE_TYPE_NONE",
+                                            "SEV_SNP"
+                                          ],
+                                          "type": "string"
+                                        },
                                         "first_on_demand": {
                                           "default": 1,
                                           "format": "int32",
@@ -17345,6 +18718,33 @@
                                 },
                                 "resolved_values": {
                                   "properties": {
+                                    "ai_function_task": {
+                                      "properties": {
+                                        "delta_table": {
+                                          "properties": {
+                                            "input_column": {
+                                              "type": "string"
+                                            },
+                                            "merge_key_columns": {
+                                              "items": {
+                                                "type": "string"
+                                              },
+                                              "maxItems": 3,
+                                              "type": "array"
+                                            },
+                                            "table_name": {
+                                              "type": "string"
+                                            }
+                                          },
+                                          "required": [
+                                            "table_name",
+                                            "input_column"
+                                          ],
+                                          "type": "object"
+                                        }
+                                      },
+                                      "type": "object"
+                                    },
                                     "condition_task": {
                                       "properties": {
                                         "left": {
@@ -17953,9 +19353,76 @@
                           },
                           "trigger_info": {
                             "properties": {
+                              "job_completion": {
+                                "properties": {
+                                  "completed_jobs": {
+                                    "items": {
+                                      "properties": {
+                                        "completion_time": {
+                                          "type": "string"
+                                        },
+                                        "job_id": {
+                                          "type": "string"
+                                        },
+                                        "run_id": {
+                                          "type": "string"
+                                        },
+                                        "termination_code": {
+                                          "enum": [
+                                            "SUCCESS",
+                                            "CANCELED",
+                                            "DRIVER_ERROR",
+                                            "CLUSTER_ERROR",
+                                            "REPOSITORY_CHECKOUT_FAILED",
+                                            "INVALID_CLUSTER_REQUEST",
+                                            "WORKSPACE_RUN_LIMIT_EXCEEDED",
+                                            "FEATURE_DISABLED",
+                                            "CLUSTER_REQUEST_LIMIT_EXCEEDED",
+                                            "STORAGE_ACCESS_ERROR",
+                                            "RUN_EXECUTION_ERROR",
+                                            "UNAUTHORIZED_ERROR",
+                                            "LIBRARY_INSTALLATION_ERROR",
+                                            "MAX_CONCURRENT_RUNS_EXCEEDED",
+                                            "MAX_SPARK_CONTEXTS_EXCEEDED",
+                                            "RESOURCE_NOT_FOUND",
+                                            "INVALID_RUN_CONFIGURATION",
+                                            "INTERNAL_ERROR",
+                                            "CLOUD_FAILURE",
+                                            "MAX_JOB_QUEUE_SIZE_EXCEEDED",
+                                            "SKIPPED",
+                                            "USER_CANCELED",
+                                            "BUDGET_POLICY_LIMIT_EXCEEDED",
+                                            "DISABLED",
+                                            "SUCCESS_WITH_FAILURES",
+                                            "BREAKING_CHANGE"
+                                          ],
+                                          "type": "string"
+                                        },
+                                        "workspace_id": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "type": "object"
+                                    },
+                                    "type": "array"
+                                  }
+                                },
+                                "type": "object"
+                              },
                               "run_id": {
                                 "format": "int64",
                                 "type": "integer"
+                              },
+                              "sql_condition": {
+                                "properties": {
+                                  "condition_evaluation_satisfied": {
+                                    "type": "boolean"
+                                  },
+                                  "condition_evaluation_sql_statement_id": {
+                                    "type": "string"
+                                  }
+                                },
+                                "type": "object"
                               }
                             },
                             "type": "object"

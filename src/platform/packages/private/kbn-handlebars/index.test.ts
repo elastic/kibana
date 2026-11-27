@@ -241,6 +241,68 @@ describe('Handlebars.compileAST', () => {
         });
       });
     });
+
+    describe('block params with `strict` and `assumeObjects`', () => {
+      const input = { goodbyes: [{ text: 'goodbye' }, { text: 'Goodbye' }] };
+
+      it('should resolve block params with `assumeObjects` set to true', () => {
+        expectTemplate('{{#each goodbyes as |value index|}}{{index}}. {{value.text}}!{{/each}}')
+          .withCompileOptions({ assumeObjects: true })
+          .withInput(input)
+          .toCompileTo('0. goodbye!1. Goodbye!');
+      });
+
+      it('should not require the last part of a block param path to exist with `strict` set to true', () => {
+        expectTemplate('{{#each goodbyes as |value|}}[{{value.missing}}]{{/each}}')
+          .withCompileOptions({ strict: true })
+          .withInput(input)
+          .toCompileTo('[][]');
+      });
+
+      it('should resolve block params passed to helpers with `strict` set to true', () => {
+        expectTemplate('{{#each goodbyes as |value|}}{{echo value.text}}{{/each}}')
+          .withCompileOptions({ strict: true })
+          .withInput(input)
+          .withHelper('echo', (text: string) => text)
+          .toCompileTo('goodbyeGoodbye');
+      });
+    });
+
+    describe('context references', () => {
+      it('should render `{{this}}` for primitive values with `strict` set to true', () => {
+        expectTemplate('{{#each items}}{{this}}{{/each}}')
+          .withCompileOptions({ strict: true })
+          .withInput({ items: ['a', 'b'] })
+          .toCompileTo('ab');
+      });
+
+      it('should render `{{.}}` for object values with `strict` set to true', () => {
+        expectTemplate('{{#each items}}{{.}}{{/each}}')
+          .withCompileOptions({ strict: true })
+          .withInput({ items: [{ toString: () => 'a' }, { toString: () => 'b' }] })
+          .toCompileTo('ab');
+      });
+
+      it('should render `{{..}}` with `strict` set to true', () => {
+        expectTemplate('{{#with obj}}{{..}}{{/with}}')
+          .withCompileOptions({ strict: true })
+          .withInput({ obj: {}, toString: () => 'parent' })
+          .toCompileTo('parent');
+      });
+
+      it('should render `{{this}}` with `strict` and `assumeObjects` set to true', () => {
+        expectTemplate('{{#each items}}{{this}}{{/each}}')
+          .withCompileOptions({ strict: true, assumeObjects: true })
+          .withInput({ items: ['a', 'b'] })
+          .toCompileTo('ab');
+      });
+
+      it('should render the context for a path that starts with an empty segment', () => {
+        expectTemplate('{{[].label}}')
+          .withInput({ '': { label: 'nested' }, toString: () => 'context' })
+          .toCompileTo('context');
+      });
+    });
   });
 
   it('invalid template', () => {
@@ -626,16 +688,13 @@ describe('blocks', () => {
       it('root decorator', () => {
         expectTemplate('{{*decorator}}world')
           .withInput({ me: 'my' })
-          .withDecorator(
-            'decorator',
-            (fn): TemplateDelegate =>
-              (context, options) => {
-                expect(context).toMatchInlineSnapshot(`
+          .withDecorator('decorator', (fn): TemplateDelegate => (context, options) => {
+            expect(context).toMatchInlineSnapshot(`
               Object {
                 "me": "my",
               }
             `);
-                expect(options).toMatchInlineSnapshot(`
+            expect(options).toMatchInlineSnapshot(`
               Object {
                 "decorators": Object {
                   "decorator": [Function],
@@ -644,21 +703,17 @@ describe('blocks', () => {
                 "partials": Object {},
               }
             `);
-                return `hello ${context.me} ${fn()}!`;
-              }
-          )
+            return `hello ${context.me} ${fn()}!`;
+          })
           .toCompileTo('hello my world!');
       });
 
       it('decorator nested inside of array-helper', () => {
         expectTemplate('{{#arr}}{{*decorator}}world{{/arr}}')
           .withInput({ arr: ['my'] })
-          .withDecorator(
-            'decorator',
-            (fn): TemplateDelegate =>
-              (context, options) => {
-                expect(context).toMatchInlineSnapshot(`"my"`);
-                expect(options).toMatchInlineSnapshot(`
+          .withDecorator('decorator', (fn): TemplateDelegate => (context, options) => {
+            expect(context).toMatchInlineSnapshot(`"my"`);
+            expect(options).toMatchInlineSnapshot(`
               Object {
                 "blockParams": Array [
                   "my",
@@ -684,9 +739,8 @@ describe('blocks', () => {
                 },
               }
             `);
-                return `hello ${context} ${fn()}!`;
-              }
-          )
+            return `hello ${context} ${fn()}!`;
+          })
           .toCompileTo('hello my world!');
       });
 
@@ -695,19 +749,15 @@ describe('blocks', () => {
           .withHelper('helper', function (options: HelperOptions) {
             return options.fn('my', { foo: 'bar' } as any);
           })
-          .withDecorator(
-            'decorator',
-            (fn): TemplateDelegate =>
-              (context, options) => {
-                expect(context).toMatchInlineSnapshot(`"my"`);
-                expect(options).toMatchInlineSnapshot(`
+          .withDecorator('decorator', (fn): TemplateDelegate => (context, options) => {
+            expect(context).toMatchInlineSnapshot(`"my"`);
+            expect(options).toMatchInlineSnapshot(`
               Object {
                 "foo": "bar",
               }
             `);
-                return `hello ${context} ${fn()}!`;
-              }
-          )
+            return `hello ${context} ${fn()}!`;
+          })
           .toCompileTo('hello my world!');
       });
     });

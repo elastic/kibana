@@ -12,6 +12,7 @@ import type {
   HasSerializableState,
   HasType,
   PublishesPhaseEvents,
+  StateComparators,
 } from '@kbn/presentation-publishing';
 import type React from 'react';
 import type { MaybePromise } from '@kbn/utility-types';
@@ -26,7 +27,8 @@ import type { PlacementStrategy } from './constants';
  * Before adding anything to this interface, please be certain that it belongs in *every* embeddable.
  */
 export interface DefaultEmbeddableApi<SerializedState extends object = object>
-  extends DefaultPresentationPanelApi,
+  extends
+    DefaultPresentationPanelApi,
     HasType,
     PublishesPhaseEvents,
     HasSerializableState<SerializedState> {}
@@ -37,12 +39,12 @@ export interface DefaultEmbeddableApi<SerializedState extends object = object>
  */
 export type EmbeddableApiRegistration<
   SerializedState extends object = object,
-  Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>
+  Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>,
 > = Omit<Api, 'uuid' | 'parent' | 'type' | 'phase$' | 'relatedPanels$' | keyof CanLockHoverActions>;
 
 export interface BuildEmbeddableProps<
   SerializedState extends object = object,
-  Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>
+  Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>,
 > {
   /**
    * Initial serialized state provided by the parent.
@@ -82,7 +84,7 @@ export interface BuildEmbeddableProps<
  **/
 export interface EmbeddablePublicDefinition<
   SerializedState extends object = object,
-  Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>
+  Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>,
 > {
   /**
    * A unique key for the type of this embeddable. The React Embeddable Renderer will use this type
@@ -99,6 +101,11 @@ export interface EmbeddablePublicDefinition<
   ) => Promise<{ Component: React.FC<{}>; api: Api }>;
 
   /**
+   * Returns comparators used to determine whether two serialized states are equal.
+   */
+  getComparators?: (embeddableState: SerializedState) => StateComparators<SerializedState>;
+
+  /**
    * Provide placement hints to customize initial placement
    */
   getPlacementHints?: (serializedState?: SerializedState) => MaybePromise<{
@@ -111,6 +118,11 @@ export interface EmbeddablePublicDefinition<
    * Provide layout contraints to customize resize behavior
    */
   layoutConstraints?: LayoutConstraints;
+
+  /**
+   * Determine whether an incoming embeddable state duplicates an existing embeddable state of the same type.
+   */
+  isDuplicate?: (incomingState: SerializedState, existingState: SerializedState) => boolean;
 }
 
 export type LayoutConstraints = {

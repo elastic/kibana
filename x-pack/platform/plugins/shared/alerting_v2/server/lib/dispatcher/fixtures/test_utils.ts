@@ -51,12 +51,16 @@ export function createStepLogger(): LoggerServiceContract {
 }
 
 export function createDispatcherTelemetryMock(): jest.Mocked<DispatcherTelemetryContract> {
-  return { recordAlertScanTruncated: jest.fn() };
+  return { recordAlertScanTruncated: jest.fn(), recordOversizedAlertDataSkipped: jest.fn() };
 }
 
 export interface DispatcherConfigOverrides {
   paused?: boolean;
-  run?: { timeout?: string; alerts?: { max?: number } };
+  run?: {
+    timeout?: string;
+    alerts?: { max?: number };
+    hydration?: { maxResponseSize?: string };
+  };
 }
 
 export function createDispatcherConfigService(
@@ -86,11 +90,10 @@ export function createDispatcherPipelineInput(
  * through their raw source data (`alerts`, `rules`, `policies`) and folded
  * into the value objects here.
  */
-export interface DispatcherPipelineStateOverrides
-  extends Omit<
-    Partial<DispatcherPipelineState>,
-    'input' | 'scan' | 'rules' | 'policies' | 'suppressions' | 'triage' | 'plan' | 'outcome'
-  > {
+export interface DispatcherPipelineStateOverrides extends Omit<
+  Partial<DispatcherPipelineState>,
+  'input' | 'scan' | 'rules' | 'policies' | 'suppressions' | 'triage' | 'plan' | 'outcome'
+> {
   input?: DispatcherPipelineInput;
   alerts?: Alert[];
   suppressions?: SuppressionRow[];

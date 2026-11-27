@@ -7,23 +7,16 @@
 
 import type {
   SessionPageVisit,
+  SessionRequest,
   SessionSummary,
   SessionTimelineEvent,
-  SessionTimelineEventKind,
 } from '../../../../common/sessions';
 import { UNKNOWN_PAGE } from '../../../labels';
-
-/** Events the journey lists; spans and logs are left to traces and Discover. */
-export const JOURNEY_EVENT_KINDS: readonly SessionTimelineEventKind[] = [
-  'page_view',
-  'click',
-  'error',
-  'web_vital',
-];
 
 export interface PageVisitEvents {
   visit: SessionPageVisit;
   events: SessionTimelineEvent[];
+  requests: SessionRequest[];
 }
 
 /**
@@ -51,7 +44,8 @@ const ownVisitIndex = (
  */
 export const groupEventsByVisit = (
   pageVisits: SessionPageVisit[],
-  timeline: SessionTimelineEvent[]
+  timeline: SessionTimelineEvent[],
+  requests: SessionRequest[] = []
 ): PageVisitEvents[] => {
   if (pageVisits.length === 0) {
     return [];
@@ -59,9 +53,6 @@ export const groupEventsByVisit = (
   const startsMs = pageVisits.map(({ startTime }) => Date.parse(startTime));
   const events = pageVisits.map((): SessionTimelineEvent[] => []);
   for (const event of timeline) {
-    if (!JOURNEY_EVENT_KINDS.includes(event.kind)) {
-      continue;
-    }
     const eventMs = Date.parse(event.timestamp);
     const openIndex = Math.max(
       0,
@@ -69,7 +60,16 @@ export const groupEventsByVisit = (
     );
     events[ownVisitIndex(pageVisits, openIndex, event)].push(event);
   }
-  return pageVisits.map((visit, index) => ({ visit, events: events[index] }));
+  // The API attributes requests to visits, as only it knows which page load each came from.
+  const visitRequests = pageVisits.map((): SessionRequest[] => []);
+  for (const request of requests) {
+    visitRequests[request.visitIndex]?.push(request);
+  }
+  return pageVisits.map((visit, index) => ({
+    visit,
+    events: events[index],
+    requests: visitRequests[index],
+  }));
 };
 
 export interface WaterfallSegment {
@@ -90,15 +90,26 @@ export interface SessionWaterfallLayout {
   totalMs: number;
   segments: WaterfallSegment[];
   errorMarkers: WaterfallMarker[];
+  frustrationMarkers: WaterfallMarker[];
 }
 
 const percentOf = (ms: number, totalMs: number): number =>
   Math.min(100, Math.max(0, (ms / totalMs) * 100));
 
+const markersOf = (
+  timeline: SessionTimelineEvent[],
+  kind: SessionTimelineEvent['kind'],
+  totalMs: number
+): WaterfallMarker[] =>
+  timeline
+    .filter((event) => event.kind === kind)
+    .map((event) => ({ offsetPercent: percentOf(event.offsetMs, totalMs), event }));
+
 /**
  * Places each page visit on a bar spanning the whole session, proportionally to when it started and
- * how long it lasted, with a marker at each error. The bar spans the summary's duration, or longer
- * when the raw events, which can be newer than the summary, run past it.
+ * how long it lasted, with a marker at each error and each frustration signal. The bar spans the
+ * summary's duration, or longer when the raw events, which can be newer than the summary, run past
+ * it.
  */
 export const layoutWaterfall = (
   session: Pick<SessionSummary, 'startTime' | 'durationMs'>,
@@ -126,9 +137,8 @@ export const layoutWaterfall = (
         widthPercent: Math.min(100 - offsetPercent, percentOf(visit.durationMs, totalMs)),
       };
     }),
-    errorMarkers: timeline
-      .filter(({ kind }) => kind === 'error')
-      .map((event) => ({ offsetPercent: percentOf(event.offsetMs, totalMs), event })),
+    errorMarkers: markersOf(timeline, 'error', totalMs),
+    frustrationMarkers: markersOf(timeline, 'frustration', totalMs),
   };
 };
 

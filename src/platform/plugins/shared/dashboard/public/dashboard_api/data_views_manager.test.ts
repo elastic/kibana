@@ -13,11 +13,12 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FilterableSource } from '@kbn/data-source';
 import { initializeDataViewsManager } from './data_views_manager';
 
-const dataView = (id: string) => ({ id, title: id, fields: [] } as unknown as DataView);
+const dataView = (id: string) => ({ id, title: id, fields: [] }) as unknown as DataView;
 const source = (id: string): FilterableSource => ({
   id,
   title: id,
   fields: [],
+  getFieldByName: () => undefined,
   isTimeBased: () => true,
 });
 

@@ -189,10 +189,10 @@ describe('computeAndPersistCompositeSummaries', () => {
         ({
           computeSummary: jest.fn(),
           computeSummaries: mockComputeSummaries,
-        } as any)
+        }) as any
     );
     (DefaultBurnRatesClient as jest.MockedClass<typeof DefaultBurnRatesClient>).mockImplementation(
-      () => ({ calculate: jest.fn(), calculateBatch: jest.fn() } as any)
+      () => ({ calculate: jest.fn(), calculateBatch: jest.fn() }) as any
     );
     mockComputeCompositeSummary.mockReturnValue(buildCompositeSummary());
 
@@ -590,6 +590,36 @@ describe('computeAndPersistCompositeSummaries', () => {
       // Second SLO still processed despite first throwing
       expect(mockComputeCompositeSummary).toHaveBeenCalledTimes(2);
       expect(esClient.bulk).toHaveBeenCalledTimes(1);
+    });
+
+    it('keeps the bulk operations paired when a summary document fails to encode', async () => {
+      const composite1 = buildStoredCompositeSLO({ id: 'composite-slo-id-11111111' });
+      const composite2 = buildStoredCompositeSLO({ id: 'composite-slo-id-22222222' });
+      mockPointInTimeFinder([[composite1, composite2]]);
+
+      const invalidSummary = buildCompositeSummary();
+      invalidSummary.compositeSummary.sliValue = Number.NaN;
+      mockComputeCompositeSummary
+        .mockReturnValueOnce(invalidSummary)
+        .mockReturnValueOnce(buildCompositeSummary());
+
+      await computeAndPersistCompositeSummaries({
+        esClient,
+        soClient: soClient as any,
+        sloRepository,
+        logger,
+        signal,
+      });
+
+      const { operations } = (esClient.bulk as unknown as jest.Mock).mock.calls[0][0];
+      expect(operations).toHaveLength(2);
+      expect(operations[0]).toEqual({
+        index: {
+          _index: COMPOSITE_SUMMARY_INDEX_NAME,
+          _id: 'default:composite-slo-id-22222222',
+        },
+      });
+      expect(operations[1].compositeSlo.id).toBe('composite-slo-id-22222222');
     });
 
     it('logs bulk errors without throwing', async () => {

@@ -15,15 +15,12 @@ import type {
   AgentBuilderVisualizationsPluginPublicStartDependencies,
 } from './types';
 
-export class AgentBuilderVisualizationsPublicPlugin
-  implements
-    Plugin<
-      AgentBuilderVisualizationsPluginPublicSetup,
-      AgentBuilderVisualizationsPluginPublicStart,
-      AgentBuilderVisualizationsPluginPublicSetupDependencies,
-      AgentBuilderVisualizationsPluginPublicStartDependencies
-    >
-{
+export class AgentBuilderVisualizationsPublicPlugin implements Plugin<
+  AgentBuilderVisualizationsPluginPublicSetup,
+  AgentBuilderVisualizationsPluginPublicStart,
+  AgentBuilderVisualizationsPluginPublicSetupDependencies,
+  AgentBuilderVisualizationsPluginPublicStartDependencies
+> {
   constructor(_initContext: PluginInitializerContext) {}
 
   setup(
@@ -52,7 +49,7 @@ export class AgentBuilderVisualizationsPublicPlugin
         customContent: {
           http: core.http,
           uiSettings: core.uiSettings,
-          search: plugins.data.search.search,
+          search: plugins.data.search,
         },
       })
     );

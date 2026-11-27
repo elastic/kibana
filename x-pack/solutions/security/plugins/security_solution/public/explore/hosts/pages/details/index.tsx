@@ -81,10 +81,10 @@ import {
   type EntityStoreRecord,
 } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import { ObservedDataSection as HostObservedDataSection } from '../../../../flyout_v2/entity/shared/components/observed_data_section';
-import { HOST_PANEL_OBSERVED_HOST_QUERY_ID } from '../../../../flyout/entity_details/host_right';
+import { HOST_PANEL_OBSERVED_HOST_QUERY_ID } from '../../../../flyout_v2/entity/host/main/constants';
 import { useObservedHost } from '../../../../flyout_v2/entity/host/main/hooks/use_observed_host';
 import { buildRiskScoreStateFromEntityRecord } from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
-import { NO_CORRESPONDING_ENTITY_EXISTS } from '../../../../flyout/entity_details/shared/translations';
+import { NO_CORRESPONDING_ENTITY_EXISTS } from '../../../../flyout_v2/entity/shared/translations';
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
 import type { Entity } from '../../../../../common/api/entity_analytics';
 import { euidDslFilterToPageFilters } from '../../../helpers';
@@ -136,7 +136,7 @@ const HostDetailsAssetCriticalitySection: React.FC<{
     <AssetCriticalityAccordion
       entity={{ name: detailName, type: EntityType.host }}
       onChange={onCriticalityChange}
-      entityRecord={entityStoreV2Enabled ? observedHostEntityRecord ?? undefined : undefined}
+      entityRecord={entityStoreV2Enabled ? (observedHostEntityRecord ?? undefined) : undefined}
       criticalityFromEntityStore={
         entityStoreV2Enabled && observedHostEntityRecord
           ? storeRecord?.asset?.criticality
@@ -465,16 +465,16 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
                         setQuery={setQuery}
                         refetch={
                           entityStoreV2Enabled
-                            ? observedHost.refetchEntityStore ??
+                            ? (observedHost.refetchEntityStore ??
                               observedHost.refetchObservedDetails ??
-                              refetch
+                              refetch)
                             : refetch
                         }
                         inspect={
                           entityStoreV2Enabled
-                            ? entityFromStoreResult?.inspect ??
+                            ? (entityFromStoreResult?.inspect ??
                               observedHost.observedDetailsInspect ??
-                              inspect
+                              inspect)
                             : inspect
                         }
                         hostName={detailName}
@@ -486,12 +486,12 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
                         riskScoreState={hostRiskScoreStateFromEntityStore}
                         firstSeenFromEntityStore={
                           entityStoreV2Enabled
-                            ? observedHost.firstSeen?.date ?? undefined
+                            ? (observedHost.firstSeen?.date ?? undefined)
                             : undefined
                         }
                         lastSeenFromEntityStore={
                           entityStoreV2Enabled
-                            ? observedHost.lastSeen?.date ?? undefined
+                            ? (observedHost.lastSeen?.date ?? undefined)
                             : undefined
                         }
                       />
@@ -553,7 +553,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
               type={HostsType.details}
               setQuery={setQuery}
               entityRecord={
-                entityStoreV2Enabled ? observedHost.entityRecord ?? undefined : undefined
+                entityStoreV2Enabled ? (observedHost.entityRecord ?? undefined) : undefined
               }
               filterQuery={stringifiedHostDetailsIdentityFilterQuery}
               hostDetailsPagePath={hostDetailsPagePath}

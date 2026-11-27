@@ -203,7 +203,7 @@ describe('Endpoint Trusted Device API validations', () => {
         osTypes: ['windows'],
         tags: [GLOBAL_ARTIFACT_TAG],
         entries: [{ field: 'host.name', type: 'match', operator: 'included', value }],
-      } as unknown as CreateExceptionListItemOptions);
+      }) as unknown as CreateExceptionListItemOptions;
 
     it('accepts a scalar value at the 4096 character limit', async () => {
       await expect(
@@ -251,7 +251,7 @@ describe('Endpoint Trusted Device API validations', () => {
   //  API TESTS FOR THIS ARTIFACT TYPE SHOULD BE COVERED WITH INTEGRATION TESTS.
   //  ADD THEM HERE:
   //
-  //  `x-pack/solutions/security/test/security_solution_api_integration/test_suites/edr_workflows`
+  //  `x-pack/solutions/security/test_suites/test-suites-security-solution-apis/test_suites/edr_workflows`
   //
   // -----------------------------------------------------------------------------
 });

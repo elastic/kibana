@@ -75,7 +75,7 @@ const createMockSlo = (overrides: Partial<SLOWithSummaryResponse> = {}): SLOWith
       },
     },
     ...overrides,
-  } as SLOWithSummaryResponse);
+  }) as SLOWithSummaryResponse;
 
 const renderWithIntl = (component: React.ReactElement) => {
   return render(<IntlProvider locale="en">{component}</IntlProvider>);

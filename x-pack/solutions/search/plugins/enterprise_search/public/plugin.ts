@@ -178,9 +178,8 @@ export class EnterpriseSearchPlugin implements Plugin {
         const pluginData = this.getPluginData();
 
         const { renderApp } = await import('./applications');
-        const { EnterpriseSearchContent } = await import(
-          './applications/enterprise_search_content'
-        );
+        const { EnterpriseSearchContent } =
+          await import('./applications/enterprise_search_content');
 
         return renderApp(EnterpriseSearchContent, kibanaDeps, pluginData);
       },
@@ -298,13 +297,14 @@ export class EnterpriseSearchPlugin implements Plugin {
     docLinks.setDocLinks(core.docLinks);
 
     import('./navigation_tree').then(({ getNavigationTreeDefinition }) => {
-      return plugins.navigation.addSolutionNavigation(
-        getNavigationTreeDefinition({
+      return plugins.navigation.addSolutionNavigation({
+        ...getNavigationTreeDefinition({
           core,
           dynamicItems$: this.sideNavDynamicItems$,
           isCloudEnabled: plugins.cloud?.isCloudEnabled,
-        })
-      );
+        }),
+        ownerPluginId: 'enterpriseSearch',
+      });
     });
 
     this.licenseSubscription = plugins.licensing?.license$.subscribe((license) => {

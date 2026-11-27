@@ -8,11 +8,11 @@
  */
 
 /**
- * Returns the mathematical constant PI
+ * Returns the mathematical constant pi
  * @return {(number)} The mathematical constant PI
  *
  * @example
- * pi() // 3.141592653589793
+ * pi() // returns 3.141592653589793
  */
 
 function pi() {

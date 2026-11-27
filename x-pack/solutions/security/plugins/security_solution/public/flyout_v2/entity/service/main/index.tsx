@@ -46,14 +46,11 @@ import {
   buildRiskScoreStateFromEntityRecord,
   getHeaderRiskLevel,
 } from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
-import { isEntityGroupView } from '../../../../flyout/entity_details/shared/entity_store_group_utils';
-import {
-  useEntityPanelTabs,
-  TABLE_TAB_ID,
-} from '../../../../flyout/entity_details/shared/hooks/use_entity_panel_tabs';
-import { EntityPanelHeaderTabs } from '../../../../flyout/entity_details/shared/components/entity_panel_tabs';
-import { EntityStoreTableTab } from '../../../../flyout/entity_details/shared/components/entity_store_table_tab';
-import { EntitySummaryGrid } from '../../../../flyout/entity_details/shared/components/entity_summary_grid';
+import { isEntityGroupView } from '../../shared/utils/entity_store_group_utils';
+import { useEntityPanelTabs, TABLE_TAB_ID } from '../../shared/hooks/use_entity_panel_tabs';
+import { EntityPanelHeaderTabs } from '../../shared/components/entity_panel_tabs';
+import { EntityStoreTableTab } from '../../shared/components/entity_store_table_tab';
+import { EntitySummaryGrid } from '../../shared/components/entity_summary_grid';
 import { useFlyoutApi } from '../../../use_flyout_api';
 import { Header } from './header';
 import { Content } from './content';
@@ -231,16 +228,16 @@ export const Service: FC<ServiceProps> = memo(function Service({
   useQueryInspector({
     deleteQuery,
     inspect: useEntityStoreInspectForRisk
-      ? entityFromStoreResult?.inspect ?? null
+      ? (entityFromStoreResult?.inspect ?? null)
       : inspectRiskScore,
-    loading: useEntityStoreInspectForRisk ? entityFromStoreResult?.isLoading ?? false : loading,
+    loading: useEntityStoreInspectForRisk ? (entityFromStoreResult?.isLoading ?? false) : loading,
     queryId: SERVICE_PANEL_RISK_SCORE_QUERY_ID,
-    refetch: useEntityStoreInspectForRisk ? entityFromStoreResult?.refetch ?? noop : refetch,
+    refetch: useEntityStoreInspectForRisk ? (entityFromStoreResult?.refetch ?? noop) : refetch,
     setQuery,
   });
 
   const entityFromStore: EntityStoreRecord | undefined = entityStoreV2Enabled
-    ? observedService.entityRecord ?? undefined
+    ? (observedService.entityRecord ?? undefined)
     : undefined;
 
   const riskScoreStateFromStore =
@@ -459,7 +456,7 @@ export const Service: FC<ServiceProps> = memo(function Service({
             onAssetCriticalityChange={onAssetCriticalityChanged}
             isPreviewMode={false}
             entityRecord={
-              entityStoreV2Enabled ? observedService.entityRecord ?? undefined : undefined
+              entityStoreV2Enabled ? (observedService.entityRecord ?? undefined) : undefined
             }
             aliasRecords={aliasRecords}
             noEntityInStore={noEntityInStore}

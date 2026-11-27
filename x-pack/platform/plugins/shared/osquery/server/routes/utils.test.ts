@@ -95,7 +95,7 @@ describe('routes utils', () => {
         service: {
           getPackagePolicyService: jest.fn().mockReturnValue(packagePolicyService),
         },
-      } as unknown as OsqueryAppContext);
+      }) as unknown as OsqueryAppContext;
 
     beforeEach(() => {
       jest.clearAllMocks();

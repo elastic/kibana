@@ -273,7 +273,7 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
         create: jest.fn(async ({ origin }: { origin: string }) => {
           attachedProposalIds.push(origin);
         }),
-      } as never),
+      }) as never,
     resolveUser: async () => ({
       username: 'analyst',
       fullName: null,
@@ -282,12 +282,12 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
   });
 
   const update = service.update.bind(service);
-  jest.spyOn(service, 'update').mockImplementation(async (params, spaceId) => {
+  jest.spyOn(service, 'update').mockImplementation(async (params, spaceId, caller, options) => {
     if (failingStatus !== undefined && params.status === failingStatus) {
       failingStatus = undefined;
       throw new Error(`Failed to write status ${params.status}`);
     }
-    return update(params, spaceId);
+    return update(params, spaceId, caller, options);
   });
 
   const privileges: ProposalPrivilegesChecker = {
@@ -382,7 +382,7 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
 
   const proposals = () =>
     [...documents.entries()].map(
-      ([id, { document }]) => ({ id, ...document } as Proposal & { id: string })
+      ([id, { document }]) => ({ id, ...document }) as Proposal & { id: string }
     );
 
   /** Stages the payload `waitForApproval` reduces a resume to, without waking the run. */

@@ -429,7 +429,7 @@ export type Matrix3 = readonly [
   number,
   number,
   number,
-  number
+  number,
 ];
 
 type EventSubtypeFull =
@@ -828,7 +828,7 @@ export interface TimeFilters {
  */
 export interface ResolverProps {
   /**
-   * Used by `styled-components`.
+   * Used by `@emotion/styled`.
    */
   className?: string;
   /**

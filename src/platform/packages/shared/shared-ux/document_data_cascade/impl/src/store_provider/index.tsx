@@ -69,7 +69,7 @@ function useDataCascadeStore<G extends GroupNode, L extends LeafNode>() {
 
 export function useDataCascadeActions<
   T extends GroupNode = GroupNode,
-  L extends LeafNode = LeafNode
+  L extends LeafNode = LeafNode,
 >() {
   const ctx = useDataCascadeStore<T, L>();
   return ctx.actions;

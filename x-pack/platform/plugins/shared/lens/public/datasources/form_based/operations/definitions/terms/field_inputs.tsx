@@ -131,8 +131,8 @@ export function FieldInputs({
 
           const shouldShowError = Boolean(
             value &&
-              ((indexPattern.getFieldByName(value)?.scripted && localValuesFilled.length > 1) ||
-                invalidFields?.includes(value))
+            ((indexPattern.getFieldByName(value)?.scripted && localValuesFilled.length > 1) ||
+              invalidFields?.includes(value))
           );
           const itemId = (value ?? 'newField') + id;
 

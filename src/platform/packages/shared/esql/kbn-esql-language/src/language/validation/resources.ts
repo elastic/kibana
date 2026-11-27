@@ -40,10 +40,8 @@ export async function retrieveSources(
   commands: ESQLAstAllCommands[],
   callbacks?: ESQLCallbacks
 ): Promise<Set<string>> {
-  if (!callbacks || commands.length < 1) {
-    return new Set();
-  }
-  if (['row', 'show', 'meta'].includes(commands[0].name)) {
+  // Only FROM and TS validate their sources, also inside subqueries.
+  if (!callbacks || !Walker.match(commands, { type: 'command', name: ['from', 'ts'] })) {
     return new Set();
   }
   const sources = await getSourcesHelper(callbacks)();

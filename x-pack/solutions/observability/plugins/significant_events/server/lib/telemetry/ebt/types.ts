@@ -31,7 +31,8 @@ interface ParentWorkflowExecutionTelemetryProps {
 }
 
 interface KnowledgeIndicatorQueriesGeneratedProps
-  extends EbtTelemetryContext,
+  extends
+    EbtTelemetryContext,
     OptionalWorkflowExecutionTelemetryProps,
     ParentWorkflowExecutionTelemetryProps {
   count: number;
@@ -46,7 +47,8 @@ interface KnowledgeIndicatorQueriesGeneratedProps
 }
 
 interface KnowledgeIndicatorFeaturesIdentifiedProps
-  extends EbtTelemetryContext,
+  extends
+    EbtTelemetryContext,
     OptionalWorkflowExecutionTelemetryProps,
     ParentWorkflowExecutionTelemetryProps {
   /** @deprecated Use `workflow_execution_id`. */
@@ -73,8 +75,7 @@ interface KnowledgeIndicatorFeaturesIdentifiedProps
 }
 
 interface AgentBuilderKnowledgeIndicatorCreatedProps
-  extends EbtTelemetryContext,
-    OptionalWorkflowExecutionTelemetryProps {
+  extends EbtTelemetryContext, OptionalWorkflowExecutionTelemetryProps {
   ki_kind: 'feature' | 'query';
   tool_id: 'ki_feature_create' | 'ki_query_create';
   success: boolean;
@@ -85,8 +86,7 @@ interface AgentBuilderKnowledgeIndicatorCreatedProps
 }
 
 interface AgentToolKnowledgeIndicatorIdentificationStartedProps
-  extends EbtTelemetryContext,
-    OptionalWorkflowExecutionTelemetryProps {
+  extends EbtTelemetryContext, OptionalWorkflowExecutionTelemetryProps {
   success: boolean;
   source_id: string;
   error_message?: string;
@@ -106,24 +106,9 @@ interface AlertCreationAttemptIdentityProps extends EbtTelemetryContext {
 }
 
 interface AgentToolEventCreateProps
-  extends AlertCreationAttemptIdentityProps,
-    OptionalWorkflowExecutionTelemetryProps {
+  extends AlertCreationAttemptIdentityProps, OptionalWorkflowExecutionTelemetryProps {
   success: boolean;
   source_ids: string[];
-  error_message?: string;
-}
-
-interface AgentToolEventStatusUpdateProps
-  extends ExistingAlertIdentityProps,
-    OptionalWorkflowExecutionTelemetryProps {
-  success: boolean;
-  /**
-   * @deprecated Superseded by `event_id`. Kept optional for schema continuity with events sent by
-   * nodes that have not been upgraded yet.
-   */
-  event_uuid?: string;
-  event_id: string;
-  status: SignificantEventStatus;
   error_message?: string;
 }
 
@@ -152,7 +137,8 @@ interface DiscoveryTriggeredProps extends EbtTelemetryContext, WorkflowExecution
 }
 
 interface DiscoveryRunIdentityProps
-  extends EbtTelemetryContext,
+  extends
+    EbtTelemetryContext,
     WorkflowExecutionTelemetryProps,
     ParentWorkflowExecutionTelemetryProps {
   alert_source: string;
@@ -170,6 +156,7 @@ interface DiscoveryCompletedProps extends DiscoveryRunIdentityProps {
   held_back_count?: number;
   needs_agent_count?: number;
   written_rule_count?: number;
+  unknown_reported_rule_count?: number;
   classifier_failed?: boolean;
   error_message?: string;
 }
@@ -202,8 +189,7 @@ interface DetectionScanProps extends EbtTelemetryContext, OptionalWorkflowExecut
 }
 
 interface KnowledgeIndicatorOnboardingScheduledProps
-  extends EbtTelemetryContext,
-    WorkflowExecutionTelemetryProps {
+  extends EbtTelemetryContext, WorkflowExecutionTelemetryProps {
   source_id: string;
   /** @deprecated Use `workflow_execution_id`. */
   execution_id: string;
@@ -213,8 +199,7 @@ interface KnowledgeIndicatorOnboardingScheduledProps
 }
 
 interface AgentToolEventWriteProps
-  extends AlertCreationAttemptIdentityProps,
-    OptionalWorkflowExecutionTelemetryProps {
+  extends AlertCreationAttemptIdentityProps, OptionalWorkflowExecutionTelemetryProps {
   success: boolean;
   event_id: string;
   /** Absent when no status was decided for the item (it was rejected or skipped earlier). */
@@ -228,8 +213,7 @@ interface AgentToolEventWriteProps
 }
 
 interface AgentToolEventSearchProps
-  extends EbtTelemetryContext,
-    OptionalWorkflowExecutionTelemetryProps {
+  extends EbtTelemetryContext, OptionalWorkflowExecutionTelemetryProps {
   success: boolean;
   result_count: number;
   has_query: boolean;
@@ -240,6 +224,57 @@ interface AgentToolEventSearchProps
   error_message?: string;
 }
 
+type AgentToolFailureCode =
+  | 'unknown_source'
+  | 'source_disabled'
+  | 'detection_rule_mismatch'
+  | 'detection_not_stored'
+  | 'unresolved_feature_reference'
+  | 'validation_error'
+  | 'bad_request'
+  | 'not_found'
+  | 'forbidden'
+  | 'paused'
+  | 'lease_held'
+  | 'reconcile_pending'
+  | 'stale_revision'
+  | 'conflict'
+  | 'outcome_unknown'
+  | 'bulk_error'
+  | 'internal_error';
+
+/** One event per failed tool call, whatever the tool; successes stay on the per-tool events. */
+interface AgentToolFailedProps
+  extends EbtTelemetryContext, OptionalWorkflowExecutionTelemetryProps {
+  tool_id: string;
+  error_code: AgentToolFailureCode;
+  input_rejected: boolean;
+  agent_id?: string;
+  tool_call_id?: string;
+  status_code?: number;
+  item_count?: number;
+  unresolved_count?: number;
+}
+
+type KnowledgeIndicatorQueriesGenerationFailureCode =
+  | 'agent_did_not_finalize'
+  | 'unexpected_source'
+  | 'model_not_found'
+  | 'model_blocked'
+  | 'aborted'
+  | 'internal_error';
+
+interface KnowledgeIndicatorQueriesGenerationFailedProps
+  extends
+    EbtTelemetryContext,
+    OptionalWorkflowExecutionTelemetryProps,
+    ParentWorkflowExecutionTelemetryProps {
+  error_code: KnowledgeIndicatorQueriesGenerationFailureCode;
+  connector_id?: string;
+  source_id: string;
+  duration_ms: number;
+}
+
 export {
   type EbtTelemetryContext,
   type AlertCreationAttemptIdentityProps,
@@ -248,7 +283,10 @@ export {
   type AgentToolKnowledgeIndicatorIdentificationStartedProps,
   type AgentToolEventCreateProps,
   type AgentToolEventSearchProps,
-  type AgentToolEventStatusUpdateProps,
+  type AgentToolFailedProps,
+  type AgentToolFailureCode,
+  type KnowledgeIndicatorQueriesGenerationFailedProps,
+  type KnowledgeIndicatorQueriesGenerationFailureCode,
   type AgentToolEventWriteProps,
   type DetectionScanProps,
   type DiscoveryCompletedProps,

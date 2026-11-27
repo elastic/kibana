@@ -11,6 +11,7 @@ import type { GetScopedClients, RouteHandlerScopedClients } from '../../../route
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import {
   createMockToolContext,
+  createMockToolFailureTelemetry,
   createSignificantEventsServer,
   invokeHandler,
   sourceWithSlug,
@@ -72,10 +73,12 @@ describe('ki_feature_similarity_search tool', () => {
       } as unknown as RouteHandlerScopedClients;
     }) as unknown as jest.MockedFunction<GetScopedClients>;
 
+    const telemetry = createMockToolFailureTelemetry();
     const tool = createFeatureSimilaritySearchTool({
       getScopedClients,
       server: toolServer,
       logger,
+      telemetry,
     });
     if (!('schema' in tool)) {
       throw new Error('Expected a schema-backed tool registration');
@@ -83,6 +86,7 @@ describe('ki_feature_similarity_search tool', () => {
 
     return {
       findFeaturesAcrossSources,
+      telemetry,
       tool,
     };
   };
@@ -122,6 +126,27 @@ describe('ki_feature_similarity_search tool', () => {
 
     expect(findFeaturesAcrossSources).not.toHaveBeenCalled();
     expect(result).toMatchObject({ results: [{ type: 'error' }] });
+  });
+
+  it('reports a failure at the warn level, with the candidate count', async () => {
+    const sourcesClient = mockSourcesClient();
+    sourcesClient.assertReadable.mockRejectedValue(forbidden('Cannot read source'));
+    const { tool, telemetry } = createTool(undefined, server, sourcesClient);
+
+    await invokeHandler(
+      tool,
+      { slug: 'logs.test', candidates: [CANDIDATE] },
+      createMockToolContext()
+    );
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      'Feature similarity search failed: Cannot read source'
+    );
+    expect(logger.error).not.toHaveBeenCalled();
+    expect(telemetry.trackAgentToolFailed).toHaveBeenCalledWith(
+      expect.objectContaining({ error_code: 'forbidden', input_rejected: false, item_count: 1 }),
+      expect.anything()
+    );
   });
 
   it('scopes the corpus to the sources the caller can read', async () => {

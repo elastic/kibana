@@ -15,8 +15,9 @@ import {
   HUMAN_READABLE_ID_PATTERN,
 } from '@kbn/human-readable-id';
 import type { DotKeysOf, DotObject, JsonValue, RecursivePartial } from '@kbn/utility-types';
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import type { WorkflowAccessSubject, WorkflowPermissions } from '../common/access_control';
+import { WORKFLOW_TEMPLATE_ORIGINS } from '../common/constants';
 import type { StepDeprecationInfo } from '../spec/deprecated_step_metadata';
 import type {
   SerializedError,
@@ -147,6 +148,13 @@ export interface WorkflowExecutionExecutedByUser {
   profileUid?: string;
 }
 
+/** One ancestor in a sub-workflow chain, and how it invoked the next run down. */
+export interface ExecutionChainHop {
+  readonly executionId: string;
+  readonly invocation: 'sync' | 'async';
+  readonly workflowId: string;
+}
+
 export interface EsWorkflowExecution {
   spaceId: string;
   id: string;
@@ -157,6 +165,11 @@ export interface EsWorkflowExecution {
   billable?: boolean | null;
   originManagedWorkflowId?: string | null;
   managedVersion?: number | null;
+  templateSlug?: string | null;
+  templateVersion?: string | null;
+  templateOrigin?: WorkflowTemplateOrigin | null;
+  /** Workflow document lifetime. Absent for a test run that has no saved workflow. */
+  workflowUid?: string;
   isTestRun: boolean;
   /** Whether the test uses a submitted definition instead of the saved workflow. */
   isEphemeral?: boolean;
@@ -205,6 +218,12 @@ export interface EsWorkflowExecution {
   /** Trigger dispatch id from event-driven scheduling (`context.metadata.eventId`), when set */
   dispatchEventId?: string;
   /**
+   * Every run above this one in a sub-workflow chain, root first and direct parent last.
+   * Indexed copy of `context.executionChain`, so the runs below any run can be queried.
+   * Absent on top-level runs and on child runs created before the field existed.
+   */
+  executionChain?: ExecutionChainHop[];
+  /**
    * Aggregated LLM token usage across all token-consuming steps in this
    * execution, accumulated incrementally as each step finishes. Absent when no
    * step reported usage. See {@link WorkflowTokenUsage}.
@@ -241,6 +260,8 @@ export interface EsWorkflowStepExecution {
   scopeStack: StackFrame[];
   workflowRunId: string;
   workflowId: string;
+  /** Workflow document lifetime copied from the execution. Absent when the run has no saved workflow. */
+  workflowUid?: string;
   status: ExecutionStatus;
   /** Whether this step execution belongs to a test run of the workflow. */
   isTestRun?: boolean;
@@ -382,28 +403,38 @@ export interface WorkflowStepExecutionListDto {
 
 // TODO: convert to actual elastic document spec
 
-export const EsWorkflowSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  description: z.string().optional(),
-  enabled: z.boolean(),
-  managed: z.boolean().optional(),
-  managedBy: z.string().nullable().optional(),
-  billable: z.boolean().nullable().optional(),
-  originManagedWorkflowId: z.string().nullable().optional(),
-  managedVersion: z.number().nullable().optional(),
-  tags: z.array(z.string()),
-  createdAt: z.date(),
-  createdBy: z.string(),
-  lastUpdatedAt: z.date(),
-  lastUpdatedBy: z.string(),
-  definition: WorkflowSchema.optional(),
-  deleted_at: z.date().nullable().default(null),
-  yaml: z.string(),
-  valid: z.boolean().readonly(),
-  /** Monotonic workflow document version counter (`_source.version`). */
-  version: z.number().optional(),
-});
+export const WorkflowTemplateOriginSchema = lazySchema(() => z.enum(WORKFLOW_TEMPLATE_ORIGINS));
+export type WorkflowTemplateOrigin = z.infer<typeof WorkflowTemplateOriginSchema>;
+
+export const EsWorkflowSchema = lazySchema(() =>
+  z.object({
+    id: z.string(),
+    name: z.string(),
+    description: z.string().optional(),
+    enabled: z.boolean(),
+    managed: z.boolean().optional(),
+    managedBy: z.string().nullable().optional(),
+    billable: z.boolean().nullable().optional(),
+    originManagedWorkflowId: z.string().nullable().optional(),
+    managedVersion: z.number().nullable().optional(),
+    /** Workflow Template library slug, or `custom` for a template outside the catalog. */
+    templateSlug: z.string().nullable().optional(),
+    templateVersion: z.string().nullable().optional(),
+    templateOrigin: WorkflowTemplateOriginSchema.nullable().optional(),
+    workflowUid: z.string().optional(),
+    tags: z.array(z.string()),
+    createdAt: z.date(),
+    createdBy: z.string(),
+    lastUpdatedAt: z.date(),
+    lastUpdatedBy: z.string(),
+    definition: WorkflowSchema.optional(),
+    deleted_at: z.date().nullable().default(null),
+    yaml: z.string(),
+    valid: z.boolean().readonly(),
+    /** Monotonic workflow document version counter (`_source.version`). */
+    version: z.number().optional(),
+  })
+);
 
 export type EsWorkflow = z.infer<typeof EsWorkflowSchema> & WorkflowAccessSubject;
 
@@ -510,6 +541,10 @@ export interface WorkflowDetailDto extends WorkflowAccessSubject {
   definitionHash?: string | null;
   originManagedWorkflowId?: string | null;
   managedVersion?: number | null;
+  templateSlug?: string | null;
+  templateVersion?: string | null;
+  templateOrigin?: WorkflowTemplateOrigin | null;
+  workflowUid?: string;
   lifecycle?: 'static' | 'dynamic' | null;
   createdAt: string;
   createdBy: string;
@@ -540,6 +575,9 @@ export interface WorkflowListItemDto extends WorkflowAccessSubject {
   enabled: boolean;
   managed?: boolean;
   managedBy?: string | null;
+  templateSlug?: string | null;
+  templateVersion?: string | null;
+  templateOrigin?: WorkflowTemplateOrigin | null;
   definition: WorkflowYaml | null;
   createdAt: string;
   history?: WorkflowExecutionHistoryModel[];
@@ -553,21 +591,24 @@ export interface WorkflowListDto {
   total: number;
   results: WorkflowListItemDto[];
 }
-export interface WorkflowExecutionEngineModel
-  extends Pick<
-    EsWorkflow,
-    | 'id'
-    | 'name'
-    | 'enabled'
-    | 'definition'
-    | 'yaml'
-    | 'managed'
-    | 'managedBy'
-    | 'billable'
-    | 'originManagedWorkflowId'
-    | 'managedVersion'
-    | 'version'
-  > {
+export interface WorkflowExecutionEngineModel extends Pick<
+  EsWorkflow,
+  | 'id'
+  | 'name'
+  | 'enabled'
+  | 'definition'
+  | 'yaml'
+  | 'managed'
+  | 'managedBy'
+  | 'billable'
+  | 'originManagedWorkflowId'
+  | 'managedVersion'
+  | 'templateSlug'
+  | 'templateVersion'
+  | 'templateOrigin'
+  | 'version'
+  | 'workflowUid'
+> {
   isTestRun?: boolean;
   isEphemeral?: boolean;
   spaceId?: string;
@@ -715,7 +756,7 @@ export interface InternalConnectorContract extends BaseConnectorContract {
 export interface EditorHandlers<
   Input extends z.ZodType = z.ZodType,
   Output extends z.ZodType = z.ZodType,
-  Config extends z.ZodObject = z.ZodObject
+  Config extends z.ZodObject = z.ZodObject,
 > {
   config?: EditorHandlersConfig<Config, Input>;
   input?: EditorHandlersInput<Input, Config>;
@@ -724,7 +765,7 @@ export interface EditorHandlers<
 
 export type EditorHandlersConfig<
   Config extends z.ZodObject = z.ZodObject,
-  Input extends z.ZodType = z.ZodType
+  Input extends z.ZodType = z.ZodType,
 > = {
   [K in DotKeysOf<z.infer<Config>>]?: StepPropertyHandler<
     DotObject<z.infer<Config>>[K],
@@ -735,7 +776,7 @@ export type EditorHandlersConfig<
 
 export type EditorHandlersInput<
   Input extends z.ZodType = z.ZodType,
-  Config extends z.ZodObject = z.ZodObject
+  Config extends z.ZodObject = z.ZodObject,
 > = Input extends z.ZodObject
   ? {
       [K in DotKeysOf<z.infer<Input>>]?: StepPropertyHandler<
@@ -752,7 +793,7 @@ export type EditorHandlersInput<
 export interface DynamicSchema<
   Input extends z.ZodType = z.ZodType,
   Output extends z.ZodType = z.ZodType,
-  Config extends z.ZodObject = z.ZodObject
+  Config extends z.ZodObject = z.ZodObject,
 > {
   /**
    * Dynamic Zod schema for validating step output based on input.
@@ -769,7 +810,7 @@ export interface DynamicSchema<
 export interface StepPropertyHandler<
   T = unknown,
   TConfig extends Record<string, unknown> = Record<string, unknown>,
-  TInput extends Record<string, unknown> = Record<string, unknown>
+  TInput extends Record<string, unknown> = Record<string, unknown>,
 > {
   /**
    * Entity selection configuration for the property.
@@ -789,7 +830,7 @@ type DependsOnValuePath = `config.${string}` | `input.${string}`;
 export interface PropertySelectionHandler<
   T = unknown,
   TConfig extends Record<string, unknown> = Record<string, unknown>,
-  TInput extends Record<string, unknown> = Record<string, unknown>
+  TInput extends Record<string, unknown> = Record<string, unknown>,
 > {
   /**
    * Dot paths (e.g. `config.proxy.ssl`, `input.owner`) whose values are passed in `context.values`
@@ -859,7 +900,7 @@ export interface SelectionDetails {
  */
 export interface StepSelectionValues<
   TConfig extends Record<string, unknown> = Record<string, unknown>,
-  TInput extends Record<string, unknown> = Record<string, unknown>
+  TInput extends Record<string, unknown> = Record<string, unknown>,
 > {
   /** Root-level step properties (everything outside the `with` block). */
   config: RecursivePartial<TConfig>;
@@ -869,7 +910,7 @@ export interface StepSelectionValues<
 
 export interface SelectionContext<
   TConfig extends Record<string, unknown> = Record<string, unknown>,
-  TInput extends Record<string, unknown> = Record<string, unknown>
+  TInput extends Record<string, unknown> = Record<string, unknown>,
 > {
   /** The step type ID (e.g., "onechat.runAgent") */
   stepType: string;

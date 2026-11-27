@@ -33,6 +33,7 @@ const ALLOWED_SNAPSHOT_URL_PREFIXES = [
   `${DAILY_SNAPSHOTS_BASE_URL}/`,
   `${PERMANENT_SNAPSHOTS_BASE_URL}/`,
 ];
+const SAFE_FILENAME_PATTERN = /^[\w-][\w.-]*$/;
 
 /**
  * Whether a snapshot manifest or archive URL points into the Kibana CI snapshot buckets.
@@ -215,6 +216,10 @@ async function getArtifactSpecForSnapshot(
     throw createCliError(`Snapshot manifest points to an unexpected archive url: ${archive.url}`);
   }
 
+  if (typeof archive.filename !== 'string' || !SAFE_FILENAME_PATTERN.test(archive.filename)) {
+    throw createCliError(`Snapshot manifest has an unsafe archive filename: ${archive.filename}`);
+  }
+
   if (archive.version !== desiredVersion) {
     log.warning(
       `Snapshot found, but version does not match Kibana. Kibana: ${desiredVersion}, Snapshot: ${archive.version}`
@@ -259,7 +264,10 @@ export class Artifact {
     });
   }
 
-  constructor(private readonly log: ToolingLog, public readonly spec: ArtifactSpec) {}
+  constructor(
+    private readonly log: ToolingLog,
+    public readonly spec: ArtifactSpec
+  ) {}
 
   /**
    * Download the artifact to disk, skips the download if the cache is

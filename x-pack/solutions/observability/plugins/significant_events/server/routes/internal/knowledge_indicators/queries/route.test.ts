@@ -18,6 +18,7 @@ import {
 } from '@kbn/workflows-extensions/server';
 import type { SignificantEventsMaintenanceState } from '../../../../../common/maintenance/state_machine';
 import { KI_QUERY_GENERATION_AGENT_ID } from '../../../../agent_builder/agents/ki_query_generation';
+import { KIQueryGenerationAgentError } from '../../../../lib/significant_events/identify_ki_queries_via_agent';
 import { internalKIQueriesRoutes } from './route';
 
 jest.mock('../../../utils/assert_significant_events_access', () => ({
@@ -108,7 +109,7 @@ const makeServer = () =>
         },
       },
     },
-  } as unknown as DiscoveryHandlerParams['server']);
+  }) as unknown as DiscoveryHandlerParams['server'];
 
 // Handler tests call the route function directly (no Zod transform), so dates
 // must already be `Date` instances — matching `makeIsoDateFromString` output.
@@ -343,7 +344,7 @@ describe('getDiscoveryQueriesRoute source resolution', () => {
       getSpaceId: jest.fn().mockResolvedValue('default'),
       server: makeServer(),
       logger: { warn: jest.fn() },
-    } as unknown as DiscoveryHandlerParams);
+    }) as unknown as DiscoveryHandlerParams;
 
   it('lists streams then searches when query is set and sourceIds is omitted', async () => {
     await discoveryQueriesRoute.handler(
@@ -630,7 +631,7 @@ describe('generateQueriesRoute', () => {
         get: jest.fn().mockReturnValue({ warn: jest.fn(), debug: jest.fn(), trace: jest.fn() }),
       },
       telemetry: {},
-    } as unknown as GenerateHandlerParams);
+    }) as unknown as GenerateHandlerParams;
 
   it('retains valid run ids and rejects blank or overlong run ids during route validation', () => {
     const parsed = strictGenerateParams.safeParse({
@@ -777,6 +778,21 @@ describe('generateQueriesRoute', () => {
         })
       )
     ).rejects.toMatchObject({ output: { statusCode: 400 } });
+  });
+
+  it('logs an expected agent miss at debug and returns 422', async () => {
+    const error = new KIQueryGenerationAgentError(
+      'agent_did_not_finalize',
+      'KI query generation agent did not finalize validate_queries'
+    );
+    mockGenerateKIQueries.mockRejectedValueOnce(error);
+    const handlerParams = makeHandlerParams({ agentBuilder: makeAgentBuilder() });
+    const generationLogger = handlerParams.logger.get('significant_events_queries_generation');
+
+    await expect(generateRoute.handler(handlerParams)).rejects.toMatchObject({
+      output: { statusCode: 422 },
+    });
+    expect(generationLogger.debug).toHaveBeenCalledWith(error.message);
   });
 });
 

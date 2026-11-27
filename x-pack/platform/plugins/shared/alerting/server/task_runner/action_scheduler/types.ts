@@ -26,6 +26,7 @@ import type {
 import type { NormalizedRuleType } from '../../rule_type_registry';
 import type { CombinedSummarizedAlerts } from '../../types';
 import type { RuleRunMetricsStore } from '../../lib/rule_run_metrics_store';
+import type { RuleResultService } from '../../monitoring/rule_result_service';
 import type {
   ActionOpts,
   AlertingEventLogger,
@@ -44,7 +45,7 @@ export interface ActionSchedulerOptions<
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string,
-  AlertData extends RuleAlertData
+  AlertData extends RuleAlertData,
 > {
   ruleType: NormalizedRuleType<
     Params,
@@ -62,6 +63,7 @@ export interface ActionSchedulerOptions<
   taskRunnerContext: TaskRunnerContext;
   taskInstance: RuleTaskInstance;
   ruleRunMetricsStore: RuleRunMetricsStore;
+  ruleResultService: RuleResultService;
   apiKeyId?: string;
   /**
    * Resolved credential to enqueue for scheduled connector actions. This is the
@@ -105,7 +107,7 @@ export type Executable<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
 > = {
   action: RuleAction | RuleSystemAction;
 } & (
@@ -123,7 +125,7 @@ export interface GetActionsToScheduleOpts<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
 > {
   activeAlerts?: Record<string, Alert<State, Context, ActionGroupIds>>;
   recoveredAlerts?: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
@@ -139,7 +141,7 @@ export interface IActionScheduler<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
 > {
   get priority(): number;
   getActionsToSchedule(
@@ -157,7 +159,7 @@ export interface RuleUrl {
 
 export interface IsExecutableAlertOpts<
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
 > {
   alert: Alert<AlertInstanceState, AlertInstanceContext, ActionGroupIds | RecoveryActionGroupId>;
   action: RuleAction;
@@ -176,7 +178,7 @@ export interface HelperOpts<ActionGroupIds extends string, RecoveryActionGroupId
 
 export interface AddSummarizedAlertsOpts<
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
 > {
   alert: Alert<AlertInstanceState, AlertInstanceContext, ActionGroupIds | RecoveryActionGroupId>;
   summarizedAlerts: CombinedSummarizedAlerts | null;

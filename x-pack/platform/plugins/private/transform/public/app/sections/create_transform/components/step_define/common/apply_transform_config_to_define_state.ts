@@ -88,13 +88,13 @@ export function applyTransformConfigToDefineState(
     state.latestConfig = {
       unique_key: transformConfig.latest.unique_key.map((v) => ({
         value: v,
-        label: dataView ? dataView.fields.find((f) => f.name === v)?.displayName ?? v : v,
+        label: dataView ? (dataView.fields.find((f) => f.name === v)?.displayName ?? v) : v,
       })),
       sort: {
         value: transformConfig.latest.sort,
         label: dataView
-          ? dataView.fields.find((f) => f.name === transformConfig.latest.sort)?.displayName ??
-            transformConfig.latest.sort
+          ? (dataView.fields.find((f) => f.name === transformConfig.latest.sort)?.displayName ??
+            transformConfig.latest.sort)
           : transformConfig.latest.sort,
       },
     };

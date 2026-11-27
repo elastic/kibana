@@ -47,9 +47,9 @@ import {
   type OptionsListSuggestions,
 } from '../../../common/options_list';
 import { dataService } from '../../services/kibana_services';
+import { getControlsTimezone } from '../utils';
 import { initializeTemporayStateManager } from '../data_controls/options_list_control/temporay_state_manager';
 import type { ESQLOptionsListRuntimeState } from './types';
-import { getControlsTimezone } from '../utils';
 
 function selectedOptionsComparatorFunction(a?: OptionsListSelection[], b?: OptionsListSelection[]) {
   return deepEqual(a ?? [], b ?? []);
@@ -101,7 +101,7 @@ export function initializeESQLControlManager(
   const isEsqlQueryControl = !isStaticControl;
 
   const availableOptions$ = new BehaviorSubject<string[]>(
-    isStaticControl ? initialState.available_options ?? [] : []
+    isStaticControl ? (initialState.available_options ?? []) : []
   );
   const selectedOptions$ = new BehaviorSubject<string[]>(initialState.selected_options);
   const hasSelections$ = new BehaviorSubject<boolean>(false); // hardcoded to false to prevent clear action from appearing.
@@ -207,7 +207,7 @@ export function initializeESQLControlManager(
             return from(
               getESQLSingleColumnValues({
                 query: esqlQuery$.getValue(),
-                search: dataService.search.search,
+                search: dataService.search,
                 signal,
                 timeRange,
                 esqlVariables: variablesInParent,
@@ -306,7 +306,7 @@ export function initializeESQLControlManager(
     });
 
   const query$ = new BehaviorSubject<AggregateQuery>({
-    esql: isEsqlQueryControl ? initialState.esql_query ?? '' : '',
+    esql: isEsqlQueryControl ? (initialState.esql_query ?? '') : '',
   });
   const publishQuerySubscription = esqlQuery$.subscribe((esql) => {
     query$.next({ esql });

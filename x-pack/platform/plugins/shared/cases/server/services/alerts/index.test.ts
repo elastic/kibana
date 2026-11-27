@@ -1242,7 +1242,7 @@ describe('updateAlertsStatus', () => {
     });
 
     const searchHits = (...hits: Array<{ _id: string; _index: string }>) =>
-      ({ hits: { hits } } as never);
+      ({ hits: { hits } }) as never;
 
     const claimedPairsQuery = (...pairs: Array<[string, string[]]>) => ({
       bool: {

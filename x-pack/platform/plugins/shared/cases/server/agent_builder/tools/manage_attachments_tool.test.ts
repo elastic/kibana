@@ -17,6 +17,7 @@ import { createCasesToolAvailability } from '../utils/get_cases_tool_availabilit
 
 const buildMockAttachments = () => ({
   add: jest.fn().mockResolvedValue({ id: 'att-1' }),
+  getActive: jest.fn().mockReturnValue([]),
   get: jest.fn(),
   delete: jest.fn(),
   update: jest.fn(),
@@ -30,12 +31,12 @@ const buildToolContext = (attachments = buildMockAttachments()): ToolHandlerCont
     logger: loggingSystemMock.createLogger(),
     attachments,
     events: { sendUiEvent: jest.fn() },
-  } as unknown as ToolHandlerContext);
+  }) as unknown as ToolHandlerContext;
 
 const buildRegistry = (
   entries: Array<{ id: string; schema?: z.ZodType }>
 ): UnifiedAttachmentTypeRegistry =>
-  ({ list: () => entries } as unknown as UnifiedAttachmentTypeRegistry);
+  ({ list: () => entries }) as unknown as UnifiedAttachmentTypeRegistry;
 
 const commentSchema = z.object({
   type: z.literal('comment'),

@@ -28,7 +28,11 @@ import { FormattedRelative } from '@kbn/i18n-react';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { QueryClientProvider, useQuery } from '@kbn/react-query';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
-import { isHuntEligibleIoc } from '@kbn/alertzero-common';
+import {
+  isHuntEligibleIoc,
+  isNonRoutableIpIoc,
+  isPlaceholderEmailIoc,
+} from '@kbn/alertzero-common';
 import type { AttachmentNavigationDeps } from '../navigation';
 import { buildDiscoverThreatReportNestedIocUrl } from '../navigation';
 import { IocBadge, discoverAction } from '../shared/ioc_badge';
@@ -161,6 +165,19 @@ const formatIocTierLabel = (ioc: ThreatIoc): string | undefined => {
     return i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.iocTierPendingReview', {
       defaultMessage: 'Pending review',
     });
+  }
+  if (isNonRoutableIpIoc(ioc)) {
+    return i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.iocTierNonRoutable', {
+      defaultMessage: 'Non-routable address',
+    });
+  }
+  if (isPlaceholderEmailIoc(ioc)) {
+    return i18n.translate(
+      'xpack.alertzero.agentBuilder.attachments.threat.iocTierPlaceholderEmail',
+      {
+        defaultMessage: 'Example address',
+      }
+    );
   }
   switch (asString(ioc.tier)) {
     case 'discriminating':
@@ -354,6 +371,8 @@ const renderIocsSection = (
   for (const ioc of nonDenied) {
     if (
       isHuntEligibleIoc({
+        type: asString(ioc.type),
+        value: asString(ioc.value),
         tier: asString(ioc.tier),
         deferred_unreviewed: asBoolean(ioc.deferred_unreviewed),
       })
@@ -788,8 +807,7 @@ const renderEnrichedSections = ({
   return <SectionStack>{sections}</SectionStack>;
 };
 
-export interface ThreatAttachmentInlineContentProps
-  extends AttachmentRenderProps<ThreatAttachment> {
+export interface ThreatAttachmentInlineContentProps extends AttachmentRenderProps<ThreatAttachment> {
   http: HttpStart;
   navigation: AttachmentNavigationDeps;
 }
@@ -864,16 +882,16 @@ const ThreatAttachmentInlineContentInner: React.FC<ThreatAttachmentInlineContent
         defaultMessage: 'You do not have access to this report.',
       })
     : liveIsEmpty
-    ? i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.liveEmpty', {
-        defaultMessage: 'This report has no details to show yet.',
-      })
-    : hasAnyField
-    ? i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.captured', {
-        defaultMessage: 'Showing captured fields. The live report could not be resolved.',
-      })
-    : i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.unavailable', {
-        defaultMessage: 'Report unavailable',
-      });
+      ? i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.liveEmpty', {
+          defaultMessage: 'This report has no details to show yet.',
+        })
+      : hasAnyField
+        ? i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.captured', {
+            defaultMessage: 'Showing captured fields. The live report could not be resolved.',
+          })
+        : i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.unavailable', {
+            defaultMessage: 'Report unavailable',
+          });
 
   return (
     <EuiPanel

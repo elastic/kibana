@@ -10,14 +10,18 @@ import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import type { ApplicationsResponse } from '../../../common/types/applications';
 import { APM_API_PRIVILEGE, DIGITAL_EXPERIENCE_API_PRIVILEGES } from '../../../common/feature';
 import { OTEL_LOGS_INDEX, OTEL_TRACES_INDEX } from '../../../common/otel_data';
+import { SESSIONS_INDEX_PATTERN } from '../../../common/sessions';
 import { getApplications } from './get_applications';
 import { hasPartialReadAccess } from './get_partial_access';
 import type { ApmIndices } from './classic/create_apm_event_client';
 import { createApmEventClient } from './classic/create_apm_event_client';
 import { getClassicApplications } from './classic/get_classic_applications';
-import { getOtelApplicationsFromBestSource } from './otel/get_otel_applications_source';
+import { getSessionsApplications } from './otel/get_sessions_applications';
+import { getMobileApplications } from './mobile/get_mobile_applications';
+import { getHistogramInterval } from '../../lib/helpers/time_series';
+import { createDigitalExperienceTracedEsClient } from '../../lib/create_digital_experience_traced_es_client';
 import { createDigitalExperienceServerRoute } from '../create_digital_experience_server_route';
-import { timeRangeQuery } from '../params';
+import { START_AFTER_END_ISSUE, isStartBeforeEnd, timeRangeShape, timeZoneShape } from '../params';
 
 export const APPLICATIONS_ENDPOINT = 'GET /internal/digital_experience/applications';
 
@@ -28,7 +32,13 @@ export const applicationsRouteRepository = createDigitalExperienceServerRoute({
   security: {
     authz: { requiredPrivileges: [DIGITAL_EXPERIENCE_API_PRIVILEGES.read, APM_API_PRIVILEGE] },
   },
-  params: lazySchema(() => z.object({ query: timeRangeQuery() })),
+  params: lazySchema(() =>
+    z.object({
+      query: z
+        .object({ ...timeRangeShape(), ...timeZoneShape() })
+        .refine(isStartBeforeEnd, START_AFTER_END_ISSUE),
+    })
+  ),
   handler: async ({
     params,
     context,
@@ -36,18 +46,18 @@ export const applicationsRouteRepository = createDigitalExperienceServerRoute({
     plugins,
     isServerless,
     isUxEnabled,
-    sessionsSettings,
-    getSessionsServices,
     logger,
   }): Promise<ApplicationsResponse> => {
-    const { environment } = params.query;
+    const { environment, timeZone } = params.query;
     const start = Date.parse(params.query.start);
     const end = Date.parse(params.query.end);
+    // The same buckets for every source and the response, which the chart reads them from.
+    const histogram = { interval: getHistogramInterval(start, end), timeZone };
 
     const { elasticsearch, savedObjects, uiSettings } = await context.core;
     const esClient = elasticsearch.client.asCurrentUser;
     const internalEsClient = elasticsearch.client.asInternalUser;
-    // APMEventClient cancels its own searches; the OTel ones and the access checks get this signal.
+    // APMEventClient cancels its own searches; the sessions one and the access checks get this signal.
     const signal = getRequestAbortedSignal(request.events.aborted$);
 
     const { apmDataAccess } = plugins;
@@ -75,6 +85,7 @@ export const applicationsRouteRepository = createDigitalExperienceServerRoute({
             start,
             end,
             environment,
+            histogram,
           })
       : undefined;
 
@@ -94,22 +105,41 @@ export const applicationsRouteRepository = createDigitalExperienceServerRoute({
           })
       : undefined;
 
-    const { taskManager, sessionsReadable } = await getSessionsServices();
     return getApplications({
+      histogram: { interval: histogram.interval, start, end },
       getOtelApplications: () =>
-        getOtelApplicationsFromBestSource({
-          esClient,
-          taskManager,
-          sessionsSettings,
-          sessionsReadable,
+        getSessionsApplications({
+          tracedEsClient: createDigitalExperienceTracedEsClient({
+            client: esClient,
+            logger,
+            abortSignal: signal,
+          }),
           start,
           end,
           environment,
+          histogram,
+        }),
+      getClassicApplications: getClassic,
+      getMobileApplications: () =>
+        getMobileApplications({
+          esClient: createDigitalExperienceTracedEsClient({
+            client: esClient,
+            logger,
+            abortSignal: signal,
+          }),
+          start,
+          end,
+          environment,
+        }),
+      hasPartialOtelAccess: () =>
+        hasPartialReadAccess({
+          esClient,
+          internalEsClient,
+          getIndices: async () => [SESSIONS_INDEX_PATTERN],
           signal,
           logger,
         }),
-      getClassicApplications: getClassic,
-      hasPartialOtelAccess: () =>
+      hasPartialMobileAccess: () =>
         hasPartialReadAccess({
           esClient,
           internalEsClient,

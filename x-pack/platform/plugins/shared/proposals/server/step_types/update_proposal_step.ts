@@ -54,18 +54,18 @@ export const getUpdateProposalStepDefinition = ({
           input.decision === undefined
             ? undefined
             : answered
-            ? (await resolveUser(request)) ?? {
-                username: respondedBy,
-                fullName: null,
-                email: null,
-              }
-            : await resolveStepUser({
-                request,
-                executionId: workflowContext.execution.id,
-                spaceId,
-                resolveUser,
-                resolveWorkerUser,
-              });
+              ? ((await resolveUser(request)) ?? {
+                  username: respondedBy,
+                  fullName: null,
+                  email: null,
+                })
+              : await resolveStepUser({
+                  request,
+                  executionId: workflowContext.execution.id,
+                  spaceId,
+                  resolveUser,
+                  resolveWorkerUser,
+                });
 
         const proposal = await getProposalsService().update(
           {
@@ -78,7 +78,14 @@ export const getUpdateProposalStepDefinition = ({
             rationale: input.rationale,
             executionError: input.executionError,
           },
-          spaceId
+          spaceId,
+          {
+            workflowId: workflowContext.workflow.id,
+            executionId: workflowContext.execution.id,
+            request,
+          },
+          // This step runs in the gate's resolve run, whose direct child is the action.
+          { linkActionExecution: true }
         );
 
         return {

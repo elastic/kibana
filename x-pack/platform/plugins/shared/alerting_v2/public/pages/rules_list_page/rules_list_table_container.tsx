@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import type { Criteria } from '@elastic/eui';
 import {
   useActiveFilters,
@@ -29,6 +29,8 @@ import { UpdateApiKeyConfirmationModal } from '../../components/rule/modals/upda
 import { RuleSummaryFlyout } from '../../components/rule/flyouts';
 import type { RuleContentListItem } from './rules_data_source';
 import { toRulesQueryParams } from './rules_query_params';
+import { RULES_LIST_DEFAULT_SORT, SORT_FIELD_TO_COLUMN_ID } from './rules_list_columns';
+import { useRulesListVisibleColumns } from './use_rules_list_visible_columns';
 import { RulesListTable, type RulesListTableSortField } from './rules_list_table';
 
 const API_SORT_TO_TABLE_FIELD: Record<string, RulesListTableSortField> = {
@@ -71,6 +73,19 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
 
   const tableSortField = API_SORT_TO_TABLE_FIELD[sortField];
 
+  const { visibleColumnIds, setVisibleColumnIds } = useRulesListVisibleColumns();
+
+  const sortedColumnId = SORT_FIELD_TO_COLUMN_ID[sortField];
+  const isSortedColumnHidden =
+    sortedColumnId !== undefined && !visibleColumnIds.includes(sortedColumnId);
+
+  // Content List restores sort from the URL and localStorage independently of column visibility.
+  useEffect(() => {
+    if (isSortedColumnHidden) {
+      setSort(RULES_LIST_DEFAULT_SORT.field, RULES_LIST_DEFAULT_SORT.direction);
+    }
+  }, [isSortedColumnHidden, setSort]);
+
   const onTableChange = ({ page: tablePage, sort }: Criteria<RuleApiResponse>) => {
     if (sort) {
       const nextSortField = TABLE_FIELD_TO_API_SORT_FIELD[sort.field as string];
@@ -99,7 +114,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
   const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
   const [showBulkUpdateApiKeyConfirm, setShowBulkUpdateApiKeyConfirm] = useState(false);
 
-  const expandedRule = expandedRuleId ? items.find((r) => r.id === expandedRuleId) ?? null : null;
+  const expandedRule = expandedRuleId ? (items.find((r) => r.id === expandedRuleId) ?? null) : null;
 
   const deleteRuleMutation = useDeleteRule();
   const bulkDeleteMutation = useBulkDeleteRules();
@@ -244,6 +259,8 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
         }
         isBulkTogglingEnabled={bulkEnableMutation.isLoading || bulkDisableMutation.isLoading}
         onTableChange={onTableChange}
+        visibleColumnIds={visibleColumnIds}
+        onVisibleColumnIdsChange={setVisibleColumnIds}
       />
       {expandedRule ? (
         <RuleSummaryFlyout

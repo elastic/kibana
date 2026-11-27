@@ -212,7 +212,7 @@ describe('convertMetricAggregationToColumn', () => {
     [
       string,
       Parameters<typeof convertMetricAggregationToColumn>,
-      Partial<MetricAggregationColumn> | null
+      Partial<MetricAggregationColumn> | null,
     ]
   >([
     [
@@ -334,7 +334,7 @@ describe('computeParentPipelineColumns', () => {
         | Partial<FormulaColumn>
         | Array<Partial<MetricAggregationColumn> | Partial<ParentPipelineAggColumn>>
         | null
-      )
+      ),
     ]
   >([
     [
@@ -447,7 +447,7 @@ describe('computeParentPipelineColumns', () => {
 
     const [metricColumn, parentPipelineColumn] = result as [
       MetricAggregationColumn,
-      ParentPipelineAggColumn
+      ParentPipelineAggColumn,
     ];
     expect(parentPipelineColumn.references).toContain(metricColumn.columnId);
   });
@@ -469,7 +469,7 @@ describe('convertParentPipelineAggToColumns', () => {
         | Partial<FormulaColumn>
         | Array<Partial<MetricAggregationColumn> | Partial<ParentPipelineAggColumn>>
         | null
-      )
+      ),
     ]
   >([
     [
@@ -570,7 +570,7 @@ describe('createParentPipelineAggregationColumn', () => {
     [
       string,
       Parameters<typeof createParentPipelineAggregationColumn>,
-      Partial<ParentPipelineAggColumn>
+      Partial<ParentPipelineAggColumn>,
     ]
   >([
     [

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiAccordion,
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
@@ -29,8 +30,16 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { getEbtProps } from '@kbn/ebt-click';
 import { checkActionTypeEnabled } from '@kbn/alerts-ui-shared/src/check_action_type_enabled';
+import type { ActionType } from '@kbn/actions-types';
 import type { SandboxConnector } from '@kbn/nightshift-investigations-plugin/common';
+import {
+  NIGHTSHIFT_EBT_ACTIONS,
+  NIGHTSHIFT_EBT_DETAILS,
+  NIGHTSHIFT_EBT_ELEMENTS,
+} from '../../../common/ebt_constants';
+import { useIsMobile } from '../../../hooks/use_is_mobile';
 import { useKibana } from '../../../hooks/use_kibana';
 import {
   useConnectorsByType,
@@ -56,7 +65,26 @@ export function AddConnectorFlyout({ onClose }: { onClose: () => void }): React.
   const { application, triggersActionsUi } = useKibana().services;
   const { groups, isLoading, error, typesError, refetch } = useConnectorsByType();
   const { assignedIds, assign, unassign, canEditAgent, updatingId } = useAgentConnectors();
-  const { openAdd, addFlyout } = useAddConnectorFlyout();
+  // Rows are expanded by type id. A connector created here is assigned without a toast, so its row
+  // opens to show it as Enabled.
+  const [openTypeIds, setOpenTypeIds] = useState<ReadonlySet<string>>(new Set());
+  const [creatingTypeId, setCreatingTypeId] = useState<string | undefined>();
+  const setTypeOpen = useCallback((typeId: string, isOpen: boolean) => {
+    setOpenTypeIds((current) => {
+      const next = new Set(current);
+      if (isOpen) next.add(typeId);
+      else next.delete(typeId);
+      return next;
+    });
+  }, []);
+  const onCreated = useCallback(() => {
+    if (creatingTypeId) setTypeOpen(creatingTypeId, true);
+  }, [creatingTypeId, setTypeOpen]);
+  const { openAdd, addFlyout } = useAddConnectorFlyout({ onCreated });
+  const startCreate = (actionType: ActionType) => {
+    setCreatingTypeId(actionType.id);
+    openAdd(actionType);
+  };
   const [search, setSearch] = useState('');
   const titleId = useGeneratedHtmlId({ prefix: 'nightshiftAddConnectorFlyout' });
 
@@ -145,10 +173,12 @@ export function AddConnectorFlyout({ onClose }: { onClose: () => void }): React.
                         !canCreate
                           ? noPermissionReason
                           : enabledCheck.isEnabled
-                          ? undefined
-                          : enabledCheck.message
+                            ? undefined
+                            : enabledCheck.message
                       }
-                      onCreate={() => openAdd(group.actionType)}
+                      onCreate={() => startCreate(group.actionType)}
+                      isOpen={openTypeIds.has(group.actionType.id)}
+                      onToggleOpen={(isOpen) => setTypeOpen(group.actionType.id, isOpen)}
                       assignedIds={assignedIds}
                       isSearching={query.length > 0}
                       canToggle={canEditAgent}
@@ -174,6 +204,8 @@ function ConnectorTypeRow({
   item,
   createDisabledReason,
   onCreate,
+  isOpen,
+  onToggleOpen,
   assignedIds,
   canToggle,
   updatingId,
@@ -184,6 +216,8 @@ function ConnectorTypeRow({
   item: ReturnType<typeof getSourceCardItem>;
   createDisabledReason?: string;
   onCreate: () => void;
+  isOpen: boolean;
+  onToggleOpen: (isOpen: boolean) => void;
   assignedIds: string[];
   canToggle: boolean;
   updatingId: string | undefined;
@@ -193,9 +227,32 @@ function ConnectorTypeRow({
   const { euiTheme } = useEuiTheme();
   const plateShadow = useEuiShadow('xs');
   const accordionId = useGeneratedHtmlId({ prefix: 'nightshiftConnectorType' });
+  const isMobile = useIsMobile();
   const hasConnectors = connectors.length > 0;
 
-  const createButton = (
+  const createEbtProps = getEbtProps({
+    action: NIGHTSHIFT_EBT_ACTIONS.OPEN_ADD_SANDBOX_CONNECTOR,
+    element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+    detail: actionType.id,
+  });
+  const createButton = isMobile ? (
+    <EuiToolTip
+      position="top"
+      content={createDisabledReason ?? createLabel}
+      disableScreenReaderOutput={createDisabledReason === undefined}
+    >
+      <EuiButtonIcon
+        display="base"
+        color="text"
+        iconType="plus"
+        isDisabled={createDisabledReason !== undefined}
+        onClick={onCreate}
+        aria-label={`${createLabel}: ${item.name}`}
+        data-test-subj={`${actionType.id}-create`}
+        {...createEbtProps}
+      />
+    </EuiToolTip>
+  ) : (
     <EuiButton
       size="s"
       color="text"
@@ -204,10 +261,19 @@ function ConnectorTypeRow({
       onClick={onCreate}
       aria-label={`${createLabel}: ${item.name}`}
       data-test-subj={`${actionType.id}-create`}
+      {...createEbtProps}
     >
       {createLabel}
     </EuiButton>
   );
+  const createAction =
+    createDisabledReason === undefined || isMobile ? (
+      createButton
+    ) : (
+      <EuiToolTip position="top" content={createDisabledReason}>
+        {createButton}
+      </EuiToolTip>
+    );
 
   return (
     <EuiPanel hasBorder hasShadow={false} paddingSize="m" data-test-subj={`${actionType.id}-row`}>
@@ -215,7 +281,8 @@ function ConnectorTypeRow({
         id={accordionId}
         arrowDisplay="left"
         isDisabled={!hasConnectors}
-        forceState={isSearching && hasConnectors ? 'open' : undefined}
+        forceState={hasConnectors && (isSearching || isOpen) ? 'open' : 'closed'}
+        onToggle={onToggleOpen}
         buttonContent={
           <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
@@ -249,15 +316,7 @@ function ConnectorTypeRow({
           </EuiFlexGroup>
         }
         buttonProps={{ 'data-test-subj': `${actionType.id}-toggle` }}
-        extraAction={
-          createDisabledReason === undefined ? (
-            createButton
-          ) : (
-            <EuiToolTip position="top" content={createDisabledReason}>
-              {createButton}
-            </EuiToolTip>
-          )
-        }
+        extraAction={createAction}
       >
         {hasConnectors && (
           <>
@@ -286,6 +345,11 @@ function ConnectorTypeRow({
                       { defaultMessage: 'Disable {name}', values: { name: connector.name } }
                     )}
                     data-test-subj={`nightshiftConnectorEnabled-${connector.id}`}
+                    {...getEbtProps({
+                      action: NIGHTSHIFT_EBT_ACTIONS.TOGGLE_SANDBOX_CONNECTOR,
+                      element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+                      detail: NIGHTSHIFT_EBT_DETAILS.DISABLE,
+                    })}
                   >
                     {i18n.translate('xpack.nightshift.addConnectorFlyout.enabledLabel', {
                       defaultMessage: 'Enabled',
@@ -302,6 +366,11 @@ function ConnectorTypeRow({
                       values: { name: connector.name },
                     })}
                     data-test-subj={`nightshiftConnectorEnable-${connector.id}`}
+                    {...getEbtProps({
+                      action: NIGHTSHIFT_EBT_ACTIONS.TOGGLE_SANDBOX_CONNECTOR,
+                      element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+                      detail: NIGHTSHIFT_EBT_DETAILS.ENABLE,
+                    })}
                   >
                     {i18n.translate('xpack.nightshift.addConnectorFlyout.enableLabel', {
                       defaultMessage: 'Enable',
@@ -336,6 +405,18 @@ function ConnectorTypeRow({
           </>
         )}
       </EuiAccordion>
+      {isMobile && createDisabledReason !== undefined && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiText
+            size="xs"
+            color="subdued"
+            data-test-subj={`${actionType.id}-createDisabledReason`}
+          >
+            {createDisabledReason}
+          </EuiText>
+        </>
+      )}
     </EuiPanel>
   );
 }

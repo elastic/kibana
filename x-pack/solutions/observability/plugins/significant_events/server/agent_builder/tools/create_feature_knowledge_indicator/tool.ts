@@ -26,7 +26,8 @@ import {
   resolveSourcesBySlugOrId,
   toSourceRef,
 } from '../../utils/resolve_source_slugs';
-import { trackTelemetryBestEffort } from '../bulk_write';
+import { trackTelemetryBestEffort } from '../../../lib/telemetry/track_telemetry_best_effort';
+import { reportToolFailure, toTelemetryErrorMessage } from '../tool_failure';
 import { createFeatureKnowledgeIndicatorToolHandler } from './handler';
 
 export const SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_CREATE_FEATURE_TOOL_ID =
@@ -156,12 +157,15 @@ export function createFeatureKnowledgeIndicatorTool({
         };
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error';
-        logger.error(`Error running ki_feature_create: ${message}`);
-        if (error instanceof Error) {
-          logger.debug(error.stack ?? error.message);
-        } else {
-          logger.debug(String(error));
-        }
+        const failure = reportToolFailure({
+          error,
+          toolId: SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_CREATE_FEATURE_TOOL_ID,
+          errorLogMessage: `Error running ki_feature_create: ${message}`,
+          logger,
+          telemetry,
+          request,
+          runContext: context.runContext,
+        });
 
         trackTelemetryBestEffort({
           logger,
@@ -175,8 +179,7 @@ export function createFeatureKnowledgeIndicatorTool({
                 success: false,
                 source_id: sourceId,
                 space_id: request.spaceId,
-                knowledge_indicator_id: featureInput.id,
-                error_message: message,
+                error_message: toTelemetryErrorMessage(failure, message),
               },
               request
             ),

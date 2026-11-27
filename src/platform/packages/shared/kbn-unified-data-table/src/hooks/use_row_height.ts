@@ -130,8 +130,8 @@ export const useRowHeight = ({
       return lineCount !== undefined && lineCount > 0
         ? lineCount
         : configRowHeight > 0
-        ? configRowHeight
-        : defaultRowHeight;
+          ? configRowHeight
+          : defaultRowHeight;
     },
     [configRowHeight, defaultRowHeight]
   );

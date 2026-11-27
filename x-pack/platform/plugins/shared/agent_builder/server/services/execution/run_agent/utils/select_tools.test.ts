@@ -52,7 +52,7 @@ const createExecutableTool = (id: string): ExecutableTool =>
     configuration: {},
     getSchema: () => z.object({}),
     execute: jest.fn(),
-  } as unknown as ExecutableTool);
+  }) as unknown as ExecutableTool;
 
 describe('selectTools', () => {
   it('returns origin metadata for internal, registry, and inline tools', async () => {
@@ -97,7 +97,7 @@ describe('selectTools', () => {
         enable_elastic_capabilities: false,
       } as any,
       aiIndicesEnabled: false,
-      capabilities: { attachmentTools: true, apiTools: true },
+      capabilities: { attachmentTools: true, apiTools: true, bashTool: true },
       attachmentsService,
       spaceId: 'default',
       runner: {
@@ -160,7 +160,7 @@ describe('selectTools', () => {
       toolProvider: { list: jest.fn().mockResolvedValue([]) } as any,
       agentConfiguration: { tools: [], enable_elastic_capabilities: false } as any,
       aiIndicesEnabled: false,
-      capabilities: { attachmentTools: true, apiTools: true },
+      capabilities: { attachmentTools: true, apiTools: true, bashTool: true },
       attachmentsService,
       spaceId: 'default',
       runner: {
@@ -219,7 +219,7 @@ describe('selectTools', () => {
         } as any,
         agentConfiguration: { tools: [], enable_elastic_capabilities: false } as any,
         aiIndicesEnabled: false,
-        capabilities: { attachmentTools: attachmentToolsEnabled, apiTools: true },
+        capabilities: { attachmentTools: attachmentToolsEnabled, apiTools: true, bashTool: true },
         attachmentsService,
         spaceId: 'default',
         runner: { runInternalTool: jest.fn() } as any,
@@ -287,7 +287,7 @@ describe('selectTools', () => {
         agentConfiguration,
         aiIndexCatalog,
         aiIndicesEnabled,
-        capabilities: { attachmentTools: true, apiTools: true },
+        capabilities: { attachmentTools: true, apiTools: true, bashTool: true },
         attachmentsService: createAttachmentsService(),
         spaceId: 'default',
         runner: createScopedRunnerMock(),

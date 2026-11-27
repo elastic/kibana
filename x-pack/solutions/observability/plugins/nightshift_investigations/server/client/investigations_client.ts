@@ -10,9 +10,15 @@ import { badRequest } from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { toSlackPlainText } from '@kbn/connector-specs';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
-import { ExecutionStatus, ExecutionType, TerminalExecutionStatuses } from '@kbn/workflows';
+import {
+  ExecutionStatus,
+  ExecutionType,
+  isSyncParentInvocation,
+  TerminalExecutionStatuses,
+} from '@kbn/workflows';
 import {
   NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
   NIGHTSHIFT_INVESTIGATIONS_TRIGGER_SOURCE,
@@ -42,6 +48,7 @@ import {
 import { assertNever } from '@kbn/std';
 import { SIGNIFICANT_EVENTS_ALERT_SOURCE } from '@kbn/significant-events-schema';
 import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
+import { UNKNOWN_ALERT_FIELD } from '../lib/alert_snapshot';
 import { assertNightshiftSpace } from '../lib/assert_nightshift_space';
 import { installAssistantAgent } from '../lib/install_assistant_agent';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
@@ -51,7 +58,10 @@ import {
 } from '../lib/notifications/notification_delivery';
 import { investigationNotificationDestinationsSchema } from '../../common/schemas';
 import type { InvestigationNotificationDestination } from '../../common/schemas';
-import { isInvestigationWorkflowExecution } from '../lib/managed_workflows/is_investigation_workflow_execution';
+import {
+  isEntryPointExecution,
+  isInvestigationWorkflowExecution,
+} from '../lib/managed_workflows/is_investigation_workflow_execution';
 import {
   getBoundInvestigationWorkflowId,
   getEntryPointServiceAccountId,
@@ -110,7 +120,9 @@ import {
   buildFollowUpMessage,
   recoverSubjectsFromInputs,
   toSlackThreadKey,
+  toSlackThreadPermalink,
   toStartSubjects,
+  toAutomationVia,
   toSubjectKeys,
   withoutRecordedSubjects,
   type WorkflowSubjectInput,
@@ -152,7 +164,22 @@ const significantEventIdOf = (
 };
 
 /** `inputs.context.follow_up` of the investigation runs `followUpRecoveredAlert` starts. */
+export const UNSUCCESSFUL_EXECUTION_STATUSES: readonly ExecutionStatus[] = [
+  ExecutionStatus.FAILED,
+  ExecutionStatus.TIMED_OUT,
+  ExecutionStatus.CANCELLED,
+];
+
 export const ALERT_RECOVERED_FOLLOW_UP = 'alert_recovered';
+
+/** An unsuccessful investigation run to report. */
+export interface UnsuccessfulInvestigationRun {
+  /** The execution the outcome is recorded and notified under. */
+  execution: WorkflowExecutionDto;
+  investigationId: string;
+  /** The execution whose status and error explain the outcome. */
+  cause: WorkflowExecutionDto;
+}
 
 /** How an investigation run started, recorded as `inputs.context.entry_point`. */
 export type InvestigationEntryPoint = 'start_api' | 'automation' | 'slack' | 'alert_recovery';
@@ -233,6 +260,8 @@ interface SlackThreadActivity {
   event?: SlackThreadEvent;
   /** Gives `event` back instead of recording it, when this execution was the one that recorded it. */
   releaseEvent?: boolean;
+  /** Recorded once, so a thread recorded without a link gets one on its next call. */
+  permalink?: string;
 }
 
 /** Whether an execution other than the one delivering `event` already handled it. */
@@ -276,30 +305,25 @@ const toSeenEvents = (
 const toSlackThreadUpdate = (
   recorded: SlackThreadSubject | undefined,
   activity: SlackThreadActivity
-): Pick<SlackThreadSubject, 'status_message_ts' | 'seen_events'> | undefined => {
-  const { statusMessageTs } = activity;
+): Pick<SlackThreadSubject, 'status_message_ts' | 'seen_events' | 'permalink'> | undefined => {
+  const { statusMessageTs, permalink } = activity;
   const seenEvents = toSeenEvents(recorded?.seen_events ?? [], activity);
   const recordStatusMessage =
     statusMessageTs !== undefined && statusMessageTs !== recorded?.status_message_ts;
-  if (!seenEvents && !recordStatusMessage) {
+  const recordPermalink = permalink !== undefined && recorded?.permalink === undefined;
+  if (!seenEvents && !recordStatusMessage && !recordPermalink) {
     return undefined;
   }
   return {
     ...(recordStatusMessage && { status_message_ts: statusMessageTs }),
     ...(seenEvents && { seen_events: seenEvents }),
+    ...(recordPermalink && { permalink }),
   };
 };
 
-/** The message text with Slack mentions and markup collapsed away. */
-const collapseSlackText = (text: string | undefined): string =>
-  (text ?? '')
-    .replace(/<[^>]*>/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-
 /** A headline from the thread's question. */
 const toSlackThreadTitle = (text: string | undefined): string => {
-  const collapsed = collapseSlackText(text);
+  const collapsed = toSlackPlainText(text);
   if (!collapsed) {
     return DEFAULT_SLACK_THREAD_TITLE;
   }
@@ -325,7 +349,7 @@ export interface LifecycleCorrelation {
 
 /**
  * A lifecycle message's view of an investigation. Until Agent Builder titles it, the title is the
- * run's `title` input; the first pending proposal stands in for the top recommendation.
+ * run's `title` input; its recommendations are the pending proposals.
  */
 const toNotifiableInvestigation = (
   {
@@ -340,7 +364,7 @@ const toNotifiableInvestigation = (
   fallbackTitle: string | undefined
 ): NotifiableInvestigation => ({
   investigation_id: id,
-  title: titlePending ? fallbackTitle ?? '' : title,
+  title: titlePending ? (fallbackTitle ?? '') : title,
   ...(metadata.severity && { severity: metadata.severity }),
   ...(metadata.summary && { summary: metadata.summary }),
   ...(metadata.verdict && { verdict: metadata.verdict }),
@@ -543,10 +567,13 @@ export class NightshiftInvestigationsClient {
     {
       automationBudget,
       automationId,
+      automationName,
       entryPoint,
     }: {
       automationBudget?: AutomationBudget;
       automationId?: string;
+      /** Recorded on the subjects of a new investigation, so they show what triggered them. */
+      automationName?: string;
       entryPoint: InvestigationEntryPoint;
     }
   ): Promise<StartInvestigationResponse> {
@@ -599,6 +626,7 @@ export class NightshiftInvestigationsClient {
       triggerType: trigger_type,
       investigationId: newInvestigationId,
       slackThread,
+      via: toAutomationVia({ id: automationId, name: automationName }),
     });
 
     const conversations = await agentBuilder.conversations.getScopedClient({
@@ -1030,7 +1058,7 @@ export class NightshiftInvestigationsClient {
     );
     if (
       TerminalExecutionStatuses.includes(execution.status) &&
-      (reopen || ![ExecutionStatus.FAILED, ExecutionStatus.TIMED_OUT].includes(execution.status))
+      (reopen || !UNSUCCESSFUL_EXECUTION_STATUSES.includes(execution.status))
     ) {
       throw new InvestigationNotFoundError(investigationId);
     }
@@ -1179,21 +1207,86 @@ export class NightshiftInvestigationsClient {
     }
   }
 
-  /** Reads a persisted unsuccessful investigation run under this request's space and permissions. */
-  async getUnsuccessfulRun(
-    executionId: string
-  ): Promise<{ execution: WorkflowExecutionDto; investigationId: string }> {
+  /**
+   * Reads a persisted unsuccessful investigation run under this request's space and permissions.
+   * A space's entry point and the shared investigation it ran are one run, reported once, through
+   * the entry point, under the shared investigation. Resolves to undefined when there is nothing
+   * to report for this execution: the entry point reports it, or the investigation completed and
+   * delivered its own outcome.
+   */
+  async getUnsuccessfulRun(executionId: string): Promise<UnsuccessfulInvestigationRun | undefined> {
     if (!executionId || executionId.length > 500) throw new InvestigationNotFoundError(executionId);
     const { execution, inputs } = await this.readInvestigationExecution(undefined, executionId);
-    if (
-      execution.isTestRun ||
-      ![ExecutionStatus.FAILED, ExecutionStatus.TIMED_OUT].includes(execution.status)
-    ) {
+    if (execution.isTestRun || !UNSUCCESSFUL_EXECUTION_STATUSES.includes(execution.status)) {
       throw new InvestigationNotFoundError(executionId);
     }
     const investigationId = asString(inputs?.investigation_id) ?? executionId;
     if (investigationId.length > 500) throw new InvestigationNotFoundError(executionId);
-    return { execution, investigationId };
+    const entryPointId = await this.getEntryPointExecutionId(execution);
+    if (entryPointId) return this.getUnsuccessfulRun(entryPointId);
+    const child = isEntryPointExecution(execution)
+      ? await this.readInvestigationChild(investigationId, execution.id)
+      : undefined;
+    if (!child) return { execution, investigationId, cause: execution };
+    if (child.status === ExecutionStatus.COMPLETED) return undefined;
+    if (!TerminalExecutionStatuses.includes(child.status)) {
+      throw new Error(`Investigation execution ${child.id} has not finished yet`);
+    }
+    // The entry point's step timeout cancels the investigation, which then carries no reason.
+    const parentTimedOut =
+      execution.status === ExecutionStatus.TIMED_OUT || execution.error?.type === 'TimeoutError';
+    return {
+      execution: child,
+      investigationId,
+      cause: child.status === ExecutionStatus.CANCELLED && parentTimedOut ? execution : child,
+    };
+  }
+
+  /**
+   * The space's entry point execution that waits on this run, if any. The entry point then fails
+   * with it and reports it. Other workflows that run the investigation, such as the Slack thread
+   * workflow, keep going when it fails, so their runs are reported on their own.
+   */
+  private async getEntryPointExecutionId(
+    execution: WorkflowExecutionDto
+  ): Promise<string | undefined> {
+    if (isEntryPointExecution(execution) || !isSyncParentInvocation(execution.context)) {
+      return undefined;
+    }
+    const { workflowsManagement } = this.requireWriteDeps();
+    const parent = await workflowsManagement.management.getWorkflowExecution(
+      execution.context.parentWorkflowExecutionId,
+      this.getSpaceId(),
+      { includeOutput: false, omitStepExecutions: true, request: this.request }
+    );
+    return parent?.spaceId === this.getSpaceId() && isEntryPointExecution(parent)
+      ? parent.id
+      : undefined;
+  }
+
+  /** The latest shared investigation run a space's entry point started, if it started one. */
+  private async readInvestigationChild(
+    investigationId: string,
+    parentExecutionId: string
+  ): Promise<WorkflowExecutionDto | undefined> {
+    const { workflowsManagement } = this.requireWriteDeps();
+    const children = await workflowsManagement.management.getChildWorkflowExecutions(
+      parentExecutionId,
+      this.getSpaceId(),
+      this.request
+    );
+    const latest = children.filter(isInvestigationWorkflowExecution).at(-1);
+    if (!latest) return undefined;
+    try {
+      const { execution } = await this.readInvestigationExecution(
+        investigationId,
+        latest.executionId
+      );
+      return execution;
+    } catch (error) {
+      if (error instanceof InvestigationNotFoundError) return undefined;
+      throw error;
+    }
   }
 
   /** Prevents a delayed outcome from replacing the aggregate state of a newer investigation run. */
@@ -1318,8 +1411,8 @@ export class NightshiftInvestigationsClient {
         ...(typeof context?.is_follow_up === 'boolean'
           ? { is_follow_up: context.is_follow_up }
           : entryPoint === 'alert_recovery'
-          ? { is_follow_up: true }
-          : {}),
+            ? { is_follow_up: true }
+            : {}),
         ...(asString(context?.nightshift_automation_id)
           ? { automation_id: asString(context?.nightshift_automation_id) }
           : {}),
@@ -1457,7 +1550,12 @@ export class NightshiftInvestigationsClient {
     const { agentBuilder, agenticInvestigations } = this.requireWriteDeps();
     const threadKey = toSlackThreadKey({ workspace, channel, threadTs });
     const subjectKey = { type: 'slack_thread' as const, id: threadKey };
-    const activity: SlackThreadActivity = { statusMessageTs, event, releaseEvent };
+    const activity: SlackThreadActivity = {
+      statusMessageTs,
+      event,
+      releaseEvent,
+      permalink: toSlackThreadPermalink({ workspace, channel, threadTs }),
+    };
     const conversations = await agentBuilder.conversations.getScopedClient({
       request: this.request,
     });
@@ -1531,7 +1629,7 @@ export class NightshiftInvestigationsClient {
     const recorded = threadSubject?.slack;
     const update = toSlackThreadUpdate(recorded, activity);
     if (!threadSubject || update) {
-      const summary = collapseSlackText(text).slice(0, MAX_SLACK_SUBJECT_SUMMARY_LENGTH);
+      const summary = toSlackPlainText(text).slice(0, MAX_SLACK_SUBJECT_SUMMARY_LENGTH);
       await subjectsClient.upsertSubjects(conversation.id, [
         {
           ...subjectKey,
@@ -1616,6 +1714,15 @@ export class NightshiftInvestigationsClient {
       snapshot: alertSubject?.snapshot,
     });
 
+    // The recovery context has no `alerts`, so the rule type travels on its own for online evals.
+    // The step passes an empty string when the rule event has no type.
+    const snapshotRuleType = alertSubject?.snapshot?.rule_type_id;
+    const alertRuleType =
+      alertInput.ruleTypeId ||
+      (typeof snapshotRuleType === 'string' && snapshotRuleType !== UNKNOWN_ALERT_FIELD
+        ? snapshotRuleType
+        : '');
+
     const spaceId = this.getSpaceId();
     this.warnOnSpaceMismatch(spaceId);
     const workflow = await this.getInvestigationWorkflow(spaceId);
@@ -1626,6 +1733,7 @@ export class NightshiftInvestigationsClient {
         source: 'alert',
         follow_up: ALERT_RECOVERED_FOLLOW_UP,
         entry_point: 'alert_recovery' satisfies InvestigationEntryPoint,
+        ...(alertRuleType ? { alert_rule_type: alertRuleType } : {}),
       },
     });
     this.telemetry?.reportInvestigationStarted({
@@ -1670,18 +1778,23 @@ export class NightshiftInvestigationsClient {
    * Claims the Slack thread a root notification started for the investigation, so a mention or
    * reply in it reaches the investigation. `externalConversationId` is the thread key the Relay
    * returned for the post. A thread another investigation holds is left with that one. Resolves to
-   * whether the investigation now holds the thread.
+   * whether the investigation now holds the thread. With the Slack `workspace`, the subject also
+   * records a permalink to the thread; `summary` is what the subject shows for it.
    */
   async claimSlackThread({
     investigationId,
     externalConversationId,
     channel,
     threadTs,
+    workspace,
+    summary,
   }: {
     investigationId: string;
     externalConversationId: string;
     channel: string;
     threadTs: string;
+    workspace?: string;
+    summary?: string;
   }): Promise<boolean> {
     const { agentBuilder, agenticInvestigations } = this.requireWriteDeps();
     const conversations = await agentBuilder.conversations.getScopedClient({
@@ -1702,11 +1815,16 @@ export class NightshiftInvestigationsClient {
       );
       return false;
     }
+    const permalink = workspace
+      ? toSlackThreadPermalink({ workspace, channel, threadTs })
+      : undefined;
+    const subjectSummary = summary?.slice(0, MAX_SLACK_SUBJECT_SUMMARY_LENGTH);
     await subjectsClient.upsertSubjects(investigationId, [
       {
         type: 'slack_thread',
         id: externalConversationId,
-        slack: { channel, thread_ts: threadTs },
+        slack: { channel, thread_ts: threadTs, ...(permalink && { permalink }) },
+        ...(subjectSummary && { summary: subjectSummary }),
       },
     ]);
     return true;

@@ -44,6 +44,7 @@ import {
   isMetricColumnESQL,
 } from '../../../../transforms/charts/datatable/helpers';
 import { buildColorProps } from '../../../../transforms/charts/datatable/to_api/columns';
+import { getClosestPageSize } from '../../../../transforms/charts/datatable/to_api/styling';
 
 type DatatableAttributes = Extract<LensAttributes, { visualizationType: 'lnsDatatable' }>;
 
@@ -439,9 +440,9 @@ export const normalizeDatatable: AttributesNormalizer<DatatableAttributes> = (at
       if (vis.paging && !vis.paging.enabled) {
         delete vis.paging;
       }
-      // The API schema only supports paging sizes [10, 20, 30, 50, 100] -> non-standard sizes are normalized to 10
-      if (vis.paging?.enabled && ![10, 20, 30, 50, 100].includes(vis.paging.size)) {
-        vis.paging.size = 10;
+      // The API schema only supports the datatable's page sizes -> other sizes map to the closest one
+      if (vis.paging?.enabled) {
+        vis.paging.size = getClosestPageSize(vis.paging.size);
       }
       // If the sorting direction is not set, set it to 'asc'
       if (vis.sorting && vis.sorting.columnId && !vis.sorting.direction) {

@@ -79,7 +79,7 @@ const createFetchedConversation = (accessControl?: ConversationAccessControl) =>
     id: conversationId,
     rounds: [{ id: 'round-1', status: ConversationRoundStatus.completed }],
     ...(accessControl ? { access_control: accessControl } : {}),
-  } as Conversation);
+  }) as Conversation;
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
@@ -240,7 +240,7 @@ describe('useConversation polling', () => {
 
   const setStreaming = () => {
     mockUseStreamingContext.mockReturnValue({
-      activeStreams: new Map([[conversationId, { type: 'send' }]]),
+      activeStreams: new Map([[conversationId, { type: 'send', streamId: 'stream-1' }]]),
       byConversationId: {},
       conversationStreamService: stubConversationStreamService,
       mutateSendMessage: jest.fn(),
@@ -323,7 +323,9 @@ describe('useConversationReadOnly', () => {
 
   const setStreaming = (isStreaming: boolean) =>
     mockUseStreamingContext.mockReturnValue({
-      activeStreams: isStreaming ? new Map([[conversationId, { type: 'send' }]]) : new Map(),
+      activeStreams: isStreaming
+        ? new Map([[conversationId, { type: 'send', streamId: 'stream-1' }]])
+        : new Map(),
       byConversationId: {},
       conversationStreamService: stubConversationStreamService,
       mutateSendMessage: jest.fn(),

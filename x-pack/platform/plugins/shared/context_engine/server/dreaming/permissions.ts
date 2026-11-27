@@ -34,8 +34,9 @@ export const isVisibleInSpace = (
   return groups.length === 0 || groupFor(groups, spaceId) !== undefined;
 };
 
-const restrictedOrUndefined = (permissions: KiPermissions | undefined): KiPermissions | undefined =>
-  privilegesOf(permissions).length > 0 ? permissions : undefined;
+const restrictedOrUndefined = (
+  permissions: KiPermissions | undefined
+): KiPermissions | undefined => (privilegesOf(permissions).length > 0 ? permissions : undefined);
 
 const canonicalPrivileges = (groups: KiPrivilegeGroup[]): string =>
   groups

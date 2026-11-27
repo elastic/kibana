@@ -132,12 +132,23 @@ export interface PutAiIndexFeedbackAnalysisResponse {
   feedback_analysis: AiIndexFeedbackAnalysis;
 }
 
+/** Something a save was meant to do beyond storing the AI index that did not happen. */
+export interface AiIndexSaveWarning {
+  /** The source the warning is about. */
+  source: AiIndexSource;
+  message: string;
+}
+
 export interface CreateAiIndexResponse {
   status: 'created';
+  /** Missing when everything the save sets off succeeded. */
+  warnings?: AiIndexSaveWarning[];
 }
 
 export interface PutAiIndexResponse {
   status: 'created' | 'updated';
+  /** Missing when everything the save sets off succeeded. */
+  warnings?: AiIndexSaveWarning[];
 }
 
 export interface DeleteAiIndexResponse {
@@ -158,6 +169,12 @@ export interface QueryAiIndicesRequest {
   params?: Record<string, AiIndexQueryParamValue>;
   /** Defaults to `DEFAULT_AI_INDEX_QUERY_LIMIT`. Capped at `MAX_AI_INDEX_QUERY_LIMIT`. */
   limit?: number;
+  /** Limits rows to this user's documents plus those with no `user_id`. */
+  user_id?: string;
+}
+
+export interface AiIndexReadScope {
+  userId?: string;
 }
 
 export interface QueryAiIndicesResponse {

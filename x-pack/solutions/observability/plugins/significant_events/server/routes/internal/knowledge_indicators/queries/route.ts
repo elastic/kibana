@@ -7,6 +7,7 @@
 
 import { lazySchema, z } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
+import { badData } from '@hapi/boom';
 import { v4 as uuidv4 } from 'uuid';
 import type {
   QueriesGetResponse,
@@ -29,6 +30,7 @@ import {
 } from '@kbn/nightshift-ai';
 import { sortQueryLinksForTable } from '../../../../lib/significant_events/utils';
 import { generateKIQueries } from '../../../../lib/significant_events/ki_queries_generation_service';
+import { KIQueryGenerationAgentError } from '../../../../lib/significant_events/identify_ki_queries_via_agent';
 import { installKIQueryGenerationAgent } from '../../../../agent_builder/agents/ki_query_generation';
 import { createSignificantEventsAvailability } from '../../../../agent_builder/tools/significant_events_availability';
 import { createServerRoute } from '../../../create_server_route';
@@ -562,6 +564,7 @@ const generateQueriesRoute = createServerRoute({
       scopedClients.getKnowledgeIndicatorClient(),
     ]);
 
+    const generationLogger = logger.get('significant_events_queries_generation');
     const result = await generateKIQueries(
       {
         source,
@@ -584,11 +587,17 @@ const generateQueriesRoute = createServerRoute({
             requestedId,
           }),
         request,
-        logger: logger.get('significant_events_queries_generation'),
+        logger: generationLogger,
         signal: getRequestAbortSignal(request),
         telemetry,
       }
-    );
+    ).catch((error: unknown) => {
+      if (error instanceof KIQueryGenerationAgentError) {
+        generationLogger.debug(error.message);
+        throw badData(error.message);
+      }
+      throw error;
+    });
 
     return {
       queries: result.queries,

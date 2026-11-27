@@ -243,7 +243,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       getDeprecatedRoutes: deps.http.getDeprecatedRoutes,
       registerRouteHandlerContext: <
         Context extends RequestHandlerContext,
-        ContextName extends keyof Omit<Context, 'resolve'>
+        ContextName extends keyof Omit<Context, 'resolve'>,
       >(
         contextName: ContextName,
         provider: IContextProvider<Context, ContextName>
@@ -438,6 +438,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
     pricing: deps.pricing,
     security: {
       authc: deps.security.authc,
+      authz: deps.security.authz,
       audit: deps.security.audit,
       serviceAccounts: deps.security.serviceAccounts.asScopedToPlugin(plugin.name),
     },

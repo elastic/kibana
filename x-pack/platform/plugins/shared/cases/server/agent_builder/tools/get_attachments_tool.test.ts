@@ -20,12 +20,13 @@ const buildToolContext = (): ToolHandlerContext =>
     logger: loggingSystemMock.createLogger(),
     attachments: {
       add: jest.fn().mockResolvedValue({ id: 'att-1' }),
+      getActive: jest.fn().mockReturnValue([]),
       get: jest.fn(),
       delete: jest.fn(),
       update: jest.fn(),
       list: jest.fn(),
     },
-  } as unknown as ToolHandlerContext);
+  }) as unknown as ToolHandlerContext;
 
 const buildTool = (getCasesClientFn = jest.fn()) => {
   return getAttachmentsTool(getCasesClientFn);

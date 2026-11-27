@@ -309,9 +309,8 @@ export function transformHealthServiceProvider({
       const result: TestResult[] = [];
 
       if (testsConfig.notStarted.enabled) {
-        const [notStartedTransform, startedTransforms] = await this.getTransformsStateReport(
-          transformIds
-        );
+        const [notStartedTransform, startedTransforms] =
+          await this.getTransformsStateReport(transformIds);
 
         const prevNotStartedSet: Set<string> = new Set(previousState?.notStarted ?? []);
         const recoveredTransforms = startedTransforms.filter((t) =>
@@ -383,10 +382,10 @@ export function transformHealthServiceProvider({
       if (testsConfig.healthCheck.enabled) {
         const response = await this.getUnhealthyTransformsReport(transformIds);
         const isHealthy = response.length === 0;
-        const count: number = isHealthy ? previousState?.unhealthy?.length ?? 0 : response.length;
+        const count: number = isHealthy ? (previousState?.unhealthy?.length ?? 0) : response.length;
 
         const transformsString = getContextMessageTransformIds(
-          isHealthy ? previousState?.unhealthy ?? [] : response.map((t) => t.transform_id)
+          isHealthy ? (previousState?.unhealthy ?? []) : response.map((t) => t.transform_id)
         );
 
         result.push({

@@ -8,6 +8,7 @@
 import type { IRouter } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { registerAuthenticateRoute } from './authenticate';
+import { getCurrentClusterData } from '../lib/cluster_info';
 import { CloudConnectClient } from '../services/cloud_connect_client';
 import type { CloudConnectApiKey } from '../types';
 import { CLOUD_CONNECT_READ_SECURITY, CLOUD_CONNECT_MANAGE_SECURITY } from './route_security';
@@ -15,6 +16,8 @@ import { CLOUD_CONNECT_READ_SECURITY, CLOUD_CONNECT_MANAGE_SECURITY } from './ro
 jest.mock('../services/cloud_connect_client');
 jest.mock('../lib/create_storage_service');
 jest.mock('../lib/cluster_info');
+
+const mockGetCurrentClusterData = getCurrentClusterData as jest.Mock;
 
 describe('Authentication Routes', () => {
   let mockRouter: jest.Mocked<IRouter>;
@@ -70,7 +73,7 @@ describe('Authentication Routes', () => {
       customError: jest.fn((params) => params),
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
     const { createStorageService } = require('../lib/create_storage_service');
     createStorageService.mockResolvedValue(mockStorageService);
   });
@@ -182,7 +185,7 @@ describe('Authentication Routes', () => {
       const mockGetStartServices = jest.fn();
       const hasEncryptedSOEnabled = true;
 
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       const { createStorageService } = require('../lib/create_storage_service');
       createStorageService.mockResolvedValue(mockStorageService);
 
@@ -287,15 +290,12 @@ describe('Authentication Routes', () => {
     });
 
     it('should authenticate with admin key and generate cluster-scoped key', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const { getCurrentClusterData } = require('../lib/cluster_info');
-
       mockCloudConnectInstance.validateApiKeyScope.mockResolvedValue({
         isClusterScoped: false,
         hasValidScope: true,
       });
 
-      getCurrentClusterData.mockResolvedValue({
+      mockGetCurrentClusterData.mockResolvedValue({
         id: 'es-cluster-uuid',
         name: 'my-cluster',
         version: '8.15.0',
@@ -392,7 +392,10 @@ describe('Authentication Routes', () => {
       await routeHandler(mockContext, mockRequest, mockResponse);
 
       expect(mockResponse.unauthorized).toHaveBeenCalledWith({
-        body: { message: 'Invalid or expired API key' },
+        body: {
+          message:
+            'The API key was rejected by https://cloud.elastic.co (HTTP 401). Check that the key is valid and not expired. If it is, a proxy between Kibana and Elastic Cloud may be intercepting the request.',
+        },
       });
     });
 
@@ -444,6 +447,149 @@ describe('Authentication Routes', () => {
 
       expect(mockResponse.badRequest).toHaveBeenCalledWith({
         body: { message: 'Bad request' },
+      });
+    });
+
+    it('should return 502 with CLOUD_API_UNREACHABLE when validation cannot reach the Cloud API', async () => {
+      mockCloudConnectInstance.validateApiKeyScope.mockResolvedValue({
+        isClusterScoped: false,
+        hasValidScope: false,
+        errorCode: 'CLOUD_API_UNREACHABLE',
+        errorMessage: "Kibana couldn't reach https://cloud.elastic.co/api/v1/saas/user.",
+      });
+
+      mockRequest = { body: { apiKey: 'some-key' } };
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      expect(mockResponse.badRequest).not.toHaveBeenCalled();
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 502,
+        body: {
+          message: "Kibana couldn't reach https://cloud.elastic.co/api/v1/saas/user.",
+          attributes: { code: 'CLOUD_API_UNREACHABLE' },
+        },
+      });
+    });
+
+    it('should return 502 with CLOUD_API_UNREACHABLE when onboarding hits a network error', async () => {
+      mockCloudConnectInstance.validateApiKeyScope.mockResolvedValue({
+        isClusterScoped: false,
+        hasValidScope: true,
+      });
+      mockGetCurrentClusterData.mockResolvedValue({});
+      mockCloudConnectInstance.onboardClusterWithKeyGeneration.mockRejectedValue({
+        isAxiosError: true,
+        code: 'ECONNRESET',
+        message: 'Client network socket disconnected before secure TLS connection was established',
+        request: {},
+        config: {
+          baseURL: 'https://cloud.elastic.co/api/v1',
+          url: '/cloud-connected/clusters?create_api_key=true',
+        },
+      });
+
+      mockRequest = { body: { apiKey: 'some-key' } };
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 502,
+        body: {
+          message:
+            "Kibana couldn't reach https://cloud.elastic.co/api/v1/cloud-connected/clusters?create_api_key=true. Check that outbound HTTPS from the Kibana server to Elastic Cloud isn't blocked by a firewall or proxy.",
+          attributes: { code: 'CLOUD_API_UNREACHABLE' },
+        },
+      });
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining('ECONNRESET: Client network socket disconnected'),
+        expect.anything()
+      );
+    });
+
+    it('should return 502 with CLOUD_API_UNREACHABLE when a proxy asks for authentication', async () => {
+      mockCloudConnectInstance.validateApiKeyScope.mockResolvedValue({
+        isClusterScoped: true,
+        hasValidScope: true,
+        clusterId: 'cluster-123',
+      });
+      mockCloudConnectInstance.getClusterDetails.mockRejectedValue({
+        isAxiosError: true,
+        message: 'Request failed with status code 407',
+        request: {},
+        response: { status: 407 },
+        config: {
+          baseURL: 'https://cloud.elastic.co/api/v1',
+          url: '/cloud-connected/clusters/cluster-123',
+        },
+      });
+
+      mockRequest = { body: { apiKey: 'some-key' } };
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 502,
+        body: {
+          message:
+            'A proxy between Kibana and Elastic Cloud rejected the request to https://cloud.elastic.co/api/v1/cloud-connected/clusters/cluster-123 (HTTP 407 Proxy Authentication Required). Check the proxy credentials configured for the Kibana server.',
+          attributes: { code: 'CLOUD_API_UNREACHABLE' },
+        },
+      });
+    });
+
+    it('should not report request setup errors as unreachable', async () => {
+      // validateApiKeyScope never rejects, so exercise the route's catch block through a
+      // later Cloud API call instead
+      mockCloudConnectInstance.validateApiKeyScope.mockResolvedValue({
+        isClusterScoped: true,
+        hasValidScope: true,
+        clusterId: 'cluster-123',
+      });
+      mockCloudConnectInstance.getClusterDetails.mockRejectedValue({
+        isAxiosError: true,
+        code: 'ERR_BAD_REQUEST',
+        message: 'Unsupported protocol ftp:',
+      });
+
+      mockRequest = { body: { apiKey: 'some-key' } };
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 500,
+        body: { message: 'An error occurred while authenticating with Cloud Connect' },
+      });
+    });
+
+    it('should return 502 with CLOUD_API_UNREACHABLE when a gateway returns 504', async () => {
+      mockCloudConnectInstance.validateApiKeyScope.mockResolvedValue({
+        isClusterScoped: false,
+        hasValidScope: true,
+      });
+      mockGetCurrentClusterData.mockResolvedValue({});
+      mockCloudConnectInstance.onboardClusterWithKeyGeneration.mockRejectedValue({
+        isAxiosError: true,
+        message: 'Request failed with status code 504',
+        request: {},
+        response: { status: 504 },
+        config: {
+          baseURL: 'https://cloud.elastic.co/api/v1',
+          url: '/cloud-connected/clusters?create_api_key=true',
+        },
+      });
+
+      mockRequest = { body: { apiKey: 'some-key' } };
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 502,
+        body: {
+          message:
+            'https://cloud.elastic.co/api/v1/cloud-connected/clusters?create_api_key=true returned HTTP 504. Elastic Cloud or a proxy between Kibana and Elastic Cloud may be unavailable. Try again later, and check the proxy if it keeps happening.',
+          attributes: { code: 'CLOUD_API_UNREACHABLE' },
+        },
       });
     });
 

@@ -23,7 +23,11 @@ export type ServiceDetailsPageTabName =
 export abstract class ServiceDetailsTab extends Tab {
   public abstract readonly tabName: ServiceDetailsPageTabName;
 
-  constructor(page: ScoutPage, kbnUrl: KibanaUrl, protected readonly defaultServiceName: string) {
+  constructor(
+    page: ScoutPage,
+    kbnUrl: KibanaUrl,
+    protected readonly defaultServiceName: string
+  ) {
     super(page, kbnUrl);
   }
 

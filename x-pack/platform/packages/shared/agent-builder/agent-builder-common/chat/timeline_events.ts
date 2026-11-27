@@ -134,8 +134,10 @@ export interface ServerAssignedEventFields {
  * `TType` is open here; `BaseTimelineEventInput` re-adds the `TimelineEventType` constraint so
  * the closed `TimelineEvent` union and all existing narrowing remain unaffected.
  */
-export interface ConversationEventInput<TType extends string = string, TData = object>
-  extends Partial<ServerAssignedEventFields> {
+export interface ConversationEventInput<
+  TType extends string = string,
+  TData = object,
+> extends Partial<ServerAssignedEventFields> {
   /** The event type discriminator. */
   type: TType;
   /** The type-specific payload. */
@@ -149,7 +151,7 @@ export interface ConversationEventInput<TType extends string = string, TData = o
 /** A stored conversation event: producer fields plus server-assigned fields made required. */
 export type ConversationEvent<
   TType extends string = string,
-  TData = object
+  TData = object,
 > = ConversationEventInput<TType, TData> & ServerAssignedEventFields;
 
 /** The fields a producer supplies for a timeline event. */
@@ -176,6 +178,13 @@ export interface UserMessageEventData {
   attachment_refs?: AttachmentVersionRef[];
   /** @deprecated Written before attachment events became the source of truth; read-only. */
   attachment_context?: string;
+  /**
+   * Set only by the steer endpoint: the message was sent while the execution with this timeline
+   * id (see `timelineExecutionId`) held the conversation lock, for that run, or the resume of its
+   * pause, to read at its next check. No other execution reads it; once that run is over the
+   * message is settled, read or not.
+   */
+  steer?: { execution_id: string };
 }
 export type UserMessageEvent = BaseTimelineEvent<
   TimelineEventType.userMessage,
@@ -187,6 +196,13 @@ export const isUserMessageEvent = <E extends { type: string }>(
   event: E
 ): event is Extract<E, { type: TimelineEventType.userMessage }> =>
   event.type === TimelineEventType.userMessage;
+
+/** A `user_message` stamped by the steer endpoint (see `UserMessageEventData.steer`). */
+export const isSteerMessageEvent = (event: {
+  type: string;
+  data?: unknown;
+}): event is UserMessageEvent =>
+  isUserMessageEvent(event) && (event as UserMessageEvent).data.steer !== undefined;
 
 export interface AgentMessageEventData {
   message: string;
@@ -623,7 +639,10 @@ export type TimelineEventInput =
  * The run lock held on a conversation while an execution is active.
  */
 export interface ActiveExecution {
+  /** The execution record holding the lock; never written on events. */
   execution_id: string;
+  /** The timeline id the holder writes its events under (see `timelineExecutionId`); steers are stamped with it. */
+  timeline_execution_id?: string;
 }
 
 /**
@@ -757,10 +776,10 @@ export type ValidConversationEventType<T extends string> =
   T extends `${string}${typeof CONVERSATION_EVENT_ID_DELIMITER}${string}`
     ? never
     : T extends ReservedConversationEventType
-    ? never
-    : T extends BuiltInConversationEventTypeValue
-    ? never
-    : T;
+      ? never
+      : T extends BuiltInConversationEventTypeValue
+        ? never
+        : T;
 
 /**
  * Validates a conversation event type name at runtime, throwing a descriptive error if invalid.

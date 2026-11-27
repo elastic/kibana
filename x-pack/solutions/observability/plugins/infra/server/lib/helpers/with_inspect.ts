@@ -15,7 +15,7 @@ export function withInspect<
   TParams = unknown,
   TQuery = unknown,
   TBody = unknown,
-  TContext extends RequestHandlerContext = RequestHandlerContext
+  TContext extends RequestHandlerContext = RequestHandlerContext,
 >(
   handler: (
     context: TContext,
@@ -37,10 +37,10 @@ export function withInspect<
         body: inspectEnabled ? { ...data, _inspect: inspectableEsQueriesMap.get(request) } : data,
       });
     } catch (err: any) {
-      const statusCode = Boom.isBoom(err) ? err.output.statusCode : err.statusCode ?? 500;
+      const statusCode = Boom.isBoom(err) ? err.output.statusCode : (err.statusCode ?? 500);
       const message = Boom.isBoom(err)
         ? err.output.payload.message
-        : err.message ?? 'An unexpected error occurred';
+        : (err.message ?? 'An unexpected error occurred');
 
       return response.customError({
         statusCode,

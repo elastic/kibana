@@ -106,7 +106,7 @@ const configSchema = schema.object({
         project_type: schema.maybe(
           schema.oneOf(
             KIBANA_SOLUTIONS.map((solution) => schema.literal(solution)) as [
-              Type<KibanaSolution> // This cast is needed because it's different to Type<T>[] :sight:
+              Type<KibanaSolution>, // This cast is needed because it's different to Type<T>[] :sight:
             ]
           )
         ),

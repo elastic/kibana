@@ -30,7 +30,8 @@ export function ChangeHistoryDefaultPreviewHeaderActions({
     enabled: supports.restore && Boolean(selectedChangeId),
   });
 
-  if (!supports.restore || isLoading || !change) {
+  // keepPreviousData can leave the previous row's detail here; never offer Restore for it.
+  if (!supports.restore || isLoading || !change || change.id !== selectedChangeId) {
     return null;
   }
 

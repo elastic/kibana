@@ -96,12 +96,12 @@ const callHandler = ({
 const frozenStats = (totalDataSetSize: number): IndicesStatsIndicesStats =>
   ({
     total: { store: { size_in_bytes: 0, total_data_set_size_in_bytes: totalDataSetSize } },
-  } as IndicesStatsIndicesStats);
+  }) as IndicesStatsIndicesStats;
 
 const hotStats = (size: number): IndicesStatsIndicesStats =>
   ({
     total: { store: { size_in_bytes: size, total_data_set_size_in_bytes: size } },
-  } as IndicesStatsIndicesStats);
+  }) as IndicesStatsIndicesStats;
 
 describe('storage_stats route (stateful)', () => {
   it('only requests the posted data streams and skips missing ones', async () => {

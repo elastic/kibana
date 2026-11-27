@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, render } from '@testing-library/react';
+import { act, render, fireEvent } from '@testing-library/react';
 import type { History as HistoryPackageHistoryInterface } from 'history';
 import { createMemoryHistory } from 'history';
 import { TestProviders } from '../../../common/mock';
@@ -92,7 +92,7 @@ describe(`Resolver: when analyzing a tree with only the origin and paginated rel
         simulator(); // Initialize simulator in beforeEach to use instance in tests
         const loadMore = await simulator().resolve('resolver:nodeEventsInCategory:loadMore');
         if (loadMore) {
-          loadMore.simulate('click', { button: 0 });
+          fireEvent.click(loadMore[0], { button: 0 });
         }
       });
       it('should hide the load more button and show all 30 events', async () => {

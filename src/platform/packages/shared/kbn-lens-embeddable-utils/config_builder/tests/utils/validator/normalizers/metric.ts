@@ -37,7 +37,7 @@ import {
 } from './common';
 import { getMetricAccessor } from '../../../../transforms/charts/utils';
 import { iconCompat } from '../../../../transforms/charts/metric';
-import { getRangeValue } from '../../../../transforms/coloring';
+import { getRangeValue, getSingleValuePercentColor } from '../../../../transforms/coloring';
 
 type MetricAttributes = Extract<LensAttributes, { visualizationType: 'lnsMetric' }>;
 
@@ -139,7 +139,7 @@ const alignVisualizationDefaults: NormalizerConfig<MetricAttributes> = {
       delete viz.applyColorTo;
     }
 
-    // The transform derives `showBar` purely from the presence of a max-accessor background bar.
+    // The transform shows the bar exactly when a max remains (a hidden bar's max is dropped above).
     viz.showBar = Boolean(viz.maxAccessor);
     viz.titlesTextAlign = viz.titlesTextAlign ?? DEFAULT_PRIMARY_LABELS_ALIGNMENT;
 
@@ -159,7 +159,7 @@ const alignVisualizationDefaults: NormalizerConfig<MetricAttributes> = {
       viz.secondaryNameVisibility =
         viz.secondaryLabel === ''
           ? 'hidden'
-          : viz.secondaryNameVisibility ?? DEFAULT_SECONDARY_LABEL_PLACEMENT;
+          : (viz.secondaryNameVisibility ?? DEFAULT_SECONDARY_LABEL_PLACEMENT);
     } else {
       // Comparison fill only; the transform does not persist these without a secondary metric.
       viz.secondaryAlign = DEFAULT_SECONDARY_VALUE_ALIGNMENT;
@@ -338,7 +338,10 @@ const alignMetricPaletteNormalizer: NormalizerConfig<MetricAttributes> = {
 
     const isAbsoluteRange = palette.params.rangeType === 'number';
     if (!viz.breakdownByAccessor && !viz.maxAccessor && !isAbsoluteRange) {
+      // The transform turns a percent palette on a single value into the static color of the band at 50%.
+      const staticColor = getSingleValuePercentColor(palette);
       delete viz.palette;
+      if (staticColor) viz.color = staticColor;
       return attributes;
     }
     // There are 4 metric tests that were failing because of this, since they had the same values stored in both `stops` and `colorStops`.
@@ -370,6 +373,33 @@ const alignTextBasedColumns: NormalizerConfig<MetricAttributes> = {
     for (const layer of Object.values(textBased?.layers ?? {})) {
       layer.columns = layer.columns.filter((c) => canonicalMetricColumns.has(c.columnId));
     }
+    return attributes;
+  },
+};
+
+/**
+ * The transform only carries the max when the bar is shown (`showBar` and a max): the runtime
+ * draws nothing for a hidden bar, and the API has the max only inside the bar. Drop the max of a
+ * hidden bar from the original.
+ */
+const alignHiddenBarMax: NormalizerConfig<MetricAttributes> = {
+  original: (attributes) => {
+    const viz = attributes.state.visualization;
+    const maxAccessor = viz.maxAccessor;
+    if (viz.showBar || !maxAccessor) {
+      return attributes;
+    }
+
+    const formBased = getFormBasedDatasourceState(attributes.state.datasourceStates);
+    for (const layer of Object.values(formBased?.layers ?? {})) {
+      delete layer.columns[maxAccessor];
+      layer.columnOrder = layer.columnOrder.filter((id: string) => id !== maxAccessor);
+    }
+    for (const layer of Object.values(attributes.state.datasourceStates.textBased?.layers ?? {})) {
+      layer.columns = layer.columns.filter((column) => column.columnId !== maxAccessor);
+    }
+    delete viz.maxAccessor;
+    delete viz.progressDirection;
     return attributes;
   },
 };
@@ -441,7 +471,7 @@ const alignIds: NormalizerConfig<MetricAttributes> = {
       getColumnRemapping(viz).filter((pair): pair is [string, string] => pair[0] != null)
     );
     const remap = (id: string | undefined): string | undefined =>
-      id == null ? id : idMap.get(id) ?? id;
+      id == null ? id : (idMap.get(id) ?? id);
 
     viz.layerId = DEFAULT_LAYER_ID;
     if (viz.trendlineLayerId) viz.trendlineLayerId = TRENDLINE_LAYER_ID;
@@ -505,6 +535,7 @@ export const normalizeMetric = mergeNormalizers([
     isSingleValueMetric
   ),
   alignIds,
+  alignHiddenBarMax,
   alignStaticValueMax,
   alignEmptyLinkedLayers,
   alignVisualizationDefaults,

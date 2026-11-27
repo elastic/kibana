@@ -227,20 +227,20 @@ describe('DetectionPage', () => {
           isHistoryLookup && mockHistoryError && !mockHistoryHasCachedData
             ? undefined
             : isHistoryLookup
-            ? {
-                entities: 0,
-                knowledge_indicators: 0,
-                active_rules: 0,
-                detections: mockHistoryDetections,
-                significant_events: mockHistorySignificantEvents,
-              }
-            : {
-                entities: 6,
-                knowledge_indicators: 113,
-                active_rules: 80,
-                detections: 40,
-                significant_events: 23,
-              },
+              ? {
+                  entities: 0,
+                  knowledge_indicators: 0,
+                  active_rules: 0,
+                  detections: mockHistoryDetections,
+                  significant_events: mockHistorySignificantEvents,
+                }
+              : {
+                  entities: 6,
+                  knowledge_indicators: 113,
+                  active_rules: 80,
+                  detections: 40,
+                  significant_events: 23,
+                },
         isLoading: false,
         isFetching: isHistoryLookup && mockHistoryIsFetching,
         isError: isHistoryLookup && mockHistoryError,
@@ -568,5 +568,45 @@ describe('DetectionPage', () => {
     expect(params.get('rulesSearch')).toBe('agent');
     expect(params.has('page')).toBe(false);
     expect(params.has('eventId')).toBe(false);
+  });
+
+  describe('viewport size', () => {
+    const originalInnerWidth = window.innerWidth;
+
+    afterEach(() => {
+      window.innerWidth = originalInnerWidth;
+    });
+
+    const getWorkspaceSection = () =>
+      screen.getByTestId('nightshiftDetectionOverviewFullSlot').parentElement?.parentElement;
+
+    it('clips the workspace to the viewport so its panes scroll on their own on a desktop', async () => {
+      renderPage();
+      expect(await screen.findByTestId('eventsTabStub')).toBeInTheDocument();
+
+      expect(getWorkspaceSection()).toHaveStyle({ overflow: 'hidden' });
+    });
+
+    it('lets the page scroll as a whole instead of clipping the workspace', async () => {
+      window.innerWidth = 400;
+      renderPage();
+      expect(await screen.findByTestId('eventsTabStub')).toBeInTheDocument();
+
+      expect(getWorkspaceSection()).not.toHaveStyle({ overflow: 'hidden' });
+    });
+
+    it('shows the compact overview on a phone, where the tab body does not scroll on its own', async () => {
+      window.innerWidth = 400;
+      renderPage();
+      expect(await screen.findByTestId('eventsTabStub')).toBeInTheDocument();
+
+      expect(screen.getByTestId('nightshiftDetectionOverviewFullSlot')).toHaveAttribute(
+        'data-collapsed',
+        'true'
+      );
+      expect(screen.getByTestId('nightshiftDetectionOverviewCompactSlot')).not.toHaveAttribute(
+        'data-collapsed'
+      );
+    });
   });
 });

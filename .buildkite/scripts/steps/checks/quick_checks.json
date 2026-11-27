@@ -60,13 +60,16 @@
     "mayChangeFiles": true
   },
   {
-    "script": ".buildkite/scripts/steps/checks/prettier_topology.sh"
+    "script": ".buildkite/scripts/steps/checks/oxfmt.sh"
   },
   {
     "script": ".buildkite/scripts/steps/checks/renovate.sh"
   },
   {
     "script": ".buildkite/scripts/steps/checks/native_modules.sh"
+  },
+  {
+    "script": ".buildkite/scripts/steps/checks/server_import_graph.sh"
   },
   {
     "script": ".buildkite/scripts/steps/checks/test_files_missing_owner.sh"

@@ -31,7 +31,7 @@ export type ChangeHistoryFilterType = 'timeRange' | 'actor';
 
 export type ChangeHistoryComparisonType = 'vs_previous' | 'vs_row';
 
-export type ChangeHistoryCompareMode = 'unified' | 'split';
+export type ChangeHistoryDiffViewMode = 'unified' | 'split';
 
 export interface ChangeHistoryTelemetryBaseParams {
   eventName: string;
@@ -41,16 +41,14 @@ export interface ReportChangeHistoryOpenedActionParams extends ChangeHistoryTele
   eventName: string;
 }
 
-export interface ReportChangeHistoryChangeSelectedActionParams
-  extends ChangeHistoryTelemetryScopeFields {
+export interface ReportChangeHistoryChangeSelectedActionParams extends ChangeHistoryTelemetryScopeFields {
   eventName: string;
   hasSequence: boolean;
   eventAction?: string;
   selectionSource: ChangeHistorySelectionSource;
 }
 
-export interface ReportChangeHistoryFilterAppliedActionParams
-  extends ChangeHistoryTelemetryScopeFields {
+export interface ReportChangeHistoryFilterAppliedActionParams extends ChangeHistoryTelemetryScopeFields {
   eventName: string;
   filterType: ChangeHistoryFilterType;
   hasActiveTimeRange?: boolean;
@@ -59,24 +57,21 @@ export interface ReportChangeHistoryFilterAppliedActionParams
 
 export type ChangeHistoryDiffNavigationSource = string;
 
-export interface ReportChangeHistoryDiffChangeNavigatedActionParams
-  extends ChangeHistoryTelemetryScopeFields {
+export interface ReportChangeHistoryDiffChangeNavigatedActionParams extends ChangeHistoryTelemetryScopeFields {
   eventName: string;
   navigationSource: ChangeHistoryDiffNavigationSource;
 }
 
-export interface ReportChangeHistoryDiffViewedActionParams
-  extends ChangeHistoryTelemetryScopeFields {
+export interface ReportChangeHistoryDiffViewedActionParams extends ChangeHistoryTelemetryScopeFields {
   eventName: string;
   comparisonType: ChangeHistoryComparisonType;
   versionDistance?: number;
-  compareMode?: ChangeHistoryCompareMode;
+  compareMode?: ChangeHistoryDiffViewMode;
   /** True when the host provides `renderChangesSummary` and the target row has summary data. */
   hasChangesSummaryTooltip?: boolean;
 }
 
-export interface ReportChangeHistoryRestoreConfirmedActionParams
-  extends ChangeHistoryTelemetryScopeFields {
+export interface ReportChangeHistoryRestoreConfirmedActionParams extends ChangeHistoryTelemetryScopeFields {
   eventName: string;
   restoredFromSequence?: number;
   currentSequence?: number;
@@ -84,8 +79,7 @@ export interface ReportChangeHistoryRestoreConfirmedActionParams
   hadUnsavedLocalEdits?: boolean;
 }
 
-export interface ReportChangeHistoryRestoreCompletedActionParams
-  extends ChangeHistoryTelemetryScopeFields {
+export interface ReportChangeHistoryRestoreCompletedActionParams extends ChangeHistoryTelemetryScopeFields {
   eventName: string;
   restoredFromSequence?: number;
   currentSequence?: number;
@@ -94,8 +88,7 @@ export interface ReportChangeHistoryRestoreCompletedActionParams
   durationMs?: number;
 }
 
-export interface ReportChangeHistoryRestoreFailedActionParams
-  extends ChangeHistoryTelemetryScopeFields {
+export interface ReportChangeHistoryRestoreFailedActionParams extends ChangeHistoryTelemetryScopeFields {
   eventName: string;
   restoredFromSequence?: number;
   currentSequence?: number;

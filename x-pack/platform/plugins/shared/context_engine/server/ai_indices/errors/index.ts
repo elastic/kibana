@@ -7,6 +7,7 @@
 
 export { AiIndexNotFoundError } from './ai_index_not_found_error';
 export { AiIndexNotReadableError } from './ai_index_not_readable_error';
+export { AiIndexWriteForbiddenError } from './ai_index_write_forbidden_error';
 export { InvalidAiIndexDestError } from './invalid_ai_index_dest_error';
 export { AiIndexConflictError } from './ai_index_conflict_error';
 export { AiIndexManagedError } from './ai_index_managed_error';

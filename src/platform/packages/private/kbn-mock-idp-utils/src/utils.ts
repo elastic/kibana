@@ -117,6 +117,10 @@ export async function createSAMLResponse(options: {
         uiamEnabled: true;
         accessTokenLifetimeSec?: number;
         refreshTokenLifetimeSec?: number;
+        /** Built-in UIAM organization roles the user holds, such as `billing-admin`. */
+        organizationRoleIds?: string[];
+        /** Built-in UIAM project roles the user holds, named without the type prefix, such as `admin`. */
+        projectRoles?: string[];
       };
 }) {
   const acsUrl = options.acsUrl ?? `${MOCK_IDP_SP_BASE_URL}/api/security/saml/callback`;
@@ -130,6 +134,8 @@ export async function createSAMLResponse(options: {
         organizationId: options.serverless.organizationId,
         projectType: options.serverless.projectType,
         roles: options.roles,
+        organizationRoleIds: options.serverless.organizationRoleIds,
+        projectRoles: options.serverless.projectRoles,
         fullName: options.full_name,
         email: options.email,
         accessTokenLifetimeSec: options.serverless.accessTokenLifetimeSec,
@@ -153,8 +159,8 @@ export async function createSAMLResponse(options: {
         <saml:NameID Format="urn:oasis:names:tc:SAML:1.1:nameid-format:transient">_643ec1b3f5673583b9f9a1e9e73a36daa2a3748f</saml:NameID>
         <saml:SubjectConfirmation Method="urn:oasis:names:tc:SAML:2.0:cm:bearer">
           <saml:SubjectConfirmationData NotOnOrAfter="${notOnOrAfter}" ${
-    options.authnRequestId ? `InResponseTo="${options.authnRequestId}"` : ''
-  } Recipient="${acsUrl}" />
+            options.authnRequestId ? `InResponseTo="${options.authnRequestId}"` : ''
+          } Recipient="${acsUrl}" />
         </saml:SubjectConfirmation>
       </saml:Subject>${conditionsXml}
       <saml:AuthnStatement AuthnInstant="${issueInstant}" SessionIndex="4464894646681600">
@@ -335,6 +341,8 @@ export async function createUiamSessionTokens({
   organizationId,
   projectType: rawProjectType,
   roles,
+  organizationRoleIds,
+  projectRoles,
   fullName,
   email,
   // 1H
@@ -346,6 +354,10 @@ export async function createUiamSessionTokens({
   organizationId: string;
   projectType: string;
   roles: string[];
+  /** Built-in UIAM organization roles the user holds, such as `billing-admin`. */
+  organizationRoleIds?: string[];
+  /** Built-in UIAM project roles the user holds, named without the type prefix, such as `admin`. */
+  projectRoles?: string[];
   fullName?: string;
   email?: string;
   accessTokenLifetimeSec?: number;
@@ -362,6 +374,8 @@ export async function createUiamSessionTokens({
     organizationId,
     projectType,
     applicationRoles: roles,
+    organizationRoleIds,
+    projectRoles,
     email,
     firstName: givenName,
     lastName: familyName,
@@ -395,6 +409,8 @@ export async function createUiamSessionTokens({
           organizationId,
           projectType,
           applicationRoles: roles,
+          organizationRoleIds,
+          projectRoles,
         }),
       },
 
@@ -578,7 +594,7 @@ export async function parseSAMLRequest(requestUrl: string): Promise<SAMLRequestI
     const attrs = authnRequest.$;
     const issuerElement = authnRequest['saml2:Issuer']?.[0];
     const issuer =
-      typeof issuerElement === 'string' ? issuerElement : issuerElement?._ ?? undefined;
+      typeof issuerElement === 'string' ? issuerElement : (issuerElement?._ ?? undefined);
     return {
       requestId: attrs.ID as string,
       acsUrl: attrs.AssertionConsumerServiceURL as string | undefined,

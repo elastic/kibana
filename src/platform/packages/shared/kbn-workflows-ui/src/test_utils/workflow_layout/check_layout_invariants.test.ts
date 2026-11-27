@@ -28,7 +28,7 @@ const workflow = (steps: unknown, triggers = [{ type: 'manual', enabled: true }]
     enabled: true,
     triggers,
     steps,
-  } as unknown as WorkflowYaml);
+  }) as unknown as WorkflowYaml;
 
 const http = (name: string) => ({ name, type: 'http' });
 const ifStep = (name: string, then: unknown[], otherwise: unknown[] = []) => ({
@@ -122,14 +122,6 @@ describe('checkLayoutInvariants', () => {
   it('labelClear: a bypass lane narrower than the label drawn over it', () => {
     const { check, moved } = start(workflow([ifStep('gate', [http('t1')]), http('after')]));
     expect(rulesOf(check(moved({ 'gate-else-bypass': { dwidth: -30 } })))).toContain('labelClear');
-  });
-
-  it('does not read the body of a merge step as a broken chain', () => {
-    // The body hangs to the right of the merge step by design, even with nothing after it.
-    const { check } = start(
-      workflow([{ name: 'combine', type: 'merge', steps: [http('m1'), http('m2')] }])
-    );
-    expect(check()).toEqual([]);
   });
 
   it('triggerOrder: triggers out of declaration order', () => {

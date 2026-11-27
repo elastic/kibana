@@ -15,6 +15,8 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { css, Global } from '@emotion/react';
+import { alertAttachmentConverter, useManualAddToChat } from '@kbn/alerting-v2-browser-shared';
+import type { FocusedEpisode } from '@kbn/alerting-v2-browser-shared';
 import { parseEpisodeDataJson } from '@kbn/alerting-v2-utils';
 import { FlyoutTemplate } from '@kbn/flyout-template';
 // We use this instead of FlyoutTemplate.Body.Accordion because the latter omits `hasBorder`
@@ -216,6 +218,25 @@ export const AlertEpisodeDetailsFlyout = ({
   const initialWidth = useAlertDetailsFlyoutWidth();
 
   const viewDetailsHref = getEpisodeDetailsHref(episodeId);
+  const loadedRule = isRuleLoaded(ruleState) ? ruleState.rule : undefined;
+  const focusedEpisode = useMemo<FocusedEpisode | undefined>(() => {
+    if (!episode) {
+      return undefined;
+    }
+    const { rule_name: episodeDataRuleName } = parseEpisodeDataJson(episode.episode_data);
+    return {
+      episode,
+      ruleName:
+        loadedRule?.metadata.name ??
+        (typeof episodeDataRuleName === 'string' ? episodeDataRuleName : undefined),
+      groupingFields: loadedRule?.grouping?.fields,
+    };
+  }, [episode, loadedRule]);
+  const { addToChat, isAddToChatAvailable } = useManualAddToChat(
+    focusedEpisode,
+    alertAttachmentConverter,
+    { agentBuilder: services.agentBuilder, application: services.application }
+  );
   const takeActionPanels = useMemo(
     () =>
       buildEpisodeMenuPanels({
@@ -269,7 +290,7 @@ export const AlertEpisodeDetailsFlyout = ({
   const titleNode = isLoading ? (
     <EuiSkeletonTitle size="xs" />
   ) : (
-    ruleName ?? i18n.HEADER_EPISODE_TITLE_FALLBACK
+    (ruleName ?? i18n.HEADER_EPISODE_TITLE_FALLBACK)
   );
 
   // Header description: triggered timestamp.
@@ -537,7 +558,7 @@ export const AlertEpisodeDetailsFlyout = ({
           <FlyoutTemplate.Body.TabPanel tabId="timeline">
             <AlertEpisodeTimelineSection
               episodeId={episodeId}
-              seriesId={episode ? episode.series_id ?? null : undefined}
+              seriesId={episode ? (episode.series_id ?? null) : undefined}
               groupHash={episode?.group_hash}
               services={services}
             />
@@ -568,11 +589,14 @@ export const AlertEpisodeDetailsFlyout = ({
         </FlyoutTemplate.Body>
 
         <FlyoutTemplate.Footer data-test-subj={FLYOUT_FOOTER_TEST_SUBJ}>
-          <FlyoutTemplate.Footer.SecondaryAction
-            label={i18n.FLYOUT_CLOSE}
-            onClick={onClose}
-            data-test-subj="alertingV2EpisodeFlyoutCloseButton"
-          />
+          {isAddToChatAvailable && (
+            <FlyoutTemplate.Footer.SecondaryAction
+              variant="ai"
+              iconType="addToChat"
+              onClick={addToChat}
+              data-test-subj="alertingV2EpisodeFlyoutAddToChatButton"
+            />
+          )}
           <FlyoutTemplate.Footer.PrimaryActionMenu
             label={i18n.FLYOUT_TAKE_ACTION}
             aria-label={i18n.FLYOUT_TAKE_ACTION}

@@ -51,7 +51,7 @@ const conversation = (
     attachments: [],
     permissions: { rename: true, delete: true, update_access_control: true },
     ...overrides,
-  } as ConversationWithoutRoundsWithPermissions);
+  }) as ConversationWithoutRoundsWithPermissions;
 
 const subject = (
   conversationId: string,
@@ -175,7 +175,11 @@ describe('InvestigationsQueryService', () => {
       const { service, client, inProgress } = setup({
         subjects: [
           subject('conv-1', 'alert-2', { createdAt: '2026-01-02T00:00:00.000Z' }),
-          subject('conv-1', 'alert-1', { triggerType: 'automatic', summary: 'High latency' }),
+          subject('conv-1', 'alert-1', {
+            triggerType: 'automatic',
+            summary: 'High latency',
+            via: { label: 'Payments alerts', locator: { id: 'L', params: { a: '1' } } },
+          }),
         ],
         impacts: [impact('conv-1')],
         hypotheses,
@@ -225,6 +229,7 @@ describe('InvestigationsQueryService', () => {
             id: 'alert-1',
             summary: 'High latency',
             trigger_type: 'automatic',
+            via: { label: 'Payments alerts', locator: { id: 'L', params: { a: '1' } } },
             created_at: '2026-01-01T00:00:00.000Z',
           },
           { type: 'alert', id: 'alert-2', created_at: '2026-01-02T00:00:00.000Z' },
@@ -960,10 +965,10 @@ describe('InvestigationsQueryService', () => {
           ({
             listByConversationIds: jest.fn().mockResolvedValue([]),
             getDocumentService: () => ({ searchConversationIds: jest.fn() }),
-          } as unknown as ImpactService),
+          }) as unknown as ImpactService,
         getSubjectsService: () => subjectsService,
         getHypothesesService: () =>
-          ({ findByConversationId: jest.fn() } as unknown as HypothesesService),
+          ({ findByConversationId: jest.fn() }) as unknown as HypothesesService,
         getProposals: () => undefined,
         inProgress: {
           findInProgressIds: jest.fn().mockResolvedValue(new Set()),

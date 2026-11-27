@@ -27,8 +27,8 @@ import type { SpecificationTypes } from './types';
 import type { HttpMethod, StabilityLevel } from '../../types/latest';
 import {
   type ContractMeta,
-  eslintFixGeneratedCode,
   formatDuration,
+  formatGeneratedCode,
   generateContractBlock,
   generateOutputSchemaString,
   generateParameterTypes,
@@ -45,8 +45,8 @@ export async function run() {
   const contracts = generateContracts();
   await generateZodSchemas(contracts);
   saveEsConnectors(contracts);
-  eslintFixGeneratedCode({
-    paths: [
+  await formatGeneratedCode({
+    patterns: [
       ES_CONTRACTS_OUTPUT_FILE_PATH,
       `${ES_GENERATED_OUTPUT_FOLDER_PATH}/elasticsearch*.gen.ts`,
     ],
@@ -208,7 +208,7 @@ async function generateZodSchemas(contracts: ContractMeta[]) {
     const zodSchemas = fs.readFileSync(zodPath, 'utf8');
     fs.writeFileSync(
       zodPath,
-      zodSchemas.replace(/import { z } from 'zod\/v4';/, "import { z } from '@kbn/zod/v4';"),
+      zodSchemas.replace(/import { z } from 'zod(?:\/v4)?';/, "import { z } from '@kbn/zod/v4';"),
       'utf8'
     );
     console.log(

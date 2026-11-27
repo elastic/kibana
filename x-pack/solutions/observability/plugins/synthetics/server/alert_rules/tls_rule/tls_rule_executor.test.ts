@@ -74,7 +74,7 @@ describe('tlsRuleExecutor', () => {
     SyntheticsServerSetup,
     SyntheticsMonitorClient,
     string,
-    string
+    string,
   ] => [
     moment().toDate(),
     ruleParams,

@@ -65,7 +65,7 @@ const coordinatesOf = ({
 }: ServiceAccountWorkloadBinding) => ({ pluginId, workloadType, workloadId, spaceId });
 
 const clusterPrivilegesResponse = (authorized: boolean) =>
-  ({ hasAllRequested: authorized } as unknown as CheckPrivilegesResponse);
+  ({ hasAllRequested: authorized }) as unknown as CheckPrivilegesResponse;
 
 describe('ServiceAccountsManagement', () => {
   let management: ServiceAccountsManagement;
@@ -90,6 +90,7 @@ describe('ServiceAccountsManagement', () => {
     store = {
       findByServiceAccountId: jest.fn().mockResolvedValue([]),
       countByServiceAccountIds: jest.fn().mockResolvedValue(new Map()),
+      summarize: jest.fn(),
       getVerified: jest.fn(),
     } as unknown as jest.Mocked<WorkloadBindingStore>;
     mockCheckPrivileges = { globally: jest.fn() } as unknown as jest.Mocked<CheckPrivileges>;
@@ -260,8 +261,8 @@ describe('ServiceAccountsManagement', () => {
     it('lists the verified bound workloads after checking `manage_security`, without their spaces', async () => {
       const bindings = [binding(), binding({ workloadId: 'workflow-2', spaceId: 'other' })];
       store.findByServiceAccountId.mockResolvedValue(bindings);
-      store.getVerified.mockImplementation(
-        async ({ workloadId }) => bindings.find((candidate) => candidate.workloadId === workloadId)!
+      store.getVerified.mockImplementation(async ({ workloadId }) =>
+        bindings.find((candidate) => candidate.workloadId === workloadId)!
       );
 
       const workloads = await management.listWorkloads(request, SERVICE_ACCOUNT_ID);
@@ -322,6 +323,22 @@ describe('ServiceAccountsManagement', () => {
 
       await expect(management.countBoundWorkloads(['service-account-id'])).resolves.toBe(counts);
       expect(store.countByServiceAccountIds).toHaveBeenCalledWith(['service-account-id']);
+      expect(mockCheckPrivileges.globally).not.toHaveBeenCalled();
+      expect(store.getVerified).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('#summarizeBoundWorkloads', () => {
+    it('summarizes through the store, without checking privileges or verifying bindings', async () => {
+      const summary = {
+        total: 1,
+        serviceAccounts: 1,
+        byWorkload: [{ pluginId: 'workflowsExecutionEngine', workloadType: 'workflow', count: 1 }],
+        byBinderType: { user: 1, api_key: 0, service_account: 0 },
+      };
+      store.summarize.mockResolvedValue(summary);
+
+      await expect(management.summarizeBoundWorkloads()).resolves.toBe(summary);
       expect(mockCheckPrivileges.globally).not.toHaveBeenCalled();
       expect(store.getVerified).not.toHaveBeenCalled();
     });

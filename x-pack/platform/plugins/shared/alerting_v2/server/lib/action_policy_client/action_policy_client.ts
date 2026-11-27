@@ -327,12 +327,12 @@ export class ActionPolicyClient {
     try {
       ({ id } = await this.actionPolicySavedObjectService.create({
         attrs: attributes,
-        id: params.options?.id,
+        id: parsed.id,
       }));
     } catch (e) {
-      this.markApiKeysForInvalidation(attributes.apiKey, false, params.options?.id);
+      this.markApiKeysForInvalidation(attributes.apiKey, false, parsed.id);
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
-        const conflictId = params.options?.id ?? 'unknown';
+        const conflictId = parsed.id ?? 'unknown';
         throw Boom.conflict(getActionPolicyAlreadyExistsMessage(conflictId), {
           code: ALERTING_ERROR_CODES.ACTION_POLICY_ALREADY_EXISTS,
           details: { action_policy_id: conflictId },
@@ -1021,16 +1021,15 @@ export class ActionPolicyClient {
     const exists = await this.actionPolicyExists({ id });
 
     if (!exists) {
-      const policy = await this.createActionPolicy({ data: parsed, options: { id } });
+      const policy = await this.createActionPolicy({ data: { ...parsed, id } });
       return { policy, created: true };
     }
 
     const actor = await this.userService.getCurrentActor();
     const now = new Date().toISOString();
 
-    const { attrs: existingAttrs, version: existingVersion } = await this.getExistingActionPolicy(
-      id
-    );
+    const { attrs: existingAttrs, version: existingVersion } =
+      await this.getExistingActionPolicy(id);
 
     // The API key is rotated on every replace; the old key is invalidated
     // only after the SO write succeeds, so a failed replace doesn't leave

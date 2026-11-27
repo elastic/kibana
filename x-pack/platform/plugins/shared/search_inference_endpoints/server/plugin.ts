@@ -56,15 +56,12 @@ const getInferenceSettingsClient = (
   return namespace ? internalClient.asScopedToNamespace(namespace) : internalClient;
 };
 
-export class SearchInferenceEndpointsPlugin
-  implements
-    Plugin<
-      SearchInferenceEndpointsPluginSetup,
-      SearchInferenceEndpointsPluginStart,
-      SearchInferenceEndpointsPluginSetupDependencies,
-      SearchInferenceEndpointsPluginStartDependencies
-    >
-{
+export class SearchInferenceEndpointsPlugin implements Plugin<
+  SearchInferenceEndpointsPluginSetup,
+  SearchInferenceEndpointsPluginStart,
+  SearchInferenceEndpointsPluginSetupDependencies,
+  SearchInferenceEndpointsPluginStartDependencies
+> {
   private readonly logger: Logger;
   private readonly featureRegistry: InferenceFeatureRegistry;
 
@@ -104,6 +101,11 @@ export class SearchInferenceEndpointsPlugin
       return pluginsStart.inference.getConnectorById(id, request);
     };
 
+    const getInferenceClient = async (request: KibanaRequest) => {
+      const [, pluginsStart] = await core.getStartServices();
+      return pluginsStart.inference.getClient({ request });
+    };
+
     defineRoutes({
       logger: this.logger,
       router,
@@ -111,6 +113,7 @@ export class SearchInferenceEndpointsPlugin
       getForFeature,
       getConnectorList,
       getConnectorById,
+      getInferenceClient,
     });
 
     plugins.inference.registerFeatureEndpointResolver(async (featureId, request) => {

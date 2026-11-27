@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { of } from 'rxjs';
-import { WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG } from '@kbn/workflows';
 import {
   ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW_ID,
   getManagedWorkflowDefinition,
@@ -67,11 +65,6 @@ export const createGateFixture = ({ existingProposal }: { existingProposal: Exis
     isFakeRequest: true,
   });
   const { coreStart } = engine.dependencies;
-  // With the flag off the step takes the legacy transport to a real localhost socket.
-  (coreStart.featureFlags.getBooleanValue$ as unknown as jest.Mock).mockImplementation(
-    (flag: string, fallback: boolean) =>
-      of(flag === WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG ? true : fallback)
-  );
   (coreStart.http.basePath.prepend as unknown as jest.Mock).mockImplementation(
     (path: string) => path
   );

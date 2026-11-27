@@ -9,12 +9,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import type { ListResponse } from '../../../common';
 import { createEntityInventoryServerRoute } from '../create_server_route';
 import { INTERIM_AUTHZ } from '../interim_authz';
-import {
-  dateRangeRefinement,
-  instantParam,
-  isFromEarlierThanTo,
-  listLimitParam,
-} from '../utils/request_params';
+import { listRequestBodySchema } from '../utils/request_params';
 import { typeNameSchema } from '../utils/type_name_schema';
 import { createAbortSignal } from '../utils/create_abort_signal';
 
@@ -23,14 +18,7 @@ export const listRoute = createEntityInventoryServerRoute({
   params: lazySchema(() =>
     z.object({
       path: z.object({ type: typeNameSchema }),
-      body: z
-        .object({
-          from: instantParam,
-          to: instantParam,
-          limit: listLimitParam,
-        })
-        .strict()
-        .refine(isFromEarlierThanTo, dateRangeRefinement),
+      body: listRequestBodySchema,
     })
   ),
   options: {

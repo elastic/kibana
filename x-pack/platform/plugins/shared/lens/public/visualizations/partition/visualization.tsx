@@ -48,7 +48,7 @@ import { suggestions } from './suggestions';
 import { PartitionChartsMeta, visualizationTypes } from './partition_charts_meta';
 import { DimensionDataExtraEditor, DimensionEditor } from './dimension_editor';
 import { LayerSettings } from './layer_settings';
-import { checkTableForContainsSmallValues } from './render_helpers';
+import { checkTableForContainsSmallValues, stripUnsupportedLegendStats } from './render_helpers';
 import type { DatasourcePublicAPI } from '../..';
 import { nonNullable, getColorMappingDefaults } from '../../utils';
 import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
@@ -159,10 +159,14 @@ export const getPieVisualization = ({
     return PartitionChartsMeta[state.shape] ?? PartitionChartsMeta.pie;
   },
 
-  switchVisualizationType: (visualizationTypeId, state) => ({
-    ...state,
-    shape: visualizationTypeId as LensPartitionVisualizationState['shape'],
-  }),
+  switchVisualizationType: (visualizationTypeId, state) => {
+    const shape = visualizationTypeId as LensPartitionVisualizationState['shape'];
+    return {
+      ...state,
+      shape,
+      layers: state.layers.map((layer) => stripUnsupportedLegendStats(layer, shape)),
+    };
+  },
 
   triggers: [VIS_EVENT_TO_TRIGGER.filter],
 
@@ -192,8 +196,8 @@ export const getPieVisualization = ({
     return state.layers.length > 0 && state.layers[0].colorMapping
       ? { type: 'colorMapping', value: state.layers[0].colorMapping }
       : state.palette
-      ? { type: 'legacyPalette', value: state.palette }
-      : undefined;
+        ? { type: 'legacyPalette', value: state.palette }
+        : undefined;
   },
 
   getSuggestions: suggestions,
@@ -236,11 +240,11 @@ export const getPieVisualization = ({
               triggerIconType: 'aggregate',
             }
           : firstNonCollapsedColumnId === accessor
-          ? {
-              triggerIconType: 'colorBy',
-              palette: colors,
-            }
-          : undefined),
+            ? {
+                triggerIconType: 'colorBy',
+                palette: colors,
+              }
+            : undefined),
       }));
 
       const primaryGroupConfigBaseProps = {
