@@ -1,0 +1,1278 @@
+{
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "bearerFormat": "JWT",
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "title": "Detections API"
+  },
+  "openapi": "3.0.0",
+  "paths": {
+    "/queries/detections": {
+      "post": {
+        "operationId": "startDetectionsRun",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "category": {
+                    "items": {
+                      "enum": [
+                        "cloud",
+                        "endpoint",
+                        "email",
+                        "firewall",
+                        "iam",
+                        "network",
+                        "compound",
+                        "backupAndRecovery"
+                      ],
+                      "type": "string"
+                    },
+                    "type": "array",
+                    "uniqueItems": true
+                  },
+                  "detectionRule": {
+                    "maxLength": 300,
+                    "minLength": 0,
+                    "pattern": "^[\\p{L}0-9\\s_-]*$",
+                    "type": "string"
+                  },
+                  "deviceName": {
+                    "maxLength": 200,
+                    "minLength": 0,
+                    "pattern": "^[\\p{L}0-9\\s_-]*$",
+                    "type": "string"
+                  },
+                  "entityType": {
+                    "maxLength": 200,
+                    "minLength": 0,
+                    "pattern": "^[\\p{L}\\s]*$",
+                    "type": "string"
+                  },
+                  "from": {
+                    "format": "date-time",
+                    "type": "string"
+                  },
+                  "ids": {
+                    "items": {
+                      "maxLength": 150,
+                      "pattern": "^[A-Fa-f0-9_-]+$",
+                      "type": "string"
+                    },
+                    "maxItems": 10,
+                    "type": "array",
+                    "uniqueItems": true
+                  },
+                  "location": {
+                    "maxLength": 200,
+                    "minLength": 0,
+                    "pattern": "^[\\p{L}\\s.-]*$",
+                    "type": "string"
+                  },
+                  "mitreAttack": {
+                    "type": "string"
+                  },
+                  "mitreAttackTactics": {
+                    "items": {
+                      "enum": [
+                        "collection",
+                        "commandControl",
+                        "credentialAccess",
+                        "defenseEvasion",
+                        "discovery",
+                        "execution",
+                        "exfiltration",
+                        "impact",
+                        "initialAccess",
+                        "lateralMovement",
+                        "persistence",
+                        "privilegeEscalation",
+                        "reconnaissance",
+                        "resourceDevelopment",
+                        "undefined"
+                      ],
+                      "type": "string"
+                    },
+                    "type": "array",
+                    "uniqueItems": true
+                  },
+                  "observable": {
+                    "type": "string"
+                  },
+                  "operatingSystem": {
+                    "items": {
+                      "maxLength": 100,
+                      "minLength": 0,
+                      "pattern": "^[\\p{L}\\s]*$",
+                      "type": "string"
+                    },
+                    "maxItems": 10,
+                    "type": "array",
+                    "uniqueItems": true
+                  },
+                  "operatingSystemName": {
+                    "maxLength": 200,
+                    "minLength": 0,
+                    "pattern": "^[\\p{L}0-9\\s._-]*$",
+                    "type": "string"
+                  },
+                  "severity": {
+                    "items": {
+                      "maximum": 10,
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "type": "array",
+                    "uniqueItems": true
+                  },
+                  "showSuppressed": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "sort": {
+                    "items": {
+                      "properties": {
+                        "direction": {
+                          "enum": [
+                            "asc",
+                            "desc"
+                          ],
+                          "type": "string"
+                        },
+                        "field": {
+                          "enum": [
+                            "category",
+                            "detectionRule",
+                            "entity",
+                            "severity",
+                            "source",
+                            "time",
+                            "type",
+                            "mitreAttack",
+                            "id",
+                            "sensorGeneratedAt"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "type": "array"
+                  },
+                  "source": {
+                    "maxLength": 200,
+                    "minLength": 0,
+                    "pattern": "^[\\p{L}0-9\\s]*$",
+                    "type": "string"
+                  },
+                  "to": {
+                    "format": "date-time",
+                    "type": "string"
+                  },
+                  "type": {
+                    "items": {
+                      "enum": [
+                        "process",
+                        "threat",
+                        "vulnerability"
+                      ],
+                      "type": "string"
+                    },
+                    "type": "array",
+                    "uniqueItems": true
+                  },
+                  "userName": {
+                    "items": {
+                      "maxLength": 300,
+                      "minLength": 0,
+                      "pattern": "^[\\p{L}\\s_-]*$",
+                      "type": "string"
+                    },
+                    "maxItems": 10,
+                    "type": "array",
+                    "uniqueItems": true
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "createdAt": {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    "expiresAt": {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    "finishedAt": {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "result": {
+                      "enum": [
+                        "succeeded",
+                        "canceled",
+                        "failed",
+                        "notAvailable",
+                        "timedOut"
+                      ],
+                      "type": "string"
+                    },
+                    "resultCount": {
+                      "type": "integer"
+                    },
+                    "status": {
+                      "enum": [
+                        "finished",
+                        "pending",
+                        "started"
+                      ],
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "correlationId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "format": "datetime",
+                      "type": "string"
+                    },
+                    "docUrl": {
+                      "format": "uri",
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "correlationId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "format": "datetime",
+                      "type": "string"
+                    },
+                    "docUrl": {
+                      "format": "uri",
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "correlationId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "format": "datetime",
+                      "type": "string"
+                    },
+                    "docUrl": {
+                      "format": "uri",
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "correlationId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "format": "datetime",
+                      "type": "string"
+                    },
+                    "docUrl": {
+                      "format": "uri",
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "correlationId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "format": "datetime",
+                      "type": "string"
+                    },
+                    "docUrl": {
+                      "format": "uri",
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/queries/detections/{runId}": {
+      "get": {
+        "operationId": "getDetectionsRun",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "runId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "createdAt": {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    "expiresAt": {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    "finishedAt": {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "result": {
+                      "enum": [
+                        "succeeded",
+                        "canceled",
+                        "failed",
+                        "notAvailable",
+                        "timedOut"
+                      ],
+                      "type": "string"
+                    },
+                    "resultCount": {
+                      "type": "integer"
+                    },
+                    "status": {
+                      "enum": [
+                        "finished",
+                        "pending",
+                        "started"
+                      ],
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "correlationId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "format": "datetime",
+                      "type": "string"
+                    },
+                    "docUrl": {
+                      "format": "uri",
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "correlationId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "format": "datetime",
+                      "type": "string"
+                    },
+                    "docUrl": {
+                      "format": "uri",
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "correlationId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "format": "datetime",
+                      "type": "string"
+                    },
+                    "docUrl": {
+                      "format": "uri",
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "correlationId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "format": "datetime",
+                      "type": "string"
+                    },
+                    "docUrl": {
+                      "format": "uri",
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/queries/detections/{runId}/results": {
+      "get": {
+        "operationId": "getDetectionsResults",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "runId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "items": {
+                      "items": {
+                        "properties": {
+                          "attackType": {
+                            "type": "string"
+                          },
+                          "caseDescription": {
+                            "properties": {
+                              "correlatedReasonId": {
+                                "type": "string"
+                              },
+                              "createdReasonId": {
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "detectionAttack": {
+                            "type": "string"
+                          },
+                          "detectionDescription": {
+                            "properties": {
+                              "createdReasonId": {
+                                "type": "string"
+                              },
+                              "significanceId": {
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "detectionEql": {
+                            "type": "string"
+                          },
+                          "detectionLicenses": {
+                            "type": "string"
+                          },
+                          "detectionRule": {
+                            "type": "string"
+                          },
+                          "detectionSigma": {
+                            "type": "object"
+                          },
+                          "device": {
+                            "properties": {
+                              "entity": {
+                                "type": "string"
+                              },
+                              "id": {
+                                "format": "uuid",
+                                "type": "string"
+                              },
+                              "type": {
+                                "enum": [
+                                  "computer",
+                                  "sensor",
+                                  "server"
+                                ],
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "entities": {
+                            "items": {
+                              "properties": {
+                                "attributes": {
+                                  "type": "object"
+                                },
+                                "category": {
+                                  "enum": [
+                                    "impacted",
+                                    "observed"
+                                  ],
+                                  "type": "string"
+                                },
+                                "id": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                },
+                                "type": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "type",
+                                "category"
+                              ],
+                              "type": "object"
+                            },
+                            "type": "array"
+                          },
+                          "geolocation": {
+                            "items": {
+                              "properties": {
+                                "city": {
+                                  "type": "string"
+                                },
+                                "country": {
+                                  "type": "string"
+                                },
+                                "countryCode": {
+                                  "type": "string"
+                                },
+                                "fieldName": {
+                                  "type": "string"
+                                },
+                                "fieldValue": {
+                                  "type": "string"
+                                },
+                                "latitude": {
+                                  "format": "float",
+                                  "type": "number"
+                                },
+                                "longitude": {
+                                  "format": "float",
+                                  "type": "number"
+                                },
+                                "postal": {
+                                  "type": "string"
+                                },
+                                "state": {
+                                  "type": "string"
+                                }
+                              },
+                              "type": "object"
+                            },
+                            "type": "array"
+                          },
+                          "id": {
+                            "maxLength": 150,
+                            "pattern": "^[A-Fa-f0-9_-]+$",
+                            "type": "string"
+                          },
+                          "intelixFileReputation": {
+                            "items": {
+                              "properties": {
+                                "detectionName": {
+                                  "type": "string"
+                                },
+                                "fieldName": {
+                                  "type": "string"
+                                },
+                                "fieldValue": {
+                                  "type": "string"
+                                },
+                                "reputationScore": {
+                                  "maximum": 100,
+                                  "minimum": 0,
+                                  "type": "integer"
+                                }
+                              },
+                              "type": "object"
+                            },
+                            "type": "array"
+                          },
+                          "mitreAttacks": {
+                            "items": {
+                              "properties": {
+                                "tactic": {
+                                  "properties": {
+                                    "id": {
+                                      "type": "string"
+                                    },
+                                    "name": {
+                                      "type": "string"
+                                    },
+                                    "techniques": {
+                                      "items": {
+                                        "properties": {
+                                          "id": {
+                                            "type": "string"
+                                          },
+                                          "name": {
+                                            "type": "string"
+                                          }
+                                        },
+                                        "type": "object"
+                                      },
+                                      "type": "array"
+                                    }
+                                  },
+                                  "type": "object"
+                                }
+                              },
+                              "type": "object"
+                            },
+                            "type": "array"
+                          },
+                          "processedData": {
+                            "type": "string"
+                          },
+                          "rawData": {
+                            "type": "object"
+                          },
+                          "ruleDescription": {
+                            "type": "string"
+                          },
+                          "schema": {
+                            "type": "string"
+                          },
+                          "sensor": {
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "source": {
+                                "type": "string"
+                              },
+                              "type": {
+                                "enum": [
+                                  "cloud",
+                                  "endpoint",
+                                  "email",
+                                  "firewall",
+                                  "iam",
+                                  "network",
+                                  "compound",
+                                  "backupAndRecovery"
+                                ],
+                                "type": "string"
+                              },
+                              "version": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "type",
+                              "source",
+                              "version"
+                            ],
+                            "type": "object"
+                          },
+                          "sensorGeneratedAt": {
+                            "format": "date-time",
+                            "type": "string"
+                          },
+                          "severity": {
+                            "maximum": 10,
+                            "minimum": 1,
+                            "type": "integer"
+                          },
+                          "suppressed": {
+                            "type": "string"
+                          },
+                          "time": {
+                            "format": "date-time",
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "sensor",
+                          "detectionRule",
+                          "detectionAttack",
+                          "device",
+                          "mitreAttacks",
+                          "rawData",
+                          "severity",
+                          "time",
+                          "type"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "pages": {
+                      "properties": {
+                        "current": {
+                          "type": "integer"
+                        },
+                        "items": {
+                          "type": "integer"
+                        },
+                        "maxSize": {
+                          "type": "integer"
+                        },
+                        "size": {
+                          "type": "integer"
+                        },
+                        "total": {
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "current",
+                        "size",
+                        "maxSize"
+                      ],
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "correlationId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "format": "datetime",
+                      "type": "string"
+                    },
+                    "docUrl": {
+                      "format": "uri",
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "correlationId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "format": "datetime",
+                      "type": "string"
+                    },
+                    "docUrl": {
+                      "format": "uri",
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "correlationId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "format": "datetime",
+                      "type": "string"
+                    },
+                    "docUrl": {
+                      "format": "uri",
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "correlationId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "format": "datetime",
+                      "type": "string"
+                    },
+                    "docUrl": {
+                      "format": "uri",
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "correlationId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "format": "datetime",
+                      "type": "string"
+                    },
+                    "docUrl": {
+                      "format": "uri",
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "requestId": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://api-{dataRegion}.central.sophos.com/detections/v1",
+      "variables": {
+        "dataRegion": {
+          "default": "eu01",
+          "enum": [
+            "eu01",
+            "eu02",
+            "us01",
+            "us03",
+            "ca01",
+            "au01",
+            "jp01",
+            "in01",
+            "br01",
+            "ae01"
+          ]
+        }
+      }
+    }
+  ]
+}

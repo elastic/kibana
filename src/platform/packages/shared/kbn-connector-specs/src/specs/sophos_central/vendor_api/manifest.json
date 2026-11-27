@@ -1,0 +1,273 @@
+{
+  "operations": {
+    "actOnAlert": [
+      {
+        "method": "post",
+        "path": "/alerts/{alertId}/actions",
+        "source": "common"
+      },
+      {
+        "method": "get",
+        "path": "/whoami/v1",
+        "source": "common"
+      }
+    ],
+    "actOnAlertsBulk": [
+      {
+        "method": "post",
+        "path": "/alerts/{alertId}/actions",
+        "source": "common"
+      },
+      {
+        "method": "get",
+        "path": "/whoami/v1",
+        "source": "common"
+      }
+    ],
+    "addAllowedItem": [
+      {
+        "method": "get",
+        "path": "/whoami/v1",
+        "source": "common"
+      },
+      {
+        "method": "post",
+        "path": "/settings/allowed-items",
+        "source": "endpoint"
+      }
+    ],
+    "addBlockedItem": [
+      {
+        "method": "get",
+        "path": "/whoami/v1",
+        "source": "common"
+      },
+      {
+        "method": "post",
+        "path": "/settings/blocked-items",
+        "source": "endpoint"
+      }
+    ],
+    "deisolateEndpoint": [
+      {
+        "method": "get",
+        "path": "/whoami/v1",
+        "source": "common"
+      },
+      {
+        "method": "post",
+        "path": "/endpoints/isolation",
+        "source": "endpoint"
+      }
+    ],
+    "deleteBlockedItem": [
+      {
+        "method": "get",
+        "path": "/whoami/v1",
+        "source": "common"
+      },
+      {
+        "method": "delete",
+        "path": "/settings/blocked-items/{blockedItemId}",
+        "source": "endpoint"
+      }
+    ],
+    "getAlert": [
+      {
+        "method": "get",
+        "path": "/alerts/{alertId}",
+        "source": "common"
+      },
+      {
+        "method": "get",
+        "path": "/whoami/v1",
+        "source": "common"
+      }
+    ],
+    "getEndpoint": [
+      {
+        "method": "get",
+        "path": "/whoami/v1",
+        "source": "common"
+      },
+      {
+        "method": "get",
+        "path": "/endpoints/{endpointId}",
+        "source": "endpoint"
+      }
+    ],
+    "getTamperProtection": [
+      {
+        "method": "get",
+        "path": "/whoami/v1",
+        "source": "common"
+      },
+      {
+        "method": "get",
+        "path": "/endpoints/{endpointId}/tamper-protection",
+        "source": "endpoint"
+      }
+    ],
+    "isolateEndpoint": [
+      {
+        "method": "get",
+        "path": "/whoami/v1",
+        "source": "common"
+      },
+      {
+        "method": "post",
+        "path": "/endpoints/isolation",
+        "source": "endpoint"
+      }
+    ],
+    "listAlerts": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 50,
+          "request": {
+            "cursorParam": "pageFromKey",
+            "sizeParam": "pageSize"
+          },
+          "response": {
+            "itemsPath": "items",
+            "nextPath": "pages.nextKey"
+          },
+          "style": "cursor"
+        },
+        "path": "/alerts",
+        "source": "common"
+      },
+      {
+        "method": "get",
+        "path": "/whoami/v1",
+        "source": "common"
+      }
+    ],
+    "listBlockedItems": [
+      {
+        "method": "get",
+        "path": "/whoami/v1",
+        "source": "common"
+      },
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 50,
+          "request": {
+            "pageParam": "page",
+            "sizeParam": "pageSize"
+          },
+          "response": {
+            "itemsPath": "items"
+          },
+          "style": "page"
+        },
+        "path": "/settings/blocked-items",
+        "source": "endpoint"
+      }
+    ],
+    "listDetections": [
+      {
+        "method": "get",
+        "path": "/whoami/v1",
+        "source": "common"
+      },
+      {
+        "method": "post",
+        "path": "/queries/detections",
+        "source": "detections"
+      },
+      {
+        "method": "get",
+        "path": "/queries/detections/{runId}",
+        "source": "detections"
+      },
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 50,
+          "request": {
+            "pageParam": "page",
+            "sizeParam": "pageSize"
+          },
+          "response": {
+            "itemsPath": "items",
+            "totalPath": "pages.total"
+          },
+          "style": "page"
+        },
+        "path": "/queries/detections/{runId}/results",
+        "source": "detections"
+      }
+    ],
+    "listEndpoints": [
+      {
+        "method": "get",
+        "path": "/whoami/v1",
+        "source": "common"
+      },
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 50,
+          "request": {
+            "cursorParam": "pageFromKey",
+            "sizeParam": "pageSize"
+          },
+          "response": {
+            "itemsPath": "items",
+            "nextPath": "pages.nextKey"
+          },
+          "style": "cursor"
+        },
+        "path": "/endpoints",
+        "source": "endpoint"
+      }
+    ],
+    "scanEndpoint": [
+      {
+        "method": "get",
+        "path": "/whoami/v1",
+        "source": "common"
+      },
+      {
+        "method": "post",
+        "path": "/endpoints/scans",
+        "source": "endpoint"
+      }
+    ],
+    "updateTamperProtection": [
+      {
+        "method": "get",
+        "path": "/whoami/v1",
+        "source": "common"
+      },
+      {
+        "method": "post",
+        "path": "/endpoints/{endpointId}/tamper-protection",
+        "source": "endpoint"
+      }
+    ]
+  },
+  "sources": {
+    "common": {
+      "apiVersion": "1.3.1",
+      "fetchedAt": "2026-11-24T12:51:24.503Z",
+      "format": "openapi",
+      "url": "https://developer.sophos.com/assets/specs/common-v1.yaml"
+    },
+    "detections": {
+      "apiVersion": "1.2.0",
+      "fetchedAt": "2026-11-24T12:51:24.505Z",
+      "format": "openapi",
+      "url": "https://developer.sophos.com/assets/specs/detections-v1.yaml"
+    },
+    "endpoint": {
+      "apiVersion": "1.94.0",
+      "fetchedAt": "2026-11-24T12:51:24.509Z",
+      "format": "openapi",
+      "url": "https://developer.sophos.com/assets/specs/endpoint-v1.yaml"
+    }
+  }
+}
