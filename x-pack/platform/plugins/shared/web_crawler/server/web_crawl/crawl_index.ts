@@ -74,7 +74,7 @@ export const createCrawlIndex = async (
   });
 };
 
-/** Adds the fields introduced after an index was created. Mappings only ever gain fields. */
+/** Adds the fields introduced after an index was created. */
 export const updateCrawlIndexMappings = async (
   esClient: ElasticsearchClient,
   indexName: string

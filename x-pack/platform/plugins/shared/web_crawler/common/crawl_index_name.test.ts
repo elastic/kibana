@@ -34,24 +34,30 @@ describe('getCrawlIndexName for a very long host', () => {
 });
 
 describe('isValidCrawlIndexName', () => {
-  it.each(['a', '9docs', 'docs-2024.01.31_v2', 'a'.repeat(255)])('accepts %s', (indexName) => {
-    expect(isValidCrawlIndexName(indexName)).toBe(true);
-  });
+  it.each(['a', '9docs', 'docs-2024.01.31_v2', 'docs+2024', 'dócs', 'a'.repeat(255)])(
+    'accepts %s',
+    (indexName) => {
+      expect(isValidCrawlIndexName(indexName)).toBe(true);
+    }
+  );
 
   it.each([
     ['an empty name', ''],
     ['a leading dot', '.kibana'],
+    ['a single dot', '.'],
     ['a leading dash', '-docs'],
     ['a leading underscore', '_docs'],
+    ['a leading plus', '+docs'],
     ['an uppercase letter', 'web-crawl-Example.com'],
     ['a space', 'my docs'],
-    ['a trailing line break', 'docs\n'],
     ['a wildcard', 'docs-*'],
     ['a comma', 'docs,logs'],
     ['a slash', 'docs/2024'],
     ['a colon', 'remote:docs'],
-    ['a non-ASCII letter', 'dócs'],
+    ['a hash', 'docs#1'],
+    ['a backslash', 'docs\\2024'],
     ['more than 255 characters', 'a'.repeat(256)],
+    ['more than 255 bytes', 'é'.repeat(128)],
   ])('rejects %s', (_, indexName) => {
     expect(isValidCrawlIndexName(indexName)).toBe(false);
   });

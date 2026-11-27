@@ -8,17 +8,14 @@ tags: ['elasticsearch', 'crawler', 'shared']
 
 ## Overview
 
-This plugin will crawl a website into an Elasticsearch index. It is being built in steps, and so far
-holds the crawl itself: finding the pages of a site, having each one fetched and converted to
-markdown by a `document_extraction` inference endpoint, and indexing them. Nothing starts a crawl
-yet.
+This plugin will crawl a website into an Elasticsearch index.
 
 ## Enabling it
 
 The plugin is off by default and loads where `xpack.webCrawler.enabled` is set to `true`. The
 Elasticsearch and vector database serverless project types set it.
 
-The crawler is still being built, so there everything it offers is also behind the
+The crawler is still in development, so everything it offers is also behind the
 `webCrawler.enabled` feature flag, which is off by default. To turn it on locally:
 
 ```yaml
@@ -44,7 +41,7 @@ ones included, are read within a small request budget.
 
 A crawl can be narrowed with path prefixes. They apply to the links a crawl finds: with
 `includePaths` only links under one of them are followed, and links under an `excludePaths` prefix
-never are. The URLs a crawl starts from are always crawled, whatever the prefixes.
+never are. The start URLs are always crawled.
 
 Links to files are not followed unless the crawl is given their extensions in `fileExtensions`. The
 ones in `WEB_CRAWL_FILE_EXTENSIONS` can be asked for: PDF and Office documents, CSV and JSON files,
@@ -53,9 +50,9 @@ is indexed like the markdown of a page.
 
 ## How a crawl runs
 
-Kibana never fetches the site itself: each page, `robots.txt` and sitemap is fetched by a
-`document_extraction` inference endpoint, preferring the Elastic Inference Service one, and Kibana
-only extracts the links from the markdown that comes back.
+Each page, `robots.txt` and sitemap is fetched by a `document_extraction` inference endpoint,
+preferring the Elastic Inference Service one, and Kibana extracts the links from the markdown that
+comes back.
 
 Ten workers pull pages from a queue that always hands out the shallowest page found so far, which
 keeps the crawl close to breadth-first without one slow page holding up a whole depth level. A page

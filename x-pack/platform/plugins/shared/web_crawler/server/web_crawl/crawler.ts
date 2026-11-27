@@ -27,7 +27,7 @@ import { MAX_SITEMAP_REQUESTS, discoverSitemapPages } from './sitemap';
 export const EXTRACTION_CONCURRENCY = 10;
 const MAX_CONTENT_LENGTH = 500_000;
 export const CRAWL_LIMITS = {
-  /** The combined length of the pages a crawl remembers having seen, which a site could otherwise grow without end. */
+  /** Caps the combined length of the URLs a crawl remembers, which bounds its memory. */
   maxSeenUrlsLength: 10_000_000,
   /** The origins, besides those of the start URLs, whose robots.txt a crawl reads. */
   maxLinkedOrigins: 50,
@@ -67,9 +67,9 @@ export interface CrawlOptions {
   maxDocuments: number;
   /** Narrow the links the crawl follows. The URL it starts from is always crawled. */
   pathRules?: PathRules;
-  /** Linked files to crawl as pages, by extension. Other than web pages, none are by default. */
+  /** Extensions of linked files to crawl as pages. None by default. */
   fileExtensions?: readonly string[];
-  /** Called synchronously whenever the counts change, so it has to be cheap. */
+  /** Called synchronously whenever the counts change. */
   onProgress?: (progress: CrawlProgress) => void;
 }
 
@@ -91,10 +91,9 @@ interface QueuedPage {
 // The depth of a URL that is known and is not a page to crawl, such as a sitemap.
 const NOT_A_PAGE = -1;
 
-// Two crawls that start from the same URLs and sitemaps with the same path rules cover the same
-// ground, so one may delete what the other indexed and no longer finds. A crawl from elsewhere may
-// not. The URLs are compared as given: another URL of the same page can lead to other links, and to
-// the robots.txt and sitemaps of another origin.
+// Crawls with the same start URLs, sitemaps and path rules share a scope, and may purge each
+// other's documents. URLs are compared as given: another URL of the same page can lead to other
+// links, and to the robots.txt and sitemaps of another origin.
 const getCrawlScope = (
   seedUrls: string[],
   sitemapUrls: string[],
@@ -125,11 +124,11 @@ const truncateContent = (content: string): string => {
 };
 
 /**
- * Crawls a site and indexes every extracted page.
+ * Crawls one or more sites and indexes every extracted page.
  *
- * A fixed number of workers pull pages from a queue that always hands out the shallowest page
- * found so far, so the crawl stays close to breadth-first without one slow page holding up a whole
- * depth level. Indexing runs alongside extraction rather than in between it.
+ * A fixed number of workers pull pages from a queue that hands out the shallowest page first, so
+ * the crawl stays close to breadth-first. Indexing runs alongside extraction. At most
+ * `maxDocuments` pages are requested.
  *
  * At most `maxDocuments` pages are requested, so that is also the ceiling on indexed documents.
  * The crawl starts from one or more pages, and stays on the sites those pages are on. The
@@ -140,10 +139,9 @@ const truncateContent = (content: string): string => {
  * robots.txt and sitemaps are all fetched by the inference endpoint; the work left on this process
  * is parsing, which yields to the event loop as it goes.
  *
- * A crawl that read the whole site without a failure ends by deleting the pages earlier crawls
- * indexed and this one did not find, within its path rules. One that failed on a page, hit the page
- * limit or another of its limits, or was stopped cannot tell a removed page from one it did not get
- * to, so it deletes nothing.
+ * A crawl that read the whole site without a failure ends by deleting the documents of earlier
+ * crawls that it did not find again. A crawl that failed on a page, hit a limit or was stopped
+ * deletes nothing.
  */
 export const crawlSite = async ({
   esClient,
@@ -278,10 +276,9 @@ export const crawlSite = async ({
   };
 
   try {
-    // robots.txt belongs to an origin: the scheme, host and port of a URL. The endpoint answers with
-    // no content for an origin without one, which allows everything. A request that fails says
-    // nothing about the rules, so the pages of that origin are left out of the crawl rather than
-    // crawled as if it had none.
+    // robots.txt is per origin (scheme, host and port). No content means the origin has none,
+    // which allows everything. When the request fails the rules are unknown, so the origin is not
+    // crawled.
     const robotsByOrigin = new Map<string, RobotsRules | null>();
     const robotsRequests = new Map<string, Promise<RobotsRules | null>>();
     const robotsErrorByOrigin = new Map<string, Error>();
@@ -319,7 +316,7 @@ export const crawlSite = async ({
           return rules;
         })
         .catch((error) => {
-          // An aborted crawl requests nothing more, whatever the rules are.
+          // An aborted crawl requests nothing more, so the rules do not matter.
           if (signal.aborted) {
             return ALLOW_ALL_ROBOTS;
           }
@@ -413,9 +410,8 @@ export const crawlSite = async ({
         if (isKnown()) {
           continue;
         }
-        // Pages past the request budget would never be taken, so they are not worth remembering.
-        // Entries of this queue that were queued again at a shallower depth are not taken either,
-        // so the budget may not be spent after all.
+        // Pages past the request budget would never be taken. Stale entries of this queue count
+        // toward the budget here but are never requested, so the crawl may still end under it.
         if (queue.length - queueCursors[depth] >= maxDocuments - requestedCount) {
           hasDroppedLinks = true;
           break;
@@ -441,8 +437,8 @@ export const crawlSite = async ({
           continue;
         }
         if (robots?.isAllowed(link)) {
-          // A page found again closer to a start URL is queued again: crawled at its earlier
-          // depth, its own links were followed less far than they are from here.
+          // A page found again closer to a start URL is queued again, so that its links are
+          // followed further.
           if (knownDepth === undefined) {
             seenUrlsLength += pageKey.length;
           }
@@ -524,9 +520,8 @@ export const crawlSite = async ({
         extractionFailedCount++;
         return;
       }
-      // Found closer to a start URL in the meantime, the page is crawled again from there, and its
-      // links are followed from there. It is indexed here all the same, in case that request
-      // fails, and at that depth, so that whichever of the two is indexed last leaves the same.
+      // A page found closer to a start URL in the meantime is crawled again from there, which
+      // follows its links. It is still indexed here, at that depth, in case that request fails.
       const pageKey = getPageKey(pageUrl);
       const getKnownDepth = (): number => depthByPage.get(pageKey) ?? depth;
 
@@ -625,7 +620,7 @@ export const crawlSite = async ({
             ),
           ])
         ).flat();
-        // The links of the start pages come first, as they are what the user pointed the crawl at.
+        // The links of the start pages are queued first.
         await seedsCrawled;
         if (!sitemapAbort.signal.aborted) {
           await enqueue(sitemapPages, 1);

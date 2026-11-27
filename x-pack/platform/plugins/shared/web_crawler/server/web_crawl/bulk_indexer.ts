@@ -12,7 +12,7 @@ import { getPageKey } from './links';
 
 // `semantic_text` runs inference on every document at ingest, so a single request stays small.
 export const BULK_SIZE = 20;
-/** A request also closes once its pages add up to this much, so a few large pages do not make a huge one. */
+/** A request also closes at this content size. */
 export const MAX_BULK_BYTES = 1024 * 1024;
 export const MAX_CONCURRENT_BULKS = 3;
 const MAX_BUFFERED_DOCUMENTS = BULK_SIZE * MAX_CONCURRENT_BULKS;
@@ -54,7 +54,7 @@ interface BulkIndexerOptions {
 }
 
 export interface BulkIndexer {
-  /** Queues a document, and only waits when indexing has fallen behind by a full set of requests. */
+  /** Queues a document. Waits only when a full set of requests is already buffered. */
   add: (document: CrawledDocument) => Promise<void>;
   /** Sends what is still queued and waits for every request to settle. */
   drain: () => Promise<void>;
@@ -72,7 +72,7 @@ export const getDocumentId = (url: string): string =>
  *
  * A request is sent as soon as there is a document and nothing in flight, so a slow crawl indexes
  * promptly, while a fast one fills whole batches and runs several requests side by side. Requests
- * and documents that Elasticsearch turns away as too many are sent again after a pause.
+ * and documents rejected with a 429 are retried after a pause.
  */
 export const createBulkIndexer = ({
   esClient,

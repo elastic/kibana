@@ -6,33 +6,30 @@
  */
 
 export const PLUGIN_ID = 'webCrawler';
-/** The feature flag that turns the crawler on. Everything the plugin offers is behind it. */
+/** Gates everything the plugin offers. */
 export const WEB_CRAWLER_ENABLED_FLAG = 'webCrawler.enabled';
-/** The ID of the crawls page among the Stack Management apps, and of the feature that grants it. */
+/** ID of the Stack Management app, and of the feature that grants it. */
 export const MANAGEMENT_APP_ID = 'web_crawls';
 
 export const WEB_CRAWLS_PATH = '/internal/web_crawler/crawls';
 export const WEB_CRAWL_PATH = '/internal/web_crawler/crawls/{id}';
 export const WEB_CRAWL_CANCEL_PATH = '/internal/web_crawler/crawls/{id}/_cancel';
-/** The most recent crawls the management page lists. */
+/** How many recent crawls the management page lists. */
 export const WEB_CRAWLS_LIST_SIZE = 200;
-/** The seed page is depth 0, so by default pages up to two links away from it are crawled. */
+/** The start page is depth 0. */
 export const WEB_CRAWL_DEFAULT_MAX_DEPTH = 2;
 export const WEB_CRAWL_DEFAULT_MAX_DOCUMENTS = 500;
-/** Upper bounds on what a single crawl may ask for. */
 export const WEB_CRAWL_MAX_DEPTH_LIMIT = 5;
 export const WEB_CRAWL_MAX_DOCUMENTS_LIMIT = 1000;
-/** Bounds on the path prefixes that narrow a crawl. */
 export const WEB_CRAWL_MAX_PATH_RULES = 20;
 export const WEB_CRAWL_MAX_PATH_RULE_LENGTH = 256;
-/** Bounds on the extra start URLs and the sitemap URLs a crawl can be given. */
 export const WEB_CRAWL_MAX_SEED_URLS = 20;
 export const WEB_CRAWL_MAX_SITEMAP_URLS = 20;
 export const WEB_CRAWL_MAX_URL_LENGTH = 2048;
 export const WEB_CRAWL_MAX_INDEX_NAME_LENGTH = 255;
 /**
- * The files a crawl indexes besides web pages when asked to. The extraction endpoint returns their
- * text, and a description for an image.
+ * File types a crawl can index besides web pages. The extraction endpoint returns their text, or
+ * a description for an image.
  */
 export const WEB_CRAWL_FILE_EXTENSIONS = [
   'pdf',

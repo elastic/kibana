@@ -168,9 +168,8 @@ const isLinkTargetEnd = (char: string, openParentheses: number): boolean =>
 /**
  * Yields the raw target of every markdown link in a document.
  *
- * Scans with a forward-only cursor instead of a regular expression, so the cost stays linear in
- * the document length whatever the page contains. Balanced parentheses are part of the target, and
- * a target in angle brackets is everything between them.
+ * Scans with a forward-only cursor, so the cost is linear in the document length. Balanced
+ * parentheses are part of the target, and a target in angle brackets is everything between them.
  */
 export function* iterateLinkTargets(markdown: string): Generator<string> {
   let cursor = 0;
@@ -207,8 +206,8 @@ export function* iterateLinkTargets(markdown: string): Generator<string> {
 }
 
 /**
- * Whether a normalized URL is a page of the site, as opposed to another site or an asset. Files
- * with one of `fileExtensions` count as pages.
+ * Whether a normalized URL is a page of the site. Assets are not, except files with one of
+ * `fileExtensions`.
  */
 export const isSameSitePage = (
   url: string,
