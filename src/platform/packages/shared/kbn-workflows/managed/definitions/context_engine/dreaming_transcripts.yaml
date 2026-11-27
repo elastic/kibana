@@ -19,6 +19,8 @@ settings:
 consts:
   ai_index_id: __AI_INDEX_ID__
   batch_workflow_id: __BATCH_WORKFLOW_ID__
+  workflow_id: __WORKFLOW_ID__
+  drain_budget_seconds: 1440
 outputs:
   - name: rounds
     type: number
@@ -87,60 +89,108 @@ steps:
             includeOutput: true
             omitStepExecutions: true
 
-  - name: read_transcripts
-    type: context-engine.readSessionTranscripts
-    with:
-      ai_index_id: '{{ consts.ai_index_id }}'
-      since: '{{ inputs.since | default: steps.last_output.output.context.output.resume_from | default: steps.last_run.output.since }}'
-      after: '{% if inputs.since == blank %}{{ steps.last_output.output.context.output.resume_after }}{% endif %}'
-      size: 1000
-      max_tokens: 600000
-      batch_tokens: 50000
-
-  - name: active
+  - name: init
     type: data.set
     with:
-      memories: '${{ steps.read_transcripts.output.memories }}'
-      batches: '${{ steps.read_transcripts.output.batches }}'
-      resume_from: '{{ steps.read_transcripts.output.resume_from }}'
-      resume_after: '{{ steps.read_transcripts.output.resume_after }}'
+      resume_from: '{{ inputs.since | default: steps.last_output.output.context.output.resume_from | default: steps.last_run.output.since }}'
+      resume_after: '{% if inputs.since == blank %}{{ steps.last_output.output.context.output.resume_after }}{% endif %}'
+      started_at: '${{ "now" | date: "%s" }}'
+      elapsed_s: 0
+      page_s: 0
+      projected_s: 0
+      rounds: 0
+      memories: []
+      batches: []
       created: 0
       updated: 0
       deleted: 0
       rejected: 0
       would_write: []
 
-  - name: dream
-    type: if
-    condition: '${{ variables.memories.size > 0 }}'
+  # Reads page after page while a read stops at its size or token cap, until a page could overrun
+  # the drain budget. A dry run reads one page.
+  - name: drain
+    type: while
+    condition: '${{ variables.resume_after != blank and inputs.dry_run != true and variables.projected_s < consts.drain_budget_seconds }}'
+    max-iterations: 100
     steps:
-      - name: batches
-        type: parallel
-        foreach: '{{ variables.batches | json }}'
-        concurrency: 4
-        steps:
-          # A batch's steps run in a workflow of their own: a parallel branch can hold only
-          # straight-line steps, and a batch retries its model call.
-          - name: dream_batch
-            type: workflow.execute
-            with:
-              workflow-id: '{{ consts.batch_workflow_id }}'
-              inputs:
-                memories: '${{ foreach.item }}'
-                dry_run: '${{ inputs.dry_run == true }}'
+      - name: read_transcripts
+        type: context-engine.readSessionTranscripts
+        with:
+          ai_index_id: '{{ consts.ai_index_id }}'
+          since: '{{ variables.resume_from }}'
+          after: '{{ variables.resume_after }}'
+          size: 1000
+          max_tokens: 600000
+          batch_tokens: 50000
 
-      - name: tally
-        type: foreach
-        foreach: '{{ steps.batches.output.results | json }}'
+      - name: page
+        type: data.set
+        with:
+          memories: '${{ steps.read_transcripts.output.memories }}'
+          batches: '${{ steps.read_transcripts.output.batches }}'
+          resume_from: '{{ steps.read_transcripts.output.resume_from }}'
+          resume_after: '{{ steps.read_transcripts.output.resume_after }}'
+          rounds: '${{ variables.rounds | plus: steps.read_transcripts.output.memories.size }}'
+
+      - name: dream
+        type: if
+        condition: '${{ variables.memories.size > 0 }}'
         steps:
-          - name: add_batch
-            type: data.set
-            with:
-              created: '${{ variables.created | plus: foreach.item.output.created }}'
-              updated: '${{ variables.updated | plus: foreach.item.output.updated }}'
-              deleted: '${{ variables.deleted | plus: foreach.item.output.deleted }}'
-              rejected: '${{ variables.rejected | plus: foreach.item.output.rejected }}'
-              would_write: '${{ variables.would_write | concat: foreach.item.output.would_write }}'
+          - name: batches
+            type: parallel
+            foreach: '{{ variables.batches | json }}'
+            concurrency: 4
+            steps:
+              # A batch's steps run in a workflow of their own: a parallel branch can hold only
+              # straight-line steps, and a batch retries its model call.
+              - name: dream_batch
+                type: workflow.execute
+                with:
+                  workflow-id: '{{ consts.batch_workflow_id }}'
+                  inputs:
+                    memories: '${{ foreach.item }}'
+                    dry_run: '${{ inputs.dry_run == true }}'
+
+          - name: tally
+            type: foreach
+            foreach: '{{ steps.batches.output.results | json }}'
+            steps:
+              - name: add_batch
+                type: data.set
+                with:
+                  created: '${{ variables.created | plus: foreach.item.output.created }}'
+                  updated: '${{ variables.updated | plus: foreach.item.output.updated }}'
+                  deleted: '${{ variables.deleted | plus: foreach.item.output.deleted }}'
+                  rejected: '${{ variables.rejected | plus: foreach.item.output.rejected }}'
+                  would_write: '${{ variables.would_write | concat: foreach.item.output.would_write }}'
+
+      - name: clock
+        type: data.set
+        with:
+          elapsed_s: '${{ "now" | date: "%s" | minus: variables.started_at }}'
+          page_s: '${{ "now" | date: "%s" | minus: variables.started_at | minus: variables.elapsed_s }}'
+
+      - name: budget
+        type: data.set
+        with:
+          projected_s: '${{ variables.elapsed_s | plus: variables.page_s }}'
+
+  # A run that stopped at a cap leaves rounds behind: queue the next run now rather than wait for
+  # the interval. The concurrency queue starts it once this run ends.
+  - name: more_rounds
+    type: if
+    condition: '${{ variables.resume_after != blank and inputs.dry_run != true }}'
+    steps:
+      - name: queue_next_run
+        type: kibana.request
+        on-failure:
+          continue: true
+        with:
+          method: POST
+          path: '/s/{{ workflow.spaceId }}/api/workflows/workflow/{{ consts.workflow_id }}/run'
+          body:
+            inputs: {}
 
   - name: dry_run_result
     type: if
@@ -150,7 +200,7 @@ steps:
         type: workflow.output
         status: cancelled
         with:
-          rounds: '${{ variables.memories | size | default: 0 }}'
+          rounds: '${{ variables.rounds | default: 0 }}'
           created: '${{ variables.created | default: 0 }}'
           updated: '${{ variables.updated | default: 0 }}'
           deleted: '${{ variables.deleted | default: 0 }}'
@@ -161,7 +211,7 @@ steps:
   - name: output_result
     type: workflow.output
     with:
-      rounds: '${{ variables.memories | size | default: 0 }}'
+      rounds: '${{ variables.rounds | default: 0 }}'
       created: '${{ variables.created | default: 0 }}'
       updated: '${{ variables.updated | default: 0 }}'
       deleted: '${{ variables.deleted | default: 0 }}'
