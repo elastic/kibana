@@ -282,7 +282,10 @@ export const createFieldDefinitionsServiceMock = (): FieldDefinitionsServiceMock
 
 const createObservableGetterServiceMock = (): ObservableGetterServiceMock => {
   const service: PublicMethodsOf<ObservableGetter> = lazyObject({
-    getForCase: jest.fn(),
+    getForCase: jest.fn().mockImplementation(async (_caseId: string, ids: string[]) => ({
+      found: [],
+      missingIds: ids,
+    })),
     countForCase: jest.fn().mockResolvedValue(0),
     findExisting: jest.fn().mockResolvedValue([]),
     findPage: jest.fn().mockResolvedValue({ items: [], total: 0 }),

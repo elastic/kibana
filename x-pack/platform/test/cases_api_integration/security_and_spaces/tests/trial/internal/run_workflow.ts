@@ -8,6 +8,8 @@
 import expect from '@kbn/expect';
 import {
   MAX_CASES_PER_WORKFLOW_RUN,
+  MAX_OBSERVABLES_PER_CASE,
+  OBSERVABLE_TYPE_HOSTNAME,
   OBSERVABLE_TYPE_IPV4,
 } from '@kbn/cases-plugin/common/constants';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -21,6 +23,7 @@ import {
   deleteWorkflow,
   getWorkflowExecution,
   runCaseWorkflow,
+  seedObservables,
 } from '../../../../common/lib/api';
 import { superUser } from '../../../../common/lib/authentication/users';
 import { createUsersAndRoles, deleteUsersAndRoles } from '../../../../common/lib/authentication';
@@ -211,6 +214,37 @@ export default ({ getService }: FtrProviderContext): void => {
               caseId: theCase.id,
               observableId,
             },
+          },
+          auth: { user: secAllWorkflowExecuteUser, space: 'space1' },
+        });
+
+        expect(result.workflowExecutionId).to.be.a('string');
+      });
+
+      it('returns 200 with origin cases.observable for an object of the type the case response leaves out', async () => {
+        const theCase = await createCase(
+          supertestWithoutAuth,
+          getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+          200,
+          { user: superUser, space: 'space1' }
+        );
+        const firstCreatedAt = Date.parse('2026-11-06T09:30:00.000Z');
+        const seeded = Array.from({ length: MAX_OBSERVABLES_PER_CASE + 1 }, (_, index) => ({
+          id: `type-${index}`,
+          typeKey: OBSERVABLE_TYPE_HOSTNAME.key,
+          value: `host-${index}.example.com`,
+          createdAt: new Date(firstCreatedAt + index).toISOString(),
+        }));
+        await seedObservables({ es, caseId: theCase.id, space: 'space1', observables: seeded });
+        const unlisted = seeded[MAX_OBSERVABLES_PER_CASE];
+
+        const result = await runCaseWorkflow({
+          supertest: supertestWithoutAuth,
+          workflowId: enabledWorkflowId,
+          params: {
+            caseIds: [theCase.id],
+            inputs: {},
+            origin: { type: 'cases.observable', caseId: theCase.id, observableId: unlisted.id },
           },
           auth: { user: secAllWorkflowExecuteUser, space: 'space1' },
         });

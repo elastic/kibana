@@ -17,6 +17,7 @@ import {
   type UpdateObservableRequest,
   type BulkAddObservablesRequest,
   type BulkDeleteObservablesRequest,
+  type BulkGetObservablesRequest,
   type ObservablePost,
 } from '../../../common/types/api';
 import {
@@ -24,15 +25,19 @@ import {
   UpdateObservableRequestSchema,
   BulkAddObservablesRequestSchema,
   BulkDeleteObservablesRequestSchema,
+  BulkGetObservablesRequestSchema,
 } from '../../../common/types/api';
 import type { CasesClient } from '../client';
 import type { CasesClientArgs } from '../types';
 import { decodeOrThrowZod, decodeWithExcessOrThrowZod } from '../../common/runtime_types';
 import type { Authorization } from '../../authorization';
 import { Operations } from '../../authorization';
+import { createCaseError } from '../../common/error';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import { flattenCaseSavedObject, mergeObservablesPreview } from '../../common/utils';
 import { LICENSING_CASE_OBSERVABLES_FEATURE } from '../../common/constants';
+import type { ObservableKey } from '../../services/observables';
+import { toObservable } from '../../services/observables/utils';
 import {
   validateChangedObservableLengths,
   validateDuplicatedObservablesInRequest,
@@ -59,8 +64,13 @@ const ensureUpdateAuthorized = async (
 
 const MAX_OBSERVABLES_WRITE_ATTEMPTS = 3;
 
+const DUPLICATED_OBSERVABLES_MESSAGE = 'Invalid duplicated observables in request.';
+
+const toObservableKey = ({ typeKey, value }: ObservableKey): string => `${typeKey}-${value}`;
+
 interface ObservablesWrite<TResult> {
-  observables: Observable[];
+  /** The case field's observables after the write; left out when the write does not change the field. */
+  observables?: Observable[];
   result: TResult;
 }
 
@@ -68,7 +78,12 @@ interface ObservablesWriteArgs<TResult, TComputed extends ObservablesWrite<TResu
   caseId: string;
   prefetchedCase?: CaseSavedObjectTransformed;
   caseService: CasesClientArgs['services']['caseService'];
-  compute: (retrievedCase: CaseSavedObjectTransformed) => TComputed;
+  observableService: CasesClientArgs['services']['observableService'];
+  /** Receives the case and how many `cases-observables` objects it holds, both read in the same attempt. */
+  compute: (
+    retrievedCase: CaseSavedObjectTransformed,
+    typeCount: number
+  ) => TComputed | Promise<TComputed>;
 }
 
 interface ObservablesWriteOutcome<TResult> {
@@ -78,10 +93,11 @@ interface ObservablesWriteOutcome<TResult> {
 }
 
 /**
- * Reads the case, lets `compute` derive the new observables list from it, and writes the list
- * with the case version. On a version conflict the case is re-read and `compute` runs again, so a
- * concurrent writer's observables are never overwritten. `compute` returns undefined when there
- * is nothing to write.
+ * Reads the case and counts its `cases-observables` objects, lets `compute` derive the new
+ * observables list from them, and writes the list with the case version. The stored total counts
+ * both stores. On a version conflict the case is re-read, the objects counted again and `compute`
+ * runs again, so a concurrent writer's observables are never overwritten. `compute` returns
+ * undefined when there is nothing to write, and leaves out the list to write only the total.
  *
  * Authorization runs once, against the first read. A saved object import can overwrite the case
  * with a different owner, so a re-read whose owner changed fails with a conflict rather than being
@@ -97,6 +113,7 @@ async function writeObservablesWithRetry<TResult>({
   caseId,
   prefetchedCase,
   caseService,
+  observableService,
   compute,
 }: ObservablesWriteArgs<TResult, ObservablesWrite<TResult> | undefined>): Promise<
   ObservablesWriteOutcome<TResult> | undefined
@@ -104,8 +121,10 @@ async function writeObservablesWithRetry<TResult>({
   let ownerAtFirstRead: string | undefined;
 
   for (let attempt = 1; attempt <= MAX_OBSERVABLES_WRITE_ATTEMPTS; attempt++) {
-    const retrievedCase =
-      attempt === 1 && prefetchedCase ? prefetchedCase : await caseService.getCase({ id: caseId });
+    const [retrievedCase, typeCount] = await Promise.all([
+      attempt === 1 && prefetchedCase ? prefetchedCase : caseService.getCase({ id: caseId }),
+      observableService.getter.countForCase(caseId),
+    ]);
 
     ownerAtFirstRead ??= retrievedCase.attributes.owner;
     if (retrievedCase.attributes.owner !== ownerAtFirstRead) {
@@ -114,10 +133,12 @@ async function writeObservablesWithRetry<TResult>({
       );
     }
 
-    const write = compute(retrievedCase);
+    const write = await compute(retrievedCase, typeCount);
     if (!write) {
       return;
     }
+
+    const fieldObservables = write.observables ?? retrievedCase.attributes.observables ?? [];
 
     try {
       const patchedCase = await caseService.patchCase({
@@ -125,8 +146,8 @@ async function writeObservablesWithRetry<TResult>({
         originalCase: retrievedCase,
         version: retrievedCase.version,
         updatedAttributes: {
-          observables: write.observables,
-          total_observables: write.observables.length,
+          ...(write.observables !== undefined && { observables: write.observables }),
+          total_observables: fieldObservables.length + typeCount,
         },
       });
 
@@ -149,6 +170,19 @@ async function writeObservablesWithRetry<TResult>({
 const toObservableWriteError = (message: string, error: unknown): Boom.Boom =>
   Boom.isBoom(error, 409) ? error : Boom.badRequest(`${message}: ${error}`);
 
+/** Sets the stored total after a write to `cases-observables` objects, which leaves the case field as it is. */
+const setObservablesTotal = (
+  retrievedCase: CaseSavedObjectTransformed,
+  { services: { caseService, observableService } }: CasesClientArgs
+): Promise<ObservablesWriteOutcome<undefined>> =>
+  writeObservablesWithRetry({
+    caseId: retrievedCase.id,
+    prefetchedCase: retrievedCase,
+    caseService,
+    observableService,
+    compute: () => ({ result: undefined }),
+  });
+
 type ApplyObservablesResult =
   | {
       status: 'added';
@@ -161,6 +195,9 @@ type ApplyObservablesResult =
  * License-agnostic core that dedupes, caps, persists, and records a user action
  * for a set of observables on a case. Callers MUST enforce the Platinum license
  * gate and call notifyUsage themselves.
+ *
+ * New observables go to the case field. Values the case already holds in either
+ * store are skipped, and the cap counts both stores.
  *
  * Skips both the patchCase write and the user action write when no new
  * observables were added (idempotency — avoids a no-op SO write on every
@@ -177,7 +214,7 @@ export const applyObservablesToCase = async (
   prefetchedCase?: CaseSavedObjectTransformed
 ): Promise<ApplyObservablesResult> => {
   const {
-    services: { caseService, userActionService },
+    services: { caseService, userActionService, observableService },
     user,
   } = clientArgs;
 
@@ -192,35 +229,49 @@ export const applyObservablesToCase = async (
     caseId,
     prefetchedCase,
     caseService,
-    compute: (retrievedCase) => {
+    observableService,
+    compute: async (retrievedCase, typeCount) => {
       const currentObservables = retrievedCase.attributes.observables ?? [];
       // Build a key-set from existing observables so we never overwrite or collapse
       // them — even when two stored rows share the same typeKey+value (reachable
       // via SO import or data written before the dedupe path was added).
-      const existingKeys = new Set(
-        currentObservables.map(({ typeKey, value }) => `${typeKey}-${value}`)
-      );
+      const existingKeys = new Set(currentObservables.map(toObservableKey));
 
       // Dedupe incoming entries against existing ones and against each other.
       // processObservables mints ids/timestamps for ObservablePost entries and
       // skips repeats, so it is safe to call for every incoming entry.
       const incomingMap = new Map<string, Observable>();
       observables.forEach((observable) => {
-        if (existingKeys.has(`${observable.typeKey}-${observable.value}`)) {
+        if (existingKeys.has(toObservableKey(observable))) {
           return;
         }
         processObservables(incomingMap, observable);
       });
 
-      // Respect the per-case cap: add as many new observables as fit.
-      const remainingCapacity = Math.max(0, MAX_OBSERVABLES_PER_CASE - currentObservables.length);
-      const newlyAddedObservables = Array.from(incomingMap.values()).slice(0, remainingCapacity);
+      // The type is searched only when it holds objects, which it doesn't until a later release
+      // writes to it.
+      const notInField = Array.from(incomingMap.values());
+      const heldInType =
+        typeCount > 0
+          ? await observableService.getter.findExisting(retrievedCase.id, notInField)
+          : [];
+      const heldInTypeKeys = new Set(heldInType.map(toObservableKey));
+      const newObservables = notInField.filter(
+        (observable) => !heldInTypeKeys.has(toObservableKey(observable))
+      );
+
+      // Respect the per-case cap, which counts both stores: add as many new observables as fit.
+      const remainingCapacity = Math.max(
+        0,
+        MAX_OBSERVABLES_PER_CASE - currentObservables.length - typeCount
+      );
+      const newlyAddedObservables = newObservables.slice(0, remainingCapacity);
 
       // Nothing new was added — skip both the patch write and the user action to
       // avoid a no-op SO write on every idempotent re-extraction (e.g. the same
       // alert being attached multiple times).
       if (newlyAddedObservables.length === 0) {
-        skipReason = incomingMap.size > 0 ? 'limit_reached' : 'nothing_new';
+        skipReason = newObservables.length > 0 ? 'limit_reached' : 'nothing_new';
         return;
       }
 
@@ -315,7 +366,7 @@ export const addObservable = async (
     if (applied.status === 'skipped') {
       throw applied.reason === 'limit_reached'
         ? Boom.forbidden(`Max ${MAX_OBSERVABLES_PER_CASE} observables per case is allowed.`)
-        : Boom.badRequest('Invalid duplicated observables in request.');
+        : Boom.badRequest(DUPLICATED_OBSERVABLES_MESSAGE);
     }
 
     const flattenedCase = flattenCaseSavedObject({ savedObject: applied.caseWithPatch });
@@ -345,6 +396,135 @@ const isUnchangedObservable = (stored: Observable, original: Observable | undefi
   stored.value === original?.value &&
   stored.description === original?.description &&
   stored.updatedAt === original?.updatedAt;
+
+const MODIFIED_BY_ANOTHER_REQUEST_MESSAGE = (observableId: string) =>
+  `Observable id ${observableId} was modified by another request. Reload the case and try again.`;
+
+interface UpdateObservableInStoreArgs {
+  observableId: string;
+  patch: UpdateObservableRequest['observable'];
+  retrievedCase: CaseSavedObjectTransformed;
+  clientArgs: CasesClientArgs;
+}
+
+const updateObservableInField = ({
+  observableId,
+  patch,
+  retrievedCase,
+  originalObservable,
+  clientArgs: {
+    services: { caseService, observableService },
+  },
+}: UpdateObservableInStoreArgs & {
+  originalObservable: Observable;
+}): Promise<ObservablesWriteOutcome<undefined>> =>
+  writeObservablesWithRetry({
+    caseId: retrievedCase.id,
+    prefetchedCase: retrievedCase,
+    caseService,
+    observableService,
+    compute: async (currentCase, typeCount) => {
+      const currentObservables = currentCase.attributes.observables ?? [];
+
+      const observableIndex = currentObservables.findIndex(
+        (observable) => observable.id === observableId
+      );
+
+      if (observableIndex === -1) {
+        throw Boom.notFound(`Failed to update observable: observable id ${observableId} not found`);
+      }
+
+      const currentObservable = currentObservables[observableIndex];
+
+      if (!isUnchangedObservable(currentObservable, originalObservable)) {
+        throw Boom.conflict(MODIFIED_BY_ANOTHER_REQUEST_MESSAGE(observableId));
+      }
+
+      validateChangedObservableLengths(currentObservable, patch);
+      validateObservableValue(currentObservable.typeKey, patch.value);
+
+      const updatedObservables = [...currentObservables];
+      updatedObservables[observableIndex] = {
+        ...currentObservable,
+        ...patch,
+        updatedAt: new Date().toISOString(),
+      };
+
+      validateDuplicatedObservablesInRequest({
+        requestFields: updatedObservables,
+      });
+
+      if (patch.value !== currentObservable.value && typeCount > 0) {
+        const heldInType = await observableService.getter.findExisting(currentCase.id, [
+          { typeKey: currentObservable.typeKey, value: patch.value },
+        ]);
+
+        if (heldInType.length > 0) {
+          throw Boom.badRequest(DUPLICATED_OBSERVABLES_MESSAGE);
+        }
+      }
+
+      return { observables: updatedObservables, result: undefined };
+    },
+  });
+
+/** Edits a `cases-observables` object in place with its version, then sets the case's stored total. */
+const updateObservableInType = async ({
+  observableId,
+  patch,
+  retrievedCase,
+  clientArgs,
+}: UpdateObservableInStoreArgs): Promise<ObservablesWriteOutcome<undefined>> => {
+  const {
+    services: { observableService },
+    user,
+  } = clientArgs;
+
+  const {
+    found: [storedObservable],
+  } = await observableService.getter.getForCase(retrievedCase.id, [observableId]);
+
+  if (storedObservable === undefined) {
+    throw Boom.notFound(`Failed to update observable: observable id ${observableId} not found`);
+  }
+
+  const { type_key: typeKey, value } = storedObservable.attributes;
+
+  validateChangedObservableLengths(storedObservable.attributes, patch);
+  validateObservableValue(typeKey, patch.value);
+
+  if (patch.value !== value) {
+    const heldInField = (retrievedCase.attributes.observables ?? []).some(
+      (observable) => observable.typeKey === typeKey && observable.value === patch.value
+    );
+    const heldInType = await observableService.getter.findExisting(retrievedCase.id, [
+      { typeKey, value: patch.value },
+    ]);
+
+    if (heldInField || heldInType.some(({ id }) => id !== observableId)) {
+      throw Boom.badRequest(DUPLICATED_OBSERVABLES_MESSAGE);
+    }
+  }
+
+  try {
+    await observableService.update({
+      observable: storedObservable,
+      attributes: {
+        value: patch.value,
+        description: patch.description,
+        updated_at: new Date().toISOString(),
+        updated_by: user,
+      },
+    });
+  } catch (error) {
+    if (SavedObjectsErrorHelpers.isConflictError(error as Error)) {
+      throw Boom.conflict(MODIFIED_BY_ANOTHER_REQUEST_MESSAGE(observableId));
+    }
+    throw error;
+  }
+
+  return setObservablesTotal(retrievedCase, clientArgs);
+};
 
 export const updateObservable = async (
   caseId: string,
@@ -377,52 +557,13 @@ export const updateObservable = async (
     const originalObservable = retrievedCase.attributes.observables?.find(
       ({ id }) => id === observableId
     );
+    const storeArgs = { observableId, patch: paramArgs.observable, retrievedCase, clientArgs };
 
-    const written = await writeObservablesWithRetry({
-      caseId,
-      prefetchedCase: retrievedCase,
-      caseService,
-      compute: (currentCase) => {
-        const currentObservables = currentCase.attributes.observables ?? [];
-
-        const observableIndex = currentObservables.findIndex(
-          (observable) => observable.id === observableId
-        );
-
-        if (observableIndex === -1) {
-          throw Boom.notFound(
-            `Failed to update observable: observable id ${observableId} not found`
-          );
-        }
-
-        if (!isUnchangedObservable(currentObservables[observableIndex], originalObservable)) {
-          throw Boom.conflict(
-            `Observable id ${observableId} was modified by another request. Reload the case and try again.`
-          );
-        }
-
-        validateChangedObservableLengths(currentObservables[observableIndex], paramArgs.observable);
-        validateObservableValue(
-          currentObservables[observableIndex].typeKey,
-          paramArgs.observable.value
-        );
-
-        const updatedObservables = [...currentObservables];
-        updatedObservables[observableIndex] = {
-          ...updatedObservables[observableIndex],
-          ...paramArgs.observable,
-          updatedAt: new Date().toISOString(),
-        };
-
-        validateDuplicatedObservablesInRequest({
-          requestFields: updatedObservables,
-        });
-
-        return { observables: updatedObservables, result: undefined };
-      },
-    });
-
-    const { retrievedCase: latestCase, patchedCase: updatedCase } = written;
+    // An edited observable stays in the store that holds it.
+    const { retrievedCase: latestCase, patchedCase: updatedCase } =
+      originalObservable !== undefined
+        ? await updateObservableInField({ ...storeArgs, originalObservable })
+        : await updateObservableInType(storeArgs);
 
     await userActionService.creator.createUserAction({
       userAction: {
@@ -455,6 +596,47 @@ export const updateObservable = async (
   }
 };
 
+const deleteObservableInField = (
+  observableId: string,
+  retrievedCase: CaseSavedObjectTransformed,
+  { services: { caseService, observableService } }: CasesClientArgs
+): Promise<ObservablesWriteOutcome<undefined>> =>
+  writeObservablesWithRetry({
+    caseId: retrievedCase.id,
+    prefetchedCase: retrievedCase,
+    caseService,
+    observableService,
+    compute: (currentCase) => {
+      const updatedObservables = currentCase.attributes.observables.filter(
+        (observable) => observable.id !== observableId
+      );
+
+      // NOTE: same length of observables pre and post filter means that the observable id has not been found
+      if (updatedObservables.length === currentCase.attributes.observables.length) {
+        throw Boom.notFound(`Failed to delete observable: observable id ${observableId} not found`);
+      }
+
+      return { observables: updatedObservables, result: undefined };
+    },
+  });
+
+/** Deletes a `cases-observables` object, then sets the case's stored total. */
+const deleteObservableInType = async (
+  observableId: string,
+  retrievedCase: CaseSavedObjectTransformed,
+  clientArgs: CasesClientArgs
+): Promise<ObservablesWriteOutcome<undefined>> => {
+  const { observableService } = clientArgs.services;
+  const { found } = await observableService.getter.getForCase(retrievedCase.id, [observableId]);
+
+  if (found.length === 0) {
+    throw Boom.notFound(`Failed to delete observable: observable id ${observableId} not found`);
+  }
+
+  await observableService.bulkDelete(found);
+  return setObservablesTotal(retrievedCase, clientArgs);
+};
+
 export const deleteObservable = async (
   caseId: string,
   observableId: string,
@@ -481,25 +663,12 @@ export const deleteObservable = async (
     const retrievedCase = await caseService.getCase({ id: caseId });
     await ensureUpdateAuthorized(authorization, retrievedCase);
 
-    const { retrievedCase: latestCase } = await writeObservablesWithRetry({
-      caseId,
-      prefetchedCase: retrievedCase,
-      caseService,
-      compute: (currentCase) => {
-        const updatedObservables = currentCase.attributes.observables.filter(
-          (observable) => observable.id !== observableId
-        );
-
-        // NOTE: same length of observables pre and post filter means that the observable id has not been found
-        if (updatedObservables.length === currentCase.attributes.observables.length) {
-          throw Boom.notFound(
-            `Failed to delete observable: observable id ${observableId} not found`
-          );
-        }
-
-        return { observables: updatedObservables, result: undefined };
-      },
-    });
+    const isInField = (retrievedCase.attributes.observables ?? []).some(
+      ({ id }) => id === observableId
+    );
+    const { retrievedCase: latestCase } = isInField
+      ? await deleteObservableInField(observableId, retrievedCase, clientArgs)
+      : await deleteObservableInType(observableId, retrievedCase, clientArgs);
 
     await userActionService.creator.createUserAction({
       userAction: {
@@ -612,28 +781,54 @@ export const bulkDeleteObservables = async (
   await ensureUpdateAuthorized(authorization, retrievedCase);
 
   const idsToDelete = new Set(paramArgs.observableIds);
+  const fieldIds = new Set(
+    (retrievedCase.attributes.observables ?? [])
+      .map(({ id }) => id)
+      .filter((id) => idsToDelete.has(id))
+  );
+
+  // Every id must be found in one of the stores before anything is deleted.
+  const { found: typeObservables, missingIds } = await observableService.getter.getForCase(
+    retrievedCase.id,
+    [...idsToDelete].filter((id) => !fieldIds.has(id))
+  );
+
+  if (missingIds.length > 0) {
+    throw Boom.notFound(
+      `Failed to bulk delete observables: observable ids not found: ${missingIds.join(', ')}`
+    );
+  }
+
+  await observableService.bulkDelete(typeObservables);
 
   const {
     retrievedCase: latestCase,
     patchedCase: updatedCase,
-    result: removedCount,
+    result: removedFromField,
   } = await writeObservablesWithRetry({
     caseId: paramArgs.caseId,
     prefetchedCase: retrievedCase,
     caseService,
+    observableService,
     compute: (currentCase) => {
+      if (fieldIds.size === 0) {
+        return { result: 0 };
+      }
+
       const currentObservables = currentCase.attributes.observables ?? [];
       const currentIdSet = new Set(currentObservables.map(({ id }) => id));
 
-      const missingIds = [...idsToDelete].filter((id) => !currentIdSet.has(id));
-      if (missingIds.length > 0) {
+      const missingFieldIds = [...fieldIds].filter((id) => !currentIdSet.has(id));
+      if (missingFieldIds.length > 0) {
         throw Boom.notFound(
-          `Failed to bulk delete observables: observable ids not found: ${missingIds.join(', ')}`
+          `Failed to bulk delete observables: observable ids not found: ${missingFieldIds.join(
+            ', '
+          )}`
         );
       }
 
       const updatedObservables = currentObservables.filter(
-        (observable) => !idsToDelete.has(observable.id)
+        (observable) => !fieldIds.has(observable.id)
       );
 
       return {
@@ -650,7 +845,7 @@ export const bulkDeleteObservables = async (
       owner: latestCase.attributes.owner,
       user,
       payload: {
-        observables: { count: removedCount, actionType: 'delete' },
+        observables: { count: removedFromField + typeObservables.length, actionType: 'delete' },
       },
     },
   });
@@ -670,4 +865,47 @@ export const bulkDeleteObservables = async (
 
   const result = decodeOrThrowZod(CaseSchema)(res);
   return result;
+};
+
+/**
+ * Returns the case's observables with the given ids, from either store. A case response lists at
+ * most 50, so this reaches the rest. Ids the case does not hold are left out.
+ */
+export const bulkGetObservables = async (
+  params: BulkGetObservablesRequest,
+  clientArgs: CasesClientArgs
+): Promise<Observable[]> => {
+  const {
+    services: { caseService, observableService },
+    authorization,
+    logger,
+  } = clientArgs;
+
+  try {
+    const { caseId, observableIds } = decodeWithExcessOrThrowZod(BulkGetObservablesRequestSchema)(
+      params
+    );
+    const theCase = await caseService.getCase({ id: caseId });
+
+    await authorization.ensureAuthorized({
+      operation: Operations.findObservables,
+      entities: [{ id: theCase.id, owner: theCase.attributes.owner }],
+    });
+
+    const ids = new Set(observableIds);
+    const inField = (theCase.attributes.observables ?? []).filter(({ id }) => ids.has(id));
+    const inFieldIds = new Set(inField.map(({ id }) => id));
+    const { found } = await observableService.getter.getForCase(
+      theCase.id,
+      [...ids].filter((id) => !inFieldIds.has(id))
+    );
+
+    return [...inField, ...found.map(toObservable)];
+  } catch (error) {
+    throw createCaseError({
+      message: `Failed to get observables of case id: ${params.caseId}: ${error}`,
+      error,
+      logger,
+    });
+  }
 };

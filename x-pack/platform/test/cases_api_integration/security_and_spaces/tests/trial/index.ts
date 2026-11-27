@@ -51,6 +51,8 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./internal/extract_observables'));
     // case responses list observables from the case field and the `cases-observables` type
     loadTestFile(require.resolve('./internal/observables_preview'));
+    // observable writes act on whichever store holds the observable
+    loadTestFile(require.resolve('./internal/observables_across_stores'));
 
     // Internal routes
     loadTestFile(require.resolve('./internal/get_user_action_stats'));
