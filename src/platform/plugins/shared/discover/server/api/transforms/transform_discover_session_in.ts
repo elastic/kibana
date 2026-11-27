@@ -12,10 +12,8 @@ import type { DiscoverSessionApiData, DiscoverSessionApiTab } from '@kbn/as-code
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { StoredDiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
-import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
 import type { DiscoverSessionInternalData } from '../internal_schema';
 import { serializeEsqlControls } from '../../../common/session/control_panels';
-import { getVisContextRequestData } from '../../../common/session/get_vis_context_request_data';
 import { toStoredSearchAndTableAttributes } from '../../../common/session/search_and_table_mapping';
 import { toStoredSessionSettings } from '../../../common/session/session_tab_mapping';
 import { toStoredTabTypeState } from '../../../common/session/tab_type_state';
@@ -33,29 +31,17 @@ export const transformDiscoverSessionIn = (data: DiscoverSessionApiData): Stored
   return assembleStoredSession(data, storedTabs);
 };
 
-/** Preserves inline Data View IDs and uses them in the stored chart fingerprint. */
+/** Converts an internal API session while preserving inline Data View IDs. */
 export const transformInternalDiscoverSessionIn = (
   data: DiscoverSessionInternalData
 ): StoredDiscoverSession => {
-  const storedTabs = data.tabs.map((tab) => {
-    const { data_source: dataSource } = tab;
-    let inlineDataViewId: string | undefined;
-
-    if (dataSource.type === AS_CODE_DATA_VIEW_SPEC_TYPE) {
-      inlineDataViewId = dataSource.id;
-    }
-
-    return toStoredSessionTab(tab, inlineDataViewId);
-  });
+  const storedTabs = data.tabs.map((tab) => toStoredSessionTab(tab));
 
   return assembleStoredSession(data, storedTabs);
 };
 
 /** Converts an API tab to saved attributes and references, including its chart and controls. */
-const toStoredSessionTab = (
-  tab: DiscoverSessionApiTab,
-  inlineDataViewId?: string
-): StoredSessionTabWithReferences => {
+const toStoredSessionTab = (tab: DiscoverSessionApiTab): StoredSessionTabWithReferences => {
   const { attributes, references } = toStoredSearchAndTableAttributes(tab, {
     refNamePrefix: `tab_${tab.id}`,
   });
@@ -68,10 +54,7 @@ const toStoredSessionTab = (
       attributes: {
         ...attributes,
         ...toStoredSessionSettings(tab),
-        visContext: fromApiVisContext(
-          tab.vis_context,
-          getVisContextRequestData(tab, inlineDataViewId)
-        ),
+        visContext: fromApiVisContext(tab.vis_context),
         controlGroupJson: serializeEsqlControls(tab.control_panels),
         ...(tabTypeState !== undefined && { tabTypeState }),
       },

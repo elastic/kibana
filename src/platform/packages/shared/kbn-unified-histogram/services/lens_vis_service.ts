@@ -42,6 +42,8 @@ import type { LegendSize } from '@kbn/chart-expressions-common';
 import { getRepresentativeQuery } from '@kbn/lens-common';
 import type {
   DefaultVisualizationOverrides,
+  TextBasedLayer,
+  TextBasedPrivateState,
   XYVisualizationState as XYConfiguration,
 } from '@kbn/lens-common';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
@@ -817,7 +819,9 @@ export class LensVisService {
         })
       ) {
         // using the external lens attributes
-        visContext = externalVisContext;
+        visContext = isTextBased
+          ? withSourceTimeFieldOnEsqlLayers(externalVisContext, timeFieldName)
+          : externalVisContext;
         externalVisContextStatus = UnifiedHistogramExternalVisContextStatus.applied;
       } else {
         // external vis is not compatible with the current suggestion
@@ -834,12 +838,15 @@ export class LensVisService {
           visContext: undefined,
         };
       }
-      const attributes = getLensAttributesFromSuggestion({
+      const suggestionAttributes = getLensAttributesFromSuggestion({
         query: currentQuery,
         filters,
         suggestion,
         dataView,
       }) as TypedLensByValueInput['attributes'];
+      const attributes = isTextBased
+        ? withEsqlLayersOnDataView(suggestionAttributes, dataView)
+        : suggestionAttributes;
 
       if (suggestionType === UnifiedHistogramSuggestionType.histogramForDataView) {
         attributes.title = i18n.translate('unifiedHistogram.lensTitle', {
@@ -892,6 +899,109 @@ export class LensVisService {
   };
 }
 
+/**
+ * Aligns rebuilt ES|QL layers and refs with the current data view, since suggestions can retain
+ * the saved index and time field even after the source changes.
+ */
+const withEsqlLayersOnDataView = (
+  attributes: TypedLensByValueInput['attributes'],
+  dataView: DataView
+): TypedLensByValueInput['attributes'] => {
+  const { state } = attributes;
+  const textBased = state.datasourceStates.textBased as TextBasedPrivateState | undefined;
+  const { id: dataViewId } = dataView;
+  const timeField = dataView.timeFieldName || undefined;
+  const adHocDataViews = state.adHocDataViews ?? {};
+
+  if (!dataViewId || !adHocDataViews[dataViewId] || !textBased?.layers) {
+    return attributes;
+  }
+
+  // Lens can keep the old chart's data view ID and time field after the source changes,
+  // so we align them with the current data view.
+  const needsDataViewAlignment = (layer: TextBasedLayer): boolean => {
+    const hasStaleIndex = Boolean(layer.index && !adHocDataViews[layer.index]);
+    const hasStaleTimeField = layer.index === dataViewId && layer.timeField !== timeField;
+
+    return hasStaleIndex || hasStaleTimeField;
+  };
+
+  const layersToAlign = Object.values(textBased.layers).filter(needsDataViewAlignment);
+  const layerIndices = layersToAlign.map((layer) => layer.index);
+  const indicesToAlign = new Set(layerIndices);
+
+  if (!indicesToAlign.size) {
+    return attributes;
+  }
+
+  const alignedTextBased: TextBasedPrivateState = {
+    ...textBased,
+    layers: Object.fromEntries(
+      Object.entries(textBased.layers).map(([layerId, layer]) => [
+        layerId,
+        indicesToAlign.has(layer.index) ? { ...layer, index: dataViewId, timeField } : layer,
+      ])
+    ),
+    ...(textBased.indexPatternRefs && {
+      indexPatternRefs: textBased.indexPatternRefs.map((ref) =>
+        indicesToAlign.has(ref.id) ? { ...ref, id: dataViewId, timeField } : ref
+      ),
+    }),
+  };
+
+  return {
+    ...attributes,
+    state: {
+      ...state,
+      datasourceStates: { ...state.datasourceStates, textBased: alignedTextBased },
+    },
+  };
+};
+
+/**
+ * Gives the current source time field to saved ES|QL layers without one, so the chart applies the
+ * time range even when the saved ad-hoc data view (e.g. from another project routing) has no time field.
+ */
+const withSourceTimeFieldOnEsqlLayers = (
+  visContext: UnifiedHistogramVisContext,
+  timeFieldName: string | undefined
+): UnifiedHistogramVisContext => {
+  const { state } = visContext.attributes;
+  const textBased = state.datasourceStates.textBased;
+  const layers = textBased?.layers;
+
+  if (!timeFieldName || !textBased || !layers) {
+    return visContext;
+  }
+
+  const layerEntries = Object.entries(layers);
+  if (layerEntries.every(([, layer]) => layer.timeField)) {
+    return visContext;
+  }
+
+  return {
+    ...visContext,
+    attributes: {
+      ...visContext.attributes,
+      state: {
+        ...state,
+        datasourceStates: {
+          ...state.datasourceStates,
+          textBased: {
+            ...textBased,
+            layers: Object.fromEntries(
+              layerEntries.map(([layerId, layer]) => [
+                layerId,
+                layer.timeField ? layer : { ...layer, timeField: timeFieldName },
+              ])
+            ),
+          },
+        },
+      },
+    },
+  };
+};
+
 function areSuggestionAndVisContextAndQueryParamsStillCompatible({
   suggestionType,
   suggestion,
@@ -905,8 +1015,17 @@ function areSuggestionAndVisContextAndQueryParamsStillCompatible({
   queryParams: QueryParams;
   requestData: UnifiedHistogramVisContext['requestData'];
 }): boolean {
-  // requestData should match
-  if (
+  if (queryParams.dataSource.kind === 'esql') {
+    const layers = externalVisContext.attributes.state?.datasourceStates?.textBased?.layers ?? {};
+    // Lens hydrates missing time fields, but an explicit field must still match the current source.
+    if (
+      Object.values(layers).some(
+        (layer) => layer.timeField && layer.timeField !== queryParams.dataSource.timeFieldName
+      )
+    ) {
+      return false;
+    }
+  } else if (
     (Object.keys(requestData) as Array<keyof UnifiedHistogramVisContext['requestData']>).some(
       (key) => !isEqual(requestData[key], externalVisContext.requestData[key])
     )

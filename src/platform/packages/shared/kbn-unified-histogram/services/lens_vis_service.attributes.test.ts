@@ -12,7 +12,14 @@ import {
   registerEsqlSourceInDataViewsCache,
   unregisterFromDataViewsCache,
 } from '@kbn/data-source';
-import { getRepresentativeQuery } from '@kbn/lens-common';
+import { cloneDeep } from 'lodash';
+import { getRepresentativeQuery, withLegacyAggregateQuerySlot } from '@kbn/lens-common';
+import type { XYPersistedState } from '@kbn/lens-common';
+import {
+  isLensLegacyAttributes,
+  LensConfigBuilder,
+  lensApiConfigSchema,
+} from '@kbn/lens-embeddable-utils';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
@@ -20,6 +27,7 @@ import {
   dataViewWithTimefieldMock,
   dataViewWithAtTimefieldMock,
 } from '../__mocks__/data_view_with_timefield';
+import { buildDataViewMock } from '../__mocks__/data_view';
 import { currentSuggestionMock, allSuggestionsMock } from '../__mocks__/suggestions';
 import { getDefaultDataSource, getLensVisMock } from '../__mocks__/lens_vis';
 import { UnifiedHistogramExternalVisContextStatus, UnifiedHistogramSuggestionType } from '../types';
@@ -839,7 +847,390 @@ describe('LensVisService attributes', () => {
     expect(visContext?.requestData.dataViewId).toBe(chartDataView.id);
   });
 
-  it('should reuse an unchanged ES|QL histogram whose query is stored only in Lens layers', async () => {
+  it.each(['layer query', 'legacy dual-written query'])(
+    'should reuse an unchanged ES|QL histogram with %s',
+    async (queryFormat) => {
+      const timeRange = {
+        from: '2022-11-17T00:00:00.000Z',
+        to: '2022-11-17T12:00:00.000Z',
+      };
+      const { lensService, visContext } = await getLensVisMock({
+        filters: [],
+        query: queryEsql,
+        dataView: dataViewWithAtTimefieldMock,
+        timeInterval,
+        timeRange,
+        breakdownField: undefined,
+        columns: [],
+        allSuggestions: [],
+      });
+
+      expect(visContext?.suggestionType).toBe(UnifiedHistogramSuggestionType.histogramForESQL);
+      expect(visContext?.attributes.state.query).toBeUndefined();
+      expect(getRepresentativeQuery(visContext?.attributes)).toStrictEqual({
+        esql: `from logstash-* | limit 10
+| STATS results = COUNT(*) BY timestamp = BUCKET(@timestamp, 5 minute)
+| LIMIT 10000`,
+      });
+      expect(visContext?.requestData).toStrictEqual({
+        dataViewId: dataViewWithAtTimefieldMock.id,
+        timeField: '@timestamp',
+        timeInterval: undefined,
+        breakdownField: undefined,
+      });
+
+      if (!visContext) {
+        throw new Error('Expected an ES|QL histogram');
+      }
+      const savedVisContext = cloneDeep(visContext);
+      if (queryFormat === 'legacy dual-written query') {
+        savedVisContext.attributes = withLegacyAggregateQuerySlot(savedVisContext.attributes);
+      }
+      const onVisContextChanged = jest.fn();
+      lensService.update({
+        queryParams: {
+          dataSource: await getDefaultDataSource({
+            query: queryEsql,
+            dataView: dataViewWithAtTimefieldMock,
+            columns: [],
+          }),
+          query: queryEsql,
+          filters: [],
+          timeRange,
+          columns: [],
+        },
+        timeInterval,
+        breakdownField: undefined,
+        externalVisContext: savedVisContext,
+        onVisContextChanged,
+      });
+
+      expect(onVisContextChanged).toHaveBeenCalledWith(
+        savedVisContext,
+        UnifiedHistogramExternalVisContextStatus.applied
+      );
+      expect(lensService.state$.getValue().visContext?.attributes).toStrictEqual(
+        savedVisContext.attributes
+      );
+    }
+  );
+
+  it.each([
+    {
+      name: 'reuses an ES|QL histogram with an empty fingerprint',
+      requestData: {},
+      shouldApply: true,
+    },
+    {
+      name: 'reuses an ES|QL histogram with a different data view ID',
+      requestData: { dataViewId: 'previous-chart-data-view', timeField: '@timestamp' },
+      shouldApply: true,
+    },
+    {
+      name: 'reuses an ES|QL histogram without a data view ID',
+      requestData: { timeField: '@timestamp' },
+      shouldApply: true,
+    },
+    {
+      name: 'reuses an ES|QL histogram despite a stale time field in its fingerprint',
+      requestData: { dataViewId: dataViewWithAtTimefieldMock.id, timeField: 'event.ingested' },
+      shouldApply: true,
+    },
+    {
+      name: 'reuses an ES|QL histogram despite a stale breakdown in its fingerprint',
+      requestData: { timeField: '@timestamp', breakdownField: 'extension' },
+      shouldApply: true,
+    },
+    {
+      name: 'overrides an ES|QL histogram when the query changes despite ignoring the ID',
+      requestData: { timeField: '@timestamp' },
+      nextQuery: { esql: 'from other-index | limit 10' },
+    },
+    {
+      name: 'overrides a classic histogram with a different data view ID',
+      requestData: {
+        dataViewId: 'previous-chart-data-view',
+        timeField: '@timestamp',
+        timeInterval,
+      },
+      currentQuery: query,
+    },
+  ])(
+    '$name',
+    async ({
+      requestData,
+      shouldApply = false,
+      currentQuery = queryEsql,
+      nextQuery = currentQuery,
+    }) => {
+      const params = {
+        filters: [],
+        query: currentQuery,
+        dataView: dataViewWithAtTimefieldMock,
+        timeInterval,
+        breakdownField: undefined,
+        columns: [],
+        allSuggestions: [],
+      };
+      const { lensService, visContext } = await getLensVisMock(params);
+      if (!visContext) {
+        throw new Error('Expected an ES|QL histogram');
+      }
+      const savedVisContext = cloneDeep(visContext);
+      const onVisContextChanged = jest.fn();
+      const updateParams = {
+        queryParams: {
+          dataSource: await getDefaultDataSource({
+            query: currentQuery,
+            dataView: dataViewWithAtTimefieldMock,
+            columns: [],
+          }),
+          query: currentQuery,
+          filters: [],
+          timeRange: { from: '2022-11-17T00:00:00.000Z', to: '2022-11-17T12:00:00.000Z' },
+          columns: [],
+        },
+        timeInterval,
+        breakdownField: undefined,
+        onVisContextChanged,
+      };
+      lensService.update({ ...updateParams, externalVisContext: savedVisContext });
+      expect(onVisContextChanged).toHaveBeenLastCalledWith(
+        savedVisContext,
+        UnifiedHistogramExternalVisContextStatus.applied
+      );
+
+      const externalVisContext = { ...savedVisContext, requestData };
+      const originalExternalVisContext = cloneDeep(externalVisContext);
+      lensService.update({
+        ...updateParams,
+        queryParams: {
+          ...updateParams.queryParams,
+          dataSource: await getDefaultDataSource({
+            query: nextQuery,
+            dataView: dataViewWithAtTimefieldMock,
+            columns: [],
+          }),
+          query: nextQuery,
+        },
+        externalVisContext,
+      });
+      expect(onVisContextChanged).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          requestData: shouldApply ? requestData : visContext.requestData,
+        }),
+        shouldApply
+          ? UnifiedHistogramExternalVisContextStatus.applied
+          : UnifiedHistogramExternalVisContextStatus.automaticallyOverridden
+      );
+      if (shouldApply) {
+        expect(lensService.state$.getValue().visContext?.attributes).toStrictEqual(
+          savedVisContext.attributes
+        );
+      }
+      expect(externalVisContext).toStrictEqual(originalExternalVisContext);
+      expect(savedVisContext).toStrictEqual(visContext);
+    }
+  );
+
+  it.each([
+    { name: 'time field', timeFieldName: 'event.ingested', breakdownField: undefined },
+    {
+      name: 'breakdown',
+      timeFieldName: '@timestamp',
+      breakdownField: dataView.fields.find((field) => field.name === 'extension'),
+    },
+  ])(
+    'regenerates the ES|QL histogram when the current $name changes',
+    async ({ timeFieldName, breakdownField }) => {
+      const timeRange = {
+        from: '2022-11-17T00:00:00.000Z',
+        to: '2022-11-17T12:00:00.000Z',
+      };
+      const { lensService, visContext } = await getLensVisMock({
+        filters: [],
+        query: queryEsql,
+        dataView: dataViewWithAtTimefieldMock,
+        timeInterval,
+        timeRange,
+        breakdownField: undefined,
+        columns: [],
+        allSuggestions: [],
+      });
+      if (!visContext) {
+        throw new Error('Expected an ES|QL histogram');
+      }
+      const currentDataView = buildDataViewMock({
+        name: dataViewWithAtTimefieldMock.name,
+        fields: dataViewWithAtTimefieldMock.fields,
+        timeFieldName,
+      });
+      const currentColumns = [
+        { id: 'extension', name: 'extension', meta: { type: 'string' as const } },
+      ];
+      const onVisContextChanged = jest.fn();
+      lensService.update({
+        queryParams: {
+          dataSource: await getDefaultDataSource({
+            query: queryEsql,
+            dataView: currentDataView,
+            columns: currentColumns,
+          }),
+          query: queryEsql,
+          filters: [],
+          timeRange,
+          columns: currentColumns,
+        },
+        timeInterval,
+        breakdownField,
+        externalVisContext: visContext,
+        onVisContextChanged,
+      });
+      expect(onVisContextChanged).toHaveBeenCalledWith(
+        expect.objectContaining({
+          requestData: expect.objectContaining({
+            timeField: timeFieldName,
+            breakdownField: breakdownField?.name,
+          }),
+        }),
+        UnifiedHistogramExternalVisContextStatus.automaticallyOverridden
+      );
+      expect(
+        getRepresentativeQuery(lensService.state$.getValue().visContext?.attributes)
+      ).not.toEqual(getRepresentativeQuery(visContext.attributes));
+    }
+  );
+
+  it.each([
+    {
+      name: 'missing',
+      savedTimeField: undefined,
+      currentTimeField: '@timestamp',
+      shouldApply: true,
+    },
+    {
+      name: 'matching',
+      savedTimeField: '@timestamp',
+      currentTimeField: '@timestamp',
+      shouldApply: true,
+    },
+    {
+      name: 'changed',
+      savedTimeField: '@timestamp',
+      currentTimeField: 'event.ingested',
+      shouldApply: false,
+    },
+    {
+      name: 'removed',
+      savedTimeField: '@timestamp',
+      currentTimeField: undefined,
+      shouldApply: false,
+    },
+  ])(
+    'checks an explicit layer time field for an aggregated ES|QL chart ($name)',
+    async ({ savedTimeField, currentTimeField, shouldApply }) => {
+      const aggregateQuery = { esql: 'FROM logstash-* | STATS count = COUNT(*) BY host' };
+      const builder = new LensConfigBuilder(undefined, true);
+      const attributes = builder.fromAPIFormat(
+        lensApiConfigSchema.parse({
+          type: 'xy',
+          title: 'Count by host',
+          layers: [
+            {
+              type: 'bar',
+              data_source: { type: 'esql', query: aggregateQuery.esql },
+              x: { column: 'host' },
+              y: [{ column: 'count' }],
+            },
+          ],
+        })
+      );
+      const datasourceState = attributes.state.datasourceStates.textBased;
+      if (!datasourceState) {
+        throw new Error('Expected an ES|QL datasource');
+      }
+      for (const layer of Object.values(datasourceState.layers)) {
+        layer.timeField = savedTimeField;
+      }
+      const suggestion = {
+        ...currentSuggestionMock,
+        title: attributes.title,
+        visualizationId: attributes.visualizationType,
+        visualizationState: attributes.state.visualization,
+        datasourceState,
+      };
+      const columns = [
+        { id: 'host', name: 'host', meta: { type: 'string' as const } },
+        { id: 'count', name: 'count', meta: { type: 'number' as const } },
+      ];
+      const { lensService, visContext } = await getLensVisMock({
+        filters: [],
+        query: aggregateQuery,
+        dataView: dataViewWithAtTimefieldMock,
+        timeInterval,
+        breakdownField: undefined,
+        columns,
+        allSuggestions: [suggestion],
+      });
+      if (!visContext) {
+        throw new Error('Expected an aggregated ES|QL chart');
+      }
+      expect(visContext.suggestionType).toBe(UnifiedHistogramSuggestionType.lensSuggestion);
+      const savedVisContext = cloneDeep(visContext);
+      const currentDataView = buildDataViewMock({
+        name: dataViewWithAtTimefieldMock.name,
+        fields: dataViewWithAtTimefieldMock.fields,
+        timeFieldName: currentTimeField,
+      });
+      suggestion.datasourceState = cloneDeep(datasourceState);
+      for (const layer of Object.values(suggestion.datasourceState.layers)) {
+        layer.timeField = currentTimeField;
+      }
+      const onVisContextChanged = jest.fn();
+      lensService.update({
+        queryParams: {
+          dataSource: await getDefaultDataSource({
+            query: aggregateQuery,
+            dataView: currentDataView,
+            columns,
+          }),
+          query: aggregateQuery,
+          filters: [],
+          columns,
+          columnsMap: Object.fromEntries(columns.map((column) => [column.name, column])),
+        },
+        timeInterval,
+        breakdownField: undefined,
+        externalVisContext: savedVisContext,
+        onVisContextChanged,
+      });
+      expect(onVisContextChanged).toHaveBeenCalledWith(
+        expect.any(Object),
+        shouldApply
+          ? UnifiedHistogramExternalVisContextStatus.applied
+          : UnifiedHistogramExternalVisContextStatus.automaticallyOverridden
+      );
+      const restored = lensService.state$.getValue().visContext;
+      if (shouldApply) {
+        const expectedVisContext = cloneDeep(savedVisContext);
+        for (const layer of Object.values(
+          expectedVisContext.attributes.state.datasourceStates.textBased?.layers ?? {}
+        )) {
+          layer.timeField = currentTimeField;
+        }
+        expect(restored).toStrictEqual(expectedVisContext);
+      } else {
+        expect(
+          Object.values(restored?.attributes.state.datasourceStates.textBased?.layers ?? {}).map(
+            (layer) => layer.timeField
+          )
+        ).toEqual([currentTimeField]);
+      }
+      expect(savedVisContext).toStrictEqual(visContext);
+    }
+  );
+
+  it('reuses an ES|QL histogram after a Lens as-code round trip', async () => {
     const timeRange = {
       from: '2022-11-17T00:00:00.000Z',
       to: '2022-11-17T12:00:00.000Z',
@@ -854,21 +1245,39 @@ describe('LensVisService attributes', () => {
       columns: [],
       allSuggestions: [],
     });
+    if (!visContext || !isLensLegacyAttributes(visContext.attributes)) {
+      throw new Error('Expected Lens attributes for an ES|QL histogram');
+    }
+    const savedAttributes = cloneDeep(visContext.attributes);
+    if (savedAttributes.visualizationType !== 'lnsXY') {
+      throw new Error('Expected an XY histogram');
+    }
+    const visualization = savedAttributes.state.visualization as XYPersistedState;
+    visualization.preferredSeriesType = 'line';
+    visualization.layers = visualization.layers.map((layer) =>
+      layer.layerType === 'data' ? { ...layer, seriesType: 'line', xAccessor: 'timestamp' } : layer
+    );
+    const builder = new LensConfigBuilder(undefined, true);
+    const apiConfig = builder.toAPIFormat(savedAttributes);
+    const attributes = builder.fromAPIFormat(apiConfig);
 
-    expect(visContext?.suggestionType).toBe(UnifiedHistogramSuggestionType.histogramForESQL);
-    expect(visContext?.attributes.state.query).toBeUndefined();
-    expect(getRepresentativeQuery(visContext?.attributes)).toStrictEqual({
-      esql: `from logstash-* | limit 10
-| STATS results = COUNT(*) BY timestamp = BUCKET(@timestamp, 5 minute)
-| LIMIT 10000`,
+    expect(attributes.state.visualization).toMatchObject({
+      preferredSeriesType: 'line',
+      layers: [{ seriesType: 'line' }],
     });
-    expect(visContext?.requestData).toStrictEqual({
-      dataViewId: dataViewWithAtTimefieldMock.id,
-      timeField: '@timestamp',
-      timeInterval: undefined,
-      breakdownField: undefined,
-    });
+    expect(getRepresentativeQuery(attributes)).toStrictEqual(
+      getRepresentativeQuery(visContext.attributes)
+    );
+    expect(builder.toAPIFormat(attributes)).toStrictEqual(apiConfig);
+    const layers = Object.values(attributes.state.datasourceStates.textBased?.layers ?? {});
+    expect(layers).toHaveLength(1);
+    expect(layers[0].timeField).toBeUndefined();
 
+    const restoredVisContext = {
+      suggestionType: visContext.suggestionType,
+      attributes,
+      requestData: { timeField: layers[0].timeField },
+    };
     const onVisContextChanged = jest.fn();
     lensService.update({
       queryParams: {
@@ -884,12 +1293,17 @@ describe('LensVisService attributes', () => {
       },
       timeInterval,
       breakdownField: undefined,
-      externalVisContext: visContext,
+      externalVisContext: restoredVisContext,
       onVisContextChanged,
     });
-
+    const expectedVisContext = cloneDeep(restoredVisContext);
+    for (const layer of Object.values(
+      expectedVisContext.attributes.state.datasourceStates.textBased?.layers ?? {}
+    )) {
+      layer.timeField = '@timestamp';
+    }
     expect(onVisContextChanged).toHaveBeenCalledWith(
-      visContext,
+      expectedVisContext,
       UnifiedHistogramExternalVisContextStatus.applied
     );
   });
@@ -939,6 +1353,110 @@ describe('LensVisService attributes', () => {
       UnifiedHistogramExternalVisContextStatus.manuallyCustomized
     );
   });
+
+  it.each([
+    { shape: 'bar', donutHole: undefined, visualization: { preferredSeriesType: 'bar' } },
+    { shape: 'pie', donutHole: 'none', visualization: { shape: 'pie' } },
+    { shape: 'donut', donutHole: 'm', visualization: { shape: 'donut' } },
+  ])(
+    'reuses an aggregated ES|QL $shape chart after a Lens as-code round trip',
+    async ({ shape, donutHole, visualization }) => {
+      const aggregateQuery = { esql: 'FROM logstash-* | STATS count = COUNT(*) BY host' };
+      const dataSource = { type: 'esql', query: aggregateQuery.esql };
+      const builder = new LensConfigBuilder(undefined, true);
+      const originalAttributes = builder.fromAPIFormat(
+        lensApiConfigSchema.parse(
+          shape === 'bar'
+            ? {
+                type: 'xy',
+                layers: [
+                  {
+                    type: 'bar',
+                    data_source: dataSource,
+                    x: { column: 'host' },
+                    y: [{ column: 'count' }],
+                  },
+                ],
+              }
+            : {
+                type: 'pie',
+                data_source: dataSource,
+                metrics: [{ column: 'count' }],
+                group_by: [{ column: 'host' }],
+                styling: { donut_hole: donutHole },
+              }
+        )
+      );
+      const apiConfig = builder.toAPIFormat(originalAttributes);
+      const attributes = builder.fromAPIFormat(apiConfig);
+      expect(builder.toAPIFormat(attributes)).toStrictEqual(apiConfig);
+      expect(attributes.state.visualization).toMatchObject(visualization);
+      expect(getRepresentativeQuery(attributes)).toStrictEqual(aggregateQuery);
+      const datasourceState = attributes.state.datasourceStates.textBased;
+      if (!datasourceState) {
+        throw new Error('Expected an ES|QL datasource');
+      }
+      const layers = Object.values(datasourceState.layers);
+      expect(layers).toHaveLength(1);
+      expect(layers[0].timeField).toBeUndefined();
+      expect(layers[0].columns.map((column) => column.fieldName).sort()).toEqual(['count', 'host']);
+
+      const columns = [
+        { id: 'host', name: 'host', meta: { type: 'string' as const } },
+        { id: 'count', name: 'count', meta: { type: 'number' as const } },
+      ];
+      const { lensService } = await getLensVisMock({
+        filters: [],
+        query: aggregateQuery,
+        dataView: dataViewWithAtTimefieldMock,
+        timeInterval,
+        breakdownField: undefined,
+        columns,
+        allSuggestions: [
+          {
+            ...currentSuggestionMock,
+            title: attributes.title,
+            visualizationId: attributes.visualizationType,
+            visualizationState: attributes.state.visualization,
+            datasourceState,
+          },
+        ],
+      });
+      const externalVisContext = {
+        suggestionType: UnifiedHistogramSuggestionType.lensSuggestion,
+        attributes,
+        requestData: {},
+      };
+      const onVisContextChanged = jest.fn();
+      lensService.update({
+        queryParams: {
+          dataSource: await getDefaultDataSource({
+            query: aggregateQuery,
+            dataView: dataViewWithAtTimefieldMock,
+            columns,
+          }),
+          query: aggregateQuery,
+          filters: [],
+          columns,
+          columnsMap: Object.fromEntries(columns.map((column) => [column.name, column])),
+        },
+        timeInterval,
+        breakdownField: undefined,
+        externalVisContext,
+        onVisContextChanged,
+      });
+      const expectedVisContext = cloneDeep(externalVisContext);
+      for (const layer of Object.values(
+        expectedVisContext.attributes.state.datasourceStates.textBased?.layers ?? {}
+      )) {
+        layer.timeField = '@timestamp';
+      }
+      expect(onVisContextChanged).toHaveBeenCalledWith(
+        expectedVisContext,
+        UnifiedHistogramExternalVisContextStatus.applied
+      );
+    }
+  );
 
   it('should use the correct histogram query when no suggestion passed', async () => {
     const histogramQuery = {
