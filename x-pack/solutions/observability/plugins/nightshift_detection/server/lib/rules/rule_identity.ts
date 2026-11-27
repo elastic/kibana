@@ -8,7 +8,7 @@
 import { v5 as uuidv5 } from 'uuid';
 import { MAX_NAME_LENGTH, type CreateRuleData } from '@kbn/alerting-v2-schemas';
 import { stableStringify } from '@kbn/std';
-import { cutText } from '../../utils/cut_text';
+import { cutText } from '../../utils/string_utils';
 
 /** Namespace of the engine's rule ids. Changing it gives every managed rule a new id. */
 const RULE_ID_NAMESPACE = 'e04d28ab-9856-4cf7-bda8-1341f14f17b5';

@@ -10,7 +10,7 @@ import { esql, Parser } from '@elastic/esql';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { timeoutSignal } from '@kbn/std';
 import { getErrorMessage } from '../errors/get_error_message';
-import { cutText } from '../../utils/cut_text';
+import { cutText } from '../../utils/string_utils';
 import {
   EVIDENCE_MAX_CELL_LENGTH,
   EVIDENCE_MAX_MESSAGE_LENGTH,

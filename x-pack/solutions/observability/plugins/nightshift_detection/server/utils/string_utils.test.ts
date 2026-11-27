@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { cutText } from './cut_text';
+import { cutText } from './string_utils';
 
 describe('cutText', () => {
   it.each([
