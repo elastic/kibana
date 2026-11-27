@@ -21,9 +21,13 @@ import { getServiceStats } from './get_service_stats';
 import type { EnhancedServiceStatsOptions } from './get_enhanced_service_stats';
 import { getEnhancedServiceStats } from './get_enhanced_service_stats';
 import { fetchExitSpanSamplesFromTraceIds } from './fetch_exit_span_samples';
+import type { ServiceCallGraph } from './get_service_call_graph';
 import { getServiceCallGraph } from './get_service_call_graph';
+import type { ServiceGroupingAttributes } from './get_service_grouping_attributes';
 import { getServiceGroupingAttributes } from './get_service_grouping_attributes';
 import { buildServiceGrouping } from './grouping/build_service_grouping';
+import { SERVICE_GROUPING_MIN_SERVICES } from './grouping/constants';
+import { getMapServices } from './grouping/get_map_services';
 
 export interface IEnvOptions {
   mlClient?: MlClient;
@@ -113,45 +117,77 @@ export function getServiceMap(
       return DEFAULT_ANOMALIES;
     });
 
-    // A service page map stays ungrouped. A failed query leaves this map unchanged.
-    const callGraphPromise =
-      grouping.enabled && !options.serviceName
-        ? getServiceCallGraph(options).catch((error) => {
-            logger.debug(`Unable to retrieve the call graph for service maps.`, { error });
-            return undefined;
-          })
-        : Promise.resolve(undefined);
+    const shouldApplyGrouping = grouping.enabled && !options.serviceName;
 
-    const groupingAttributesPromise =
-      grouping.enabled && !options.serviceName
-        ? getServiceGroupingAttributes({ ...options, source: grouping.source }).catch((error) => {
+    const connectionDataPromise = getConnectionData(options);
+
+    const servicesDataPromise = grouping.enabled
+      ? getEnhancedServiceStats({ ...options, source: grouping.source })
+      : getServiceStats(options);
+
+    // A service page map stays ungrouped. A failed query leaves this map unchanged.
+    let callGraphPromise: Promise<ServiceCallGraph | undefined> = Promise.resolve(undefined);
+    if (shouldApplyGrouping) {
+      callGraphPromise = getServiceCallGraph(options).catch((error) => {
+        logger.debug(`Unable to retrieve the call graph for service maps.`, { error });
+        return undefined;
+      });
+    }
+
+    // The services the map draws, which every grouping and its labels are built over. Missing when
+    // there are too few to group, so neither the labels nor the grouping are computed.
+    let mapServicesPromise: Promise<string[] | undefined> = Promise.resolve(undefined);
+    // The labels of the drawn services, to group them by attribute.
+    let groupingAttributesPromise: Promise<ServiceGroupingAttributes | undefined> =
+      Promise.resolve(undefined);
+    if (shouldApplyGrouping) {
+      mapServicesPromise = Promise.all([connectionDataPromise, servicesDataPromise]).then(
+        ([{ spans }, servicesData]) => {
+          const services = getMapServices({ spans, servicesData });
+          return services.length >= SERVICE_GROUPING_MIN_SERVICES ? services : undefined;
+        }
+      );
+      // Labels are read only for the drawn services, so they wait for them but do not need to wait for the call graph.
+      groupingAttributesPromise = mapServicesPromise.then((services) => {
+        if (services) {
+          return getServiceGroupingAttributes({
+            ...options,
+            services,
+            source: grouping.source,
+          }).catch((error) => {
             logger.debug(`Unable to retrieve grouping attributes for service maps.`, { error });
             return undefined;
-          })
-        : Promise.resolve(undefined);
+          });
+        }
+        return undefined;
+      });
+    }
 
-    // groupingAttributes is fetched for group selection. It stays off the response until then.
-    const [connectionData, servicesData, anomalies, callGraph] = await Promise.all([
-      getConnectionData(options),
-      grouping.enabled
-        ? getEnhancedServiceStats({ ...options, source: grouping.source })
-        : getServiceStats(options),
-      anomaliesPromise,
-      callGraphPromise,
-      groupingAttributesPromise,
-    ]);
+    const [connectionData, servicesData, anomalies, callGraph, services, groupingAttributes] =
+      await Promise.all([
+        connectionDataPromise,
+        servicesDataPromise,
+        anomaliesPromise,
+        callGraphPromise,
+        mapServicesPromise,
+        groupingAttributesPromise,
+      ]);
 
     // If the grouping logic fails, the service map will remain ungrouped.
     // Grouping is pure code over data already read, so a failure here is an unexpected bug
     // so we log it at warning level as debug is off by default.
     let serviceGrouping: ServiceMapGrouping | undefined;
-    if (callGraph) {
+    if (callGraph && services) {
       try {
-        serviceGrouping = buildServiceGrouping({
-          callGraph,
-          spans: connectionData.spans,
-          servicesData,
-        });
+        serviceGrouping = {
+          services,
+          ...buildServiceGrouping({
+            callGraph,
+            spans: connectionData.spans,
+            services,
+            attributes: groupingAttributes,
+          }),
+        };
       } catch (error) {
         logger.warn(`Unable to group the services of the service map.`, { error });
       }

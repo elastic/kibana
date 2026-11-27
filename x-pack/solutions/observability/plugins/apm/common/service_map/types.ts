@@ -46,6 +46,7 @@ export type {
   GroupResourceNodesResult,
   ReactFlowServiceMapResponse,
   ServiceGroupingSource,
+  AttributeGroupingSource,
   ServiceMapGroup,
   ServiceGroupingStrategy,
   ServiceMapGrouping,

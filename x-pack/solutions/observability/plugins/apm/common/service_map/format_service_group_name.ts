@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ServiceMapGroup } from './types';
+import type { AttributeGroupingSource, ServiceMapGroup } from './types';
 
 /**
  * Display name for a closed service group, from the group's kind fields.
@@ -26,6 +26,22 @@ export function formatServiceGroupName(group: ServiceMapGroup): string {
     case 'notConnected':
       return i18n.translate('xpack.apm.serviceMap.serviceGroup.notConnected', {
         defaultMessage: 'Not connected',
+      });
+    case 'noValue':
+      return formatNoValueGroupName(group.attribute);
+  }
+}
+
+function formatNoValueGroupName(attribute: AttributeGroupingSource): string {
+  switch (attribute) {
+    case 'service.namespace':
+    case 'kubernetes.namespace':
+      return i18n.translate('xpack.apm.serviceMap.serviceGroup.noNamespace', {
+        defaultMessage: 'No namespace',
+      });
+    case 'namePrefix':
+      return i18n.translate('xpack.apm.serviceMap.serviceGroup.ungrouped', {
+        defaultMessage: 'Ungrouped',
       });
   }
 }

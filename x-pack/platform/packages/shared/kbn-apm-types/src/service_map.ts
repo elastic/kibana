@@ -117,16 +117,25 @@ export interface NotConnectedServiceMapGroup {
   kind: 'notConnected';
 }
 
+/** Services with no value for the attribute their strategy groups by. */
+export interface NoValueServiceMapGroup {
+  id: 'noValue';
+  kind: 'noValue';
+  attribute: AttributeGroupingSource;
+}
+
 /**
- * A group of services on the map. Ids are the source and a value, `<source>:<value>`, or `shared`
- * and `notConnected`, so groups of different kinds never share one, even within a strategy.
+ * A group of services on the map. Ids are the source and a value, `<source>:<value>`, or `shared`,
+ * `notConnected` and `noValue`, so groups of different kinds never share one, even within a
+ * strategy.
  */
 export type ServiceMapGroup =
   | SavedGroupServiceMapGroup
   | AttributeServiceMapGroup
   | CallsServiceMapGroup
   | SharedServiceMapGroup
-  | NotConnectedServiceMapGroup;
+  | NotConnectedServiceMapGroup
+  | NoValueServiceMapGroup;
 
 /** One way of grouping the map's services. */
 export interface ServiceGroupingStrategy {

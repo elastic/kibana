@@ -81,6 +81,41 @@ export const SERVICE_MAP_GROUPING_NOT_CONNECTED = [
   ...SERVICE_MAP_GROUPING_ISOLATED,
 ];
 
+/** Each team's `service.namespace`, by team: grouping by namespace should find the teams. */
+export const SERVICE_MAP_GROUPING_TEAM_NAMESPACES = SERVICE_MAP_GROUPING_TEAMS.map(
+  (_, team) => `grouping-team-${team}`
+);
+/**
+ * A team service that also runs more transactions with a blank `service.namespace` and
+ * `kubernetes.namespace` than with its own. Blank values don't count, so it still sits with its team
+ * in both groupings.
+ */
+export const SERVICE_MAP_GROUPING_MOSTLY_BLANK_NAMESPACE = SERVICE_MAP_GROUPING_TEAMS[0][15];
+/** The platform services' `service.namespace`: shared by calls, they still have a namespace. */
+export const SERVICE_MAP_GROUPING_PLATFORM_NAMESPACE = 'grouping-platform';
+/** Services that set no `service.namespace`, with calls (the gateway) and without. */
+export const SERVICE_MAP_GROUPING_WITHOUT_NAMESPACE = [
+  SERVICE_MAP_GROUPING_GATEWAY,
+  ...SERVICE_MAP_GROUPING_NOT_CONNECTED,
+];
+/**
+ * Each team's `kubernetes.namespace`, by team. A namespace holds two teams, so grouping by it
+ * differs from grouping by `service.namespace`.
+ */
+export const SERVICE_MAP_GROUPING_TEAM_KUBERNETES_NAMESPACES = SERVICE_MAP_GROUPING_TEAMS.map(
+  (_, team) => `grouping-k8s-${Math.floor(team / 2)}`
+);
+/** The gateway's `kubernetes.namespace`: shared by calls, it still has a namespace. */
+export const SERVICE_MAP_GROUPING_GATEWAY_KUBERNETES_NAMESPACE = 'grouping-k8s-edge';
+/**
+ * Services that set no `kubernetes.namespace`: the platform services, which have a
+ * `service.namespace`, and the services not connected.
+ */
+export const SERVICE_MAP_GROUPING_WITHOUT_KUBERNETES_NAMESPACE = [
+  ...SERVICE_MAP_GROUPING_PLATFORM,
+  ...SERVICE_MAP_GROUPING_NOT_CONNECTED,
+];
+
 export const SERVICE_MAP_GROUPING_SERVICES = [
   ...SERVICE_MAP_GROUPING_TEAMS.flat(),
   ...SERVICE_MAP_GROUPING_SHARED,
