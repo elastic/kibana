@@ -13,9 +13,6 @@ export type SavedObjectComparator = (a: SavedObject, b: SavedObject) => number;
 
 export const getObjKey = (obj: SavedObject) => `${obj.type}|${obj.id}`;
 
-export const byIdAscComparator: SavedObjectComparator = (a: SavedObject, b: SavedObject) =>
-  a.id > b.id ? 1 : -1;
-
 /**
  * Create a comparator that will sort objects depending on their position in the provided array.
  * Objects not present in the array will be appended at the end of the list, and sorted by id asc.
@@ -42,6 +39,6 @@ export const getPreservedOrderComparator = (objects: SavedObject[]): SavedObject
     if (indexB > -1) {
       return 1;
     }
-    return byIdAscComparator(a, b);
+    return a.id > b.id ? 1 : -1;
   };
 };

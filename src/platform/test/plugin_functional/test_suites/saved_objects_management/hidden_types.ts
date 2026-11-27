@@ -8,10 +8,9 @@
  */
 
 import path from 'path';
+import { sortBy } from 'lodash';
 import expect from '@kbn/expect';
 import type { PluginFunctionalProviderContext } from '../../services';
-
-const byIdAscComparator = (a: { id: string }, b: { id: string }) => (a.id > b.id ? 1 : -1);
 
 const fixturePaths = {
   hiddenImportable: path.join(__dirname, 'exports', '_import_hidden_importable.ndjson'),
@@ -50,13 +49,14 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
           .expect(200)
           .then((resp) => {
             expect(
-              resp.body.saved_objects
-                .map((obj: any) => ({
+              sortBy(
+                resp.body.saved_objects.map((obj: any) => ({
                   id: obj.id,
                   type: obj.type,
                   hidden: obj.meta.hiddenType,
-                }))
-                .sort(byIdAscComparator)
+                })),
+                'id'
+              )
             ).to.eql([
               {
                 id: 'obj_1',
