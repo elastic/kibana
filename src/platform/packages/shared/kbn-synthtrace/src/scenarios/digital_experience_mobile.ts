@@ -17,8 +17,10 @@
  *   `<screen> - view appearing` spans, and the `app.launch` and screen spans some apps create
  *   themselves with the bridge's `startSpan()`
  * - `logs-generic.otel-default`: `app.crash`, `app.widget.click` and iOS `device.app.lifecycle`
- *   events, ERROR logs of the bridge's `emitLog()`, and the `exception` span events of failed
- *   HTTP requests
+ *   events, ERROR logs of the bridge's `emitLog()`, the `exception` span events of failed HTTP
+ *   requests, and an `elastic.app.start` per launch (`start.type` cold or warm,
+ *   `elastic.app.start.duration` in ms), the signal proposed for the native SDKs that EDOT React
+ *   Native runs on
  * - every span and log of a session carries its `session.id`, lowercase on Android and uppercase
  *   on iOS, except the `exception` span events, which only link to their span. Neither SDK writes
  *   a React Native marker, a launch span or Android screen spans.
