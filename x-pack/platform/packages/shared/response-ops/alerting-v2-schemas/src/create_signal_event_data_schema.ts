@@ -66,6 +66,26 @@ export const createSignalEventResponseSchema = lazySchema(() =>
   })
 );
 
+/**
+ * The result of a bulk signal write. There is one item for each input event, in input
+ * order, so the caller can line results up with what it sent and retry only the failures.
+ * A failed event does not stop the others from being stored.
+ */
+export const bulkCreateSignalEventsResponseSchema = lazySchema(() =>
+  z.object({
+    items: z.array(
+      z.discriminatedUnion('status', [
+        z.object({ status: z.literal('created'), group_hash: z.string() }),
+        z.object({
+          status: z.literal('failed'),
+          error: z.object({ code: z.string(), message: z.string() }),
+        }),
+      ])
+    ),
+  })
+);
+
 export type SignalEventStatus = z.infer<typeof signalEventStatusSchema>;
 export type CreateSignalEventData = z.infer<typeof createSignalEventInternalDataSchema>;
 export type CreateSignalEventResponse = z.infer<typeof createSignalEventResponseSchema>;
+export type BulkCreateSignalEventsResponse = z.infer<typeof bulkCreateSignalEventsResponseSchema>;
