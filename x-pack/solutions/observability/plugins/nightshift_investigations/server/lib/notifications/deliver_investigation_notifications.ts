@@ -189,8 +189,15 @@ const executeDestinationDelivery = async (
   { delivery, diagnostic }: PreparedDestinationDelivery,
   execute?: ExecuteConnector
 ): Promise<NotificationOutcome> => {
-  if (signal.aborted || !(await routingClient.isActive())) {
-    return { status: 'unconfirmed', error: 'Notification delivery stopped after claiming' };
+  const stopped: NotificationOutcome = {
+    status: 'failed',
+    error: 'Notification delivery stopped before posting',
+  };
+  if (signal.aborted) {
+    return stopped;
+  }
+  if (!(await routingClient.isActive()) || signal.aborted) {
+    return stopped;
   }
   if (diagnostic || !execute || !delivery) {
     return { status: 'failed', error: diagnostic || 'Notification delivery is unavailable' };
@@ -317,8 +324,9 @@ const deliverToDestination = async (
  * Uncertain root deliveries block automatic root recreation, including in later executions.
  *
  * Cancellation and inactive attachments stop further delivery. Setup, preparation, and connector
- * error responses are recorded per destination so other destinations can proceed. Posting
- * exceptions, missing confirmation, or cancellation after claiming remain unconfirmed.
+ * error responses are recorded per destination so other destinations can proceed, and so is
+ * cancellation before posting. Posting exceptions, missing confirmation, or cancellation during
+ * posting remain unconfirmed.
  * Persistence errors propagate and stop further posts, leaving any durable claim in place
  * without retrying the connector.
  */

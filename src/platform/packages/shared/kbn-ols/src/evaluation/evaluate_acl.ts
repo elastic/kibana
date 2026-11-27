@@ -121,15 +121,7 @@ export const evaluateAcl = ({
   }
 
   // The owner can do everything an access manager can, and only the owner can transfer ownership.
-  const ordinaryLevel: AclAccess = isOwner ? 'manage' : level;
-  const operations = new Set(
-    Object.entries(policy.operations)
-      .filter(([, operation]) => compareLevels(operation.access, ordinaryLevel) <= 0)
-      .map(([name]) => name)
-  );
-  if (ordinaryLevel === 'manage') {
-    operations.add('manage_access');
-  }
+  const operations = getOperationsAtAccess(policy, isOwner ? 'manage' : level);
   if (isOwner) {
     operations.add('transfer');
   }
@@ -154,6 +146,26 @@ export const evaluateAcl = ({
     operations,
     operationsViaRecovery,
   };
+};
+
+/**
+ * Lists the operations that an access permits under a type's policy: every operation that needs
+ * that access or less, and access management at `manage`. It doesn't depend on the values that
+ * general access and entries can take, so it answers for any access, such as the access an entry
+ * would grant. Ownership, recovery, and feature privileges are not applied.
+ *
+ * @param policy The access policy of the object's type.
+ * @param access The access to list the operations for.
+ * @returns The names of the operations that the access permits.
+ */
+export const getOperationsAtAccess = (policy: AccessPolicy, access: AclAccess): Set<string> => {
+  const operations = new Set(
+    Object.entries(policy.operations)
+      .filter(([, operation]) => compareLevels(operation.access, access) <= 0)
+      .map(([name]) => name)
+  );
+
+  return access === 'manage' ? operations.add('manage_access') : operations;
 };
 
 /**

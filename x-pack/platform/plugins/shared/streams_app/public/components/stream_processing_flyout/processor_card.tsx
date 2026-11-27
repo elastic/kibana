@@ -20,6 +20,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { DragHandle, useDragHandle } from '../draggable_steps';
+import { ROUTING_SIGNAL_LABELS } from '../stream_routing_flyout/signal_labels';
 import { ProcessorContextMenu } from './processor_context_menu';
 import { describeProcessor, summarizeProcessor } from './processor_summary';
 import type { ProcessingDiagnostic } from '../../services/unit_diagnostics';
@@ -151,13 +152,23 @@ export function ProcessorCard({
               ) : null}
               {step.status !== 'saved' ? (
                 <EuiFlexItem grow={false}>
-                  <EuiBadge data-test-subj="streamsProcessingFlyoutStepUnsaved">
+                  <EuiBadge color="warning" data-test-subj="streamsProcessingFlyoutStepUnsaved">
                     {i18n.translate('xpack.streams.processingFlyout.card.unsaved', {
                       defaultMessage: 'Unsaved',
                     })}
                   </EuiBadge>
                 </EuiFlexItem>
               ) : null}
+              {step.processor.supported_telemetry.map((signal) => (
+                <EuiFlexItem key={signal} grow={false}>
+                  <EuiBadge
+                    color="default"
+                    data-test-subj={`streamsProcessingFlyoutStepSignal-${signal}`}
+                  >
+                    {ROUTING_SIGNAL_LABELS[signal]}
+                  </EuiBadge>
+                </EuiFlexItem>
+              ))}
               <EuiFlexItem grow={false}>
                 <ProcessorContextMenu
                   isDisabled={!editable}

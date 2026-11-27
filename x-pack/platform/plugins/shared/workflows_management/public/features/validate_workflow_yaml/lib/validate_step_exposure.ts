@@ -6,23 +6,12 @@
  */
 
 import type { LineCounter } from 'yaml';
-import { i18n } from '@kbn/i18n';
 import type { WorkflowLookup, YamlValidationResult } from '@kbn/workflows-yaml';
+import {
+  getInternalStepMessage,
+  getManagedOnlyStepMessage,
+} from '../../../../common/lib/collect_step_exposure_diagnostics';
 import { getStepExposure } from '../../../../common/schema';
-
-const getInternalStepMessage = (stepType: string): string =>
-  i18n.translate('workflows.validateStepExposure.internalStepWarningMessage', {
-    defaultMessage:
-      'Step type "{stepType}" is an internal step. Use it at your own risk: its inputs, outputs and behavior can change without notice.',
-    values: { stepType },
-  });
-
-const getManagedOnlyStepMessage = (stepType: string): string =>
-  i18n.translate('workflows.validateStepExposure.managedOnlyStepErrorMessage', {
-    defaultMessage:
-      'Step type "{stepType}" is an internal step and can\'t be used in custom workflows.',
-    values: { stepType },
-  });
 
 /** Flags `internal` (warning) and `managed_only` (error) steps in workflows that aren't managed. */
 export const validateStepExposure = (

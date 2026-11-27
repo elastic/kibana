@@ -7,32 +7,16 @@
 
 import { TOASTER_CLOSE_ICON } from '../../screens/alerts_detection_rules';
 import {
-  CANCEL_BTN,
   CLOSE_ALERTS_CHECKBOX,
   CLOSE_ALERTS_REASON_SELECT,
   CLOSE_SINGLE_ALERT_CHECKBOX,
   CONFIRM_BTN,
   EXCEPTION_EDIT_FLYOUT_SAVE_BTN,
-  EXCEPTION_FIELD_MAPPING_CONFLICTS_ACCORDION_ICON,
-  EXCEPTION_FIELD_MAPPING_CONFLICTS_DESCRIPTION,
-  EXCEPTION_FIELD_MAPPING_CONFLICTS_ICON,
-  EXCEPTION_FIELD_MAPPING_CONFLICTS_TOOLTIP,
   EXCEPTION_ITEM_NAME_INPUT,
   OS_INPUT,
   OS_SELECTION_SECTION,
 } from '../../screens/exceptions';
 import { closeErrorToast } from '../alerts_detection_rules';
-
-export const showFieldConflictsWarningTooltipWithMessage = (message: string, index = 0) => {
-  cy.get(EXCEPTION_FIELD_MAPPING_CONFLICTS_ICON).eq(index).realHover();
-  cy.get(EXCEPTION_FIELD_MAPPING_CONFLICTS_TOOLTIP).should('be.visible');
-  cy.get(EXCEPTION_FIELD_MAPPING_CONFLICTS_TOOLTIP).should('have.text', message);
-};
-
-export const showMappingConflictsWarningMessage = (message: string, index = 0) => {
-  cy.get(EXCEPTION_FIELD_MAPPING_CONFLICTS_ACCORDION_ICON).eq(index).click({ force: true });
-  cy.get(EXCEPTION_FIELD_MAPPING_CONFLICTS_DESCRIPTION).eq(index).should('have.text', message);
-};
 
 export const addExceptionFlyoutItemName = (
   name: string,
@@ -72,10 +56,6 @@ export const selectCloseSingleAlerts = () => {
 export const selectCloseAlertsReason = (reason: string) => {
   cy.get(CLOSE_ALERTS_REASON_SELECT).click();
   cy.get(`[role=option][id="${reason}"]`).click();
-};
-
-export const closeExceptionBuilderFlyout = () => {
-  cy.get(CANCEL_BTN).click();
 };
 
 export const selectOs = (os: string) => {

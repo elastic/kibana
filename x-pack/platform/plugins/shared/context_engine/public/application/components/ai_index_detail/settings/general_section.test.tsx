@@ -65,6 +65,16 @@ describe('GeneralSection', () => {
     expect(screen.getByTestId('contextDescriptionTextArea')).toHaveValue('My custom description');
   });
 
+  it('uses the shared description field, without its help text (the row already explains it)', () => {
+    renderWithProviders(<GeneralSection isLoading={false} aiIndex={aiIndex} onSaved={jest.fn()} />);
+
+    expect(screen.getByTestId('contextDescriptionTextArea')).toHaveAttribute(
+      'placeholder',
+      expect.stringContaining('knowledge documents')
+    );
+    expect(screen.queryByText(/Important: This description shapes/)).not.toBeInTheDocument();
+  });
+
   it('does not show save or discard for trailing whitespace only', () => {
     renderWithProviders(
       <GeneralSection

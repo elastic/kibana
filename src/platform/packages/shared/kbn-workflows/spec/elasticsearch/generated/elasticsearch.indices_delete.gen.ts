@@ -54,9 +54,9 @@ You can then use the delete index API to delete the previous write index.
     bodyParams: [],
   },
   paramsSchema: z.object({
-    ...getShapeAt(indices_delete_request, 'body'),
-    ...getShapeAt(indices_delete_request, 'path'),
     ...getShapeAt(indices_delete_request, 'query'),
+    ...getShapeAt(indices_delete_request, 'path'),
+    ...getShapeAt(indices_delete_request, 'body'),
   }),
   outputSchema: indices_delete_response,
 };

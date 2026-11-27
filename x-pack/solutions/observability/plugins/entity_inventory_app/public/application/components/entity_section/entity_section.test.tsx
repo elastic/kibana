@@ -9,8 +9,6 @@ import React from 'react';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 import type { InventoryType } from '@kbn/entity-inventory-plugin/common';
 import { HOST_TYPE_FIXTURE } from '../../../__fixtures__/inventory_data';
@@ -18,9 +16,8 @@ import { installIntersectionObserverMock } from '../../../__fixtures__/intersect
 import type { IntersectionObserverMockControls } from '../../../__fixtures__/intersection_observer_mock';
 import { createScenarioEntityInventoryApiClient } from '../../../__fixtures__/inventory_scenarios';
 import type { FixtureScenario } from '../../../__fixtures__/inventory_scenarios';
-import { createAppServicesMock } from '../../../mocks';
+import { createAppServicesMock, MockEntityInventoryProvider } from '../../../mocks';
 import { EntityTablePreferencesProvider } from '../../context/entity_table_preferences_context';
-import { EntityInventorySearchProvider } from '../../context/search_context';
 import { EntitySection } from './entity_section';
 
 // EuiDataGrid's render cost is largely fixed and can exceed the default 5s budget under parallel CI load.
@@ -42,15 +39,15 @@ const renderSection = ({
   const section = (
     <I18nProvider>
       <EuiProvider>
-        <KibanaContextProvider services={createAppServicesMock({ inventoryApi })}>
-          <EntityTablePreferencesProvider>
-            <Router history={history}>
-              <EntityInventorySearchProvider entityCategory="hosts">
-                <EntitySection entityType={entityType} onTruncatedChange={onTruncatedChange} />
-              </EntityInventorySearchProvider>
-            </Router>
-          </EntityTablePreferencesProvider>
-        </KibanaContextProvider>
+        <EntityTablePreferencesProvider>
+          <MockEntityInventoryProvider
+            entityCategory="hosts"
+            services={createAppServicesMock({ inventoryApi })}
+            history={history}
+          >
+            <EntitySection entityType={entityType} onTruncatedChange={onTruncatedChange} />
+          </MockEntityInventoryProvider>
+        </EntityTablePreferencesProvider>
       </EuiProvider>
     </I18nProvider>
   );

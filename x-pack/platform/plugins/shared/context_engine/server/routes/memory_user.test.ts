@@ -90,14 +90,19 @@ describe('resolveMemoryUser', () => {
     });
   });
 
-  it('allows targeting another user with manage_memory even without a caller profile', async () => {
+  it('allows targeting another user with manage_memory without looking up the caller profile', async () => {
+    const getCurrentProfileId = jest.fn(async () => {
+      throw new Error('profile activation failed');
+    });
+
     await expect(
       resolveMemoryUser({
         request: requestWith({ [apiPrivileges.manageMemory]: true }),
-        userProfile: userProfileWith(null),
+        userProfile: { getCurrentProfileId },
         requestedUserId: 'u_other',
       })
     ).resolves.toEqual({ ok: true, userId: 'u_other' });
+    expect(getCurrentProfileId).not.toHaveBeenCalled();
   });
 });
 

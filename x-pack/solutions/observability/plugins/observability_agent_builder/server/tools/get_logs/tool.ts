@@ -131,9 +131,9 @@ export function createGetLogsTool({
         return getAgentBuilderResourceAvailability({ core, request, logger });
       },
     },
-    handler: async (toolParams, { esClient }) => {
+    handler: async (toolParams, { esClient, request }) => {
       try {
-        const logIndexPatterns = await getLogsIndices({ core, logger });
+        const logIndexPatterns = await getLogsIndices({ core, request, logger });
 
         const startMs = parseDatemath(toolParams.start)!;
         const endMs = parseDatemath(toolParams.end, { roundUp: true })!;

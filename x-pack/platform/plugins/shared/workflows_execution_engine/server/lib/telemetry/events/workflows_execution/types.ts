@@ -65,7 +65,7 @@ export interface BaseWorkflowExecutionTelemetryParams {
    */
   templateVersion?: string;
   /**
-   * How the workflow was created from the template: install, import, or remix
+   * How the workflow was created from the template: catalog, import, or remix
    */
   templateOrigin?: WorkflowTemplateOrigin;
   /**

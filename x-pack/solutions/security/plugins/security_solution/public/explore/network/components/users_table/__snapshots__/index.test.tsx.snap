@@ -212,6 +212,7 @@ exports[`Users Table Component Rendering it renders the default Users table 1`] 
                       User
                     </span>
                     <span
+                      aria-hidden="true"
                       class="euiTableSortIcon"
                       data-euiicon-type="sortUp"
                     />
@@ -296,6 +297,7 @@ exports[`Users Table Component Rendering it renders the default Users table 1`] 
                       Document count
                     </span>
                     <span
+                      aria-hidden="true"
                       class="euiTableSortIcon euiTableSortIcon--sortable"
                       color="subdued"
                       data-euiicon-type="sortable"

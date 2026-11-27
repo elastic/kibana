@@ -33,6 +33,7 @@ export const notificationAttemptSchema = lazySchema(() =>
       creates_root: z.boolean(),
       message_ts: messageId.optional(),
       external_conversation_id: identifier.optional(),
+      workspace: identifier.optional(),
       sent_at: timestamp.optional(),
       error: z.string().max(MAX_TEXT_LENGTH).optional(),
     })
@@ -87,7 +88,7 @@ export type NotificationPhase = z.infer<typeof notificationPhaseSchema>;
 export type NotificationAttempt = z.infer<typeof notificationAttemptSchema>;
 export type NotificationOutcome = Pick<
   NotificationAttempt,
-  'message_ts' | 'external_conversation_id' | 'sent_at' | 'error'
+  'message_ts' | 'external_conversation_id' | 'workspace' | 'sent_at' | 'error'
 > & {
   status: z.infer<typeof outcomeStatusSchema>;
   channel?: string;

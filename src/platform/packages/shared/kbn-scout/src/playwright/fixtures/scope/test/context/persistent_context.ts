@@ -11,6 +11,7 @@ import * as os from 'os';
 import getPort from 'get-port';
 import type { BrowserContext } from 'playwright/test';
 import { chromium } from 'playwright/test';
+import { getBrowserEnvWithoutProxy } from '../../../../utils/browser_env';
 import { coreWorkerFixtures } from '../../worker';
 
 /**
@@ -36,11 +37,9 @@ export const persistentContextFixture = coreWorkerFixtures.extend<
     async ({ log, debuggingPort }, use) => {
       const userDataDir = os.tmpdir();
       const context = await chromium.launchPersistentContext(userDataDir, {
-        args: [
-          `--remote-debugging-port=${debuggingPort}`,
-          // Same as the Playwright config: Chromium cannot authenticate to Citadel.
-          ...(process.env.USE_CITADEL_PROXY === 'true' ? ['--no-proxy-server'] : []),
-        ],
+        args: [`--remote-debugging-port=${debuggingPort}`],
+        // Same as the Playwright config: Chromium cannot authenticate to Citadel.
+        env: getBrowserEnvWithoutProxy(),
       });
       log.serviceLoaded(`persistentContext on port [${debuggingPort}]`);
       await use(context);

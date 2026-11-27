@@ -198,7 +198,7 @@ describe('toWriteupDataset', () => {
 describe('loadWriteupDataset', () => {
   const client = { getDatasetByName: jest.fn() };
 
-  it('reads a private conversations file', async () => {
+  it('reads a private conversations file from a .json path', async () => {
     const dir = mkdtempSync(join(tmpdir(), 'writeup-'));
     const path = join(dir, 'c0.json');
     writeFileSync(
@@ -209,7 +209,7 @@ describe('loadWriteupDataset', () => {
         conversations: [toWriteupConversation('c0', exported)],
       })
     );
-    const dataset = await loadWriteupDataset(client, { examplesFile: path });
+    const dataset = await loadWriteupDataset(client, path);
     expect(dataset.name).toBe('nightshift/writeup-c0');
     expect(dataset.examples.map((e) => e.metadata.case_id)).toEqual(['c0/r2']);
   });
@@ -222,19 +222,13 @@ describe('loadWriteupDataset', () => {
       description: 'd',
       examples: [{ ...example, id: 'e1' }],
     });
-    const dataset = await loadWriteupDataset(client, { datasetName: 'nightshift/stored' });
+    const dataset = await loadWriteupDataset(client, 'nightshift/stored');
     expect(dataset.examples[0]).toMatchObject({ id: 'e1', metadata: { case_id: 'c0/r1' } });
 
     client.getDatasetByName.mockResolvedValueOnce(null);
-    await expect(loadWriteupDataset(client, { datasetName: 'missing' })).rejects.toThrow(
+    await expect(loadWriteupDataset(client, 'missing')).rejects.toThrow(
       'Writeup dataset not found: missing'
     );
-  });
-
-  it('refuses both a stored name and a file', async () => {
-    await expect(
-      loadWriteupDataset(client, { datasetName: 'a', examplesFile: 'b' })
-    ).rejects.toThrow('not both');
   });
 });
 
@@ -285,14 +279,14 @@ describe('the pinned ORCA release', () => {
     const client = {
       getDatasetByName: jest.fn().mockResolvedValue({ ...stored, id: 'not-the-pinned-id' }),
     };
-    await expect(
-      loadWriteupDataset(client, { datasetName: ORCA_WRITEUP_RELEASE.name })
-    ).rejects.toThrow('identity differs');
+    await expect(loadWriteupDataset(client, ORCA_WRITEUP_RELEASE.name)).rejects.toThrow(
+      'identity differs'
+    );
   });
 
   it('is what loads when no dataset or file is named', async () => {
     const client = { getDatasetByName: jest.fn().mockResolvedValue(null) };
-    await expect(loadWriteupDataset(client, {})).rejects.toThrow(ORCA_WRITEUP_RELEASE.name);
+    await expect(loadWriteupDataset(client, undefined)).rejects.toThrow(ORCA_WRITEUP_RELEASE.name);
     expect(client.getDatasetByName).toHaveBeenCalledWith(ORCA_WRITEUP_RELEASE.name);
   });
 });

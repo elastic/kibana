@@ -10,14 +10,24 @@
 import type { Topic } from './topic';
 
 /**
+ * Maximum `id.length` of a producer-supplied event id, in UTF-16 code units. Longer ids are
+ * rejected. One emoji outside the basic multilingual plane counts as two units, so 129 of them
+ * exceed this limit.
+ *
+ * @public
+ */
+export const PUBSUB_MAX_ID_LENGTH = 256;
+
+/**
  * The event a producer writes.
  *
  * @public
  */
 export interface PubSubEventInit<TData> {
   /**
-   * Stable, source-derived id, unique within the topic. Reuse it when retrying the same delivery
-   * so a durable bus can recognise the duplicate. Phase 1 does not deduplicate.
+   * Stable, source-derived id, unique within the topic, at most {@link PUBSUB_MAX_ID_LENGTH}
+   * UTF-16 code units. Reuse it when retrying the same delivery so a durable bus can recognise
+   * the duplicate. Phase 1 does not deduplicate.
    */
   readonly id: string;
   /**

@@ -49,7 +49,7 @@ export const ConnectAgentPanel = ({ prompt }: ConnectAgentPanelProps) => {
             <p>
               <FormattedMessage
                 id="xpack.contextEngine.aiIndexDetail.onboarding.connectAgent.description"
-                defaultMessage="Paste this prompt into Claude Code, Cursor, Codex, or another coding agent. It explains this AI index, the APIs your agent can call, and how to start storing memories and Knowledge Indicators."
+                defaultMessage="Paste this prompt into Claude Code, Cursor, Codex, or another coding agent. It explains this AI index, the APIs your agent can call, and how to start storing memories and knowledge documents."
               />
             </p>
           </EuiText>

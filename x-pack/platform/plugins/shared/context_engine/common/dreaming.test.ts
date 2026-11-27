@@ -9,7 +9,7 @@ import {
   CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
   CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID,
   CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,
-  CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
+  CONTEXT_ENGINE_TRANSCRIPT_DREAMING_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import {
   dreamingBuildsAnything,
@@ -110,7 +110,9 @@ describe('isDreamingAutomation', () => {
 
   it('matches the workflows dreaming attaches to an AI index', () => {
     expect(isDreamingAutomation(workflow(CONTEXT_ENGINE_DREAMING_WORKFLOW_ID))).toBe(true);
-    expect(isDreamingAutomation(workflow(CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID))).toBe(true);
+    expect(isDreamingAutomation(workflow(CONTEXT_ENGINE_TRANSCRIPT_DREAMING_WORKFLOW_ID))).toBe(
+      true
+    );
     expect(isDreamingAutomation(workflow(CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID))).toBe(true);
   });
 

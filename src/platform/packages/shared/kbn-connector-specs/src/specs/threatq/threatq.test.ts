@@ -286,10 +286,17 @@ describe('ThreatQ', () => {
   it.each([
     ['listIndicatorStatuses', '/indicator/statuses'],
     ['listIndicatorTypes', '/indicator/types'],
-    ['listPlugins', '/plugins'],
   ])('%s uses its documented endpoint', async (action, path) => {
     authenticatedApi().get(`/api${path}`).query({ limit: 50, offset: 0 }).reply(200, response);
     await expect(execute(action, { limit: 50, offset: 0 })).resolves.toEqual(response);
+  });
+
+  it('lists plugins without forcing a plugin sync, as the reference requires forceRefresh', async () => {
+    authenticatedApi()
+      .get('/api/plugins')
+      .query({ limit: 50, offset: 0, forceRefresh: 'N' })
+      .reply(200, response);
+    await expect(execute('listPlugins', { limit: 50, offset: 0 })).resolves.toEqual(response);
   });
 
   it('gets plugin actions and supported object types', async () => {
@@ -516,32 +523,65 @@ describe('ThreatQ', () => {
   );
 
   it.each(['searchIndicators', 'searchObjects'])(
-    '%s sends fields in the body and relationships in the query',
+    '%s sends fields in the body and no relationships, which the query routes do not take',
     async (action) => {
       authenticatedApi()
         .post('/api/indicators/query', { fields: ['id', 'value'] })
-        .query({ limit: 50, offset: 0, with: 'sources,attributes' })
+        .query({ limit: 50, offset: 0 })
         .reply(200, response);
       const input = ThreatQ.actions[action].input.parse({
         objectType: 'indicators',
         fields: ['id', 'value'],
         with: ['sources', 'attributes'],
       });
+      expect(input).not.toHaveProperty('with');
       await expect(execute(action, input)).resolves.toEqual(response);
     }
   );
 
-  it('adds tags with an array body', async () => {
+  it('adds tags with one request per tag, as the reference takes one name', async () => {
     authenticatedApi()
-      .post('/api/indicators/123/tags', [{ name: 'Elastic triage' }, { name: 'EICAR' }])
-      .reply(201, response);
+      .post('/api/indicators/123/tags', { name: 'Elastic triage' })
+      .reply(201, { total: 1, data: [{ id: 1, name: 'Elastic triage' }] })
+      .post('/api/indicators/123/tags', { name: 'EICAR' })
+      .reply(201, { total: 1, data: [{ id: 2, name: 'EICAR' }] });
     await expect(
       execute('addTags', {
         objectType: 'indicators',
         objectId: 123,
         tags: ['Elastic triage', 'EICAR'],
       })
-    ).resolves.toEqual(response);
+    ).resolves.toEqual({
+      total: 2,
+      data: [
+        { id: 1, name: 'Elastic triage' },
+        { id: 2, name: 'EICAR' },
+      ],
+    });
+  });
+
+  it('names the tags added and those left when a request fails partway through', async () => {
+    authenticatedApi()
+      .post('/api/indicators/123/tags', { name: 'Elastic triage' })
+      .reply(201, { total: 1, data: [{ id: 1, name: 'Elastic triage' }] })
+      .post('/api/indicators/123/tags', { name: 'EICAR' })
+      .reply(500, {});
+    await expect(
+      execute('addTags', {
+        objectType: 'indicators',
+        objectId: 123,
+        tags: ['Elastic triage', 'EICAR', 'Malware'],
+      })
+    ).rejects.toThrow(
+      'ThreatQ request failed (HTTP 500). Check the account permissions, input, and instance connection. Failed on tag "EICAR". Already added: "Elastic triage". Not added: "EICAR", "Malware".'
+    );
+  });
+
+  it('says that no tags were added when the first request fails', async () => {
+    authenticatedApi().post('/api/indicators/123/tags', { name: 'EICAR' }).reply(403, {});
+    await expect(
+      execute('addTags', { objectType: 'indicators', objectId: 123, tags: ['EICAR'] })
+    ).rejects.toThrow('Failed on tag "EICAR". No tags were added. Not added: "EICAR".');
   });
 
   it('creates a custom object and supplies the configured default source', async () => {

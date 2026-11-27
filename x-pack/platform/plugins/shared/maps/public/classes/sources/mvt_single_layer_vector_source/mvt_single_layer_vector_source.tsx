@@ -25,8 +25,8 @@ import {
 } from '../../../../common/constants';
 import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters';
 import type {
-  MapExtent,
   MVTFieldDescriptor,
+  MapExtent,
   TiledSingleLayerVectorSourceDescriptor,
   TooltipFeatureAction,
 } from '../../../../common/descriptor_types';
@@ -42,7 +42,10 @@ export const sourceTitle = i18n.translate(
   }
 );
 
-export class MVTSingleLayerVectorSource extends AbstractSource implements IMvtVectorSource {
+export class MVTSingleLayerVectorSource
+  extends AbstractSource<TiledSingleLayerVectorSourceDescriptor>
+  implements IMvtVectorSource
+{
   static createDescriptor({
     urlTemplate,
     layerName,
@@ -86,7 +89,9 @@ export class MVTSingleLayerVectorSource extends AbstractSource implements IMvtVe
     return false;
   }
 
-  renderSourceSettingsEditor({ onChange }: SourceEditorArgs) {
+  renderSourceSettingsEditor({
+    onChange,
+  }: SourceEditorArgs<TiledSingleLayerVectorSourceDescriptor>) {
     return (
       <UpdateSourceEditor onChange={onChange} tooltipFields={this._tooltipFields} source={this} />
     );

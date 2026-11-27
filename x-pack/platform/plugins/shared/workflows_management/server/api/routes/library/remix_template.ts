@@ -9,7 +9,11 @@ import { schema } from '@kbn/config-schema';
 import { MAX_WORKFLOW_YAML_LENGTH, WORKFLOWS_LIBRARY_ENABLED_SETTING_ID } from '@kbn/workflows';
 
 import { mapLibraryError } from './error_mapper';
-import { type LibraryService, resolveTemplateOrigin } from '../../../library';
+import {
+  type LibraryService,
+  resolveTemplateOrigin,
+  type TemplateInstallDetails,
+} from '../../../library';
 import type { RouteDependencies } from '../types';
 import { INTERNAL_API_VERSION } from '../utils/route_constants';
 import { WORKFLOW_CREATE_SECURITY } from '../utils/route_security';
@@ -45,6 +49,8 @@ export function registerRemixTemplateRoute(
         validate: { request: { params: paramsSchema, body: bodySchema } },
       },
       withAvailabilityCheck(async (context, request, response) => {
+        // The slug from the URL reaches telemetry only once resolved against the catalog.
+        const installDetails: TemplateInstallDetails = { origin: 'remix' };
         try {
           const { uiSettings } = await context.core;
           const libraryEnabled = await uiSettings.globalClient.get<boolean>(
@@ -61,6 +67,7 @@ export function registerRemixTemplateRoute(
                 origin: 'remix',
               })
             : undefined;
+          installDetails.storedOrigin = templateOrigin;
 
           // Same create path as POST /api/workflows/workflow, so schema
           // validation, space scoping, and authz apply identically.
@@ -80,9 +87,11 @@ export function registerRemixTemplateRoute(
             throw error;
           }
           audit.logWorkflowCreated(request, { id: createdWorkflow.id });
+          libraryService.telemetry.reportTemplateInstalled(installDetails, createdWorkflow);
 
           return response.ok({ body: createdWorkflow });
         } catch (error) {
+          libraryService.telemetry.reportTemplateInstallFailed(installDetails, error);
           return mapLibraryError(response, error);
         }
       })

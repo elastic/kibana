@@ -46,22 +46,33 @@ export const facetRows = (buckets: FacetBucket[], selected: readonly FilterValue
   ];
 };
 
-/** The text of one selected value, e.g. "Browser: Chrome", or "Browser: not Chrome" when excluded. */
-export const filterPillText = (label: string, { value, exclude }: FilterValue): string =>
+/**
+ * The text of the values of one filter that are all included or all excluded, e.g. "Browser:
+ * Chrome, Edge", or "NOT Browser: Chrome, Edge" when excluded, as the pills of Discover.
+ */
+export const filterPillText = ({
+  label,
+  values,
+  exclude,
+}: {
+  label: string;
+  values: readonly string[];
+  exclude: boolean;
+}): string =>
   exclude
     ? i18n.translate('xpack.digitalExperience.multiFacetFilter.excludedPill', {
-        defaultMessage: '{label}: not {value}',
-        values: { label, value },
+        defaultMessage: 'NOT {label}: {values}',
+        values: { label, values: values.join(', ') },
       })
     : i18n.translate('xpack.digitalExperience.multiFacetFilter.includedPill', {
-        defaultMessage: '{label}: {value}',
-        values: { label, value },
+        defaultMessage: '{label}: {values}',
+        values: { label, values: values.join(', ') },
       });
 
 /**
  * A filter button of an `EuiFilterGroup` that lists the values of one facet with their counts, to
  * include or exclude several of them. Each pick applies at once, and the button counts them; the
- * values themselves are shown as pills beside the filters.
+ * values themselves are shown as one pill per filter beside the filters.
  */
 export function MultiFacetFilter({
   label,
@@ -71,6 +82,7 @@ export function MultiFacetFilter({
   formatters: { formatNumber },
   isLoading,
   ebtElement,
+  note,
   'data-test-subj': dataTestSubj,
 }: {
   label: string;
@@ -81,6 +93,8 @@ export function MultiFacetFilter({
   isLoading: boolean;
   /** Names the filter in click telemetry. */
   ebtElement: string;
+  /** What the filter leaves out, e.g. the data it does not narrow, shown below the values. */
+  note?: string;
   'data-test-subj': string;
 }) {
   const { euiTheme } = useEuiTheme();
@@ -167,24 +181,31 @@ export function MultiFacetFilter({
             })
           )}
         </div>
-        {values.length > 0 && (
+        {(note !== undefined || values.length > 0) && (
           <EuiPopoverFooter paddingSize="s">
+            {note !== undefined && (
+              <EuiText size="xs" color="subdued" data-test-subj={`${dataTestSubj}Note`}>
+                {note}
+              </EuiText>
+            )}
             {isFull && <FilterLimitNote data-test-subj={`${dataTestSubj}LimitNote`} />}
-            <EuiButtonEmpty
-              size="xs"
-              flush="left"
-              iconType="cross"
-              onClick={() => onChange([])}
-              data-test-subj={`${dataTestSubj}Clear`}
-              {...getEbtProps({
-                action: DIGITAL_EXPERIENCE_EBT_ACTIONS.CLEAR_FILTERS,
-                element: ebtElement,
-              })}
-            >
-              {i18n.translate('xpack.digitalExperience.multiFacetFilter.clear', {
-                defaultMessage: 'Clear selection',
-              })}
-            </EuiButtonEmpty>
+            {values.length > 0 && (
+              <EuiButtonEmpty
+                size="xs"
+                flush="left"
+                iconType="cross"
+                onClick={() => onChange([])}
+                data-test-subj={`${dataTestSubj}Clear`}
+                {...getEbtProps({
+                  action: DIGITAL_EXPERIENCE_EBT_ACTIONS.CLEAR_FILTERS,
+                  element: ebtElement,
+                })}
+              >
+                {i18n.translate('xpack.digitalExperience.multiFacetFilter.clear', {
+                  defaultMessage: 'Clear selection',
+                })}
+              </EuiButtonEmpty>
+            )}
           </EuiPopoverFooter>
         )}
       </div>

@@ -54,7 +54,7 @@
   "sources": {
     "v3": {
       "apiVersion": "v3",
-      "fetchedAt": "2026-10-07T20:20:44.886Z",
+      "fetchedAt": "2026-11-23T11:10:30.684Z",
       "format": "discovery",
       "url": "https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"
     }

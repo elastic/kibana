@@ -96,7 +96,7 @@ x-codeSamples:
   - lang: curl
     source: |
       curl \
-        -X PUT "https://${KIBANA_URL}/api/context_engine/ai_index/customer_support" \
+        -X PUT "${KIBANA_URL}/api/context_engine/ai_index/customer_support" \
         -H "Authorization: ApiKey ${API_KEY}" \
         -H "kbn-xsrf: true" \
         -H "Content-Type: application/json" \

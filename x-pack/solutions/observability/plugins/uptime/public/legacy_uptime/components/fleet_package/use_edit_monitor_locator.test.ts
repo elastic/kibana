@@ -55,9 +55,7 @@ describe('useEditMonitorLocator', () => {
   const httpGet = jest.fn();
 
   const renderLocator = (monitorSpaces: string[]) =>
-    renderHook(() =>
-      useEditMonitorLocator({ configId: 'config-1', monitorSpaces, packagePolicyId: 'policy-1' })
-    );
+    renderHook(() => useEditMonitorLocator({ configId: 'config-1', monitorSpaces }));
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -78,7 +76,6 @@ describe('useEditMonitorLocator', () => {
     await waitFor(() =>
       expect(getUrl).toHaveBeenCalledWith({
         configId: 'config-1',
-        packagePolicyId: 'policy-1',
         spaceId: 'team-a',
       })
     );
@@ -98,7 +95,7 @@ describe('useEditMonitorLocator', () => {
     renderLocator(['default', 'fleet-admin']);
 
     await waitFor(() => expect(getUrl).toHaveBeenCalled());
-    expect(getUrl).toHaveBeenCalledWith({ configId: 'config-1', packagePolicyId: 'policy-1' });
+    expect(getUrl).toHaveBeenCalledWith({ configId: 'config-1' });
     expect(httpGet).not.toHaveBeenCalled();
   });
 

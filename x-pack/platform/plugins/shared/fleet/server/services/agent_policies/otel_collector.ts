@@ -32,6 +32,7 @@ import {
 import { FleetError } from '../../errors';
 import { getOutputIdForAgentPolicy } from '../../../common/services/output_helpers';
 import { pkgToPkgKey } from '../epm/registry';
+import { getOtlpAuthHeaders } from '../outputs/otlp_auth';
 import { hasDynamicSignalTypes } from '../../../common/services';
 
 import { buildOtelEsExporterConfig, parseYamlRecord } from './otel_output_settings';
@@ -57,6 +58,10 @@ import { buildOtelEsExporterConfig, parseYamlRecord } from './otel_output_settin
 // Recursively removes null and undefined values from a plain object so that
 // SO-layer cleanup sentinels (written when switching OTLP protocols) never
 // reach compiled collector config where the strict decoder would reject them.
+// A `null` OTLP `sending_queue` or `batch` is left out too, so the exporter uses its
+// defaults. Batching turned off therefore relies on the exporterhelper not batching by
+// default, which only holds while the `pkg.exporterhelper.queueBatchEnabled` feature
+// gate is off: once it is on by default, a left-out batch enables batching.
 const deepStripNulls = (obj: Record<string, unknown>): Record<string, unknown> =>
   Object.fromEntries(
     Object.entries(obj)
@@ -846,11 +851,25 @@ function generateOtelcolExporter(
       const exporterID =
         protocol === otlpProtocol.Grpc ? `otlp/${outputID}` : `otlphttp/${outputID}`;
       const tlsSecrets = dataOutput.secrets?.otlp_exporter?.tls;
+      // the credential is a secret reference in the header value, Fleet Server replaces it
+      const authHeaders = getOtlpAuthHeaders(
+        dataOutput.auth,
+        dataOutput.secrets?.auth?.credential,
+        dataOutput.otlp_exporter
+      );
       return {
         extensions: {},
         exporters: {
           [exporterID]: {
             ...exporterConfig,
+            ...(authHeaders
+              ? {
+                  headers: {
+                    ...(exporterConfig.headers as Record<string, string> | undefined),
+                    ...authHeaders,
+                  },
+                }
+              : {}),
             ...(tlsSecrets ? { secrets: { tls: tlsSecrets } } : {}),
           },
         },

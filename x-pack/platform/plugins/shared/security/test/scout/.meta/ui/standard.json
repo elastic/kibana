@@ -1,5 +1,5 @@
 {
-  "sha1": "aa9e5ead9accfc4f57aab1d66dd86e343e3b6bb5",
+  "sha1": "9cbf99608b8b9a35eed5b73f470e838c72637d5a",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -285,8 +285,8 @@
       }
     },
     {
-      "id": "b565e04e3725128-e8501ae33568cc4",
-      "title": "Security - Login Page displays message acknowledging logout",
+      "id": "b565e04e3725128-5eba3300334394d",
+      "title": "Security - Login Page loads only plugin entries selected for the login page",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -299,6 +299,20 @@
       }
     },
     {
+      "id": "b565e04e3725128-e8501ae33568cc4",
+      "title": "Security - Login Page displays message acknowledging logout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/login.spec.ts",
+        "line": 56,
+        "column": 11
+      }
+    },
+    {
       "id": "b565e04e3725128-14215394dca17ca",
       "title": "Security - Login Page logging out of a non-default space redirects to the root login page",
       "expectedStatus": "passed",
@@ -308,8 +322,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/login.spec.ts",
-        "line": 30,
-        "column": 5
+        "line": 72,
+        "column": 12
       }
     },
     {
@@ -322,8 +336,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/login.spec.ts",
-        "line": 49,
-        "column": 58
+        "line": 95,
+        "column": 11
       }
     },
     {
@@ -336,8 +350,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/login.spec.ts",
-        "line": 54,
-        "column": 13
+        "line": 100,
+        "column": 9
       }
     },
     {
@@ -350,8 +364,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/login.spec.ts",
-        "line": 66,
-        "column": 23
+        "line": 112,
+        "column": 5
       }
     },
     {
@@ -364,8 +378,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/login.spec.ts",
-        "line": 78,
-        "column": 65
+        "line": 126,
+        "column": 8
       }
     },
     {
