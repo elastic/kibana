@@ -944,7 +944,8 @@ apiTest.describe.skip('Automated resolution integration tests', { tag: ENTITY_ST
   apiTest(
     'SID bridge links a local entity created by extraction to Active Directory',
     async ({ apiClient, esClient }) => {
-      await startEntityTypes(apiClient, defaultHeaders, ['user']);
+      const startResponse = await startEntityTypes(apiClient, defaultHeaders, ['user']);
+      expect(startResponse.statusCode).toBe(200);
       // Own stream/template, name outside logs-entity-store-tests-* so this
       // cannot overlap history_snapshot's default template at the same priority
       // (including a leftover wildcard from an older run).
@@ -984,7 +985,9 @@ apiTest.describe.skip('Automated resolution integration tests', { tag: ENTITY_ST
           toDateISO,
           'single'
         );
+        // The route answers 200 even when extraction fails, so check the summary too.
         expect(extraction.statusCode).toBe(200);
+        expect(extraction.body).toMatchObject({ success: true });
 
         let extractedSource:
           | { entity?: { namespace?: string }; user?: { id?: unknown } }
