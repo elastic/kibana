@@ -20,11 +20,13 @@ function styleChunksForClass(className: string): string {
     .join('}');
 }
 
-/** Emotion may emit the media query before or after the selector; take the active-mode block. */
+/** Emotion may emit multiple media query blocks; take the winning (last) one. */
 function forcedColorsBlock(styles: string): string {
-  const match = styles.match(/@media\s*\(forced-colors:\s*active\)[^{]*\{([\s\S]*?)(?:\}|$)/);
-  expect(match?.[1]).toBeDefined();
-  return match![1];
+  const matches = [
+    ...styles.matchAll(/@media\s*\(forced-colors:\s*active\)[^{]*\{([\s\S]*?)(?:\}|$)/g),
+  ];
+  expect(matches.length).toBeGreaterThan(0);
+  return matches[matches.length - 1][1];
 }
 
 describe('AiGradientBadge', () => {
