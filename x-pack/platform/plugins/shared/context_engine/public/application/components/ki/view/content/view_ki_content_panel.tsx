@@ -27,7 +27,7 @@ export const ViewKiContentPanel = ({ content }: ViewKiContentPanelProps) => {
       {hasContent ? (
         <div data-test-subj="contextViewKiContent">
           <div data-test-subj="contextViewKiMarkdownRendered">
-            <EuiMarkdownFormat textSize="m">{content}</EuiMarkdownFormat>
+            <EuiMarkdownFormat textSize="s">{content}</EuiMarkdownFormat>
           </div>
         </div>
       ) : (
