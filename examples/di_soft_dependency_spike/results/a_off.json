@@ -1,0 +1,9 @@
+{
+  "spikeOptA": {"statusCode":404,"error":"Not Found","message":"Not Found"},
+  "spikeOptB": {"id":"spikeOptB","setup":{"lookup":"absent","singletonInjected":"absent"},"start":{"lookup":"absent","singletonInjected":"absent"},"deferredFromSetup":"absent","request":{"lookup":"absent","singletonInjected":"absent"}},
+  "spikeRegA": {"statusCode":404,"error":"Not Found","message":"Not Found"},
+  "spikeRegB": {"id":"spikeRegB","setup":{"visibleContributions":[],"registry":[]},"start":{"visibleContributions":[],"registry":[]},"request":{"visibleContributions":[],"registry":[]}},
+  "spikeRtA": {"statusCode":404,"error":"Not Found","message":"Not Found"},
+  "spikeRtB": {"id":"spikeRtB","setup":{"fromA":"pending"},"start":{"fromA":"pending"},"request":{"fromA":"absent"}},
+  "status": "available"
+}

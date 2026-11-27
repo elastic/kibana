@@ -1,0 +1,9 @@
+{
+  "spikeOptA": {"id":"spikeOptA","setup":{"lookup":"hello from spikeOptB","singletonInjected":"hello from spikeOptB"},"start":{"lookup":"hello from spikeOptB","singletonInjected":"hello from spikeOptB"},"deferredFromSetup":"hello from spikeOptB","request":{"lookup":"hello from spikeOptB","singletonInjected":"hello from spikeOptB"}},
+  "spikeOptB": {"id":"spikeOptB","setup":{"lookup":"absent","singletonInjected":"absent"},"start":{"lookup":"hello from spikeOptA","singletonInjected":"absent"},"deferredFromSetup":"hello from spikeOptA","request":{"lookup":"hello from spikeOptA","singletonInjected":"absent"}},
+  "spikeRegA": {"id":"spikeRegA","setup":{"visibleContributions":["widget contributed by spikeRegB"],"registry":[]},"start":{"visibleContributions":["widget contributed by spikeRegB"],"registry":["widget contributed by spikeRegB"]},"request":{"visibleContributions":["widget contributed by spikeRegB"],"registry":["widget contributed by spikeRegB"]}},
+  "spikeRegB": {"id":"spikeRegB","setup":{"visibleContributions":[],"registry":[]},"start":{"visibleContributions":["widget contributed by spikeRegA"],"registry":["widget contributed by spikeRegA"]},"request":{"visibleContributions":["widget contributed by spikeRegA"],"registry":["widget contributed by spikeRegA"]}},
+  "spikeRtA": {"id":"spikeRtA","setup":{"fromB":"pending"},"start":{"fromB":"pending"},"request":{"fromB":"hello from spikeRtB start contract"}},
+  "spikeRtB": {"id":"spikeRtB","setup":{"fromA":"pending"},"start":{"fromA":"pending"},"request":{"fromA":"hello from spikeRtA start contract"}},
+  "status": "available"
+}
