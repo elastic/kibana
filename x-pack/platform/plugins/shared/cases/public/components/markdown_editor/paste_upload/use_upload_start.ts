@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { type FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { useEffect } from 'react';
+import type { MarkdownValueControl } from '../types';
 import { type PasteUploadState, type Action, UploadPhase, ActionType } from './types';
 
 export function useUploadStart(
   state: PasteUploadState,
   dispatch: React.Dispatch<Action>,
   textarea: HTMLTextAreaElement | null,
-  field: FieldHook<string>
+  field: MarkdownValueControl
 ) {
   // Handle uploading state
   useEffect(() => {

@@ -7,6 +7,7 @@
 
 import type { IconType } from '@elastic/eui';
 import type React from 'react';
+import type { z } from '@kbn/zod/v4';
 
 import type { ConnectorTypeFields } from '../../../common/types/domain';
 import type { CaseActionConnector } from '../types';
@@ -24,6 +25,16 @@ export interface CaseConnector<UIProps = unknown> {
   previewComponent: React.LazyExoticComponent<
     React.ComponentType<ConnectorFieldsPreviewProps<UIProps>>
   > | null;
+  /**
+   * Validates the connector's `fields` value inside a react-hook-form parent form (see
+   * `connector_fields_contract.ts`). Connectors without one are not validated by the parent.
+   */
+  fieldsSchema?: z.ZodType;
+  /**
+   * Initial `fields` value. Required for every key a `fieldsSchema` validates, otherwise errors land on
+   * `fields` instead of on the individual field. `null` when omitted.
+   */
+  defaultFields?: Record<string, unknown>;
 }
 
 export interface CaseConnectorsRegistry {
