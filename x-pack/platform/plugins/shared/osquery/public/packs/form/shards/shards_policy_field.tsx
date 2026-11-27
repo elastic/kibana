@@ -9,7 +9,6 @@ import { useController } from 'react-hook-form';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useAgentPolicies } from '../../../agent_policies';
 import type { ShardsFormReturn } from './shards_form';
 
 interface ShardsPolicyFieldComponent {
@@ -27,8 +26,6 @@ const ShardsPolicyFieldComponent = ({
   hideLabel,
   options,
 }: ShardsPolicyFieldComponent) => {
-  const { data: { agentPoliciesById } = {} } = useAgentPolicies();
-
   const missingValueError = i18n.translate(
     'xpack.osquery.pack.form.shardsPolicyFieldMissingErrorMessage',
     {
@@ -66,11 +63,12 @@ const ShardsPolicyFieldComponent = ({
   );
 
   useEffect(() => {
-    const foundPolicy = agentPoliciesById?.[value.key];
-    if (value && foundPolicy) {
-      setSelected([{ label: value.label || foundPolicy.name, value: value.key }]);
-    }
-  }, [agentPoliciesById, value]);
+    // Fall back to the key so a deleted policy (or a row converted before the
+    // policy list loaded) still shows a selection instead of an empty combobox.
+    setSelected(
+      value?.key ? [{ ...value, label: value.label || value.key, value: value.key }] : []
+    );
+  }, [value]);
 
   const singleSelectionConfig = useMemo(() => ({ asPlainText: true }), []);
 

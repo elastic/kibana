@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ElasticsearchClient } from '@kbn/core/server';
 import {
   createTestServers,
   createRootWithCorePlugins,
@@ -33,7 +34,21 @@ async function waitForLicense(root: ReturnType<typeof createRootWithCorePlugins>
   throw new Error(`Timed out waiting for license to become available (last status ${lastStatus})`);
 }
 
-export async function setupTestServers(settings = {}) {
+type TestCoreSetup = Awaited<ReturnType<ReturnType<typeof createRootWithCorePlugins>['setup']>>;
+
+interface SetupTestServersOptions {
+  /** Runs after Elasticsearch starts and before Kibana starts. */
+  beforeKibanaStart?: (esClient: ElasticsearchClient) => Promise<void>;
+  /** `subscribe` throws once `start` begins, so a real consumer has to be attached here. */
+  beforeStart?: (coreSetup: TestCoreSetup) => void;
+  /** Starts Kibana in dev mode. Some config keys, such as xpack.actions.catalog.enabled, need it. */
+  dev?: boolean;
+}
+
+export async function setupTestServers(
+  settings = {},
+  { beforeKibanaStart, beforeStart, dev = false }: SetupTestServersOptions = {}
+) {
   const { startES } = createTestServers({
     adjustTimeout: (t) => jest.setTimeout(t),
     settings: {
@@ -45,11 +60,13 @@ export async function setupTestServers(settings = {}) {
 
   const esServer = await startES();
 
-  const root = createRootWithCorePlugins(settings, { oss: false });
+  const root = createRootWithCorePlugins(settings, { oss: false, dev });
 
   try {
+    await beforeKibanaStart?.(esServer.es.getClient());
     await root.preboot();
     const coreSetup = await root.setup();
+    beforeStart?.(coreSetup);
     const coreStart = await root.start();
 
     await waitForLicense(root);

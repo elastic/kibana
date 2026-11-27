@@ -77,12 +77,20 @@ const useSettings = ({ settingsKeys }: { settingsKeys: string[] }) => {
 
   const {
     fields,
+    isLoading,
+    loadError,
+    retry,
     unsavedChanges,
     handleFieldChange,
     cleanUnsavedChanges,
     saveAll: saveAllSettings,
     isSaving,
-  } = useEditableSettings({ settingsKeys, settingsClient: settings.client });
+  } = useEditableSettings({
+    settingsKeys,
+    settingsClient: settings.client,
+    metadataClient: settings.metadata,
+    scope: 'namespace',
+  });
 
   // Custom validation errors from external validators
   const [customValidationErrors, setCustomValidationErrors] = React.useState<ValidationError[]>([]);
@@ -128,6 +136,9 @@ const useSettings = ({ settingsKeys }: { settingsKeys: string[] }) => {
 
   return {
     fields,
+    isLoading,
+    loadError,
+    retry,
     unsavedChanges,
     handleFieldChange,
     saveAll,

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { usePageReady } from '@kbn/ebt-tools/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
+import { useStatusSignal } from '@kbn/agentic-investigations-plugin/public';
 import { NIGHTSHIFT_UI_PRIVILEGES } from '@kbn/nightshift-shared';
 import React from 'react';
 import { MemoryRouter, useLocation } from 'react-router-dom';
@@ -21,6 +22,9 @@ import { useKibana } from '../../hooks/use_kibana';
 import { useDetectionSetupBanner } from './use_detection_setup_banner';
 
 jest.mock('../../data/investigations/use_investigation_sections');
+jest.mock('@kbn/agentic-investigations-plugin/public', () => ({
+  useStatusSignal: jest.fn(),
+}));
 jest.mock('../../hooks/use_kibana');
 jest.mock('@kbn/ebt-tools/react');
 jest.mock('../../components/entities/investigation/use_investigation_assignees', () => ({
@@ -135,6 +139,7 @@ function setSections({
   hasActiveInvestigations = false,
   activeInvestigationCount,
   isInitialLoading = false,
+  isOpenInitialLoading = isInitialLoading,
   isFetching = false,
   areSeverityCountsLoading = false,
   hasSeverityCountsError = false,
@@ -143,6 +148,7 @@ function setSections({
   hasActiveInvestigations?: boolean;
   activeInvestigationCount?: number;
   isInitialLoading?: boolean;
+  isOpenInitialLoading?: boolean;
   isFetching?: boolean;
   areSeverityCountsLoading?: boolean;
   hasSeverityCountsError?: boolean;
@@ -158,6 +164,7 @@ function setSections({
   };
   const resolvedActiveCount =
     activeInvestigationCount ?? (hasActiveInvestigations ? sectionTotal('in-progress') : 0);
+  const openSections = sections.filter((section) => section.id !== 'closed');
   const totalCount = sections.reduce((sum, section) => sum + section.total, 0);
   mockUseInvestigationSections.mockReturnValue({
     sections,
@@ -171,9 +178,11 @@ function setSections({
     hasActiveInvestigations: hasActiveInvestigations || resolvedActiveCount > 0,
     activeInvestigationCount: resolvedActiveCount,
     isInitialLoading,
+    isOpenInitialLoading,
     isFetching,
     totalCount,
-    loadedCount: sections.reduce((sum, section) => sum + section.investigations.length, 0),
+    openTotalCount: openSections.reduce((sum, section) => sum + section.total, 0),
+    loadedCount: openSections.reduce((sum, section) => sum + section.investigations.length, 0),
     refetchAll,
   });
 }
@@ -200,11 +209,13 @@ function LocationProbe(): React.ReactElement {
 const queryClient = new QueryClient();
 const invalidateQueries = jest.spyOn(queryClient, 'invalidateQueries');
 
-const QueryWrapper = ({ children }: { children: React.ReactNode }) => (
-  <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-);
-
-function renderApp({ initialEntries = ['/'] }: { initialEntries?: string[] } = {}) {
+function renderApp({
+  initialEntries = ['/'],
+  client = queryClient,
+}: {
+  initialEntries?: string[];
+  client?: QueryClient;
+} = {}) {
   return render(
     <I18nProvider>
       <MemoryRouter initialEntries={initialEntries}>
@@ -212,7 +223,11 @@ function renderApp({ initialEntries = ['/'] }: { initialEntries?: string[] } = {
         <LocationProbe />
       </MemoryRouter>
     </I18nProvider>,
-    { wrapper: QueryWrapper }
+    {
+      wrapper: ({ children }) => (
+        <QueryClientProvider client={client}>{children}</QueryClientProvider>
+      ),
+    }
   );
 }
 
@@ -542,7 +557,7 @@ describe('NightshiftApp', () => {
         jest.advanceTimersByTime(300);
       });
       expect(screen.getByTestId('nightshiftInvestigationsEmpty')).toHaveTextContent(
-        'No open investigations found'
+        'No investigations found'
       );
 
       const searchInput = screen.getByTestId('nightshiftInvestigationsSearchInput');
@@ -896,5 +911,395 @@ describe('NightshiftApp', () => {
       })
     );
     expect(JSON.stringify(reportEvent.mock.calls)).not.toContain('checkout');
+  });
+
+  describe('Closed investigations with the section queries', () => {
+    interface ListQuery {
+      status?: string;
+      severity?: string[];
+      in_progress?: boolean;
+      query?: string;
+      updated_after?: string;
+      updated_before?: string;
+      sort_field?: 'created_at' | 'updated_at';
+      page?: number;
+      per_page?: number;
+    }
+
+    let records: InvestigationSummary[];
+    let client: QueryClient;
+    let closedRequestFails: boolean;
+    let closedRequestPending: boolean;
+
+    beforeEach(() => {
+      window.localStorage.clear();
+      client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+      records = [];
+      closedRequestFails = false;
+      closedRequestPending = false;
+      mockUseInvestigationSections.mockImplementation(
+        jest.requireActual('../../data/investigations/use_investigation_sections')
+          .useInvestigationSections
+      );
+      const httpGet = jest.fn(async (url: string, { query }: { query: ListQuery }) => {
+        if (closedRequestPending && query.status === 'closed') {
+          return new Promise(() => {});
+        }
+        if (closedRequestFails && query.status === 'closed') {
+          throw Object.assign(new Error('Closed investigations unavailable'), {
+            request: {},
+            response: { status: 403 },
+          });
+        }
+        const matching = records.filter(
+          (item) =>
+            item.metadata.status === (query.status ?? 'open') &&
+            item.in_progress === query.in_progress &&
+            (!query.severity || query.severity.includes(item.metadata.severity ?? 'none')) &&
+            (!query.query || item.title.toLowerCase().includes(query.query.toLowerCase())) &&
+            (!query.updated_after || item.updated_at >= query.updated_after) &&
+            (!query.updated_before || item.updated_at <= query.updated_before)
+        );
+        if (url.endsWith('_severity_counts')) {
+          return Object.fromEntries(
+            ['critical', 'high', 'medium', 'low'].map((severity) => [
+              severity,
+              matching.filter(({ metadata }) => metadata.severity === severity).length,
+            ])
+          );
+        }
+        const sortField = query.sort_field ?? 'created_at';
+        matching.sort((left, right) => right[sortField].localeCompare(left[sortField]));
+        const page = query.page ?? 1;
+        const perPage = query.per_page ?? 20;
+        return {
+          results: matching.slice((page - 1) * perPage, page * perPage),
+          pagination: { page, per_page: perPage, total: matching.length },
+        };
+      });
+      mockUseKibana.mockReturnValue({
+        services: {
+          ...mockUseKibana().services,
+          http: { basePath: { get: () => '' }, get: httpGet },
+        },
+      });
+    });
+
+    afterEach(() => client.clear());
+
+    const fixedWindowUrl = '/?rangeFrom=2026-09-10T00:00:00.000Z&rangeTo=2026-09-12T00:00:00.000Z';
+    const closedToggle = () => screen.getByTestId('nightshiftInvestigationSectionToggle-closed');
+    const closedSection = () => screen.getByRole('region', { name: 'Closed' });
+    const bumpStatus = () => {
+      // The flyout persists status on its own QueryClient, then notifies the landing page.
+      const onBump = jest.mocked(useStatusSignal).mock.calls.at(-1)?.[0];
+      if (!onBump) {
+        throw new Error('Landing page is not subscribed to status changes');
+      }
+      act(() => onBump());
+    };
+
+    it('moves finished work to Closed and back with open-only counts, retaining a closed-only page', async () => {
+      records = [criticalInvestigation];
+      renderApp({ client, initialEntries: [fixedWindowUrl] });
+
+      await screen.findByText('1 investigation needs you');
+      expect(screen.getByRole('region', { name: 'Critical' })).toHaveTextContent(
+        'Checkout is down'
+      );
+
+      records = records.map((item) => ({
+        ...item,
+        metadata: { ...item.metadata, status: 'closed' },
+      }));
+      bumpStatus();
+
+      await waitFor(() => {
+        expect(screen.queryByRole('region', { name: 'Critical' })).not.toBeInTheDocument();
+        expect(screen.getByText('Nothing urgent so far')).toBeInTheDocument();
+        expect(screen.getByTestId('nightshiftInvestigationSectionCount-closed')).toHaveTextContent(
+          '1'
+        );
+      });
+      expect(screen.getByTestId('nightshiftSeverityTileCount-critical')).toHaveTextContent('0');
+      expect(screen.getByTestId('nightshiftInvestigationsSearchInput')).toBeInTheDocument();
+      expect(screen.queryByTestId('nightshiftInvestigationsEmpty')).not.toBeInTheDocument();
+      expect(closedToggle()).toHaveAttribute('aria-expanded', 'false');
+      fireEvent.click(closedToggle());
+      expect(
+        within(closedSection()).getByRole('button', { name: 'Checkout is down' })
+      ).toBeVisible();
+
+      records = records.map((item) => ({
+        ...item,
+        metadata: { ...item.metadata, status: 'open' },
+      }));
+      bumpStatus();
+
+      await waitFor(() => {
+        expect(screen.getByText('1 investigation needs you')).toBeInTheDocument();
+        expect(screen.getByRole('region', { name: 'Critical' })).toHaveTextContent(
+          'Checkout is down'
+        );
+        expect(screen.queryByRole('region', { name: 'Closed' })).not.toBeInTheDocument();
+      });
+    });
+
+    it('searches Closed in the updated-time window and keeps its total when loading more', async () => {
+      records = Array.from({ length: 4 }, (_, index) =>
+        makeInvestigation(`closed-${index}`, `Checkout ${index}`, {
+          updated_at: `2026-11-09T0${index + 1}:00:00.000Z`,
+          metadata: { status: 'closed', severity: index % 2 === 0 ? 'critical' : 'high' },
+        })
+      );
+      records.push(
+        makeInvestigation('old', 'Checkout old', {
+          updated_at: '2026-11-07T00:00:00.000Z',
+          metadata: { status: 'closed' },
+        }),
+        makeInvestigation('new', 'Checkout new', {
+          updated_at: '2026-11-11T00:00:00.000Z',
+          metadata: { status: 'closed' },
+        }),
+        makeInvestigation('other', 'Unrelated', {
+          updated_at: '2026-11-09T00:00:00.000Z',
+          metadata: { status: 'closed' },
+        })
+      );
+      renderApp({
+        client,
+        initialEntries: [
+          '/?q=checkout&rangeFrom=2026-11-08T00:00:00.000Z&rangeTo=2026-11-10T00:00:00.000Z',
+        ],
+      });
+
+      await waitFor(() =>
+        expect(screen.getByTestId('nightshiftInvestigationSectionCount-closed')).toHaveTextContent(
+          '4'
+        )
+      );
+      expect(screen.getByTestId('nightshiftInvestigationsSearchInput')).toHaveValue('checkout');
+      expect(screen.queryByTestId('nightshiftInvestigationsEmpty')).not.toBeInTheDocument();
+      fireEvent.click(closedToggle());
+      expect(within(closedSection()).getAllByRole('listitem')).toHaveLength(3);
+      expect(mockUsePageReady).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          customMetrics: expect.objectContaining({ value1: 0, value2: 0 }),
+        })
+      );
+      expect(
+        within(closedSection())
+          .getAllByRole('listitem')
+          .map((item) => item.textContent)
+      ).toEqual(['Checkout 3', 'Checkout 2', 'Checkout 1']);
+      fireEvent.click(screen.getByRole('button', { name: 'Show 1 more Closed investigations' }));
+
+      await waitFor(() => expect(within(closedSection()).getAllByRole('listitem')).toHaveLength(4));
+      expect(screen.getByTestId('nightshiftInvestigationSectionCount-closed')).toHaveTextContent(
+        '4'
+      );
+      expect(screen.queryByRole('button', { name: /Show .* more Closed/ })).not.toBeInTheDocument();
+      expect(reportEvent).toHaveBeenCalledWith('nightshift_investigations_searched', {
+        query_length: 8,
+        result_count: 4,
+      });
+    });
+
+    it('exposes a failed Closed request while collapsed, without a false zero, and retries it', async () => {
+      closedRequestFails = true;
+      records = [
+        {
+          ...criticalInvestigation,
+          metadata: { ...criticalInvestigation.metadata, status: 'closed' },
+        },
+      ];
+      renderApp({ client, initialEntries: [fixedWindowUrl] });
+
+      const retry = await screen.findByRole('button', {
+        name: 'Retry loading Closed investigations',
+      });
+      expect(retry).toBeVisible();
+      expect(closedToggle()).toHaveAttribute('aria-expanded', 'false');
+      expect(
+        screen.queryByTestId('nightshiftInvestigationSectionCount-closed')
+      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('nightshiftInvestigationsEmpty')).not.toBeInTheDocument();
+      closedRequestFails = false;
+      fireEvent.click(retry);
+
+      await waitFor(() =>
+        expect(screen.getByTestId('nightshiftInvestigationSectionCount-closed')).toHaveTextContent(
+          '1'
+        )
+      );
+      expect(
+        screen.queryByRole('button', { name: 'Retry loading Closed investigations' })
+      ).not.toBeInTheDocument();
+      expect(closedToggle()).toHaveAttribute('aria-expanded', 'false');
+      expect(screen.getByTestId('nightshiftInvestigationsSearchInput')).toBeInTheDocument();
+    });
+
+    it('excludes Closed rows from homepage-viewed and open page-ready metrics', async () => {
+      records = [
+        criticalInvestigation,
+        makeInvestigation('open-unrated', 'Open unrated'),
+        makeInvestigation('closed-critical', 'Closed critical', {
+          metadata: { status: 'closed', severity: 'critical' },
+        }),
+        makeInvestigation('closed-unrated', 'Closed unrated', {
+          metadata: { status: 'closed' },
+        }),
+      ];
+      renderApp({ client, initialEntries: [fixedWindowUrl] });
+
+      await waitFor(() =>
+        expect(screen.getByTestId('nightshiftInvestigationSectionCount-closed')).toHaveTextContent(
+          '2'
+        )
+      );
+      await waitFor(() =>
+        expect(reportEvent).toHaveBeenCalledWith('nightshift_homepage_viewed', {
+          investigation_count: 2,
+          critical_count: 1,
+          high_count: 0,
+          medium_count: 0,
+          low_count: 0,
+          unrated_count: 1,
+        })
+      );
+      expect(mockUsePageReady).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          isReady: true,
+          customMetrics: expect.objectContaining({
+            key1: 'investigation_count',
+            value1: 2,
+            key2: 'investigation_total',
+            value2: 2,
+            key3: 'active_investigation_count',
+            value3: 0,
+            key4: 'unrated_investigation_count',
+            value4: 1,
+          }),
+        })
+      );
+    });
+
+    it('renders header and severity tiles once open data loads even while Closed is still loading', async () => {
+      closedRequestPending = true;
+      records = [criticalInvestigation];
+      renderApp({ client, initialEntries: [fixedWindowUrl] });
+
+      await screen.findByText('1 investigation needs you');
+      expect(screen.getByTestId('nightshiftSeverityTileCount-critical')).toHaveTextContent('1');
+      expect(
+        screen.getByTestId('nightshiftInvestigationSectionSkeleton-closed')
+      ).toBeInTheDocument();
+    });
+
+    it('withholds search telemetry while Closed fails and reports the full count after retry', async () => {
+      closedRequestFails = true;
+      records = [
+        criticalInvestigation,
+        makeInvestigation('closed-checkout', 'Checkout closed', {
+          metadata: { status: 'closed' },
+        }),
+      ];
+      renderApp({
+        client,
+        initialEntries: [
+          '/?q=checkout&rangeFrom=2026-09-10T00:00:00.000Z&rangeTo=2026-09-12T00:00:00.000Z',
+        ],
+      });
+
+      const retry = await screen.findByRole('button', {
+        name: 'Retry loading Closed investigations',
+      });
+      expect(screen.getByRole('region', { name: 'Critical' })).toHaveTextContent(
+        'Checkout is down'
+      );
+      expect(reportEvent).not.toHaveBeenCalledWith(
+        'nightshift_investigations_searched',
+        expect.anything()
+      );
+
+      closedRequestFails = false;
+      fireEvent.click(retry);
+
+      await waitFor(() =>
+        expect(screen.getByTestId('nightshiftInvestigationSectionCount-closed')).toHaveTextContent(
+          '1'
+        )
+      );
+      await waitFor(() =>
+        expect(reportEvent).toHaveBeenCalledWith('nightshift_investigations_searched', {
+          query_length: 8,
+          result_count: 2,
+        })
+      );
+      expect(
+        reportEvent.mock.calls.filter(
+          ([eventType]) => eventType === 'nightshift_investigations_searched'
+        )
+      ).toHaveLength(1);
+    });
+
+    it('reports a repeated search again after an intervening search is held back by a failed section', async () => {
+      jest.useFakeTimers();
+      try {
+        records = [
+          criticalInvestigation,
+          makeInvestigation('closed-checkout', 'Checkout closed', {
+            metadata: { status: 'closed' },
+          }),
+        ];
+        renderApp({
+          client,
+          initialEntries: [
+            '/?q=checkout&rangeFrom=2026-09-10T00:00:00.000Z&rangeTo=2026-09-12T00:00:00.000Z',
+          ],
+        });
+
+        const searchedCalls = () =>
+          reportEvent.mock.calls.filter(
+            ([eventType]) => eventType === 'nightshift_investigations_searched'
+          );
+
+        await waitFor(() =>
+          expect(searchedCalls()).toEqual([
+            ['nightshift_investigations_searched', { query_length: 8, result_count: 2 }],
+          ])
+        );
+
+        closedRequestFails = true;
+        fireEvent.change(screen.getByTestId('nightshiftInvestigationsSearchInput'), {
+          target: { value: 'latency' },
+        });
+        act(() => {
+          jest.advanceTimersByTime(300);
+        });
+
+        await screen.findByRole('button', {
+          name: 'Retry loading Closed investigations',
+        });
+        expect(searchedCalls()).toHaveLength(1);
+
+        closedRequestFails = false;
+        fireEvent.change(screen.getByTestId('nightshiftInvestigationsSearchInput'), {
+          target: { value: 'checkout' },
+        });
+        act(() => {
+          jest.advanceTimersByTime(300);
+        });
+
+        await waitFor(() =>
+          expect(searchedCalls()).toEqual([
+            ['nightshift_investigations_searched', { query_length: 8, result_count: 2 }],
+            ['nightshift_investigations_searched', { query_length: 8, result_count: 2 }],
+          ])
+        );
+      } finally {
+        jest.useRealTimers();
+      }
+    });
   });
 });

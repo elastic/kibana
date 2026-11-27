@@ -738,6 +738,9 @@ describe('sessions routes', () => {
           browser: 'Chrome',
           withJsErrors: true,
           withFailedRequests: false,
+          withFrustration: true,
+          frustrationTarget: '#buy',
+          frustrationPage: '/cart',
           minDurationMs: 10_000,
           sortField: 'start_time',
           sortDirection: 'desc',
@@ -761,6 +764,9 @@ describe('sessions routes', () => {
       filters: {
         withJsErrors: true,
         withFailedRequests: false,
+        withFrustration: true,
+        frustrationTarget: '#buy',
+        frustrationPage: '/cart',
         minDurationMs: 10_000,
         maxDurationMs: undefined,
       },
@@ -837,6 +843,29 @@ describe('sessions routes', () => {
       ).toBe(false);
     });
 
+    it('parses the frustration filters and bounds the target and page', () => {
+      expect(
+        querySchemaOf().parse({
+          ...range,
+          withFrustration: 'true',
+          frustrationTarget: '#buy',
+          frustrationPage: '/cart',
+        })
+      ).toMatchObject({
+        withFrustration: true,
+        frustrationTarget: '#buy',
+        frustrationPage: '/cart',
+      });
+      expect(querySchemaOf().safeParse({ ...range, withFrustration: 'maybe' }).success).toBe(false);
+      for (const name of ['frustrationTarget', 'frustrationPage']) {
+        const accepts = (length: number) =>
+          querySchemaOf().safeParse({ ...range, [name]: 'x'.repeat(length) }).success;
+        expect(accepts(1024)).toBe(true);
+        expect(accepts(1025)).toBe(false);
+        expect(accepts(0)).toBe(false);
+      }
+    });
+
     it('accepts an environment up to 1024 characters', () => {
       const withEnvironment = (length: number) =>
         querySchemaOf().safeParse({ ...range, environment: 'x'.repeat(length) }).success;
@@ -853,6 +882,9 @@ describe('sessions routes', () => {
       expect(
         querySchemaOf().parse({ ...range, sortField: 'http_failed_request_count' }).sortField
       ).toBe('http_failed_request_count');
+      expect(querySchemaOf().parse({ ...range, sortField: 'frustration_count' }).sortField).toBe(
+        'frustration_count'
+      );
       expect(querySchemaOf().safeParse({ ...range, sortField: 'error_count' }).success).toBe(false);
       expect(querySchemaOf().safeParse({ ...range, sortField: 'user.key' }).success).toBe(false);
       expect(querySchemaOf().safeParse({ ...range, perPage: '101' }).success).toBe(false);

@@ -1,0 +1,209 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { MAX_TEXT_LENGTH, type SignificantEvent } from '@kbn/significant-events-schema';
+import type { ContinuationCycle, ContinuationEvaluator } from './continuation_stability';
+
+export interface ContinuationNarrativeEvolutionResult {
+  score: number | null;
+  passedChecks: number;
+  comparableChecks: number;
+  /** Per continued event, which narrative fields changed against the event's previous write. */
+  evolution: string[];
+  explanation: string;
+}
+
+type WrittenEvent = Partial<SignificantEvent>;
+
+interface RuleVerdicts {
+  readonly confirming: ReadonlySet<string>;
+  readonly offTopic: ReadonlySet<string>;
+  readonly all: ReadonlySet<string>;
+}
+
+interface PreviousNarrative {
+  readonly event: WrittenEvent;
+  readonly ruleVerdicts: ReadonlyMap<string, string>;
+}
+
+const ruleVerdicts = (event: WrittenEvent): RuleVerdicts => {
+  const confirming = new Set<string>();
+  const offTopic = new Set<string>();
+  const all = new Set<string>();
+  for (const signal of event.signals ?? []) {
+    const ruleUuid = signal.metadata?.rule_uuid;
+    if (!ruleUuid) continue;
+    all.add(ruleUuid);
+    if (signal.verdict === 'confirms') confirming.add(ruleUuid);
+    if (signal.verdict === 'off_topic') offTopic.add(ruleUuid);
+  }
+  return { confirming, offTopic, all };
+};
+
+const ruleVerdictByUuid = (event: WrittenEvent): Map<string, string> =>
+  new Map(
+    (event.signals ?? []).flatMap((signal) => {
+      const ruleUuid = signal.metadata?.rule_uuid;
+      return ruleUuid === undefined ? [] : [[ruleUuid, signal.verdict] as const];
+    })
+  );
+
+/** The wording a reader already knows: the stored text with its whitespace normalised. */
+const storedWording = (text: string): string => text.replace(/\s+/g, ' ').trim();
+
+/** A sentence ends at a stop followed by whitespace and the start of a new sentence, so `e.g. foo` and `2.5k` stay whole. */
+const SENTENCE_END = /(?<=[.!?])\s+(?=[A-Z0-9`"'([])/;
+
+/**
+ * How many sentences `previous` says that `next` no longer keeps. New text may sit in the part it
+ * belongs to, between stored sentences, so the stored text need not survive as one contiguous
+ * span. The check is best-effort: a stored sentence that reappears inside a longer rewritten
+ * sentence still counts as kept.
+ */
+const countDroppedStoredSentences = (previous: string, next: string): number => {
+  const kept = storedWording(next);
+  return storedWording(previous)
+    .split(SENTENCE_END)
+    .filter((sentence) => !kept.includes(sentence)).length;
+};
+
+/**
+ * Scores how the narrative fields of a continued event evolve across cycles:
+ * - the title is preserved verbatim;
+ * - `summary` keeps every stored sentence, never rewritten, unless a rule the event held as
+ *   `off_topic` now confirms (the stored text described a sampled error). When a rule newly
+ *   confirms, newer evidence may supersede a stored statement, so dropped sentences are reported
+ *   but not scored;
+ * - `assessment_note` is re-reasoned when the evidence behind it changed (a rule that newly
+ *   confirms, whether new to the event or moved from another verdict, or a new severity), so a stale
+ *   note does not sit beside new evidence. A new rule that does not
+ *   confirm changes neither the note nor the text, so it is reported but never scored.
+ * Whether the text grew for a new confirming rule is reported per event but not scored: only a
+ * signal that helps explain the problem extends it, which a code check cannot tell. A changed
+ * `symptom_hypothesis` is reported but not scored either: it may rephrase to stay within three
+ * sentences, which a code check cannot tell from a rewrite.
+ */
+export const scoreContinuationNarrativeEvolution = (
+  cycles: ContinuationCycle[]
+): ContinuationNarrativeEvolutionResult => {
+  const previousByEventId = new Map<string, PreviousNarrative>();
+  const evolution: string[] = [];
+  const issues: string[] = [];
+  let passedChecks = 0;
+  let comparableChecks = 0;
+
+  const check = (passed: boolean, issue: string) => {
+    comparableChecks++;
+    if (passed) passedChecks++;
+    else issues.push(issue);
+  };
+
+  cycles.forEach((cycle, cycleIndex) => {
+    for (const event of cycle.narrativeEvents ?? []) {
+      const eventId = event.event_id;
+      if (!eventId) continue;
+      const previous = previousByEventId.get(eventId);
+      const currentRuleVerdicts = ruleVerdictByUuid(event);
+      previousByEventId.set(eventId, {
+        event,
+        ruleVerdicts: new Map([...(previous?.ruleVerdicts ?? []), ...currentRuleVerdicts]),
+      });
+      if (!previous) continue;
+
+      const label = `cycle ${cycleIndex}: "${eventId}"`;
+      const before = ruleVerdicts(previous.event);
+      const now = ruleVerdicts(event);
+      const newRules = [...now.all].filter((ruleUuid) => !before.all.has(ruleUuid));
+      const addedConfirmingRules = [...now.confirming].filter(
+        (ruleUuid) => !before.all.has(ruleUuid)
+      );
+      const newlyConfirmingRules = [...now.confirming].filter(
+        (ruleUuid) => previous.ruleVerdicts.get(ruleUuid) !== 'confirms'
+      );
+      const rewriteAllowed = [...now.confirming].some(
+        (ruleUuid) => previous.ruleVerdicts.get(ruleUuid) === 'off_topic'
+      );
+
+      if (previous.event.title !== undefined && event.title !== undefined && !rewriteAllowed) {
+        check(previous.event.title === event.title, `${label} title changed`);
+      }
+      const summaryAtCapacity = previous.event.summary?.length === MAX_TEXT_LENGTH;
+      const droppedSentences =
+        previous.event.summary !== undefined && event.summary !== undefined
+          ? countDroppedStoredSentences(previous.event.summary, event.summary)
+          : 0;
+      // New confirming evidence may supersede a stored statement, so even a full rewrite there is reported, not scored.
+      const summaryCheckScored =
+        !rewriteAllowed && !summaryAtCapacity && newlyConfirmingRules.length === 0;
+      if (
+        summaryCheckScored &&
+        previous.event.summary !== undefined &&
+        event.summary !== undefined
+      ) {
+        check(droppedSentences === 0, `${label} summary was rewritten`);
+      }
+      const evidenceMoved =
+        newlyConfirmingRules.length > 0 || previous.event.severity !== event.severity;
+      if (evidenceMoved && previous.event.assessment_note !== undefined) {
+        check(
+          previous.event.assessment_note !== event.assessment_note,
+          `${label} assessment_note is unchanged although ${
+            newlyConfirmingRules.length > 0 ? 'a rule newly confirms' : 'severity changed'
+          }`
+        );
+      }
+
+      const changed = (['summary', 'symptom_hypothesis', 'assessment_note'] as const).filter(
+        (field) => previous.event[field] !== event[field]
+      );
+      const notConfirming = newRules.length - addedConfirmingRules.length;
+      evolution.push(
+        `${label} ${newRules.length > 0 ? `+${newRules.length} rule(s)` : 'no new rule'}` +
+          `${notConfirming > 0 ? ` (${notConfirming} not confirming)` : ''}: ` +
+          (changed.length > 0 ? `changed ${changed.join(', ')}` : 'narrative unchanged') +
+          (droppedSentences > 0 &&
+          newlyConfirmingRules.length > 0 &&
+          !rewriteAllowed &&
+          !summaryAtCapacity
+            ? ` (dropped ${droppedSentences} stored summary sentence(s), not scored)`
+            : '')
+      );
+    }
+  });
+
+  if (comparableChecks === 0) {
+    return {
+      score: null,
+      passedChecks: 0,
+      comparableChecks: 0,
+      evolution,
+      explanation: 'No continued event wrote its narrative twice, so there is nothing to compare',
+    };
+  }
+
+  return {
+    score: passedChecks / comparableChecks,
+    passedChecks,
+    comparableChecks,
+    evolution,
+    explanation:
+      `${passedChecks}/${comparableChecks} narrative check(s) held` +
+      (issues.length > 0 ? ` (${issues.join('; ')})` : '') +
+      `. Evolution: ${evolution.join(' | ')}`,
+  };
+};
+
+/** CODE evaluator: continued events keep their title, extend rather than rewrite, and re-reason the note. */
+export const continuationNarrativeEvolutionEvaluator: ContinuationEvaluator = {
+  name: 'continuation_narrative_evolution',
+  kind: 'CODE',
+  direction: 'maximize',
+  evaluate: ({ output }) => {
+    const { score, explanation } = scoreContinuationNarrativeEvolution(output.cycles ?? []);
+    return Promise.resolve({ score, explanation });
+  },
+};

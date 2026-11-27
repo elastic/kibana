@@ -6,6 +6,7 @@
  */
 
 import type { CoreWebVital } from './core_web_vitals';
+import type { FrustrationCounts } from './frustration';
 import { OTEL_LOGS_INDEX, OTEL_TRACES_INDEX } from './otel_data';
 
 /**
@@ -49,6 +50,8 @@ export const MOBILE_SESSIONS_TASK_ID = 'digital_experience:mobile-sessions-summa
 export const MOBILE_SESSIONS_RECONCILE_INTERVAL_MINUTES = 60;
 /** Events that arrive later than this after their time are not summarized. */
 export const MOBILE_SESSIONS_RECONCILE_HOURS = 24;
+/** How late a crash may be sent after it happened, as the next launch sends it. */
+export const MOBILE_MAX_CRASH_DELAY_HOURS = 24;
 
 /** How often the summaries task runs by default. */
 export const SESSIONS_DEFAULT_FREQUENCY = '1m';
@@ -72,6 +75,7 @@ export const SESSIONS_MAX_ID_LENGTH = 256;
  * changed session is rebuilt from this far back.
  */
 export const SESSIONS_MAX_SESSION_HOURS = 24;
+export const SESSIONS_MAX_SESSION_MS = SESSIONS_MAX_SESSION_HOURS * 60 * 60 * 1000;
 /** Max page views kept, in order, for the session journey. */
 export const SESSIONS_JOURNEY_SIZE = 10;
 /**
@@ -79,6 +83,12 @@ export const SESSIONS_JOURNEY_SIZE = 10;
  * URLs that differ only in their query or hash collapse into one page.
  */
 export const SESSIONS_JOURNEY_URL_CANDIDATES = 3 * SESSIONS_JOURNEY_SIZE;
+/** Frustrated element selectors and page paths kept per session, the ones with the most signals. */
+export const SESSIONS_FRUSTRATION_VALUES = 20;
+/** Frustrated URLs collected per session, as URLs that differ in their query or hash share a page. */
+export const SESSIONS_FRUSTRATION_URL_CANDIDATES = 3 * SESSIONS_FRUSTRATION_VALUES;
+/** The longest value the summaries index as a keyword (`ignore_above`). */
+export const SESSIONS_MAX_KEYWORD_LENGTH = 1024;
 
 export const SESSION_SORT_FIELDS = [
   'start_time',
@@ -87,6 +97,7 @@ export const SESSION_SORT_FIELDS = [
   'click_count',
   'js_error_count',
   'http_failed_request_count',
+  'frustration_count',
 ] as const;
 export type SessionSortField = (typeof SESSION_SORT_FIELDS)[number];
 
@@ -105,6 +116,8 @@ export const SESSIONS_LIST_MAX_FACET_LENGTHS = {
   country: 16,
   entryPage: 1024,
 } as const;
+/** The longest frustrated element selector or page path the list filters by: the summaries' keyword `ignore_above`. */
+export const SESSIONS_LIST_MAX_FRUSTRATION_FILTER_LENGTH = SESSIONS_MAX_KEYWORD_LENGTH;
 
 export type SessionWebVitals = Record<CoreWebVital, number | null>;
 
@@ -230,6 +243,7 @@ export interface SessionSummary {
   jsErrorCount: number;
   httpRequestCount: number;
   failedRequestCount: number;
+  frustration: FrustrationCounts;
   bounced: boolean;
   entryPage: string | null;
   exitPage: string | null;
@@ -260,6 +274,7 @@ export interface SessionListKpis {
   bounceRate: number | null;
   sessionsWithJsErrors: number;
   sessionsWithFailedRequests: number;
+  sessionsWithFrustration: number;
   webVitals: SessionWebVitals;
 }
 
@@ -274,20 +289,48 @@ export interface SessionListResponse {
   kpis: SessionListKpis;
 }
 
-/** The events the journey lists; the API leaves out all others, which Discover shows. */
-export type SessionTimelineEventKind = 'page_view' | 'click' | 'error' | 'web_vital';
+/** The kinds of events a mobile session's timeline lists. */
+export type MobileSessionEventKind = 'screen' | 'tap' | 'request' | 'error' | 'log';
+
+/**
+ * The events the journey lists; the API leaves out all others, which Discover shows. Mobile
+ * sessions list screens, taps, requests and logs too.
+ */
+export type SessionTimelineEventKind =
+  | 'page_view'
+  | 'click'
+  | 'error'
+  | 'web_vital'
+  | 'frustration'
+  | MobileSessionEventKind;
 
 export interface SessionTimelineEvent {
   kind: SessionTimelineEventKind;
   name: string;
   timestamp: string;
   offsetMs: number;
+  /** The page, or a mobile app's screen, the event happened on. */
   page: string | null;
   detail: string | null;
+  /** The clicks a rage click summarizes; `null` for every other event. */
+  clickCount: number | null;
   /** The stack trace of an error, when the browser reported one. */
   stacktrace: string | null;
   traceId: string | null;
   spanId: string | null;
+  /** The uncaught exception behind an error click; unset for every other event. */
+  exception?: SessionTimelineException;
+  /** A mobile request's response status; the browser's requests are listed apart. */
+  statusCode?: number | null;
+  /** A mobile request's duration. */
+  durationMs?: number | null;
+}
+
+/** The uncaught exception a frustration signal names, as an error click does. */
+export interface SessionTimelineException {
+  type: string | null;
+  message: string | null;
+  stacktrace: string | null;
 }
 
 /** How long each network phase of a request took, in milliseconds; 0 when it didn't happen. */
@@ -353,6 +396,7 @@ export interface SessionPageVisit {
   durationMs: number;
   clickCount: number;
   errorCount: number;
+  frustrationCount: number;
   webVitals: SessionWebVitals;
   /** Set on a visit that loaded the page document, rather than an in-app navigation. */
   load: SessionPageLoad | null;

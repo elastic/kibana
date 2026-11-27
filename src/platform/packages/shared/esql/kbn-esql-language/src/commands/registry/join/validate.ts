@@ -18,6 +18,10 @@ import type {
 import { isBinaryExpression, isIdentifier, isSource } from '@elastic/esql';
 import type { ICommandCallbacks, ICommandContext } from '../types';
 import { errors } from '../../definitions/utils/errors';
+import {
+  findNamedSubqueryForSource,
+  isNamedSubqueryDeclaredBefore,
+} from '../../definitions/utils/named_subqueries';
 import { validateCommandArguments } from '../../definitions/utils/validation';
 import { COORDINATOR_LOOKUP_JOIN_PREFIX } from '../../definitions/constants';
 import { getOnOption } from './utils';
@@ -56,6 +60,16 @@ export const validate = (
     index = target as ESQLSource;
   } else {
     return [errors.unexpected(target.location)];
+  }
+
+  if (commandType === 'lookup') {
+    const namedSubquery = findNamedSubqueryForSource(index, context?.namedSubqueries ?? []);
+    if (namedSubquery) {
+      // The LET validator reports self and forward references.
+      return isNamedSubqueryDeclaredBefore(namedSubquery, index)
+        ? [errors.subqueryNotSupportedInLookupJoin(index)]
+        : [];
+    }
   }
 
   const isCoordinatorTarget = index.prefix?.valueUnquoted === COORDINATOR_LOOKUP_JOIN_PREFIX;

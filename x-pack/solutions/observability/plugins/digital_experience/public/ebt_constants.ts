@@ -45,6 +45,10 @@ export const DIGITAL_EXPERIENCE_EBT_ACTIONS = {
   VIEW_SESSIONS: 'viewSessions',
   /** The user opens the full list behind a summary, e.g. every error from the Overview. */
   VIEW_ALL: 'viewAll',
+  /** The user opens a dashboard of an application from its Overview. */
+  VIEW_DASHBOARD: 'viewDashboard',
+  /** The user saves a page's panels as a Kibana dashboard. */
+  SAVE_AS_DASHBOARD: 'saveAsDashboard',
   /** The user opens a session's details. */
   VIEW_SESSION: 'viewSession',
   /** The user jumps from the session timeline to one of its page visits. */
@@ -85,6 +89,13 @@ export const MOBILE_APPLICATION_EBT_ELEMENTS = {
   OS_FILTER: 'mobileOsFilter',
   RETRY: 'mobileRetry',
   CLEAR_FILTERS: 'mobileClearFilters',
+  COMPARE_TOGGLE: 'mobileCompareToggle',
+} as const;
+
+export const MOBILE_CRASHES_EBT_ELEMENTS = {
+  RETRY: 'mobileCrashesRetry',
+  CRASH_GROUP: 'mobileCrashGroup',
+  OPEN_SESSION: 'mobileCrashOpenSession',
 } as const;
 
 export const APPLICATIONS_LIST_EBT_ELEMENTS = {
@@ -102,9 +113,12 @@ export const APPLICATIONS_LIST_EBT_ELEMENTS = {
 
 export const APPLICATION_OVERVIEW_EBT_ELEMENTS = {
   RETRY: 'overviewRetry',
+  KPIS_RETRY: 'overviewKpisRetry',
   USAGE_RETRY: 'overviewUsageRetry',
   BROWSER_SESSIONS_LINK: 'overviewBrowserSessionsLink',
   OS_SESSIONS_LINK: 'overviewOsSessionsLink',
+  FRUSTRATION_SESSIONS_LINK: 'overviewFrustrationSessionsLink',
+  FRUSTRATION_DASHBOARD_LINK: 'overviewFrustrationDashboardLink',
   BROWSER_FILTER: 'overviewBrowserFilter',
   OS_FILTER: 'overviewOsFilter',
   DEVICE_FILTER: 'overviewDeviceFilter',
@@ -123,6 +137,10 @@ export const APPLICATION_OVERVIEW_EBT_ELEMENTS = {
   ALL_FILTERS_RESET: 'overviewAllFiltersReset',
   CLEAR_FILTERS: 'overviewClearFilters',
   PERCENTILE: 'overviewPercentile',
+} as const;
+
+export const FRUSTRATION_EBT_ELEMENTS = {
+  USAGE_RETRY: 'frustrationUsageRetry',
 } as const;
 
 export const ERRORS_EBT_ELEMENTS = {
@@ -149,6 +167,9 @@ export const SESSIONS_EBT_ELEMENTS = {
   SESSION_LINK: 'sessionLink',
   ERRORS_FILTER: 'sessionsErrorsFilter',
   FAILED_REQUESTS_FILTER: 'sessionsFailedRequestsFilter',
+  FRUSTRATION_FILTER: 'sessionsFrustrationFilter',
+  FRUSTRATION_TARGET_FILTER: 'sessionsFrustrationTargetFilter',
+  FRUSTRATION_PAGE_FILTER: 'sessionsFrustrationPageFilter',
   DURATION_FILTER: 'sessionsDurationFilter',
   BROWSER_FILTER: 'sessionsBrowserFilter',
   OS_FILTER: 'sessionsOsFilter',
