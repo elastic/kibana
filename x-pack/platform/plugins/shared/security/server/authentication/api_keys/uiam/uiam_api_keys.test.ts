@@ -521,6 +521,24 @@ describe('UiamAPIKeys', () => {
             });
           },
         ],
+        [
+          'a user-created (external) API key',
+          () => {
+            authenticatedWithApiKey(false);
+            return createMockRequest('ApiKey essu_internal_key');
+          },
+        ],
+        [
+          'an external API key that a fake request is marked as carrying',
+          () => {
+            mockGetCurrentUser.mockReturnValue(null);
+            const request = httpServerMock.createFakeKibanaRequest({
+              headers: { authorization: 'ApiKey essu_internal_key' },
+            });
+            markExternalUiamCredential(request);
+            return request;
+          },
+        ],
       ])('clones %s', async (_, buildRequest) => {
         const result = await uiamApiKeys.copy(buildRequest(), { name: 'copy-name' });
 
@@ -529,28 +547,10 @@ describe('UiamAPIKeys', () => {
         expect(mockUiam.grantApiKey).not.toHaveBeenCalled();
       });
 
-      it.each([
-        ['an access token, which is not an API key', () => createMockRequest('Bearer essu_token')],
-        [
-          'a user-created (external) API key',
-          () => {
-            authenticatedWithApiKey(false);
-            return createMockRequest('ApiKey essu_external_key');
-          },
-        ],
-        [
-          'an external API key that a fake request is marked as carrying',
-          () => {
-            mockGetCurrentUser.mockReturnValue(null);
-            const request = httpServerMock.createFakeKibanaRequest({
-              headers: { authorization: 'ApiKey essu_external_key' },
-            });
-            markExternalUiamCredential(request);
-            return request;
-          },
-        ],
-      ])('grants from %s', async (_, buildRequest) => {
-        const result = await uiamApiKeys.copy(buildRequest(), { name: 'copy-name' });
+      it('grants from an access token, which is not an API key', async () => {
+        const result = await uiamApiKeys.copy(createMockRequest('Bearer essu_token'), {
+          name: 'copy-name',
+        });
 
         expect(result).toEqual({
           id: 'granted_id',
@@ -619,7 +619,6 @@ describe('UiamAPIKeys', () => {
 
       it.each([
         ['a revoked or invalid source key', createUiamError(400, '0x824009', 'invalid source')],
-        ['an external source key', createUiamError(400, '0x21D2B8', 'not internal')],
         ['an organization over its key limit', createUiamError(400, '0x3196F8', 'too many keys')],
         ['a UIAM server error', createUiamError(500, '0x1C6964', 'boom')],
         ['a network failure', new Error('socket hang up')],

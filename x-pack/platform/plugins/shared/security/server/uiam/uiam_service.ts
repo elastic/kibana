@@ -106,6 +106,20 @@ export interface GrantUiamApiKeyRequestBody {
 }
 
 /**
+ * Limits an API key to the applications of projects, so it carries none of the Cloud privileges of
+ * the user or the external key it is made from. UIAM requires it to grant a key, and to clone an
+ * external one.
+ */
+const APPLICATION_ONLY_ROLE_ASSIGNMENTS: GrantUiamApiKeyRequestBody['role_assignments'] = {
+  limit: {
+    // limit access to applications within projects (i.e. application_roles, not cloud roles)
+    access: ['application'],
+    // limit access to projects (i.e. not deployments, organizations, etc.)
+    resource: ['project'],
+  },
+};
+
+/**
  * Represents the response from granting an API key via UIAM.
  */
 export interface GrantUiamApiKeyResponse {
@@ -322,12 +336,14 @@ export interface UiamServicePublic {
   ): Promise<GrantUiamApiKeyResponse>;
 
   /**
-   * Clones an internal UIAM API key. Unlike a key granted from another key, which belongs to that
-   * key, the clone keeps the creator of the key it copies. UIAM authenticates the call by Kibana's
-   * client certificate alone, so it carries neither the key's authorization nor client
-   * authentication. A key that can't be cloned, such as a revoked one, is refused with a 400. The
-   * clone has no expiration of its own: it expires when the key it copies does.
-   * @param apiKey The secret of the internal key to clone.
+   * Clones a UIAM API key, internal or external (user-created), into an internal key limited to the
+   * applications of projects. Unlike a key granted from another key, which belongs to that key, the
+   * clone keeps the creator of the key it copies. UIAM authenticates the call by Kibana's client
+   * certificate alone, so it carries neither the key's authorization nor client authentication. A
+   * key that can't be cloned, such as a revoked one, is refused with a 400. The clone has no
+   * expiration of its own: it expires when the key it copies does, and it stays valid when that key
+   * is revoked.
+   * @param apiKey The secret of the key to clone.
    * @param description The description of the new key.
    * @returns A promise that resolves to the cloned key's details.
    */
@@ -829,15 +845,8 @@ export class UiamService implements UiamServicePublic {
         description: params.name,
         internal: true,
         ...(expiration ? { expiration: expiration.toISOString() } : {}),
-        role_assignments: {
-          // currently required  to downscope privileges
-          limit: {
-            // limit access to applications within projects (i.e. application_roles, not cloud roles)
-            access: ['application'],
-            // limit access to projects  (i.e. not deployments, organizations, etc.)
-            resource: ['project'],
-          },
-        },
+        // currently required to downscope privileges
+        role_assignments: APPLICATION_ONLY_ROLE_ASSIGNMENTS,
       };
       const requestOptions: RequestInit & { dispatcher?: Agent } = {
         method: 'POST',
@@ -870,11 +879,17 @@ export class UiamService implements UiamServicePublic {
   async cloneApiKey(apiKey: string, description: string): Promise<CloneUiamApiKeyResponse> {
     this.#logger.debug('Attempting to clone an API key.');
 
-    // The key goes in the body, because the client certificate authenticates the call.
+    // The key goes in the body, because the client certificate authenticates the call. The limit is
+    // what lets UIAM clone an external key, and it changes nothing for an internal key of ours, which
+    // is limited the same way.
     const requestOptions: RequestInit & { dispatcher?: Agent } = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'User-Agent': this.#userAgentHeader },
-      body: JSON.stringify({ api_key: apiKey, description }),
+      body: JSON.stringify({
+        api_key: apiKey,
+        description,
+        role_assignments: APPLICATION_ONLY_ROLE_ASSIGNMENTS,
+      }),
       dispatcher: this.#dispatcher,
     };
 

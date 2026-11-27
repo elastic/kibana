@@ -31,10 +31,11 @@ export interface UiamAPIKeysType {
    * Copies the request's credential into a new API key that keeps the same creator, so actions the
    * copy performs can be traced back to the user who created the original.
    *
-   * An internal UIAM API key is cloned, which keeps its creator and expiration. Any other credential
-   * (a session, a token, a user-created key) is granted from, like `grant`. A clone UIAM refuses
-   * because of Kibana and not the key (it does not accept Kibana as a project service account, or has
-   * no clone endpoint) throws a server error, as does any other failure, such as a revoked source key.
+   * A UIAM API key, internal or user-created, is cloned into an internal key that keeps its creator
+   * and expiration. Any other credential (a session or a token) is granted from, like `grant`. A
+   * clone UIAM refuses because of Kibana and not the key (it does not accept Kibana as a project
+   * service account, or has no clone endpoint) throws a server error, as does any other failure, such
+   * as a revoked source key.
    *
    * @param request The Kibana request instance containing the credential to copy.
    * @param params The parameters for creating the API key (name).

@@ -12,6 +12,7 @@ import { getKbnServerlessUiamCert } from '@kbn/dev-utils';
 import {
   createSAMLResponse,
   MOCK_IDP_ATTRIBUTE_UIAM_ACCESS_TOKEN,
+  MOCK_IDP_UIAM_ORG_ADMIN_API_KEY,
   MOCK_IDP_UIAM_SERVICE_URL,
   MOCK_IDP_UIAM_SHARED_SECRET,
 } from '@kbn/mock-idp-utils';
@@ -169,6 +170,25 @@ apiTest.describe('[NON-MKI] UIAM API Keys copy', { tag: tags.serverless.all }, (
     }
   );
 
+  apiTest(
+    'should copy an external (user-created) API key into an internal key created by a user',
+    async ({ apiClient }) => {
+      const response = await callTestEndpoint(apiClient, 'copy', {
+        name: 'copy-test-from-external-key',
+        authcScheme: 'ApiKey',
+        credential: MOCK_IDP_UIAM_ORG_ADMIN_API_KEY,
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.name).toBe('copy-test-from-external-key');
+      // The copy is made by the user who created the external key, not by the key. The seeded key
+      // takes the creator of whoever logged in last, so no particular user is expected.
+      const copy = await authenticateAtUiam(response.body.api_key);
+      expect(copy.status).toBe(200);
+      expect(copy.creator?.type).toBe('user');
+    }
+  );
+
   apiTest('should keep a copy valid after its source key is invalidated', async ({ apiClient }) => {
     const source = await createSourceKey(apiClient);
     const response = await callTestEndpoint(apiClient, 'copy', {
@@ -190,28 +210,25 @@ apiTest.describe('[NON-MKI] UIAM API Keys copy', { tag: tags.serverless.all }, (
     expect((await authenticateAtUiam(response.body.api_key)).status).toBe(200);
   });
 
-  apiTest(
-    'should fail, not fall back to a grant, when the source key is invalidated',
-    async ({ apiClient }) => {
-      const source = await createSourceKey(apiClient);
-      const invalidated = await apiClient.post('test_endpoints/uiam/api_keys/_invalidate', {
-        headers: { ...COMMON_UNSAFE_HEADERS },
-        responseType: 'json',
-        body: { id: source.id, authcScheme: 'ApiKey', credential: source.apiKey },
-      });
-      expect(invalidated).toHaveStatusCode(200);
+  apiTest('should fail when the source key is invalidated', async ({ apiClient }) => {
+    const source = await createSourceKey(apiClient);
+    const invalidated = await apiClient.post('test_endpoints/uiam/api_keys/_invalidate', {
+      headers: { ...COMMON_UNSAFE_HEADERS },
+      responseType: 'json',
+      body: { id: source.id, authcScheme: 'ApiKey', credential: source.apiKey },
+    });
+    expect(invalidated).toHaveStatusCode(200);
 
-      const response = await callTestEndpoint(apiClient, 'copy', {
-        name: 'copy-test-from-revoked',
-        authcScheme: 'ApiKey',
-        credential: source.apiKey,
-      });
+    const response = await callTestEndpoint(apiClient, 'copy', {
+      name: 'copy-test-from-revoked',
+      authcScheme: 'ApiKey',
+      credential: source.apiKey,
+    });
 
-      expect(response).toHaveStatusCode(500);
-      // UIAM's refusal of an invalid source key, not the outcome of a grant.
-      expect(response.body.message).toContain('0x824009');
-    }
-  );
+    expect(response).toHaveStatusCode(500);
+    // UIAM's refusal of an invalid source key, not the outcome of a grant.
+    expect(response.body.message).toContain('0x824009');
+  });
 
   apiTest('should reject copying a non-UIAM credential', async ({ apiClient }) => {
     const response = await callTestEndpoint(apiClient, 'copy', {

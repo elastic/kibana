@@ -162,8 +162,8 @@ export class UiamAPIKeys implements UiamAPIKeysType {
   /**
    * Copies the caller's credential into a new API key that keeps the same creator.
    *
-   * An internal UIAM API key is cloned. Any other credential (session, bearer, external key) is
-   * granted from, like `grant`. A clone UIAM refuses because of Kibana and not the key (401, 403 or
+   * A UIAM API key, internal or user-created, is cloned. Any other credential (a session or a
+   * token) is granted from, like `grant`. A clone UIAM refuses because of Kibana and not the key (401, 403 or
    * 404: a client certificate it does not accept, or no clone endpoint) throws a server error: that
    * is a project configuration problem to fix, not to hide behind a grant that loses the creator.
    * Any other clone failure, such as a revoked source key, is thrown as it is.
@@ -182,7 +182,7 @@ export class UiamAPIKeys implements UiamAPIKeysType {
 
     const authorization = UiamAPIKeys.getAuthorizationHeader(request);
 
-    if (!this.canClone(request, authorization)) {
+    if (!this.canClone(authorization)) {
       return this.grant(request, { name });
     }
 
@@ -213,15 +213,11 @@ export class UiamAPIKeys implements UiamAPIKeysType {
   }
 
   /**
-   * Only an internal UIAM API key can be cloned: `_clone` takes an API key as its source, so a
-   * session or an access token has none to clone, and UIAM refuses an external (user-created) key.
+   * Only a UIAM API key can be cloned: `_clone` takes an API key as its source, so a session or an
+   * access token has none to clone. UIAM clones an external (user-created) key too.
    */
-  private canClone(request: KibanaRequest, authorization: HTTPAuthorizationHeader): boolean {
-    return (
-      isUiamCredential(authorization) &&
-      authorization.scheme.toLowerCase() === 'apikey' &&
-      !this.isExternalApiKey(request)
-    );
+  private canClone(authorization: HTTPAuthorizationHeader): boolean {
+    return isUiamCredential(authorization) && authorization.scheme.toLowerCase() === 'apikey';
   }
 
   /**

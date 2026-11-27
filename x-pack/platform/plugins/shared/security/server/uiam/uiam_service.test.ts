@@ -1422,7 +1422,12 @@ describe('UiamService', () => {
         method: 'POST',
         // Neither the key's `Authorization` nor Kibana's shared secret is sent.
         headers: { 'Content-Type': 'application/json', 'User-Agent': 'Kibana/9.0.0' },
-        body: JSON.stringify({ api_key: 'essu_source_key', description: 'my-clone' }),
+        // The limit is what lets UIAM clone an external key.
+        body: JSON.stringify({
+          api_key: 'essu_source_key',
+          description: 'my-clone',
+          role_assignments: { limit: { access: ['application'], resource: ['project'] } },
+        }),
         dispatcher: AGENT_MOCK,
       });
     });
