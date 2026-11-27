@@ -21,7 +21,6 @@ import type { Logger } from '@kbn/logging';
 import { UiamAPIKeys } from './uiam_api_keys';
 import type { SecurityLicense } from '../../../../common';
 import { licenseMock } from '../../../../common/licensing/index.mock';
-import { securityTelemetry } from '../../../otel/instrumentation';
 import type { UiamServicePublic } from '../../../uiam';
 import { authenticatorMock } from '../../authenticator.mock';
 
@@ -483,18 +482,9 @@ describe('UiamAPIKeys', () => {
     const cloned = { id: 'cloned_id', key: 'essu_cloned_key', description: 'copy-name' };
     const granted = { id: 'granted_id', key: 'essu_granted_key', description: 'copy-name' };
 
-    let recordFallback: jest.SpyInstance;
-
     beforeEach(() => {
-      recordFallback = jest
-        .spyOn(securityTelemetry, 'recordApiKeyCopyFallback')
-        .mockImplementation(() => {});
       mockUiam.cloneApiKey.mockResolvedValue(cloned);
       mockUiam.grantApiKey.mockResolvedValue(granted);
-    });
-
-    afterEach(() => {
-      recordFallback.mockRestore();
     });
 
     it('returns null when license is not enabled', async () => {
@@ -537,7 +527,6 @@ describe('UiamAPIKeys', () => {
         expect(result).toEqual({ id: 'cloned_id', name: 'copy-name', api_key: 'essu_cloned_key' });
         expect(mockUiam.cloneApiKey).toHaveBeenCalledWith('essu_internal_key', 'copy-name');
         expect(mockUiam.grantApiKey).not.toHaveBeenCalled();
-        expect(recordFallback).not.toHaveBeenCalled();
       });
 
       it.each([
@@ -569,7 +558,6 @@ describe('UiamAPIKeys', () => {
           api_key: 'essu_granted_key',
         });
         expect(mockUiam.cloneApiKey).not.toHaveBeenCalled();
-        expect(recordFallback).not.toHaveBeenCalled();
       });
 
       it('does not clone a credential that is not a UIAM credential', async () => {
@@ -582,33 +570,46 @@ describe('UiamAPIKeys', () => {
       });
     });
 
-    describe('when UIAM refuses the clone', () => {
+    describe('when UIAM refuses the clone because of Kibana and not the key', () => {
       beforeEach(() => authenticatedWithApiKey(true));
 
       it.each([
-        ['endpoint_not_found', createUiamError(404, '0x1C6964', 'not found')],
-        ['client_not_authenticated', createUiamError(401, '0xBA477C', 'no authentication found')],
-        ['client_not_authenticated', createUiamError(401, '0x1C6964', 'Authentication failed')],
+        ['no clone endpoint', createUiamError(404, '0x1C6964', 'not found')],
         [
-          'client_not_service_account',
+          'a client it does not authenticate',
+          createUiamError(401, '0x1C6964', 'Authentication failed'),
+        ],
+        ['no authentication found', createUiamError(401, '0xBA477C', 'no authentication found')],
+        [
+          'a caller that is not a project service account',
           createUiamError(403, '0x9F3B1D', 'Project principal required'),
         ],
-      ])('falls back to grant and records %s', async (reason, refusal) => {
+        [
+          'a source key without access to the project',
+          createUiamError(403, '0xDEF39C', 'no access'),
+        ],
+      ])('throws a server error, and does not grant, on %s', async (_, refusal) => {
         mockUiam.cloneApiKey.mockRejectedValue(refusal);
-        const request = createMockRequest('ApiKey essu_internal_key');
 
-        const result = await uiamApiKeys.copy(request, { name: 'copy-name' });
+        const failure = await uiamApiKeys
+          .copy(createMockRequest('ApiKey essu_internal_key'), { name: 'copy-name' })
+          .catch((error: Boom.Boom) => error);
 
-        expect(result).toEqual({
-          id: 'granted_id',
-          name: 'copy-name',
-          api_key: 'essu_granted_key',
-        });
-        expect(mockUiam.grantApiKey).toHaveBeenCalledTimes(1);
-        expect(recordFallback).toHaveBeenCalledTimes(1);
-        expect(recordFallback).toHaveBeenCalledWith({ reason });
-        expect(logger.warn).toHaveBeenCalledWith(
-          expect.stringContaining(`UIAM refused to clone an API key (${reason}), granting instead`)
+        // The caller must not see UIAM's 401 or 403 as if its own credentials were wrong.
+        expect(Boom.isBoom(failure)).toBe(true);
+        expect(failure).toEqual(
+          expect.objectContaining({
+            message: expect.stringContaining(
+              `UIAM refused to clone an API key (${refusal.output.statusCode})`
+            ),
+            data: refusal,
+          })
+        );
+        expect((failure as Boom.Boom).output.statusCode).toBe(500);
+        expect((failure as Boom.Boom).message).toContain(refusal.message);
+        expect(mockUiam.grantApiKey).not.toHaveBeenCalled();
+        expect(logger.error).toHaveBeenCalledWith(
+          expect.stringContaining('Failed to clone API key')
         );
       });
     });
@@ -619,14 +620,10 @@ describe('UiamAPIKeys', () => {
       it.each([
         ['a revoked or invalid source key', createUiamError(400, '0x824009', 'invalid source')],
         ['an external source key', createUiamError(400, '0x21D2B8', 'not internal')],
-        [
-          'a source key without access to the project',
-          createUiamError(403, '0xDEF39C', 'no access'),
-        ],
         ['an organization over its key limit', createUiamError(400, '0x3196F8', 'too many keys')],
         ['a UIAM server error', createUiamError(500, '0x1C6964', 'boom')],
         ['a network failure', new Error('socket hang up')],
-      ])('throws on %s without falling back', async (_, failure) => {
+      ])('throws on %s as it is, without granting', async (_, failure) => {
         mockUiam.cloneApiKey.mockRejectedValue(failure);
 
         await expect(
@@ -634,7 +631,6 @@ describe('UiamAPIKeys', () => {
         ).rejects.toBe(failure);
 
         expect(mockUiam.grantApiKey).not.toHaveBeenCalled();
-        expect(recordFallback).not.toHaveBeenCalled();
         expect(logger.error).toHaveBeenCalledWith(
           expect.stringContaining('Failed to clone API key')
         );

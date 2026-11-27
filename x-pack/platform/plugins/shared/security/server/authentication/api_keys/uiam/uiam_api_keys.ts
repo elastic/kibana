@@ -13,7 +13,6 @@ import {
   HTTPAuthorizationHeader,
   isExternalUiamCredential,
   isUiamCredential,
-  UIAM_ERROR_CODES,
 } from '@kbn/core-security-server';
 import type {
   ConvertUiamAPIKeysResponse,
@@ -24,11 +23,9 @@ import type {
   InvalidateUiamAPIKeyParams,
   UiamAPIKeysType,
 } from '@kbn/security-plugin-types-server';
-import { lazySchema, z } from '@kbn/zod';
 
 import type { SecurityLicense } from '../../../../common';
 import { getDetailedErrorMessage } from '../../../errors';
-import { type ApiKeyCopyFallbackReason, securityTelemetry } from '../../../otel/instrumentation';
 import { type UiamServicePublic, isExternalApiKey as userHasExternalApiKey } from '../../../uiam';
 import { getUiamClientAuthentication } from '../../../uiam/get_client_authentication';
 import type { APIKeyAuthenticator, RequestCredentials } from '../../authenticator';
@@ -45,15 +42,11 @@ export interface UiamAPIKeysOptions {
   authenticator: APIKeyAuthenticator;
 }
 
-const uiamErrorResponseSchema = lazySchema(() =>
-  z.object({ error: z.object({ code: z.string() }) })
-);
-
-/** The error code of a UIAM error response, or `undefined` when the payload is not one. */
-const getUiamErrorCode = (payload: unknown): string | undefined => {
-  const parsed = uiamErrorResponseSchema.safeParse(payload);
-  return parsed.success ? parsed.data.error.code : undefined;
-};
+/**
+ * UIAM answers a clone with these when it refuses Kibana rather than the source key: the caller is
+ * not accepted (401, 403) or there is no clone endpoint (404).
+ */
+const CLONE_REFUSAL_STATUS_CODES = new Set([401, 403, 404]);
 
 /**
  * Class responsible for managing UIAM-specific API key operations.
@@ -170,9 +163,10 @@ export class UiamAPIKeys implements UiamAPIKeysType {
    * Copies the caller's credential into a new API key that keeps the same creator.
    *
    * An internal UIAM API key is cloned. Any other credential (session, bearer, external key) is
-   * granted from, as is a clone UIAM refuses (no clone endpoint, or it does not accept Kibana's
-   * certificate as a project service account), so a UIAM that cannot clone behaves as `grant`
-   * does. Any other clone failure (a revoked source, a UIAM error) is thrown.
+   * granted from, like `grant`. A clone UIAM refuses because of Kibana and not the key (401, 403 or
+   * 404: a client certificate it does not accept, or no clone endpoint) throws a server error: that
+   * is a project configuration problem to fix, not to hide behind a grant that loses the creator.
+   * Any other clone failure, such as a revoked source key, is thrown as it is.
    *
    * @param request The Kibana request carrying the credential to copy.
    * @param params The name of the new API key.
@@ -198,46 +192,24 @@ export class UiamAPIKeys implements UiamAPIKeysType {
       this.logger.debug('API key was cloned successfully');
       return { id, name: description, api_key: key };
     } catch (e) {
-      const reason = UiamAPIKeys.getCloneRefusalReason(e);
-      if (!reason) {
-        this.logger.error(`Failed to clone API key: ${getDetailedErrorMessage(e)}`);
+      this.logger.error(`Failed to clone API key: ${getDetailedErrorMessage(e)}`);
+      if (!UiamAPIKeys.isCloneRefusal(e)) {
         throw e;
       }
 
-      this.logger.warn(
-        `UIAM refused to clone an API key (${reason}), granting instead. ` +
-          `The copy will be owned by the API key, not its creator: ${getDetailedErrorMessage(e)}`
+      // The caller must not see UIAM's 401 or 403 as if its own credentials were wrong.
+      throw Boom.badImplementation(
+        `UIAM refused to clone an API key (${e.output.statusCode}). This points to the project's ` +
+          `UIAM configuration, such as the client certificate or the UIAM version, or to the ` +
+          `source key's access to the project: ${getDetailedErrorMessage(e)}`,
+        e
       );
-      securityTelemetry.recordApiKeyCopyFallback({ reason });
-      return this.grant(request, { name });
     }
   }
 
-  /**
-   * Tells a clone UIAM cannot serve from one it rejected: a missing endpoint, a caller UIAM did not
-   * authenticate (any 401, as problems with the source key are always a 400), or one it
-   * authenticated as something other than a project service account.
-   * A revoked or malformed source answers 400 and must not fall back.
-   */
-  private static getCloneRefusalReason(error: unknown): ApiKeyCopyFallbackReason | undefined {
-    if (!Boom.isBoom(error)) {
-      return undefined;
-    }
-
-    const { statusCode, payload } = error.output;
-    if (statusCode === 404) {
-      return 'endpoint_not_found';
-    }
-    if (statusCode === 401) {
-      return 'client_not_authenticated';
-    }
-    if (
-      statusCode === 403 &&
-      getUiamErrorCode(payload) === UIAM_ERROR_CODES.PROJECT_PRINCIPAL_REQUIRED
-    ) {
-      return 'client_not_service_account';
-    }
-    return undefined;
+  /** Whether UIAM refused the clone because of Kibana (see {@link CLONE_REFUSAL_STATUS_CODES}). */
+  private static isCloneRefusal(error: unknown): error is Boom.Boom {
+    return Boom.isBoom(error) && CLONE_REFUSAL_STATUS_CODES.has(error.output.statusCode);
   }
 
   /**
