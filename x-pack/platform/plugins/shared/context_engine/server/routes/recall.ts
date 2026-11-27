@@ -124,6 +124,7 @@ const recallResultSchema = schema.object(
 const recallResponseSchema = () =>
   schema.object(
     {
+      // codeql[js/kibana/unbounded-array-in-schema] Response schema: validates server output, not request input
       results: schema.arrayOf(recallResultSchema, {
         meta: { description: 'The recalled results, most relevant first.' },
       }),
