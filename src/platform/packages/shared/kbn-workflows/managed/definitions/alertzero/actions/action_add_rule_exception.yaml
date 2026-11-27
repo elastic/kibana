@@ -130,9 +130,10 @@ steps:
     type: workflow.fail
     if: "${{ steps.fetch_rule.error != nil and steps.fetch_rule.error.message contains 'HTTP 404' }}"
     with:
+      type: NonRetryableError
       message: >-
         The rule was deleted after this proposal was created, so this tuning can't
-        be applied. Approving again won't work, so decline it.
+        be applied.
 
   - name: fail_rule_read
     type: workflow.fail
@@ -146,11 +147,11 @@ steps:
       ${{ inputs.actionInput.expected_revision != nil
         and steps.fetch_rule.output.revision != inputs.actionInput.expected_revision }}
     with:
+      type: NonRetryableError
       message: >-
         The rule was changed by "{{ steps.fetch_rule.output.updated_by }}" after this
-        proposal was created, so this tuning can't be applied. Approving again won't
-        work, so decline it. If the rule keeps producing false positives, a new review
-        will follow.
+        proposal was created, so this tuning can't be applied. If the rule keeps
+        producing false positives, a new review will follow.
 
   # `${{ }}` keeps the entries as objects; `{{ }}` would render a string.
   - name: create_exception

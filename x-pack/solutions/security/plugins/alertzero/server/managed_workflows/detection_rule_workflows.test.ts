@@ -1057,10 +1057,11 @@ describe('detection rule workflows', () => {
           'mark_alerts_declined',
           'mark_alerts_dismissed',
           'mark_alerts_applied',
+          'mark_alerts_stale',
           'mark_alerts_acknowledged',
         ]);
 
-        const [declined, dismissed, applied, acknowledged] = tagSteps;
+        const [declined, dismissed, applied, stale, acknowledged] = tagSteps;
         // A declined entry gate retires the alerts too, or the next sweep re-opens it.
         const entryDecision = reviewSteps.find(({ name }) => name === 'entry_decision')!;
         expect(
@@ -1095,6 +1096,10 @@ describe('detection rule workflows', () => {
           '{{ consts.reviewed_tag }}',
           '{{ consts.applied_tag }}',
         ]);
+        // An approved action that failed on a stale target retires the alerts only when the
+        // rule still exists, and marks them reviewed with no outcome tag.
+        expect(stale.if).toBe('${{ steps.resolve_stale_action.output.processed == true }}');
+        expect(stale.with?.tags_to_add).toEqual(['{{ consts.reviewed_tag }}']);
         // Approving a recommendation the pipeline cannot apply itself acknowledges
         // the manual follow-up and retires the alerts; the auto-apply path keeps
         // its alerts untagged on failure so a later sweep can retry.
@@ -1232,6 +1237,16 @@ describe('detection rule workflows', () => {
           );
 
           expect(failStep?.name).toBe(expectedFailStep);
+          // A deleted or edited rule never recovers, so the gate must not re-offer it. A failed
+          // read can, so it stays retryable.
+          if (
+            expectedFailStep === 'fail_rule_deleted' ||
+            expectedFailStep === 'fail_rule_changed'
+          ) {
+            expect(failStep?.with?.type).toBe('NonRetryableError');
+          } else if (expectedFailStep === 'fail_rule_read') {
+            expect(failStep?.with).not.toHaveProperty('type');
+          }
           // The rule is only touched after every check has had its chance to stop the run.
           expect(steps.findIndex(({ type }) => type.startsWith('security.'))).toBeGreaterThan(
             steps.findIndex((step) => step === failStep)
@@ -1405,6 +1420,8 @@ describe('detection rule workflows', () => {
           'propose_threshold',
           'propose_schedule',
           'propose_manual',
+          // Runs after the gate resumed the run, like the coverage review's notes.
+          'note_action_failed',
         ]);
         const [, previews] = children;
         expect(previews.with?.['workflow-id']).toBe(ALERTZERO_RULE_PREVIEW_WORKFLOW_ID);

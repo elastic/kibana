@@ -316,6 +316,63 @@ describe('tuning_review applied threshold cardinality', () => {
   });
 });
 
+// An action fails as non-retryable when the rule was deleted or changed after the
+// proposal, and the gate then reports it approved with status `failed`.
+describe('tuning_review stale approved action', () => {
+  const engine = createWorkflowLiquidEngine();
+  const withOf = (name: string) => stepByName(name)?.with as Record<string, string> | undefined;
+  const evaluate = (expression: string | undefined, steps: Record<string, unknown>): unknown =>
+    engine.evalValueSync(String(expression).trim().slice(3, -2).trim(), { steps });
+  const renderTemplate = (template: unknown, steps: Record<string, unknown>): string =>
+    engine.parseAndRenderSync(String(template), { steps });
+
+  // A changed rule is still there, and later sweeps only pick up alerts from its latest
+  // version, so its alerts are done. A deleted rule is never harvested again, so there is
+  // nothing to tag. A read that failed says nothing, so the alerts stay untagged.
+  it.each([
+    ['a rule changed since', true, null, { id: 'r1' }, true],
+    ['a rule deleted since', true, { message: 'HTTP 404: Not Found' }, {}, false],
+    ['a rule that could not be read', true, { message: 'HTTP 500: boom' }, {}, false],
+    ['an action that did not fail', false, null, { id: 'r1' }, false],
+  ])('tags the alerts for %s: %s', (_scenario, actionFailed, error, rechecked, expected) => {
+    expect(
+      evaluate(withOf('resolve_stale_action')?.processed, {
+        record_proposal_action_decision: { output: { action_failed: actionFailed } },
+        recheck_rule: { error, output: rechecked },
+      })
+    ).toBe(expected);
+  });
+
+  it.each([
+    ['a processed stale action', true, 'The alerts are marked as reviewed.'],
+    ['an unprocessed stale action', false, 'The alerts stay untagged.'],
+  ])('journals why a stale action did nothing for %s', (_scenario, processed, ending) => {
+    const note = stepByName('note_action_failed');
+    const { message } = (note?.with?.inputs ?? {}) as { message: string };
+
+    expect(renderTemplate(message, { resolve_stale_action: { output: { processed } } })).toBe(
+      '**The approved change could not be applied.** The rule was changed or deleted after this ' +
+        `proposal was created.\n\n${ending}`
+    );
+  });
+
+  it.each([
+    ['a stale action', true, 'other'],
+    ['an applied action', false, 'resolved'],
+  ])('closes the investigation for %s as %s', (_scenario, actionFailed, expected) => {
+    const updates = stepByName('close_investigation_applied')?.with?.updates as Record<
+      string,
+      string
+    >;
+
+    expect(
+      renderTemplate(updates.close_reason, {
+        record_proposal_action_decision: { output: { action_failed: actionFailed } },
+      })
+    ).toBe(expected);
+  });
+});
+
 describe('tuning_review proposal text', () => {
   const engine = createWorkflowLiquidEngine();
 

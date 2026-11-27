@@ -1192,6 +1192,84 @@ describe('Detection Coverage review', () => {
       }
     );
 
+    // A stale target fails the action as non-retryable, so the gate reports the proposal
+    // approved with status `failed`. A rule that was edited since is covered by later
+    // sweeps, so the gap is done. A rule that was deleted, or one that could not be read,
+    // keeps the gap pending.
+    it.each([
+      ['a rule edited since', 'failed', null, { id: 'r1' }, false],
+      ['a rule deleted since', 'failed', { message: 'HTTP 404: Not Found' }, {}, true],
+      ['a rule that could not be read', 'failed', { message: 'HTTP 500: boom' }, {}, true],
+      ['an enable that did not land and did not fail', 'succeeded', null, { id: 'r1' }, true],
+    ])(
+      'enable_approved_not_applied for %s',
+      (_scenario, gateStatus, recheckError, rechecked, expected) => {
+        expect(
+          evaluateExpression(String(outcome?.enable_approved_not_applied), {
+            steps: {
+              propose_enable: { output: { decision: 'approved', status: gateStatus } },
+              refetch_rule: { error: null, output: { enabled: false } },
+              recheck_rule: { error: recheckError, output: rechecked },
+            },
+          })
+        ).toBe(expected);
+      }
+    );
+
+    // Every stale install case, such as a rule installed meanwhile or a version change,
+    // leaves nothing to propose, so the gap is done.
+    it.each([
+      ['an install that failed on a stale target', 'failed', false],
+      ['an install that completed without the rule', 'succeeded', true],
+    ])('install_approved_not_applied for %s', (_scenario, gateStatus, expected) => {
+      expect(
+        evaluateExpression(String(outcome?.install_approved_not_applied), {
+          steps: {
+            propose_install: { output: { decision: 'approved', status: gateStatus } },
+            refetch_rule: { error: { message: 'HTTP 404: not found' }, output: {} },
+          },
+        })
+      ).toBe(expected);
+    });
+
+    it.each([
+      [
+        'a stale enable on a deleted rule',
+        { enable_approved_not_applied: true, install_approved_not_applied: false },
+        'The gap stays pending, and the next sweep checks it again.',
+      ],
+      [
+        'a stale install',
+        { enable_approved_not_applied: false, install_approved_not_applied: false },
+        'Nothing was changed, and the gap will not be checked again.',
+      ],
+    ])('journals why a stale action did nothing for %s', (_scenario, flags, ending) => {
+      const note = stepByName('note_action_failed');
+      const { message } = inputsOf(note) as { message: string };
+
+      expect(
+        createWorkflowLiquidEngine().parseAndRenderSync(message, {
+          steps: { resolve_outcome: { output: flags } },
+        })
+      ).toBe(
+        '**The approved action could not be applied.** The rule changed, was deleted, or is no ' +
+          `longer available since this proposal was created.\n\n${ending}`
+      );
+    });
+
+    it('closes an approved stale action as other, not resolved', () => {
+      const updates = stepByName('close_investigation_resolved')?.with?.updates as Record<
+        string,
+        string
+      >;
+
+      expect(
+        createWorkflowLiquidEngine().parseAndRenderSync(updates.close_reason, {
+          steps: { resolve_outcome: { output: { action_failed: true } } },
+        })
+      ).toBe('other');
+    });
+
     // One source for the queue write and the report. If they were computed separately, a
     // run could report "approved but not applied" and still drop the indicator.
     it.each(APPLIED_FLAGS)('%s is computed once and forwarded to the output', (flag) => {

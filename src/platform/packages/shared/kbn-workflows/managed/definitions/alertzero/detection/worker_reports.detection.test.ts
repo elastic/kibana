@@ -42,8 +42,10 @@ describe('Rule Tuning and Rule Coverage close reports', () => {
         definition: ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW,
         reportStep: 'report_investigation_closed_declined',
       },
+      // An approved action that failed on a stale target closes as `other`, so the report
+      // reads the reason back from the close's output.
       {
-        closeReason: 'resolved',
+        closeReason: '{{ steps.close_investigation_applied.output.metadata.close_reason }}',
         closeStep: 'close_investigation_applied',
         definition: ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW,
         reportStep: 'report_investigation_closed_applied',

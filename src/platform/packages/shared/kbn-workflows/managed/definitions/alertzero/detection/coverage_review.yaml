@@ -950,12 +950,31 @@ steps:
     on-failure:
       continue: true
 
+  # A stale enable only says the rule changed or is gone, so read it again: a 404 means
+  # it was deleted.
+  - name: recheck_rule
+    type: kibana.request
+    if: "${{ steps.propose_enable.output.status == 'failed' }}"
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules?id={{ steps.resolve_rule.output.id | url_encode }}"
+      headers:
+        kbn-xsrf: string
+        elastic-api-version: "2023-10-31"
+        Content-Type: application/json
+    on-failure:
+      continue: true
+
   # Step 8 of 10: decide whether each approved action was applied, and whether anyone
   # decided at all. The gate's `succeeded` only says the action workflow completed;
   # each flag below also reads the re-read rule, so a re-read that failed or found the
   # rule unchanged counts as not applied. `close_investigation`, `mark_processed` and
   # `emit_result` all read these flags, so the investigation, the queue write and the
   # report cannot disagree.
+  #
+  # An approved action that failed as non-retryable (status `failed`) found its target stale,
+  # so it does not count as not applied. The exception is an enable whose rule was deleted
+  # or could not be re-read: the gap stays pending for the next sweep.
   #
   # `decided` is the no-decision hole for the proposal paths: an expired gate
   # completes with neither `approved` nor `dismissed`. `creation_unreviewed` is the
@@ -973,12 +992,19 @@ steps:
       enable_approved_not_applied: >-
         ${{ steps.propose_enable.output.decision == 'approved'
           and not (steps.refetch_rule.error == null
-            and steps.refetch_rule.output.enabled == true) }}
+            and steps.refetch_rule.output.enabled == true)
+          and not (steps.propose_enable.output.status == 'failed'
+            and steps.recheck_rule.error == null
+            and steps.recheck_rule.output.id != null) }}
       install_approved_not_applied: >-
         ${{ steps.propose_install.output.decision == 'approved'
+          and steps.propose_install.output.status != 'failed'
           and not (steps.refetch_rule.error == null
             and steps.refetch_rule.output.id != null
             and steps.refetch_rule.output.enabled == true) }}
+      action_failed: >-
+        ${{ steps.propose_enable.output.status == 'failed'
+          or steps.propose_install.output.status == 'failed' }}
       creation_no_rule: >-
         ${{ steps.coverage_check.output.structured_output.verdict == 'no_coverage'
           and steps.run_rule_creation.error == null
@@ -999,6 +1025,26 @@ steps:
       no_content: >-
         ${{ steps.read_ki.output.hits.total.value > 0
           and steps.gap.output.ready != true }}
+
+  # An approved action that found its target stale tells the analyst why nothing changed,
+  # since the chat would otherwise show an approval with no effect.
+  - name: note_action_failed
+    type: workflow.execute
+    if: >-
+      ${{ steps.create_investigation.output.conversation_id != null
+        and steps.resolve_outcome.output.action_failed == true }}
+    on-failure:
+      continue: true
+    with:
+      workflow-id: system-alertzero-journal-note
+      run-as-mode: inherit
+      inputs:
+        author_name: "{{ consts.author_name }}"
+        conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+        message: |-
+          **The approved action could not be applied.** The rule changed, was deleted, or is no longer available since this proposal was created.
+
+          {% if steps.resolve_outcome.output.enable_approved_not_applied == true or steps.resolve_outcome.output.install_approved_not_applied == true %}The gap stays pending, and the next sweep checks it again.{% else %}Nothing was changed, and the gap will not be checked again.{% endif %}
 
   # Step 9 of 10: close the investigation. Metadata writes fire the
   # ai.conversation.metadataUpdated trigger, which is the emit point for downstream
@@ -1022,7 +1068,7 @@ steps:
               conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
               updates:
                 status: closed
-                close_reason: "{% if steps.report_unresolved_rule.output.decision == 'approved' or steps.report_unconfirmed_rule.output.decision == 'approved' or steps.report_missing_version.output.decision == 'approved' or steps.report_unknown_verdict.output.decision == 'approved' %}other{% else %}resolved{% endif %}"
+                close_reason: "{% if steps.resolve_outcome.output.action_failed == true or steps.report_unresolved_rule.output.decision == 'approved' or steps.report_unconfirmed_rule.output.decision == 'approved' or steps.report_missing_version.output.decision == 'approved' or steps.report_unknown_verdict.output.decision == 'approved' %}other{% else %}resolved{% endif %}"
             on-failure:
               continue: true
 
@@ -1143,9 +1189,9 @@ steps:
   # A gap no rule can be drafted for is also marked processed, so it does not come back.
   # A check without a verdict asked nobody. An expired proposal decided nothing. A failed
   # rule-creation run decided nothing, and one whose draft could not be attached asked
-  # nobody. An approved action that changed nothing did not apply the decision. In each
-  # case the indicator stays pending for the next sweep, except when `mark_invalid`
-  # retires it.
+  # nobody. An approved action that changed nothing did not apply the decision, unless
+  # its target was stale (see `resolve_outcome`). In each case the indicator stays pending
+  # for the next sweep, except when `mark_invalid` retires it.
   #
   # Only `attributes.status` is written. `attributes` merges on update. `tags` is a list,
   # and a partial update replaces the full list. This workflow does not write tags.

@@ -90,9 +90,9 @@ steps:
     type: workflow.fail
     if: "${{ steps.fetch_rule.error != nil and steps.fetch_rule.error.message contains 'HTTP 404' }}"
     with:
+      type: NonRetryableError
       message: >-
         The rule was deleted after this proposal was created, so it can't be enabled.
-        Approving again won't work, so decline it.
 
   - name: fail_rule_read
     type: workflow.fail
@@ -124,10 +124,11 @@ steps:
       ${{ steps.fetch_rule.output.enabled != true
         and steps.fetch_rule.output.revision != inputs.actionInput.expected_revision }}
     with:
+      type: NonRetryableError
       message: >-
         The rule "{{ steps.fetch_rule.output.name }}" was changed by
         "{{ steps.fetch_rule.output.updated_by }}" after this proposal was created,
-        so it can't be enabled. Approving again won't work, so decline it.
+        so it can't be enabled.
 
   # The bulk API reports an already-enabled rule as succeeded, so the read above
   # is the only way to tell that case apart.
