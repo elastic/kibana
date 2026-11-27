@@ -59,6 +59,8 @@ export const MOBILE_FIELDS = {
   exceptionType: attributeField(EXCEPTION_TYPE),
   exceptionMessage: attributeField(EXCEPTION_MESSAGE),
   exceptionStacktrace: attributeField(EXCEPTION_STACKTRACE),
+  /** `javascript` on the crash records EDOT React Native sends for uncaught JavaScript errors. */
+  exceptionSource: attributeField('elastic.exception.source'),
   /** A crash's group, once ingest stores one; no SDK or pipeline writes it yet. */
   exceptionFingerprint: attributeField('elastic.error.grouping_key'),
   eventName: OTEL_EVENT_NAME,

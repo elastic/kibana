@@ -99,6 +99,13 @@ describe('crash fingerprint rules', () => {
     );
   });
 
+  it('groups the JavaScript errors EDOT React Native reports itself by message, not by stack', () => {
+    expect(fingerprintOf('javascriptSourceA')).toBe(fingerprintOf('javascriptSourceB'));
+    expect(crashFramesOf(CRASH_FINGERPRINT_CASES.javascriptSourceA)).toBe(
+      "undefined is not an object (evaluating 'payee.iban')"
+    );
+  });
+
   it("tells an iOS report by how it starts, not by a line an error's message can repeat", () => {
     expect(isIosReportOf(CRASH_FINGERPRINT_CASES.iosLaunchA)).toBe(true);
     expect(isIosReportOf(CRASH_FINGERPRINT_CASES.jvmMentioningCrashed)).toBe(false);
@@ -162,7 +169,9 @@ describe('crashFingerprint', () => {
   });
 
   it('reads JavaScript errors from their message and other crashes from their stack trace', () => {
-    expect(printed).toContain('`attributes.exception.type` LIKE "*JavascriptException"');
+    expect(printed).toContain(
+      '`attributes.exception.type` LIKE "*JavascriptException" OR `attributes.elastic.exception.source` == "javascript"'
+    );
     expect(printed).toContain('REPLACE(`attributes.exception.message`, "(?s)\\\\n.*", "")');
     expect(printed).toContain('`attributes.exception.stacktrace` LIKE "Incident Identifier:*"');
   });

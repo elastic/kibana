@@ -63,8 +63,10 @@ export type CrashKind = keyof typeof CRASH_FRAME_RULES;
 /** Longest crash fingerprint a route or URL takes: a computed one is 64 characters. */
 export const MAX_CRASH_FINGERPRINT_LENGTH = 256;
 
-/** `exception.type` suffix of the JavaScript errors React Native reports as crashes. */
+/** `exception.type` suffix of the JavaScript errors React Native reports through the native SDKs. */
 export const JAVASCRIPT_EXCEPTION_SUFFIX = 'JavascriptException';
+/** `elastic.exception.source` of the JavaScript errors EDOT React Native reports itself. */
+export const JAVASCRIPT_EXCEPTION_SOURCE = 'javascript';
 /**
  * The release in a PLCrashReporter report's `Version:` line, e.g. `8.4.0` of `8.4.0 (840)`, or an
  * empty string without one. EDOT iOS sends a crash on the next launch, with that launch's resource,
@@ -127,7 +129,8 @@ export const reportOsVersion = (): ESQLAstExpression => fromIosReport(IOS_REPORT
 /** The frames a crash is grouped on, as an ES|QL expression. */
 export const crashFrames = (): ESQLAstExpression =>
   esql.exp`CASE(
-    ${mobileColumn('exceptionType')} LIKE ${`*${JAVASCRIPT_EXCEPTION_SUFFIX}`},
+    ${mobileColumn('exceptionType')} LIKE ${`*${JAVASCRIPT_EXCEPTION_SUFFIX}`}
+      OR ${mobileColumn('exceptionSource')} == ${JAVASCRIPT_EXCEPTION_SOURCE},
     ${withRules(mobileColumn('exceptionMessage'), 'javascript')},
     ${isIosReport()},
     ${withRules(mobileColumn('exceptionStacktrace'), 'ios')},

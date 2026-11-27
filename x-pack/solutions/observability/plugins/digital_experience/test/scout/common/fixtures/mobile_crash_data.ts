@@ -54,6 +54,7 @@ interface Crash {
   type?: string;
   message?: string;
   stacktrace?: string;
+  source?: string;
   storedFingerprint?: string;
   /** Unset for a crash whose resource has no device model. */
   deviceModel?: string;
@@ -388,6 +389,7 @@ const documents = [
         ...(crash.type ? { 'exception.type': crash.type } : {}),
         ...(crash.message ? { 'exception.message': crash.message } : {}),
         ...(crash.stacktrace ? { 'exception.stacktrace': crash.stacktrace } : {}),
+        ...(crash.source ? { 'elastic.exception.source': crash.source } : {}),
         ...(crash.storedFingerprint
           ? { 'elastic.error.grouping_key': crash.storedFingerprint }
           : {}),
