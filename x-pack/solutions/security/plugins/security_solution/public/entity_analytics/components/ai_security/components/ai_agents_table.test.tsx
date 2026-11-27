@@ -79,23 +79,44 @@ describe('AiAgentsTable', () => {
     renderTable();
     const table = screen.getByTestId(AI_AGENTS_TABLE_TEST_ID);
     expect(within(table).getAllByText('Runs as').length).toBeGreaterThan(0);
+    expect(within(table).getAllByText('Signed in as').length).toBeGreaterThan(0);
     expect(within(table).queryByText('Owner')).not.toBeInTheDocument();
     const claudeRow = screen.getByTestId('aiAgentsTableRow-ai_agent:claude_code@host-1@ec2-user');
     expect(claudeRow).toHaveTextContent('Claude Code');
     expect(claudeRow).toHaveTextContent('build-01');
     expect(claudeRow).toHaveTextContent('alex@example.com');
-    expect(claudeRow).toHaveTextContent('2.1.332');
     expect(claudeRow).toHaveTextContent('3');
-    expect(claudeRow).toHaveTextContent('High');
+    expect(claudeRow).toHaveTextContent('72');
   });
 
-  it('copes with sparse rows: no host name, no version, no account and no score', () => {
+  it('shows the first account and a count of the rest', () => {
+    render(
+      <TestProviders>
+        <AiAgentsTable
+          rows={[
+            row({
+              entityId: 'ai_agent:claude_code@host-1@ec2-user',
+              accountEmails: ['alex@example.com', 'sam@example.com', 'kim@example.com'],
+            }),
+          ]}
+          loading={false}
+          alertsUnavailable={false}
+          onOpenAgent={jest.fn()}
+        />
+      </TestProviders>
+    );
+    const claudeRow = screen.getByTestId('aiAgentsTableRow-ai_agent:claude_code@host-1@ec2-user');
+    expect(claudeRow).toHaveTextContent('alex@example.com');
+    expect(claudeRow).toHaveTextContent('+2');
+    expect(claudeRow).not.toHaveTextContent('sam@example.com');
+  });
+
+  it('copes with sparse rows: no host name, no account and no score', () => {
     renderTable();
     const cursorRow = screen.getByTestId('aiAgentsTableRow-ai_agent:cursor@host-2@jenkins');
     expect(cursorRow).toHaveTextContent('host-2');
-    expect(cursorRow).toHaveTextContent('Unknown');
-    expect(cursorRow).toHaveTextContent('None seen');
-    expect(cursorRow).toHaveTextContent('No score yet');
+    expect(cursorRow).not.toHaveTextContent('None seen');
+    expect(cursorRow).not.toHaveTextContent('No score yet');
   });
 
   it("names each agent's own watchlists, and finds agents by watchlist name", () => {

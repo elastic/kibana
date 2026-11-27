@@ -21,32 +21,28 @@ import {
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { RiskScoreCell } from '../../home/entities_table/risk_score_cell';
-import { RiskLevelBadge } from '../../../../flyout_v2/entity/shared/components/risk_level_badge';
 import { TruncatedBadgeList } from '../../../../flyout_v2/entity/shared/components/entity_source_value';
 import { useWatchlistLookup } from '../hooks/use_watchlist_lookup';
 import type { AgentInventoryRow } from '../types';
 import { getAgentDisplayName } from '../utils';
 import { getAgentIconType } from './agent_logo';
 import {
-  COLUMN_ACCOUNTS,
   COLUMN_AGENT,
   COLUMN_ALERTS,
-  COLUMN_FIRST_SEEN,
   COLUMN_HOST,
   COLUMN_LAST_SEEN,
   COLUMN_RISK,
   COLUMN_RUNS_AS,
-  COLUMN_VERSION,
+  COLUMN_SIGNED_IN_AS,
   COLUMN_WATCHLISTS,
-  NO_ACCOUNT,
-  NO_SCORE_YET,
   OPEN_FLYOUT,
   SEARCH_PLACEHOLDER,
-  UNKNOWN_VERSION,
   WATCHLISTS_OVERFLOW_TITLE,
 } from '../translations';
 
 export const AI_AGENTS_TABLE_TEST_ID = 'aiAgentsTable';
+
+const LAST_SEEN_RELATIVE_HOURS = 24 * 7;
 
 export interface AiAgentsTableProps {
   readonly rows: readonly AgentInventoryRow[];
@@ -95,6 +91,33 @@ export const AiAgentsTable = memo(
           ),
         },
         {
+          field: 'accountEmails',
+          name: COLUMN_SIGNED_IN_AS,
+          truncateText: true,
+          render: (emails: readonly string[]) => {
+            const [first, ...rest] = emails;
+            if (first == null) {
+              return getEmptyTagValue();
+            }
+            return (
+              <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>
+                <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
+                  <EuiText size="s" className="eui-textTruncate">
+                    {first}
+                  </EuiText>
+                </EuiFlexItem>
+                {rest.length > 0 && (
+                  <EuiFlexItem grow={false}>
+                    <EuiToolTip content={rest.join(', ')}>
+                      <EuiBadge color="hollow" tabIndex={0}>{`+${rest.length}`}</EuiBadge>
+                    </EuiToolTip>
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            );
+          },
+        },
+        {
           field: 'hostName',
           name: COLUMN_HOST,
           sortable: true,
@@ -105,46 +128,26 @@ export const AiAgentsTable = memo(
           field: 'userName',
           name: COLUMN_RUNS_AS,
           sortable: true,
+          truncateText: true,
           render: (userName: string) =>
             userName === 'root' ? <EuiBadge color="danger">{userName}</EuiBadge> : userName,
-        },
-        {
-          field: 'accountEmails',
-          name: COLUMN_ACCOUNTS,
-          render: (emails: readonly string[]) =>
-            emails.length === 0 ? (
-              <EuiText size="xs" color="subdued">
-                {NO_ACCOUNT}
-              </EuiText>
-            ) : (
-              <EuiFlexGroup direction="column" gutterSize="none">
-                {emails.map((email) => (
-                  <EuiFlexItem key={email}>
-                    <EuiText size="xs">{email}</EuiText>
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
-            ),
-        },
-        {
-          field: 'version',
-          name: COLUMN_VERSION,
-          sortable: true,
-          render: (version: string | undefined) => version ?? UNKNOWN_VERSION,
-        },
-        {
-          field: 'firstSeen',
-          name: COLUMN_FIRST_SEEN,
-          sortable: true,
-          render: (value: string | undefined) =>
-            value ? <FormattedRelativePreferenceDate value={value} /> : getEmptyTagValue(),
         },
         {
           field: 'lastSeen',
           name: COLUMN_LAST_SEEN,
           sortable: true,
+          width: '128px',
           render: (value: string | undefined) =>
-            value ? <FormattedRelativePreferenceDate value={value} /> : getEmptyTagValue(),
+            value ? (
+              <span className="eui-textNoWrap">
+                <FormattedRelativePreferenceDate
+                  value={value}
+                  relativeThresholdInHrs={LAST_SEEN_RELATIVE_HOURS}
+                />
+              </span>
+            ) : (
+              getEmptyTagValue()
+            ),
         },
         {
           field: 'alertCount',
@@ -163,7 +166,7 @@ export const AiAgentsTable = memo(
         {
           field: 'watchlistIds',
           name: COLUMN_WATCHLISTS,
-          width: '160px',
+          width: '200px',
           render: (watchlistIds: readonly string[]) => (
             <TruncatedBadgeList
               values={watchlistLookup(watchlistIds).map(({ name }) => name)}
@@ -178,23 +181,8 @@ export const AiAgentsTable = memo(
           field: 'riskScore',
           name: COLUMN_RISK,
           sortable: true,
-          render: (score: number | undefined, row: AgentInventoryRow) =>
-            score == null && !row.riskLevel ? (
-              <EuiText size="xs" color="subdued">
-                {NO_SCORE_YET}
-              </EuiText>
-            ) : row.riskLevel ? (
-              <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <RiskScoreCell riskScore={score} />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <RiskLevelBadge riskLevel={row.riskLevel} />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            ) : (
-              <RiskScoreCell riskScore={score} />
-            ),
+          width: '80px',
+          render: (score: number | undefined) => <RiskScoreCell riskScore={score} />,
         },
       ],
       [alertsUnavailable, onOpenAgent, watchlistLookup]

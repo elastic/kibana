@@ -16,7 +16,7 @@ export const PAGE_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.entityAnalytics.aiSecurity.pageDescription',
   {
     defaultMessage:
-      'One row per install of an AI coding agent, from the Entity Store. Select a row for its context, alerts and activity.',
+      'AI coding agents running on your hosts, and the people they act for. Select one to investigate.',
   }
 );
 
@@ -73,22 +73,10 @@ export const COLUMN_RUNS_AS = i18n.translate(
     defaultMessage: 'Runs as',
   }
 );
-export const COLUMN_ACCOUNTS = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.aiSecurity.columns.accounts',
+export const COLUMN_SIGNED_IN_AS = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.aiSecurity.columns.signedInAs',
   {
-    defaultMessage: 'Accounts seen',
-  }
-);
-export const COLUMN_VERSION = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.aiSecurity.columns.version',
-  {
-    defaultMessage: 'Version',
-  }
-);
-export const COLUMN_FIRST_SEEN = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.aiSecurity.columns.firstSeen',
-  {
-    defaultMessage: 'First seen',
+    defaultMessage: 'Signed in as',
   }
 );
 export const COLUMN_LAST_SEEN = i18n.translate(
@@ -120,12 +108,6 @@ export const UNKNOWN_VERSION = i18n.translate(
   'xpack.securitySolution.entityAnalytics.aiSecurity.unknownVersion',
   {
     defaultMessage: 'Unknown',
-  }
-);
-export const NO_ACCOUNT = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.aiSecurity.noAccount',
-  {
-    defaultMessage: 'None seen',
   }
 );
 export const NO_SCORE_YET = i18n.translate(
