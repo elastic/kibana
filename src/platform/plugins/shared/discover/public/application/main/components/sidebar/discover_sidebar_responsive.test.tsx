@@ -695,6 +695,9 @@ describe('discover responsive sidebar', function () {
     // open flyout
     await user.click(screen.getByTestId('discover-sidebar-fields-button'));
 
+    expect(screen.queryByText('Data view')).not.toBeInTheDocument();
+    expect(screen.getByTestId('dataView-switch-link')).toHaveTextContent('logstash-*');
+
     // open data view picker
     await user.click(await screen.findByTestId('dataView-switch-link'));
     expect(await screen.findByTestId('changeDataViewPopover')).toBeInTheDocument();
