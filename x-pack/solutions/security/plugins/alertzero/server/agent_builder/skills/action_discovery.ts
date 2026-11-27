@@ -18,7 +18,7 @@ export const createActionDiscoverySkill = (assertAccess: AssertAlertZeroAccess):
     description:
       'Discover installed AlertZero action workflows and their input schemas when choosing an action to propose or explaining available response and configuration actions.',
     availability: {
-      cacheMode: 'none',
+      cacheMode: 'space-user',
       handler: async ({ request }) => {
         try {
           await assertAccess(request, 'read');

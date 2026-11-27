@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { operationToEsqlCondition, parseOperationCondition } from '@kbn/trace-latency-map';
 import { extractFilters } from './extract_filters';
 
 describe('extractFilters', () => {
@@ -158,6 +159,61 @@ describe('extractFilters', () => {
       const query = 'FROM traces* | STATS count() BY service.name | SORT count() DESC';
       const result = extractFilters(query);
       expect(result).toEqual([]);
+    });
+  });
+
+  describe('as the parser reads the query', () => {
+    it('drops a comment after the expression', () => {
+      const query = 'FROM traces* | WHERE service.name == "foo" // mine\n| LIMIT 10';
+      expect(extractFilters(query)).toEqual(['service.name == "foo"']);
+    });
+
+    it('keeps the parentheses of the source', () => {
+      const query = 'FROM traces* | WHERE (a == 1 OR b == 2) AND ((c == 3))';
+      expect(extractFilters(query)).toEqual(['(a == 1 OR b == 2) AND ((c == 3))']);
+    });
+
+    it('leaves a WHERE inside a FORK branch out: it is not a filter of the whole query', () => {
+      const query = 'FROM traces* | FORK (WHERE a == 1) (WHERE b == 2) | WHERE c == 3';
+      expect(extractFilters(query)).toEqual(['c == 3']);
+    });
+
+    it('falls back to the text of a query that does not parse', () => {
+      const query = 'FROM traces* | WHERE service.name == "foo" | WHERE';
+      expect(extractFilters(query)).toEqual(['service.name == "foo"']);
+    });
+  });
+
+  describe('string literals', () => {
+    it('keeps a pipe inside a string literal part of its filter', () => {
+      const query = 'FROM traces* | WHERE span.name == "a|b" | WHERE status == "error"';
+      expect(extractFilters(query)).toEqual(['span.name == "a|b"', 'status == "error"']);
+    });
+
+    it('does not treat the word "where" inside a string literal as a command', () => {
+      const query = 'FROM traces* | WHERE transaction.name == "GET /where/:id"';
+      expect(extractFilters(query)).toEqual(['transaction.name == "GET /where/:id"']);
+    });
+
+    it('respects escaped quotes inside literals', () => {
+      const query = 'FROM traces* | WHERE name == "say \\"where | what\\"" | LIMIT 10';
+      expect(extractFilters(query)).toEqual(['name == "say \\"where | what\\""']);
+    });
+
+    it('treats triple-quoted strings as literals', () => {
+      const query = 'FROM traces* | WHERE message LIKE """a | where b""" | WHERE x == 1';
+      // The parser prints the literal in its plain form: the same value.
+      expect(extractFilters(query)).toEqual(['message LIKE "a | where b"', 'x == 1']);
+    });
+
+    it('round-trips an operation condition whose name holds a pipe and "where"', () => {
+      // The latency map writes arbitrary operation names into the query; extracting the
+      // clause back must return it intact for the badge and for clearing it.
+      const operation = { service: 'cart', name: 'GET /where|:id' };
+      const condition = operationToEsqlCondition(operation);
+      const [extracted] = extractFilters(`FROM traces* | WHERE ${condition}`);
+      expect(extracted).toBe(condition);
+      expect(parseOperationCondition(extracted)).toEqual(operation);
     });
   });
 });
