@@ -28,6 +28,7 @@ interface UseVisorNlToEsqlParams {
   telemetryService?: ESQLEditorTelemetryService;
   previewPendingRef: PreviewPendingRef;
   publishQuery: (query: string) => void;
+  dismissAllReviews: () => void;
 }
 
 export const useVisorNlToEsql = ({
@@ -38,6 +39,7 @@ export const useVisorNlToEsql = ({
   telemetryService,
   previewPendingRef,
   publishQuery,
+  dismissAllReviews,
 }: UseVisorNlToEsqlParams) => {
   const { euiTheme } = useEuiTheme();
   const reviewRef = useRef<Parameters<VisorNlResultHandler>[1] | undefined>(undefined);
@@ -98,9 +100,9 @@ export const useVisorNlToEsql = ({
       const model = editorModel.current;
       if (!editor || !model) return;
 
-      // Revert any outstanding review so the next plan is against the original query,
-      // not leftover generated lines from the previous result.
-      dismiss();
+      // Remove any outstanding preview, from any flow, so the next plan is against the
+      // original query and no other review reacts to this insertion.
+      dismissAllReviews();
 
       reviewRef.current = review;
 
@@ -134,7 +136,7 @@ export const useVisorNlToEsql = ({
         insertAndReview();
       }
     },
-    [editorRef, editorModel, dismiss, showReview, onAfterInsert, previewPendingRef]
+    [editorRef, editorModel, dismissAllReviews, showReview, onAfterInsert, previewPendingRef]
   );
 
   return { showVisorReview, acceptReview, dismissReview: dismiss };

@@ -266,7 +266,7 @@ describe('useReplaceReview', () => {
     expect(params.onAfterReject).toHaveBeenCalledTimes(1);
   });
 
-  it('an edit ends the review, removes the suggestion and publishes the resulting text', async () => {
+  it('an edit ends the review and removes the suggestion, which publishes the text itself', async () => {
     const params = makeParams();
     const { editor, executeEdits, emitContentChange } = buildEditor();
     params.editorRef.current = editor;
@@ -284,7 +284,7 @@ describe('useReplaceReview', () => {
 
     expect(result.current.reviewStateRef.current).toBeNull();
     expect(executeEdits).toHaveBeenCalledWith('test-edit-reject', expect.any(Array));
-    expect(params.publishQuery).toHaveBeenCalledWith(MODEL_VALUE);
+    expect(params.publishQuery).not.toHaveBeenCalled();
     expect(params.onAfterReject).not.toHaveBeenCalled();
     expect(params.onAfterAccept).not.toHaveBeenCalled();
   });

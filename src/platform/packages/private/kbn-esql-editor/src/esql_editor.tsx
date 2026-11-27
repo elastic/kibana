@@ -331,6 +331,17 @@ const ESQLEditorInternal = function ESQLEditor({
     [onTextLangQueryChange]
   );
 
+  // The editor reports a query replaced from outside, such as a tab switch, as a model change
+  // too. That text is already the committed query, so it must not be echoed back as an edit.
+  const publishEditedQuery = useCallback(
+    (value: string) => {
+      if (value !== fixedQueryRef.current) onQueryUpdate(value);
+    },
+    [onQueryUpdate]
+  );
+
+  const dismissAllReviews = useCallback(() => pendingReviewRef.current.dismiss(), []);
+
   const onEditorModelChange = useCallback(
     (value: string) => {
       if (previewPendingRef.current) return;
@@ -673,7 +684,8 @@ const ESQLEditorInternal = function ESQLEditor({
     telemetryService,
     onAfterInsert: expandToFitContent,
     previewPendingRef,
-    publishQuery: onQueryUpdate,
+    publishQuery: publishEditedQuery,
+    dismissAllReviews,
   });
 
   const onGenerateFromCommentRef = useRef(onGenerateFromComment);
@@ -738,7 +750,8 @@ const ESQLEditorInternal = function ESQLEditor({
     telemetryService,
     onAfterInsert: expandToFitContent,
     previewPendingRef,
-    publishQuery: onQueryUpdate,
+    publishQuery: publishEditedQuery,
+    dismissAllReviews,
   });
 
   const focusEditor = useCallback(() => editorRef.current?.focus(), []);
@@ -759,7 +772,8 @@ const ESQLEditorInternal = function ESQLEditor({
     onAfterInsert: expandToFitContent,
     telemetryService,
     previewPendingRef,
-    publishQuery: onQueryUpdate,
+    publishQuery: publishEditedQuery,
+    dismissAllReviews,
   });
 
   // The first review that reports it was pending wins; accepting submits the query itself.

@@ -33,7 +33,7 @@ interface UseReplaceReviewParams {
   isReplaceMode?: (state: ReviewState) => boolean;
   /** Cleared when the review ends so the following accept/reject edit can publish. */
   previewPendingRef?: PreviewPendingRef;
-  /** Publishes the editor text once an edit has ended the review, as edits made while it was pending were not. */
+  /** Publishes the editor text when an edit ends the review without removing any suggestion text. */
   publishQuery: (query: string) => void;
   onAfterAccept?: (state: ReviewState, acceptedQuery: string) => void;
   onAfterReject?: (state: ReviewState) => void;
@@ -58,6 +58,7 @@ const alwaysReplace = () => true;
  *  - accept      — keeps the suggestion and drops the original lines; false if nothing was pending
  *
  * Editing the query ends the review: the suggestion is removed and the resulting text published.
+ * Nothing is published for a query replaced from outside, such as a tab switch.
  */
 export const useReplaceReview = ({
   editorRef,
@@ -109,7 +110,7 @@ export const useReplaceReview = ({
 
     cleanup();
 
-    if (!editor || !model || !block || block.isEmpty()) return;
+    if (!editor || !model || !block || block.isEmpty()) return false;
 
     // The preview was inserted with one newline. Remove it too, unless the user joined the
     // first generated line to an original one, in which case only the generated text goes.
@@ -133,6 +134,7 @@ export const useReplaceReview = ({
         text: null,
       },
     ]);
+    return true;
   }, [editorRef, editorModel, cleanup, editSourceId]);
 
   const reject = useCallback(() => {
@@ -256,8 +258,9 @@ export const useReplaceReview = ({
         editor.onDidChangeModelContent(() => {
           queueMicrotask(() => {
             if (reviewStateRef.current !== state) return;
-            dismiss();
-            publishQuery(editorModel.current?.getValue() ?? '');
+            // Removing the suggestion publishes the text itself. Only publish here when there was
+            // nothing to remove, for example after the user replaced the whole query.
+            if (!dismiss()) publishQuery(editorModel.current?.getValue() ?? '');
           });
         }),
       ];

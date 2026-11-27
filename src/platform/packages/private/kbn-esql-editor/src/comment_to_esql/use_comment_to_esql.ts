@@ -49,6 +49,7 @@ interface UseCommentToEsqlParams {
   onAfterInsert?: () => void;
   previewPendingRef?: PreviewPendingRef;
   publishQuery: (query: string) => void;
+  dismissAllReviews: () => void;
 }
 
 export const useCommentToEsql = ({
@@ -64,6 +65,7 @@ export const useCommentToEsql = ({
   onAfterInsert,
   previewPendingRef,
   publishQuery,
+  dismissAllReviews,
 }: UseCommentToEsqlParams) => {
   const { euiTheme } = useEuiTheme();
   // Aborts the in-flight nl_to_esql HTTP request when the user retriggers or accepts/rejects.
@@ -303,6 +305,9 @@ export const useCommentToEsql = ({
         result.content.trimEnd().split('\n').length
       );
 
+      // Another flow may have shown a preview while this request was running.
+      dismissAllReviews();
+
       const liveModel = editorModel.current;
       const anchorRanges = commentAnchorRef.current?.getRanges() ?? [];
       clearCommentAnchor();
@@ -367,6 +372,7 @@ export const useCommentToEsql = ({
     showReview,
     clearGeneratingDecoration,
     previewPendingRef,
+    dismissAllReviews,
   ]);
 
   return {
@@ -374,6 +380,8 @@ export const useCommentToEsql = ({
     isReviewActiveRef: reviewStateRef,
     isGeneratingRef,
     acceptReview,
-    dismissReview: cleanup,
+    // Only the review: the editor calls this while a generation of this hook may be running,
+    // and that generation still needs its comment anchor.
+    dismissReview,
   };
 };

@@ -75,6 +75,7 @@ interface UseSuggestFixParams {
   onAfterInsert?: () => void;
   previewPendingRef?: PreviewPendingRef;
   publishQuery: (query: string) => void;
+  dismissAllReviews: () => void;
 }
 
 export const useSuggestFix = ({
@@ -88,6 +89,7 @@ export const useSuggestFix = ({
   onAfterInsert,
   previewPendingRef,
   publishQuery,
+  dismissAllReviews,
 }: UseSuggestFixParams) => {
   const { euiTheme } = useEuiTheme();
 
@@ -204,6 +206,9 @@ export const useSuggestFix = ({
           return;
         }
 
+        // The request took a while, so another flow may have shown a preview meanwhile.
+        dismissAllReviews();
+
         const fixedQuery = result.content.replace(/\n+$/, '');
         const originalLines = model.getValue().split('\n');
         const fixedLines = fixedQuery.split('\n');
@@ -274,6 +279,7 @@ export const useSuggestFix = ({
       editorRef,
       editorModel,
       rejectFix,
+      dismissAllReviews,
       http,
       onAfterInsert,
       trackFixResult,

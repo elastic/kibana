@@ -92,6 +92,8 @@ describe('useVisorNlToEsql', () => {
     const onSubmit = jest.fn();
     const previewPendingRef = { current: false };
     const publishQuery = jest.fn();
+    const dismissReviewRef: { current: (() => void) | undefined } = { current: undefined };
+    const dismissAllReviews = jest.fn(() => dismissReviewRef.current?.());
 
     const rendered = renderHook(() =>
       useVisorNlToEsql({
@@ -100,14 +102,18 @@ describe('useVisorNlToEsql', () => {
         onSubmit,
         previewPendingRef,
         publishQuery,
+        dismissAllReviews,
       })
     );
+
+    dismissReviewRef.current = () => rendered.result.current.dismissReview();
 
     return {
       ...rendered,
       onSubmit,
       previewPendingRef,
       publishQuery,
+      dismissAllReviews,
       executeEdits,
       emitContentChange,
       collapseGeneratedBlock,
@@ -157,8 +163,9 @@ describe('useVisorNlToEsql', () => {
       await Promise.resolve();
     });
 
+    // Removing the suggestion publishes the text through the editor's own change handler.
     expect(model.getValue()).toBe('FROM traces-*');
-    expect(publishQuery).toHaveBeenCalledWith('FROM traces-*');
+    expect(publishQuery).not.toHaveBeenCalled();
     expect(onReject).not.toHaveBeenCalled();
 
     // Nothing is pending any more, so Run submits the editor's own query.
@@ -189,6 +196,20 @@ describe('useVisorNlToEsql', () => {
     expect(executeEdits).not.toHaveBeenCalled();
     expect(publishQuery).toHaveBeenCalledWith('FROM traces-*');
     expect(model.getValue()).toBe('FROM traces-*');
+  });
+
+  it('dismisses every pending review before inserting a new suggestion', () => {
+    const model = buildModel(ORIGINAL);
+    const { result, dismissAllReviews, executeEdits } = renderVisor(model);
+
+    act(() => {
+      result.current.showVisorReview(GENERATED, { onAccept: jest.fn() });
+    });
+
+    expect(dismissAllReviews).toHaveBeenCalledTimes(1);
+    expect(dismissAllReviews.mock.invocationCallOrder[0]).toBeLessThan(
+      executeEdits.mock.invocationCallOrder[0]
+    );
   });
 
   it('removes the suggestion when it is dismissed from outside, for example by History', () => {
