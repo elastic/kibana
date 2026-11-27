@@ -11,15 +11,20 @@ import type { ProductName } from './product';
 
 /**
  * Returns the index name suffix for an inference ID, or an empty string for the implied default
- * ELSER endpoint.
+ * ELSER endpoint. The id is validated before the implied-default check, because that check is a
+ * substring match on `elser` that would otherwise let a malformed ELSER-like id (e.g. `elser,x`)
+ * skip validation and silently resolve to the default index.
  */
 const getInferenceIdSuffix = (inferenceId?: string): string => {
-  if (inferenceId === undefined || isImpliedDefaultElserInferenceId(inferenceId)) {
+  if (inferenceId === undefined) {
     return '';
   }
   const error = validateInferenceId(inferenceId);
   if (error) {
     throw new Error(error);
+  }
+  if (isImpliedDefaultElserInferenceId(inferenceId)) {
+    return '';
   }
   return `-${inferenceId}`;
 };

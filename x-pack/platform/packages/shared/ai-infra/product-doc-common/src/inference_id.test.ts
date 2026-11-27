@@ -13,13 +13,17 @@ describe('isValidInferenceId', () => {
     expect(isValidInferenceId(id)).toBe(true);
   });
 
-  it.each(['my-custom_endpoint.v2', '.anyInferenceId'])('accepts the custom endpoint %s', (id) => {
-    expect(isValidInferenceId(id)).toBe(true);
-  });
+  it.each(['my-custom_endpoint.v2', '.any-inference-id'])(
+    'accepts the custom endpoint %s',
+    (id) => {
+      expect(isValidInferenceId(id)).toBe(true);
+    }
+  );
 
   it.each([
     ['a comma-separated list', '.multilingual-e5-small-elasticsearch,.kibana_9.6.0_001'],
     ['a wildcard', '.multilingual-e5-small-elasticsearch*'],
+    ['uppercase letters', '.AnyInferenceId'],
     ['a space', 'my endpoint'],
     ['a slash', 'my/endpoint'],
     ['an empty string', ''],

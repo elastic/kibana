@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-export const INFERENCE_ID_MAX_LENGTH = 256;
+// The id becomes part of an Elasticsearch index name, which is capped at 255 bytes. A limit of 128
+// characters stays well under that once the index prefix is added.
+export const INFERENCE_ID_MAX_LENGTH = 128;
 
-// The id becomes part of an index name, so it must not contain multi-index or pattern
-// characters such as `,` and `*`.
-const INFERENCE_ID_PATTERN = /^[a-zA-Z0-9._-]+$/;
+// The id becomes part of an Elasticsearch index name, so it must be lowercase (index names cannot
+// contain uppercase) and must not contain multi-index or pattern characters such as `,` and `*`.
+const INFERENCE_ID_PATTERN = /^[a-z0-9._-]+$/;
 
 /**
  * Returns true if the inference id is safe to embed in an Elasticsearch index name.
@@ -25,4 +27,4 @@ export const isValidInferenceId = (inferenceId: string): boolean =>
 export const validateInferenceId = (inferenceId: string): string | undefined =>
   isValidInferenceId(inferenceId)
     ? undefined
-    : `inferenceId must be 1-${INFERENCE_ID_MAX_LENGTH} characters of letters, digits, '.', '_' or '-'`;
+    : `inferenceId must be 1-${INFERENCE_ID_MAX_LENGTH} characters of lowercase letters, digits, '.', '_' or '-'`;

@@ -18,6 +18,7 @@ import {
   DocumentationProduct,
   type ProductName,
   ResourceTypes,
+  validateInferenceId,
 } from '@kbn/product-doc-common';
 import { defaultInferenceEndpoints, InferenceEndpointProvider } from '@kbn/inference-common';
 import { cloneDeep } from 'lodash';
@@ -729,6 +730,10 @@ export class PackageInstaller {
 
   async uninstallAll(params: { inferenceId?: string; resourceType?: ResourceType } = {}) {
     const { inferenceId, resourceType } = params;
+    const error = inferenceId !== undefined ? validateInferenceId(inferenceId) : undefined;
+    if (error) {
+      throw new Error(error);
+    }
     const allProducts = Object.values(DocumentationProduct);
     for (const productName of allProducts) {
       await this.productDocClient.setUninstallationStarted(productName, inferenceId);
