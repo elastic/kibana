@@ -10,6 +10,11 @@ jest.mock('@kbn/upgrade-assistant-pkg-server/src/es_indices_state_check', () => 
 }));
 import { BehaviorSubject } from 'rxjs';
 import type { TransportResult } from '@elastic/elasticsearch';
+import type {
+  DeleteResponse,
+  TasksGetResponse,
+  TasksTaskInfo,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ScopedClusterClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
@@ -645,13 +650,62 @@ describe('reindexService', () => {
         },
       } as ReindexSavedObject;
 
+      const createMockTaskResponse = (
+        overrides: Partial<Omit<TasksGetResponse, 'task'>> & {
+          task?: Partial<TasksTaskInfo>;
+        } = {}
+      ): TasksGetResponse => {
+        const { task, ...rest } = overrides;
+        return {
+          completed: true,
+          ...rest,
+          task: {
+            node: 'node-1',
+            id: 1,
+            type: 'transport',
+            action: 'indices:data/write/reindex',
+            start_time_in_millis: 0,
+            running_time_in_nanos: 0,
+            cancellable: true,
+            headers: {},
+            ...task,
+          },
+        };
+      };
+
+      const createMockDeleteResponse = (
+        overrides: Partial<DeleteResponse> = {}
+      ): DeleteResponse => ({
+        _id: 'xyz',
+        _index: '.tasks',
+        _version: 1,
+        result: 'deleted',
+        _shards: { total: 1, successful: 1, failed: 0 },
+        ...overrides,
+      });
+
+      const expectCleanupAndNoTaskDeletion = () => {
+        expect(clusterClient.asCurrentUser.tasks.cancel).toHaveBeenCalledWith({
+          task_id: 'xyz',
+        });
+        expect(clusterClient.asCurrentUser.indices.putSettings).toHaveBeenCalledWith({
+          index: defaultAttributes.indexName,
+          settings: { blocks: { write: false } },
+        });
+        expect(clusterClient.asCurrentUser.indices.delete).toHaveBeenCalledWith({
+          index: defaultAttributes.newIndexName,
+        });
+        expect(clusterClient.asCurrentUser.delete).not.toHaveBeenCalled();
+      };
+
       describe('reindex task is not complete', () => {
         it('updates reindexTaskPercComplete', async () => {
-          clusterClient.asCurrentUser.tasks.get.mockResponseOnce({
-            completed: false,
-            // @ts-expect-error not full interface
-            task: { status: { created: 10, total: 100 } },
-          });
+          clusterClient.asCurrentUser.tasks.get.mockResponseOnce(
+            createMockTaskResponse({
+              completed: false,
+              task: { status: { created: 10, total: 100 } },
+            })
+          );
 
           const updatedOp = await service.processNextStep(reindexOp);
           expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.reindexStarted);
@@ -661,25 +715,15 @@ describe('reindexService', () => {
 
       describe('reindex task is complete', () => {
         it('deletes task, updates reindexTaskPercComplete, updates lastCompletedStep', async () => {
-          clusterClient.asCurrentUser.tasks.get.mockResponseOnce({
-            completed: true,
-            // @ts-expect-error not full interface
-            task: { status: { created: 100, total: 100 } },
-          });
-
-          clusterClient.asCurrentUser.count.mockResponseOnce(
-            // @ts-expect-error not full interface
-            {
-              count: 100,
-            }
+          clusterClient.asCurrentUser.tasks.get.mockResponseOnce(
+            createMockTaskResponse({
+              completed: true,
+              task: { status: { created: 100, total: 100 } },
+              response: { failures: [] },
+            })
           );
 
-          clusterClient.asCurrentUser.delete.mockResponseOnce(
-            // @ts-expect-error not full interface
-            {
-              result: 'deleted',
-            }
-          );
+          clusterClient.asCurrentUser.delete.mockResponseOnce(createMockDeleteResponse());
 
           const updatedOp = await service.processNextStep(reindexOp);
           expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.reindexCompleted);
@@ -691,23 +735,17 @@ describe('reindexService', () => {
         });
 
         it('does not throw if task doc deletion returns a bad result', async () => {
-          clusterClient.asCurrentUser.tasks.get.mockResponseOnce({
-            completed: true,
-            // @ts-expect-error not full interface
-            task: { status: { created: 100, total: 100 } },
-          });
-
-          clusterClient.asCurrentUser.count.mockResponseOnce(
-            // @ts-expect-error not full interface
-            {
-              count: 100,
-            }
+          clusterClient.asCurrentUser.tasks.get.mockResponseOnce(
+            createMockTaskResponse({
+              completed: true,
+              task: { status: { created: 100, total: 100 } },
+              response: { failures: [] },
+            })
           );
 
-          clusterClient.asCurrentUser.delete.mockResponseOnce({
-            // @ts-expect-error not known result
-            result: '!?',
-          });
+          clusterClient.asCurrentUser.delete.mockResponseOnce(
+            createMockDeleteResponse({ result: 'not_found' })
+          );
 
           const updatedOp = await service.processNextStep(reindexOp);
           expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.reindexCompleted);
@@ -720,17 +758,12 @@ describe('reindexService', () => {
         });
 
         it('does not throw if task doc deletion throws', async () => {
-          clusterClient.asCurrentUser.tasks.get.mockResponseOnce({
-            completed: true,
-            // @ts-expect-error not full interface
-            task: { status: { created: 100, total: 100 } },
-          });
-
-          clusterClient.asCurrentUser.count.mockResponseOnce(
-            // @ts-expect-error not full interface
-            {
-              count: 100,
-            }
+          clusterClient.asCurrentUser.tasks.get.mockResponseOnce(
+            createMockTaskResponse({
+              completed: true,
+              task: { status: { created: 100, total: 100 } },
+              response: { failures: [] },
+            })
           );
 
           clusterClient.asCurrentUser.delete.mockRejectedValue(new Error('FAILED!'));
@@ -749,18 +782,14 @@ describe('reindexService', () => {
         it.each([401, 403])(
           'does not throw if task doc deletion throws AND does not log due to missing access permission: %d',
           async (statusCode) => {
-            clusterClient.asCurrentUser.tasks.get.mockResponseOnce({
-              completed: true,
-              // @ts-expect-error not full interface
-              task: { status: { created: 100, total: 100 } },
-            });
-
-            clusterClient.asCurrentUser.count.mockResponseOnce(
-              // @ts-expect-error not full interface
-              {
-                count: 100,
-              }
+            clusterClient.asCurrentUser.tasks.get.mockResponseOnce(
+              createMockTaskResponse({
+                completed: true,
+                task: { status: { created: 100, total: 100 } },
+                response: { failures: [] },
+              })
             );
+
             const e = new Error();
             Object.defineProperty(e, 'statusCode', { value: statusCode });
             clusterClient.asCurrentUser.delete.mockRejectedValue(e);
@@ -773,18 +802,145 @@ describe('reindexService', () => {
         );
       });
 
+      describe('reindex task failed', () => {
+        it('marks reindex as failed and cleans up when task completes with a top-level error and no response', async () => {
+          clusterClient.asCurrentUser.tasks.get.mockResponseOnce(
+            createMockTaskResponse({
+              completed: true,
+              task: { status: { created: 0, total: 100 } },
+              error: {
+                type: 'circuit_breaking_exception',
+                reason: '[parent] Data too large',
+              },
+            })
+          );
+
+          const updatedOp = await service.processNextStep(reindexOp);
+
+          expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
+          expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.reindexStarted);
+          expect(updatedOp.attributes.errorMessage).toContain('Reindexing failed:');
+          expect(updatedOp.attributes.errorMessage).toContain('circuit_breaking_exception');
+          expect(log.error).toHaveBeenCalledTimes(1);
+          expectCleanupAndNoTaskDeletion();
+        });
+
+        it('marks reindex as failed and cleans up when task completes without a response', async () => {
+          clusterClient.asCurrentUser.tasks.get.mockResponseOnce(
+            createMockTaskResponse({
+              completed: true,
+              task: { status: { created: 0, total: 100 } },
+            })
+          );
+
+          const updatedOp = await service.processNextStep(reindexOp);
+
+          expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
+          expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.reindexStarted);
+          expect(updatedOp.attributes.errorMessage).toContain(
+            'Reindexing task completed without a response:'
+          );
+          expect(log.error).toHaveBeenCalledTimes(1);
+          expectCleanupAndNoTaskDeletion();
+        });
+
+        it('marks reindex as failed and cleans up when task status.canceled has a non-user reason', async () => {
+          clusterClient.asCurrentUser.tasks.get.mockResponseOnce(
+            createMockTaskResponse({
+              completed: true,
+              task: { status: { created: 10, total: 100, canceled: 'node shutdown' } },
+              response: { failures: [] },
+            })
+          );
+
+          const updatedOp = await service.processNextStep(reindexOp);
+
+          expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
+          expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.reindexStarted);
+          expect(updatedOp.attributes.errorMessage).toContain(
+            'Reindexing task was canceled unexpectedly:'
+          );
+          expect(updatedOp.attributes.errorMessage).toContain('node shutdown');
+          expect(log.error).toHaveBeenCalledTimes(1);
+          expectCleanupAndNoTaskDeletion();
+        });
+
+        it('marks reindex as failed and cleans up when task.cancelled is true without user request reason', async () => {
+          clusterClient.asCurrentUser.tasks.get.mockResponseOnce(
+            createMockTaskResponse({
+              completed: true,
+              task: { cancelled: true, status: { created: 10, total: 100 } },
+              response: { failures: [] },
+            })
+          );
+
+          const updatedOp = await service.processNextStep(reindexOp);
+
+          expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
+          expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.reindexStarted);
+          expect(updatedOp.attributes.errorMessage).toContain(
+            'Reindexing task was canceled unexpectedly:'
+          );
+          expect(log.error).toHaveBeenCalledTimes(1);
+          expectCleanupAndNoTaskDeletion();
+        });
+
+        it('marks reindex as failed and cleans up when task response has timed_out: true', async () => {
+          clusterClient.asCurrentUser.tasks.get.mockResponseOnce(
+            createMockTaskResponse({
+              completed: true,
+              task: { status: { created: 50, total: 100 } },
+              response: { timed_out: true, failures: [] },
+            })
+          );
+
+          const updatedOp = await service.processNextStep(reindexOp);
+
+          expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
+          expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.reindexStarted);
+          expect(updatedOp.attributes.errorMessage).toContain('Reindexing timed out:');
+          expect(log.error).toHaveBeenCalledTimes(1);
+          expectCleanupAndNoTaskDeletion();
+        });
+
+        it('marks reindex as failed and cleans up when task response contains failures', async () => {
+          clusterClient.asCurrentUser.tasks.get.mockResponseOnce(
+            createMockTaskResponse({
+              completed: true,
+              task: { status: { created: 99, total: 100 } },
+              response: {
+                timed_out: false,
+                failures: [
+                  {
+                    index: defaultAttributes.newIndexName,
+                    cause: { type: 'mapper_parsing_exception' },
+                  },
+                ],
+              },
+            })
+          );
+
+          const updatedOp = await service.processNextStep(reindexOp);
+
+          expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
+          expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.reindexStarted);
+          expect(updatedOp.attributes.errorMessage).toContain('Reindexing failed:');
+          expect(updatedOp.attributes.errorMessage).toContain('mapper_parsing_exception');
+          expect(log.error).toHaveBeenCalledTimes(1);
+          expectCleanupAndNoTaskDeletion();
+        });
+      });
+
       describe('reindex task is cancelled', () => {
         it('deletes task, updates status to cancelled', async () => {
-          clusterClient.asCurrentUser.tasks.get.mockResponseOnce({
-            completed: true,
-            // @ts-expect-error not full interface
-            task: { status: { created: 100, total: 100, canceled: 'by user request' } },
-          });
-
-          clusterClient.asCurrentUser.delete.mockResponseOnce(
-            // @ts-expect-error not full interface
-            { result: 'deleted' }
+          clusterClient.asCurrentUser.tasks.get.mockResponseOnce(
+            createMockTaskResponse({
+              completed: true,
+              task: { status: { created: 100, total: 100, canceled: 'by user request' } },
+            })
           );
+
+          clusterClient.asCurrentUser.delete.mockResponseOnce(createMockDeleteResponse());
 
           const updatedOp = await service.processNextStep(reindexOp);
           expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.reindexStarted);
