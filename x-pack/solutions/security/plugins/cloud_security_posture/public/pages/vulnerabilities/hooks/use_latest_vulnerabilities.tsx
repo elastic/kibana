@@ -27,6 +27,7 @@ import type { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common
 import { VULNERABILITY_FIELDS } from '../../../common/constants';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { getCaseInsensitiveSortScript } from '../utils/custom_sort_script';
+import { getFixGroupRuntimeMappings } from './fix_group_runtime_fields';
 type LatestFindingsRequest = IKibanaSearchRequest<SearchRequest>;
 type LatestFindingsResponse = IKibanaSearchResponse<
   SearchResponse<CspVulnerabilityFinding, FindingsAggs>
@@ -41,14 +42,23 @@ interface VulnerabilitiesQuery extends BaseEsQuery {
   pageSize: number;
 }
 
+const NUMERIC_SORT_FIELDS: string[] = [
+  VULNERABILITY_FIELDS.SCORE_RISK,
+  VULNERABILITY_FIELDS.SCORE_BASE,
+];
+
 const getMultiFieldsSort = (sort: string[][]) => {
   return sort.map(([id, direction]) => {
     if (id === VULNERABILITY_FIELDS.PACKAGE_NAME) {
       return getCaseInsensitiveSortScript(id, direction);
     }
 
+    // Scores are floats: a keyword fallback on an index without the field conflicts with the
+    // float mapping on other indices ("incompatible sort types across shards").
+    const unmappedType = NUMERIC_SORT_FIELDS.includes(id) ? 'float' : 'keyword';
+
     return {
-      [id]: { order: direction, unmapped_type: 'keyword' },
+      [id]: { order: direction, unmapped_type: unmappedType },
     };
   });
 };
@@ -79,6 +89,7 @@ export const getVulnerabilitiesQuery = (
     },
   },
   ...(pageParam ? { from: pageParam } : {}),
+  runtime_mappings: getFixGroupRuntimeMappings(),
 });
 
 export const useLatestVulnerabilities = (options: VulnerabilitiesQuery) => {

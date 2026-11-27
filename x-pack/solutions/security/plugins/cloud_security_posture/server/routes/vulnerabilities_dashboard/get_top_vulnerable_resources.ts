@@ -6,7 +6,7 @@
  */
 
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
-import { CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
+import { CDR_CNVM_AND_NATIVE_SCANNER_VULNERABILITIES_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { AggFieldBucket, VulnerableResourceStat } from '../../../common/types_old';
 
@@ -28,7 +28,9 @@ const getVulnerabilitiesResourcesQuery = (): SearchRequest => ({
   query: {
     match_all: {},
   },
-  index: CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
+  index: CDR_CNVM_AND_NATIVE_SCANNER_VULNERABILITIES_INDEX_PATTERN,
+  ignore_unavailable: true,
+  allow_no_indices: true,
   aggs: {
     vulnerable_resources: {
       terms: {

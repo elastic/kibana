@@ -7,7 +7,7 @@
 
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
+import { CDR_CNVM_AND_NATIVE_SCANNER_VULNERABILITIES_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
 import type { AggFieldBucket, PatchableVulnerabilityStat } from '../../../common/types_old';
 
 interface VulnerabilityBucket {
@@ -39,7 +39,9 @@ const getPatchableVulnerabilitiesQuery = (): SearchRequest => ({
       ],
     },
   },
-  index: CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
+  index: CDR_CNVM_AND_NATIVE_SCANNER_VULNERABILITIES_INDEX_PATTERN,
+  ignore_unavailable: true,
+  allow_no_indices: true,
   aggs: {
     patchable_vulnerabilities: {
       terms: {

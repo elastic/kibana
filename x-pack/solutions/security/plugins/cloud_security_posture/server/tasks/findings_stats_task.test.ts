@@ -7,7 +7,11 @@
 
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { validateBenchmarkScoreTemplate } from './findings_stats_task';
+import {
+  CDR_LATEST_NATIVE_SCANNER_VULNERABILITIES_INDEX_PATTERN,
+  CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
+} from '@kbn/cloud-security-posture-common';
+import { getVulnStatsTrendQuery, validateBenchmarkScoreTemplate } from './findings_stats_task';
 import { createBenchmarkScoreIndex } from '../create_indices/create_indices';
 import { benchmarkScoreMapping } from '../create_indices/benchmark_score_mapping';
 
@@ -205,5 +209,18 @@ describe('validateBenchmarkScoreTemplate', () => {
     expect(logger.error).toHaveBeenCalledWith(
       'Template still has no mapping properties after fixing attempt'
     );
+  });
+});
+
+describe('getVulnStatsTrendQuery', () => {
+  it('aggregates CNVM and the native scanner alias only, tolerating either being absent', () => {
+    const request = getVulnStatsTrendQuery();
+
+    expect(request.index).toBe(
+      `${CDR_LATEST_NATIVE_SCANNER_VULNERABILITIES_INDEX_PATTERN},${CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN}`
+    );
+    expect(request.index).not.toContain('security_solution-*');
+    expect(request.ignore_unavailable).toBe(true);
+    expect(request.allow_no_indices).toBe(true);
   });
 });

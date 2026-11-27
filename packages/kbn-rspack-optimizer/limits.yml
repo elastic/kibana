@@ -134,6 +134,7 @@ pageLoadAssetSize:
   mitreAttack: 2022
   ml: 950
   monitoring: 22416
+  nativeVulnScanner: 1131
   navigation: 14840
   newsfeed: 10708
   nightshift: 5665

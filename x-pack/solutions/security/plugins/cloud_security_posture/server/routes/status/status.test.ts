@@ -335,4 +335,78 @@ describe('calculateIntegrationStatus for vul_mgmt', () => {
 
     expect(statusCode).toMatch('indexing');
   });
+
+  it('Verify status is indexed when only native scanner findings exist, without the CSP package', async () => {
+    const statusCode = calculateIntegrationStatus(
+      VULN_MGMT_POLICY_TEMPLATE,
+      {
+        latest: 'empty',
+        stream: 'empty',
+        score: 'empty',
+        nativeLatest: 'not-empty',
+      },
+      undefined,
+      0,
+      0,
+      []
+    );
+
+    expect(statusCode).toMatch('indexed');
+  });
+
+  it('Verify status stays not-installed when native scanner findings are empty and there is no CSP package', async () => {
+    const statusCode = calculateIntegrationStatus(
+      VULN_MGMT_POLICY_TEMPLATE,
+      {
+        latest: 'empty',
+        stream: 'empty',
+        score: 'empty',
+        nativeLatest: 'empty',
+      },
+      undefined,
+      0,
+      0,
+      []
+    );
+
+    expect(statusCode).toMatch('not-installed');
+  });
+
+  it('Verify unprivileged wins over native scanner findings', async () => {
+    const statusCode = calculateIntegrationStatus(
+      VULN_MGMT_POLICY_TEMPLATE,
+      {
+        latest: 'unprivileged',
+        stream: 'unprivileged',
+        score: 'unprivileged',
+        nativeLatest: 'not-empty',
+      },
+      undefined,
+      0,
+      0,
+      []
+    );
+
+    expect(statusCode).toMatch('unprivileged');
+  });
+});
+
+describe('calculateIntegrationStatus native scanner findings for cspm', () => {
+  it('Verify native scanner findings do not mark cspm as indexed', async () => {
+    const statusCode = calculateIntegrationStatus(
+      CSPM_POLICY_TEMPLATE,
+      {
+        latest: 'empty',
+        stream: 'empty',
+        score: 'empty',
+        nativeLatest: 'not-empty',
+      },
+      undefined,
+      0,
+      0,
+      []
+    );
+
+    expect(statusCode).toMatch('not-installed');
+  });
 });

@@ -10,6 +10,7 @@ import { isNativeCspFinding } from './is_native_csp_finding';
 import { INTEGRATION_VENDORS } from '../constants';
 
 export const CSP_VULN_DATASET = 'cloud_security_posture.vulnerabilities';
+export const NATIVE_VULN_SCANNER_DATASET = 'native_vuln_scanner.vulnerability';
 export const WIZ_MISCONFIGURATIONS_DATASET = 'wiz.cloud_configuration_finding';
 export const WIZ_VULN_DATASET = 'wiz.vulnerability';
 export const QUALYS_VULN_DATASET = 'qualys_vmdr';

@@ -237,6 +237,9 @@ export interface VulnerabilitiesGroupingAggregation {
   accountName?: {
     buckets?: GenericBuckets[];
   };
+  fixVersion?: {
+    buckets?: GenericBuckets[];
+  };
   isLoading?: boolean;
   critical?: {
     doc_count?: NumberOrNull;

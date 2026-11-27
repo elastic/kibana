@@ -10,9 +10,15 @@ import {
   KSPM_POLICY_TEMPLATE,
   CLOUD_SECURITY_POSTURE_BASE_PATH,
 } from '@kbn/cloud-security-posture-common';
-import { NAV_ITEMS_NAMES } from '@kbn/cloud-security-posture/src/constants/navigation';
+import {
+  NAV_ITEMS_NAMES,
+  findingsNavigation,
+} from '@kbn/cloud-security-posture/src/constants/navigation';
 import { CNVM_POLICY_TEMPLATE } from '../../../common/constants';
 import type { CspPage, CspPageNavigationItem } from './types';
+
+/** Deep link only: the native vulnerability scanner settings are not in the navigation. */
+export const SCANNER_SETTINGS_PATH = `${findingsNavigation.vulnerabilities.path}/scanner_settings`;
 
 const CSPM_DASHBOARD_TAB_NAME = 'Cloud';
 const KSPM_DASHBOARD_TAB_NAME = 'Kubernetes';

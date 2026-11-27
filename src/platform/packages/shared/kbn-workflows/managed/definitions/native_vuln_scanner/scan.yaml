@@ -1,0 +1,60 @@
+version: "1"
+# Daily: download the vendor advisory feeds the osquery software inventory needs, match the
+# inventory against them and write vulnerability findings, then record one run summary.
+# Installed once in the default space and shipped disabled: the findings come from software
+# inventory that agent policies have to opt in to, so an operator turns the schedule on.
+# Every step but the last is allowed to fail so the summary is always written; the last step
+# then fails the run when anything above it did.
+name: Scan for vulnerabilities
+description: Match the osquery software inventory against vendor security advisories and write vulnerability findings
+tags:
+  - native-vuln-scanner
+enabled: false
+settings:
+  concurrency:
+    key: "native-vuln-scan"
+    strategy: drop
+    max: 1
+triggers:
+  - type: scheduled
+    with:
+      every: "24h"
+  - type: manual
+steps:
+  - name: fetch_feed
+    type: native_vuln.fetch_feed
+    on-failure:
+      continue: true
+
+  - name: match_when_fetched
+    type: if
+    condition: "${{ steps.fetch_feed.error == blank and steps.fetch_feed.output.pack_missing != true }}"
+    steps:
+      - name: match
+        type: native_vuln.match
+        with:
+          feeds: "${{ steps.fetch_feed.output.feeds }}"
+        on-failure:
+          continue: true
+
+  - name: summarize
+    type: native_vuln.summarize
+    with:
+      fetch: "${{ steps.fetch_feed.output }}"
+      match: "${{ steps.match.output }}"
+      fetch_error: "${{ steps.fetch_feed.error.message }}"
+      match_error: "${{ steps.match.error.message }}"
+    on-failure:
+      continue: true
+
+  - name: fail_when_incomplete
+    type: if
+    condition: "${{ steps.fetch_feed.error != blank or steps.match.error != blank or steps.summarize.error != blank }}"
+    steps:
+      - name: fail_run
+        type: workflow.fail
+        with:
+          message: >-
+            The vulnerability scan did not complete. Fetch: {{ steps.fetch_feed.error.message | default: "ok" }}.
+            Match: {{ steps.match.error.message | default: "ok" }}.
+            Summary: {{ steps.summarize.error.message | default: "ok" }}.

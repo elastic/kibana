@@ -34,6 +34,7 @@ import { useGroupedVulnerabilities } from './use_grouped_vulnerabilities';
 import { defaultGroupingOptions, getDefaultQuery } from '../constants';
 import { useCloudSecurityGrouping } from '../../../components/cloud_security_grouping';
 import { VULNERABILITIES_UNIT, groupingTitle, VULNERABILITIES_GROUPS_UNIT } from '../translations';
+import { getFixGroupRuntimeMappings } from './fix_group_runtime_fields';
 
 const getTermAggregation = (key: keyof VulnerabilitiesGroupingAggregation, field: string) => ({
   [key]: {
@@ -109,6 +110,11 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
       ];
     case VULNERABILITY_GROUPING_OPTIONS.CVE:
       return [...aggMetrics, getTermAggregation('description', VULNERABILITY_FIELDS.DESCRIPTION)];
+    case VULNERABILITY_GROUPING_OPTIONS.FIX_GROUP_ADVISORY_PACKAGE:
+      return [
+        ...aggMetrics,
+        getTermAggregation('fixVersion', VULNERABILITY_FIELDS.PACKAGE_FIXED_VERSION),
+      ];
   }
   return aggMetrics;
 };
@@ -226,6 +232,7 @@ export const useLatestVulnerabilitiesGrouping = ({
     additionalFilters: query ? [query, additionalFilters] : [additionalFilters],
     groupByField: currentSelectedGroup,
     uniqueValue,
+    runtimeMappings: getFixGroupRuntimeMappings(),
     timeRange: {
       from: `now-${CDR_EXTENDED_VULN_RETENTION_POLICY}`,
       to: 'now',

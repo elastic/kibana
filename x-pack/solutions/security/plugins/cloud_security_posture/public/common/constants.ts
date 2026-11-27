@@ -75,6 +75,7 @@ export const VULNERABILITY_FIELDS = {
   VULNERABILITY_TITLE: 'vulnerability.title',
   VULNERABILITY_ID: 'vulnerability.id',
   SCORE_BASE: 'vulnerability.score.base',
+  SCORE_RISK: 'vulnerability.score.risk',
   RESOURCE_NAME: 'resource.name',
   RESOURCE_ID: 'resource.id',
   SEVERITY: 'vulnerability.severity',
@@ -86,6 +87,8 @@ export const VULNERABILITY_FIELDS = {
   CLOUD_PROVIDER: 'cloud.provider',
   DESCRIPTION: 'vulnerability.description',
   VENDOR: 'observer.vendor',
+  ADVISORIES: 'native_vuln_scanner.advisories.id',
+  KEV_KNOWN_EXPLOITED: 'vulnerability.kev.known_exploited',
 } as const;
 
 export const VULNERABILITY_GROUPING_OPTIONS = {
@@ -93,6 +96,8 @@ export const VULNERABILITY_GROUPING_OPTIONS = {
   RESOURCE_ID: VULNERABILITY_FIELDS.RESOURCE_ID,
   CLOUD_ACCOUNT_ID: VULNERABILITY_FIELDS.CLOUD_ACCOUNT_ID,
   CVE: VULNERABILITY_FIELDS.VULNERABILITY_ID,
+  FIX_GROUP_ADVISORY_PACKAGE: 'fix_group.advisory_package',
+  FIX_GROUP_PACKAGE_FIXED: 'fix_group.package_fixed',
 } as const;
 
 export const FINDINGS_FILTER_OPTIONS = {
@@ -116,4 +121,6 @@ export const VULNERABILITY_GROUPING_MULTIPLE_VALUE_FIELDS: string[] = [
   VULNERABILITY_FIELDS.PACKAGE_NAME,
   VULNERABILITY_FIELDS.PACKAGE_VERSION,
   VULNERABILITY_FIELDS.PACKAGE_FIXED_VERSION,
+  VULNERABILITY_GROUPING_OPTIONS.FIX_GROUP_ADVISORY_PACKAGE,
+  VULNERABILITY_GROUPING_OPTIONS.FIX_GROUP_PACKAGE_FIXED,
 ];

@@ -16,7 +16,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import {
   CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
-  CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
+  CDR_CNVM_AND_NATIVE_SCANNER_VULNERABILITIES_INDEX_PATTERN,
   VULNERABILITIES_SEVERITY,
 } from '@kbn/cloud-security-posture-common';
 import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
@@ -379,8 +379,10 @@ const getScoreQuery = (filteredRules: QueryDslQueryContainer[]): SearchRequest =
   },
 });
 
-const getVulnStatsTrendQuery = (): SearchRequest => ({
-  index: CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
+export const getVulnStatsTrendQuery = (): SearchRequest => ({
+  index: CDR_CNVM_AND_NATIVE_SCANNER_VULNERABILITIES_INDEX_PATTERN,
+  ignore_unavailable: true,
+  allow_no_indices: true,
   size: 0,
   query: {
     match_all: {},
@@ -398,6 +400,7 @@ const getVulnStatsTrendQuery = (): SearchRequest => ({
     low: {
       filter: { term: { 'vulnerability.severity': VULNERABILITIES_SEVERITY.LOW } },
     },
+    // Native scanner findings carry no cloud.account, so they count in the totals above but not here.
     vulnerabilities_stats_by_cloud_account: {
       terms: {
         field: 'cloud.account.id',

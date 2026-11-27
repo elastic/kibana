@@ -12,6 +12,7 @@ import {
   STATUS_ROUTE_PATH,
   LATEST_FINDINGS_RETENTION_POLICY,
   CDR_MISCONFIGURATIONS_INDEX_PATTERN,
+  CDR_LATEST_NATIVE_SCANNER_VULNERABILITIES_INDEX_PATTERN,
   CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
   LATEST_VULNERABILITIES_RETENTION_POLICY,
   CDR_VULNERABILITIES_INDEX_PATTERN,
@@ -108,6 +109,7 @@ export const calculateIntegrationStatus = (
     latest: IndexStatus;
     stream: IndexStatus;
     score?: IndexStatus;
+    nativeLatest?: IndexStatus;
   },
   installation: Installation | undefined,
   healthyAgents: number,
@@ -119,6 +121,9 @@ export const calculateIntegrationStatus = (
 
   if (indicesStatus.latest === 'unprivileged' || indicesStatus.score === 'unprivileged')
     return 'unprivileged';
+  // The native vulnerability scanner works without the CSP Fleet package.
+  if (integration === VULN_MGMT_POLICY_TEMPLATE && indicesStatus.nativeLatest === 'not-empty')
+    return 'indexed';
   if (!installation) return 'not-installed';
   if (indicesStatus.latest === 'not-empty') return 'indexed';
   if (indicesStatus.stream === 'not-empty' && indicesStatus.latest === 'empty') return 'indexing';
@@ -207,7 +212,8 @@ export const getCspStatus = async ({
     findingsLatestIndexStatusKspm,
     findingsIndexStatusKspm,
     scoreIndexStatusKspm,
-    vulnerabilitiesLatestIndexStatus,
+    cnvmLatestIndexStatus,
+    nativeScannerLatestIndexStatus,
     vulnerabilitiesIndexStatus,
     installation,
     latestCspPackage,
@@ -268,6 +274,12 @@ export const getCspStatus = async ({
     }),
 
     checkIndexStatus(esClient, CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN, logger, {
+      postureType: VULN_MGMT_POLICY_TEMPLATE,
+      retentionTime: LATEST_VULNERABILITIES_RETENTION_POLICY,
+    }),
+    // Checked separately: the alias does not exist for CNVM-only customers, and a missing index in
+    // a combined search would report the CNVM index as empty.
+    checkIndexStatus(esClient, CDR_LATEST_NATIVE_SCANNER_VULNERABILITIES_INDEX_PATTERN, logger, {
       postureType: VULN_MGMT_POLICY_TEMPLATE,
       retentionTime: LATEST_VULNERABILITIES_RETENTION_POLICY,
     }),
@@ -338,6 +350,11 @@ export const getCspStatus = async ({
   const latestCspPackageVersion = latestCspPackage.version;
 
   const MIN_DATE = 0;
+  // A CNVM privileges problem must not be masked by native data.
+  const vulnerabilitiesLatestIndexStatus =
+    cnvmLatestIndexStatus !== 'unprivileged' && nativeScannerLatestIndexStatus === 'not-empty'
+      ? 'not-empty'
+      : cnvmLatestIndexStatus;
   const indicesDetails = [
     {
       index: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
@@ -353,7 +370,7 @@ export const getCspStatus = async ({
     },
     {
       index: CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
-      status: vulnerabilitiesLatestIndexStatus,
+      status: cnvmLatestIndexStatus,
     },
   ];
 
@@ -389,6 +406,7 @@ export const getCspStatus = async ({
       latest: vulnerabilitiesLatestIndexStatus,
       stream: vulnerabilitiesIndexStatus,
       score: scoreIndexStatus,
+      nativeLatest: nativeScannerLatestIndexStatus,
     },
     installation,
     healthyAgentsVulMgmt,

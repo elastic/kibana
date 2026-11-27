@@ -6,7 +6,8 @@
  */
 import type { Filter } from '@kbn/es-query';
 import React, { useEffect } from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiFilterButton, EuiFilterGroup, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { CDR_VULNERABILITIES_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
 import { useLatestVulnerabilitiesGrouping } from './hooks/use_latest_vulnerabilities_grouping';
 import { LatestVulnerabilitiesTable } from './latest_vulnerabilities_table';
@@ -15,6 +16,10 @@ import { FindingsSearchBar } from '../configurations/layout/findings_search_bar'
 import { ErrorCallout } from '../configurations/layout/error_callout';
 import { EmptyState } from '../../components/empty_state';
 import { CloudSecurityGrouping } from '../../components/cloud_security_grouping';
+import { VULNERABILITY_FIELDS } from '../../common/constants';
+import { useDataViewContext } from '../../common/contexts/data_view_context';
+import { VULNERABILITY_KEV_FILTER_CHIP } from './test_subjects';
+import { buildKevFilter } from './utils/build_kev_filter';
 
 export const LatestVulnerabilitiesContainer = () => {
   const SubGrouping = ({
@@ -139,6 +144,40 @@ export const LatestVulnerabilitiesContainer = () => {
   const { grouping, isFetching, urlQuery, setUrlQuery, onResetFilters, error, isEmptyResults } =
     useLatestVulnerabilitiesGrouping({ groupPanelRenderer, getGroupStats: groupStatsRenderer });
 
+  const { dataView } = useDataViewContext();
+  const kevFilterActive = (urlQuery.filters || []).some(
+    (filter) => filter.meta?.key === VULNERABILITY_FIELDS.KEV_KNOWN_EXPLOITED
+  );
+
+  const onToggleKevFilter = () => {
+    const withoutKev = (urlQuery.filters || []).filter(
+      (filter) => filter.meta?.key !== VULNERABILITY_FIELDS.KEV_KNOWN_EXPLOITED
+    );
+    setUrlQuery(
+      kevFilterActive
+        ? { filters: withoutKev }
+        : {
+            filters: [...withoutKev, buildKevFilter(dataView.id)],
+          }
+    );
+  };
+
+  const kevFilterGroup = (
+    <EuiFilterGroup>
+      <EuiFilterButton
+        data-test-subj={VULNERABILITY_KEV_FILTER_CHIP}
+        onClick={onToggleKevFilter}
+        hasActiveFilters={kevFilterActive}
+        isSelected={kevFilterActive}
+        grow={false}
+      >
+        {i18n.translate('xpack.csp.vulnerabilities.kevFilterChipLabel', {
+          defaultMessage: 'KEV listed',
+        })}
+      </EuiFilterButton>
+    </EuiFilterGroup>
+  );
+
   if (error || isEmptyResults) {
     return (
       <>
@@ -148,6 +187,7 @@ export const LatestVulnerabilitiesContainer = () => {
           loading={isFetching}
           refreshQueryKey={CDR_VULNERABILITIES_INDEX_PATTERN}
         />
+        {kevFilterGroup}
         <EuiSpacer size="m" />
         {error && <ErrorCallout error={error} />}
         {isEmptyResults && <EmptyState onResetFilters={onResetFilters} />}
@@ -163,6 +203,7 @@ export const LatestVulnerabilitiesContainer = () => {
         loading={isFetching}
         refreshQueryKey={CDR_VULNERABILITIES_INDEX_PATTERN}
       />
+      {kevFilterGroup}
       <EuiSpacer size="m" />
       <div>
         {renderChildComponent({

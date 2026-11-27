@@ -27,6 +27,10 @@ export const vulnerabilitiesTableFieldLabels: Record<string, string> = {
     'xpack.csp.vulnerabilityFindings.vulnerabilityFindingsTable.vulnerabilityFindingsTableColumn.vulnerabilityScoreColumnLabel',
     { defaultMessage: 'CVSS' }
   ),
+  'vulnerability.score.risk': i18n.translate(
+    'xpack.csp.vulnerabilityFindings.vulnerabilityFindingsTable.vulnerabilityFindingsTableColumn.vulnerabilityRiskColumnLabel',
+    { defaultMessage: 'Risk score' }
+  ),
   'vulnerability.severity': i18n.translate(
     'xpack.csp.vulnerabilityFindings.vulnerabilityFindingsTable.vulnerabilityFindingsTableColumn.vulnerabilitySeverityColumnLabel',
     { defaultMessage: 'Severity' }

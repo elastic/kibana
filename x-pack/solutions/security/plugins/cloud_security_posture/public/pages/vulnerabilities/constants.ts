@@ -24,6 +24,14 @@ export const defaultGroupingOptions: GroupOption[] = [
     label: 'CVE',
     key: VULNERABILITY_GROUPING_OPTIONS.CVE,
   },
+  {
+    label: GROUPING_LABELS.FIX_GROUP_ADVISORY_PACKAGE,
+    key: VULNERABILITY_GROUPING_OPTIONS.FIX_GROUP_ADVISORY_PACKAGE,
+  },
+  {
+    label: GROUPING_LABELS.FIX_GROUP_PACKAGE_FIXED,
+    key: VULNERABILITY_GROUPING_OPTIONS.FIX_GROUP_PACKAGE_FIXED,
+  },
 ];
 
 export const getDefaultQuery = ({
@@ -36,7 +44,7 @@ export const getDefaultQuery = ({
   filters,
   sort: [
     [VULNERABILITY_FIELDS.SEVERITY, 'asc'],
-    [VULNERABILITY_FIELDS.SCORE_BASE, 'desc'],
+    [VULNERABILITY_FIELDS.SCORE_RISK, 'desc'],
   ],
 });
 

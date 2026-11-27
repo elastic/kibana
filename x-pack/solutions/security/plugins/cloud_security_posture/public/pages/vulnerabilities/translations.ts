@@ -72,6 +72,13 @@ export const NULL_GROUPING_MESSAGES = {
   }),
 };
 
+export const NO_FIX_YET_BADGE = i18n.translate(
+  'xpack.csp.vulnerabilities.grouping.fixGroup.noFixBadge',
+  {
+    defaultMessage: 'no fix available yet',
+  }
+);
+
 export const GROUPING_LABELS = {
   RESOURCE: i18n.translate('xpack.csp.vulnerabilities.groupBy.resource', {
     defaultMessage: 'Resource ID',
@@ -79,6 +86,18 @@ export const GROUPING_LABELS = {
   CLOUD_ACCOUNT: i18n.translate('xpack.csp.vulnerabilities.groupBy.cloudAccount', {
     defaultMessage: 'Cloud account ID',
   }),
+  FIX_GROUP_ADVISORY_PACKAGE: i18n.translate(
+    'xpack.csp.vulnerabilities.groupBy.fixGroupAdvisoryPackage',
+    {
+      defaultMessage: 'Fix group (advisory and package)',
+    }
+  ),
+  FIX_GROUP_PACKAGE_FIXED: i18n.translate(
+    'xpack.csp.vulnerabilities.groupBy.fixGroupPackageFixed',
+    {
+      defaultMessage: 'Fix group (package and fix version)',
+    }
+  ),
 };
 
 export const groupingTitle = i18n.translate('xpack.csp.vulnerabilities.groupBy', {
