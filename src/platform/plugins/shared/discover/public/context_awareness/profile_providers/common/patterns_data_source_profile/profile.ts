@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Parser } from '@elastic/esql';
+import { Parser, Walker } from '@elastic/esql';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getCategorizeColumns, getSparklineColumns } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
@@ -70,6 +70,7 @@ export const createPatternsDataSourceProfileProvider = (
   services: ProfileProviderServices
 ): DataSourceProfileProvider<{
   patternColumns: string[];
+  patternParameters: Array<string | number>;
   sparklineColumns: string[];
 }> => ({
   profileId: 'patterns-data-source-profile',
@@ -144,12 +145,15 @@ export const createPatternsDataSourceProfileProvider = (
     getAdditionalCellActions:
       (prev, { context, toolkit }) =>
       () => {
+        const hasPatternControls = (esqlVariables: AdditionalCellActionContext['esqlVariables']) =>
+          context.patternParameters.every((name) => esqlVariables?.some(({ key }) => key === name));
+
         return [
           ...prev(),
           {
             id: 'patterns-action-view-docs-in-discover',
             getDisplayName: (cell) => {
-              if (searchesBeyondSample(cell)) {
+              if (hasPatternControls(cell.esqlVariables) && searchesBeyondSample(cell)) {
                 return i18n.translate(
                   'discover.docViews.patterns.cellAction.viewResultsBeyondSampleLabel',
                   { defaultMessage: 'View matching results (searches beyond the sample)' }
@@ -167,9 +171,15 @@ export const createPatternsDataSourceProfileProvider = (
               if (!isOfAggregateQueryType(query) || field === undefined) {
                 return false;
               }
-              return patternColumns.includes(field.name);
+              return (
+                patternColumns.includes(field.name) &&
+                hasPatternControls(compatibleContext.esqlVariables)
+              );
             },
             execute: async (cell) => {
+              if (!hasPatternControls(cell.esqlVariables)) {
+                return;
+              }
               const matchingResultsQuery = getCellMatchingResultsQuery(cell);
               if (!matchingResultsQuery) {
                 return;
@@ -207,6 +217,12 @@ export const createPatternsDataSourceProfileProvider = (
       return { isMatch: false };
     }
 
+    const patternParameters = query.esql.includes('?')
+      ? Walker.matchAll(Parser.parse(query.esql).root, {
+          type: 'function',
+          name: 'categorize',
+        }).flatMap((fn) => Walker.params(fn).map(({ value }) => value))
+      : [];
     const sparklineColumns = getSparklineColumns(query.esql);
 
     void services.aiops?.aiopsUsage.trackRenderEsqlCategorizationResults();
@@ -216,6 +232,7 @@ export const createPatternsDataSourceProfileProvider = (
       context: {
         category: DataSourceCategory.Default,
         patternColumns,
+        patternParameters,
         sparklineColumns,
       },
     };

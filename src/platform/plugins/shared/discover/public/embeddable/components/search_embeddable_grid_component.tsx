@@ -313,12 +313,14 @@ export function SearchEmbeddableGridComponent({
     [canShareExpandedDocLink, expandedDoc, shareDirectLinkActions]
   );
 
+  const appliedEsqlVariables = fetchContext?.esqlVariables ?? esqlVariables;
   const cellActionsMetadata = useAdditionalCellActions({
     dataSource,
     dataView,
     query: savedSearchQuery,
     filters: savedSearchFilters,
     timeRange,
+    esqlVariables: appliedEsqlVariables,
   });
 
   // Security Solution overrides our cell actions -- this is a temporary workaroud to keep
@@ -427,7 +429,7 @@ export function SearchEmbeddableGridComponent({
       table,
       filters: fetchContext?.filters,
       timeRange,
-      esqlVariables: fetchContext?.esqlVariables ?? esqlVariables,
+      esqlVariables: appliedEsqlVariables,
       searchSessionId: fetchContext?.searchSessionId,
       projectRouting: fetchContext?.projectRouting,
       isApproximate: fetchContext?.isApproximate,
@@ -437,7 +439,7 @@ export function SearchEmbeddableGridComponent({
   }, [
     abortSignal,
     resultDataSource,
-    esqlVariables,
+    appliedEsqlVariables,
     fetchContext,
     isEsql,
     rows,

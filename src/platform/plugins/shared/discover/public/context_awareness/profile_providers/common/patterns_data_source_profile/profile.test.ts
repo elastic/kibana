@@ -8,6 +8,7 @@
  */
 
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { ESQLVariableType } from '@kbn/esql-types';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import type {
   CustomGridColumnsConfiguration,
@@ -45,6 +46,7 @@ const getConfiguration = (
     context: {
       category: DataSourceCategory.Default,
       patternColumns: ['Pattern'],
+      patternParameters: [],
       sparklineColumns: [],
     },
     toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
@@ -241,6 +243,31 @@ describe('patternsDataSourceProfileProvider', () => {
       expect(
         await action.isCompatible?.(createContext({ query: { query: '', language: 'kuery' } }))
       ).toBe(false);
+    });
+
+    it('requires the applied field control to open a sampled pattern from a dashboard', async () => {
+      const query = {
+        esql: 'FROM logs-* | SAMPLE 0.1 | STATS Count = COUNT(*) BY Pattern = CATEGORIZE(??field)',
+      };
+      const { action, services } = await getViewMatchingResultsAction(undefined, query);
+      const missing = createContext({ query, esqlVariables: undefined });
+      expect(await action.isCompatible?.(missing)).toBe(false);
+      expect(action.getDisplayName(missing)).toBe('View matching results');
+      await action.execute(missing);
+      expect(windowOpen).not.toHaveBeenCalled();
+
+      const applied = createContext({
+        query,
+        esqlVariables: [{ key: 'field', value: 'message', type: ESQLVariableType.FIELDS }],
+      });
+      expect(await action.isCompatible?.(applied)).toBe(true);
+      expect(action.getDisplayName(applied)).toBe(
+        'View matching results (searches beyond the sample)'
+      );
+      await action.execute(applied);
+      expect(services.locator.getRedirectUrl).toHaveBeenCalledWith(
+        expect.objectContaining({ query: { esql: expect.stringMatching(/MATCH\(\s*message,/) } })
+      );
     });
 
     it('replaces the query in the current tab, keeping the commands preceding the STATS', async () => {

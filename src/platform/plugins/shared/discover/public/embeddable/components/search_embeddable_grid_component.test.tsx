@@ -625,6 +625,20 @@ describe('SearchEmbeddableGridComponent', () => {
       [{ id: 'message', name: 'message', meta: { type: 'string' } }]
     );
 
+    it('gives cell actions the field control applied to the panel results', async () => {
+      const applied = [{ key: 'field', value: 'message', type: ESQLVariableType.FIELDS }];
+      await renderComponent({
+        isEsql: true,
+        fetchContext: { ...fetchContext, esqlVariables: applied },
+        parentApi: {
+          esqlVariables$: new BehaviorSubject([{ ...applied[0], value: 'pendingField' }]),
+        } as SearchEmbeddableApi['parentApi'],
+        resultDataSource,
+      });
+
+      expect(getLastGridProps()?.cellActionsMetadata?.esqlVariables).toEqual(applied);
+    });
+
     it('passes a completed ES|QL table and dashboard filterQuery', async () => {
       const abortController = new AbortController();
       const { api } = await renderComponent({ isEsql: true, fetchContext, resultDataSource });
