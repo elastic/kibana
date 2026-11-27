@@ -7,16 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import React, { useCallback, useMemo } from 'react';
+import { useStableCallback } from '@kbn/react-hooks';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ACTION_INSPECT_PANEL, EmbeddableRendererContext } from '@kbn/embeddable-plugin/public';
 import type { QuickActionIds } from '@kbn/embeddable-plugin/public';
+import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
 import { getRepresentativeQuery, EMPTY_KQL_QUERY } from '@kbn/lens-common';
 import type { LensProps } from './hooks/use_lens_props';
 import { useLensExtraActions } from './hooks/use_lens_extra_actions';
 import { resolveEsqlVariables } from './helpers/resolve_esql_variables';
 import { ACTION_EXPLORE_IN_DISCOVER_TAB } from '../../common/constants';
 import type { UnifiedMetricsGridProps } from '../../types';
+import { useOnChartLoaded } from '../../context/chart_loaded_context';
 
 const DEFAULT_QUICK_ACTION_VIEW: QuickActionIds = [
   ACTION_EXPLORE_IN_DISCOVER_TAB,
@@ -138,6 +141,17 @@ export function LensWrapper({
 
   const disabledActions = [...DEFAULT_DISABLED_ACTIONS, ...extraDisabledActions];
 
+  const onChartLoaded = useOnChartLoaded();
+  // Lens keeps the first onLoad it receives, a stable callback always calls the latest onChartLoaded
+  const onLoad = useStableCallback<NonNullable<EmbeddableComponentProps['onLoad']>>(
+    (isLoading, adapters) => {
+      const tables = Object.values(adapters?.tables?.tables ?? {});
+      if (!isLoading && tables.some(({ rows }) => rows.length > 0)) {
+        onChartLoaded?.();
+      }
+    }
+  );
+
   // EmbeddableRendererContext is the only way to configure the visible quick-action row because
   // Lens does not expose a first-class prop for it (tracked in https://github.com/elastic/kibana/issues/236787).
   // Memoize the whole context value (not just `view`) so consumers of the context don't re-render
@@ -161,6 +175,7 @@ export function LensWrapper({
           withDefaultActions
           onBrushEnd={onBrushEnd}
           onFilter={onFilter}
+          onLoad={onLoad}
           syncTooltips={syncTooltips}
           syncCursor={syncCursor}
         />

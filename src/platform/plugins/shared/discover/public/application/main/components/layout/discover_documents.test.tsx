@@ -10,6 +10,8 @@
 import React from 'react';
 import { act, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { of } from 'rxjs';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
@@ -22,6 +24,7 @@ import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_sta
 import { DEFAULT_EXPANDED_DOC_OWNER, internalStateActions } from '../../state_management/redux';
 import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
 import type { DiscoverServices } from '../../../../build_services';
+import type { AggregateQuery } from '@kbn/es-query';
 import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import { createEsqlDataSource } from '../../../../../common/data_sources';
 import { createContextAwarenessMocks } from '../../../../context_awareness/__mocks__';
@@ -59,11 +62,15 @@ async function mountComponent({
   hits,
   toolkit,
   isEsqlMode,
+  error,
+  query,
 }: {
   fetchStatus: FetchStatus;
   hits: EsHitRecord[];
   toolkit?: InternalStateMockToolkit;
   isEsqlMode?: boolean;
+  error?: Error;
+  query?: AggregateQuery;
 }) {
   if (!toolkit) {
     ({ toolkit } = await setup());
@@ -83,6 +90,8 @@ async function mountComponent({
 
   const testDocuments = {
     fetchStatus,
+    error,
+    query,
     result: hits.map((hit) => buildDataTableRecord(hit, dataViewMock)),
     ...(isEsqlMode
       ? {
@@ -137,6 +146,58 @@ describe('Discover documents layout', () => {
     await mountComponent({ fetchStatus: FetchStatus.LOADING, hits: [] });
     expect(screen.getByText('Loading documents')).toBeVisible();
     expect(screen.queryByTestId('discoverDocumentsTable')).not.toBeInTheDocument();
+  });
+
+  test('render the error instead of the documents when fetching them failed', async () => {
+    await mountComponent({
+      fetchStatus: FetchStatus.ERROR,
+      hits: [],
+      isEsqlMode: true,
+      error: new Error('This query failed'),
+    });
+    expect(screen.getByText('This query failed')).toBeVisible();
+    expect(screen.queryByTestId('discoverDocumentsTable')).not.toBeInTheDocument();
+  });
+
+  test('offers to explain the ES|QL error with AI when the documents failed to load', async () => {
+    const services = createDiscoverServicesMock();
+    services.licensing = {
+      license$: of({ isActive: true, hasAtLeast: () => true }),
+    } as unknown as LicensingPluginStart;
+    const { toolkit } = await setup({ services });
+
+    await mountComponent({
+      fetchStatus: FetchStatus.ERROR,
+      hits: [],
+      toolkit,
+      isEsqlMode: true,
+      error: new Error('This query failed'),
+      // the failed query is still the active one
+      query: { esql: 'from *' },
+    });
+
+    expect(await screen.findByTestId('discoverErrorExplainButton')).toBeInTheDocument();
+    expect(screen.queryByTestId('discoverDocumentsTable')).not.toBeInTheDocument();
+  });
+
+  test('does not offer to explain the error of a query which is not the active one anymore', async () => {
+    const services = createDiscoverServicesMock();
+    services.licensing = {
+      license$: of({ isActive: true, hasAtLeast: () => true }),
+    } as unknown as LicensingPluginStart;
+    const { toolkit } = await setup({ services });
+
+    await mountComponent({
+      fetchStatus: FetchStatus.ERROR,
+      hits: [],
+      toolkit,
+      isEsqlMode: true,
+      error: new Error('This query failed'),
+      query: { esql: 'from previous' },
+    });
+
+    expect(screen.getByText('This query failed')).toBeVisible();
+    expect(screen.queryByTestId('discoverErrorExplainButton')).not.toBeInTheDocument();
   });
 
   test('render complete when loading but documents were already fetched', async () => {

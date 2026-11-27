@@ -92,6 +92,7 @@ import {
 import type { CascadedDocumentsContext } from './cascaded_documents';
 import { isCascadedDocumentsVisible } from './cascaded_documents';
 import { SaveDiscoverTableButton } from './save_discover_table_button';
+import { DiscoverSearchErrorCallout } from './discover_search_error_callout';
 import type { RenderViewModeToggle } from '../../../../components/view_mode_toggle';
 
 // export needs for testing
@@ -590,6 +591,13 @@ function DiscoverDocumentsComponent({
     setSelectedCascadeGroups,
     renderViewModeToggle,
   ]);
+
+  if (documentState.fetchStatus === FetchStatus.ERROR && documentState.error) {
+    // displayed in place of the documents if they failed to load while the chart is already displayed
+    return (
+      <DiscoverSearchErrorCallout error={documentState.error} failedQuery={documentState.query} />
+    );
+  }
 
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
     return (

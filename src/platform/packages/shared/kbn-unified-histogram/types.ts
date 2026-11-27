@@ -316,6 +316,10 @@ export interface ChartSectionProps {
    */
   isChartLoading?: boolean;
   /**
+   * Callback to report that a chart of the section finished loading with data
+   */
+  onChartLoaded?: () => void;
+  /**
    * Controls whether or not the chart is visible (used for Show and Hide toggle)
    */
   isComponentVisible: boolean;

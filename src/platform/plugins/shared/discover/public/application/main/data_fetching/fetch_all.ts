@@ -239,12 +239,27 @@ export function fetchAll(
           }
         }
       })
-      // Only the document query should send its errors to main$, to cause the full Discover app
-      // to get into an error state. The other queries will not cause all of Discover to error out
-      // but their errors will be shown in-place (e.g. of the chart).
+      // Only the document query sends its errors to main$, which puts all of Discover into an
+      // error state. Errors of the other queries are shown in place (e.g. of the chart).
+      // Exception: a displayed ES|QL chart is kept, see isChartDisplayed below.
       .catch((e) => {
         sendErrorMsg(dataSubjects.documents$, e, { query });
-        sendErrorMsg(dataSubjects.main$, e);
+
+        if (isEsqlQuery) {
+          // ES|QL total hits come from the documents, without this fetchAll would never resolve
+          sendErrorMsg(dataSubjects.totalHits$, e);
+        }
+
+        // main$ is PARTIAL once a chart of this fetch is displayed. The error is then shown in
+        // place of the documents. A chart loading later replaces the full page error.
+        const isChartDisplayed =
+          isEsqlQuery &&
+          dataSubjects.main$.getValue().fetchStatus === FetchStatus.PARTIAL &&
+          !getCurrentTab().appState.hideChart;
+
+        if (!isChartDisplayed) {
+          sendErrorMsg(dataSubjects.main$, e);
+        }
       });
 
     // Return a promise that will resolve once all the requests have finished or failed, or no results are found

@@ -288,6 +288,69 @@ describe('test fetchAll', () => {
     ]);
   });
 
+  describe('ES|QL documents error', () => {
+    const error = new Error('This query failed');
+
+    const fetchAllEsql = () => {
+      deps.internalState.dispatch(
+        internalStateActions.updateAppState({
+          tabId: deps.getCurrentTab().id,
+          appState: { query: { esql: 'from foo' } },
+        })
+      );
+      mockfetchEsql.mockRejectedValue(error);
+      return fetchAll({ ...deps, esqlSource: createMockEsqlSource([], [], '@timestamp') });
+    };
+
+    // main$ is PARTIAL once a chart of the fetch is displayed
+    const showChart = () => subjects.main$.next({ fetchStatus: FetchStatus.PARTIAL });
+
+    test('should set main$ and totalHits$ to ERROR and resolve', async () => {
+      await fetchAllEsql();
+
+      expect(subjects.documents$.getValue()).toEqual(
+        expect.objectContaining({ fetchStatus: FetchStatus.ERROR, error })
+      );
+      expect(subjects.totalHits$.getValue()).toEqual({ fetchStatus: FetchStatus.ERROR, error });
+      expect(subjects.main$.getValue()).toEqual({ fetchStatus: FetchStatus.ERROR, error });
+    });
+
+    test('should complete main$ if a chart is already displayed', async () => {
+      const fetchPromise = fetchAllEsql();
+      showChart();
+      await fetchPromise;
+
+      // the error and its query still reach documents$, it is shown in place of the documents
+      expect(subjects.documents$.getValue()).toEqual(
+        expect.objectContaining({
+          fetchStatus: FetchStatus.ERROR,
+          error,
+          query: { esql: 'from foo' },
+        })
+      );
+      expect(subjects.totalHits$.getValue()).toEqual({ fetchStatus: FetchStatus.ERROR, error });
+      expect(subjects.main$.getValue()).toEqual({
+        fetchStatus: FetchStatus.COMPLETE,
+        foundDocuments: true,
+        error: undefined,
+      });
+    });
+
+    test('should set main$ to ERROR if the displayed chart was hidden in the meantime', async () => {
+      const fetchPromise = fetchAllEsql();
+      showChart();
+      deps.internalState.dispatch(
+        internalStateActions.updateAppState({
+          tabId: deps.getCurrentTab().id,
+          appState: { hideChart: true },
+        })
+      );
+      await fetchPromise;
+
+      expect(subjects.main$.getValue()).toEqual({ fetchStatus: FetchStatus.ERROR, error });
+    });
+  });
+
   test('finishes loading when ES|QL is canceled before returning results', async () => {
     const query = { esql: 'from foo' };
     setEsqlQuery(query);
