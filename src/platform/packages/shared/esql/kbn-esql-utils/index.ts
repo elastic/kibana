@@ -71,6 +71,7 @@ export {
   convertTimeseriesCommandToFrom,
   getESQLStatsQueryMeta,
   constructCascadeQuery,
+  UnsupportedCascadeQueryError,
   appendFilteringWhereClauseForCascadeLayout,
   getStatsGroupFieldType,
   getFieldParamDefinition,

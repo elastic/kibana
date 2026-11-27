@@ -18,6 +18,7 @@ import {
   extractCategorizeTokens,
   getCategorizeField,
   prettifyQuery,
+  UnsupportedCascadeQueryError,
 } from '@kbn/esql-utils';
 
 const DOC_LIMIT = 10000;
@@ -38,8 +39,9 @@ export const getMatchingResultsQuery = ({
   patternColumn: string;
   pattern: string;
 }): AggregateQuery | undefined => {
+  let matchingResultsQuery: AggregateQuery | undefined;
   try {
-    const matchingResultsQuery = constructCascadeQuery({
+    matchingResultsQuery = constructCascadeQuery({
       query,
       dataView,
       esqlVariables,
@@ -47,12 +49,13 @@ export const getMatchingResultsQuery = ({
       nodePath: [patternColumn],
       nodePathMap: { [patternColumn]: pattern },
     });
-    if (matchingResultsQuery) {
-      // The cascade query is printed on a single line, wrap it like a query typed in the editor
-      return { esql: prettifyQuery(appendLimitToQuery(matchingResultsQuery.esql, DOC_LIMIT)) };
+  } catch (error) {
+    if (!(error instanceof UnsupportedCascadeQueryError)) {
+      throw error;
     }
-  } catch {
-    // The STATS shape is not supported (e.g. CATEGORIZE over a function), use the index-only query below
+  }
+  if (matchingResultsQuery) {
+    return { esql: prettifyQuery(appendLimitToQuery(matchingResultsQuery.esql, DOC_LIMIT)) };
   }
 
   const index = dataView.getIndexPattern();

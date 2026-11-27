@@ -287,6 +287,8 @@ export interface CascadeQueryArgs {
   nodePathMap: Record<string, string>;
 }
 
+export class UnsupportedCascadeQueryError extends Error {}
+
 /**
  * Constructs a cascade query from the provided query, based on the node type, node path and node path map.
  */
@@ -307,7 +309,9 @@ export const constructCascadeQuery = ({
   const summarizedStatsCommand = getStatsCommandToOperateOn(EditorESQLQuery);
 
   if (!summarizedStatsCommand || Object.keys(summarizedStatsCommand?.grouping ?? {}).length === 0) {
-    throw new Error('Query does not have a valid stats command with grouping options');
+    throw new UnsupportedCascadeQueryError(
+      'Query does not have a valid stats command with grouping options'
+    );
   }
 
   if (nodeType === 'leaf') {
@@ -357,7 +361,7 @@ export const constructCascadeQuery = ({
       // check if we have a value for the path segment in the node path map to match on
       !(groupValue && nodePathMap[pathSegment] !== undefined)
     ) {
-      throw new Error(`The "${pathSegment}" field is not operable`);
+      throw new UnsupportedCascadeQueryError(`The "${pathSegment}" field is not operable`);
     }
 
     const operatingStatsCommandIndex = EditorESQLQuery.ast.commands.findIndex(
@@ -387,7 +391,7 @@ export const constructCascadeQuery = ({
           );
         }
         default: {
-          throw new Error(
+          throw new UnsupportedCascadeQueryError(
             `The "${groupValueDefinition.name}" function is not supported for leaf node operations`
           );
         }
@@ -566,7 +570,9 @@ function handleStatsByCategorizeLeafOperation(
       }
     }
   } else {
-    throw new Error('Categorizing functions with function arguments are not supported');
+    throw new UnsupportedCascadeQueryError(
+      'Categorizing functions with function arguments are not supported'
+    );
   }
 
   const matchValue = nodePathMap[removeBackticks(categorizeCommandNode.field)];

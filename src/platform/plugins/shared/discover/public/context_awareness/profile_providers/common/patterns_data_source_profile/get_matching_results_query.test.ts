@@ -51,6 +51,20 @@ describe('getMatchingResultsQuery', () => {
     }
   );
 
+  it('propagates a missing control error instead of dropping the query filters', () => {
+    expect(() =>
+      getMatchingResultsQuery({
+        query: {
+          esql: 'FROM logs-* | WHERE service.name == "checkout" | STATS Count = COUNT(*) BY Pattern = CATEGORIZE(??field)',
+        },
+        dataView: dataViewMock,
+        esqlVariables: [],
+        patternColumn: 'Pattern',
+        pattern: '.*?payment.*?',
+      })
+    ).toThrow(/control variable .* was not found/);
+  });
+
   it('falls back to an index-only query with an escaped pattern when the pattern column cannot be traced back', () => {
     const result = getMatchingResultsQuery({
       query: {
