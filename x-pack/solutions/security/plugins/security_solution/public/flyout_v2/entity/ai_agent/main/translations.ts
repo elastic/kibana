@@ -11,6 +11,14 @@ export const ENTITY_TYPE_BADGE = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.aiAgent.entityTypeBadge',
   { defaultMessage: 'AI agent' }
 );
+export const UNSANCTIONED_BADGE = i18n.translate(
+  'xpack.securitySolution.flyout.entityDetails.aiAgent.unsanctionedBadge',
+  { defaultMessage: 'Unsanctioned' }
+);
+export const RUNNING_NOW = i18n.translate(
+  'xpack.securitySolution.flyout.entityDetails.aiAgent.runningNow',
+  { defaultMessage: 'Running now' }
+);
 export const LOAD_ERROR = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.aiAgent.loadError',
   { defaultMessage: 'Agent details could not be loaded' }

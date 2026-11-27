@@ -12,7 +12,8 @@ import type {
   AgentIdentity,
   AgentRow,
 } from '../../../../entity_analytics/components/ai_security/types';
-import { AiAgentHeader } from './header';
+import { getUnsanctionedAiAgentsWatchlistSavedObjectId } from '../../../../../common/entity_analytics/watchlists/constants';
+import { AiAgentHeader, isUnsanctionedAgent } from './header';
 import { AI_AGENT_TEST_IDS } from './test_ids';
 
 jest.mock('../../../../entity_analytics/api/hooks/use_get_watchlists', () => ({
@@ -89,6 +90,28 @@ describe('AiAgentHeader', () => {
     renderHeader({ agent: { ...agent, firstSeen: '2026-11-20T10:00:00.000Z' } });
     expect(screen.queryByText('2.1.332')).not.toBeInTheDocument();
     expect(screen.queryByText('First seen')).not.toBeInTheDocument();
+  });
+
+  it('shows the Unsanctioned and Running now pills next to the others', () => {
+    renderHeader({ isUnsanctioned: true, isRunning: true });
+    expect(screen.getByTestId(AI_AGENT_TEST_IDS.unsanctionedBadge)).toHaveTextContent(
+      'Unsanctioned'
+    );
+    expect(screen.getByTestId(AI_AGENT_TEST_IDS.headerRunning)).toHaveTextContent('Running now');
+  });
+
+  it('shows neither pill by default', () => {
+    renderHeader();
+    expect(screen.queryByTestId(AI_AGENT_TEST_IDS.unsanctionedBadge)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(AI_AGENT_TEST_IDS.headerRunning)).not.toBeInTheDocument();
+  });
+
+  it('recognises the Unsanctioned AI agents watchlist by its ID in the space', () => {
+    const watchlistId = getUnsanctionedAiAgentsWatchlistSavedObjectId('gen-demo');
+    expect(isUnsanctionedAgent({ ...agent, watchlistIds: [watchlistId] }, 'gen-demo')).toBe(true);
+    expect(isUnsanctionedAgent({ ...agent, watchlistIds: [watchlistId] }, 'default')).toBe(false);
+    expect(isUnsanctionedAgent(agent, 'gen-demo')).toBe(false);
+    expect(isUnsanctionedAgent(undefined, 'gen-demo')).toBe(false);
   });
 
   it('falls back to the install ID fields when there is no store row', () => {

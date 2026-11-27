@@ -19,6 +19,7 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiText,
+  EuiTextColor,
   EuiTitle,
   EuiToolTip,
   useEuiTheme,
@@ -39,6 +40,8 @@ import type {
   LaunchMode,
   ModelUsage,
   ProcessStep,
+  RunReach,
+  RunStatus,
   SideEffects,
   ToolCallStep,
 } from '../../../../../entity_analytics/components/ai_security/activity/types';
@@ -48,6 +51,7 @@ import type {
 } from '../../../../../entity_analytics/components/ai_security/types';
 import { getToolShellCommand } from '../../../../../entity_analytics/components/ai_security/utils';
 import { buildActivityRows, getRootCommandLabel, type ActivityRow } from './activity_rows';
+import { AskAiAboutRun } from './ask_ai_about_run';
 import { AI_AGENT_TEST_IDS } from '../test_ids';
 
 const LAUNCH_MODE_LABELS: Readonly<Record<LaunchMode, string>> = {
@@ -181,7 +185,13 @@ const StepBadges = ({
       )}
       {sideEffects && hasSideEffects && (
         <EuiFlexItem grow={false}>
-          <EuiToolTip content={[...sideEffects.files, ...sideEffects.destinations].join('\n')}>
+          <EuiToolTip
+            content={[
+              ...sideEffects.files,
+              ...sideEffects.domains,
+              ...sideEffects.destinations,
+            ].join('\n')}
+          >
             <EuiText size="xs" color="subdued" tabIndex={0}>
               <FormattedMessage
                 id="xpack.securitySolution.flyout.entityDetails.aiAgent.activity.sideEffects"
@@ -515,14 +525,151 @@ const SectionView = memo(
 );
 SectionView.displayName = 'SectionView';
 
+const RunStatusBadge = ({ status }: { status?: RunStatus }) => {
+  if (status?.kind === 'running') {
+    return (
+      <EuiBadge color="accent" data-test-subj={AI_AGENT_TEST_IDS.runStatus}>
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.entityDetails.aiAgent.activity.runningNow"
+          defaultMessage="Running now"
+        />
+      </EuiBadge>
+    );
+  }
+  if (status?.kind === 'stale') {
+    return (
+      <EuiBadge color="hollow" data-test-subj={AI_AGENT_TEST_IDS.runStatus}>
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.entityDetails.aiAgent.activity.noEndEventSince"
+          defaultMessage="No end event since {time}"
+          values={{ time: <PreferenceFormattedDate value={new Date(status.since)} /> }}
+        />
+      </EuiBadge>
+    );
+  }
+  return null;
+};
+
+const getOutsideLabel = ({ filesOutside, destinations, workingDirectory }: RunReach) => {
+  const values = {
+    files: filesOutside.length,
+    destinations: destinations.length,
+    directory: workingDirectory ?? '',
+  };
+  if (!workingDirectory) {
+    return destinations.length > 0
+      ? i18n.translate(
+          'xpack.securitySolution.flyout.entityDetails.aiAgent.activity.reach.destinations',
+          {
+            defaultMessage:
+              '{destinations, plural, one {# network destination} other {# network destinations}}',
+            values,
+          }
+        )
+      : undefined;
+  }
+  if (filesOutside.length > 0 && destinations.length > 0) {
+    return i18n.translate(
+      'xpack.securitySolution.flyout.entityDetails.aiAgent.activity.reach.filesAndDestinationsOutside',
+      {
+        defaultMessage:
+          '{files, plural, one {# file} other {# files}} and {destinations, plural, one {# network destination} other {# network destinations}} outside {directory}',
+        values,
+      }
+    );
+  }
+  if (filesOutside.length > 0) {
+    return i18n.translate(
+      'xpack.securitySolution.flyout.entityDetails.aiAgent.activity.reach.filesOutside',
+      {
+        defaultMessage: '{files, plural, one {# file} other {# files}} outside {directory}',
+        values,
+      }
+    );
+  }
+  if (destinations.length > 0) {
+    return i18n.translate(
+      'xpack.securitySolution.flyout.entityDetails.aiAgent.activity.reach.destinationsOutside',
+      {
+        defaultMessage:
+          '{destinations, plural, one {# network destination} other {# network destinations}} outside {directory}',
+        values,
+      }
+    );
+  }
+  return undefined;
+};
+
+const HEADLESS = i18n.translate(
+  'xpack.securitySolution.flyout.entityDetails.aiAgent.activity.reach.headless',
+  { defaultMessage: 'headless' }
+);
+const PERMISSION_PROMPTS_OFF = i18n.translate(
+  'xpack.securitySolution.flyout.entityDetails.aiAgent.activity.reach.permissionPromptsOff',
+  { defaultMessage: 'permission prompts off' }
+);
+
+/**
+ * One line under the run header: how it was launched, whether it was headless or ran with
+ * permission prompts off, and what it touched outside its working directory. Parts with no data
+ * are left out rather than shown as zero.
+ */
+const ReachLine = ({ run }: { run: AgentRun }) => {
+  const { reach } = run;
+  const outside = getOutsideLabel(reach);
+  const parts: Array<{ key: string; node: React.ReactNode }> = [
+    ...(run.launchMode !== 'unknown' || run.root.entryLeaderName
+      ? [{ key: 'launch', node: getLaunchLabel(run) }]
+      : []),
+    ...(run.isHeadless ? [{ key: 'headless', node: HEADLESS }] : []),
+    ...(reach.permissionPromptsOff
+      ? [
+          {
+            key: 'permissions',
+            node: <EuiTextColor color="danger">{PERMISSION_PROMPTS_OFF}</EuiTextColor>,
+          },
+        ]
+      : []),
+    ...(outside
+      ? [
+          {
+            key: 'outside',
+            node: (
+              <EuiToolTip
+                content={[...reach.filesOutside, ...reach.destinations].slice(0, 20).join('\n')}
+              >
+                <span tabIndex={0}>{outside}</span>
+              </EuiToolTip>
+            ),
+          },
+        ]
+      : []),
+  ];
+  if (parts.length === 0) return null;
+  return (
+    <EuiText size="xs" color="subdued" data-test-subj={AI_AGENT_TEST_IDS.reachLine}>
+      {parts.map(({ key, node }, index) => (
+        <React.Fragment key={key}>
+          {index > 0 && ' · '}
+          {node}
+        </React.Fragment>
+      ))}
+    </EuiText>
+  );
+};
+
 const RunView = memo(
   ({
     run,
+    identity,
+    agentRow,
     showSetup,
     isMatchedByAccount,
     onOpenProcessTree,
   }: {
     run: AgentRun;
+    identity: AgentIdentity;
+    agentRow?: AgentRow;
     showSetup: boolean;
     isMatchedByAccount: boolean;
     onOpenProcessTree: OpenProcessTree;
@@ -550,11 +697,14 @@ const RunView = memo(
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow" data-test-subj={AI_AGENT_TEST_IDS.launchBadge}>
-              {getLaunchLabel(run)}
-            </EuiBadge>
+            <RunStatusBadge status={run.status} />
+          </EuiFlexItem>
+          <EuiFlexItem />
+          <EuiFlexItem grow={false}>
+            <AskAiAboutRun identity={identity} agent={agentRow} run={run} />
           </EuiFlexItem>
         </EuiFlexGroup>
+        <ReachLine run={run} />
         {headlessPrompt && (
           <>
             <EuiSpacer size="xs" />
@@ -668,6 +818,7 @@ export const AgentActivity = memo(({ agent }: AgentActivityProps) => {
   }
 
   const isMatchedByAccount = data.otelMatch === 'account';
+  const agentRow = 'watchlistIds' in agent ? agent : undefined;
 
   return (
     <div data-test-subj={AI_AGENT_TEST_IDS.activity}>
@@ -709,6 +860,8 @@ export const AgentActivity = memo(({ agent }: AgentActivityProps) => {
         <React.Fragment key={run.id}>
           <RunView
             run={run}
+            identity={agent}
+            agentRow={agentRow}
             showSetup={showSetup}
             isMatchedByAccount={isMatchedByAccount}
             onOpenProcessTree={onOpenProcessTree}

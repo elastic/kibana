@@ -10,7 +10,10 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { useFlyoutApi } from '../../../use_flyout_api';
 import { createFlyoutApiMock } from '../../../use_flyout_api.mock';
-import { useAiAgentContext } from '../../../../entity_analytics/components/ai_security/hooks/use_ai_agents';
+import {
+  useAiAgentActivity,
+  useAiAgentContext,
+} from '../../../../entity_analytics/components/ai_security/hooks/use_ai_agents';
 import { mockAgentContext, mockAgentIdentity, mockAgentRow } from './mocks';
 import { AiAgent } from '.';
 import { AI_AGENT_TEST_IDS } from './test_ids';
@@ -67,6 +70,24 @@ describe('AiAgent', () => {
       isLoading: false,
       isError: false,
     } as unknown as ReturnType<typeof useAiAgentContext>);
+    jest.mocked(useAiAgentActivity).mockReturnValue({
+      data: undefined,
+    } as unknown as ReturnType<typeof useAiAgentActivity>);
+  });
+
+  it('shows Running now in the header when a run is running', () => {
+    jest.mocked(useAiAgentActivity).mockReturnValue({
+      data: { runs: [{ id: 'run-1', status: { kind: 'running' } }] },
+    } as unknown as ReturnType<typeof useAiAgentActivity>);
+    renderFlyout();
+    expect(screen.getByTestId(AI_AGENT_TEST_IDS.headerRunning)).toBeInTheDocument();
+  });
+
+  it('reads activity only once the agent row has loaded', () => {
+    renderFlyout();
+    expect(useAiAgentActivity).toHaveBeenLastCalledWith(
+      expect.objectContaining({ entityId: mockAgentIdentity.entityId, dataSources: ['endpoint'] })
+    );
   });
 
   it('orders the overview: summary grid, attribution, risk, alerts, related agents, install details', () => {

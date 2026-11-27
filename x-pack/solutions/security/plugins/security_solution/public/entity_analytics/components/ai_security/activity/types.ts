@@ -11,6 +11,9 @@ export interface ProcessRecord {
   readonly timestamp: string;
   readonly documentId?: string;
   readonly index?: string;
+  readonly pid?: number;
+  /** Elastic Agent ID of the Defend install that saw the process (`agent.id`). */
+  readonly endpointAgentId?: string;
   readonly parentEntityId?: string;
   readonly ancestry: readonly string[];
   readonly name?: string;
@@ -38,6 +41,9 @@ export interface SideEffects {
   readonly fileEvents: number;
   readonly networkEvents: number;
   readonly files: readonly string[];
+  /** Names the process looked up in DNS. */
+  readonly domains: readonly string[];
+  /** Addresses of connections that didn't come from a DNS lookup. */
   readonly destinations: readonly string[];
 }
 
@@ -114,10 +120,30 @@ export interface ActivitySection {
   readonly modelUsage?: ModelUsage;
 }
 
+/**
+ * Whether the run's root process has ended, from Defend's end events at read time. `stale` is a
+ * root with no end event that started before the cap: a long session or a host that went offline.
+ */
+export type RunStatus =
+  | { readonly kind: 'running' }
+  | { readonly kind: 'stale'; readonly since: string }
+  | { readonly kind: 'ended' };
+
+/** What the run could reach, for the line under its header. Empty parts mean no data. */
+export interface RunReach {
+  readonly permissionPromptsOff: boolean;
+  readonly workingDirectory?: string;
+  /** Distinct files outside the working directory. Empty when the directory is unknown. */
+  readonly filesOutside: readonly string[];
+  /** Distinct domains, or addresses with no lookup. Every network destination is outside. */
+  readonly destinations: readonly string[];
+}
+
 /** One launch of the agent and everything its process tree did. */
 export interface AgentRun {
   readonly id: string;
   readonly root: ProcessRecord;
+  readonly rootSideEffects?: SideEffects;
   readonly start: string;
   readonly end: string;
   readonly launchMode: LaunchMode;
@@ -125,6 +151,20 @@ export interface AgentRun {
   readonly headlessPrompt?: string;
   readonly sessionIds: readonly string[];
   readonly sections: readonly ActivitySection[];
+  /** Absent when end events couldn't be read. */
+  readonly status?: RunStatus;
+  readonly reach: RunReach;
+  /** Alerts on a process of this run, newest first. */
+  readonly alertIds: readonly string[];
+}
+
+/** An alert on the agent, with the process fields that tie it to a run. */
+export interface RunAlertRecord {
+  readonly id: string;
+  readonly timestamp: string;
+  readonly processEntityId?: string;
+  readonly parentEntityId?: string;
+  readonly ancestry: readonly string[];
 }
 
 export type OtelMatch = 'session' | 'account' | 'none';

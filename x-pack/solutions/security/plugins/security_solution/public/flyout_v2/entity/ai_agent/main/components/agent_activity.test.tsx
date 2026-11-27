@@ -166,7 +166,7 @@ describe('AgentActivity', () => {
           proc({ entityId: 'npm', parentEntityId: 'shell', commandLine: 'npm test' }),
         ],
         sideEffects: new Map([
-          ['npm', { fileEvents: 3, networkEvents: 1, files: [], destinations: [] }],
+          ['npm', { fileEvents: 3, networkEvents: 1, files: [], domains: [], destinations: [] }],
         ]),
         otelEvents: [
           {
@@ -189,7 +189,7 @@ describe('AgentActivity', () => {
     );
   });
 
-  it('merges the launch mode and the terminal session into one badge', () => {
+  it('shows the launch mode with its terminal session on the reach line', () => {
     mockActivity(
       buildAgentActivity({
         identity: claude,
@@ -209,10 +209,115 @@ describe('AgentActivity', () => {
     );
     renderActivity();
 
-    expect(screen.getByTestId(AI_AGENT_TEST_IDS.launchBadge)).toHaveTextContent(
-      'Scheduled (crond)'
+    expect(screen.getByTestId(AI_AGENT_TEST_IDS.reachLine)).toHaveTextContent(
+      /^Scheduled \(crond\)$/
     );
     expect(screen.queryByText(/Terminal session/)).not.toBeInTheDocument();
+  });
+
+  it('shows the reach line: launch, headless, permission prompts off and what is outside the directory', () => {
+    mockActivity(
+      buildAgentActivity({
+        identity: claude,
+        ownEvents: [
+          proc({
+            entityId: 'agent',
+            isDescendant: false,
+            entryMetaType: 'init',
+            entryLeaderName: 'crond',
+            workingDirectory: '/home/ec2-user/repo',
+            commandLine: 'claude -p fix the build --dangerously-skip-permissions',
+          }),
+        ],
+        descendantEvents: [
+          proc({ entityId: 'curl', parentEntityId: 'agent', commandLine: 'curl' }),
+        ],
+        sideEffects: new Map([
+          [
+            'curl',
+            {
+              fileEvents: 2,
+              networkEvents: 2,
+              files: ['/home/ec2-user/Downloads/kit.tar.gz', '/home/ec2-user/.aws/credentials'],
+              domains: ['dl.kit.example'],
+              destinations: [],
+            },
+          ],
+        ]),
+        otelEvents: [],
+        otelMatch: 'none',
+      })
+    );
+    renderActivity();
+
+    expect(screen.getByTestId(AI_AGENT_TEST_IDS.reachLine)).toHaveTextContent(
+      'Scheduled (crond) · headless · permission prompts off · 2 files and 1 network destination outside /home/ec2-user/repo'
+    );
+  });
+
+  it('leaves out reach parts that have no data rather than showing zero', () => {
+    mockActivity(
+      buildAgentActivity({
+        identity: claude,
+        ownEvents: [proc({ entityId: 'agent', isDescendant: false, interactive: true })],
+        descendantEvents: [],
+        sideEffects: new Map(),
+        otelEvents: [],
+        otelMatch: 'none',
+      })
+    );
+    renderActivity();
+
+    expect(screen.getByTestId(AI_AGENT_TEST_IDS.reachLine)).toHaveTextContent(/^Interactive$/);
+  });
+
+  it('shows "Running now" on a run whose root has no end event', () => {
+    const now = Date.now();
+    mockActivity(
+      buildAgentActivity({
+        identity: claude,
+        ownEvents: [
+          proc({
+            entityId: 'agent',
+            isDescendant: false,
+            timestamp: new Date(now - 3_600_000).toISOString(),
+          }),
+        ],
+        descendantEvents: [],
+        sideEffects: new Map(),
+        otelEvents: [],
+        otelMatch: 'none',
+        endedProcessIds: new Set(),
+        now,
+      })
+    );
+    renderActivity();
+
+    expect(screen.getByTestId(AI_AGENT_TEST_IDS.runStatus)).toHaveTextContent('Running now');
+  });
+
+  it('says "No end event since" past the cap, and nothing for an ended run', () => {
+    const now = new Date('2026-11-27T12:00:00.000Z').getTime();
+    mockActivity(
+      buildAgentActivity({
+        identity: claude,
+        ownEvents: [
+          proc({ entityId: 'old', isDescendant: false, timestamp: '2026-11-25T10:00:00.000Z' }),
+          proc({ entityId: 'done', isDescendant: false, timestamp: '2026-11-27T11:00:00.000Z' }),
+        ],
+        descendantEvents: [],
+        sideEffects: new Map(),
+        otelEvents: [],
+        otelMatch: 'none',
+        endedProcessIds: new Set(['done']),
+        now,
+      })
+    );
+    renderActivity();
+
+    const statuses = screen.getAllByTestId(AI_AGENT_TEST_IDS.runStatus);
+    expect(statuses).toHaveLength(1);
+    expect(statuses[0]).toHaveTextContent(/^No end event since /);
   });
 
   it('summarises model use and marks sessions matched by account', () => {

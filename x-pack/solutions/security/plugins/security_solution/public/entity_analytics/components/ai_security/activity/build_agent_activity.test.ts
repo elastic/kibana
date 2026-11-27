@@ -7,13 +7,20 @@
 
 import {
   buildAgentActivity,
+  buildRunReach,
+  getRunAlertIds,
+  getRunStatus,
+  hasPermissionBypass,
+  isInsideDirectory,
   isSetupProcess,
   mergeProcessEvents,
   parseHeadlessPrompt,
+  toEndedProcessIds,
   toOtelRecord,
   toProcessEvent,
+  toRunAlert,
 } from './build_agent_activity';
-import type { OtelRecord, ProcessRecord, ProcessStep } from './types';
+import type { OtelRecord, ProcessRecord, ProcessStep, SideEffects } from './types';
 import type { AgentIdentity } from '../types';
 
 const identity: AgentIdentity = {
@@ -384,5 +391,186 @@ describe('row readers', () => {
   it('marks generated OTel as mock data', () => {
     expect(toOtelRecord({ '@timestamp': 'T1', tags: ['poc-mock'] })?.isMock).toBe(true);
     expect(toOtelRecord({ '@timestamp': 'T1', tags: null })?.isMock).toBe(false);
+  });
+
+  it('reads the pid and Defend agent ID, ended processes and run alerts', () => {
+    expect(
+      toProcessEvent({
+        '@timestamp': 'T1',
+        'process.entity_id': 'p',
+        'process.pid': 16884,
+        'agent.id': 'endpoint-1',
+      })
+    ).toMatchObject({ pid: 16884, endpointAgentId: 'endpoint-1' });
+    expect(
+      toEndedProcessIds([{ 'process.entity_id': 'a' }, { 'process.entity_id': null }])
+    ).toEqual(new Set(['a']));
+    expect(
+      toRunAlert({ _id: 'alert-1', '@timestamp': 'T1', 'process.entity_id': 'p' })
+    ).toMatchObject({ id: 'alert-1', processEntityId: 'p', ancestry: [] });
+    expect(toRunAlert({ '@timestamp': 'T1' })).toBeUndefined();
+  });
+});
+
+describe('run status', () => {
+  const now = new Date('2026-11-27T12:00:00.000Z').getTime();
+  const root = proc({ entityId: 'agent', isDescendant: false });
+
+  it('is running when the root has no end event, ended when it has one', () => {
+    const recent = { ...root, timestamp: '2026-11-27T11:00:00.000Z' };
+    expect(getRunStatus(recent, new Set(), now)).toEqual({ kind: 'running' });
+    expect(getRunStatus(recent, new Set(['agent']), now)).toEqual({ kind: 'ended' });
+  });
+
+  it('says "no end event since" past the cap instead of running', () => {
+    const old = { ...root, timestamp: '2026-11-26T10:00:00.000Z' };
+    expect(getRunStatus(old, new Set(), now)).toEqual({ kind: 'stale', since: old.timestamp });
+  });
+
+  it('has no status when end events could not be read', () => {
+    expect(getRunStatus(root, undefined, now)).toBeUndefined();
+  });
+
+  it('is calculated for each run from the end events passed at read time', () => {
+    const activity = build({
+      ownEvents: [
+        proc({ entityId: 'a', isDescendant: false, timestamp: '2026-11-27T11:00:00.000Z' }),
+        proc({ entityId: 'b', isDescendant: false, timestamp: '2026-11-27T11:30:00.000Z' }),
+      ],
+      endedProcessIds: new Set(['a']),
+      now,
+    });
+    expect(activity.runs.map((run) => run.status?.kind)).toEqual(['ended', 'running']);
+  });
+});
+
+describe('run reach', () => {
+  const effects = (overrides: Partial<SideEffects>): SideEffects => ({
+    fileEvents: 1,
+    networkEvents: 0,
+    files: [],
+    domains: [],
+    destinations: [],
+    ...overrides,
+  });
+
+  it('flags permission prompts off from the root command line, by product', () => {
+    const claude = proc({
+      entityId: 'agent',
+      commandLine: 'claude -p fix it --dangerously-skip-permissions',
+    });
+    expect(hasPermissionBypass('claude_code', claude)).toBe(true);
+    expect(hasPermissionBypass('cursor', claude)).toBe(false);
+    expect(
+      hasPermissionBypass(
+        'claude_code',
+        proc({ entityId: 'a', args: ['claude', '--permission-mode', 'bypassPermissions'] })
+      )
+    ).toBe(true);
+    expect(
+      hasPermissionBypass(
+        'cursor',
+        proc({ entityId: 'c', unorderedArgs: ['--force', 'cursor-agent'] })
+      )
+    ).toBe(true);
+    expect(hasPermissionBypass('claude_code', proc({ entityId: 'd', commandLine: 'claude' }))).toBe(
+      false
+    );
+  });
+
+  it('compares paths with the working directory, Windows paths without case', () => {
+    expect(isInsideDirectory('/home/u/repo/src/a.ts', '/home/u/repo')).toBe(true);
+    expect(isInsideDirectory('/home/u/repo-other/a.ts', '/home/u/repo')).toBe(false);
+    expect(isInsideDirectory('C:\\Users\\U\\Repo\\a.py', 'c:\\users\\u\\repo\\')).toBe(true);
+  });
+
+  it("counts files outside the directory and every destination, without the agent's own state and service", () => {
+    const root = proc({
+      entityId: 'agent',
+      isDescendant: false,
+      workingDirectory: '/home/u/repo',
+    });
+    const curl = proc({ entityId: 'curl', parentEntityId: 'agent', commandLine: 'curl …' });
+    const reach = buildRunReach(
+      'claude_code',
+      root,
+      [root, curl],
+      new Map([
+        [
+          'agent',
+          effects({
+            files: [
+              '/home/u/.claude/sessions/1.json',
+              '/home/u/.aws/credentials',
+              '/home/u/repo/a',
+            ],
+            domains: ['api.anthropic.com', 'get.notes.example'],
+            destinations: ['198.51.100.20'],
+          }),
+        ],
+        [
+          'curl',
+          effects({
+            files: [
+              '/home/u/Downloads/kit.tar.gz',
+              '/tmp/claude-ab12-cwd',
+              '/home/u/.claude/shell-snapshots/snapshot-bash-1.sh',
+              '/home/u/.claude/settings.json',
+            ],
+            domains: ['dl.kit.example'],
+          }),
+        ],
+      ])
+    );
+    expect(reach).toEqual({
+      permissionPromptsOff: false,
+      workingDirectory: '/home/u/repo',
+      filesOutside: [
+        '/home/u/.aws/credentials',
+        '/home/u/.claude/settings.json',
+        '/home/u/Downloads/kit.tar.gz',
+      ],
+      destinations: ['dl.kit.example', 'get.notes.example'],
+    });
+  });
+
+  it('counts addresses of a process that made no lookup, and no files without a directory', () => {
+    const root = proc({ entityId: 'agent', isDescendant: false });
+    const nc = proc({ entityId: 'nc', parentEntityId: 'agent' });
+    const reach = buildRunReach(
+      'claude_code',
+      root,
+      [root, nc],
+      new Map([['nc', effects({ files: ['/etc/passwd'], destinations: ['203.0.113.9'] })]])
+    );
+    expect(reach.filesOutside).toEqual([]);
+    expect(reach.destinations).toEqual(['203.0.113.9']);
+  });
+});
+
+describe('run alerts', () => {
+  it('ties an alert to the run by its process, its parent or its ancestry', () => {
+    const alerts = [
+      { id: 'own', timestamp: 'T3', processEntityId: 'helper', ancestry: [] },
+      {
+        id: 'child',
+        timestamp: 'T2',
+        processEntityId: 'x',
+        parentEntityId: 'helper',
+        ancestry: [],
+      },
+      { id: 'deep', timestamp: 'T1', processEntityId: 'y', ancestry: ['z', 'agent'] },
+      { id: 'other', timestamp: 'T0', processEntityId: 'elsewhere', ancestry: [] },
+    ];
+    expect(getRunAlertIds(new Set(['agent', 'helper']), alerts)).toEqual(['own', 'child', 'deep']);
+  });
+
+  it('puts each run its own alerts', () => {
+    const activity = build({
+      ownEvents: [proc({ entityId: 'agent', isDescendant: false })],
+      descendantEvents: [proc({ entityId: 'helper', parentEntityId: 'agent' })],
+      alerts: [{ id: 'alert-1', timestamp: 'T1', processEntityId: 'helper', ancestry: [] }],
+    });
+    expect(activity.runs[0].alertIds).toEqual(['alert-1']);
   });
 });

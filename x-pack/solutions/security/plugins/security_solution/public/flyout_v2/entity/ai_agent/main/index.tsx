@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { memo, useCallback, useRef, useState } from 'react';
+import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
 import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
@@ -18,12 +18,16 @@ import {
   EuiTabs,
 } from '@elastic/eui';
 import { KbnDangerCallout } from '@kbn/ui-callout';
-import { useAiAgentContext } from '../../../../entity_analytics/components/ai_security/hooks/use_ai_agents';
+import {
+  useAiAgentActivity,
+  useAiAgentContext,
+} from '../../../../entity_analytics/components/ai_security/hooks/use_ai_agents';
 import { parseAgentId } from '../../../../entity_analytics/components/ai_security/utils';
 import { useFlyoutApi } from '../../../use_flyout_api';
 import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
+import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { EntitySummaryGrid } from '../../shared/components/entity_summary_grid';
-import { AiAgentHeader } from './header';
+import { AiAgentHeader, isUnsanctionedAgent } from './header';
 import { Footer } from './footer';
 import { AttributionSection } from './components/attribution_section';
 import { RiskSummarySection } from './components/risk_summary_section';
@@ -59,9 +63,15 @@ export const AiAgent: FC<AiAgentProps> = memo(function AiAgent({ entityId, entit
   const relatedAgentsRef = useRef<HTMLDivElement>(null);
   const { data, isLoading, isError } = useAiAgentContext(entityId);
   const { openAiAgentFlyoutAsChild } = useFlyoutApi();
+  const spaceId = useSpaceId();
   const identity = data?.identity ?? parseAgentId(entityId);
   const agent = data?.agent;
   const agentName = entityName ?? agent?.entityName ?? entityId;
+  const { data: activity } = useAiAgentActivity(isLoading ? undefined : agent ?? identity);
+  const runningRuns = useMemo(
+    () => activity?.runs.filter((run) => run.status?.kind === 'running') ?? [],
+    [activity]
+  );
 
   const onShowAgent = useCallback(
     () =>
@@ -100,7 +110,13 @@ export const AiAgent: FC<AiAgentProps> = memo(function AiAgent({ entityId, entit
   return (
     <>
       <EuiFlyoutHeader hasBorder>
-        <AiAgentHeader identity={identity} agent={agent} isLoading={isLoading} />
+        <AiAgentHeader
+          identity={identity}
+          agent={agent}
+          isLoading={isLoading}
+          isUnsanctioned={isUnsanctionedAgent(agent, spaceId)}
+          isRunning={runningRuns.length > 0}
+        />
         <EuiSpacer size="s" />
         <EuiTabs size="s" bottomBorder={false} data-test-subj={AI_AGENT_TEST_IDS.tabs}>
           {tabs.map((tab) => (
@@ -165,7 +181,7 @@ export const AiAgent: FC<AiAgentProps> = memo(function AiAgent({ entityId, entit
         )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <Footer identity={identity} />
+        <Footer identity={identity} agent={agent} runningRuns={runningRuns} />
       </EuiFlyoutFooter>
     </>
   );

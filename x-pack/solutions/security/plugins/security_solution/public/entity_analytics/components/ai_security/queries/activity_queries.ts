@@ -6,7 +6,11 @@
  */
 
 import { escapeStringValue } from '@kbn/esql-utils';
-import { SET_UNMAPPED_NULLIFY, toList } from '../../home/entities_grid/queries/esql';
+import {
+  getAlertsIndex,
+  SET_UNMAPPED_NULLIFY,
+  toList,
+} from '../../home/entities_grid/queries/esql';
 import {
   ACTIVITY_MAX_OTEL_EVENTS,
   ACTIVITY_MAX_PROCESS_EVENTS,
@@ -27,7 +31,9 @@ export const PROCESS_COLUMNS = [
   '_id',
   '_index',
   'event.action',
+  'agent.id',
   'process.entity_id',
+  'process.pid',
   'process.parent.entity_id',
   'process.Ext.ancestry',
   'process.name',
@@ -46,6 +52,8 @@ export const PROCESS_COLUMNS = [
   'process.interactive',
 ] as const;
 
+const ACTIVITY_MAX_RUN_ALERTS = 500;
+
 const PROCESS_START = '(MV_CONTAINS(event.action, "exec") OR MV_CONTAINS(event.action, "fork"))';
 
 const since = (from: string): string => `@timestamp >= ${escapeStringValue(from)}`;
@@ -62,6 +70,25 @@ export const buildOwnProcessesQuery = (
     `| WHERE ${agentOwnEventsFilter(identity)} AND ${PROCESS_START} AND ${since(from)}`,
     `| KEEP ${PROCESS_COLUMNS.join(', ')}`,
     '| SORT @timestamp ASC',
+    `| LIMIT ${ACTIVITY_MAX_PROCESS_EVENTS}`,
+  ].join('\n');
+
+/**
+ * The agent's own processes that have an end event. Defend can put fork, exec and end on one
+ * event for a short-lived process, so any event carrying `end` counts.
+ */
+export const buildOwnProcessEndsQuery = (
+  namespace: string,
+  identity: AgentIdentity,
+  from: string
+): string =>
+  [
+    SET_UNMAPPED_NULLIFY,
+    `FROM ${getEndpointProcessIndex(namespace)}`,
+    `| WHERE ${agentOwnEventsFilter(identity)} AND MV_CONTAINS(event.action, "end") AND ${since(
+      from
+    )}`,
+    '| STATS ended_at = MAX(@timestamp) BY process.entity_id',
     `| LIMIT ${ACTIVITY_MAX_PROCESS_EVENTS}`,
   ].join('\n');
 
@@ -98,13 +125,28 @@ export const buildProcessSideEffectsQuery = (
     `FROM ${getEndpointFileIndex(namespace)}, ${getEndpointNetworkIndex(namespace)}`,
     `| WHERE process.ai_agent.name == ${escapeStringValue(agentName)}`,
     `  AND host.id == ${escapeStringValue(hostId)} AND ${since(from)}`,
-    '| EVAL is_network = data_stream.dataset == "endpoint.events.network"',
+    '| EVAL is_network = data_stream.dataset == "endpoint.events.network",',
+    '    direct_ip = CASE(dns.question.name IS NULL, destination.ip, NULL)',
     '| STATS file_events = SUM(CASE(is_network, 0, 1)),',
     '    network_events = SUM(CASE(is_network, 1, 0)),',
     '    files = MV_SLICE(VALUES(file.path), 0, 9),',
-    '    destinations = MV_SLICE(VALUES(destination.ip), 0, 9)',
+    '    domains = MV_SLICE(VALUES(dns.question.name), 0, 9),',
+    '    destinations = MV_SLICE(VALUES(direct_ip), 0, 9)',
     '  BY process.entity_id',
     `| LIMIT ${ACTIVITY_MAX_PROCESS_EVENTS}`,
+  ].join('\n');
+
+/** Alerts on the agent with the process fields that tie each one to a run, newest first. */
+export const buildRunAlertsQuery = (namespace: string, entityId: string, from: string): string =>
+  [
+    SET_UNMAPPED_NULLIFY,
+    `FROM ${getAlertsIndex(namespace)} METADATA _id`,
+    `| WHERE MV_CONTAINS(kibana.alert.entity.id, ${escapeStringValue(entityId)}) AND ${since(
+      from
+    )}`,
+    '| KEEP @timestamp, _id, process.entity_id, process.parent.entity_id, process.Ext.ancestry',
+    '| SORT @timestamp DESC',
+    `| LIMIT ${ACTIVITY_MAX_RUN_ALERTS}`,
   ].join('\n');
 
 /**

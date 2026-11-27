@@ -18,6 +18,9 @@ import type {
   OtelRecord,
   ProcessRecord,
   ProcessStep,
+  RunAlertRecord,
+  RunReach,
+  RunStatus,
   SideEffects,
 } from './types';
 
@@ -51,6 +54,40 @@ const SETUP_COMMAND_MARKERS: readonly string[] = [
   '/etc/debuginfod',
 ];
 
+/** A root with no end event reads as running for this long, then as "no end event since". */
+export const RUNNING_CAP_MS = 24 * 3_600_000;
+
+/** Launch flags that turn permission prompts off, by product (Claude CLI docs, Cursor CLI docs). */
+const PERMISSION_BYPASS_FLAGS: Readonly<Record<string, readonly string[]>> = {
+  claude_code: ['--dangerously-skip-permissions', '--permission-mode=bypassPermissions'],
+  cursor: ['--force', '--yolo'],
+};
+
+/**
+ * The agent's own state and service traffic, ignored on the agent's own process only. A command
+ * the agent runs that touches them still counts. Domains follow the prebuilt GenAI rules'
+ * exclusions, plus Claude Code's log intake.
+ */
+const AGENT_STATE_PATH_MARKERS: readonly string[] = [
+  '/.claude/',
+  '/.claude.json',
+  '/.local/state/claude/',
+  '/.local/share/claude/',
+  '/.cursor/',
+  '/.config/cursor/',
+  '/cc-socks/',
+];
+const AGENT_SERVICE_DOMAINS: readonly string[] = [
+  'anthropic.com',
+  'claude.ai',
+  'claude.com',
+  'cursor.com',
+  'cursor.sh',
+  'datadoghq.com',
+];
+/** Claude Code's tool shell sources its snapshot and writes its working directory on every command. */
+const TOOL_SHELL_PATH_MARKERS: readonly string[] = ['/tmp/claude-', '/.claude/shell-snapshots/'];
+
 type EsqlRecord = Record<string, unknown>;
 
 /** Reads one process start event from an ES|QL row. */
@@ -63,6 +100,8 @@ export const toProcessEvent = (row: EsqlRecord): ProcessRecord | undefined => {
     timestamp,
     documentId: firstString(row._id),
     index: firstString(row._index),
+    pid: toNumber(row['process.pid']),
+    endpointAgentId: firstString(row['agent.id']),
     parentEntityId: firstString(row['process.parent.entity_id']),
     ancestry: toStringArray(row['process.Ext.ancestry']),
     name: firstString(row['process.name']),
@@ -95,12 +134,32 @@ export const toSideEffects = (rows: readonly EsqlRecord[]): Map<string, SideEffe
             fileEvents: toNumber(row.file_events) ?? 0,
             networkEvents: toNumber(row.network_events) ?? 0,
             files: toStringArray(row.files),
+            domains: toStringArray(row.domains),
             destinations: toStringArray(row.destinations),
           },
         ] as const,
       ];
     })
   );
+
+/** Entity IDs of the agent's processes that have an end event. */
+export const toEndedProcessIds = (rows: readonly EsqlRecord[]): Set<string> =>
+  new Set(rows.map((row) => firstString(row['process.entity_id'])).filter(isString));
+
+export const toRunAlert = (row: EsqlRecord): RunAlertRecord | undefined => {
+  const id = firstString(row._id);
+  const timestamp = firstString(row['@timestamp']);
+  if (!id || !timestamp) return undefined;
+  return {
+    id,
+    timestamp,
+    processEntityId: firstString(row['process.entity_id']),
+    parentEntityId: firstString(row['process.parent.entity_id']),
+    ancestry: toStringArray(row['process.Ext.ancestry']),
+  };
+};
+
+const isString = (value: string | undefined): value is string => !!value;
 
 export const toOtelRecord = (row: EsqlRecord): OtelRecord | undefined => {
   const timestamp = firstString(row['@timestamp']);
@@ -145,6 +204,8 @@ const mergeTwo = (first: ProcessRecord, second: ProcessRecord): ProcessRecord =>
     timestamp: first.timestamp < second.timestamp ? first.timestamp : second.timestamp,
     documentId: primary.documentId ?? secondary.documentId,
     index: primary.index ?? secondary.index,
+    pid: primary.pid ?? secondary.pid,
+    endpointAgentId: primary.endpointAgentId ?? secondary.endpointAgentId,
     parentEntityId: primary.parentEntityId ?? secondary.parentEntityId,
     ancestry: primary.ancestry.length > 0 ? primary.ancestry : secondary.ancestry,
     name: primary.name ?? secondary.name,
@@ -200,6 +261,120 @@ export const parseHeadlessPrompt = (
   return { isHeadless: true, prompt: prompt && !prompt.startsWith('-') ? prompt : undefined };
 };
 
+/** The root was launched with permission prompts off. */
+export const hasPermissionBypass = (agentName: string, root: ProcessRecord): boolean => {
+  const flags = PERMISSION_BYPASS_FLAGS[agentName] ?? [];
+  const tokens =
+    root.args && root.args.length > 0
+      ? root.args
+      : root.unorderedArgs.length > 0
+      ? root.unorderedArgs
+      : root.commandLine?.split(/\s+/) ?? [];
+  return tokens.some(
+    (token, index) =>
+      flags.includes(token) ||
+      (flags.includes('--permission-mode=bypassPermissions') &&
+        token === '--permission-mode' &&
+        tokens[index + 1] === 'bypassPermissions')
+  );
+};
+
+const normalisePath = (path: string): string => path.replace(/\\/g, '/').replace(/\/+$/, '');
+
+const isWindowsPath = (path: string): boolean => /^[a-zA-Z]:[\\/]/.test(path);
+
+/** The path is the directory or under it. Windows paths compare without case. */
+export const isInsideDirectory = (path: string, directory: string): boolean => {
+  const caseless = isWindowsPath(directory);
+  const fold = (value: string) => (caseless ? value.toLowerCase() : value);
+  const dir = fold(normalisePath(directory));
+  const target = fold(normalisePath(path));
+  return target === dir || target.startsWith(`${dir}/`);
+};
+
+const isServiceDomain = (domain: string): boolean =>
+  AGENT_SERVICE_DOMAINS.some((service) => domain === service || domain.endsWith(`.${service}`));
+
+const hasMarker = (path: string, markers: readonly string[]): boolean => {
+  const normalised = normalisePath(path);
+  return markers.some((marker) => normalised.includes(marker));
+};
+
+const NO_SIDE_EFFECTS: SideEffects = {
+  fileEvents: 0,
+  networkEvents: 0,
+  files: [],
+  domains: [],
+  destinations: [],
+};
+
+/** The run's reach: permission prompts, and files and destinations outside its working directory. */
+export const buildRunReach = (
+  agentName: string,
+  root: ProcessRecord,
+  processes: readonly ProcessRecord[],
+  sideEffects: ReadonlyMap<string, SideEffects>
+): RunReach => {
+  const workingDirectory = root.workingDirectory;
+  const files = new Set<string>();
+  const destinations = new Set<string>();
+  for (const process of processes) {
+    const effects = sideEffects.get(process.entityId) ?? NO_SIDE_EFFECTS;
+    const isAgentProcess = !process.isDescendant;
+    if (workingDirectory) {
+      effects.files
+        .filter(
+          (path) =>
+            !isInsideDirectory(path, workingDirectory) &&
+            !hasMarker(path, TOOL_SHELL_PATH_MARKERS) &&
+            !(isAgentProcess && hasMarker(path, AGENT_STATE_PATH_MARKERS))
+        )
+        .forEach((path) => files.add(path));
+    }
+    const domains = effects.domains.filter(
+      (domain) => !(isAgentProcess && isServiceDomain(domain))
+    );
+    domains.forEach((domain) => destinations.add(domain));
+    // A process that looked names up connects to their addresses, which would count twice.
+    if (effects.domains.length === 0) {
+      effects.destinations.forEach((address) => destinations.add(address));
+    }
+  }
+  return {
+    permissionPromptsOff: hasPermissionBypass(agentName, root),
+    workingDirectory,
+    filesOutside: [...files].sort(),
+    destinations: [...destinations].sort(),
+  };
+};
+
+/** Running or not, from the root's end event, calculated when the activity is read. */
+export const getRunStatus = (
+  root: ProcessRecord,
+  endedProcessIds: ReadonlySet<string> | undefined,
+  now: number
+): RunStatus | undefined => {
+  if (!endedProcessIds) return undefined;
+  if (endedProcessIds.has(root.entityId)) return { kind: 'ended' };
+  return now - new Date(root.timestamp).getTime() > RUNNING_CAP_MS
+    ? { kind: 'stale', since: root.timestamp }
+    : { kind: 'running' };
+};
+
+/** Alerts on a process of the run: the process itself, or a descendant of one by ancestry. */
+export const getRunAlertIds = (
+  processIds: ReadonlySet<string>,
+  alerts: readonly RunAlertRecord[]
+): string[] =>
+  alerts
+    .filter(
+      ({ processEntityId, parentEntityId, ancestry }) =>
+        (!!processEntityId && processIds.has(processEntityId)) ||
+        (!!parentEntityId && processIds.has(parentEntityId)) ||
+        ancestry.some((id) => processIds.has(id))
+    )
+    .map(({ id }) => id);
+
 export const isSetupProcess = (process: ProcessRecord): boolean => {
   if (!process.isDescendant) return false;
   if (process.name && SETUP_PROCESS_NAMES.has(process.name)) return true;
@@ -228,6 +403,11 @@ export interface BuildAgentActivityParams {
   readonly otelMatch: OtelMatch;
   /** Ordered `process.args` of run roots, by process entity ID. */
   readonly rootArgs?: ReadonlyMap<string, readonly string[]>;
+  /** Agent processes with an end event. Absent when end events couldn't be read. */
+  readonly endedProcessIds?: ReadonlySet<string>;
+  readonly alerts?: readonly RunAlertRecord[];
+  /** Read time, in milliseconds. */
+  readonly now?: number;
   readonly truncated?: boolean;
 }
 
@@ -246,6 +426,9 @@ export const buildAgentActivity = ({
   otelEvents,
   otelMatch,
   rootArgs,
+  endedProcessIds,
+  alerts = [],
+  now = Date.now(),
   truncated = false,
 }: BuildAgentActivityParams): AgentActivity => {
   const own = mergeProcessEvents(ownEvents);
@@ -368,17 +551,17 @@ export const buildAgentActivity = ({
   const runs: AgentRun[] = sortByTime(
     draftList.map((draft) => ({ timestamp: draft.root.timestamp, draft }))
   ).map(({ draft }) => {
-    const { root } = draft;
+    const orderedArgs = rootArgs?.get(draft.root.entityId);
+    const root = orderedArgs ? { ...draft.root, args: orderedArgs } : draft.root;
     const members = sortByTime(draft.members);
-    const { isHeadless, prompt } = parseHeadlessPrompt(
-      rootArgs?.get(root.entityId) ?? root.args,
-      root.commandLine
-    );
+    const { isHeadless, prompt } = parseHeadlessPrompt(root.args, root.commandLine);
     const sections = buildSections(members.map(toProcessStep), draft.otel, root.sessionId);
     const lastTimestamp = members.length ? members[members.length - 1].timestamp : root.timestamp;
+    const processes = [root, ...members];
     return {
       id: root.entityId,
       root,
+      rootSideEffects: sideEffects.get(root.entityId),
       start: root.timestamp,
       end: lastTimestamp,
       launchMode: getLaunchMode(root),
@@ -386,6 +569,9 @@ export const buildAgentActivity = ({
       headlessPrompt: prompt,
       sessionIds: [...sessionsOf(draft)],
       sections,
+      status: getRunStatus(root, endedProcessIds, now),
+      reach: buildRunReach(identity.agentName, root, processes, sideEffects),
+      alertIds: getRunAlertIds(new Set(processes.map(({ entityId }) => entityId)), alerts),
     };
   });
 

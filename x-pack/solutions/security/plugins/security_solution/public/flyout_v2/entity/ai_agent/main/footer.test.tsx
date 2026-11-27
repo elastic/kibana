@@ -6,20 +6,49 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import { TestProviders } from '../../../../common/mock';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
-import { mockAgentIdentity } from './mocks';
+import { ENTITY_PROMPT } from '../../../../agent_builder/components/prompts';
+import { mockAgentIdentity, mockAgentRow } from './mocks';
+import { buildAgentEntityAttachment } from './chat_attachments';
+import { useKillProcessItems } from './hooks/use_kill_process_items';
 import { buildAgentTimelineQuery, Footer } from './footer';
+
+const mockOpenChat = jest.fn();
+
+jest.mock('../../../../common/lib/kibana', () => ({
+  useKibana: () => ({ services: { agentBuilder: { openChat: mockOpenChat } } }),
+}));
 
 jest.mock('../../../../common/hooks/is_in_security_app', () => ({
   useIsInSecurityApp: jest.fn(() => true),
 }));
 
+jest.mock('./hooks/use_kill_process_items', () => ({
+  useKillProcessItems: jest.fn(() => () => [<div key="kill" data-test-subj="mockKillProcess" />]),
+}));
+
+jest.mock('../../../../agent_builder/components/new_agent_builder_attachment', () => ({
+  NewAgentBuilderAttachment: ({ onClick }: { onClick: () => void }) => (
+    <button type="button" data-test-subj="mockAddToChat" onClick={onClick}>
+      {'Add to chat'}
+    </button>
+  ),
+}));
+
 jest.mock('../../shared/components/take_action', () => ({
-  TakeAction: ({ kqlQuery, isDisabled }: { kqlQuery: string; isDisabled?: boolean }) => (
+  TakeAction: ({
+    kqlQuery,
+    isDisabled,
+    additionalItems,
+  }: {
+    kqlQuery: string;
+    isDisabled?: boolean;
+    additionalItems?: (closePopover: () => void) => React.ReactElement[];
+  }) => (
     <div data-test-subj="mockTakeAction" data-disabled={String(!!isDisabled)}>
       {kqlQuery}
+      {additionalItems?.(() => {})}
     </div>
   ),
 }));
@@ -39,12 +68,10 @@ describe('buildAgentTimelineQuery', () => {
 });
 
 describe('Footer', () => {
+  beforeEach(() => jest.clearAllMocks());
+
   it('investigates the install in Timeline', () => {
-    render(
-      <TestProviders>
-        <Footer identity={mockAgentIdentity} />
-      </TestProviders>
-    );
+    render(<Footer identity={mockAgentIdentity} />);
     const takeAction = screen.getByTestId('mockTakeAction');
     expect(takeAction).toHaveTextContent(buildAgentTimelineQuery(mockAgentIdentity));
     expect(takeAction).toHaveAttribute('data-disabled', 'false');
@@ -52,11 +79,24 @@ describe('Footer', () => {
 
   it('is disabled outside the Security app', () => {
     jest.mocked(useIsInSecurityApp).mockReturnValueOnce(false);
-    render(
-      <TestProviders>
-        <Footer identity={mockAgentIdentity} />
-      </TestProviders>
-    );
+    render(<Footer identity={mockAgentIdentity} />);
     expect(screen.getByTestId('mockTakeAction')).toHaveAttribute('data-disabled', 'true');
+  });
+
+  it('adds the agent to a new chat with the entity attachment and the risk prompt', () => {
+    render(<Footer identity={mockAgentIdentity} agent={mockAgentRow} />);
+    fireEvent.click(screen.getByTestId('mockAddToChat'));
+    expect(mockOpenChat).toHaveBeenCalledWith({
+      newConversation: true,
+      initialMessage: ENTITY_PROMPT,
+      attachments: [buildAgentEntityAttachment(mockAgentIdentity, mockAgentRow)],
+      sessionTag: 'security',
+    });
+  });
+
+  it('puts Kill process for the running runs in Take action', () => {
+    render(<Footer identity={mockAgentIdentity} runningRuns={[]} />);
+    expect(useKillProcessItems).toHaveBeenCalledWith([]);
+    expect(screen.getByTestId('mockKillProcess')).toBeInTheDocument();
   });
 });
