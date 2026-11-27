@@ -320,8 +320,6 @@ overrides:
   vega-util: 2.1.0
   vscode-languageserver-types: 3.17.5
 
-pnpmfileChecksum: sha256-JL9Z/8IecLxwanP1rhrhbsvFTvupuyak+iLixXT5Rmk=
-
 importers:
 
   .:
@@ -4287,11 +4285,11 @@ importers:
         specifier: 1.8.4
         version: 1.8.4(@aws-sdk/credential-provider-node@3.972.97)(@langchain/core@1.4.0(@opentelemetry/api@1.10.0)(@opentelemetry/exporter-trace-otlp-proto@0.301.1(@opentelemetry/api@1.10.0))(openai@4.104.0(ws@8.23.0)(zod@4.6.5))(ws@8.23.0))(@smithy/signature-v4@5.7.5)(google-auth-library@11.3.4(supports-color@10.2.2))(undici@7.30.2)(ws@8.23.0)
       '@launchdarkly/node-server-sdk':
-        specifier: 9.16.4
-        version: 9.16.4(supports-color@10.2.2)
+        specifier: 9.16.5
+        version: 9.16.5(supports-color@10.2.2)
       '@launchdarkly/openfeature-node-server':
-        specifier: 2.1.7
-        version: 2.1.7(@launchdarkly/node-server-sdk@9.16.4(supports-color@10.2.2))(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))
+        specifier: 2.1.8
+        version: 2.1.8(@launchdarkly/node-server-sdk@9.16.5(supports-color@10.2.2))(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))
       '@lezer/common':
         specifier: 1.5.5
         version: 1.5.5
@@ -4969,13 +4967,13 @@ importers:
         version: 2.6.5
       redux-devtools-extension:
         specifier: 2.13.8
-        version: 2.13.8
+        version: 2.13.8(redux@5.0.1)
       redux-saga:
         specifier: 1.3.0
         version: 1.3.0
       redux-thunk-v2:
         specifier: npm:redux-thunk@2.4.2
-        version: redux-thunk@2.4.2
+        version: redux-thunk@2.4.2(redux@5.0.1)
       redux-toolkit-v1:
         specifier: npm:@reduxjs/toolkit@1.9.7
         version: '@reduxjs/toolkit@1.9.7(react-redux@9.2.0(@types/react@18.2.79)(react@18.2.0)(redux@5.0.1))(react@18.2.0)'
@@ -12447,19 +12445,19 @@ packages:
   '@launchdarkly/js-sdk-common@2.32.2':
     resolution: {integrity: sha512-LnJUCx9FZocgSVYN50lpXrxWt2CpxB7SZEd/fHf+im5hf+cGEaxQIylhXYBzN1tmse3n/vkODBgsZJNZ3pAcxA==}
 
-  '@launchdarkly/js-server-sdk-common@2.26.4':
-    resolution: {integrity: sha512-DF6G7xVeK7FNEY8+88YF/oQVPwBeQEjyU3tY/SuMdbvehBDsY5Mit8JXWtZUu41SyYX9EjaogTy93TJcynhM/w==}
+  '@launchdarkly/js-server-sdk-common@2.26.5':
+    resolution: {integrity: sha512-v0dypdjJsInZ36NCsC1li/ZDfiAtR4j5EP19gO13QjeM2S8SFTkkyWiDBkEfNYDTSs1uKa5oWzhiekZZ/Onyxw==}
 
-  '@launchdarkly/node-server-sdk@9.16.4':
-    resolution: {integrity: sha512-1bOYuh1pEEVLNiHy1mynJlpzeriUnokFGMYAk+6lpWgahnyG2oHacC3LkMJd9dOJR0Ud5P4swl3DTti51RLOOQ==}
+  '@launchdarkly/node-server-sdk@9.16.5':
+    resolution: {integrity: sha512-RyYzmG91bBOlF0ZGVAYb4Ce8GKD2+P1mWXIYK+pdQGNPiwLDn6fgYXMcVFDCyqmBqcOcR56csENKpf/kotdW+Q==}
 
   '@launchdarkly/openfeature-js-server-common@2.2.3':
     resolution: {integrity: sha512-3etyrFp+C1OzrpjBnaGzXP2BN/OUAIWjhSVG2sJggdx4cnGwD0PHl9z8Y1YSTyhE7aTh7t4D3VgBP75aJ1KlaQ==}
     peerDependencies:
       '@openfeature/server-sdk': ^1.16.0
 
-  '@launchdarkly/openfeature-node-server@2.1.7':
-    resolution: {integrity: sha512-PtXI3e0XbkJa6/Yhl8g8ktshBMfn4OoieFJTPrTYdiPY/iiPvrNw2tn2GEtobuu8DN/LWgkBA4aE6OUo4kgb1g==}
+  '@launchdarkly/openfeature-node-server@2.1.8':
+    resolution: {integrity: sha512-4F0TAcYX5IjfXxMeHT6jNSUCXsxZHYCT4lNz/jqph78jxq4zQMI49dgEguJMwGdWPmyjLN3ELOAusn234B5CHA==}
     engines: {node: '>=20'}
     peerDependencies:
       '@launchdarkly/node-server-sdk': ^9.0.0
@@ -22765,12 +22763,16 @@ packages:
   redux-devtools-extension@2.13.8:
     resolution: {integrity: sha512-8qlpooP2QqPtZHQZRhx3x3OP5skEV1py/zUdMY28WNAocbafxdG2tRD1MWE7sp8obGMNYuLWanhhQ7EQvT1FBg==}
     deprecated: Package moved to @redux-devtools/extension.
+    peerDependencies:
+      redux: ^3.1.0 || ^4.0.0
 
   redux-saga@1.3.0:
     resolution: {integrity: sha512-J9RvCeAZXSTAibFY0kGw6Iy4EdyDNW7k6Q+liwX+bsck7QVsU78zz8vpBRweEfANxnnlG/xGGeOvf6r8UXzNJQ==}
 
   redux-thunk@2.4.2:
     resolution: {integrity: sha512-+P3TjtnP0k/FEjcBL5FZpoovtvrTNT/UXd4/sluaSyrURlSlhLSzEdfsTBW7WsKB6yPvgd7q/iZPICFjW4o57Q==}
+    peerDependencies:
+      redux: ^4
 
   redux-thunk@3.1.0:
     resolution: {integrity: sha512-NW2r5T6ksUKXCabzhL9z+h206HQw/NJkcLm1GPImRQ8IzfXwRGqjVhKJGauHirT0DAuyy6hjdnMZaRoAcy0Klw==}
@@ -28655,15 +28657,15 @@ snapshots:
 
   '@launchdarkly/js-sdk-common@2.32.2': {}
 
-  '@launchdarkly/js-server-sdk-common@2.26.4':
+  '@launchdarkly/js-server-sdk-common@2.26.5':
     dependencies:
       '@launchdarkly/js-sdk-common': 2.32.2
       semver: 7.5.4
 
-  '@launchdarkly/node-server-sdk@9.16.4(supports-color@10.2.2)':
+  '@launchdarkly/node-server-sdk@9.16.5(supports-color@10.2.2)':
     dependencies:
       '@launchdarkly/eventsource': 0.2.4
-      '@launchdarkly/js-server-sdk-common': 2.26.4
+      '@launchdarkly/js-server-sdk-common': 2.26.5
       https-proxy-agent: 7.0.6(supports-color@10.2.2)
     transitivePeerDependencies:
       - supports-color
@@ -28673,9 +28675,9 @@ snapshots:
       '@launchdarkly/js-sdk-common': 2.32.2
       '@openfeature/server-sdk': 1.23.0(@openfeature/core@1.12.0)
 
-  '@launchdarkly/openfeature-node-server@2.1.7(@launchdarkly/node-server-sdk@9.16.4(supports-color@10.2.2))(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))':
+  '@launchdarkly/openfeature-node-server@2.1.8(@launchdarkly/node-server-sdk@9.16.5(supports-color@10.2.2))(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))':
     dependencies:
-      '@launchdarkly/node-server-sdk': 9.16.4(supports-color@10.2.2)
+      '@launchdarkly/node-server-sdk': 9.16.5(supports-color@10.2.2)
       '@launchdarkly/openfeature-js-server-common': 2.2.3(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))
       '@openfeature/server-sdk': 1.23.0(@openfeature/core@1.12.0)
 
@@ -29950,7 +29952,7 @@ snapshots:
     dependencies:
       immer: 9.0.21
       redux: 4.2.1
-      redux-thunk: 2.4.2
+      redux-thunk: 2.4.2(redux@4.2.1)
       reselect: 4.1.8
     optionalDependencies:
       react: 18.2.0
@@ -40466,17 +40468,21 @@ snapshots:
       reduce-reducers: 0.4.3
       to-camel-case: 1.0.0
 
-  redux-devtools-extension@2.13.8:
+  redux-devtools-extension@2.13.8(redux@5.0.1):
     dependencies:
-      redux: 4.2.1
+      redux: 5.0.1
 
   redux-saga@1.3.0:
     dependencies:
       '@redux-saga/core': 1.3.0
 
-  redux-thunk@2.4.2:
+  redux-thunk@2.4.2(redux@4.2.1):
     dependencies:
       redux: 4.2.1
+
+  redux-thunk@2.4.2(redux@5.0.1):
+    dependencies:
+      redux: 5.0.1
 
   redux-thunk@3.1.0(redux@5.0.1):
     dependencies:
