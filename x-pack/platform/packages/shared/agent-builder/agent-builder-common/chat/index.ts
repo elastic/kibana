@@ -24,6 +24,7 @@ export {
 } from './access_control';
 export {
   DEFAULT_CONVERSATION_TITLE,
+  DEFAULT_THREAD_TITLE,
   CHAT_MESSAGE_MAX_LENGTH,
   STEER_MESSAGE_MAX_LENGTH,
   CONVERSATION_TITLE_MAX_LENGTH,
@@ -283,6 +284,10 @@ export {
   type AgentMessageEvent,
   type AgentMessageEventData,
   type MessageEvent,
+  type ThreadStartedEventData,
+  type ThreadStartedEvent,
+  type ThreadCreatedEventData,
+  type ThreadCreatedEvent,
   type PromptResponseEventData,
   type PromptResponseEvent,
   type ExecutionStartedEventData,
@@ -320,6 +325,9 @@ export {
   isUserMessageEvent,
   isSteerMessageEvent,
   isMessageEvent,
+  isThreadStartedEvent,
+  isThreadCreatedEvent,
+  isThreadEvent,
   ConversationActivityEventType,
   type ConversationCreatedActivityEventData,
   type ConversationCreatedActivityEvent,

@@ -85,3 +85,24 @@ export interface AddConversationEventsRequestBody {
 export interface AddConversationEventsResponse {
   events: ConversationEvent[];
 }
+
+export interface CreateThreadRequest {
+  /** The new thread's id, chosen by the client so a resent request finds the same thread. */
+  conversation_id: string;
+  cut_event_id?: string;
+  /** The thread's first user message. */
+  input?: string;
+  title?: string;
+  trigger?: 'always' | 'never';
+  connector_id?: string | null;
+  inference_id?: string | null;
+  project_routing?: string;
+  reasoning_level?: 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh';
+}
+
+export interface CreateThreadResponse {
+  conversation_id: string;
+  /** The first run, or on a resend the run still in progress. */
+  execution_id?: string;
+  conversation: ConversationWithPermissions;
+}

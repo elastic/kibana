@@ -18,6 +18,7 @@ import {
   EventActorType,
   isAttachmentEvent,
   isSteerMessageEvent,
+  isThreadEvent,
   isTimelineEvent,
   isMessageEvent,
 } from '@kbn/agent-builder-common';
@@ -34,6 +35,7 @@ import type { AgentHandlerContext } from '@kbn/agent-builder-server/agents';
 import { mergeAttachmentInputs } from '../../../attachments/merge_attachment_inputs';
 import { authorAndOrigin } from '../../../conversation/client/events_to_rounds';
 import { formatAttachmentEvent } from './attachment_event_presentation';
+import { formatThreadEvent } from './thread_event_presentation';
 import type { ResumeAnchors } from './attachment_placement';
 import { formatAttachmentsMetadata } from './attachment_presentation';
 import type {
@@ -139,6 +141,11 @@ export const prepareConversation = async ({
         ? {
             ...round.event,
             representation: { type: 'text' as const, value: formatAttachmentEvent(round.event) },
+          }
+        : isThreadEvent(round.event)
+        ? {
+            ...round.event,
+            representation: { type: 'text' as const, value: formatThreadEvent(round.event) },
           }
         : await processCustomEvent({ event: round.event, context });
       if (processedEvent) {
