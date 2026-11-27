@@ -202,3 +202,21 @@ TS k8s
 | STATS missing = MAX(ABSENT_OVER_TIME(events_received)) BY pod, TBUCKET(2 minute)
 | WHERE missing == true
 ```
+
+```esql
+// Which outbound destinations transferred more than 1 MB?
+FROM logs-*
+| WHERE network.direction == "outbound"
+| STATS data_size = SUM(network.bytes) BY destination.ip
+| WHERE data_size > 1000000
+| KEEP destination.ip, data_size
+```
+
+```esql
+// How many failed logins did each source IP make, keeping only the sources with more than 5?
+FROM logs-*
+| WHERE event.action == "failed_login"
+| STATS login_count = COUNT(*) BY source.ip
+| WHERE login_count > 5
+| SORT login_count DESC
+```
