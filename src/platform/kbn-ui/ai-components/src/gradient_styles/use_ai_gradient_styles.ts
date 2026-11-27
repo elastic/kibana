@@ -116,8 +116,8 @@ const gradientLabelCss = (
     background: none !important;
     background-clip: initial !important;
     -webkit-background-clip: initial !important;
-    color: CanvasText !important;
-    -webkit-text-fill-color: CanvasText !important;
+    color: inherit !important;
+    -webkit-text-fill-color: currentColor !important;
   }
 
   ${hoverGradient
@@ -158,8 +158,8 @@ const plainLabelCss = (euiTheme: UseEuiTheme['euiTheme'], color: string) => css`
   -webkit-text-fill-color: currentColor !important;
 
   @media (forced-colors: active) {
-    color: CanvasText !important;
-    -webkit-text-fill-color: CanvasText !important;
+    color: inherit !important;
+    -webkit-text-fill-color: currentColor !important;
   }
 
   button:disabled &,
@@ -168,8 +168,8 @@ const plainLabelCss = (euiTheme: UseEuiTheme['euiTheme'], color: string) => css`
     -webkit-text-fill-color: ${euiTheme.colors.textDisabled} !important;
 
     @media (forced-colors: active) {
-      color: GrayText !important;
-      -webkit-text-fill-color: GrayText !important;
+      color: inherit !important;
+      -webkit-text-fill-color: currentColor !important;
     }
   }
 `;
