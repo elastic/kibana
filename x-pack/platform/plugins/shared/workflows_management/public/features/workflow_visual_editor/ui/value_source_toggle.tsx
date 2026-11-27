@@ -1,0 +1,66 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { EuiButtonGroup } from '@elastic/eui';
+import React from 'react';
+import { i18n } from '@kbn/i18n';
+
+export type ValueSource = 'fixed' | 'data';
+
+/** Neutral Fixed | Data switch for controls that hold a typed value or a whole reference. */
+export function ValueSourceToggle({
+  source,
+  fieldLabel,
+  onChange,
+  labels,
+  'data-test-subj': dataTestSubj,
+}: {
+  readonly source: ValueSource;
+  /** Words for the two sides when "Fixed" and "Data" don't describe the control (a list). */
+  readonly labels?: { readonly fixed: string; readonly data: string };
+  /** Label of the field the switch belongs to; names the group for screen readers. */
+  readonly fieldLabel: string;
+  readonly onChange: (next: ValueSource) => void;
+  readonly 'data-test-subj': string;
+}) {
+  const fixedId = `${dataTestSubj}-fixed`;
+  const dataId = `${dataTestSubj}-data`;
+  return (
+    <EuiButtonGroup
+      type="single"
+      buttonSize="compressed"
+      color="text"
+      legend={i18n.translate('workflows.stepConfigPanel.valueSource.legend', {
+        defaultMessage: 'Value source for {field}',
+        values: { field: fieldLabel },
+      })}
+      idSelected={source === 'fixed' ? fixedId : dataId}
+      onChange={(id) => onChange(id === fixedId ? 'fixed' : 'data')}
+      options={[
+        {
+          id: fixedId,
+          label:
+            labels?.fixed ??
+            i18n.translate('workflows.stepConfigPanel.valueSource.fixed', {
+              defaultMessage: 'Fixed',
+            }),
+          'data-test-subj': fixedId,
+        },
+        {
+          id: dataId,
+          label:
+            labels?.data ??
+            i18n.translate('workflows.stepConfigPanel.valueSource.data', {
+              defaultMessage: 'Data',
+            }),
+          'data-test-subj': dataId,
+        },
+      ]}
+      data-test-subj={dataTestSubj}
+    />
+  );
+}
