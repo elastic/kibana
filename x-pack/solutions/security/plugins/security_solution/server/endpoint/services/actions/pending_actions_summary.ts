@@ -50,7 +50,9 @@ export const getPendingActionsSummary = async (
     );
 
   const pending: EndpointPendingActions[] = [];
-  let endpointMetadataLastUpdated: Record<string, Date> | undefined;
+  let endpointMetadataByAgentId:
+    | Record<string, { eventCreated: Date; isolation: boolean | undefined }>
+    | undefined;
 
   for (const agentID of agentIDs) {
     const agentPendingActions: EndpointPendingActions['pending_actions'] = {};
@@ -78,32 +80,41 @@ export const getPendingActionsSummary = async (
       ) {
         // For Elastic Defend (endpoint):
         // For Isolate and Un-Isolate, we want to ensure that the isolation status being reported in the
-        // endpoint metadata was received after the action was completed. This is to ensure that the
-        // isolation status being reported in the UI remains as accurate as possible.
+        // endpoint metadata reflects the outcome of the action that completed. This is to ensure that
+        // the isolation status being reported in the UI remains as accurate as possible.
 
         // If the metadata documents for all agents has not yet been retrieved, do it now
-        if (!endpointMetadataLastUpdated) {
-          endpointMetadataLastUpdated = (
+        if (!endpointMetadataByAgentId) {
+          endpointMetadataByAgentId = (
             await metadataService.findHostMetadataForFleetAgents(agentIDs)
           ).reduce((acc, endpointMetadata) => {
-            acc[endpointMetadata.elastic.agent.id] = new Date(endpointMetadata.event.created);
+            acc[endpointMetadata.elastic.agent.id] = {
+              eventCreated: new Date(endpointMetadata.event.created),
+              isolation: endpointMetadata.Endpoint.state?.isolation,
+            };
             return acc;
-          }, {} as Record<string, Date>);
+          }, {} as Record<string, { eventCreated: Date; isolation: boolean | undefined }>);
         }
 
-        const lastEndpointMetadataEventTimestamp = endpointMetadataLastUpdated[agentID];
+        const lastEndpointMetadata = endpointMetadataByAgentId[agentID];
         const actionCompletedAtTimestamp = new Date(unExpiredAction.completedAt ?? Date.now());
         const enoughTimeHasLapsed =
           Date.now() - actionCompletedAtTimestamp.getTime() >
           PENDING_ACTION_RESPONSE_MAX_LAPSED_TIME;
+        // The endpoint ships the isolation-state metadata document and the action response within the
+        // same burst, so `event.created` can precede `completedAt` on a document that already reports
+        // the state the action asked for. Trust that state over the timestamp ordering.
+        const metadataReportsActionOutcome =
+          lastEndpointMetadata?.isolation === (unExpiredAction.command === 'isolate');
 
-        // If an endpoint metadata update was not received after the action completed,
-        // and we are still within the lapse time of waiting for it, then show this action
-        // as pending.
+        // If the endpoint metadata does not yet reflect the outcome of the completed action, and no
+        // metadata update was received after the action completed, and we are still within the lapse
+        // time of waiting for it, then show this action as pending.
         if (
           !enoughTimeHasLapsed &&
-          lastEndpointMetadataEventTimestamp &&
-          lastEndpointMetadataEventTimestamp < actionCompletedAtTimestamp
+          lastEndpointMetadata &&
+          !metadataReportsActionOutcome &&
+          lastEndpointMetadata.eventCreated < actionCompletedAtTimestamp
         ) {
           setActionAsPending(unExpiredAction.command);
         }
