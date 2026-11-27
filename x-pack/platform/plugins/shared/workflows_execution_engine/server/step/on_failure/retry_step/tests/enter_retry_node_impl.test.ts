@@ -36,7 +36,7 @@ describe('EnterRetryNodeImpl', () => {
       getCurrentStepState: jest.fn(),
       startStep: jest.fn(),
       setCurrentStepState: jest.fn(),
-      getCurrentStepResult: jest.fn(),
+      getCurrentStepError: jest.fn(),
       failStep: jest.fn(),
       setWaitStep: jest.fn(),
     } as unknown as StepExecutionRuntime;
@@ -61,13 +61,14 @@ describe('EnterRetryNodeImpl', () => {
     };
 
     fakeFailedContextManager = jest.mocked({
+      prepareContext: jest.fn().mockResolvedValue(undefined),
       evaluateBooleanExpressionInContext: jest.fn(),
     } as unknown as StepExecutionRuntime['contextManager']);
     fakeFailedContextManager.evaluateBooleanExpressionInContext.mockReturnValue(true);
     fakeFailedContext = {
       stepExecution: fakeStepExecutionDoc,
       contextManager: fakeFailedContextManager,
-      getCurrentStepResult: jest.fn(),
+      getCurrentStepError: jest.fn(),
     } as unknown as StepExecutionRuntime;
   });
 
@@ -273,12 +274,12 @@ describe('EnterRetryNodeImpl', () => {
   describe('catchError', () => {
     beforeEach(() => {
       (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({ attempt: 2 });
-      (fakeFailedContext.getCurrentStepResult as jest.Mock).mockReturnValue({
-        error: new ExecutionError({
+      (fakeFailedContext.getCurrentStepError as jest.Mock).mockResolvedValue(
+        new ExecutionError({
           type: 'NetworkError',
           message: 'Failed to connect to server',
-        }),
-      });
+        })
+      );
     });
 
     describe('when attempts exceed max limit', () => {
@@ -350,6 +351,9 @@ describe('EnterRetryNodeImpl', () => {
             message: 'Failed to connect to server',
           });
           fakeStepExecutionDoc.error = fakeError;
+          expect(fakeFailedContextManager.prepareContext).toHaveBeenCalledWith(
+            node.configuration.condition
+          );
           expect(fakeFailedContextManager.evaluateBooleanExpressionInContext).toHaveBeenCalledWith(
             node.configuration.condition,
             {
@@ -380,13 +384,13 @@ describe('EnterRetryNodeImpl', () => {
 
     describe('when the error is not retryable', () => {
       beforeEach(() => {
-        (fakeFailedContext.getCurrentStepResult as jest.Mock).mockReturnValue({
-          error: new ExecutionError({
+        (fakeFailedContext.getCurrentStepError as jest.Mock).mockResolvedValue(
+          new ExecutionError({
             type: 'StepSizeLimitExceeded',
             message: 'Too large',
             retryable: false,
-          }),
-        });
+          })
+        );
       });
 
       it('propagates the error without retrying when no condition is configured', async () => {
@@ -395,6 +399,7 @@ describe('EnterRetryNodeImpl', () => {
         expect(workflowRuntime.navigateToNode).not.toHaveBeenCalled();
         expect(workflowRuntime.setWorkflowError).not.toHaveBeenCalled();
         expect(stepExecutionRuntime.failStep).not.toHaveBeenCalled();
+        expect(fakeFailedContextManager.prepareContext).not.toHaveBeenCalled();
         expect(fakeFailedContextManager.evaluateBooleanExpressionInContext).not.toHaveBeenCalled();
         expect(workflowLogger.logDebug).toHaveBeenCalledWith(
           'Error "StepSizeLimitExceeded" is not retryable, propagating error.'
@@ -445,9 +450,9 @@ describe('EnterRetryNodeImpl', () => {
 
     describe('when the error is explicitly retryable', () => {
       it('retries it', async () => {
-        (fakeFailedContext.getCurrentStepResult as jest.Mock).mockReturnValue({
-          error: new ExecutionError({ type: 'NetworkError', message: 'Reset', retryable: true }),
-        });
+        (fakeFailedContext.getCurrentStepError as jest.Mock).mockResolvedValue(
+          new ExecutionError({ type: 'NetworkError', message: 'Reset', retryable: true })
+        );
 
         await underTest.catchError(fakeFailedContext);
 

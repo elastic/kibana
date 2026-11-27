@@ -49,6 +49,7 @@ dependsOn:
   - '@kbn/i18n-react'
   - '@kbn/es-query'
   - '@kbn/datemath'
+  - '@kbn/es-errors'
   - '@kbn/core-notifications-browser'
   - '@kbn/shared-ux-page-kibana-template'
   - '@kbn/shared-ux-page-no-data'

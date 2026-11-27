@@ -24,7 +24,7 @@ import {
   type FpDecisionKind,
 } from '../../alert_triage/fp_decisions';
 import {
-  findAlertIdsClosedAsOther,
+  findAlertsClosedWithoutFalsePositiveReason,
   findKeyTagsWithVerdicts,
   loadAlertsByIds,
   statusCodeOf,
@@ -97,25 +97,39 @@ export const getTriageStoreFpDecisionsStepDefinition = ({
           return result('alerts_missing');
         }
         const entries = alerts.map((doc) => ({ id: String(doc._id), doc }));
-        // The approval keeps earlier closures, so an alert an analyst closed as a true positive can
-        // be in the proposal. It is no evidence of a false positive, and its pattern is blocked.
-        const closedAsOther =
+        // The approval keeps earlier closures, so an alert that is already closed can be in the
+        // proposal. One closed as a true positive is no evidence of a false positive, and its
+        // pattern is blocked. One closed with no reason is no evidence either, but it says nothing
+        // against the pattern, so it only leaves the count.
+        const { closedAsOther, closedWithoutReason } =
           kind === 'false_positive'
-            ? new Set(
-                await findAlertIdsClosedAsOther(
-                  contextManager,
-                  entries.map(({ id }) => id)
-                )
+            ? await findAlertsClosedWithoutFalsePositiveReason(
+                contextManager,
+                entries.map(({ id }) => id)
               )
-            : new Set<string>();
+            : { closedAsOther: [], closedWithoutReason: [] };
+        const blockingIds = new Set(closedAsOther);
+        // Alerts closed as another reason are left out of the grouping by `blockingIds`, so the
+        // evidence filter only has the ones closed with no reason left to take out.
+        const noEvidenceIds = new Set(closedWithoutReason);
         const conflictedKeys = groupByStrictKey({
-          alerts: entries.filter(({ id }) => closedAsOther.has(id)),
+          alerts: entries.filter(({ id }) => blockingIds.has(id)),
           spaceId,
         }).groups.map(({ hash }) => hash);
-        const { groups, alertsWithoutStrictKey } = groupByStrictKey({
-          alerts: entries.filter(({ id }) => !closedAsOther.has(id)),
+        // Every key the proposal has is counted, whatever its evidence: an approval whose alerts
+        // were all closed with no reason has keys, and reports them below the minimum, not as
+        // having none. The evidence filter only decides how many alerts a key has for the minimum.
+        const grouped = groupByStrictKey({
+          alerts: entries.filter(({ id }) => !blockingIds.has(id)),
           spaceId,
         });
+        const { alertsWithoutStrictKey } = grouped;
+        const groups = grouped.groups
+          .map((group) => ({
+            ...group,
+            alertIds: group.alertIds.filter((id) => !noEvidenceIds.has(id)),
+          }))
+          .sort((a, b) => b.alertIds.length - a.alertIds.length || a.hash.localeCompare(b.hash));
         if (groups.length === 0) {
           return result('no_strict_keys', { alerts_without_strict_key: alertsWithoutStrictKey });
         }

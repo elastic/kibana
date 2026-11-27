@@ -37,6 +37,9 @@ const ebtAction = {
     PIN_CONVERSATION: 'pin_conversation',
     UNPIN_CONVERSATION: 'unpin_conversation',
   },
+  conversationStarters: {
+    CONVERSATION_STARTER_CLICK: 'conversation_starter_click',
+  },
   agentCustomization: {
     ENTITY_ADD_FROM_LIBRARY: 'entity_add_from_library',
     ENTITY_CREATE_NEW: 'entity_create_new',

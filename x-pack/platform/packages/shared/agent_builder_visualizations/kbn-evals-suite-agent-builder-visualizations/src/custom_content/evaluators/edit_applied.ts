@@ -9,8 +9,9 @@ import { BasicPrettyPrinter } from '@elastic/esql';
 import { getQuerySummary } from '@kbn/esql-utils';
 import type { EsqlQueryRunner } from '../../evaluators/esql_query_runner';
 import { skippedResult } from '../../evaluator_utils';
+import { getQueries } from '../custom_content_output';
 import type { CustomContentEvaluator } from '../types';
-import { readColumnReferences } from './template_column_references';
+import { readColumnReferencesByQuery } from './template_column_references';
 
 export const CUSTOM_CONTENT_EDIT_APPLIED_EVALUATOR_NAME = 'Custom Content Data Edit Applied';
 
@@ -57,37 +58,50 @@ export const createDataEditAppliedEvaluator = ({
       return skippedResult('This example is not a data edit that adds a measure.');
     }
 
-    const { template, esql: query } = output.after ?? {};
-    if (!template || !query) {
+    const { template } = output.after ?? {};
+    const queries = getQueries(output.after);
+    if (!template || queries.length === 0) {
       return skippedResult('The panel has no template and query to compare.');
     }
 
-    let columns: string[];
-    try {
-      columns = ((await runQuery(query)).columns ?? []).map(({ name }) => name);
-    } catch {
-      return skippedResult('The query did not run; the execution evaluator reports that.');
+    const reads = readColumnReferencesByQuery(template);
+    const columnsByQuery: string[][] = [];
+    for (const query of queries) {
+      try {
+        columnsByQuery.push(((await runQuery(query)).columns ?? []).map(({ name }) => name));
+      } catch {
+        return skippedResult('The query did not run; the execution evaluator reports that.');
+      }
     }
 
-    const { computed, returned } = findMeasureColumns(query, measure, columns);
-    if (!computed) {
+    const baselineQueries = getQueries(output.baseline?.content);
+    const found = queries
+      .map((query, position) => ({
+        position,
+        edited: query !== baselineQueries[position],
+        ...findMeasureColumns(query, measure, columnsByQuery[position]),
+      }))
+      .filter(({ edited }) => edited);
+    if (!found.some(({ computed }) => computed)) {
       return {
         score: 0,
         label: 'measure-not-in-query',
         explanation: `The edited query does not compute ${measure}.`,
       };
     }
-    if (returned.length === 0) {
+    if (!found.some(({ returned }) => returned.length > 0)) {
       return {
         score: 0,
         label: 'measure-not-returned',
         explanation: `The query computes ${measure} but does not return it, for example because a KEEP drops it.`,
-        metadata: { columns },
+        metadata: { columns: columnsByQuery.flat() },
       };
     }
 
-    const read = readColumnReferences(template);
-    const shown = returned.filter((column) => read.includes(column));
+    const shown = found.flatMap(({ position, returned }) =>
+      returned.filter((column) => reads.get(position)?.includes(column))
+    );
+    const returnedColumns = found.flatMap(({ returned }) => returned);
     return shown.length > 0
       ? {
           score: 1,
@@ -97,10 +111,10 @@ export const createDataEditAppliedEvaluator = ({
       : {
           score: 0,
           label: 'new-measure-not-shown',
-          explanation: `The query returns ${measure} as ${returned.join(
+          explanation: `The query returns ${measure} as ${returnedColumns.join(
             ', '
           )} but the template does not read it.`,
-          metadata: { returned, columns },
+          metadata: { returned: returnedColumns, columns: columnsByQuery.flat() },
         };
   },
 });

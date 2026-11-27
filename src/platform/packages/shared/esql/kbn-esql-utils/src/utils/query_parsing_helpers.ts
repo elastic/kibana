@@ -208,7 +208,7 @@ export function convertTimeseriesCommandNodeToFrom<T extends ESQLCommand>(cmd: T
  */
 export function convertTimeseriesCommandToFrom(esql?: string): string {
   const { root } = Parser.parse(esql || '');
-  const timeseriesCommand = Walker.commands(root).find(({ name }) => name === 'ts');
+  const timeseriesCommand = root.commands.find(({ name }) => name === 'ts');
   if (!timeseriesCommand) return esql || '';
 
   const fromCommand = convertTimeseriesCommandNodeToFrom(timeseriesCommand);
@@ -237,9 +237,11 @@ export function convertTimeseriesCommandToFrom(esql?: string): string {
  */
 export const parseTimeFieldFromESQLQuery = (esql: string) => {
   const { root } = Parser.parse(esql);
+  // The main pipeline comes first, so its time params win over the ones of a LET.
+  const commands = [...root.commands, ...(root.header ?? [])];
   const functions: ESQLFunction[] = [];
 
-  walk(root.commands, {
+  walk(commands, {
     visitFunction: (node) => functions.push(node),
   });
 
@@ -248,7 +250,7 @@ export const parseTimeFieldFromESQLQuery = (esql: string) => {
     ? '@timestamp'
     : undefined;
 
-  const params = Walker.params(root);
+  const params = Walker.params(commands);
   const timeNamedParam = params.find(
     (param) => param.value === '_tstart' || param.value === '_tend'
   );

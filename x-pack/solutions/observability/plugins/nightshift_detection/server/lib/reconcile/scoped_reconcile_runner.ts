@@ -25,7 +25,6 @@ import type {
   ReconcileRulesResult,
   StrategyError,
 } from '../../../common/reconcile';
-import { ManagedRuleReader } from '../rules/managed_rule_reader';
 import { SpaceReconcileLock } from './space_reconcile_lock';
 
 /**
@@ -104,8 +103,7 @@ export class ScopedReconcileRunner {
       accountRequest,
       spaceId,
       fn: async (scope) => {
-        // Both read the rules client bound in the fork, so they live and die with it.
-        scope.bind(ManagedRuleReader).toSelf();
+        // Reads the rules client bound in the fork, so it lives and dies with it.
         scope.bind(AlertingRuleReconciler).toSelf();
 
         const context: ResourceContext = {
@@ -152,13 +150,15 @@ export class ScopedReconcileRunner {
 
         try {
           const result = await strategy.resources(context);
-          if (result.skipped.length > 0) {
+          const unwatched = [
+            ...result.skipped.map(({ source_id: id, reason }) => `${id}: ${reason}`),
+            ...(result.notes ?? []),
+          ];
+          if (unwatched.length > 0) {
             this.logger.debug(
-              `${descriptor.id} cannot watch ${result.skipped.length} item(s) in space [${
+              `${descriptor.id} cannot watch ${unwatched.length} item(s) in space [${
                 context.spaceId
-              }]: ${result.skipped
-                .map(({ source_id: id, reason }) => `${id}: ${reason}`)
-                .join('; ')}`
+              }]: ${unwatched.join('; ')}`
             );
           }
           skippedSources.push(
