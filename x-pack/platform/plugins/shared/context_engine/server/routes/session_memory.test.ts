@@ -29,7 +29,7 @@ interface RegisteredRoute {
   config: {
     path: string;
     access: string;
-    security: { authz: { requiredPrivileges: string[]; extendedPrivileges?: string[] } };
+    security: { authz: { requiredPrivileges: string[]; extendedPrivileges: string[] } };
     options: { availability: unknown };
   };
   handler: RequestHandler;
@@ -79,7 +79,7 @@ describe('session memory routes', () => {
   });
 
   it.each([SESSION_MEMORY_FORGET_PATH, SESSION_MEMORY_REMEMBER_PATH])(
-    'registers %s as a public experimental route that needs write',
+    'registers %s as a public experimental route that needs write and declares manage memory',
     (path) => {
       expect(routes[path].config).toMatchObject({
         path,
@@ -87,7 +87,9 @@ describe('session memory routes', () => {
         security: { authz: { requiredPrivileges: [apiPrivileges.writeContextEngine] } },
         options: { availability: { stability: 'experimental' } },
       });
-      expect(routes[path].config.security.authz.extendedPrivileges).toBeUndefined();
+      expect(routes[path].config.security.authz.extendedPrivileges).toEqual([
+        apiPrivileges.manageMemory,
+      ]);
     }
   );
 

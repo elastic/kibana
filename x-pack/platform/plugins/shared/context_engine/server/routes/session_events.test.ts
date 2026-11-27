@@ -26,7 +26,7 @@ interface RegisteredRoute {
   config: {
     path: string;
     access: string;
-    security: { authz: { requiredPrivileges: string[]; extendedPrivileges?: string[] } };
+    security: { authz: { requiredPrivileges: string[]; extendedPrivileges: string[] } };
     options: { availability: unknown; body: { maxBytes: number } };
   };
   handler: RequestHandler;
@@ -84,14 +84,14 @@ describe('session events routes', () => {
     registerSessionEventsRoutes({ router, getSessionMemoryClient });
   });
 
-  it('registers a public experimental route that needs write and takes 10 MB', () => {
+  it('registers a public experimental route that needs write, declares manage memory and takes 10 MB', () => {
     expect(route.config).toMatchObject({
       path: '/api/context_engine/memory/_save_event',
       access: 'public',
       security: { authz: { requiredPrivileges: [apiPrivileges.writeContextEngine] } },
       options: { availability: { stability: 'experimental' } },
     });
-    expect(route.config.security.authz.extendedPrivileges).toBeUndefined();
+    expect(route.config.security.authz.extendedPrivileges).toEqual([apiPrivileges.manageMemory]);
     expect(SESSION_EVENTS_SAVE_PATH).toBe(route.config.path);
     expect(route.config.options.body.maxBytes).toBe(10 * 1024 * 1024);
   });

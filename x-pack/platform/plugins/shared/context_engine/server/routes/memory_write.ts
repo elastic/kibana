@@ -19,9 +19,15 @@ import {
 
 const REMEMBER_RETRY_AFTER_SECONDS = '1';
 
-/** Security for memory routes that write. The session memory client checks the rest. */
+/**
+ * Security for memory routes that write. `manageMemory` is declared so the API docs list it; the
+ * session memory client enforces it, along with the other checks.
+ */
 export const MEMORY_WRITE_SECURITY: RouteSecurity = {
-  authz: { requiredPrivileges: [apiPrivileges.writeContextEngine] },
+  authz: {
+    requiredPrivileges: [apiPrivileges.writeContextEngine],
+    extendedPrivileges: [apiPrivileges.manageMemory],
+  },
 };
 
 /** Maps a session memory client error to its response, and rethrows any other error. */
