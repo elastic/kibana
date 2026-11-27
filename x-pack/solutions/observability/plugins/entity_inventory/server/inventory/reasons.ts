@@ -31,3 +31,16 @@ export const partialValuesReason = (): string =>
     defaultMessage:
       'partial result: some shards or clusters did not answer, so values may be missing',
   });
+
+export const partialAlertCountsReason = (): string =>
+  i18n.translate('xpack.entityInventory.reasons.partialAlertCounts', {
+    defaultMessage:
+      'partial result: some shards or clusters did not answer, so alert counts may be missing',
+  });
+
+export const alertCountLimitReason = (limit: number): string =>
+  i18n.translate('xpack.entityInventory.reasons.alertCountLimit', {
+    defaultMessage:
+      'alert counts reached the {limit} entity limit, so entities with fewer alerts may show no count',
+    values: { limit },
+  });

@@ -10,7 +10,7 @@
     "browser": false,
     "server": true,
     "configPath": ["xpack", "entityInventory"],
-    "requiredPlugins": ["entityStore"],
+    "requiredPlugins": ["entityStore", "spaces"],
     "requiredBundles": []
   }
 }

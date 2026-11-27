@@ -121,6 +121,20 @@ export interface ListQueryDiagnostic extends QueryExecutionStats {
   rowCount: number;
 }
 
+/** The active alerts of the entities of a type, counted by one query over the alert indices. */
+export interface AlertCounts {
+  /**
+   * Entity id to the number of active classic alerts whose grouping fields reproduce the entity's
+   * identity. An entity with none is absent, and one whose alerts group by other fields than its
+   * identity is undercounted.
+   */
+  byEntityId: Record<string, number>;
+  /** The query sent, or null when none could be built; see `errors` for why. */
+  query: ListQueryDiagnostic | null;
+  /** Why counts are missing or incomplete, kept apart from the list's `errors[]`, which are about rows. */
+  errors: SourceError[];
+}
+
 /**
  * What the probe of one source pattern decided: `time_series` and `no_time_series` plan queries,
  * `failed` runs none (see `errors`).
@@ -169,6 +183,8 @@ export interface ListResponse {
   timings: ListTimings;
   errors: SourceError[];
   unavailableColumns: UnavailableColumn[];
+  /** Present only when the request set `includeAlertCounts`; covers the returned rows only. */
+  alertCounts?: AlertCounts;
 }
 
 /** The body the inventory sends to Elasticsearch's `POST /_query` for one query. */

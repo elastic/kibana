@@ -9,7 +9,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import type { PlanResponse } from '../../../common';
 import { createEntityInventoryServerRoute } from '../create_server_route';
 import { INTERIM_AUTHZ } from '../interim_authz';
-import { listRequestBodySchema } from '../utils/request_params';
+import { planRequestBodySchema } from '../utils/request_params';
 import { typeNameSchema } from '../utils/type_name_schema';
 import { createAbortSignal } from '../utils/create_abort_signal';
 
@@ -18,7 +18,7 @@ export const planRoute = createEntityInventoryServerRoute({
   params: lazySchema(() =>
     z.object({
       path: z.object({ type: typeNameSchema }),
-      body: listRequestBodySchema,
+      body: planRequestBodySchema,
     })
   ),
   options: {
