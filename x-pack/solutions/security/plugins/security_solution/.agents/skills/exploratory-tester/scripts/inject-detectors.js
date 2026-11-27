@@ -112,14 +112,12 @@
         );
 
       // ── Level 2: search-response warning callout (already has visible text) ──
-      document
-        .querySelectorAll('[data-test-subj="searchResponseWarningsCallout"]')
-        .forEach((el) =>
-          r.level2.push({
-            type: 'search_response_warning_callout',
-            text: el.textContent.trim().substring(0, 300),
-          })
-        );
+      document.querySelectorAll('[data-test-subj="searchResponseWarningsCallout"]').forEach((el) =>
+        r.level2.push({
+          type: 'search_response_warning_callout',
+          text: el.textContent.trim().substring(0, 300),
+        })
+      );
 
       // ── Level 3: loading spinners still visible ──────────────────────────────
       // (only meaningful if called after waiting for the action to settle)

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { timeoutSignal } from '@kbn/std';
 import { parse as parseCookie } from 'tough-cookie';
 import { Agent, fetch } from 'undici';
 
@@ -17,6 +16,7 @@ import {
 } from '@kbn/mock-idp-utils';
 import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
+import { timeoutSignal } from '@kbn/std';
 
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../../../common/constants';
 import { COMMON_UNSAFE_HEADERS, extractAttributeValue } from '../fixtures';

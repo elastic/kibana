@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { timeoutSignal } from '@kbn/std';
 import { Agent, fetch } from 'undici';
 
 import { createUiamOAuthAccessToken, MOCK_IDP_UIAM_SERVICE_URL } from '@kbn/mock-idp-utils';
 import { apiTest as baseApiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
+import { timeoutSignal } from '@kbn/std';
 
 export const TEST_USERNAME = '1234567891';
 
