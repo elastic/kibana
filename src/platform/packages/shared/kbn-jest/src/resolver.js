@@ -112,6 +112,15 @@ module.exports = (request, options) => {
     });
   }
 
+  // nock is Node-only, but jsdom environments resolve the `browser` export condition, under which
+  // @mswjs/interceptors hides the Node interceptors nock depends on.
+  if (options.basedir.includes(`${Path.sep}node_modules${Path.sep}nock${Path.sep}`)) {
+    return options.defaultResolver(request, {
+      ...options,
+      conditions: options.conditions?.filter((condition) => condition !== 'browser'),
+    });
+  }
+
   if (request === `elastic-apm-node`) {
     return APM_AGENT_MOCK;
   }

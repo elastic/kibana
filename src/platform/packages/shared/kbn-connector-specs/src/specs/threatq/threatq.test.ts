@@ -8,6 +8,7 @@
  */
 
 import axios from 'axios';
+import type Nock from 'nock';
 import { Request, Response, Headers } from 'undici';
 import { loggerMock } from '@kbn/logging-mocks';
 import { z } from '@kbn/zod/v4';
@@ -30,7 +31,7 @@ import {
 // Use the server HTTP client under this package's jsdom test environment.
 jest.mock('axios', () => jest.requireActual('axios/dist/node/axios.cjs'));
 
-let nock: typeof import('nock');
+let nock: typeof Nock;
 
 const origin = 'https://threatq.example.com';
 const secrets = { token: 'test-token' };
@@ -49,7 +50,7 @@ describe('ThreatQ', () => {
   beforeAll(() => {
     // Nock captures these classes on import; jsdom supplies incompatible fetch polyfills.
     Object.assign(globalThis, { Request, Response, Headers });
-    nock = jest.requireActual('nock');
+    nock = jest.requireActual<typeof Nock>('nock');
     nock.disableNetConnect();
   });
   beforeEach(async () => {
