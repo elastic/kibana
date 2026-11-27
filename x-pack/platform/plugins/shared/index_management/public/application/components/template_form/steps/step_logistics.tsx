@@ -604,7 +604,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
                     >
                       <FormattedMessage
                         id="xpack.idxMgmt.templateForm.stepLogistics.dataStreamOptionsLostDescription"
-                        defaultMessage="This template has data stream options configured. Because the template will no longer create data streams, those options will be removed when you save it."
+                        defaultMessage="Create data stream is turned off, so any data stream options in this template will be removed when you save."
                       />
                     </EuiCallOut>
                   </>
