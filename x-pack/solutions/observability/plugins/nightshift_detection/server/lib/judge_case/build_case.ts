@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { cutText } from '../text/cut_text';
+import { cutText } from '../../utils/cut_text';
 import { JUDGE_CASE_SETTINGS } from './constants';
 import type { ReadEvidenceResult } from './evidence_types';
 import type {

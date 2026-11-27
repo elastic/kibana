@@ -25,6 +25,7 @@ Enterprise license.
 Server code is grouped by what it does, so a new feature adds a folder instead of growing a shared one:
 
 - `server/lib/<domain>/`: the logic. `engine/` runs a tick, `strategies/` holds what a tick runs, `signals/` and `state/` store what it finds and where it stopped, `service_account/` binds a space to its account, `workflows/` installs the managed workflows, `judge_case/` runs a signal's evidence queries (once each per run, up to a cap) and builds the judge's case from them, within a size budget.
+- `server/utils/`: small helpers that more than one domain uses, one function per file, as in other Kibana plugins. A helper only one domain uses stays in that domain's folder.
 - `server/routes/<feature>/`: one folder of routes per feature, built on `BaseEngineRoute`.
 - `server/setup/bind_<feature>.ts`: the DI bindings of one feature, loaded from `server/index.ts`.
 
