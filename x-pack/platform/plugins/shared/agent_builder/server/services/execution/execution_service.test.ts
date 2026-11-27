@@ -1849,6 +1849,64 @@ describe('AgentExecutionService', () => {
       expect(conversationService.getScopedClientAsUser).not.toHaveBeenCalled();
     });
 
+    it("stamps the parent's root execution as its own root", async () => {
+      mockExecutionClient.peek.mockResolvedValueOnce({
+        status: ExecutionStatus.running,
+        eventCount: 0,
+        rootExecutionId: 'root-1',
+      });
+
+      await executeSubAgent();
+
+      expect(mockExecutionClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({ parentExecutionId: 'parent-1', rootExecutionId: 'root-1' })
+      );
+    });
+
+    it('stamps its own id as the root when it has no parent', async () => {
+      await service.executeAgent({
+        mode: AgentExecutionMode.standalone,
+        request: httpServerMock.createKibanaRequest(),
+        executionId: 'exec-1',
+        params: { agentId: 'agent-1', nextInput: { message: 'hi' } },
+        useTaskManager: true,
+      });
+
+      expect(mockExecutionClient.peek).not.toHaveBeenCalled();
+      expect(mockExecutionClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({ executionId: 'exec-1', rootExecutionId: 'exec-1' })
+      );
+    });
+
+    it('stamps the root of the sub-agent execution a wake run reports', async () => {
+      mockExecutionClient.peek.mockResolvedValueOnce({
+        status: ExecutionStatus.completed,
+        eventCount: 0,
+        rootExecutionId: 'root-1',
+      });
+      conversationClient.exists.mockResolvedValue(true);
+      conversationClient.get.mockResolvedValue(
+        createEmptyConversation({ id: 'conv-1', agent_id: 'agent-1' })
+      );
+
+      await service.executeAgent({
+        mode: AgentExecutionMode.conversation,
+        request: httpServerMock.createKibanaRequest(),
+        executionId: 'wake-1',
+        params: {
+          conversationId: 'conv-1',
+          nextInput: { message: 'finished' },
+          reportsBackgroundExecution: 'child-1',
+        },
+        useTaskManager: true,
+      });
+
+      expect(mockExecutionClient.peek).toHaveBeenCalledWith('child-1');
+      expect(mockExecutionClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({ executionId: 'wake-1', rootExecutionId: 'root-1' })
+      );
+    });
+
     it('a wake run acts as the owner of the sub-agent execution it reports', async () => {
       mockExecutionClient.peek.mockResolvedValueOnce({
         status: ExecutionStatus.completed,

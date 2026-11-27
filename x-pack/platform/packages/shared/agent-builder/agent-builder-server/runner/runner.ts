@@ -123,6 +123,8 @@ export interface RunAgentStackEntry {
   agentName?: string;
   conversationId?: string;
   executionId?: string;
+  /** Id of the top execution of this run's tree: its own on a root, else inherited. */
+  rootExecutionId?: string;
   origin?: ConversationOriginType;
 }
 

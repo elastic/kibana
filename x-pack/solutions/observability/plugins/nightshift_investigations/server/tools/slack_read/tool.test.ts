@@ -48,7 +48,7 @@ const setup = (
         request: {},
         agentConfiguration: { connector_ids: assigned },
         callContext: { toolId: SLACK_READ_TOOL_ID },
-        runContext: { stack: [{ type: 'agent', agentId }] },
+        runContext: { stack: [{ type: 'agent', agentId, conversationId: 'conv-1' }] },
       }
     );
     return results[0];
@@ -79,6 +79,12 @@ describe('platform.nightshift.slack_read', () => {
       expect.objectContaining({
         actionId: 'elastic-apps-slack',
         params: { subAction: 'listChannels', subActionParams: {} },
+        source: expect.objectContaining({
+          source: {
+            toolId: SLACK_READ_TOOL_ID,
+            runContext: { conversationId: 'conv-1' },
+          },
+        }),
       })
     );
   });

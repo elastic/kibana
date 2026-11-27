@@ -16,7 +16,12 @@ import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import type { Runner, HooksServiceStart } from '@kbn/agent-builder-server';
+import type {
+  Runner,
+  HooksServiceStart,
+  RunAgentParams,
+  RunAgentReturn,
+} from '@kbn/agent-builder-server';
 import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
 import type { ToolsServiceStart } from '../../tools';
 import type { AgentsServiceStart } from '../../agents';
@@ -64,6 +69,20 @@ export interface RunnerFactoryDeps {
   deductiveRegister: boolean;
 }
 
+/** Options only the execution runner passes, kept off the public `RunAgentParams`. */
+export interface InternalRunAgentOptions {
+  rootExecutionId?: string;
+}
+
+export type InternalRunAgentFn = (
+  params: RunAgentParams,
+  options?: InternalRunAgentOptions
+) => Promise<RunAgentReturn>;
+
+export interface InternalRunner extends Runner {
+  runAgent: InternalRunAgentFn;
+}
+
 export interface RunnerFactory {
-  getRunner(): Runner;
+  getRunner(): InternalRunner;
 }

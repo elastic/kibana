@@ -22,9 +22,16 @@ import { createConnectorNetworkSettings } from './create_connector_network_setti
 import type { ActionsConfigurationUtilities } from '../../actions_config';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import {
+  asAgentBuilderExecutionSource,
+  asNotificationExecutionSource,
+} from '../action_execution_source';
+import type { ActionExecutionSource } from '../action_execution_source';
+import type { RelayClientContract } from '../relay';
 
 describe('generateExecutorFunction', () => {
   const connectorId = 'test-connector-id';
+  const runContext = { conversationId: 'conv-1', executionId: 'exec-1' };
 
   let logger: MockedLogger;
   let mockGetAxiosInstanceWithAuth: jest.MockedFunction<GetAxiosInstanceWithAuthFn>;
@@ -158,13 +165,17 @@ describe('generateExecutorFunction', () => {
       );
     });
 
-    it('passes the Relay client in the handler context for relay-authenticated executions', async () => {
-      const relay = {
+    const makeRelay = () =>
+      ({
         trigger: jest.fn(),
         listBindings: jest.fn(),
         readMessages: jest.fn(),
         readThread: jest.fn(),
-      };
+        withRunContext: jest.fn(),
+      } as unknown as jest.Mocked<RelayClientContract>);
+
+    it('passes the Relay client in the handler context for relay-authenticated executions', async () => {
+      const relay = makeRelay();
       const executor = generateExecutorFunction({
         actions: makeActions(),
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
@@ -181,13 +192,57 @@ describe('generateExecutorFunction', () => {
       expect(mockHandler).toHaveBeenCalledWith(expect.objectContaining({ relay }), {});
     });
 
+    const executeWithRelay = async (
+      relay: RelayClientContract,
+      source: ActionExecutionSource<unknown>
+    ) => {
+      const executor = generateExecutorFunction({
+        actions: makeActions(),
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => fakeLeasePool,
+        getRelayClient: () => relay,
+        networkSettings: mockNetwork,
+        platform: mockPlatform,
+      });
+      const opts = makeExecOptions({ subAction: 'testAction', subActionParams: {} });
+      await executor({ ...opts, source, secrets: { authType: 'relay', tenantKey: 'tenant-A' } });
+    };
+
+    it('scopes the Relay client to the run for an Agent Builder source with a run context', async () => {
+      const relay = makeRelay();
+      const scopedRelay = makeRelay();
+      relay.withRunContext.mockReturnValue(scopedRelay);
+
+      await executeWithRelay(
+        relay,
+        asAgentBuilderExecutionSource({ toolId: 'tool-1', runContext })
+      );
+
+      expect(relay.withRunContext).toHaveBeenCalledWith(runContext);
+      expect(mockHandler.mock.calls[0][0].relay).toBe(scopedRelay);
+    });
+
+    it.each([
+      [
+        'an Agent Builder source without a run context',
+        asAgentBuilderExecutionSource({ toolId: 'tool-1' }),
+      ],
+      [
+        'another source type',
+        asNotificationExecutionSource({ requesterId: 'workflows', connectorId }),
+      ],
+    ])('keeps the shared Relay client for %s', async (_label, source) => {
+      const relay = makeRelay();
+
+      await executeWithRelay(relay, source);
+
+      expect(mockHandler.mock.calls[0][0].relay).toBe(relay);
+      expect(relay.withRunContext).not.toHaveBeenCalled();
+    });
+
     it('leaves the Relay client undefined for non-relay auth types even when one is configured', async () => {
-      const relay = {
-        trigger: jest.fn(),
-        listBindings: jest.fn(),
-        readMessages: jest.fn(),
-        readThread: jest.fn(),
-      };
+      const relay = makeRelay();
       const executor = generateExecutorFunction({
         actions: makeActions(),
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,

@@ -121,6 +121,40 @@ describe('runAgent', () => {
     );
   });
 
+  it('records the root execution of its runner on the run context stack', async () => {
+    runnerManager = new RunnerManager({ ...runnerDeps, rootExecutionId: 'root-exec' });
+    const createChild = jest.spyOn(runnerManager, 'createChild');
+
+    await runAgent({
+      agentExecutionParams: {
+        agentId: 'test-agent',
+        executionId: 'exec-1',
+        agentParams: { nextInput: { message: 'bar' } },
+      },
+      parentManager: runnerManager,
+    });
+
+    const childManager = createChild.mock.results[0].value as RunnerManager;
+    expect(getAgentFromRunContext(childManager.context)?.rootExecutionId).toBe('root-exec');
+    expect(childManager.deps.rootExecutionId).toBe('root-exec');
+  });
+
+  it('records no root execution when its runner has none', async () => {
+    const createChild = jest.spyOn(runnerManager, 'createChild');
+
+    await runAgent({
+      agentExecutionParams: {
+        agentId: 'test-agent',
+        executionId: 'exec-1',
+        agentParams: { nextInput: { message: 'bar' } },
+      },
+      parentManager: runnerManager,
+    });
+
+    const childManager = createChild.mock.results[0].value as RunnerManager;
+    expect(getAgentFromRunContext(childManager.context)?.rootExecutionId).toBeUndefined();
+  });
+
   describe('origin on the run context stack', () => {
     const runAndReadAgentEntry = async (agentParams: ScopedRunnerRunAgentParams['agentParams']) => {
       const createChild = jest.spyOn(runnerManager, 'createChild');

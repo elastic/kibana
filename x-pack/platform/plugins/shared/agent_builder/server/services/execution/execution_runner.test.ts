@@ -2152,11 +2152,13 @@ describe('handleAgentExecution — round attribution', () => {
   const run = async ({
     agentParams = {},
     parentExecutionId,
+    rootExecutionId,
     reportRoundComplete = jest.fn(),
     reportRoundError = jest.fn(),
   }: {
     agentParams?: Record<string, unknown>;
     parentExecutionId?: string;
+    rootExecutionId?: string;
     reportRoundComplete?: jest.Mock;
     reportRoundError?: jest.Mock;
   }) => {
@@ -2183,6 +2185,7 @@ describe('handleAgentExecution — round attribution', () => {
         executionMode: AgentExecutionMode.conversation,
         owner: { id: 'owner-1', username: 'owner' },
         ...(parentExecutionId ? { parentExecutionId } : {}),
+        ...(rootExecutionId ? { rootExecutionId } : {}),
       } as never,
       request: { headers: {} } as never,
     });
@@ -2305,6 +2308,16 @@ describe('handleAgentExecution — round attribution', () => {
     const [{ telemetryMetadata }] = executeAgentMock.mock.calls[0];
     expect(telemetryMetadata?.interactionId).toBeUndefined();
   });
+
+  it('runs the round with the root execution stamped on the execution document', async () => {
+    mockAgentStream([makeRoundStartedEvent(), makeRoundCompleteEvent()]);
+
+    await run({ rootExecutionId: 'root-1' });
+
+    expect(executeAgentMock).toHaveBeenCalledWith(
+      expect.objectContaining({ rootExecutionId: 'root-1' })
+    );
+  });
 });
 
 describe('handleAgentExecution — standalone workflow attribution', () => {
@@ -2312,7 +2325,13 @@ describe('handleAgentExecution — standalone workflow attribution', () => {
     jest.clearAllMocks();
   });
 
-  const runStandalone = async ({ parentExecutionId }: { parentExecutionId?: string }) => {
+  const runStandalone = async ({
+    parentExecutionId,
+    rootExecutionId,
+  }: {
+    parentExecutionId?: string;
+    rootExecutionId?: string;
+  }) => {
     const conversationClient = createConversationClientMock();
     stubResolveServices(conversationClient);
     executeAgentMock.mockReturnValue(
@@ -2332,6 +2351,7 @@ describe('handleAgentExecution — standalone workflow attribution', () => {
           workflowExecutionId: 'workflow-run-1',
         },
         ...(parentExecutionId ? { parentExecutionId } : {}),
+        ...(rootExecutionId ? { rootExecutionId } : {}),
       } as never,
       deps: createDeps({ conversationClient }),
       request: { headers: {} } as never,
@@ -2359,6 +2379,14 @@ describe('handleAgentExecution — standalone workflow attribution', () => {
     expect(telemetryMetadata?.interactionId).toBeUndefined();
     expect(executeAgentMock).toHaveBeenCalledWith(
       expect.objectContaining({ workflowExecutionId: 'workflow-run-1' })
+    );
+  });
+
+  it('runs with the root execution stamped on the execution document', async () => {
+    await runStandalone({ parentExecutionId: 'parent-execution-1', rootExecutionId: 'root-1' });
+
+    expect(executeAgentMock).toHaveBeenCalledWith(
+      expect.objectContaining({ rootExecutionId: 'root-1' })
     );
   });
 });
