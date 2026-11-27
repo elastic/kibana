@@ -17,6 +17,7 @@ Reviewers should verify this PR satisfies this list as well.
 - [ ] [Flaky Test Runner](https://ci-stats.kibana.dev/trigger_flaky_test_runner/1) was used on any tests changed
 - [ ] The correct `release_note:*` type label (or `release_note:skip`) is applied, the PR title reads as a release note, and the description has a `## Release note` section if a custom summary is needed, per the [guidelines](https://www.elastic.co/docs/extend/kibana/contributing/workflow/how-we-use-github#release-notes).
 - [ ] Review the [backport guidelines](https://docs.google.com/document/d/1VyN5k91e5OVumlc0Gb9RPa3h1ewuPE705nRtioPiTvY/edit?usp=sharing) and apply applicable `backport:*` labels.
+- [ ] If this PR changes behavior defined in system prompts (for example, Agent Builder system prompts), update the relevant prompts and associated evaluations to match the new behavior.
 
 ### Identify risks
 
