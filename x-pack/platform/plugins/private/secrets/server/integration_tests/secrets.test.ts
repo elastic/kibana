@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/server';
+import type { AuditLogger, CoreStart } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
 import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
@@ -80,6 +80,30 @@ describe('secrets on Elasticsearch', () => {
     return createSecretsClient({ storage, profileId: null });
   };
 
+  /**
+   * Returns a client of a space whose audit events are kept, as a logger configured to include
+   * saved object names, or not, would receive them.
+   */
+  const getAuditedClient = ({
+    spaceId,
+    includeSavedObjectNames = true,
+  }: {
+    spaceId: string;
+    includeSavedObjectNames?: boolean;
+  }) => {
+    const log = jest.fn<void, Parameters<AuditLogger['log']>>();
+    jest
+      .spyOn(pluginCore.security.audit, 'asScoped')
+      .mockReturnValue({ log, enabled: true, includeSavedObjectNames });
+    return { client: getClient(spaceId), events: () => log.mock.calls.map(([event]) => event) };
+  };
+
+  const savedObjectOf = ({ spaceId, name }: { spaceId: string; name: string }) => ({
+    type: SECRET_SAVED_OBJECT_TYPE,
+    id: getSecretSavedObjectId({ spaceId, name }),
+    name,
+  });
+
   beforeAll(async () => {
     // Kibana loads the plugin itself. Its start call is the only way to reach its contract.
     const start = jest.spyOn(SecretsPlugin.prototype, 'start');
@@ -102,9 +126,11 @@ describe('secrets on Elasticsearch', () => {
     await esServer?.stop();
   });
 
-  it('creates, lists, updates and deletes a secret, and never returns its value', async () => {
-    const client = getClient();
+  it('creates, lists, updates and deletes a secret, records each step in the audit log and never exposes its value', async () => {
+    const spaceId = 'lifecycle';
     const name = 'lifecycle_token';
+    const savedObject = savedObjectOf({ spaceId, name });
+    const { client, events } = getAuditedClient({ spaceId });
 
     const created = await client.create({ name, description: DESCRIPTION, value: VALUE });
     const listed = await client.list();
@@ -112,12 +138,26 @@ describe('secrets on Elasticsearch', () => {
     await client.delete({ name });
 
     expect(created).toMatchObject({ name, description: DESCRIPTION });
-    expect(listed).toContainEqual(created);
+    expect(listed).toEqual([created]);
     expect(updated).toMatchObject({ name, description: DESCRIPTION });
     for (const secret of [created, ...listed, updated]) {
       expect(secret).not.toHaveProperty('value');
     }
-    expect((await client.list()).map((secret) => secret.name)).not.toContain(name);
+    expect(await client.list()).toEqual([]);
+    expect(events()).toEqual(
+      [
+        ['secret_create', 'creation', 'created'],
+        ['secret_find', 'access', 'accessed'],
+        ['secret_update', 'change', 'updated'],
+        ['secret_delete', 'deletion', 'deleted'],
+      ].map(([action, type, past]) => ({
+        message: `User has ${past} secret [id=${savedObject.id}] [name=${name}]`,
+        event: { action, category: ['database'], type: [type], outcome: 'success' },
+        kibana: { saved_object: savedObject },
+      }))
+    );
+    expect(JSON.stringify(events())).not.toContain(VALUE);
+    expect(JSON.stringify(events())).not.toContain(NEW_VALUE);
   });
 
   it('stores the value encrypted', async () => {
@@ -309,6 +349,47 @@ describe('secrets on Elasticsearch', () => {
         value: VALUE,
         description: 'Changed meanwhile',
       });
+    });
+  });
+
+  describe('audit', () => {
+    it('records a failed attempt with its error', async () => {
+      const spaceId = 'audited_failure';
+      const name = 'taken_token';
+      const savedObject = savedObjectOf({ spaceId, name });
+      const { client, events } = getAuditedClient({ spaceId });
+      await client.create({ name, value: VALUE });
+
+      await expect(client.create({ name, value: VALUE })).rejects.toThrow(SecretAlreadyExistsError);
+
+      expect(events()).toHaveLength(2);
+      expect(events()[1]).toEqual({
+        message: `Failed attempt to create secret [id=${savedObject.id}] [name=${name}]`,
+        event: {
+          action: 'secret_create',
+          category: ['database'],
+          type: ['creation'],
+          outcome: 'failure',
+        },
+        kibana: { saved_object: savedObject },
+        error: { code: 'SecretAlreadyExistsError', message: expect.any(String) },
+      });
+    });
+
+    it('leaves out the name when the audit log excludes saved object names', async () => {
+      const spaceId = 'audited_without_names';
+      const name = 'unnamed_token';
+      const { type, id } = savedObjectOf({ spaceId, name });
+      const { client, events } = getAuditedClient({ spaceId, includeSavedObjectNames: false });
+
+      await client.create({ name, value: VALUE });
+
+      expect(events()).toEqual([
+        expect.objectContaining({
+          message: `User has created secret [id=${id}]`,
+          kibana: { saved_object: { type, id } },
+        }),
+      ]);
     });
   });
 });
