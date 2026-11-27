@@ -256,6 +256,19 @@ The GitHub connector exposes the following actions:
 `callTool`
 :   Call any tool on the GitHub MCP server directly by name. Use this as an escape hatch when a specific tool is not yet exposed as a named action.
 
+## Search issues and pull requests in Agent Builder [github-agent-builder-skill]
+
+```{applies_to}
+serverless: preview
+stack: preview 9.7+
+```
+
+When you assign a GitHub connector to an Agent Builder agent, the agent also gets the built-in `connector-github` skill. With it, the agent can find issues or pull requests by label, author, assignee, text, or date, and list the issues or pull requests of one repository. The skill returns compact results, such as an issue's number, title, state, and labels, instead of the full API response.
+
+For anything else, such as reading an issue's comments or creating a pull request, the agent uses the [connector actions](#github-action-configuration).
+
+To learn how agents get connector skills and what they need to run, refer to [Connector skills](docs-content://explore-analyze/ai-features/agent-builder/builtin-skills-reference.md#agent-builder-connector-skills).
+
 ## Connector networking configuration [github-connector-networking-configuration]
 
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.

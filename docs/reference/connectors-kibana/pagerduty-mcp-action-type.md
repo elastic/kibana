@@ -116,6 +116,19 @@ The PagerDuty connector exposes the following actions. The `browse*` and `manage
 `callTool`
 :   Call any tool on the PagerDuty MCP server directly by name. Use this as an escape hatch when a specific tool is not yet exposed as a named action.
 
+## Look up on-call schedules and incidents in Agent Builder [pagerduty-mcp-agent-builder-skill]
+
+```{applies_to}
+serverless: preview
+stack: preview 9.7+
+```
+
+When you assign a PagerDuty connector to an Agent Builder agent, the agent also gets the built-in `connector-pagerduty` skill. With it, the agent can look up who's on call for a named schedule and list incidents, escalation policies, and users. The skill returns compact results instead of the full API response.
+
+For anything else, such as finding who's on call without naming a schedule, listing teams, or creating and updating incidents, the agent uses the [connector actions](#pagerduty-connector-actions).
+
+To learn how agents get connector skills and what they need to run, refer to [Connector skills](docs-content://explore-analyze/ai-features/agent-builder/builtin-skills-reference.md#agent-builder-connector-skills).
+
 ## Connector networking configuration [pagerduty-mcp-connector-networking-configuration]
 
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
