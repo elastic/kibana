@@ -63,6 +63,7 @@ const caseWithAlerts: CaseUI = {
 
 const caseWithObservables: CaseUI = {
   ...caseWithAlerts,
+  totalObservables: 1,
   observables: [
     {
       id: 'obs-1',

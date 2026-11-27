@@ -10,6 +10,7 @@ import type { z } from '@kbn/zod/v4';
 import { UnifiedAttachmentBoundsSchema } from '../../../common/types/api/attachment/v2';
 import type { UnifiedAttachmentPayload } from '../../../common/types/domain/attachment/v2';
 import { isTypeAllowedForOwner } from '../../../common/utils/attachments';
+import { OBSERVABLE_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import type { UnifiedAttachmentTypeRegistry } from '../../attachment_framework/unified_attachment_registry';
 
 const summarizeIssues = (error: z.ZodError): string =>
@@ -43,6 +44,13 @@ export const validateUnifiedAttachments = ({
   const bounds = UnifiedAttachmentBoundsSchema.safeParse(query);
   if (!bounds.success) {
     throw Boom.badRequest(`Invalid attachment payload: ${summarizeIssues(bounds.error)}`);
+  }
+
+  // Observables need derived ids, dedupe and the per-case cap, which only the observables client applies.
+  if (query.type === OBSERVABLE_ATTACHMENT_TYPE) {
+    throw Boom.badRequest(
+      `Attachment type ${OBSERVABLE_ATTACHMENT_TYPE} must be written through the observables API.`
+    );
   }
 
   if (!unifiedAttachmentTypeRegistry.has(query.type)) {

@@ -14,6 +14,7 @@ import {
   dashboardAttachmentType,
   mapAttachmentType,
   discoverSessionAttachmentType,
+  observableAttachmentType,
 } from '../attachment_framework/attachments';
 
 export const registerInternalAttachments = (unifiedRegistry: UnifiedAttachmentTypeRegistry) => {
@@ -24,4 +25,5 @@ export const registerInternalAttachments = (unifiedRegistry: UnifiedAttachmentTy
   unifiedRegistry.register(dashboardAttachmentType);
   unifiedRegistry.register(mapAttachmentType);
   unifiedRegistry.register(discoverSessionAttachmentType);
+  unifiedRegistry.register(observableAttachmentType);
 };

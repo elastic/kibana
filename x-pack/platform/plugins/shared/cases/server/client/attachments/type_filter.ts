@@ -6,7 +6,9 @@
  */
 
 import type { KueryNode } from '@kbn/es-query';
+import { nodeBuilder, nodeTypes } from '@kbn/es-query';
 import { CASE_ATTACHMENT_SAVED_OBJECT, CASE_COMMENT_SAVED_OBJECT } from '../../../common/constants';
+import { OBSERVABLE_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import { toLegacyTypeMatches, type LegacyTypeMatch } from '../../../common/utils/attachments';
 import { buildFilter, combineFilters, NodeBuilderOperators } from '../utils';
 
@@ -32,12 +34,23 @@ export const commentsMatchFilter = ({
 };
 
 /**
+ * Excludes observables. A case can hold up to 100,000, so they are listed only when asked for
+ * by type, never with a case's other attachments.
+ */
+export const excludeObservablesFilter = (): KueryNode =>
+  nodeTypes.function.buildNode(
+    'not',
+    nodeBuilder.is(`${CASE_ATTACHMENT_SAVED_OBJECT}.attributes.type`, OBSERVABLE_ATTACHMENT_TYPE)
+  );
+
+/**
  * Find type filter: `cases-attachments` by unified type, `cases-comments` by the
  * mapped legacy type (and subtype/owner when comments rows share a type bucket).
+ * With no types, every type except observables.
  */
 export const buildAttachmentTypeFilter = (types: string[] | undefined): KueryNode | undefined => {
   if (!types || types.length === 0) {
-    return undefined;
+    return excludeObservablesFilter();
   }
 
   const commentsSoFilter = combineFilters(

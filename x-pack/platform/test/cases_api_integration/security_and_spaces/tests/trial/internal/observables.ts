@@ -7,7 +7,12 @@
 
 import expect from '@kbn/expect';
 
-import { MAX_OBSERVABLES_PER_CASE, OBSERVABLE_TYPE_IPV4 } from '@kbn/cases-plugin/common/constants';
+import {
+  MAX_OBSERVABLES_PER_CASE,
+  OBSERVABLE_TYPE_HOSTNAME,
+  OBSERVABLE_TYPE_IPV4,
+} from '@kbn/cases-plugin/common/constants';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { Case } from '@kbn/cases-plugin/common';
 import type { ObservablesUserAction } from '@kbn/cases-plugin/common/types/domain';
 import { UserActionTypes } from '@kbn/cases-plugin/common/types/domain';
@@ -23,7 +28,14 @@ import {
   bulkDeleteObservables,
   getCase,
   findCaseUserActions,
+  bulkCreateObservables,
+  findObservables,
+  createComment,
+  deleteCases,
+  findAttachmentsV2,
+  getAllComments,
 } from '../../../../common/lib/api';
+import { postCommentUserReq } from '../../../../common/lib/mock';
 
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
@@ -342,6 +354,248 @@ export default ({ getService }: FtrProviderContext): void => {
         const { observables } = await getCase({ supertest, caseId: postedCase.id });
 
         expect(observables.length).to.be(0);
+      });
+    });
+
+    describe('observables stored as attachments', () => {
+      const ipv4 = (value: string) => ({
+        typeKey: OBSERVABLE_TYPE_IPV4.key,
+        value,
+        description: null,
+      });
+      const ipv4Range = (count: number) =>
+        Array.from({ length: count }, (_, index) =>
+          ipv4(`10.0.${Math.floor(index / 256)}.${index % 256}`)
+        );
+
+      const countStoredObservables = async (caseId: string): Promise<number> => {
+        await es.indices.refresh({ index: ALERTING_CASES_SAVED_OBJECT_INDEX });
+        const { count } = await es.count({
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+          query: {
+            bool: {
+              filter: [
+                { term: { 'cases-attachments.type': 'observable' } },
+                { nested: { path: 'references', query: { term: { 'references.id': caseId } } } },
+              ],
+            },
+          },
+        });
+        return count;
+      };
+
+      it('bulk creates observables and reports duplicates', async () => {
+        const postedCase = await createCase(supertest, getPostCaseRequest());
+
+        const first = await bulkCreateObservables({
+          supertest,
+          caseId: postedCase.id,
+          params: { observables: [...ipv4Range(3), ipv4('10.0.0.0')] },
+        });
+        const second = await bulkCreateObservables({
+          supertest,
+          caseId: postedCase.id,
+          params: { observables: ipv4Range(5) },
+        });
+
+        expect(first).to.eql({ added: 3, duplicates: 1, over_cap: 0, total_observables: 3 });
+        expect(second).to.eql({ added: 2, duplicates: 3, over_cap: 0, total_observables: 5 });
+        expect(await countStoredObservables(postedCase.id)).to.be(5);
+      });
+
+      it('keeps the case response to a preview of the first observables and an accurate total', async () => {
+        const postedCase = await createCase(supertest, getPostCaseRequest());
+        await bulkCreateObservables({
+          supertest,
+          caseId: postedCase.id,
+          params: { observables: ipv4Range(MAX_OBSERVABLES_PER_CASE + 10) },
+        });
+
+        const theCase = await getCase({ supertest, caseId: postedCase.id });
+
+        expect(theCase.total_observables).to.be(MAX_OBSERVABLES_PER_CASE + 10);
+        expect(theCase.observables.length).to.be(MAX_OBSERVABLES_PER_CASE);
+      });
+
+      it('pages through every observable with a cursor', async () => {
+        const postedCase = await createCase(supertest, getPostCaseRequest());
+        await bulkCreateObservables({
+          supertest,
+          caseId: postedCase.id,
+          params: { observables: ipv4Range(25) },
+        });
+
+        const seen = new Set<string>();
+        let cursor: string | undefined;
+        let pages = 0;
+        do {
+          const page = await findObservables({
+            supertest,
+            caseId: postedCase.id,
+            params: { perPage: 10, sortField: 'value', ...(cursor != null && { cursor }) },
+          });
+          expect(page.total).to.be(25);
+          page.observables.forEach(({ id }) => seen.add(id));
+          cursor = page.cursor;
+          pages += 1;
+        } while (cursor != null && pages < 10);
+
+        expect(seen.size).to.be(25);
+        expect(pages).to.be(3);
+      });
+
+      it('sorts, filters by type and searches values case-insensitively', async () => {
+        const postedCase = await createCase(supertest, getPostCaseRequest());
+        await bulkCreateObservables({
+          supertest,
+          caseId: postedCase.id,
+          params: {
+            observables: [
+              ...ipv4Range(3),
+              {
+                typeKey: OBSERVABLE_TYPE_HOSTNAME.key,
+                value: 'Web-01.example.com',
+                description: null,
+              },
+              {
+                typeKey: OBSERVABLE_TYPE_HOSTNAME.key,
+                value: 'db-01.example.com',
+                description: null,
+              },
+            ],
+          },
+        });
+
+        const byValueDesc = await findObservables({
+          supertest,
+          caseId: postedCase.id,
+          params: { sortField: 'value', sortOrder: 'desc' },
+        });
+        const hostnames = await findObservables({
+          supertest,
+          caseId: postedCase.id,
+          params: { typeKeys: [OBSERVABLE_TYPE_HOSTNAME.key] },
+        });
+        const search = await findObservables({
+          supertest,
+          caseId: postedCase.id,
+          params: { search: 'web-01' },
+        });
+
+        expect(byValueDesc.observables.map(({ value }) => value)).to.eql([
+          'db-01.example.com',
+          'Web-01.example.com',
+          '10.0.0.2',
+          '10.0.0.1',
+          '10.0.0.0',
+        ]);
+        expect(hostnames.total).to.be(2);
+        expect(search.observables.map(({ value }) => value)).to.eql(['Web-01.example.com']);
+      });
+
+      it('leaves observables out of the case attachments unless asked for by type', async () => {
+        const postedCase = await createCase(supertest, getPostCaseRequest());
+        await createComment({ supertest, caseId: postedCase.id, params: postCommentUserReq });
+        await bulkCreateObservables({
+          supertest,
+          caseId: postedCase.id,
+          params: { observables: ipv4Range(3) },
+        });
+
+        const attachments = await findAttachmentsV2({ supertest, caseId: postedCase.id });
+        const observableAttachments = await findAttachmentsV2({
+          supertest,
+          caseId: postedCase.id,
+          query: { type: 'observable' },
+        });
+        const allComments = await getAllComments({ supertest, caseId: postedCase.id });
+
+        expect(attachments.total).to.be(1);
+        expect(observableAttachments.total).to.be(3);
+        expect(allComments.length).to.be(1);
+      });
+
+      it('refuses observables on the generic attachment API', async () => {
+        const postedCase = await createCase(supertest, getPostCaseRequest());
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: {
+            type: 'observable',
+            owner: postedCase.owner,
+            data: { typeKey: OBSERVABLE_TYPE_IPV4.key, value: '10.0.0.1', description: null },
+          },
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('gives an observable a new id when its value changes', async () => {
+        const postedCase = await createCase(supertest, getPostCaseRequest());
+        const {
+          observables: [original],
+        } = await addObservable({
+          supertest,
+          caseId: postedCase.id,
+          params: { observable: ipv4('10.0.0.1') },
+        });
+
+        const {
+          observables: [updated],
+        } = await updateObservable({
+          supertest,
+          caseId: postedCase.id,
+          observableId: original.id,
+          params: { observable: { value: '10.0.0.2', description: null } },
+        });
+
+        expect(updated.value).to.be('10.0.0.2');
+        expect(updated.id).not.to.be(original.id);
+        await deleteObservable({
+          supertest,
+          caseId: postedCase.id,
+          observableId: original.id,
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('does not delete an observable through another case', async () => {
+        const firstCase = await createCase(supertest, getPostCaseRequest());
+        const secondCase = await createCase(supertest, getPostCaseRequest());
+        const {
+          observables: [observable],
+        } = await addObservable({
+          supertest,
+          caseId: firstCase.id,
+          params: { observable: ipv4('10.0.0.1') },
+        });
+
+        await bulkDeleteObservables({
+          supertest,
+          caseId: secondCase.id,
+          observableIds: [observable.id],
+          expectedHttpCode: 404,
+        });
+        expect(await countStoredObservables(firstCase.id)).to.be(1);
+      });
+
+      it('deletes the observables of a deleted case', async () => {
+        const postedCase = await createCase(supertest, getPostCaseRequest());
+        await bulkCreateObservables({
+          supertest,
+          caseId: postedCase.id,
+          params: { observables: ipv4Range(1_000) },
+        });
+        await bulkCreateObservables({
+          supertest,
+          caseId: postedCase.id,
+          params: { observables: ipv4Range(1_200).slice(1_000) },
+        });
+        expect(await countStoredObservables(postedCase.id)).to.be(1_200);
+
+        await deleteCases({ supertest, caseIDs: [postedCase.id] });
+
+        expect(await countStoredObservables(postedCase.id)).to.be(0);
       });
     });
 
