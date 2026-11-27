@@ -24,7 +24,7 @@ import {
   useIsDecliningProposal,
   useReopenProposal,
   useSettleDeclinedProposal,
-  PENDING_CARD_POLL_INTERVAL_MS,
+  CONVERSATION_POLL_INTERVAL_MS,
 } from './use_proposals_api';
 import {
   PROPOSALS_INTERNAL_URL,
@@ -998,6 +998,7 @@ describe('when a proposal of a polled conversation is decided elsewhere', () => 
   const setup = (server: Record<string, Record<string, unknown>>) => {
     const http = makeHttp();
     const listFailure: { error?: Error } = {};
+    const listHold: { until?: Promise<void> } = {};
     http.get.mockImplementation(async (url: string) => {
       if (url === PROPOSALS_INTERNAL_URL) {
         if (listFailure.error) {
@@ -1009,6 +1010,7 @@ describe('when a proposal of a polled conversation is decided elsewhere', () => 
           decision: row.decision ?? null,
           supersededBy: row.supersededBy ?? null,
         }));
+        await listHold.until;
         return { proposals, total: proposals.length };
       }
       return server[url.split('/').pop() ?? ''];
@@ -1019,7 +1021,7 @@ describe('when a proposal of a polled conversation is decided elsewhere', () => 
     const fetchesOfList = () =>
       http.get.mock.calls.filter(([url]) => url === PROPOSALS_INTERNAL_URL);
     const fetchesOf = (id: string) => http.get.mock.calls.filter(([url]) => url.endsWith(`/${id}`));
-    return { http, listFailure, fetchesOfList, fetchesOf, ...createWrapper() };
+    return { http, listFailure, listHold, fetchesOfList, fetchesOf, ...createWrapper() };
   };
 
   const advance = (ms: number) =>
@@ -1046,7 +1048,7 @@ describe('when a proposal of a polled conversation is decided elsewhere', () => 
     await waitFor(() => expect(card.result.current.data?.status).toBe('pending'));
 
     server['p-1'] = { ...server['p-1'], ...decided };
-    await advance(PENDING_CARD_POLL_INTERVAL_MS);
+    await advance(CONVERSATION_POLL_INTERVAL_MS);
 
     await waitFor(() => expect(card.result.current.data?.status).toBe('no_action'));
     expect(http.get).toHaveBeenCalledWith(
@@ -1063,51 +1065,55 @@ describe('when a proposal of a polled conversation is decided elsewhere', () => 
     const card = renderHook(() => useProposal('p-1'), { wrapper: Wrapper });
     await waitFor(() => expect(card.result.current.isSuccess).toBe(true));
 
-    await advance(PENDING_CARD_POLL_INTERVAL_MS * 2);
+    await advance(CONVERSATION_POLL_INTERVAL_MS * 2);
 
     expect(fetchesOfList()).toHaveLength(2);
     expect(fetchesOf('p-1')).toHaveLength(1);
   });
 
-  it('sends one list request per interval for several open cards of one chat', async () => {
+  it.each([3, 120])(
+    'sends one list request per interval for %s open cards, and no detail request',
+    async (cardCount) => {
+      const ids = Array.from({ length: cardCount }, (_, index) => `p-${index + 1}`);
+      const server = Object.fromEntries(ids.map((id) => [id, { id, ...open }]));
+      const { http, fetchesOfList, Wrapper } = setup(server);
+
+      // The cards mount 100 ms apart, so their timers fire at different times.
+      const cards: Array<{ result: { current: { isSuccess: boolean } } }> = [];
+      for (const id of ids) {
+        cards.push(renderHook(() => useProposal(id), { wrapper: Wrapper }));
+        await advance(100);
+      }
+      await waitFor(() => expect(cards.every((card) => card.result.current.isSuccess)).toBe(true));
+
+      // The first card reads the list at about 15 s and 30 s. The timers of the other cards find
+      // it fresh. The extra second covers the time that each timer starts after its card mounts.
+      await advance(CONVERSATION_POLL_INTERVAL_MS * 2 - ids.length * 100 + 1000);
+
+      expect(fetchesOfList()).toHaveLength(2);
+      const detailReads = http.get.mock.calls.filter(([url]) => url !== PROPOSALS_INTERNAL_URL);
+      expect(detailReads).toHaveLength(ids.length);
+    }
+  );
+
+  it('compares the list with the cache once for a list read that several cards share', async () => {
     const server = {
       'p-1': { id: 'p-1', ...open },
       'p-2': { id: 'p-2', ...open },
+      'p-3': { id: 'p-3', ...open },
     };
-    const { fetchesOfList, Wrapper } = setup(server);
-    const first = renderHook(() => useProposal('p-1'), { wrapper: Wrapper });
-    await waitFor(() => expect(first.result.current.isSuccess).toBe(true));
-    await advance(7000);
-    const second = renderHook(() => useProposal('p-2'), { wrapper: Wrapper });
-    await waitFor(() => expect(second.result.current.isSuccess).toBe(true));
-
-    // The timer of the first card reads the list at 15 s and 30 s. The timer of the second card
-    // fires at 22 s. The list read is still fresh then, so it sends no request.
-    await advance(PENDING_CARD_POLL_INTERVAL_MS * 2 - 7000);
-
-    expect(fetchesOfList()).toHaveLength(2);
-  });
-
-  it('sends one list request per interval for 120 open cards, and no detail request', async () => {
-    const ids = Array.from({ length: 120 }, (_, index) => `p-${index + 1}`);
-    const server = Object.fromEntries(ids.map((id) => [id, { id, ...open }]));
-    const { http, fetchesOfList, Wrapper } = setup(server);
-
-    // The cards mount 100 ms apart, so their timers fire at different times within 12 s.
-    const cards = [];
-    for (const id of ids) {
-      cards.push(renderHook(() => useProposal(id), { wrapper: Wrapper }));
-      await advance(100);
-    }
+    const { Wrapper, queryClient } = setup(server);
+    const cards = ['p-1', 'p-2', 'p-3'].map((id) =>
+      renderHook(() => useProposal(id), { wrapper: Wrapper })
+    );
     await waitFor(() => expect(cards.every((card) => card.result.current.isSuccess)).toBe(true));
 
-    // The first card reads the list at about 15 s and 30 s. The timers of the other cards find it
-    // fresh. The extra second covers the time that each timer starts after its card mounts.
-    await advance(PENDING_CARD_POLL_INTERVAL_MS * 2 - ids.length * 100 + 1000);
+    const findSpy = jest.spyOn(queryClient.getQueryCache(), 'find');
+    await advance(CONVERSATION_POLL_INTERVAL_MS);
 
-    expect(fetchesOfList()).toHaveLength(2);
-    const detailReads = http.get.mock.calls.filter(([url]) => url !== PROPOSALS_INTERNAL_URL);
-    expect(detailReads).toHaveLength(ids.length);
+    // One lookup of a cached detail for each proposal of the list, not for each card.
+    const detailLookups = findSpy.mock.calls.filter(([queryKey]) => queryKey[1] === 'detail');
+    expect(detailLookups).toHaveLength(Object.keys(server).length);
   });
 
   it('stops polling the conversation when its only open card is decided', async () => {
@@ -1117,10 +1123,10 @@ describe('when a proposal of a polled conversation is decided elsewhere', () => 
     await waitFor(() => expect(card.result.current.isSuccess).toBe(true));
 
     server['p-1'] = { ...server['p-1'], ...decided };
-    await advance(PENDING_CARD_POLL_INTERVAL_MS);
+    await advance(CONVERSATION_POLL_INTERVAL_MS);
     await waitFor(() => expect(card.result.current.data?.status).toBe('no_action'));
     const readsWhenDecided = fetchesOfList().length;
-    await advance(PENDING_CARD_POLL_INTERVAL_MS * 3);
+    await advance(CONVERSATION_POLL_INTERVAL_MS * 3);
 
     expect(fetchesOfList()).toHaveLength(readsWhenDecided);
   });
@@ -1132,7 +1138,7 @@ describe('when a proposal of a polled conversation is decided elsewhere', () => 
     await waitFor(() => expect(card.result.current.isSuccess).toBe(true));
 
     setVisibility('hidden');
-    await advance(PENDING_CARD_POLL_INTERVAL_MS * 2);
+    await advance(CONVERSATION_POLL_INTERVAL_MS * 2);
 
     expect(fetchesOfList()).toHaveLength(0);
   });
@@ -1144,42 +1150,43 @@ describe('when a proposal of a polled conversation is decided elsewhere', () => 
     await waitFor(() => expect(card.result.current.isSuccess).toBe(true));
 
     listFailure.error = makeHttpFetchError(500);
-    await advance(PENDING_CARD_POLL_INTERVAL_MS);
+    await advance(CONVERSATION_POLL_INTERVAL_MS);
     expect(card.result.current.data?.status).toBe('pending');
     expect(fetchesOf('p-1')).toHaveLength(1);
 
     delete listFailure.error;
     server['p-1'] = { ...server['p-1'], ...decided };
-    await advance(PENDING_CARD_POLL_INTERVAL_MS);
+    await advance(CONVERSATION_POLL_INTERVAL_MS);
 
     await waitFor(() => expect(card.result.current.data?.status).toBe('no_action'));
     expect(fetchesOfList()).toHaveLength(2);
   });
 
-  it('does not refresh a card whose detail was read after the list', async () => {
-    const server = {
-      'p-1': { id: 'p-1', ...open },
-      'p-2': { id: 'p-2', ...open },
-    };
-    const { fetchesOf, Wrapper, queryClient } = setup(server);
-    const second = renderHook(() => useProposal('p-2'), { wrapper: Wrapper });
-    await waitFor(() => expect(second.result.current.isSuccess).toBe(true));
-    await advance(7000);
-    const first = renderHook(() => useProposal('p-1'), { wrapper: Wrapper });
-    await waitFor(() => expect(first.result.current.isSuccess).toBe(true));
-    // The list read at 15 s says that both cards are open.
-    await advance(8000);
+  it('does not refresh a card whose detail was read while the list request was in flight', async () => {
+    const server = { 'p-1': { id: 'p-1', ...open } };
+    const { fetchesOf, fetchesOfList, listHold, Wrapper, queryClient } = setup(server);
+    const card = renderHook(() => useProposal('p-1'), { wrapper: Wrapper });
+    await waitFor(() => expect(card.result.current.isSuccess).toBe(true));
 
-    // Then p-2 is decided and its card reads it. The timer of the p-1 card fires at 22 s and
-    // reuses that list read.
-    await advance(1000);
-    server['p-2'] = { ...server['p-2'], ...decided };
-    await act(async () => {
-      await queryClient.refetchQueries({ queryKey: queryKeys.proposals.detail('p-2') });
+    // The list request starts and the server answers it with p-1 open. The answer arrives late.
+    let release: () => void = () => {};
+    listHold.until = new Promise<void>((resolve) => {
+      release = resolve;
     });
-    await advance(6000);
+    await advance(CONVERSATION_POLL_INTERVAL_MS);
+    expect(fetchesOfList()).toHaveLength(1);
 
-    expect(fetchesOf('p-2')).toHaveLength(2);
+    // Meanwhile p-1 is decided, and its card reads that. The late list is older than the card.
+    await advance(100);
+    server['p-1'] = { ...server['p-1'], ...decided };
+    await act(async () => {
+      await queryClient.refetchQueries({ queryKey: queryKeys.proposals.detail('p-1') });
+    });
+    release();
+    await advance(1000);
+
+    expect(card.result.current.data?.status).toBe('no_action');
+    expect(fetchesOf('p-1')).toHaveLength(2);
   });
 });
 

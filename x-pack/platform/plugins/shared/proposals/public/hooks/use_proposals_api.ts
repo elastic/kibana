@@ -8,6 +8,7 @@
 import { useCallback, useEffect } from 'react';
 import type { MutationKey, QueryClient, UseInfiniteQueryResult } from '@kbn/react-query';
 import {
+  focusManager,
   useInfiniteQuery,
   useIsMutating,
   useMutation,
@@ -23,6 +24,7 @@ import {
   PROPOSALS_INTERNAL_URL,
   PROPOSAL_REOPEN_URL,
   PROPOSAL_SETTLING_POLL_INTERVAL_MS,
+  isAwaitingDecision,
   isAwaitingRetry,
   isProposalSettling,
   isTerminal,
@@ -166,7 +168,7 @@ const useRefreshWhenSuperseded = (proposal: ProposalWithMetadata | undefined): v
   const id = proposal?.id;
   const rootProposalId = proposal?.rootProposalId;
   const revision = proposal?.revision ?? 1;
-  const isOpen = proposal !== undefined && !isReplacedProposal(proposal);
+  const isOpen = proposal && !isReplacedProposal(proposal);
 
   useEffect(() => {
     if (!id || !isOpen) {
@@ -177,7 +179,7 @@ const useRefreshWhenSuperseded = (proposal: ProposalWithMetadata | undefined): v
       .some(
         ([, cached]) =>
           cached?.supersedes === id ||
-          (rootProposalId !== undefined &&
+          (rootProposalId &&
             cached?.rootProposalId === rootProposalId &&
             (cached?.revision ?? 1) > revision)
       );
@@ -191,7 +193,7 @@ const useRefreshWhenSuperseded = (proposal: ProposalWithMetadata | undefined): v
 };
 
 /** How often the proposals of a conversation are read while one of its cards is open. */
-export const PENDING_CARD_POLL_INTERVAL_MS = 15_000;
+export const CONVERSATION_POLL_INTERVAL_MS = 15_000;
 
 const hasChangedState = (cached: ProposalWithMetadata, listed: ProposalWithMetadata): boolean =>
   cached.status !== listed.status ||
@@ -199,25 +201,25 @@ const hasChangedState = (cached: ProposalWithMetadata, listed: ProposalWithMetad
   (cached.supersededBy ?? null) !== (listed.supersededBy ?? null);
 
 /**
- * Refreshes the cached details that differ from the list. A detail read after the list is newer
- * than the list, so the list cannot correct it.
+ * Refreshes the cached details that differ from the list. A detail read at or after the start of
+ * the list request can be newer than the list, so the list cannot correct it.
  */
 const refreshChangedDetails = (
   queryClient: QueryClient,
-  listKey: ReturnType<typeof queryKeys.proposals.conversationPoll>,
-  list: ListProposalsResponse
+  list: ListProposalsResponse,
+  requestedAt: number
 ): void => {
   const cache = queryClient.getQueryCache();
-  const listFetchedAt = cache.find(listKey, { exact: true })?.state.dataUpdatedAt ?? 0;
   const changed = new Set<string>();
   for (const listed of list.proposals) {
-    const detailKey = queryKeys.proposals.detail(listed.id);
-    const query = cache.find(detailKey, { exact: true });
-    const cached = queryClient.getQueryData<ProposalWithMetadata>(detailKey);
+    const query = cache.find<ProposalWithMetadata>(queryKeys.proposals.detail(listed.id), {
+      exact: true,
+    });
+    const cached = query?.state.data;
     if (
       query &&
       cached &&
-      query.state.dataUpdatedAt <= listFetchedAt &&
+      query.state.dataUpdatedAt < requestedAt &&
       hasChangedState(cached, listed)
     ) {
       changed.add(query.queryHash);
@@ -233,41 +235,44 @@ const refreshChangedDetails = (
  * Instead, the conversation of the card is polled. One list reads all proposals of the
  * conversation. Polling runs while a card of the conversation is open and the tab is visible.
  * The cards of one conversation share the list read, because `staleTime` limits them to about one
- * request per interval. A card refreshes only if its state differs from the list. A failed read
- * changes nothing, and the next interval tries again.
+ * request per interval. The read compares the list with the cached details once, however many
+ * cards share it. A failed read changes nothing, and the next interval tries again.
  */
 const usePollConversationDecisions = (proposal: ProposalWithMetadata | undefined): void => {
   const { services } = useKibana();
   const queryClient = useQueryClient();
   const { http } = services;
   const conversationId = proposal?.conversationId;
-  const isOpen = proposal && proposal.status === 'pending' && !proposal.decision;
+  const isOpen = proposal && isAwaitingDecision(proposal) && !proposal.decision;
 
   useEffect(() => {
     if (!http || !conversationId || !isOpen) {
       return;
     }
-    const listKey = queryKeys.proposals.conversationPoll(conversationId);
+    const readConversation = async (): Promise<ListProposalsResponse> => {
+      const requestedAt = Date.now();
+      const list = await http.get<ListProposalsResponse>(PROPOSALS_INTERNAL_URL, {
+        version: PROPOSALS_API_VERSION,
+        query: { conversationId, size: MAX_PROPOSALS_PAGE_SIZE, order: 'newest' },
+      });
+      refreshChangedDetails(queryClient, list, requestedAt);
+      return list;
+    };
     const poll = async (): Promise<void> => {
-      if (document.visibilityState !== 'visible') {
+      if (!focusManager.isFocused()) {
         return;
       }
-      const list = await queryClient
+      await queryClient
         .fetchQuery({
-          queryKey: listKey,
-          queryFn: (): Promise<ListProposalsResponse> =>
-            http.get<ListProposalsResponse>(PROPOSALS_INTERNAL_URL, {
-              version: PROPOSALS_API_VERSION,
-              query: { conversationId, size: MAX_PROPOSALS_PAGE_SIZE, order: 'newest' },
-            }),
-          staleTime: PENDING_CARD_POLL_INTERVAL_MS - 1000,
+          queryKey: queryKeys.proposals.conversationPoll(conversationId),
+          queryFn: readConversation,
+          staleTime: CONVERSATION_POLL_INTERVAL_MS - 1000,
+          // The list read must outlive one interval, so that the cards can share it.
+          cacheTime: CONVERSATION_POLL_INTERVAL_MS * 2,
         })
         .catch(() => undefined);
-      if (list) {
-        refreshChangedDetails(queryClient, listKey, list);
-      }
     };
-    const timer = setInterval(() => void poll(), PENDING_CARD_POLL_INTERVAL_MS);
+    const timer = setInterval(() => void poll(), CONVERSATION_POLL_INTERVAL_MS);
     return () => clearInterval(timer);
   }, [queryClient, http, conversationId, isOpen]);
 };
