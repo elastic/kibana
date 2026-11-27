@@ -1,0 +1,96 @@
+{
+  "exposure": "open",
+  "id": "alertzero.triage.retagProposalAlerts",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema1"
+          }
+        ],
+        "description": "Root id of the proposal. Open alerts tagged `az:proposal:<id>` are re-tagged."
+      },
+      "__schema1": {
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema2": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema3"
+          }
+        ],
+        "description": "Alerts to re-tag as well, for those that may lack the proposal tag."
+      },
+      "__schema3": {
+        "items": {
+          "$ref": "#/definitions/__schema1"
+        },
+        "maxItems": 20000,
+        "type": "array"
+      },
+      "__schema4": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema5"
+          }
+        ],
+        "description": "Alerts to leave alone, such as the ones an approved proposal just closed."
+      },
+      "__schema5": {
+        "items": {
+          "$ref": "#/definitions/__schema1"
+        },
+        "maxItems": 10000,
+        "type": "array"
+      },
+      "__schema6": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema7"
+          }
+        ],
+        "description": "Also remove `az:model_fp`, when a human disagreed with the verdict."
+      },
+      "__schema7": {
+        "type": "boolean"
+      }
+    },
+    "properties": {
+      "alert_ids": {
+        "$ref": "#/definitions/__schema2"
+      },
+      "drop_model_fp": {
+        "$ref": "#/definitions/__schema6"
+      },
+      "exclude_alert_ids": {
+        "$ref": "#/definitions/__schema4"
+      },
+      "proposal_id": {
+        "$ref": "#/definitions/__schema0"
+      }
+    },
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "properties": {
+      "failed": {
+        "description": "Alerts whose re-tag failed.",
+        "type": "number"
+      },
+      "matched": {
+        "description": "Open alerts that still carried `az:false_positive`.",
+        "type": "number"
+      }
+    },
+    "required": [
+      "failed",
+      "matched"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

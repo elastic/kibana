@@ -1,0 +1,310 @@
+{
+  "exposure": "open",
+  "id": "nightshift.decisionTreeReinforce",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "maxLength": 1024,
+        "type": "string"
+      },
+      "__schema1": {
+        "maxLength": 1024,
+        "type": "string"
+      },
+      "__schema10": {
+        "type": "boolean"
+      },
+      "__schema2": {
+        "maximum": 9007199254740991,
+        "minimum": -9007199254740991,
+        "type": "integer"
+      },
+      "__schema3": {
+        "items": {
+          "$ref": "#/definitions/__schema4"
+        },
+        "maxItems": 2000,
+        "type": "array"
+      },
+      "__schema4": {
+        "additionalProperties": {},
+        "properties": {
+          "params": {
+            "additionalProperties": {},
+            "type": "object"
+          },
+          "tool_call_id": {
+            "maxLength": 512,
+            "type": "string"
+          },
+          "tool_id": {
+            "maxLength": 512,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "__schema5": {
+        "items": {
+          "$ref": "#/definitions/__schema6"
+        },
+        "maxItems": 2000,
+        "type": "array"
+      },
+      "__schema6": {
+        "additionalProperties": {},
+        "properties": {
+          "results": {
+            "items": {
+              "$ref": "#/definitions/__schema7"
+            },
+            "maxItems": 2000,
+            "type": "array"
+          },
+          "tool_call_id": {
+            "maxLength": 512,
+            "type": "string"
+          },
+          "tool_id": {
+            "maxLength": 512,
+            "type": "string"
+          }
+        },
+        "required": [
+          "results",
+          "tool_call_id"
+        ],
+        "type": "object"
+      },
+      "__schema7": {},
+      "__schema8": {
+        "maxLength": 500,
+        "type": "string"
+      },
+      "__schema9": {
+        "maxLength": 128,
+        "type": "string"
+      }
+    },
+    "properties": {
+      "background_trace_id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema9"
+          }
+        ],
+        "description": "Deterministic T_background trace id from materialize."
+      },
+      "connector_id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema8"
+          }
+        ],
+        "description": "Inference connector for the reinforcement run."
+      },
+      "conversation_id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "Conversation the round belongs to."
+      },
+      "message": {
+        "description": "Turn message from nightshift.decisionTreePrepare.",
+        "maxLength": 100000,
+        "type": "string"
+      },
+      "prompt": {
+        "description": "The user message that started the round.",
+        "maxLength": 65536,
+        "type": "string"
+      },
+      "replay": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema10"
+          }
+        ],
+        "description": "True when the round is a recorded transcript an evaluation replays: reinforcement learns from tool_calls and tool_results instead of reading the conversation."
+      },
+      "response": {
+        "description": "The assistant's final response for the round.",
+        "maxLength": 65536,
+        "type": "string"
+      },
+      "round_id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema1"
+          }
+        ],
+        "description": "Id or positional/semantic alias (e.g. \"0\", \"-1\", \"1st\", \"first\", \"last\", \"investigation_start\") of the completed round."
+      },
+      "round_index": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema2"
+          }
+        ],
+        "description": "Zero-based sequence index of the round in the conversation (supports negative offsets such as -1 for latest)."
+      },
+      "tool_calls": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema3"
+          }
+        ],
+        "description": "Investigator tool calls from this round. Shows the optimizer what the investigator queried."
+      },
+      "tool_results": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema5"
+          }
+        ],
+        "description": "Results of the investigator tool calls, keyed by tool_call_id. Shows the optimizer what each query returned."
+      },
+      "turn_kind": {
+        "description": "Turn kind from nightshift.decisionTreePrepare. Picks the tool set.",
+        "enum": [
+          "initial_investigation",
+          "feedback_reinforcement"
+        ],
+        "type": "string"
+      }
+    },
+    "required": [
+      "message",
+      "prompt",
+      "response",
+      "turn_kind"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "definitions": {
+      "__schema0": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "action": {
+              "type": "string"
+            },
+            "after_content": {
+              "type": "string"
+            },
+            "after_status": {
+              "type": "string"
+            },
+            "before_content": {
+              "type": "string"
+            },
+            "before_status": {
+              "type": "string"
+            },
+            "item_id": {
+              "type": "string"
+            },
+            "replaced_ids": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "store": {
+              "enum": [
+                "wiki",
+                "semantic_memory",
+                "decision_tree",
+                "decision_tree_learning"
+              ],
+              "type": "string"
+            },
+            "version": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                }
+              ]
+            }
+          },
+          "required": [
+            "action",
+            "item_id",
+            "store"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "__schema1": {
+        "maxLength": 500,
+        "type": "string"
+      },
+      "__schema2": {
+        "maxLength": 500,
+        "type": "string"
+      },
+      "__schema3": {
+        "type": "boolean"
+      }
+    },
+    "properties": {
+      "applied_writes": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "Decision tree and learning writes applied during this reinforcement turn."
+      },
+      "conversation_id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema1"
+          }
+        ],
+        "description": "Conversation that holds this reinforcement run."
+      },
+      "message": {
+        "description": "The reinforcement agent's final response.",
+        "type": "string"
+      },
+      "skipped": {
+        "type": "boolean"
+      },
+      "submissions_json": {
+        "description": "JSON array of nightshift_submit_optimizer_result arguments, in call order. Empty when the agent did not submit.",
+        "type": "string"
+      },
+      "submit_rejected": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema3"
+          }
+        ],
+        "description": "True when the last submit call returned a tool error."
+      },
+      "trace_id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema2"
+          }
+        ],
+        "description": "Agent Builder trace of this reinforcement run, when tracing recorded one."
+      }
+    },
+    "required": [
+      "message",
+      "submissions_json"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

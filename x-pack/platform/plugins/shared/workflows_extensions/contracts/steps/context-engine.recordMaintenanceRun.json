@@ -1,0 +1,167 @@
+{
+  "exposure": "open",
+  "id": "context-engine.recordMaintenanceRun",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "maximum": 9007199254740991,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema1": {
+        "properties": {
+          "change": {
+            "enum": [
+              "merged",
+              "superseded",
+              "rewritten",
+              "summarized",
+              "tombstoned",
+              "needs_review"
+            ],
+            "type": "string"
+          },
+          "id": {
+            "maxLength": 512,
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "change",
+          "id",
+          "reason"
+        ],
+        "type": "object"
+      },
+      "__schema2": {
+        "properties": {
+          "item": {
+            "description": "Which item of the change set, such as `fact new:1`",
+            "type": "string"
+          },
+          "reason": {
+            "description": "Why it was not applied",
+            "type": "string"
+          }
+        },
+        "required": [
+          "item",
+          "reason"
+        ],
+        "type": "object"
+      }
+    },
+    "properties": {
+      "ai_index_id": {
+        "description": "The id of the AI index the knowledge indicator belongs to",
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "changes": {
+        "items": {
+          "$ref": "#/definitions/__schema1"
+        },
+        "maxItems": 5000,
+        "type": "array"
+      },
+      "mode": {
+        "description": "report: planned only; apply: written; dry_run: a manual run that wrote nothing",
+        "enum": [
+          "report",
+          "apply",
+          "dry_run"
+        ],
+        "type": "string"
+      },
+      "needs_review": {
+        "items": {
+          "$ref": "#/definitions/__schema1"
+        },
+        "maxItems": 5000,
+        "type": "array"
+      },
+      "rejected": {
+        "items": {
+          "$ref": "#/definitions/__schema2"
+        },
+        "maxItems": 5000,
+        "type": "array"
+      },
+      "reviewed": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "Facts and entities the model reviewed"
+      },
+      "written": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "Facts, entities and relationships written, or that would be"
+      }
+    },
+    "required": [
+      "ai_index_id",
+      "changes",
+      "mode",
+      "needs_review",
+      "rejected",
+      "reviewed",
+      "written"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "properties": {
+      "merged": {
+        "type": "number"
+      },
+      "needs_review": {
+        "type": "number"
+      },
+      "rejected": {
+        "type": "number"
+      },
+      "reviewed": {
+        "type": "number"
+      },
+      "rewritten": {
+        "type": "number"
+      },
+      "summarized": {
+        "type": "number"
+      },
+      "superseded": {
+        "type": "number"
+      },
+      "tombstoned": {
+        "type": "number"
+      },
+      "written": {
+        "type": "number"
+      }
+    },
+    "required": [
+      "merged",
+      "needs_review",
+      "rejected",
+      "reviewed",
+      "rewritten",
+      "summarized",
+      "superseded",
+      "tombstoned",
+      "written"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

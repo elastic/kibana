@@ -1,0 +1,103 @@
+{
+  "exposure": "open",
+  "id": "nightshift.decisionTreeHydrate",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "maxLength": 500000,
+        "type": "string"
+      },
+      "__schema1": {
+        "maxLength": 1024,
+        "type": "string"
+      }
+    },
+    "properties": {
+      "agent_id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema1"
+          }
+        ],
+        "description": "Agent the round belongs to. When set, only the investigator gets trees; the reinforcement hydrate workflow omits it."
+      },
+      "prompt": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "The round message. Reinforcement messages carry an accessed-trees marker; without it every tree is written (investigator hydrate)."
+      },
+      "sandbox_id": {
+        "description": "Workspace key from nightshift.obtainSandbox. Already space-scoped.",
+        "maxLength": 1024,
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "required": [
+      "sandbox_id"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "definitions": {
+      "__schema0": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "__schema1": {
+        "type": "boolean"
+      }
+    },
+    "properties": {
+      "conversation_id": {
+        "description": "Unscoped conversation id derived from the sandbox key.",
+        "type": "string"
+      },
+      "failed": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema1"
+          }
+        ],
+        "description": "The write failed; its contents may be incomplete."
+      },
+      "hydrated_ids": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "Canonical symptom:<slug> tree ids materialized into the sandbox."
+      },
+      "notification": {
+        "description": "Always empty on success. On failure, the incomplete-materialization notice for /workspace/decision-trees.",
+        "type": "string"
+      },
+      "sandbox_id": {
+        "description": "Sandbox that was hydrated.",
+        "type": "string"
+      },
+      "skipped": {
+        "type": "boolean"
+      },
+      "tree_count": {
+        "description": "Number of decision trees written into the sandbox.",
+        "type": "number"
+      }
+    },
+    "required": [
+      "conversation_id",
+      "notification",
+      "sandbox_id",
+      "tree_count"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

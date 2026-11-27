@@ -1,0 +1,418 @@
+{
+  "exposure": "open",
+  "id": "investigations.attachImpact",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "properties": {
+          "evidence": {
+            "properties": {
+              "chart": {
+                "properties": {
+                  "annotations": {
+                    "items": {
+                      "$ref": "#/definitions/__schema3"
+                    },
+                    "maxItems": 5,
+                    "type": "array"
+                  },
+                  "series": {
+                    "items": {
+                      "$ref": "#/definitions/__schema1"
+                    },
+                    "maxItems": 5,
+                    "minItems": 1,
+                    "type": "array"
+                  },
+                  "stacked": {
+                    "type": "boolean"
+                  },
+                  "title": {
+                    "maxLength": 255,
+                    "type": "string"
+                  },
+                  "type": {
+                    "enum": [
+                      "line",
+                      "bar"
+                    ],
+                    "type": "string"
+                  },
+                  "x_axis": {
+                    "properties": {
+                      "label": {
+                        "maxLength": 128,
+                        "type": "string"
+                      },
+                      "type": {
+                        "enum": [
+                          "time",
+                          "category"
+                        ],
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "type"
+                    ],
+                    "type": "object"
+                  },
+                  "y_axis": {
+                    "properties": {
+                      "label": {
+                        "maxLength": 128,
+                        "type": "string"
+                      },
+                      "unit": {
+                        "enum": [
+                          "number",
+                          "percent",
+                          "bytes",
+                          "ms",
+                          "s"
+                        ],
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "series",
+                  "title",
+                  "type",
+                  "x_axis",
+                  "y_axis"
+                ],
+                "type": "object"
+              },
+              "description": {
+                "maxLength": 10000,
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "featureId": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "id": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 512,
+            "minLength": 1,
+            "type": "string"
+          },
+          "streamName": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
+      "__schema1": {
+        "properties": {
+          "name": {
+            "maxLength": 128,
+            "type": "string"
+          },
+          "points": {
+            "items": {
+              "$ref": "#/definitions/__schema2"
+            },
+            "maxItems": 100,
+            "type": "array"
+          }
+        },
+        "required": [
+          "name",
+          "points"
+        ],
+        "type": "object"
+      },
+      "__schema2": {
+        "properties": {
+          "x": {
+            "maxLength": 128,
+            "type": "string"
+          },
+          "y": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "x",
+          "y"
+        ],
+        "type": "object"
+      },
+      "__schema3": {
+        "properties": {
+          "label": {
+            "maxLength": 255,
+            "type": "string"
+          },
+          "x": {
+            "maxLength": 128,
+            "type": "string"
+          },
+          "x_end": {
+            "maxLength": 128,
+            "type": "string"
+          }
+        },
+        "required": [
+          "label",
+          "x"
+        ],
+        "type": "object"
+      }
+    },
+    "properties": {
+      "conversationId": {
+        "description": "Conversation this impact belongs to.",
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "entities": {
+        "description": "Entities this investigation is about. Merged by id onto any existing impact for the conversation. Each entity needs an id; name, type, featureId, and streamName are optional.",
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "maxItems": 100,
+        "minItems": 1,
+        "type": "array"
+      }
+    },
+    "required": [
+      "conversationId",
+      "entities"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "definitions": {
+      "__schema0": {
+        "additionalProperties": false,
+        "properties": {
+          "evidence": {
+            "additionalProperties": false,
+            "properties": {
+              "chart": {
+                "additionalProperties": false,
+                "properties": {
+                  "annotations": {
+                    "items": {
+                      "$ref": "#/definitions/__schema3"
+                    },
+                    "maxItems": 5,
+                    "type": "array"
+                  },
+                  "series": {
+                    "items": {
+                      "$ref": "#/definitions/__schema1"
+                    },
+                    "maxItems": 5,
+                    "minItems": 1,
+                    "type": "array"
+                  },
+                  "stacked": {
+                    "type": "boolean"
+                  },
+                  "title": {
+                    "maxLength": 255,
+                    "type": "string"
+                  },
+                  "type": {
+                    "enum": [
+                      "line",
+                      "bar"
+                    ],
+                    "type": "string"
+                  },
+                  "x_axis": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "label": {
+                        "maxLength": 128,
+                        "type": "string"
+                      },
+                      "type": {
+                        "enum": [
+                          "time",
+                          "category"
+                        ],
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "type"
+                    ],
+                    "type": "object"
+                  },
+                  "y_axis": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "label": {
+                        "maxLength": 128,
+                        "type": "string"
+                      },
+                      "unit": {
+                        "enum": [
+                          "number",
+                          "percent",
+                          "bytes",
+                          "ms",
+                          "s"
+                        ],
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "series",
+                  "title",
+                  "type",
+                  "x_axis",
+                  "y_axis"
+                ],
+                "type": "object"
+              },
+              "description": {
+                "maxLength": 10000,
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "featureId": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "id": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 512,
+            "minLength": 1,
+            "type": "string"
+          },
+          "streamName": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
+      "__schema1": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "maxLength": 128,
+            "type": "string"
+          },
+          "points": {
+            "items": {
+              "$ref": "#/definitions/__schema2"
+            },
+            "maxItems": 100,
+            "type": "array"
+          }
+        },
+        "required": [
+          "name",
+          "points"
+        ],
+        "type": "object"
+      },
+      "__schema2": {
+        "additionalProperties": false,
+        "properties": {
+          "x": {
+            "maxLength": 128,
+            "type": "string"
+          },
+          "y": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "x",
+          "y"
+        ],
+        "type": "object"
+      },
+      "__schema3": {
+        "additionalProperties": false,
+        "properties": {
+          "label": {
+            "maxLength": 255,
+            "type": "string"
+          },
+          "x": {
+            "maxLength": 128,
+            "type": "string"
+          },
+          "x_end": {
+            "maxLength": 128,
+            "type": "string"
+          }
+        },
+        "required": [
+          "label",
+          "x"
+        ],
+        "type": "object"
+      }
+    },
+    "properties": {
+      "entities": {
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "maxItems": 100,
+        "minItems": 1,
+        "type": "array"
+      },
+      "id": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "entities",
+      "id"
+    ],
+    "type": "object"
+  },
+  "stability": "beta"
+}

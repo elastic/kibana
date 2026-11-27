@@ -1,15 +1,15 @@
 ---
 name: workflows-custom-steps
-description: Register and implement custom workflow steps from an external Kibana plugin using `@kbn/workflows-extensions`. Use when adding or modifying a step type with `registerStepDefinition`, designing input/output/config Zod schemas, implementing `createServerStepDefinition` / `createPublicStepDefinition`, choosing `StepCategory`, building `editorHandlers` (selection / dynamicSchema), wiring `callKibanaApi` / `onCancel`, deciding sync vs async loader registration, managing per-step approval files under `approved_step_definitions/`, or reviewing PRs that touch any of these.
+description: Register and implement custom workflow steps from an external Kibana plugin using `@kbn/workflows-extensions`. Use when adding or modifying a step type with `registerStepDefinition`, designing input/output/config Zod schemas, implementing `createServerStepDefinition` / `createPublicStepDefinition`, choosing `StepCategory`, building `editorHandlers` (selection / dynamicSchema), wiring `callKibanaApi` / `onCancel`, deciding sync vs async loader registration, keeping the per-step contract files under `contracts/steps/` compatible, or reviewing PRs that touch any of these.
 ---
 
 # Workflows — Custom Step Registration
 
-> Custom steps run inside the Kibana workflow engine and become part of the YAML the user writes. A misconfigured step can break workflows on every restart, pull heavy modules into the main bundle, leak resources on cancellation, or silently fail the approval gate. The defaults are not always right — verify each field below explicitly.
+> Custom steps run inside the Kibana workflow engine and become part of the YAML the user writes. A misconfigured step can break workflows on every restart, pull heavy modules into the main bundle, leak resources on cancellation, or break the contract that existing workflows rely on. The defaults are not always right — verify each field below explicitly.
 
 ## Canonical guide — read this for implementation steps
 
-Follow the end-to-end steps, code templates, naming conventions, and approval workflow in:
+Follow the end-to-end steps, code templates, naming conventions, and contract check in:
 
 **[dev_docs/STEPS.md](../../dev_docs/STEPS.md)**
 
@@ -29,7 +29,7 @@ Sections to use while implementing:
 | Error handling and `ExecutionError` | [Error Handling](../../dev_docs/STEPS.md#error-handling) |
 | `callKibanaApi` usage | [Calling Kibana APIs](../../dev_docs/STEPS.md#calling-kibana-apis-callkibanaapi) |
 | Cancellation cleanup | [Cancellation Cleanup (`onCancel`)](../../dev_docs/STEPS.md#cancellation-cleanup-oncancel) |
-| Approval gate (per-step file workflow) | [Step Definition Approval Process](../../dev_docs/STEPS.md#step-definition-approval-process) |
+| Contract check (per-step contract files, breaking changes) | [Step Contract Check](../../dev_docs/STEPS.md#step-contract-check) |
 
 ## Overview
 
@@ -54,7 +54,8 @@ Both sides register through the `workflowsExtensions` setup contract: `registerS
 - Server step types: `x-pack/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts` (`ServerStepDefinition`, `StepHandler`, `StepHandlerContext`, `ContextManager`, `CallKibanaApiParams`, `OnCancelHandler`)
 - Public step types: `x-pack/platform/plugins/shared/workflows_extensions/public/step_registry/types.ts` (`PublicStepDefinition`)
 - `ExecutionError`: `src/platform/packages/shared/kbn-workflows/server/errors/execution_error.ts`
-- Approval fixtures (one file per step): `x-pack/platform/plugins/shared/workflows_extensions/test/scout/api/fixtures/approved_step_definitions/`
+- Step contracts (one file per step, written by CI): `x-pack/platform/plugins/shared/workflows_extensions/contracts/steps/`
+- Accepted breaking changes: `x-pack/platform/plugins/shared/workflows_extensions/contracts/breaking_changes_allowlist.json`
 
 ## 0. Locate the owning plugin (do this first)
 
@@ -158,7 +159,8 @@ For the YAML naming conventions (the single most common mistake — only the ste
 | `exposure` | `internal` or `managed_only` on steps meant only for the owner's managed workflows | `open`, suggested everywhere | Users are nudged toward internal steps; or user workflows that already use the step start failing validation |
 | Public registration | Async loader to keep modules out of main bundle | sync inline | Step module + zod inflate plugin bundle |
 | Conditional registration | Loader returns `undefined` to skip | always registers | Cannot feature-flag |
-| Approval gate | Create/update `approved_step_definitions/<step.id>.txt` with the new `definitionHash` (one file per step) | test fails | CI blocks merge until updated |
+| New step approval | Add the step id to `contracts/approved_steps.json`, keeping it sorted | not listed | CI fails the PR until the id is added and workflows-eng approves |
+| Contract compatibility | Don't remove or require input/config fields, remove or make optional output fields, or narrow `exposure` to `managed_only` on an existing step, whatever its stability; for an intended break, add an entry to `contracts/breaking_changes_allowlist.json` | CI commits the contract file | CI fails the PR on the breaking change |
 
 ## Author checklist
 
@@ -206,10 +208,10 @@ When adding a new step:
    - [ ] Feature flags are subscribed to in `start()` and checked in the handler. Loaders do not snapshot them with `firstValueFrom`. `undefined` from a loader is only for a decision that cannot change after startup
    - [ ] All `registerStepDefinition` calls happen in `setup()`, never `start()`
 
-6. **Approval gate** — see [STEPS.md Step Definition Approval Process](../../dev_docs/STEPS.md#step-definition-approval-process)
-   - [ ] The step schema generation check was run locally (see STEPS.md); it printed an `echo … > approved_step_definitions/<step.id>.txt` command per offending step
-   - [ ] Ran the printed `echo` command(s) from the kibana directory to create/update the per-step approval file(s)
-   - [ ] PR description requests review from `@elastic/workflows-eng`
+6. **Contract check** — see [STEPS.md Step Contract Check](../../dev_docs/STEPS.md#step-contract-check)
+   - [ ] For a new step, its id is added to `contracts/approved_steps.json` (sorted), which requests review from `@elastic/workflows-eng`
+   - [ ] The contract file CI commits (`contracts/steps/<step.id>.json`) shows only the intended changes
+   - [ ] For an existing step, the change is compatible, or it's an intended breaking change with an entry in `contracts/breaking_changes_allowlist.json` and a review request to `@elastic/workflows-eng`
 
 ## Reviewer checklist
 
@@ -234,7 +236,8 @@ When reviewing a PR that adds or modifies a custom step:
 - [ ] Public registration uses an async loader unless the step module is trivially small
 - [ ] Conditional registration paths return `undefined`, not `null` or a rejected promise
 - [ ] No `registerStepDefinition` call moved into `start()`
-- [ ] Per-step approval file `approved_step_definitions/<step.id>.txt` is added or updated with the new `definitionHash`; workflows-eng review requested
+- [ ] A new step's id is added to `contracts/approved_steps.json`
+- [ ] The changes to `contracts/steps/<step.id>.json` match the intended change, and every breaking change has an allowlist entry with a reason
 
 ## Reference implementations
 

@@ -1,0 +1,93 @@
+{
+  "exposure": "open",
+  "id": "context-engine.getFeedbackContext",
+  "input": {
+    "properties": {
+      "ai_index_id": {
+        "description": "The AI index to analyze",
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "required": [
+      "ai_index_id"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "definitions": {
+      "__schema0": {},
+      "__schema1": {
+        "type": "string"
+      },
+      "__schema2": {
+        "type": "string"
+      },
+      "__schema3": {
+        "type": "string"
+      }
+    },
+    "properties": {
+      "agent_id": {
+        "description": "The agent to run the analysis with, resolved from the AI index's feedback_analysis.agent_id or the default Elastic agent.",
+        "type": "string"
+      },
+      "briefing": {
+        "description": "The rendered prompt for the run: the index, its signal patterns, and prior work.",
+        "type": "string"
+      },
+      "has_signals": {
+        "description": "Whether any selected signal was classified as a problem. False means there is nothing to analyze and the agent should not be run.",
+        "type": "boolean"
+      },
+      "output_schema": {
+        "additionalProperties": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "description": "JSON Schema for the run's structured output, narrowed to the actions this AI index permits.",
+        "type": "object"
+      },
+      "signal_count": {
+        "description": "How many signals were selected.",
+        "type": "number"
+      },
+      "signal_spaces": {
+        "description": "The spaces the selected signals came from.",
+        "items": {
+          "$ref": "#/definitions/__schema3"
+        },
+        "type": "array"
+      },
+      "signal_window": {
+        "additionalProperties": false,
+        "description": "The resolved window the signals were read from.",
+        "properties": {
+          "from": {
+            "$ref": "#/definitions/__schema1"
+          },
+          "to": {
+            "$ref": "#/definitions/__schema2"
+          }
+        },
+        "required": [
+          "from",
+          "to"
+        ],
+        "type": "object"
+      }
+    },
+    "required": [
+      "agent_id",
+      "briefing",
+      "has_signals",
+      "output_schema",
+      "signal_count",
+      "signal_spaces",
+      "signal_window"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

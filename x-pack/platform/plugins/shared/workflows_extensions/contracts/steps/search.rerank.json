@@ -1,0 +1,109 @@
+{
+  "config": {
+    "definitions": {
+      "__schema0": {
+        "type": "string"
+      }
+    },
+    "properties": {
+      "inference_id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "Rerank inference endpoint ID. If not provided, automatically selects an available rerank endpoint from Elasticsearch, prioritizing Elastic-hosted models over self-hosted Elasticsearch models."
+      }
+    },
+    "type": "object"
+  },
+  "exposure": "open",
+  "id": "search.rerank",
+  "input": {
+    "definitions": {
+      "__schema0": {},
+      "__schema1": {
+        "items": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "type": "array"
+      },
+      "__schema2": {
+        "type": "number"
+      },
+      "__schema3": {
+        "type": "number"
+      },
+      "__schema4": {
+        "type": "number"
+      }
+    },
+    "properties": {
+      "data": {
+        "description": "Array of documents to rerank",
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "type": "array"
+      },
+      "fields": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema1"
+          }
+        ],
+        "description": "Optional field paths to extract from each document for reranking. E.g., [[\"title\"], [\"content\"], [\"user\", \"name\"]] extracts item.title, item.content, and item.user.name"
+      },
+      "max_input_field_length": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema3"
+          }
+        ],
+        "default": 1000,
+        "description": "Maximum character length per individual field when extracting fields from documents. Prevents any single field from dominating the text sent to rerank. Defaults to 1000 characters."
+      },
+      "max_input_total_length": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema4"
+          }
+        ],
+        "default": 2000,
+        "description": "Maximum character length for the total text sent per document to the rerank endpoint. Applied after field extraction and concatenation. Prevents exceeding model token limits. Defaults to 2000 characters."
+      },
+      "rank_window_size": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema2"
+          }
+        ],
+        "default": 100,
+        "description": "Number of documents from the start of the input array to send for reranking. Limits inference API costs by only reranking the top N documents. Remaining documents are appended to output in their input order. Defaults to 100."
+      },
+      "rerank_text": {
+        "description": "Text to rerank documents against",
+        "type": "string"
+      }
+    },
+    "required": [
+      "data",
+      "rerank_text"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "definitions": {
+      "__schema0": {}
+    },
+    "description": "Array of reranked documents in descending relevance order",
+    "items": {
+      "$ref": "#/definitions/__schema0"
+    },
+    "type": "array"
+  },
+  "stability": "tech_preview"
+}

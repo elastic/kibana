@@ -1,0 +1,382 @@
+{
+  "exposure": "open",
+  "id": "alertzero.triage.groupFpCandidates",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema1": {
+        "items": {
+          "$ref": "#/definitions/__schema2"
+        },
+        "maxItems": 100,
+        "type": "array"
+      },
+      "__schema2": {
+        "properties": {
+          "id": {
+            "maxLength": 512,
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 512,
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "host",
+              "user"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "type"
+        ],
+        "type": "object"
+      },
+      "__schema3": {
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "maxItems": 1000,
+        "type": "array"
+      },
+      "__schema4": {
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "maxItems": 1000,
+        "type": "array"
+      }
+    },
+    "properties": {
+      "autonomy": {
+        "enum": [
+          "manual",
+          "supervised"
+        ],
+        "type": "string"
+      },
+      "confidence_floor": {
+        "description": "Confidence floor, quoted in the comment.",
+        "maximum": 1,
+        "minimum": 0,
+        "type": "number"
+      },
+      "fp_candidate_ids": {
+        "description": "The false positives at or above the confidence floor. May be empty, to get only the inconclusive link.",
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "maxItems": 1000,
+        "type": "array"
+      },
+      "impacted_entities": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema1"
+          }
+        ],
+        "description": "Entities the analysis found. Each new proposal keeps those its alerts name."
+      },
+      "inconclusive_alert_ids": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema4"
+          }
+        ],
+        "description": "Alerts of the batch that were inconclusive, for the link in the proposal message."
+      },
+      "other_alert_ids": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema3"
+          }
+        ],
+        "description": "Alerts of the batch that are in no proposal, for the entities of their Investigation."
+      },
+      "rule_name": {
+        "description": "Name of the rule, quoted in the proposal comment.",
+        "maxLength": 1024,
+        "type": "string"
+      },
+      "space_id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "Space of the alerts. It is part of every key hash."
+      }
+    },
+    "required": [
+      "autonomy",
+      "confidence_floor",
+      "fp_candidate_ids",
+      "rule_name",
+      "space_id"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "definitions": {
+      "__schema0": {
+        "additionalProperties": false,
+        "properties": {
+          "alert_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "comment": {
+            "type": "string"
+          },
+          "impacted_entities": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "type": {
+                  "enum": [
+                    "host",
+                    "user"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "type"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "kind": {
+            "enum": [
+              "keyed",
+              "pooled",
+              "overflow",
+              "failed_join",
+              "batch"
+            ],
+            "type": "string"
+          },
+          "proposal_alerts_page_query": {
+            "description": "Query string of the Alerts page link that shows every alert of the proposal, by its `az:proposal` tag.",
+            "type": "string"
+          },
+          "proposal_id": {
+            "description": "The id the proposal is created under.",
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "alert_ids",
+          "comment",
+          "impacted_entities",
+          "kind",
+          "proposal_alerts_page_query",
+          "proposal_id",
+          "title"
+        ],
+        "type": "object"
+      },
+      "__schema1": {
+        "additionalProperties": false,
+        "properties": {
+          "alert_ids": {
+            "description": "Only the alerts the proposal did not hold.",
+            "items": {
+              "$ref": "#/definitions/__schema2"
+            },
+            "type": "array"
+          },
+          "alerts_page_query": {
+            "description": "Query string of the Alerts page link that shows just the added alerts.",
+            "type": "string"
+          },
+          "conversation_id": {
+            "description": "The owner's Investigation.",
+            "type": "string"
+          },
+          "impacted_entities": {
+            "description": "Entities the added alerts name, for the owner Investigation.",
+            "items": {
+              "$ref": "#/definitions/__schema3"
+            },
+            "type": "array"
+          },
+          "owner_proposal_id": {
+            "description": "Root id of the proposal that took the alerts.",
+            "type": "string"
+          },
+          "proposal_id": {
+            "description": "The revision the join created.",
+            "type": "string"
+          },
+          "revision": {
+            "type": "number"
+          },
+          "total_alerts": {
+            "description": "How many alerts the proposal holds after this join.",
+            "type": "number"
+          }
+        },
+        "required": [
+          "alert_ids",
+          "alerts_page_query",
+          "conversation_id",
+          "impacted_entities",
+          "owner_proposal_id",
+          "proposal_id",
+          "revision",
+          "total_alerts"
+        ],
+        "type": "object"
+      },
+      "__schema2": {
+        "type": "string"
+      },
+      "__schema3": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "host",
+              "user"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "type"
+        ],
+        "type": "object"
+      },
+      "__schema4": {
+        "type": "string"
+      },
+      "__schema5": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "host",
+              "user"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "type"
+        ],
+        "type": "object"
+      }
+    },
+    "properties": {
+      "alerts_joined": {
+        "type": "number"
+      },
+      "alerts_pooled": {
+        "type": "number"
+      },
+      "grouped": {
+        "description": "False when grouping is off, so the batch has one proposal.",
+        "type": "boolean"
+      },
+      "grouping": {
+        "description": "Whether the batch was grouped, or why not.",
+        "enum": [
+          "on",
+          "supervised",
+          "flag_off",
+          "lookup_incomplete"
+        ],
+        "type": "string"
+      },
+      "inconclusive_alerts_page_query": {
+        "description": "Query string of the Alerts page link that shows the inconclusive alerts. Empty if none.",
+        "type": "string"
+      },
+      "joins": {
+        "description": "Alerts added to an open proposal.",
+        "items": {
+          "$ref": "#/definitions/__schema1"
+        },
+        "type": "array"
+      },
+      "mints": {
+        "description": "New proposals, one review each.",
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "type": "array"
+      },
+      "missing_alert_ids": {
+        "description": "Ids that no longer match an alert.",
+        "items": {
+          "$ref": "#/definitions/__schema4"
+        },
+        "type": "array"
+      },
+      "other_impacted_entities": {
+        "description": "Entities that the alerts in `other_alert_ids` name. Empty if none could be read.",
+        "items": {
+          "$ref": "#/definitions/__schema5"
+        },
+        "type": "array"
+      },
+      "proposals_created": {
+        "type": "number"
+      }
+    },
+    "required": [
+      "alerts_joined",
+      "alerts_pooled",
+      "grouped",
+      "grouping",
+      "inconclusive_alerts_page_query",
+      "joins",
+      "mints",
+      "missing_alert_ids",
+      "other_impacted_entities",
+      "proposals_created"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

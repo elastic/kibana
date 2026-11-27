@@ -1,0 +1,120 @@
+{
+  "exposure": "open",
+  "id": "ai.attachment.add",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema1": {},
+      "__schema2": {
+        "maxLength": 2048,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema3": {
+        "maxLength": 1024,
+        "type": "string"
+      },
+      "__schema4": {
+        "type": "boolean"
+      },
+      "__schema5": {
+        "type": "boolean"
+      }
+    },
+    "properties": {
+      "conversation_id": {
+        "description": "The ID of the conversation to add the attachment to.",
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "data": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema1"
+          }
+        ],
+        "description": "The attachment data/content. Required unless `origin` is provided."
+      },
+      "description": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema3"
+          }
+        ],
+        "description": "Human-readable description of the attachment."
+      },
+      "hidden": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema4"
+          }
+        ],
+        "description": "Whether the attachment should be hidden from the user."
+      },
+      "id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "Optional client-supplied ID for the attachment. Server-generated if omitted."
+      },
+      "origin": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema2"
+          }
+        ],
+        "description": "Origin string for by-reference attachments. When provided without `data`, content is resolved once at creation time."
+      },
+      "render_inline": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema5"
+          }
+        ],
+        "description": "When true, the attachment is rendered inline in the UI when the conversation is opened, without the agent referencing it. Defaults to false."
+      },
+      "type": {
+        "description": "The attachment type.",
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "required": [
+      "conversation_id",
+      "type"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "properties": {
+      "attachment_id": {
+        "description": "The ID of the created attachment.",
+        "type": "string"
+      },
+      "current_version": {
+        "description": "The version number of the newly created attachment (always 1 on create).",
+        "type": "number"
+      },
+      "type": {
+        "description": "The attachment type.",
+        "type": "string"
+      }
+    },
+    "required": [
+      "attachment_id",
+      "current_version",
+      "type"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

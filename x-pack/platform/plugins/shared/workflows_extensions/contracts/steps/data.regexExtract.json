@@ -1,0 +1,73 @@
+{
+  "config": {
+    "properties": {
+      "errorIfNoMatch": {
+        "default": false,
+        "type": "boolean"
+      },
+      "source": {}
+    },
+    "required": [
+      "source"
+    ],
+    "type": "object"
+  },
+  "exposure": "open",
+  "id": "data.regexExtract",
+  "input": {
+    "properties": {
+      "fields": {
+        "additionalProperties": {
+          "type": "string"
+        },
+        "type": "object"
+      },
+      "flags": {
+        "type": "string"
+      },
+      "pattern": {
+        "maxLength": 10000,
+        "type": "string"
+      }
+    },
+    "required": [
+      "fields",
+      "pattern"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "anyOf": [
+      {
+        "additionalProperties": {},
+        "type": "object"
+      },
+      {
+        "items": {
+          "anyOf": [
+            {
+              "additionalProperties": {},
+              "type": "object"
+            },
+            {
+              "enum": [
+                null
+              ],
+              "nullable": true,
+              "type": "string"
+            }
+          ]
+        },
+        "type": "array"
+      },
+      {
+        "enum": [
+          null
+        ],
+        "nullable": true,
+        "type": "string"
+      }
+    ]
+  },
+  "stability": "tech_preview"
+}

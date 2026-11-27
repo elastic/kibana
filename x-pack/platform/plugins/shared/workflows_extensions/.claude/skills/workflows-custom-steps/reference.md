@@ -565,7 +565,7 @@ Reuse the local plugin's test style; common minimum:
 - **Common Zod schemas**: a snapshot or fixture round-trip per schema with at least one happy-path object and one rejection case (e.g. wrong type, missing required field).
 - **Server handler**: a Jest unit test mocking `StepHandlerContext` (or the plugin's own helper) — assert the happy path produces the expected `output`, and at least one error path throws / returns the expected `ExecutionError.type`.
 - **Public registration**: there is already a precedent of `register_workflow_steps.test.ts` in `security_solution` — assert each step is registered (including async loaders) and that conditional registrations respect their flags.
-- **Approval test** (Scout API): runs in CI; locally, run it to get the `echo … > approved_step_definitions/<step.id>.txt` command(s) you need to run from the kibana directory to add or update each per-step approval file. See [STEPS.md → Step Definition Approval Process](../../dev_docs/STEPS.md#step-definition-approval-process).
+- **Contract check**: runs in CI, which commits the step's contract file and fails the PR on a breaking change. See [STEPS.md → Step Contract Check](../../dev_docs/STEPS.md#step-contract-check) to run it locally.
 
 Avoid snapshotting the entire definition unless behavior changes; the i18n strings churn.
 
@@ -587,6 +587,6 @@ Useful files to grep for real-world patterns:
 | `connectorIdSelection` example | `x-pack/platform/plugins/shared/agent_builder/public/step_types/run_agent_step.ts` |
 | `BaseStepDefinition` + `StepCategory` | `src/platform/packages/shared/kbn-workflows/spec/step_definition_types.ts` |
 | `ExecutionError` | `src/platform/packages/shared/kbn-workflows/server/errors/execution_error.ts` |
-| Approval fixtures (one file per step) | `x-pack/platform/plugins/shared/workflows_extensions/test/scout/api/fixtures/approved_step_definitions/` |
+| Step contracts (one file per step) | `x-pack/platform/plugins/shared/workflows_extensions/contracts/steps/` |
 | Factory-style server steps | `x-pack/platform/plugins/shared/cases/server/workflows/steps/` |
 | Feature-flagged loader | `x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/register_workflow_steps.ts` |

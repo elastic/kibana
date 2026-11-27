@@ -29,10 +29,9 @@ describe('registerGetStepDefinitionsRoute', () => {
     expect(routeConfig.path).toBe('/internal/workflows_extensions/step_definitions');
     expect(routeConfig.options?.access).toBe('internal');
     expect(routeConfig.security?.authz).toHaveProperty('enabled', false);
-    expect(routeConfig.validate).toBe(false);
   });
 
-  it('returns steps sorted alphabetically with definition hashes', async () => {
+  it('returns only the ids of the steps, sorted alphabetically, by default', async () => {
     const stepRegistry = new ServerStepRegistry(logger);
     const sharedHandler = async () => ({ output: {} });
     stepRegistry.register({ id: 'z.step', handler: sharedHandler } as any);
@@ -48,14 +47,7 @@ describe('registerGetStepDefinitionsRoute', () => {
 
     expect(response.ok).toHaveBeenCalledTimes(1);
     const { body } = response.ok.mock.calls[0][0]!;
-    const { steps } = body as { steps: Array<{ id: string; definitionHash: string }> };
-
-    expect(steps.map((s) => s.id)).toEqual(['a.step', 'm.step', 'z.step']);
-    // All share the same handler, so hashes must be identical
-    expect(steps[0].definitionHash).toBe(steps[1].definitionHash);
-    expect(steps[1].definitionHash).toBe(steps[2].definitionHash);
-    // Hashes are non-empty hex strings
-    expect(steps[0].definitionHash).toMatch(/^[a-f0-9]+$/);
+    expect(body).toEqual({ steps: [{ id: 'a.step' }, { id: 'm.step' }, { id: 'z.step' }] });
   });
 
   it('waits for pending async loaders before returning steps', async () => {
@@ -94,99 +86,85 @@ describe('registerGetStepDefinitionsRoute', () => {
     expect((body as { steps: unknown[] }).steps).toEqual([]);
   });
 
-  it('ignores handler implementation when computing the hash', async () => {
-    const stepRegistry = new ServerStepRegistry(logger);
-    // Same contract (no schemas/metadata), different handler implementations.
-    stepRegistry.register({ id: 'a.step', handler: async () => ({ output: 'a' }) } as any);
-    stepRegistry.register({ id: 'b.step', handler: async () => ({ output: 'b' }) } as any);
+  describe('with include_contracts', () => {
+    const getSteps = async (stepRegistry: ServerStepRegistry) => {
+      const testRouter = httpServiceMock.createRouter();
+      registerGetStepDefinitionsRoute(testRouter, stepRegistry, logger);
 
-    const testRouter = httpServiceMock.createRouter();
-    registerGetStepDefinitionsRoute(testRouter, stepRegistry, logger);
+      const [, handler] = testRouter.get.mock.calls[0];
+      const response = httpServerMock.createResponseFactory();
+      await handler(
+        {} as any,
+        httpServerMock.createKibanaRequest({ query: { include_contracts: true } }),
+        response
+      );
 
-    const [, handler] = testRouter.get.mock.calls[0];
-    const response = httpServerMock.createResponseFactory();
-    await handler({} as any, httpServerMock.createKibanaRequest(), response);
+      const { body } = response.ok.mock.calls[0][0]!;
+      return (body as { steps: Array<Record<string, unknown>> }).steps;
+    };
 
-    const { body } = response.ok.mock.calls[0][0]!;
-    const { steps } = body as { steps: Array<{ id: string; definitionHash: string }> };
-    expect(steps[0].definitionHash).toBe(steps[1].definitionHash);
-  });
+    beforeEach(() => {
+      logger.error.mockClear();
+    });
 
-  it('produces different hashes when only the schema differs', async () => {
-    const sharedHandler = async () => ({ output: {} });
-    const stepRegistry = new ServerStepRegistry(logger);
-    stepRegistry.register({
-      id: 'a.step',
-      handler: sharedHandler,
-      inputSchema: z.object({ message: z.string() }),
-    } as any);
-    stepRegistry.register({
-      id: 'b.step',
-      handler: sharedHandler,
-      inputSchema: z.object({ count: z.number() }),
-    } as any);
+    it('returns the contract of each step', async () => {
+      const stepRegistry = new ServerStepRegistry(logger);
+      stepRegistry.register({
+        id: 'a.step',
+        handler: async () => ({ output: {} }),
+        inputSchema: z.object({ message: z.string() }),
+        outputSchema: z.object({ sent: z.boolean() }),
+        stability: 'stable',
+      } as any);
 
-    const testRouter = httpServiceMock.createRouter();
-    registerGetStepDefinitionsRoute(testRouter, stepRegistry, logger);
+      const steps = await getSteps(stepRegistry);
 
-    const [, handler] = testRouter.get.mock.calls[0];
-    const response = httpServerMock.createResponseFactory();
-    await handler({} as any, httpServerMock.createKibanaRequest(), response);
+      expect(steps).toEqual([
+        {
+          id: 'a.step',
+          contract: {
+            id: 'a.step',
+            stability: 'stable',
+            exposure: 'open',
+            input: {
+              type: 'object',
+              properties: { message: { type: 'string' } },
+              required: ['message'],
+            },
+            output: {
+              type: 'object',
+              properties: { sent: { type: 'boolean' } },
+              required: ['sent'],
+              additionalProperties: false,
+            },
+          },
+        },
+      ]);
+    });
 
-    const { body } = response.ok.mock.calls[0][0]!;
-    const { steps } = body as { steps: Array<{ id: string; definitionHash: string }> };
-    expect(steps[0].definitionHash).not.toBe(steps[1].definitionHash);
-  });
+    it('returns the error, and logs it, when a contract cannot be serialized', async () => {
+      const stepRegistry = new ServerStepRegistry(logger);
+      // A value that isn't a zod schema makes z.toJSONSchema throw even with unrepresentable: 'any'.
+      stepRegistry.register({
+        id: 'broken.step',
+        handler: async () => ({ output: {} }),
+        inputSchema: {},
+        outputSchema: z.object({}),
+      } as any);
+      stepRegistry.register({
+        id: 'valid.step',
+        handler: async () => ({ output: {} }),
+        inputSchema: z.object({}),
+        outputSchema: z.object({}),
+      } as any);
 
-  it('computes a real hash for schemas with parts JSON Schema cannot represent', async () => {
-    const stepRegistry = new ServerStepRegistry(logger);
-    // Transforms and z.date() are unrepresentable in JSON Schema; they must not break hashing.
-    stepRegistry.register({
-      id: 'a.step',
-      handler: async () => ({ output: 'a' }),
-      inputSchema: z.object({ name: z.string().transform((value) => value.trim()) }),
-    } as any);
-    stepRegistry.register({
-      id: 'b.step',
-      handler: async () => ({ output: 'b' }),
-      inputSchema: z.date(),
-    } as any);
+      const steps = await getSteps(stepRegistry);
 
-    const testRouter = httpServiceMock.createRouter();
-    registerGetStepDefinitionsRoute(testRouter, stepRegistry, logger);
-
-    const [, handler] = testRouter.get.mock.calls[0];
-    const response = httpServerMock.createResponseFactory();
-    await handler({} as any, httpServerMock.createKibanaRequest(), response);
-
-    const { body } = response.ok.mock.calls[0][0]!;
-    const { steps } = body as { steps: Array<{ id: string; definitionHash: string }> };
-    expect(steps.map(({ definitionHash }) => definitionHash)).toEqual([
-      expect.stringMatching(/^[a-f0-9]{64}$/),
-      expect.stringMatching(/^[a-f0-9]{64}$/),
-    ]);
-    expect(logger.error).not.toHaveBeenCalled();
-  });
-
-  it('logs an error and returns a fallback hash when hashing fails', async () => {
-    const stepRegistry = new ServerStepRegistry(logger);
-    // A value that is not a zod schema makes z.toJSONSchema throw even when unrepresentable types are allowed.
-    stepRegistry.register({
-      id: 'a.step',
-      handler: async () => ({ output: 'a' }),
-      inputSchema: {},
-    } as any);
-
-    const testRouter = httpServiceMock.createRouter();
-    registerGetStepDefinitionsRoute(testRouter, stepRegistry, logger);
-
-    const [, handler] = testRouter.get.mock.calls[0];
-    const response = httpServerMock.createResponseFactory();
-    await handler({} as any, httpServerMock.createKibanaRequest(), response);
-
-    const { body } = response.ok.mock.calls[0][0]!;
-    const { steps } = body as { steps: Array<{ id: string; definitionHash: string }> };
-    expect(steps[0].definitionHash).toBe('definition-hashing-error');
-    expect(logger.error).toHaveBeenCalled();
+      expect(steps).toEqual([
+        { id: 'broken.step', contractError: expect.any(String) },
+        { id: 'valid.step', contract: expect.objectContaining({ id: 'valid.step' }) },
+      ]);
+      expect(logger.error).toHaveBeenCalledTimes(1);
+    });
   });
 });

@@ -1,0 +1,187 @@
+{
+  "exposure": "open",
+  "id": "security.attack-discovery.run",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "maxLength": 256,
+        "type": "string"
+      }
+    },
+    "properties": {
+      "additional_context": {
+        "type": "string"
+      },
+      "aggregate_by": {
+        "maxLength": 256,
+        "type": "string"
+      },
+      "alert_retrieval_mode": {
+        "default": "custom_query",
+        "enum": [
+          "custom_only",
+          "custom_query",
+          "esql",
+          "provided"
+        ],
+        "type": "string"
+      },
+      "alert_retrieval_workflow_ids": {
+        "default": [],
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "alerts": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "connector_id": {
+        "type": "string"
+      },
+      "end": {
+        "type": "string"
+      },
+      "esql_query": {
+        "type": "string"
+      },
+      "feature_id": {
+        "anyOf": [
+          {
+            "maxLength": 256,
+            "type": "string"
+          },
+          {
+            "items": {
+              "$ref": "#/definitions/__schema0"
+            },
+            "maxItems": 8,
+            "type": "array"
+          }
+        ]
+      },
+      "filter": {
+        "additionalProperties": {},
+        "type": "object"
+      },
+      "generation_source": {
+        "maxLength": 256,
+        "type": "string"
+      },
+      "ground_truth_gate_enabled": {
+        "default": true,
+        "type": "boolean"
+      },
+      "include_attack_discoveries": {
+        "default": true,
+        "type": "boolean"
+      },
+      "mode": {
+        "default": "sync",
+        "enum": [
+          "async",
+          "sync"
+        ],
+        "type": "string"
+      },
+      "plugin_id": {
+        "maxLength": 256,
+        "type": "string"
+      },
+      "size": {
+        "default": 100,
+        "maximum": 9007199254740991,
+        "minimum": -9007199254740991,
+        "type": "integer"
+      },
+      "start": {
+        "type": "string"
+      },
+      "validation_workflow_id": {
+        "default": "",
+        "type": "string"
+      }
+    },
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "properties": {
+      "alerts_context_count": {
+        "maximum": 9007199254740991,
+        "minimum": -9007199254740991,
+        "type": "integer"
+      },
+      "attack_discoveries": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "alert_ids": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "details_markdown": {
+              "type": "string"
+            },
+            "entity_summary_markdown": {
+              "type": "string"
+            },
+            "id": {
+              "type": "string"
+            },
+            "mitre_attack_tactics": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "summary_markdown": {
+              "type": "string"
+            },
+            "timestamp": {
+              "type": "string"
+            },
+            "title": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "alert_ids",
+            "details_markdown",
+            "summary_markdown",
+            "title"
+          ],
+          "type": "object"
+        },
+        "nullable": true,
+        "type": "array"
+      },
+      "discovery_count": {
+        "maximum": 9007199254740991,
+        "minimum": -9007199254740991,
+        "type": "integer"
+      },
+      "execution_uuid": {
+        "type": "string"
+      },
+      "status": {
+        "enum": [
+          "pending",
+          "completed"
+        ],
+        "type": "string"
+      }
+    },
+    "required": [
+      "execution_uuid",
+      "status"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

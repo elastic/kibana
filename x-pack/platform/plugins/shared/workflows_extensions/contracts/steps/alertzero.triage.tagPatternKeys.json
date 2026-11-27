@@ -1,0 +1,92 @@
+{
+  "exposure": "open",
+  "id": "alertzero.triage.tagPatternKeys",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "properties": {
+      "alert_ids": {
+        "description": "Alerts of one triage batch that received a verdict.",
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "maxItems": 1000,
+        "minItems": 1,
+        "type": "array"
+      },
+      "fp_candidate_ids": {
+        "description": "The false positives at or above the confidence floor, for the fallback count.",
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "maxItems": 1000,
+        "type": "array"
+      },
+      "space_id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "Space of the alerts. It is part of every key hash."
+      }
+    },
+    "required": [
+      "alert_ids",
+      "fp_candidate_ids",
+      "space_id"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "definitions": {
+      "__schema0": {
+        "type": "string"
+      }
+    },
+    "properties": {
+      "alerts_with_strict_key": {
+        "type": "number"
+      },
+      "fp_candidates_on_fallback": {
+        "type": "number"
+      },
+      "missing_alert_ids": {
+        "description": "Ids that no longer match an alert.",
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "type": "array"
+      },
+      "strict_keys": {
+        "type": "number"
+      },
+      "strict_keys_single_alert": {
+        "type": "number"
+      },
+      "wide_keys": {
+        "type": "number"
+      },
+      "wide_keys_single_alert": {
+        "type": "number"
+      }
+    },
+    "required": [
+      "alerts_with_strict_key",
+      "fp_candidates_on_fallback",
+      "missing_alert_ids",
+      "strict_keys",
+      "strict_keys_single_alert",
+      "wide_keys",
+      "wide_keys_single_alert"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

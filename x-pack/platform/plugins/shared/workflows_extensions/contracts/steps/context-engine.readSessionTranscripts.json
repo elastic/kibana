@@ -1,0 +1,222 @@
+{
+  "exposure": "open",
+  "id": "context-engine.readSessionTranscripts",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "maxLength": 2048,
+        "type": "string"
+      },
+      "__schema1": {
+        "maximum": 10000,
+        "minimum": 1,
+        "type": "integer"
+      },
+      "__schema2": {
+        "maximum": 10000000,
+        "minimum": 1,
+        "type": "integer"
+      },
+      "__schema3": {
+        "maximum": 1000000,
+        "minimum": 1,
+        "type": "integer"
+      },
+      "__schema4": {
+        "maximum": 60,
+        "minimum": 0,
+        "type": "integer"
+      }
+    },
+    "properties": {
+      "after": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "The resume_after of the read that stopped at since: the event to continue after. Empty or omitted: read from since."
+      },
+      "ai_index_id": {
+        "description": "The id of the AI index the knowledge indicator belongs to",
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "batch_tokens": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema3"
+          }
+        ],
+        "description": "The most estimated tokens of one batch: what one model call reads. Defaults to 50000."
+      },
+      "max_tokens": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema2"
+          }
+        ],
+        "description": "Stop the read before its transcripts exceed this many estimated tokens. Defaults to 600000."
+      },
+      "settle_minutes": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema4"
+          }
+        ],
+        "description": "Leave events saved this recently for the next run: their turn may still be running. Defaults to 5."
+      },
+      "since": {
+        "description": "Read the events saved since this ISO 8601 time",
+        "maxLength": 64,
+        "type": "string"
+      },
+      "size": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema1"
+          }
+        ],
+        "description": "How many events to look at, oldest first. Defaults to 500."
+      }
+    },
+    "required": [
+      "ai_index_id",
+      "since"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "definitions": {
+      "__schema0": {
+        "additionalProperties": false,
+        "properties": {
+          "attributes": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            },
+            "type": "object"
+          },
+          "content": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "permissions": {
+            "additionalProperties": false,
+            "properties": {
+              "kibana": {
+                "additionalProperties": false,
+                "properties": {
+                  "privileges": {
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "space": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "space"
+                      ],
+                      "type": "object"
+                    },
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "privileges"
+                ],
+                "type": "object"
+              }
+            },
+            "required": [
+              "kibana"
+            ],
+            "type": "object"
+          },
+          "title": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "content",
+          "id",
+          "permissions",
+          "title",
+          "type",
+          "updated_at"
+        ],
+        "type": "object"
+      },
+      "__schema1": {
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "type": "array"
+      },
+      "__schema2": {
+        "type": "string"
+      }
+    },
+    "properties": {
+      "batches": {
+        "description": "The memories in batches for the model, a call each: each session together and in order, whole sessions up to batch_tokens",
+        "items": {
+          "$ref": "#/definitions/__schema1"
+        },
+        "type": "array"
+      },
+      "memories": {
+        "description": "One transcript per turn, oldest first, shaped as the memories applyDreamChanges takes",
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "type": "array"
+      },
+      "resume_after": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema2"
+          }
+        ],
+        "description": "Set when size or max_tokens cut the read: the event to pass as after"
+      },
+      "resume_from": {
+        "description": "Where the next read starts: the last event read when size or max_tokens cut the read, else the end of the window read",
+        "type": "string"
+      },
+      "skipped": {
+        "description": "Turns left out because nobody said anything in them",
+        "type": "number"
+      }
+    },
+    "required": [
+      "batches",
+      "memories",
+      "resume_from",
+      "skipped"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

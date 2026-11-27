@@ -1,0 +1,165 @@
+{
+  "exposure": "open",
+  "id": "security.buildExceptionEntriesFilter",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "properties": {
+          "field": {
+            "$ref": "#/definitions/__schema1"
+          },
+          "list": {
+            "$ref": "#/definitions/__schema6"
+          },
+          "operator": {
+            "$ref": "#/definitions/__schema2"
+          },
+          "value": {
+            "$ref": "#/definitions/__schema3"
+          },
+          "values": {
+            "$ref": "#/definitions/__schema4"
+          }
+        },
+        "required": [
+          "field",
+          "operator"
+        ],
+        "type": "object"
+      },
+      "__schema1": {
+        "maxLength": 1024,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema2": {
+        "enum": [
+          "is",
+          "is_not",
+          "is_one_of",
+          "is_not_one_of",
+          "matches",
+          "does_not_match",
+          "exists",
+          "does_not_exist",
+          "is_in_list",
+          "is_not_in_list"
+        ],
+        "type": "string"
+      },
+      "__schema3": {
+        "maxLength": 1024,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema4": {
+        "items": {
+          "$ref": "#/definitions/__schema5"
+        },
+        "maxItems": 1000,
+        "minItems": 1,
+        "type": "array"
+      },
+      "__schema5": {
+        "maxLength": 1024,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema6": {
+        "properties": {
+          "id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "binary",
+              "boolean",
+              "byte",
+              "date",
+              "date_nanos",
+              "date_range",
+              "double",
+              "double_range",
+              "float",
+              "float_range",
+              "geo_point",
+              "geo_shape",
+              "half_float",
+              "integer",
+              "integer_range",
+              "ip",
+              "ip_range",
+              "keyword",
+              "long",
+              "long_range",
+              "shape",
+              "short",
+              "text"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "type"
+        ],
+        "type": "object"
+      },
+      "__schema7": {
+        "items": {
+          "additionalProperties": {},
+          "type": "object"
+        },
+        "type": "array"
+      }
+    },
+    "properties": {
+      "entries": {
+        "description": "Proposed exception entries, ANDed together as one exception item would be",
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "maxItems": 100,
+        "minItems": 1,
+        "type": "array"
+      },
+      "existing_filters": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema7"
+          }
+        ],
+        "default": [],
+        "description": "The rule's own current filters, to preserve alongside the new one"
+      }
+    },
+    "required": [
+      "entries"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "definitions": {
+      "__schema0": {
+        "additionalProperties": {},
+        "type": "object"
+      }
+    },
+    "properties": {
+      "filters": {
+        "description": "existing_filters plus one filter excluding alerts the proposed exception would suppress — use in place of the rule's own filters when previewing the exception",
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "filters"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

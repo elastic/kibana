@@ -25,6 +25,7 @@ dependsOn:
   - '@kbn/repo-info'
   - '@kbn/core-test-helpers-kbn-server'
   - '@kbn/std'
+  - '@kbn/api-contracts'
 tags:
   - shared-common
   - package

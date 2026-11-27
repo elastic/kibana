@@ -1,0 +1,351 @@
+{
+  "exposure": "open",
+  "id": "security.buildAlertEntityGraph",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "items": {
+          "properties": {
+            "aliases": {
+              "items": {
+                "properties": {
+                  "field": {
+                    "type": "string"
+                  },
+                  "score": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "field"
+                ],
+                "type": "object"
+              },
+              "type": "array"
+            },
+            "field": {
+              "type": "string"
+            },
+            "score": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "field"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "__schema1": {
+        "type": "string"
+      },
+      "__schema10": {
+        "type": "boolean"
+      },
+      "__schema2": {
+        "type": "string"
+      },
+      "__schema3": {
+        "maximum": 9007199254740991,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema4": {
+        "maximum": 9007199254740991,
+        "minimum": 1,
+        "type": "integer"
+      },
+      "__schema5": {
+        "maximum": 1000,
+        "minimum": 1,
+        "type": "integer"
+      },
+      "__schema6": {
+        "maximum": 9007199254740991,
+        "minimum": 1,
+        "type": "integer"
+      },
+      "__schema7": {
+        "maximum": 9007199254740991,
+        "minimum": 1,
+        "type": "integer"
+      },
+      "__schema8": {
+        "items": {
+          "properties": {
+            "field": {
+              "type": "string"
+            },
+            "values": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "field",
+            "values"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "__schema9": {
+        "minimum": 1,
+        "type": "number"
+      }
+    },
+    "properties": {
+      "alertId": {
+        "description": "The alert ID to find related alerts for",
+        "type": "string"
+      },
+      "alertIndex": {
+        "description": "The alert index",
+        "type": "string"
+      },
+      "entity_fields": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "default": [
+          {
+            "field": "host.name"
+          },
+          {
+            "field": "user.name"
+          },
+          {
+            "field": "service.name"
+          }
+        ],
+        "description": "Entity fields to extract and use for correlation. Each entry may provide an optional score override for that field, plus optional aliases (additional fields to match against using the same value). (default: host.name, user.name, service.name)"
+      },
+      "expand_window": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema2"
+          }
+        ],
+        "default": "1h",
+        "description": "Time window padding applied to the growing min/max timestamps as related alerts are found. Default: \"1h\""
+      },
+      "ignore_entities": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema8"
+          }
+        ],
+        "default": [],
+        "description": "Entity values to ignore for correlation/scoring (e.g. field=user.name values=[root,SYSTEM]). Ignored values do not contribute to edge scores and are not used for graph expansion."
+      },
+      "include_seed": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema10"
+          }
+        ],
+        "default": true,
+        "description": "Whether to include the seed alert as a node in the output graph. Default: true"
+      },
+      "max_alerts": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema4"
+          }
+        ],
+        "default": 300,
+        "description": "Hard cap on number of discovered alerts (including seed if included). Default: 300"
+      },
+      "max_depth": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema3"
+          }
+        ],
+        "default": 3,
+        "description": "Maximum recursion depth (number of expansion rounds). Default: 3"
+      },
+      "max_entities_per_field": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema7"
+          }
+        ],
+        "default": 200,
+        "description": "Maximum number of distinct entity values to track per entity field. Default: 200"
+      },
+      "max_terms_per_query": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema6"
+          }
+        ],
+        "default": 500,
+        "description": "Maximum number of terms per `terms` query clause (chunked if exceeded). Default: 500"
+      },
+      "min_entity_score": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema9"
+          }
+        ],
+        "default": 2,
+        "description": "Minimum total entity match score required to create an edge (sum of per-label scores). Default: 2"
+      },
+      "page_size": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema5"
+          }
+        ],
+        "default": 200,
+        "description": "Elasticsearch page size per query. Default: 200"
+      },
+      "seed_window": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema1"
+          }
+        ],
+        "default": "1h",
+        "description": "Initial time window around the seed alert timestamp (e.g., \"1h\", \"24h\"). Default: \"1h\""
+      }
+    },
+    "required": [
+      "alertId",
+      "alertIndex"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "properties": {
+      "alerts": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "alert_id": {
+              "type": "string"
+            },
+            "alert_index": {
+              "type": "string"
+            },
+            "rule_name": {
+              "type": "string"
+            },
+            "severity": {
+              "type": "string"
+            },
+            "timestamp": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "alert_id",
+            "alert_index"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "edges": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "from": {
+              "type": "string"
+            },
+            "label_scores": {
+              "additionalProperties": {
+                "type": "number"
+              },
+              "type": "object"
+            },
+            "score": {
+              "type": "number"
+            },
+            "to": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "from",
+            "label_scores",
+            "score",
+            "to"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "nodes": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "stats": {
+        "additionalProperties": false,
+        "properties": {
+          "depth_reached": {
+            "type": "number"
+          },
+          "edges": {
+            "type": "number"
+          },
+          "nodes": {
+            "type": "number"
+          },
+          "queries": {
+            "type": "number"
+          },
+          "time_range": {
+            "additionalProperties": false,
+            "properties": {
+              "gte": {
+                "type": "string"
+              },
+              "lte": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "gte",
+              "lte"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "depth_reached",
+          "edges",
+          "nodes",
+          "queries",
+          "time_range"
+        ],
+        "type": "object"
+      }
+    },
+    "required": [
+      "alerts",
+      "edges",
+      "nodes"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

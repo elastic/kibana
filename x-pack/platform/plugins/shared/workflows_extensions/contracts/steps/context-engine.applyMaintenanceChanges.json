@@ -1,0 +1,1296 @@
+{
+  "exposure": "open",
+  "id": "context-engine.applyMaintenanceChanges",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "properties": {
+          "about_facts": {
+            "description": "Facts about the reviewed entities",
+            "items": {
+              "$ref": "#/definitions/__schema19"
+            },
+            "maxItems": 500,
+            "type": "array"
+          },
+          "audience": {
+            "description": "Who can see every item of the batch",
+            "type": "string"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/definitions/__schema1"
+            },
+            "maxItems": 20,
+            "type": "array"
+          },
+          "neighbors": {
+            "description": "Similar items the reviewed ones may duplicate or contradict",
+            "items": {
+              "$ref": "#/definitions/__schema19"
+            },
+            "maxItems": 500,
+            "type": "array"
+          },
+          "relationships": {
+            "description": "Relationships touching the reviewed items or their neighbors",
+            "items": {
+              "$ref": "#/definitions/__schema20"
+            },
+            "maxItems": 500,
+            "type": "array"
+          }
+        },
+        "required": [
+          "about_facts",
+          "audience",
+          "items",
+          "neighbors",
+          "relationships"
+        ],
+        "type": "object"
+      },
+      "__schema1": {
+        "properties": {
+          "about_fact_ids": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema15"
+              }
+            ],
+            "description": "For an entity, the facts about it, newest first"
+          },
+          "content": {
+            "$ref": "#/definitions/__schema7"
+          },
+          "description": {
+            "$ref": "#/definitions/__schema6"
+          },
+          "id": {
+            "$ref": "#/definitions/__schema2"
+          },
+          "kind": {
+            "$ref": "#/definitions/__schema3"
+          },
+          "last_seen_at": {
+            "$ref": "#/definitions/__schema9"
+          },
+          "lost_source_ids": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema16"
+              }
+            ],
+            "description": "The memories it came from that were deleted"
+          },
+          "neighbor_ids": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema14"
+              }
+            ],
+            "description": "The most similar items of its kind"
+          },
+          "occurrences": {
+            "$ref": "#/definitions/__schema8"
+          },
+          "person_edited": {
+            "$ref": "#/definitions/__schema11"
+          },
+          "reasons": {
+            "description": "Why it is reviewed",
+            "items": {
+              "$ref": "#/definitions/__schema13"
+            },
+            "type": "array"
+          },
+          "remaining_memories": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema17"
+              }
+            ],
+            "description": "The memories it came from that remain, to rewrite it from"
+          },
+          "title": {
+            "$ref": "#/definitions/__schema5"
+          },
+          "type": {
+            "$ref": "#/definitions/__schema4"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "occurrences",
+          "reasons",
+          "title",
+          "type"
+        ],
+        "type": "object"
+      },
+      "__schema10": {
+        "type": "string"
+      },
+      "__schema11": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema12"
+          }
+        ],
+        "description": "A person edited it: its text is kept and it is never removed"
+      },
+      "__schema12": {
+        "type": "boolean"
+      },
+      "__schema13": {
+        "enum": [
+          "changed",
+          "lost_sources",
+          "about_facts_changed",
+          "sweep"
+        ],
+        "type": "string"
+      },
+      "__schema14": {
+        "items": {
+          "$ref": "#/definitions/__schema2"
+        },
+        "type": "array"
+      },
+      "__schema15": {
+        "items": {
+          "$ref": "#/definitions/__schema2"
+        },
+        "type": "array"
+      },
+      "__schema16": {
+        "items": {
+          "$ref": "#/definitions/__schema2"
+        },
+        "type": "array"
+      },
+      "__schema17": {
+        "items": {
+          "$ref": "#/definitions/__schema18"
+        },
+        "maxItems": 10,
+        "type": "array"
+      },
+      "__schema18": {
+        "properties": {
+          "content": {
+            "type": "string"
+          },
+          "id": {
+            "$ref": "#/definitions/__schema2"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "content",
+          "id"
+        ],
+        "type": "object"
+      },
+      "__schema19": {
+        "properties": {
+          "content": {
+            "$ref": "#/definitions/__schema7"
+          },
+          "description": {
+            "$ref": "#/definitions/__schema6"
+          },
+          "id": {
+            "$ref": "#/definitions/__schema2"
+          },
+          "kind": {
+            "$ref": "#/definitions/__schema3"
+          },
+          "last_seen_at": {
+            "$ref": "#/definitions/__schema9"
+          },
+          "occurrences": {
+            "$ref": "#/definitions/__schema8"
+          },
+          "person_edited": {
+            "$ref": "#/definitions/__schema11"
+          },
+          "title": {
+            "$ref": "#/definitions/__schema5"
+          },
+          "type": {
+            "$ref": "#/definitions/__schema4"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "occurrences",
+          "title",
+          "type"
+        ],
+        "type": "object"
+      },
+      "__schema2": {
+        "maxLength": 512,
+        "type": "string"
+      },
+      "__schema20": {
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "from": {
+            "$ref": "#/definitions/__schema2"
+          },
+          "id": {
+            "$ref": "#/definitions/__schema2"
+          },
+          "relation": {
+            "type": "string"
+          },
+          "to": {
+            "$ref": "#/definitions/__schema2"
+          }
+        },
+        "required": [
+          "from",
+          "id",
+          "relation",
+          "to"
+        ],
+        "type": "object"
+      },
+      "__schema21": {
+        "properties": {
+          "contradictions": {
+            "default": [],
+            "items": {
+              "$ref": "#/definitions/__schema29"
+            },
+            "maxItems": 100,
+            "type": "array"
+          },
+          "merges": {
+            "default": [],
+            "items": {
+              "$ref": "#/definitions/__schema22"
+            },
+            "maxItems": 100,
+            "type": "array"
+          },
+          "relationships": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema33"
+              }
+            ],
+            "default": [],
+            "description": "Relationships to remove: duplicates, and inverses of another one"
+          },
+          "rewrites": {
+            "default": [],
+            "items": {
+              "$ref": "#/definitions/__schema30"
+            },
+            "maxItems": 100,
+            "type": "array"
+          },
+          "summaries": {
+            "default": [],
+            "items": {
+              "$ref": "#/definitions/__schema32"
+            },
+            "maxItems": 100,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "__schema22": {
+        "properties": {
+          "absorbed": {
+            "items": {
+              "$ref": "#/definitions/__schema23"
+            },
+            "maxItems": 20,
+            "minItems": 1,
+            "type": "array"
+          },
+          "content": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema26"
+              }
+            ]
+          },
+          "description": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema25"
+              }
+            ]
+          },
+          "reason": {
+            "$ref": "#/definitions/__schema28"
+          },
+          "survivor": {
+            "$ref": "#/definitions/__schema23"
+          },
+          "title": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema24"
+              }
+            ]
+          }
+        },
+        "required": [
+          "absorbed",
+          "reason",
+          "survivor"
+        ],
+        "type": "object"
+      },
+      "__schema23": {
+        "maxLength": 512,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema24": {
+        "maxLength": 512,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema25": {
+        "maxLength": 2048,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema26": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema27"
+          }
+        ],
+        "maxLength": 65536
+      },
+      "__schema27": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema28": {
+        "maxLength": 1024,
+        "type": "string"
+      },
+      "__schema29": {
+        "properties": {
+          "content": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema26"
+              }
+            ],
+            "description": "With changed: what the newer fact says, now that it replaces the older"
+          },
+          "ids": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/__schema23"
+                },
+                {
+                  "$ref": "#/definitions/__schema23"
+                }
+              ]
+            },
+            "maxItems": 2,
+            "minItems": 2,
+            "type": "array"
+          },
+          "label": {
+            "enum": [
+              "changed",
+              "conflict"
+            ],
+            "type": "string"
+          },
+          "reason": {
+            "$ref": "#/definitions/__schema28"
+          }
+        },
+        "required": [
+          "ids",
+          "label",
+          "reason"
+        ],
+        "type": "object"
+      },
+      "__schema3": {
+        "enum": [
+          "fact",
+          "entity"
+        ],
+        "type": "string"
+      },
+      "__schema30": {
+        "properties": {
+          "content": {
+            "$ref": "#/definitions/__schema31"
+          },
+          "id": {
+            "$ref": "#/definitions/__schema23"
+          },
+          "reason": {
+            "$ref": "#/definitions/__schema28"
+          },
+          "title": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema24"
+              }
+            ]
+          }
+        },
+        "required": [
+          "content",
+          "id",
+          "reason"
+        ],
+        "type": "object"
+      },
+      "__schema31": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema27"
+          }
+        ],
+        "maxLength": 65536
+      },
+      "__schema32": {
+        "properties": {
+          "content": {
+            "$ref": "#/definitions/__schema31"
+          },
+          "description": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema25"
+              }
+            ]
+          },
+          "id": {
+            "$ref": "#/definitions/__schema23"
+          },
+          "reason": {
+            "$ref": "#/definitions/__schema28"
+          }
+        },
+        "required": [
+          "content",
+          "id",
+          "reason"
+        ],
+        "type": "object"
+      },
+      "__schema33": {
+        "items": {
+          "$ref": "#/definitions/__schema34"
+        },
+        "maxItems": 500,
+        "type": "array"
+      },
+      "__schema34": {
+        "properties": {
+          "id": {
+            "$ref": "#/definitions/__schema23"
+          },
+          "reason": {
+            "$ref": "#/definitions/__schema28"
+          }
+        },
+        "required": [
+          "id",
+          "reason"
+        ],
+        "type": "object"
+      },
+      "__schema35": {
+        "items": {
+          "$ref": "#/definitions/__schema36"
+        },
+        "maxItems": 1000,
+        "type": "array"
+      },
+      "__schema36": {
+        "properties": {
+          "change": {
+            "enum": [
+              "merged",
+              "superseded",
+              "rewritten",
+              "summarized",
+              "tombstoned",
+              "needs_review"
+            ],
+            "type": "string"
+          },
+          "id": {
+            "$ref": "#/definitions/__schema2"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "change",
+          "id",
+          "reason"
+        ],
+        "type": "object"
+      },
+      "__schema37": {
+        "type": "boolean"
+      },
+      "__schema4": {
+        "type": "string"
+      },
+      "__schema5": {
+        "type": "string"
+      },
+      "__schema6": {
+        "type": "string"
+      },
+      "__schema7": {
+        "type": "string"
+      },
+      "__schema8": {
+        "description": "How many memories it was seen in",
+        "type": "number"
+      },
+      "__schema9": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema10"
+          }
+        ],
+        "description": "When the latest memory it was seen in was saved"
+      }
+    },
+    "properties": {
+      "ai_index_id": {
+        "description": "The id of the AI index the knowledge indicator belongs to",
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "batch": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "The batch the model reviewed, as gathered. Changes may only touch its items"
+      },
+      "changes": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema21"
+          }
+        ],
+        "description": "The changes the maintenance model returned for the batch"
+      },
+      "fixes": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema35"
+          }
+        ],
+        "description": "The fixes the gather step listed: items and relationships to tombstone"
+      },
+      "plan_only": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema37"
+          }
+        ],
+        "description": "Check and resolve the changes and report what they would do, without writing"
+      }
+    },
+    "required": [
+      "ai_index_id"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "definitions": {
+      "__schema0": {
+        "additionalProperties": false,
+        "properties": {
+          "change": {
+            "enum": [
+              "merged",
+              "superseded",
+              "rewritten",
+              "summarized",
+              "tombstoned",
+              "needs_review"
+            ],
+            "type": "string"
+          },
+          "id": {
+            "$ref": "#/definitions/__schema1"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "change",
+          "id",
+          "reason"
+        ],
+        "type": "object"
+      },
+      "__schema1": {
+        "maxLength": 512,
+        "type": "string"
+      },
+      "__schema10": {
+        "type": "string"
+      },
+      "__schema11": {
+        "description": "How many memories it was seen in",
+        "type": "number"
+      },
+      "__schema12": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema13"
+          }
+        ],
+        "description": "When the latest memory it was seen in was saved"
+      },
+      "__schema13": {
+        "type": "string"
+      },
+      "__schema14": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema15"
+          }
+        ],
+        "description": "A person edited it: its text is kept and it is never removed"
+      },
+      "__schema15": {
+        "type": "boolean"
+      },
+      "__schema16": {
+        "enum": [
+          "changed",
+          "lost_sources",
+          "about_facts_changed",
+          "sweep"
+        ],
+        "type": "string"
+      },
+      "__schema17": {
+        "items": {
+          "$ref": "#/definitions/__schema1"
+        },
+        "type": "array"
+      },
+      "__schema18": {
+        "items": {
+          "$ref": "#/definitions/__schema1"
+        },
+        "type": "array"
+      },
+      "__schema19": {
+        "items": {
+          "$ref": "#/definitions/__schema1"
+        },
+        "type": "array"
+      },
+      "__schema2": {
+        "additionalProperties": false,
+        "properties": {
+          "item": {
+            "description": "Which item of the change set, such as `fact new:1`",
+            "type": "string"
+          },
+          "reason": {
+            "description": "Why it was not applied",
+            "type": "string"
+          }
+        },
+        "required": [
+          "item",
+          "reason"
+        ],
+        "type": "object"
+      },
+      "__schema20": {
+        "items": {
+          "$ref": "#/definitions/__schema21"
+        },
+        "maxItems": 10,
+        "type": "array"
+      },
+      "__schema21": {
+        "additionalProperties": false,
+        "properties": {
+          "content": {
+            "type": "string"
+          },
+          "id": {
+            "$ref": "#/definitions/__schema1"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "content",
+          "id"
+        ],
+        "type": "object"
+      },
+      "__schema22": {
+        "additionalProperties": false,
+        "properties": {
+          "content": {
+            "$ref": "#/definitions/__schema10"
+          },
+          "description": {
+            "$ref": "#/definitions/__schema9"
+          },
+          "id": {
+            "$ref": "#/definitions/__schema1"
+          },
+          "kind": {
+            "$ref": "#/definitions/__schema6"
+          },
+          "last_seen_at": {
+            "$ref": "#/definitions/__schema12"
+          },
+          "occurrences": {
+            "$ref": "#/definitions/__schema11"
+          },
+          "person_edited": {
+            "$ref": "#/definitions/__schema14"
+          },
+          "title": {
+            "$ref": "#/definitions/__schema8"
+          },
+          "type": {
+            "$ref": "#/definitions/__schema7"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "occurrences",
+          "title",
+          "type"
+        ],
+        "type": "object"
+      },
+      "__schema23": {
+        "additionalProperties": false,
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "from": {
+            "$ref": "#/definitions/__schema1"
+          },
+          "id": {
+            "$ref": "#/definitions/__schema1"
+          },
+          "relation": {
+            "type": "string"
+          },
+          "to": {
+            "$ref": "#/definitions/__schema1"
+          }
+        },
+        "required": [
+          "from",
+          "id",
+          "relation",
+          "to"
+        ],
+        "type": "object"
+      },
+      "__schema24": {
+        "additionalProperties": false,
+        "properties": {
+          "absorbed": {
+            "items": {
+              "$ref": "#/definitions/__schema25"
+            },
+            "maxItems": 20,
+            "minItems": 1,
+            "type": "array"
+          },
+          "content": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema28"
+              }
+            ]
+          },
+          "description": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema27"
+              }
+            ]
+          },
+          "reason": {
+            "$ref": "#/definitions/__schema30"
+          },
+          "survivor": {
+            "$ref": "#/definitions/__schema25"
+          },
+          "title": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema26"
+              }
+            ]
+          }
+        },
+        "required": [
+          "absorbed",
+          "reason",
+          "survivor"
+        ],
+        "type": "object"
+      },
+      "__schema25": {
+        "maxLength": 512,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema26": {
+        "maxLength": 512,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema27": {
+        "maxLength": 2048,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema28": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema29"
+          }
+        ],
+        "maxLength": 65536
+      },
+      "__schema29": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema3": {
+        "items": {
+          "$ref": "#/definitions/__schema4"
+        },
+        "maxItems": 1,
+        "type": "array"
+      },
+      "__schema30": {
+        "maxLength": 1024,
+        "type": "string"
+      },
+      "__schema31": {
+        "additionalProperties": false,
+        "properties": {
+          "content": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema28"
+              }
+            ],
+            "description": "With changed: what the newer fact says, now that it replaces the older"
+          },
+          "ids": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/__schema25"
+                },
+                {
+                  "$ref": "#/definitions/__schema25"
+                }
+              ]
+            },
+            "maxItems": 2,
+            "minItems": 2,
+            "type": "array"
+          },
+          "label": {
+            "enum": [
+              "changed",
+              "conflict"
+            ],
+            "type": "string"
+          },
+          "reason": {
+            "$ref": "#/definitions/__schema30"
+          }
+        },
+        "required": [
+          "ids",
+          "label",
+          "reason"
+        ],
+        "type": "object"
+      },
+      "__schema32": {
+        "additionalProperties": false,
+        "properties": {
+          "content": {
+            "$ref": "#/definitions/__schema33"
+          },
+          "id": {
+            "$ref": "#/definitions/__schema25"
+          },
+          "reason": {
+            "$ref": "#/definitions/__schema30"
+          },
+          "title": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema26"
+              }
+            ]
+          }
+        },
+        "required": [
+          "content",
+          "id",
+          "reason"
+        ],
+        "type": "object"
+      },
+      "__schema33": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema29"
+          }
+        ],
+        "maxLength": 65536
+      },
+      "__schema34": {
+        "additionalProperties": false,
+        "properties": {
+          "content": {
+            "$ref": "#/definitions/__schema33"
+          },
+          "description": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema27"
+              }
+            ]
+          },
+          "id": {
+            "$ref": "#/definitions/__schema25"
+          },
+          "reason": {
+            "$ref": "#/definitions/__schema30"
+          }
+        },
+        "required": [
+          "content",
+          "id",
+          "reason"
+        ],
+        "type": "object"
+      },
+      "__schema35": {
+        "items": {
+          "$ref": "#/definitions/__schema36"
+        },
+        "maxItems": 500,
+        "type": "array"
+      },
+      "__schema36": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/definitions/__schema25"
+          },
+          "reason": {
+            "$ref": "#/definitions/__schema30"
+          }
+        },
+        "required": [
+          "id",
+          "reason"
+        ],
+        "type": "object"
+      },
+      "__schema4": {
+        "additionalProperties": false,
+        "properties": {
+          "batch": {
+            "additionalProperties": false,
+            "properties": {
+              "about_facts": {
+                "description": "Facts about the reviewed entities",
+                "items": {
+                  "$ref": "#/definitions/__schema22"
+                },
+                "maxItems": 500,
+                "type": "array"
+              },
+              "audience": {
+                "description": "Who can see every item of the batch",
+                "type": "string"
+              },
+              "items": {
+                "items": {
+                  "$ref": "#/definitions/__schema5"
+                },
+                "maxItems": 20,
+                "type": "array"
+              },
+              "neighbors": {
+                "description": "Similar items the reviewed ones may duplicate or contradict",
+                "items": {
+                  "$ref": "#/definitions/__schema22"
+                },
+                "maxItems": 500,
+                "type": "array"
+              },
+              "relationships": {
+                "description": "Relationships touching the reviewed items or their neighbors",
+                "items": {
+                  "$ref": "#/definitions/__schema23"
+                },
+                "maxItems": 500,
+                "type": "array"
+              }
+            },
+            "required": [
+              "about_facts",
+              "audience",
+              "items",
+              "neighbors",
+              "relationships"
+            ],
+            "type": "object"
+          },
+          "changes": {
+            "additionalProperties": false,
+            "properties": {
+              "contradictions": {
+                "default": [],
+                "items": {
+                  "$ref": "#/definitions/__schema31"
+                },
+                "maxItems": 100,
+                "type": "array"
+              },
+              "merges": {
+                "default": [],
+                "items": {
+                  "$ref": "#/definitions/__schema24"
+                },
+                "maxItems": 100,
+                "type": "array"
+              },
+              "relationships": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema35"
+                  }
+                ],
+                "default": [],
+                "description": "Relationships to remove: duplicates, and inverses of another one"
+              },
+              "rewrites": {
+                "default": [],
+                "items": {
+                  "$ref": "#/definitions/__schema32"
+                },
+                "maxItems": 100,
+                "type": "array"
+              },
+              "summaries": {
+                "default": [],
+                "items": {
+                  "$ref": "#/definitions/__schema34"
+                },
+                "maxItems": 100,
+                "type": "array"
+              }
+            },
+            "required": [
+              "contradictions",
+              "merges",
+              "relationships",
+              "rewrites",
+              "summaries"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "batch",
+          "changes"
+        ],
+        "type": "object"
+      },
+      "__schema5": {
+        "additionalProperties": false,
+        "properties": {
+          "about_fact_ids": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema18"
+              }
+            ],
+            "description": "For an entity, the facts about it, newest first"
+          },
+          "content": {
+            "$ref": "#/definitions/__schema10"
+          },
+          "description": {
+            "$ref": "#/definitions/__schema9"
+          },
+          "id": {
+            "$ref": "#/definitions/__schema1"
+          },
+          "kind": {
+            "$ref": "#/definitions/__schema6"
+          },
+          "last_seen_at": {
+            "$ref": "#/definitions/__schema12"
+          },
+          "lost_source_ids": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema19"
+              }
+            ],
+            "description": "The memories it came from that were deleted"
+          },
+          "neighbor_ids": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema17"
+              }
+            ],
+            "description": "The most similar items of its kind"
+          },
+          "occurrences": {
+            "$ref": "#/definitions/__schema11"
+          },
+          "person_edited": {
+            "$ref": "#/definitions/__schema14"
+          },
+          "reasons": {
+            "description": "Why it is reviewed",
+            "items": {
+              "$ref": "#/definitions/__schema16"
+            },
+            "type": "array"
+          },
+          "remaining_memories": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema20"
+              }
+            ],
+            "description": "The memories it came from that remain, to rewrite it from"
+          },
+          "title": {
+            "$ref": "#/definitions/__schema8"
+          },
+          "type": {
+            "$ref": "#/definitions/__schema7"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "occurrences",
+          "reasons",
+          "title",
+          "type"
+        ],
+        "type": "object"
+      },
+      "__schema6": {
+        "enum": [
+          "fact",
+          "entity"
+        ],
+        "type": "string"
+      },
+      "__schema7": {
+        "type": "string"
+      },
+      "__schema8": {
+        "type": "string"
+      },
+      "__schema9": {
+        "type": "string"
+      }
+    },
+    "properties": {
+      "changes": {
+        "description": "What changed, each with why",
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "type": "array"
+      },
+      "needs_review": {
+        "description": "Changes not made because a person must decide, each with why",
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "type": "array"
+      },
+      "plans": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema3"
+          }
+        ],
+        "description": "With plan_only and a batch: the batch and its changes, to pass back to apply them"
+      },
+      "rejected": {
+        "description": "Changes that broke a rule, each with why",
+        "items": {
+          "$ref": "#/definitions/__schema2"
+        },
+        "type": "array"
+      },
+      "written": {
+        "description": "Facts, entities and relationships written",
+        "type": "number"
+      }
+    },
+    "required": [
+      "changes",
+      "needs_review",
+      "rejected",
+      "written"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

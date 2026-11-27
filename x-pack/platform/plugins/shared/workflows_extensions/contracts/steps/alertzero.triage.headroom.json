@@ -1,0 +1,50 @@
+{
+  "exposure": "open",
+  "id": "alertzero.triage.headroom",
+  "input": {
+    "properties": {
+      "batch_workflow_id": {
+        "description": "Workflow id of the batch workflow whose runs are counted.",
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "required": [
+      "batch_workflow_id"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "properties": {
+      "in_flight": {
+        "maximum": 9007199254740991,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "lag_ms": {
+        "minimum": 0,
+        "type": "number"
+      },
+      "slots": {
+        "maximum": 9007199254740991,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "status": {
+        "enum": [
+          "ok",
+          "behind",
+          "unknown"
+        ],
+        "type": "string"
+      }
+    },
+    "required": [
+      "status"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

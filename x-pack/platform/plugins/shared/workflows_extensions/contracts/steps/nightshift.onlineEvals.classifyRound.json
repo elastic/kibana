@@ -1,0 +1,117 @@
+{
+  "exposure": "open",
+  "id": "nightshift.onlineEvals.classifyRound",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "maxLength": 100,
+        "type": "string"
+      }
+    },
+    "properties": {
+      "follow_up": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "`inputs.context.follow_up` of the run; `alert_recovered` for a recovery round."
+      },
+      "investigation_id": {
+        "description": "The investigation the run belongs to.",
+        "maxLength": 1024,
+        "minLength": 1,
+        "type": "string"
+      },
+      "investigation_started_at": {
+        "description": "When the investigation workflow run started (`execution.startedAt`).",
+        "maxLength": 100,
+        "type": "string"
+      }
+    },
+    "required": [
+      "investigation_id",
+      "investigation_started_at"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "definitions": {
+      "__schema0": {
+        "enum": [
+          "initial",
+          "follow_up",
+          "alert_recovery"
+        ],
+        "type": "string"
+      },
+      "__schema1": {
+        "type": "string"
+      },
+      "__schema2": {
+        "enum": [
+          "found",
+          "changed",
+          "withdrawn",
+          "unchanged",
+          "unknown"
+        ],
+        "type": "string"
+      },
+      "__schema3": {
+        "enum": [
+          "evals_unavailable",
+          "paused",
+          "no_round",
+          "follow_up_not_scored",
+          "classification_failed"
+        ],
+        "type": "string"
+      }
+    },
+    "properties": {
+      "root_cause_outcome": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema2"
+          }
+        ],
+        "description": "What the round did to the confirmed root cause, from the findings recorder's hypotheses before and after it. `unknown` when they can't be compared."
+      },
+      "round_id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema1"
+          }
+        ],
+        "description": "The round this run created."
+      },
+      "round_kind": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "What kind of round this run created."
+      },
+      "should_score": {
+        "description": "Whether to start the scoring workflow for this round.",
+        "type": "boolean"
+      },
+      "skip_reason": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema3"
+          }
+        ],
+        "description": "Why the round is not scored."
+      }
+    },
+    "required": [
+      "should_score"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

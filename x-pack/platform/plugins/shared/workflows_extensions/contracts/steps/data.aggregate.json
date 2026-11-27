@@ -1,0 +1,123 @@
+{
+  "config": {
+    "properties": {
+      "items": {}
+    },
+    "required": [
+      "items"
+    ],
+    "type": "object"
+  },
+  "exposure": "open",
+  "id": "data.aggregate",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "type": "string"
+      },
+      "__schema1": {
+        "properties": {
+          "field": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "operation": {
+            "enum": [
+              "count",
+              "sum",
+              "avg",
+              "min",
+              "max"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "operation"
+        ],
+        "type": "object"
+      },
+      "__schema2": {
+        "properties": {
+          "from": {
+            "type": "number"
+          },
+          "label": {
+            "type": "string"
+          },
+          "to": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      }
+    },
+    "properties": {
+      "buckets": {
+        "properties": {
+          "field": {
+            "type": "string"
+          },
+          "ranges": {
+            "items": {
+              "$ref": "#/definitions/__schema2"
+            },
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "field",
+          "ranges"
+        ],
+        "type": "object"
+      },
+      "group_by": {
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
+      "limit": {
+        "exclusiveMinimum": true,
+        "minimum": 0,
+        "type": "number"
+      },
+      "metrics": {
+        "items": {
+          "$ref": "#/definitions/__schema1"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
+      "order": {
+        "default": "asc",
+        "enum": [
+          "asc",
+          "desc"
+        ],
+        "type": "string"
+      },
+      "order_by": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "group_by",
+      "metrics"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "items": {
+      "additionalProperties": {},
+      "type": "object"
+    },
+    "type": "array"
+  },
+  "stability": "tech_preview"
+}

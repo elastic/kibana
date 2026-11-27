@@ -1,0 +1,56 @@
+{
+  "exposure": "open",
+  "id": "nightshift.sendNotifications",
+  "input": {
+    "properties": {
+      "investigation_id": {
+        "description": "The investigation receiving lifecycle notifications",
+        "maxLength": 500,
+        "minLength": 1,
+        "type": "string"
+      },
+      "phase": {
+        "enum": [
+          "started",
+          "completed",
+          "failed",
+          "timed_out"
+        ],
+        "type": "string"
+      },
+      "reason": {
+        "maxLength": 10000,
+        "type": "string"
+      }
+    },
+    "required": [
+      "investigation_id",
+      "phase"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "properties": {
+      "failed": {
+        "description": "Destinations whose delivery failed in this run",
+        "type": "number"
+      },
+      "sent": {
+        "description": "Destinations that received the message in this run",
+        "type": "number"
+      },
+      "unconfirmed": {
+        "description": "Attempts without a confirmed delivery result",
+        "type": "number"
+      }
+    },
+    "required": [
+      "failed",
+      "sent",
+      "unconfirmed"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

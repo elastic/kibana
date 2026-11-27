@@ -1,0 +1,263 @@
+{
+  "exposure": "open",
+  "id": "security.matchAttackFingerprints",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "additionalProperties": {},
+        "type": "object"
+      },
+      "__schema1": {
+        "maxLength": 128,
+        "type": "string"
+      }
+    },
+    "properties": {
+      "attacks": {
+        "description": "Persisted Attack Discovery documents from one worker run",
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "maxItems": 2000,
+        "type": "array"
+      },
+      "parent_run_id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema1"
+          }
+        ],
+        "description": "Workflow execution id of the worker run, stored on a new fingerprint"
+      }
+    },
+    "required": [
+      "attacks"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "definitions": {
+      "__schema0": {
+        "additionalProperties": false,
+        "properties": {
+          "alert_ids": {
+            "items": {
+              "$ref": "#/definitions/__schema1"
+            },
+            "maxItems": 1000,
+            "type": "array"
+          },
+          "attack_discovery_id": {
+            "maxLength": 512,
+            "type": "string"
+          },
+          "related_investigation_id": {
+            "maxLength": 256,
+            "type": "string"
+          },
+          "related_link_reason": {
+            "maxLength": 32,
+            "type": "string"
+          },
+          "sibling_alert_ids": {
+            "items": {
+              "$ref": "#/definitions/__schema2"
+            },
+            "maxItems": 1000,
+            "type": "array"
+          },
+          "sibling_attack_discovery_ids": {
+            "items": {
+              "$ref": "#/definitions/__schema3"
+            },
+            "maxItems": 1000,
+            "type": "array"
+          },
+          "summary_markdown": {
+            "maxLength": 8000,
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 1024,
+            "type": "string"
+          }
+        },
+        "required": [
+          "alert_ids",
+          "attack_discovery_id",
+          "related_investigation_id",
+          "related_link_reason",
+          "sibling_alert_ids",
+          "sibling_attack_discovery_ids",
+          "summary_markdown",
+          "title"
+        ],
+        "type": "object"
+      },
+      "__schema1": {
+        "maxLength": 256,
+        "type": "string"
+      },
+      "__schema10": {
+        "maxLength": 64,
+        "type": "string"
+      },
+      "__schema2": {
+        "maxLength": 256,
+        "type": "string"
+      },
+      "__schema3": {
+        "maxLength": 512,
+        "type": "string"
+      },
+      "__schema4": {
+        "additionalProperties": false,
+        "properties": {
+          "alert_ids": {
+            "items": {
+              "$ref": "#/definitions/__schema5"
+            },
+            "maxItems": 1000,
+            "type": "array"
+          },
+          "attack_discovery_id": {
+            "maxLength": 512,
+            "type": "string"
+          },
+          "entity_pairs": {
+            "items": {
+              "$ref": "#/definitions/__schema9"
+            },
+            "maxItems": 100,
+            "type": "array"
+          },
+          "expires_at": {
+            "maxLength": 64,
+            "type": "string"
+          },
+          "fingerprint_pending": {
+            "type": "boolean"
+          },
+          "first_alert_at": {
+            "maxLength": 64,
+            "type": "string"
+          },
+          "host_entity_ids": {
+            "items": {
+              "$ref": "#/definitions/__schema7"
+            },
+            "maxItems": 100,
+            "type": "array"
+          },
+          "investigation_id": {
+            "maxLength": 256,
+            "type": "string"
+          },
+          "journal_alerts_retired": {
+            "type": "boolean"
+          },
+          "last_alert_at": {
+            "maxLength": 64,
+            "type": "string"
+          },
+          "own_fingerprint_id": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema6"
+              }
+            ],
+            "description": "Fingerprint id for a review this attach starts after the Investigation changed"
+          },
+          "retarget_if_missing": {
+            "description": "True only when the matcher confirmed the Investigation is missing",
+            "type": "boolean"
+          },
+          "summary_markdown": {
+            "maxLength": 8000,
+            "type": "string"
+          },
+          "tactics": {
+            "items": {
+              "$ref": "#/definitions/__schema10"
+            },
+            "maxItems": 100,
+            "type": "array"
+          },
+          "tag_correlated_alerts": {
+            "type": "boolean"
+          },
+          "tag_fp_chain_alerts": {
+            "type": "boolean"
+          },
+          "title": {
+            "maxLength": 1024,
+            "type": "string"
+          },
+          "user_entity_ids": {
+            "items": {
+              "$ref": "#/definitions/__schema8"
+            },
+            "maxItems": 100,
+            "type": "array"
+          }
+        },
+        "required": [
+          "alert_ids",
+          "attack_discovery_id",
+          "fingerprint_pending",
+          "investigation_id",
+          "journal_alerts_retired",
+          "retarget_if_missing",
+          "summary_markdown",
+          "tag_correlated_alerts",
+          "tag_fp_chain_alerts",
+          "title"
+        ],
+        "type": "object"
+      },
+      "__schema5": {
+        "maxLength": 256,
+        "type": "string"
+      },
+      "__schema6": {
+        "maxLength": 128,
+        "type": "string"
+      },
+      "__schema7": {
+        "maxLength": 512,
+        "type": "string"
+      },
+      "__schema8": {
+        "maxLength": 512,
+        "type": "string"
+      },
+      "__schema9": {
+        "maxLength": 1024,
+        "type": "string"
+      }
+    },
+    "properties": {
+      "attachments": {
+        "description": "Attacks joined to an Investigation that already exists or is opened by a sibling",
+        "items": {
+          "$ref": "#/definitions/__schema4"
+        },
+        "type": "array"
+      },
+      "reviews": {
+        "description": "Attacks that open an Investigation and run FP/TP analysis",
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "attachments",
+      "reviews"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

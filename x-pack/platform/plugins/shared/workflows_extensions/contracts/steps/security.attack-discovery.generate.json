@@ -1,0 +1,145 @@
+{
+  "exposure": "open",
+  "id": "security.attack-discovery.generate",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "type": "string"
+      }
+    },
+    "properties": {
+      "additional_context": {
+        "type": "string"
+      },
+      "aggregate_by": {
+        "maxLength": 256,
+        "type": "string"
+      },
+      "alerts": {
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
+      "api_config": {
+        "properties": {
+          "action_type_id": {
+            "type": "string"
+          },
+          "connector_id": {
+            "type": "string"
+          },
+          "default_system_prompt_id": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          },
+          "provider": {
+            "enum": [
+              "OpenAI",
+              "Azure OpenAI",
+              "Other"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "connector_id"
+        ],
+        "type": "object"
+      },
+      "plugin_id": {
+        "maxLength": 256,
+        "type": "string"
+      },
+      "replacements": {
+        "additionalProperties": {
+          "type": "string"
+        },
+        "type": "object"
+      },
+      "size": {
+        "default": 10,
+        "maximum": 9007199254740991,
+        "minimum": -9007199254740991,
+        "type": "integer"
+      }
+    },
+    "required": [
+      "alerts",
+      "api_config"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "properties": {
+      "attack_discoveries": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "alert_ids": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "details_markdown": {
+              "type": "string"
+            },
+            "entity_summary_markdown": {
+              "type": "string"
+            },
+            "id": {
+              "type": "string"
+            },
+            "mitre_attack_tactics": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "summary_markdown": {
+              "type": "string"
+            },
+            "timestamp": {
+              "type": "string"
+            },
+            "title": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "alert_ids",
+            "details_markdown",
+            "summary_markdown",
+            "title"
+          ],
+          "type": "object"
+        },
+        "nullable": true,
+        "type": "array"
+      },
+      "execution_uuid": {
+        "format": "uuid",
+        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+        "type": "string"
+      },
+      "replacements": {
+        "additionalProperties": {
+          "type": "string"
+        },
+        "type": "object"
+      }
+    },
+    "required": [
+      "attack_discoveries",
+      "execution_uuid",
+      "replacements"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

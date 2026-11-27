@@ -1,0 +1,160 @@
+{
+  "exposure": "open",
+  "id": "security.getNotes",
+  "input": {
+    "properties": {
+      "document_id": {
+        "description": "The Elasticsearch `_id` of the alert, attack, or document to retrieve notes for.",
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "required": [
+      "document_id"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "definitions": {
+      "__schema0": {
+        "additionalProperties": false,
+        "properties": {
+          "created": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema6"
+              }
+            ],
+            "description": "When the note was created, as a 13-digit Epoch timestamp."
+          },
+          "created_by": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema5"
+              }
+            ],
+            "description": "The user who created the note."
+          },
+          "document_id": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema3"
+              }
+            ],
+            "description": "The Elasticsearch `_id` of the document the note is attached to."
+          },
+          "note_id": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema1"
+              }
+            ],
+            "description": "The `savedObjectId` of the note."
+          },
+          "text": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema2"
+              }
+            ],
+            "description": "The text content of the note."
+          },
+          "timeline_id": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema4"
+              }
+            ],
+            "description": "The `savedObjectId` of the Timeline the note belongs to, if any."
+          },
+          "updated": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema8"
+              }
+            ],
+            "description": "When the note was last updated, as a 13-digit Epoch timestamp."
+          },
+          "updated_by": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema7"
+              }
+            ],
+            "description": "The user who last updated the note."
+          },
+          "version": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema9"
+              }
+            ],
+            "description": "The version of the note."
+          }
+        },
+        "type": "object"
+      },
+      "__schema1": {
+        "nullable": true,
+        "type": "string"
+      },
+      "__schema2": {
+        "nullable": true,
+        "type": "string"
+      },
+      "__schema3": {
+        "nullable": true,
+        "type": "string"
+      },
+      "__schema4": {
+        "nullable": true,
+        "type": "string"
+      },
+      "__schema5": {
+        "nullable": true,
+        "type": "string"
+      },
+      "__schema6": {
+        "nullable": true,
+        "type": "number"
+      },
+      "__schema7": {
+        "nullable": true,
+        "type": "string"
+      },
+      "__schema8": {
+        "nullable": true,
+        "type": "number"
+      },
+      "__schema9": {
+        "nullable": true,
+        "type": "string"
+      }
+    },
+    "properties": {
+      "notes": {
+        "description": "The notes attached to the document.",
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "type": "array"
+      },
+      "success": {
+        "type": "boolean"
+      },
+      "total_count": {
+        "description": "The total number of notes returned.",
+        "type": "number"
+      }
+    },
+    "required": [
+      "notes",
+      "success",
+      "total_count"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

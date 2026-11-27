@@ -1,0 +1,47 @@
+{
+  "exposure": "open",
+  "id": "security.renderAlertNarrative",
+  "input": {
+    "properties": {
+      "alertId": {
+        "description": "The alert ID",
+        "type": "string"
+      },
+      "alertIndex": {
+        "description": "The index that contains the alert",
+        "type": "string"
+      }
+    },
+    "required": [
+      "alertId",
+      "alertIndex"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "properties": {
+      "alert_id": {
+        "type": "string"
+      },
+      "alert_index": {
+        "type": "string"
+      },
+      "message": {
+        "type": "string"
+      },
+      "timeline_string": {
+        "description": "A Timeline-like English string for the alert",
+        "type": "string"
+      }
+    },
+    "required": [
+      "alert_id",
+      "alert_index",
+      "message",
+      "timeline_string"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

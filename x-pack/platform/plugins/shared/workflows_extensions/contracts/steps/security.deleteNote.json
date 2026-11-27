@@ -1,0 +1,59 @@
+{
+  "exposure": "open",
+  "id": "security.deleteNote",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema1": {
+        "items": {
+          "$ref": "#/definitions/__schema2"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
+      "__schema2": {
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "properties": {
+      "ids": {
+        "anyOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          },
+          {
+            "$ref": "#/definitions/__schema1"
+          }
+        ],
+        "description": "A single note `savedObjectId` or a list of IDs to support bulk deletion."
+      }
+    },
+    "required": [
+      "ids"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "properties": {
+      "message": {
+        "maxLength": 1000,
+        "type": "string"
+      },
+      "success": {
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "success"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

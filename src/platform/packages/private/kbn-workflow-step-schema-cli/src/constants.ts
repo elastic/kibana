@@ -13,3 +13,15 @@ export const DEFAULT_CHANNEL = 'release';
 
 /** Public API version required by the reused versioned routes. */
 export const KIBANA_API_VERSION = '2023-10-31';
+
+/** Directory, relative to the repo root, with one committed `<step id>.json` contract per custom step. */
+export const STEP_CONTRACTS_DIR =
+  'x-pack/platform/plugins/shared/workflows_extensions/contracts/steps';
+
+/** File, relative to the repo root, with the breaking step contract changes workflows-eng accepted. */
+export const STEP_CONTRACTS_ALLOWLIST_PATH =
+  'x-pack/platform/plugins/shared/workflows_extensions/contracts/breaking_changes_allowlist.json';
+
+/** File, relative to the repo root, with the custom steps workflows-eng approved. */
+export const STEP_CONTRACTS_APPROVED_STEPS_PATH =
+  'x-pack/platform/plugins/shared/workflows_extensions/contracts/approved_steps.json';

@@ -1,0 +1,53 @@
+{
+  "exposure": "open",
+  "id": "nightshift.obtainSandbox",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "type": "boolean"
+      }
+    },
+    "properties": {
+      "conversation_id": {
+        "description": "Unscoped conversation id from the Agent Builder hook.",
+        "maxLength": 1024,
+        "minLength": 1,
+        "type": "string"
+      },
+      "required": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "When false, a missing sandbox config skips allocate and still returns sandbox_id. Hydrate leaves this unset (fail closed). Optimize sets false so transcript extraction still runs."
+      }
+    },
+    "required": [
+      "conversation_id"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "properties": {
+      "conversation_id": {
+        "description": "Unscoped conversation id from the hook.",
+        "type": "string"
+      },
+      "sandbox_id": {
+        "description": "Workspace key (`<space>__<conversation>`). Pass this to every writer.",
+        "type": "string"
+      },
+      "skipped": {
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "conversation_id",
+      "sandbox_id"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

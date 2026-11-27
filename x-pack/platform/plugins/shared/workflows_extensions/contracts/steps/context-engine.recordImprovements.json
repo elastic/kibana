@@ -1,0 +1,160 @@
+{
+  "exposure": "open",
+  "id": "context-engine.recordImprovements",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema1": {
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema2": {
+        "items": {
+          "$ref": "#/definitions/__schema3"
+        },
+        "maxItems": 1000,
+        "type": "array"
+      },
+      "__schema3": {
+        "maxLength": 1024,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema4": {
+        "items": {
+          "$ref": "#/definitions/__schema5"
+        },
+        "maxItems": 200,
+        "type": "array"
+      },
+      "__schema5": {}
+    },
+    "properties": {
+      "agent_run_id": {
+        "description": "The workflow execution that produced these proposals",
+        "maxLength": 1024,
+        "minLength": 1,
+        "type": "string"
+      },
+      "ai_index_id": {
+        "description": "The AI index these improvements are proposed for",
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "improvements": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema4"
+          }
+        ],
+        "default": [],
+        "description": "What the run proposed, straight off the agent"
+      },
+      "signal_spaces": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema2"
+          }
+        ],
+        "default": [],
+        "description": "The spaces the signals came from, echoed from the context step"
+      },
+      "signal_window": {
+        "description": "The window the signals were read from, echoed from the context step",
+        "properties": {
+          "from": {
+            "$ref": "#/definitions/__schema0"
+          },
+          "to": {
+            "$ref": "#/definitions/__schema1"
+          }
+        },
+        "required": [
+          "from",
+          "to"
+        ],
+        "type": "object"
+      }
+    },
+    "required": [
+      "agent_run_id",
+      "ai_index_id",
+      "signal_window"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "definitions": {
+      "__schema0": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "improvement_id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "action",
+          "improvement_id",
+          "title"
+        ],
+        "type": "object"
+      },
+      "__schema1": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "type": "object"
+      }
+    },
+    "properties": {
+      "recorded": {
+        "description": "The proposals that became revisions, with the ids the server derived for them",
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "type": "array"
+      },
+      "skipped": {
+        "description": "The proposals that were not recorded, each with why",
+        "items": {
+          "$ref": "#/definitions/__schema1"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "recorded",
+      "skipped"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

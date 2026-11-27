@@ -1,0 +1,179 @@
+{
+  "exposure": "open",
+  "id": "security.attack-discovery.defaultAlertRetrieval",
+  "input": {
+    "properties": {
+      "alerts_index_pattern": {
+        "type": "string"
+      },
+      "anonymization_fields": {
+        "items": {
+          "properties": {
+            "allowed": {
+              "type": "boolean"
+            },
+            "anonymized": {
+              "type": "boolean"
+            },
+            "field": {
+              "type": "string"
+            },
+            "id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "field",
+            "id"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "api_config": {
+        "properties": {
+          "action_type_id": {
+            "type": "string"
+          },
+          "connector_id": {
+            "type": "string"
+          },
+          "default_system_prompt_id": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          },
+          "provider": {
+            "enum": [
+              "OpenAI",
+              "Azure OpenAI",
+              "Other"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "connector_id"
+        ],
+        "type": "object"
+      },
+      "end": {
+        "type": "string"
+      },
+      "esql_query": {
+        "type": "string"
+      },
+      "filter": {
+        "additionalProperties": {},
+        "type": "object"
+      },
+      "replacements": {
+        "additionalProperties": {
+          "type": "string"
+        },
+        "type": "object"
+      },
+      "size": {
+        "maximum": 9007199254740991,
+        "minimum": -9007199254740991,
+        "type": "integer"
+      },
+      "start": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "alerts_index_pattern",
+      "anonymization_fields",
+      "api_config",
+      "size"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "properties": {
+      "alerts": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "alerts_context_count": {
+        "maximum": 9007199254740991,
+        "minimum": -9007199254740991,
+        "type": "integer"
+      },
+      "anonymized_alerts": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "metadata": {
+              "additionalProperties": {},
+              "type": "object"
+            },
+            "page_content": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "metadata",
+            "page_content"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "api_config": {
+        "additionalProperties": false,
+        "properties": {
+          "action_type_id": {
+            "type": "string"
+          },
+          "connector_id": {
+            "type": "string"
+          },
+          "default_system_prompt_id": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          },
+          "provider": {
+            "enum": [
+              "OpenAI",
+              "Azure OpenAI",
+              "Other"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "connector_id"
+        ],
+        "type": "object"
+      },
+      "connector_name": {
+        "type": "string"
+      },
+      "replacements": {
+        "additionalProperties": {
+          "type": "string"
+        },
+        "type": "object"
+      }
+    },
+    "required": [
+      "alerts",
+      "alerts_context_count",
+      "api_config",
+      "replacements"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

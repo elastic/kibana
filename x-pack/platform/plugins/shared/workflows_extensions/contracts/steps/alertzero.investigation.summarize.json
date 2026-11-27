@@ -1,0 +1,64 @@
+{
+  "exposure": "open",
+  "id": "alertzero.investigation.summarize",
+  "input": {
+    "properties": {
+      "conversation_id": {
+        "description": "Investigation or escalation conversation to read and summarize.",
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "required": [
+      "conversation_id"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "definitions": {
+      "__schema0": {
+        "enum": [
+          "template",
+          "no_proposal",
+          "empty",
+          "no_connector",
+          "incomplete",
+          "cancelled"
+        ],
+        "type": "string"
+      },
+      "__schema1": {
+        "type": "string"
+      }
+    },
+    "properties": {
+      "reason": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "Why the step wrote nothing."
+      },
+      "skipped": {
+        "description": "True when no summary was written.",
+        "type": "boolean"
+      },
+      "summary": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema1"
+          }
+        ],
+        "description": "Reading written to metadata.summary."
+      }
+    },
+    "required": [
+      "skipped"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

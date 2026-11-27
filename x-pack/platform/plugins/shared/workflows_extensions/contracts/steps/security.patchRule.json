@@ -1,0 +1,6040 @@
+{
+  "exposure": "open",
+  "id": "security.patchRule",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema1": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema10": {
+        "type": "string"
+      },
+      "__schema11": {
+        "enum": [
+          "exactMatch",
+          "aliasMatch",
+          "conflict"
+        ],
+        "type": "string"
+      },
+      "__schema12": {
+        "type": "string"
+      },
+      "__schema13": {
+        "enum": [
+          "savedObjectConversion",
+          "savedObjectImport"
+        ],
+        "type": "string"
+      },
+      "__schema14": {
+        "type": "string"
+      },
+      "__schema15": {
+        "type": "string"
+      },
+      "__schema16": {
+        "type": "string"
+      },
+      "__schema17": {
+        "type": "string"
+      },
+      "__schema18": {
+        "type": "string"
+      },
+      "__schema19": {
+        "additionalProperties": {},
+        "properties": {},
+        "type": "object"
+      },
+      "__schema2": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema3"
+          }
+        ]
+      },
+      "__schema20": {
+        "properties": {
+          "field_names": {
+            "items": {
+              "$ref": "#/definitions/__schema21"
+            },
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "field_names"
+        ],
+        "type": "object"
+      },
+      "__schema21": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema22": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema23"
+          }
+        ]
+      },
+      "__schema23": {
+        "anyOf": [
+          {
+            "enum": [
+              "no_actions",
+              "rule"
+            ],
+            "type": "string"
+          },
+          {
+            "pattern": "^[1-9]\\d*[smhd]$",
+            "type": "string"
+          }
+        ]
+      },
+      "__schema24": {
+        "items": {
+          "oneOf": [
+            {
+              "properties": {
+                "action_type_id": {
+                  "enum": [
+                    ".osquery"
+                  ],
+                  "type": "string"
+                },
+                "params": {
+                  "properties": {
+                    "ecs_mapping": {
+                      "allOf": [
+                        {
+                          "$ref": "#/definitions/__schema26"
+                        }
+                      ]
+                    },
+                    "pack_id": {
+                      "allOf": [
+                        {
+                          "$ref": "#/definitions/__schema28"
+                        }
+                      ],
+                      "description": "To specify a query pack, use the packId field. Example: \"packId\": \"processes_elastic\""
+                    },
+                    "queries": {
+                      "items": {
+                        "properties": {
+                          "ecs_mapping": {
+                            "allOf": [
+                              {
+                                "$ref": "#/definitions/__schema26"
+                              }
+                            ]
+                          },
+                          "id": {
+                            "description": "Query ID",
+                            "maxLength": 256,
+                            "type": "string"
+                          },
+                          "platform": {
+                            "maxLength": 256,
+                            "type": "string"
+                          },
+                          "query": {
+                            "description": "Query to run",
+                            "maxLength": 30000,
+                            "type": "string"
+                          },
+                          "removed": {
+                            "type": "boolean"
+                          },
+                          "snapshot": {
+                            "type": "boolean"
+                          },
+                          "version": {
+                            "allOf": [
+                              {
+                                "$ref": "#/definitions/__schema27"
+                              }
+                            ],
+                            "description": "Query version"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "query"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "query": {
+                      "allOf": [
+                        {
+                          "$ref": "#/definitions/__schema25"
+                        }
+                      ],
+                      "description": "To run a single query, use the query field and enter a SQL query. Example: \"query\": \"SELECT * FROM processes;\""
+                    },
+                    "saved_query_id": {
+                      "allOf": [
+                        {
+                          "$ref": "#/definitions/__schema29"
+                        }
+                      ],
+                      "description": "To run a saved query, use the saved_query_id field and specify the saved query ID. Example: \"saved_query_id\": \"processes_elastic\""
+                    },
+                    "timeout": {
+                      "allOf": [
+                        {
+                          "$ref": "#/definitions/__schema30"
+                        }
+                      ],
+                      "description": "A timeout period, in seconds, after which the query will stop running. Overwriting the default timeout allows you to support queries that require more time to complete. The default and minimum supported value is 60. The maximum supported value is 900. Example: \"timeout\": 120."
+                    }
+                  },
+                  "type": "object"
+                }
+              },
+              "required": [
+                "action_type_id",
+                "params"
+              ],
+              "type": "object"
+            },
+            {
+              "properties": {
+                "action_type_id": {
+                  "enum": [
+                    ".endpoint"
+                  ],
+                  "type": "string"
+                },
+                "params": {
+                  "anyOf": [
+                    {
+                      "properties": {
+                        "command": {
+                          "enum": [
+                            "isolate"
+                          ],
+                          "type": "string"
+                        },
+                        "comment": {
+                          "maxLength": 30000,
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "command"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "oneOf": [
+                        {
+                          "properties": {
+                            "command": {
+                              "description": "To run an endpoint response action, specify a value for the command field. Example: \"command\": \"kill-process\"",
+                              "enum": [
+                                "kill-process"
+                              ],
+                              "type": "string"
+                            },
+                            "comment": {
+                              "allOf": [
+                                {
+                                  "$ref": "#/definitions/__schema31"
+                                }
+                              ],
+                              "description": "Add a note that explains or describes the action. You can find your comment in the response actions history log. Example: \"comment\": \"Check processes\""
+                            },
+                            "config": {
+                              "properties": {
+                                "field": {
+                                  "description": "Field to use instead of `process.pid`",
+                                  "maxLength": 2000,
+                                  "type": "string"
+                                },
+                                "kill_descendants": {
+                                  "allOf": [
+                                    {
+                                      "$ref": "#/definitions/__schema33"
+                                    }
+                                  ],
+                                  "description": "Whether to also terminate the descendant processes of the targeted process."
+                                },
+                                "overwrite": {
+                                  "allOf": [
+                                    {
+                                      "$ref": "#/definitions/__schema32"
+                                    }
+                                  ],
+                                  "default": true,
+                                  "description": "Whether to overwrite field with `process.pid`"
+                                }
+                              },
+                              "required": [
+                                "field"
+                              ],
+                              "type": "object"
+                            }
+                          },
+                          "required": [
+                            "command",
+                            "config"
+                          ],
+                          "type": "object"
+                        },
+                        {
+                          "properties": {
+                            "command": {
+                              "description": "To run an endpoint response action, specify a value for the command field. Example: \"command\": \"suspend-process\"",
+                              "enum": [
+                                "suspend-process"
+                              ],
+                              "type": "string"
+                            },
+                            "comment": {
+                              "allOf": [
+                                {
+                                  "$ref": "#/definitions/__schema34"
+                                }
+                              ],
+                              "description": "Add a note that explains or describes the action. You can find your comment in the response actions history log. Example: \"comment\": \"Check processes\""
+                            },
+                            "config": {
+                              "properties": {
+                                "field": {
+                                  "description": "Field to use instead of process.pid",
+                                  "maxLength": 2000,
+                                  "type": "string"
+                                },
+                                "overwrite": {
+                                  "allOf": [
+                                    {
+                                      "$ref": "#/definitions/__schema35"
+                                    }
+                                  ],
+                                  "default": true,
+                                  "description": "Whether to overwrite field with process.pid"
+                                }
+                              },
+                              "required": [
+                                "field"
+                              ],
+                              "type": "object"
+                            }
+                          },
+                          "required": [
+                            "command",
+                            "config"
+                          ],
+                          "type": "object"
+                        }
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "command": {
+                          "enum": [
+                            "runscript"
+                          ],
+                          "type": "string"
+                        },
+                        "comment": {
+                          "allOf": [
+                            {
+                              "$ref": "#/definitions/__schema36"
+                            }
+                          ],
+                          "description": "Add a note that explains or describes the action. You can find your comment in the response actions history log"
+                        },
+                        "config": {
+                          "properties": {
+                            "linux": {
+                              "allOf": [
+                                {
+                                  "$ref": "#/definitions/__schema37"
+                                }
+                              ]
+                            },
+                            "macos": {
+                              "allOf": [
+                                {
+                                  "$ref": "#/definitions/__schema37"
+                                }
+                              ]
+                            },
+                            "windows": {
+                              "allOf": [
+                                {
+                                  "$ref": "#/definitions/__schema37"
+                                }
+                              ]
+                            }
+                          },
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "command"
+                      ],
+                      "type": "object"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "action_type_id",
+                "params"
+              ],
+              "type": "object"
+            }
+          ]
+        },
+        "type": "array"
+      },
+      "__schema25": {
+        "maxLength": 30000,
+        "type": "string"
+      },
+      "__schema26": {
+        "additionalProperties": {
+          "properties": {
+            "field": {
+              "maxLength": 2000,
+              "type": "string"
+            },
+            "value": {
+              "anyOf": [
+                {
+                  "maxLength": 30000,
+                  "type": "string"
+                },
+                {
+                  "items": {
+                    "maxLength": 30000,
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              ]
+            }
+          },
+          "type": "object"
+        },
+        "properties": {},
+        "type": "object"
+      },
+      "__schema27": {
+        "maxLength": 256,
+        "type": "string"
+      },
+      "__schema28": {
+        "maxLength": 256,
+        "type": "string"
+      },
+      "__schema29": {
+        "maxLength": 256,
+        "type": "string"
+      },
+      "__schema3": {
+        "maximum": 100,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema30": {
+        "type": "number"
+      },
+      "__schema31": {
+        "maxLength": 30000,
+        "type": "string"
+      },
+      "__schema32": {
+        "type": "boolean"
+      },
+      "__schema33": {
+        "type": "boolean"
+      },
+      "__schema34": {
+        "maxLength": 30000,
+        "type": "string"
+      },
+      "__schema35": {
+        "type": "boolean"
+      },
+      "__schema36": {
+        "maxLength": 30000,
+        "type": "string"
+      },
+      "__schema37": {
+        "properties": {
+          "scriptId": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema38"
+              }
+            ],
+            "description": "The ID of the script to run (from the Kibana Script library)"
+          },
+          "scriptInput": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema39"
+              }
+            ],
+            "description": "The arguments to pass to the script (if any)"
+          },
+          "timeout": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema40"
+              }
+            ],
+            "description": "Specify the timeout in seconds for the script execution"
+          }
+        },
+        "type": "object"
+      },
+      "__schema38": {
+        "maxLength": 256,
+        "type": "string"
+      },
+      "__schema39": {
+        "maxLength": 8192,
+        "type": "string"
+      },
+      "__schema4": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema5"
+          }
+        ]
+      },
+      "__schema40": {
+        "maximum": 9007199254740991,
+        "minimum": -9007199254740991,
+        "type": "integer"
+      },
+      "__schema41": {
+        "maximum": 9007199254740991,
+        "minimum": 1,
+        "type": "integer"
+      },
+      "__schema42": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "__schema43": {
+        "type": "boolean"
+      },
+      "__schema44": {
+        "items": {
+          "properties": {
+            "field": {
+              "description": "Source event field used to override the default `risk_score`.",
+              "type": "string"
+            },
+            "operator": {
+              "enum": [
+                "equals"
+              ],
+              "type": "string"
+            },
+            "risk_score": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/__schema3"
+                }
+              ]
+            },
+            "value": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "field",
+            "operator",
+            "value"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "__schema45": {
+        "items": {
+          "properties": {
+            "field": {
+              "description": "Source event field used to override the default `severity`.",
+              "type": "string"
+            },
+            "operator": {
+              "enum": [
+                "equals"
+              ],
+              "type": "string"
+            },
+            "severity": {
+              "$ref": "#/definitions/__schema5"
+            },
+            "value": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "field",
+            "operator",
+            "severity",
+            "value"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "__schema46": {
+        "type": "string"
+      },
+      "__schema47": {
+        "type": "string"
+      },
+      "__schema48": {
+        "type": "string"
+      },
+      "__schema49": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema50"
+          }
+        ],
+        "description": "Array defining the automated actions (notifications) taken when alerts are generated."
+      },
+      "__schema5": {
+        "enum": [
+          "low",
+          "medium",
+          "high",
+          "critical"
+        ],
+        "type": "string"
+      },
+      "__schema50": {
+        "items": {
+          "properties": {
+            "action_type_id": {
+              "description": "The action type used for sending notifications, can be:\n\n  - `.slack`\n  - `.slack_api`\n  - `.email`\n  - `.index`\n  - `.pagerduty`\n  - `.swimlane`\n  - `.webhook`\n  - `.servicenow`\n  - `.servicenow-itom`\n  - `.servicenow-sir`\n  - `.jira`\n  - `.resilient`\n  - `.opsgenie`\n  - `.teams`\n  - `.torq`\n  - `.tines`\n  - `.d3security`\n",
+              "type": "string"
+            },
+            "alerts_filter": {
+              "additionalProperties": {},
+              "properties": {},
+              "type": "object"
+            },
+            "frequency": {
+              "properties": {
+                "notifyWhen": {
+                  "enum": [
+                    "onActiveAlert",
+                    "onThrottleInterval",
+                    "onActionGroupChange"
+                  ],
+                  "type": "string"
+                },
+                "summary": {
+                  "description": "Action summary indicates whether we will send a summary notification about all the generate alerts or notification per individual alert",
+                  "type": "boolean"
+                },
+                "throttle": {
+                  "allOf": [
+                    {
+                      "$ref": "#/definitions/__schema23"
+                    }
+                  ],
+                  "nullable": true
+                }
+              },
+              "required": [
+                "notifyWhen",
+                "summary",
+                "throttle"
+              ],
+              "type": "object"
+            },
+            "group": {
+              "type": "string"
+            },
+            "id": {
+              "type": "string"
+            },
+            "params": {
+              "additionalProperties": {},
+              "properties": {},
+              "type": "object"
+            },
+            "uuid": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/__schema21"
+                }
+              ]
+            }
+          },
+          "required": [
+            "action_type_id",
+            "id",
+            "params"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "__schema51": {
+        "items": {
+          "properties": {
+            "id": {
+              "description": "ID of the exception container",
+              "minLength": 1,
+              "type": "string"
+            },
+            "list_id": {
+              "description": "List ID of the exception container",
+              "minLength": 1,
+              "type": "string"
+            },
+            "namespace_type": {
+              "description": "Determines the exceptions validity in rule's Kibana space",
+              "enum": [
+                "agnostic",
+                "single"
+              ],
+              "type": "string"
+            },
+            "type": {
+              "enum": [
+                "detection",
+                "rule_default",
+                "endpoint",
+                "endpoint_trusted_apps",
+                "endpoint_trusted_devices",
+                "endpoint_events",
+                "endpoint_host_isolation_exceptions",
+                "endpoint_blocklists",
+                "endpoint_custom_yara_signatures"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "list_id",
+            "namespace_type",
+            "type"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "__schema52": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "__schema53": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "__schema54": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "__schema55": {
+        "maximum": 9007199254740991,
+        "minimum": 1,
+        "type": "integer"
+      },
+      "__schema56": {
+        "items": {
+          "properties": {
+            "framework": {
+              "description": "Relevant attack framework",
+              "type": "string"
+            },
+            "tactic": {
+              "properties": {
+                "id": {
+                  "description": "Tactic ID",
+                  "type": "string"
+                },
+                "name": {
+                  "description": "Tactic name",
+                  "type": "string"
+                },
+                "reference": {
+                  "description": "Tactic reference",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "reference"
+              ],
+              "type": "object"
+            },
+            "technique": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/__schema57"
+                }
+              ],
+              "description": "Array containing information on the attack techniques (optional)"
+            }
+          },
+          "required": [
+            "framework",
+            "tactic"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "__schema57": {
+        "items": {
+          "properties": {
+            "id": {
+              "description": "Technique ID",
+              "type": "string"
+            },
+            "name": {
+              "description": "Technique name",
+              "type": "string"
+            },
+            "reference": {
+              "description": "Technique reference",
+              "type": "string"
+            },
+            "subtechnique": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/__schema58"
+                }
+              ],
+              "description": "Array containing more specific information on the attack technique.\n"
+            }
+          },
+          "required": [
+            "id",
+            "name",
+            "reference"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "__schema58": {
+        "items": {
+          "properties": {
+            "id": {
+              "description": "Subtechnique ID",
+              "type": "string"
+            },
+            "name": {
+              "description": "Subtechnique name",
+              "type": "string"
+            },
+            "reference": {
+              "description": "Subtechnique reference",
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "name",
+            "reference"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "__schema59": {
+        "type": "string"
+      },
+      "__schema6": {
+        "type": "string"
+      },
+      "__schema60": {
+        "items": {
+          "properties": {
+            "integration": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/__schema21"
+                }
+              ]
+            },
+            "package": {
+              "$ref": "#/definitions/__schema21"
+            },
+            "version": {
+              "$ref": "#/definitions/__schema21"
+            }
+          },
+          "required": [
+            "package",
+            "version"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "__schema61": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema62"
+          }
+        ],
+        "description": "Elasticsearch fields and their types that need to be present for the rule to function.\n> info\n> The value of `required_fields` does not affect the rule’s behavior, and specifying it incorrectly won’t cause the rule to fail. Use `required_fields` as an informational property to document the fields that the rule expects to be present in the data.\n"
+      },
+      "__schema62": {
+        "items": {
+          "properties": {
+            "name": {
+              "description": "Name of an Elasticsearch field",
+              "minLength": 1,
+              "type": "string"
+            },
+            "type": {
+              "description": "Type of the Elasticsearch field",
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "name",
+            "type"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "__schema63": {
+        "format": "uuid",
+        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+        "type": "string"
+      },
+      "__schema64": {
+        "type": "string"
+      },
+      "__schema65": {
+        "type": "string"
+      },
+      "__schema66": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "__schema67": {
+        "type": "string"
+      },
+      "__schema68": {
+        "items": {},
+        "type": "array"
+      },
+      "__schema69": {
+        "properties": {
+          "duration": {
+            "properties": {
+              "unit": {
+                "$ref": "#/definitions/__schema72"
+              },
+              "value": {
+                "$ref": "#/definitions/__schema71"
+              }
+            },
+            "required": [
+              "unit",
+              "value"
+            ],
+            "type": "object"
+          },
+          "group_by": {
+            "items": {
+              "$ref": "#/definitions/__schema70"
+            },
+            "maxItems": 3,
+            "minItems": 1,
+            "type": "array"
+          },
+          "missing_fields_strategy": {
+            "enum": [
+              "doNotSuppress",
+              "suppress"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "group_by"
+        ],
+        "type": "object"
+      },
+      "__schema7": {
+        "type": "string"
+      },
+      "__schema70": {
+        "type": "string"
+      },
+      "__schema71": {
+        "maximum": 9007199254740991,
+        "minimum": 1,
+        "type": "integer"
+      },
+      "__schema72": {
+        "enum": [
+          "s",
+          "m",
+          "h"
+        ],
+        "type": "string"
+      },
+      "__schema73": {
+        "type": "string"
+      },
+      "__schema74": {
+        "enum": [
+          "kuery",
+          "lucene"
+        ],
+        "type": "string"
+      },
+      "__schema75": {
+        "type": "string"
+      },
+      "__schema76": {
+        "properties": {
+          "entries": {
+            "items": {
+              "properties": {
+                "field": {
+                  "$ref": "#/definitions/__schema21"
+                },
+                "negate": {
+                  "type": "boolean"
+                },
+                "type": {
+                  "enum": [
+                    "mapping"
+                  ],
+                  "type": "string"
+                },
+                "value": {
+                  "$ref": "#/definitions/__schema21"
+                }
+              },
+              "required": [
+                "field",
+                "type",
+                "value"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "entries"
+        ],
+        "type": "object"
+      },
+      "__schema77": {
+        "type": "string"
+      },
+      "__schema78": {
+        "type": "string"
+      },
+      "__schema8": {
+        "type": "boolean"
+      },
+      "__schema9": {
+        "type": "string"
+      }
+    },
+    "properties": {
+      "patch": {
+        "anyOf": [
+          {
+            "additionalProperties": false,
+            "properties": {
+              "actions": {
+                "$ref": "#/definitions/__schema49"
+              },
+              "alert_suppression": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema69"
+                  }
+                ]
+              },
+              "alias_purpose": {
+                "$ref": "#/definitions/__schema13"
+              },
+              "alias_target_id": {
+                "$ref": "#/definitions/__schema12"
+              },
+              "author": {
+                "$ref": "#/definitions/__schema52"
+              },
+              "building_block_type": {
+                "$ref": "#/definitions/__schema16"
+              },
+              "data_view_id": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema67"
+                  }
+                ]
+              },
+              "description": {
+                "$ref": "#/definitions/__schema1"
+              },
+              "enabled": {
+                "$ref": "#/definitions/__schema43"
+              },
+              "event_category_override": {
+                "type": "string"
+              },
+              "exceptions_list": {
+                "$ref": "#/definitions/__schema51"
+              },
+              "false_positives": {
+                "$ref": "#/definitions/__schema53"
+              },
+              "filters": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema68"
+                  }
+                ]
+              },
+              "from": {
+                "$ref": "#/definitions/__schema47"
+              },
+              "id": {
+                "$ref": "#/definitions/__schema63"
+              },
+              "index": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema66"
+                  }
+                ]
+              },
+              "interval": {
+                "$ref": "#/definitions/__schema46"
+              },
+              "investigation_fields": {
+                "$ref": "#/definitions/__schema20"
+              },
+              "language": {
+                "description": "Query language to use",
+                "enum": [
+                  "eql"
+                ],
+                "type": "string"
+              },
+              "license": {
+                "$ref": "#/definitions/__schema14"
+              },
+              "max_signals": {
+                "$ref": "#/definitions/__schema55"
+              },
+              "meta": {
+                "$ref": "#/definitions/__schema19"
+              },
+              "name": {
+                "$ref": "#/definitions/__schema0"
+              },
+              "namespace": {
+                "$ref": "#/definitions/__schema18"
+              },
+              "note": {
+                "$ref": "#/definitions/__schema15"
+              },
+              "outcome": {
+                "$ref": "#/definitions/__schema11"
+              },
+              "output_index": {
+                "$ref": "#/definitions/__schema17"
+              },
+              "query": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema65"
+                  }
+                ]
+              },
+              "references": {
+                "$ref": "#/definitions/__schema54"
+              },
+              "related_integrations": {
+                "$ref": "#/definitions/__schema60"
+              },
+              "required_fields": {
+                "$ref": "#/definitions/__schema61"
+              },
+              "response_actions": {
+                "$ref": "#/definitions/__schema24"
+              },
+              "risk_score": {
+                "$ref": "#/definitions/__schema2"
+              },
+              "risk_score_mapping": {
+                "$ref": "#/definitions/__schema44"
+              },
+              "rule_id": {
+                "$ref": "#/definitions/__schema64"
+              },
+              "rule_name_override": {
+                "$ref": "#/definitions/__schema6"
+              },
+              "setup": {
+                "$ref": "#/definitions/__schema59"
+              },
+              "severity": {
+                "$ref": "#/definitions/__schema4"
+              },
+              "severity_mapping": {
+                "$ref": "#/definitions/__schema45"
+              },
+              "tags": {
+                "$ref": "#/definitions/__schema42"
+              },
+              "threat": {
+                "$ref": "#/definitions/__schema56"
+              },
+              "throttle": {
+                "$ref": "#/definitions/__schema22"
+              },
+              "tiebreaker_field": {
+                "type": "string"
+              },
+              "timeline_id": {
+                "$ref": "#/definitions/__schema9"
+              },
+              "timeline_title": {
+                "$ref": "#/definitions/__schema10"
+              },
+              "timestamp_field": {
+                "type": "string"
+              },
+              "timestamp_override": {
+                "$ref": "#/definitions/__schema7"
+              },
+              "timestamp_override_fallback_disabled": {
+                "$ref": "#/definitions/__schema8"
+              },
+              "to": {
+                "$ref": "#/definitions/__schema48"
+              },
+              "type": {
+                "enum": [
+                  "eql"
+                ],
+                "type": "string"
+              },
+              "version": {
+                "$ref": "#/definitions/__schema41"
+              }
+            },
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "actions": {
+                "$ref": "#/definitions/__schema49"
+              },
+              "alert_suppression": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema69"
+                  }
+                ]
+              },
+              "alias_purpose": {
+                "$ref": "#/definitions/__schema13"
+              },
+              "alias_target_id": {
+                "$ref": "#/definitions/__schema12"
+              },
+              "author": {
+                "$ref": "#/definitions/__schema52"
+              },
+              "building_block_type": {
+                "$ref": "#/definitions/__schema16"
+              },
+              "data_view_id": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema67"
+                  }
+                ]
+              },
+              "description": {
+                "$ref": "#/definitions/__schema1"
+              },
+              "enabled": {
+                "$ref": "#/definitions/__schema43"
+              },
+              "exceptions_list": {
+                "$ref": "#/definitions/__schema51"
+              },
+              "false_positives": {
+                "$ref": "#/definitions/__schema53"
+              },
+              "filters": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema68"
+                  }
+                ]
+              },
+              "from": {
+                "$ref": "#/definitions/__schema47"
+              },
+              "id": {
+                "$ref": "#/definitions/__schema63"
+              },
+              "index": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema66"
+                  }
+                ]
+              },
+              "interval": {
+                "$ref": "#/definitions/__schema46"
+              },
+              "investigation_fields": {
+                "$ref": "#/definitions/__schema20"
+              },
+              "language": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema74"
+                  }
+                ]
+              },
+              "license": {
+                "$ref": "#/definitions/__schema14"
+              },
+              "max_signals": {
+                "$ref": "#/definitions/__schema55"
+              },
+              "meta": {
+                "$ref": "#/definitions/__schema19"
+              },
+              "name": {
+                "$ref": "#/definitions/__schema0"
+              },
+              "namespace": {
+                "$ref": "#/definitions/__schema18"
+              },
+              "note": {
+                "$ref": "#/definitions/__schema15"
+              },
+              "outcome": {
+                "$ref": "#/definitions/__schema11"
+              },
+              "output_index": {
+                "$ref": "#/definitions/__schema17"
+              },
+              "query": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema65"
+                  }
+                ]
+              },
+              "references": {
+                "$ref": "#/definitions/__schema54"
+              },
+              "related_integrations": {
+                "$ref": "#/definitions/__schema60"
+              },
+              "required_fields": {
+                "$ref": "#/definitions/__schema61"
+              },
+              "response_actions": {
+                "$ref": "#/definitions/__schema24"
+              },
+              "risk_score": {
+                "$ref": "#/definitions/__schema2"
+              },
+              "risk_score_mapping": {
+                "$ref": "#/definitions/__schema44"
+              },
+              "rule_id": {
+                "$ref": "#/definitions/__schema64"
+              },
+              "rule_name_override": {
+                "$ref": "#/definitions/__schema6"
+              },
+              "saved_id": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema73"
+                  }
+                ]
+              },
+              "setup": {
+                "$ref": "#/definitions/__schema59"
+              },
+              "severity": {
+                "$ref": "#/definitions/__schema4"
+              },
+              "severity_mapping": {
+                "$ref": "#/definitions/__schema45"
+              },
+              "tags": {
+                "$ref": "#/definitions/__schema42"
+              },
+              "threat": {
+                "$ref": "#/definitions/__schema56"
+              },
+              "throttle": {
+                "$ref": "#/definitions/__schema22"
+              },
+              "timeline_id": {
+                "$ref": "#/definitions/__schema9"
+              },
+              "timeline_title": {
+                "$ref": "#/definitions/__schema10"
+              },
+              "timestamp_override": {
+                "$ref": "#/definitions/__schema7"
+              },
+              "timestamp_override_fallback_disabled": {
+                "$ref": "#/definitions/__schema8"
+              },
+              "to": {
+                "$ref": "#/definitions/__schema48"
+              },
+              "type": {
+                "enum": [
+                  "query"
+                ],
+                "type": "string"
+              },
+              "version": {
+                "$ref": "#/definitions/__schema41"
+              }
+            },
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "actions": {
+                "$ref": "#/definitions/__schema49"
+              },
+              "alert_suppression": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema69"
+                  }
+                ]
+              },
+              "alias_purpose": {
+                "$ref": "#/definitions/__schema13"
+              },
+              "alias_target_id": {
+                "$ref": "#/definitions/__schema12"
+              },
+              "author": {
+                "$ref": "#/definitions/__schema52"
+              },
+              "building_block_type": {
+                "$ref": "#/definitions/__schema16"
+              },
+              "data_view_id": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema67"
+                  }
+                ]
+              },
+              "description": {
+                "$ref": "#/definitions/__schema1"
+              },
+              "enabled": {
+                "$ref": "#/definitions/__schema43"
+              },
+              "exceptions_list": {
+                "$ref": "#/definitions/__schema51"
+              },
+              "false_positives": {
+                "$ref": "#/definitions/__schema53"
+              },
+              "filters": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema68"
+                  }
+                ]
+              },
+              "from": {
+                "$ref": "#/definitions/__schema47"
+              },
+              "id": {
+                "$ref": "#/definitions/__schema63"
+              },
+              "index": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema66"
+                  }
+                ]
+              },
+              "interval": {
+                "$ref": "#/definitions/__schema46"
+              },
+              "investigation_fields": {
+                "$ref": "#/definitions/__schema20"
+              },
+              "language": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema74"
+                  }
+                ]
+              },
+              "license": {
+                "$ref": "#/definitions/__schema14"
+              },
+              "max_signals": {
+                "$ref": "#/definitions/__schema55"
+              },
+              "meta": {
+                "$ref": "#/definitions/__schema19"
+              },
+              "name": {
+                "$ref": "#/definitions/__schema0"
+              },
+              "namespace": {
+                "$ref": "#/definitions/__schema18"
+              },
+              "note": {
+                "$ref": "#/definitions/__schema15"
+              },
+              "outcome": {
+                "$ref": "#/definitions/__schema11"
+              },
+              "output_index": {
+                "$ref": "#/definitions/__schema17"
+              },
+              "query": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema65"
+                  }
+                ]
+              },
+              "references": {
+                "$ref": "#/definitions/__schema54"
+              },
+              "related_integrations": {
+                "$ref": "#/definitions/__schema60"
+              },
+              "required_fields": {
+                "$ref": "#/definitions/__schema61"
+              },
+              "response_actions": {
+                "$ref": "#/definitions/__schema24"
+              },
+              "risk_score": {
+                "$ref": "#/definitions/__schema2"
+              },
+              "risk_score_mapping": {
+                "$ref": "#/definitions/__schema44"
+              },
+              "rule_id": {
+                "$ref": "#/definitions/__schema64"
+              },
+              "rule_name_override": {
+                "$ref": "#/definitions/__schema6"
+              },
+              "saved_id": {
+                "type": "string"
+              },
+              "setup": {
+                "$ref": "#/definitions/__schema59"
+              },
+              "severity": {
+                "$ref": "#/definitions/__schema4"
+              },
+              "severity_mapping": {
+                "$ref": "#/definitions/__schema45"
+              },
+              "tags": {
+                "$ref": "#/definitions/__schema42"
+              },
+              "threat": {
+                "$ref": "#/definitions/__schema56"
+              },
+              "throttle": {
+                "$ref": "#/definitions/__schema22"
+              },
+              "timeline_id": {
+                "$ref": "#/definitions/__schema9"
+              },
+              "timeline_title": {
+                "$ref": "#/definitions/__schema10"
+              },
+              "timestamp_override": {
+                "$ref": "#/definitions/__schema7"
+              },
+              "timestamp_override_fallback_disabled": {
+                "$ref": "#/definitions/__schema8"
+              },
+              "to": {
+                "$ref": "#/definitions/__schema48"
+              },
+              "type": {
+                "enum": [
+                  "saved_query"
+                ],
+                "type": "string"
+              },
+              "version": {
+                "$ref": "#/definitions/__schema41"
+              }
+            },
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "actions": {
+                "$ref": "#/definitions/__schema49"
+              },
+              "alert_suppression": {
+                "properties": {
+                  "duration": {
+                    "properties": {
+                      "unit": {
+                        "$ref": "#/definitions/__schema72"
+                      },
+                      "value": {
+                        "$ref": "#/definitions/__schema71"
+                      }
+                    },
+                    "required": [
+                      "unit",
+                      "value"
+                    ],
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "duration"
+                ],
+                "type": "object"
+              },
+              "alias_purpose": {
+                "$ref": "#/definitions/__schema13"
+              },
+              "alias_target_id": {
+                "$ref": "#/definitions/__schema12"
+              },
+              "author": {
+                "$ref": "#/definitions/__schema52"
+              },
+              "building_block_type": {
+                "$ref": "#/definitions/__schema16"
+              },
+              "data_view_id": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema67"
+                  }
+                ]
+              },
+              "description": {
+                "$ref": "#/definitions/__schema1"
+              },
+              "enabled": {
+                "$ref": "#/definitions/__schema43"
+              },
+              "exceptions_list": {
+                "$ref": "#/definitions/__schema51"
+              },
+              "false_positives": {
+                "$ref": "#/definitions/__schema53"
+              },
+              "filters": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema68"
+                  }
+                ]
+              },
+              "from": {
+                "$ref": "#/definitions/__schema47"
+              },
+              "id": {
+                "$ref": "#/definitions/__schema63"
+              },
+              "index": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema66"
+                  }
+                ]
+              },
+              "interval": {
+                "$ref": "#/definitions/__schema46"
+              },
+              "investigation_fields": {
+                "$ref": "#/definitions/__schema20"
+              },
+              "language": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema74"
+                  }
+                ]
+              },
+              "license": {
+                "$ref": "#/definitions/__schema14"
+              },
+              "max_signals": {
+                "$ref": "#/definitions/__schema55"
+              },
+              "meta": {
+                "$ref": "#/definitions/__schema19"
+              },
+              "name": {
+                "$ref": "#/definitions/__schema0"
+              },
+              "namespace": {
+                "$ref": "#/definitions/__schema18"
+              },
+              "note": {
+                "$ref": "#/definitions/__schema15"
+              },
+              "outcome": {
+                "$ref": "#/definitions/__schema11"
+              },
+              "output_index": {
+                "$ref": "#/definitions/__schema17"
+              },
+              "query": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema65"
+                  }
+                ]
+              },
+              "references": {
+                "$ref": "#/definitions/__schema54"
+              },
+              "related_integrations": {
+                "$ref": "#/definitions/__schema60"
+              },
+              "required_fields": {
+                "$ref": "#/definitions/__schema61"
+              },
+              "response_actions": {
+                "$ref": "#/definitions/__schema24"
+              },
+              "risk_score": {
+                "$ref": "#/definitions/__schema2"
+              },
+              "risk_score_mapping": {
+                "$ref": "#/definitions/__schema44"
+              },
+              "rule_id": {
+                "$ref": "#/definitions/__schema64"
+              },
+              "rule_name_override": {
+                "$ref": "#/definitions/__schema6"
+              },
+              "saved_id": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema73"
+                  }
+                ]
+              },
+              "setup": {
+                "$ref": "#/definitions/__schema59"
+              },
+              "severity": {
+                "$ref": "#/definitions/__schema4"
+              },
+              "severity_mapping": {
+                "$ref": "#/definitions/__schema45"
+              },
+              "tags": {
+                "$ref": "#/definitions/__schema42"
+              },
+              "threat": {
+                "$ref": "#/definitions/__schema56"
+              },
+              "threshold": {
+                "properties": {
+                  "cardinality": {
+                    "items": {
+                      "properties": {
+                        "field": {
+                          "description": "The field on which to calculate and compare the cardinality.",
+                          "type": "string"
+                        },
+                        "value": {
+                          "description": "The threshold value from which an alert is generated based on unique number of values of cardinality.field.",
+                          "maximum": 9007199254740991,
+                          "minimum": 0,
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "field",
+                        "value"
+                      ],
+                      "type": "object"
+                    },
+                    "type": "array"
+                  },
+                  "field": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "items": {
+                          "$ref": "#/definitions/__schema75"
+                        },
+                        "maxItems": 5,
+                        "type": "array"
+                      }
+                    ]
+                  },
+                  "value": {
+                    "maximum": 9007199254740991,
+                    "minimum": 1,
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "field",
+                  "value"
+                ],
+                "type": "object"
+              },
+              "throttle": {
+                "$ref": "#/definitions/__schema22"
+              },
+              "timeline_id": {
+                "$ref": "#/definitions/__schema9"
+              },
+              "timeline_title": {
+                "$ref": "#/definitions/__schema10"
+              },
+              "timestamp_override": {
+                "$ref": "#/definitions/__schema7"
+              },
+              "timestamp_override_fallback_disabled": {
+                "$ref": "#/definitions/__schema8"
+              },
+              "to": {
+                "$ref": "#/definitions/__schema48"
+              },
+              "type": {
+                "enum": [
+                  "threshold"
+                ],
+                "type": "string"
+              },
+              "version": {
+                "$ref": "#/definitions/__schema41"
+              }
+            },
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "actions": {
+                "$ref": "#/definitions/__schema49"
+              },
+              "alert_suppression": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema69"
+                  }
+                ]
+              },
+              "alias_purpose": {
+                "$ref": "#/definitions/__schema13"
+              },
+              "alias_target_id": {
+                "$ref": "#/definitions/__schema12"
+              },
+              "author": {
+                "$ref": "#/definitions/__schema52"
+              },
+              "building_block_type": {
+                "$ref": "#/definitions/__schema16"
+              },
+              "concurrent_searches": {
+                "maximum": 9007199254740991,
+                "minimum": 1,
+                "type": "integer"
+              },
+              "data_view_id": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema67"
+                  }
+                ]
+              },
+              "description": {
+                "$ref": "#/definitions/__schema1"
+              },
+              "enabled": {
+                "$ref": "#/definitions/__schema43"
+              },
+              "exceptions_list": {
+                "$ref": "#/definitions/__schema51"
+              },
+              "false_positives": {
+                "$ref": "#/definitions/__schema53"
+              },
+              "filters": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema68"
+                  }
+                ]
+              },
+              "from": {
+                "$ref": "#/definitions/__schema47"
+              },
+              "id": {
+                "$ref": "#/definitions/__schema63"
+              },
+              "index": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema66"
+                  }
+                ]
+              },
+              "interval": {
+                "$ref": "#/definitions/__schema46"
+              },
+              "investigation_fields": {
+                "$ref": "#/definitions/__schema20"
+              },
+              "items_per_search": {
+                "maximum": 9007199254740991,
+                "minimum": 1,
+                "type": "integer"
+              },
+              "language": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema74"
+                  }
+                ]
+              },
+              "license": {
+                "$ref": "#/definitions/__schema14"
+              },
+              "max_signals": {
+                "$ref": "#/definitions/__schema55"
+              },
+              "meta": {
+                "$ref": "#/definitions/__schema19"
+              },
+              "name": {
+                "$ref": "#/definitions/__schema0"
+              },
+              "namespace": {
+                "$ref": "#/definitions/__schema18"
+              },
+              "note": {
+                "$ref": "#/definitions/__schema15"
+              },
+              "outcome": {
+                "$ref": "#/definitions/__schema11"
+              },
+              "output_index": {
+                "$ref": "#/definitions/__schema17"
+              },
+              "query": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema65"
+                  }
+                ]
+              },
+              "references": {
+                "$ref": "#/definitions/__schema54"
+              },
+              "related_integrations": {
+                "$ref": "#/definitions/__schema60"
+              },
+              "required_fields": {
+                "$ref": "#/definitions/__schema61"
+              },
+              "response_actions": {
+                "$ref": "#/definitions/__schema24"
+              },
+              "risk_score": {
+                "$ref": "#/definitions/__schema2"
+              },
+              "risk_score_mapping": {
+                "$ref": "#/definitions/__schema44"
+              },
+              "rule_id": {
+                "$ref": "#/definitions/__schema64"
+              },
+              "rule_name_override": {
+                "$ref": "#/definitions/__schema6"
+              },
+              "saved_id": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema73"
+                  }
+                ]
+              },
+              "setup": {
+                "$ref": "#/definitions/__schema59"
+              },
+              "severity": {
+                "$ref": "#/definitions/__schema4"
+              },
+              "severity_mapping": {
+                "$ref": "#/definitions/__schema45"
+              },
+              "tags": {
+                "$ref": "#/definitions/__schema42"
+              },
+              "threat": {
+                "$ref": "#/definitions/__schema56"
+              },
+              "threat_filters": {
+                "items": {},
+                "type": "array"
+              },
+              "threat_index": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "threat_indicator_path": {
+                "type": "string"
+              },
+              "threat_language": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema74"
+                  }
+                ]
+              },
+              "threat_mapping": {
+                "items": {
+                  "$ref": "#/definitions/__schema76"
+                },
+                "minItems": 1,
+                "type": "array"
+              },
+              "threat_query": {
+                "type": "string"
+              },
+              "throttle": {
+                "$ref": "#/definitions/__schema22"
+              },
+              "timeline_id": {
+                "$ref": "#/definitions/__schema9"
+              },
+              "timeline_title": {
+                "$ref": "#/definitions/__schema10"
+              },
+              "timestamp_override": {
+                "$ref": "#/definitions/__schema7"
+              },
+              "timestamp_override_fallback_disabled": {
+                "$ref": "#/definitions/__schema8"
+              },
+              "to": {
+                "$ref": "#/definitions/__schema48"
+              },
+              "type": {
+                "enum": [
+                  "threat_match"
+                ],
+                "type": "string"
+              },
+              "version": {
+                "$ref": "#/definitions/__schema41"
+              }
+            },
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "actions": {
+                "$ref": "#/definitions/__schema49"
+              },
+              "alert_suppression": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema69"
+                  }
+                ]
+              },
+              "alias_purpose": {
+                "$ref": "#/definitions/__schema13"
+              },
+              "alias_target_id": {
+                "$ref": "#/definitions/__schema12"
+              },
+              "anomaly_threshold": {
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "author": {
+                "$ref": "#/definitions/__schema52"
+              },
+              "building_block_type": {
+                "$ref": "#/definitions/__schema16"
+              },
+              "description": {
+                "$ref": "#/definitions/__schema1"
+              },
+              "enabled": {
+                "$ref": "#/definitions/__schema43"
+              },
+              "exceptions_list": {
+                "$ref": "#/definitions/__schema51"
+              },
+              "false_positives": {
+                "$ref": "#/definitions/__schema53"
+              },
+              "from": {
+                "$ref": "#/definitions/__schema47"
+              },
+              "id": {
+                "$ref": "#/definitions/__schema63"
+              },
+              "interval": {
+                "$ref": "#/definitions/__schema46"
+              },
+              "investigation_fields": {
+                "$ref": "#/definitions/__schema20"
+              },
+              "license": {
+                "$ref": "#/definitions/__schema14"
+              },
+              "machine_learning_job_id": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "items": {
+                      "$ref": "#/definitions/__schema77"
+                    },
+                    "minItems": 1,
+                    "type": "array"
+                  }
+                ]
+              },
+              "max_signals": {
+                "$ref": "#/definitions/__schema55"
+              },
+              "meta": {
+                "$ref": "#/definitions/__schema19"
+              },
+              "name": {
+                "$ref": "#/definitions/__schema0"
+              },
+              "namespace": {
+                "$ref": "#/definitions/__schema18"
+              },
+              "note": {
+                "$ref": "#/definitions/__schema15"
+              },
+              "outcome": {
+                "$ref": "#/definitions/__schema11"
+              },
+              "output_index": {
+                "$ref": "#/definitions/__schema17"
+              },
+              "references": {
+                "$ref": "#/definitions/__schema54"
+              },
+              "related_integrations": {
+                "$ref": "#/definitions/__schema60"
+              },
+              "required_fields": {
+                "$ref": "#/definitions/__schema61"
+              },
+              "response_actions": {
+                "$ref": "#/definitions/__schema24"
+              },
+              "risk_score": {
+                "$ref": "#/definitions/__schema2"
+              },
+              "risk_score_mapping": {
+                "$ref": "#/definitions/__schema44"
+              },
+              "rule_id": {
+                "$ref": "#/definitions/__schema64"
+              },
+              "rule_name_override": {
+                "$ref": "#/definitions/__schema6"
+              },
+              "setup": {
+                "$ref": "#/definitions/__schema59"
+              },
+              "severity": {
+                "$ref": "#/definitions/__schema4"
+              },
+              "severity_mapping": {
+                "$ref": "#/definitions/__schema45"
+              },
+              "tags": {
+                "$ref": "#/definitions/__schema42"
+              },
+              "threat": {
+                "$ref": "#/definitions/__schema56"
+              },
+              "throttle": {
+                "$ref": "#/definitions/__schema22"
+              },
+              "timeline_id": {
+                "$ref": "#/definitions/__schema9"
+              },
+              "timeline_title": {
+                "$ref": "#/definitions/__schema10"
+              },
+              "timestamp_override": {
+                "$ref": "#/definitions/__schema7"
+              },
+              "timestamp_override_fallback_disabled": {
+                "$ref": "#/definitions/__schema8"
+              },
+              "to": {
+                "$ref": "#/definitions/__schema48"
+              },
+              "type": {
+                "enum": [
+                  "machine_learning"
+                ],
+                "type": "string"
+              },
+              "version": {
+                "$ref": "#/definitions/__schema41"
+              }
+            },
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "actions": {
+                "$ref": "#/definitions/__schema49"
+              },
+              "alert_suppression": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema69"
+                  }
+                ]
+              },
+              "alias_purpose": {
+                "$ref": "#/definitions/__schema13"
+              },
+              "alias_target_id": {
+                "$ref": "#/definitions/__schema12"
+              },
+              "author": {
+                "$ref": "#/definitions/__schema52"
+              },
+              "building_block_type": {
+                "$ref": "#/definitions/__schema16"
+              },
+              "data_view_id": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema67"
+                  }
+                ]
+              },
+              "description": {
+                "$ref": "#/definitions/__schema1"
+              },
+              "enabled": {
+                "$ref": "#/definitions/__schema43"
+              },
+              "exceptions_list": {
+                "$ref": "#/definitions/__schema51"
+              },
+              "false_positives": {
+                "$ref": "#/definitions/__schema53"
+              },
+              "filters": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema68"
+                  }
+                ]
+              },
+              "from": {
+                "$ref": "#/definitions/__schema47"
+              },
+              "history_window_start": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "id": {
+                "$ref": "#/definitions/__schema63"
+              },
+              "index": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema66"
+                  }
+                ]
+              },
+              "interval": {
+                "$ref": "#/definitions/__schema46"
+              },
+              "investigation_fields": {
+                "$ref": "#/definitions/__schema20"
+              },
+              "language": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema74"
+                  }
+                ]
+              },
+              "license": {
+                "$ref": "#/definitions/__schema14"
+              },
+              "max_signals": {
+                "$ref": "#/definitions/__schema55"
+              },
+              "meta": {
+                "$ref": "#/definitions/__schema19"
+              },
+              "name": {
+                "$ref": "#/definitions/__schema0"
+              },
+              "namespace": {
+                "$ref": "#/definitions/__schema18"
+              },
+              "new_terms_fields": {
+                "items": {
+                  "$ref": "#/definitions/__schema78"
+                },
+                "maxItems": 3,
+                "minItems": 1,
+                "type": "array"
+              },
+              "note": {
+                "$ref": "#/definitions/__schema15"
+              },
+              "outcome": {
+                "$ref": "#/definitions/__schema11"
+              },
+              "output_index": {
+                "$ref": "#/definitions/__schema17"
+              },
+              "query": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema65"
+                  }
+                ]
+              },
+              "references": {
+                "$ref": "#/definitions/__schema54"
+              },
+              "related_integrations": {
+                "$ref": "#/definitions/__schema60"
+              },
+              "required_fields": {
+                "$ref": "#/definitions/__schema61"
+              },
+              "response_actions": {
+                "$ref": "#/definitions/__schema24"
+              },
+              "risk_score": {
+                "$ref": "#/definitions/__schema2"
+              },
+              "risk_score_mapping": {
+                "$ref": "#/definitions/__schema44"
+              },
+              "rule_id": {
+                "$ref": "#/definitions/__schema64"
+              },
+              "rule_name_override": {
+                "$ref": "#/definitions/__schema6"
+              },
+              "setup": {
+                "$ref": "#/definitions/__schema59"
+              },
+              "severity": {
+                "$ref": "#/definitions/__schema4"
+              },
+              "severity_mapping": {
+                "$ref": "#/definitions/__schema45"
+              },
+              "tags": {
+                "$ref": "#/definitions/__schema42"
+              },
+              "threat": {
+                "$ref": "#/definitions/__schema56"
+              },
+              "throttle": {
+                "$ref": "#/definitions/__schema22"
+              },
+              "timeline_id": {
+                "$ref": "#/definitions/__schema9"
+              },
+              "timeline_title": {
+                "$ref": "#/definitions/__schema10"
+              },
+              "timestamp_override": {
+                "$ref": "#/definitions/__schema7"
+              },
+              "timestamp_override_fallback_disabled": {
+                "$ref": "#/definitions/__schema8"
+              },
+              "to": {
+                "$ref": "#/definitions/__schema48"
+              },
+              "type": {
+                "enum": [
+                  "new_terms"
+                ],
+                "type": "string"
+              },
+              "version": {
+                "$ref": "#/definitions/__schema41"
+              }
+            },
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "actions": {
+                "$ref": "#/definitions/__schema49"
+              },
+              "alert_suppression": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema69"
+                  }
+                ]
+              },
+              "alias_purpose": {
+                "$ref": "#/definitions/__schema13"
+              },
+              "alias_target_id": {
+                "$ref": "#/definitions/__schema12"
+              },
+              "author": {
+                "$ref": "#/definitions/__schema52"
+              },
+              "building_block_type": {
+                "$ref": "#/definitions/__schema16"
+              },
+              "description": {
+                "$ref": "#/definitions/__schema1"
+              },
+              "enabled": {
+                "$ref": "#/definitions/__schema43"
+              },
+              "exceptions_list": {
+                "$ref": "#/definitions/__schema51"
+              },
+              "false_positives": {
+                "$ref": "#/definitions/__schema53"
+              },
+              "from": {
+                "$ref": "#/definitions/__schema47"
+              },
+              "id": {
+                "$ref": "#/definitions/__schema63"
+              },
+              "interval": {
+                "$ref": "#/definitions/__schema46"
+              },
+              "investigation_fields": {
+                "$ref": "#/definitions/__schema20"
+              },
+              "language": {
+                "enum": [
+                  "esql"
+                ],
+                "type": "string"
+              },
+              "license": {
+                "$ref": "#/definitions/__schema14"
+              },
+              "max_signals": {
+                "$ref": "#/definitions/__schema55"
+              },
+              "meta": {
+                "$ref": "#/definitions/__schema19"
+              },
+              "name": {
+                "$ref": "#/definitions/__schema0"
+              },
+              "namespace": {
+                "$ref": "#/definitions/__schema18"
+              },
+              "note": {
+                "$ref": "#/definitions/__schema15"
+              },
+              "outcome": {
+                "$ref": "#/definitions/__schema11"
+              },
+              "output_index": {
+                "$ref": "#/definitions/__schema17"
+              },
+              "query": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema65"
+                  }
+                ]
+              },
+              "references": {
+                "$ref": "#/definitions/__schema54"
+              },
+              "related_integrations": {
+                "$ref": "#/definitions/__schema60"
+              },
+              "required_fields": {
+                "$ref": "#/definitions/__schema61"
+              },
+              "response_actions": {
+                "$ref": "#/definitions/__schema24"
+              },
+              "risk_score": {
+                "$ref": "#/definitions/__schema2"
+              },
+              "risk_score_mapping": {
+                "$ref": "#/definitions/__schema44"
+              },
+              "rule_id": {
+                "$ref": "#/definitions/__schema64"
+              },
+              "rule_name_override": {
+                "$ref": "#/definitions/__schema6"
+              },
+              "setup": {
+                "$ref": "#/definitions/__schema59"
+              },
+              "severity": {
+                "$ref": "#/definitions/__schema4"
+              },
+              "severity_mapping": {
+                "$ref": "#/definitions/__schema45"
+              },
+              "tags": {
+                "$ref": "#/definitions/__schema42"
+              },
+              "threat": {
+                "$ref": "#/definitions/__schema56"
+              },
+              "throttle": {
+                "$ref": "#/definitions/__schema22"
+              },
+              "timeline_id": {
+                "$ref": "#/definitions/__schema9"
+              },
+              "timeline_title": {
+                "$ref": "#/definitions/__schema10"
+              },
+              "timestamp_override": {
+                "$ref": "#/definitions/__schema7"
+              },
+              "timestamp_override_fallback_disabled": {
+                "$ref": "#/definitions/__schema8"
+              },
+              "to": {
+                "$ref": "#/definitions/__schema48"
+              },
+              "type": {
+                "enum": [
+                  "esql"
+                ],
+                "type": "string"
+              },
+              "version": {
+                "$ref": "#/definitions/__schema41"
+              }
+            },
+            "type": "object"
+          }
+        ]
+      }
+    },
+    "required": [
+      "patch"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "definitions": {
+      "__schema0": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema1": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema10": {
+        "type": "string"
+      },
+      "__schema11": {
+        "enum": [
+          "savedObjectConversion",
+          "savedObjectImport"
+        ],
+        "type": "string"
+      },
+      "__schema12": {
+        "type": "string"
+      },
+      "__schema13": {
+        "type": "string"
+      },
+      "__schema14": {
+        "type": "string"
+      },
+      "__schema15": {
+        "type": "string"
+      },
+      "__schema16": {
+        "type": "string"
+      },
+      "__schema17": {
+        "additionalProperties": {},
+        "properties": {},
+        "type": "object"
+      },
+      "__schema18": {
+        "additionalProperties": false,
+        "properties": {
+          "field_names": {
+            "items": {
+              "$ref": "#/definitions/__schema19"
+            },
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "field_names"
+        ],
+        "type": "object"
+      },
+      "__schema19": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema2": {
+        "maximum": 100,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema20": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema21"
+          }
+        ]
+      },
+      "__schema21": {
+        "anyOf": [
+          {
+            "enum": [
+              "no_actions",
+              "rule"
+            ],
+            "type": "string"
+          },
+          {
+            "pattern": "^[1-9]\\d*[smhd]$",
+            "type": "string"
+          }
+        ]
+      },
+      "__schema22": {
+        "items": {
+          "oneOf": [
+            {
+              "additionalProperties": false,
+              "properties": {
+                "action_type_id": {
+                  "enum": [
+                    ".osquery"
+                  ],
+                  "type": "string"
+                },
+                "params": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "ecs_mapping": {
+                      "allOf": [
+                        {
+                          "$ref": "#/definitions/__schema24"
+                        }
+                      ]
+                    },
+                    "pack_id": {
+                      "allOf": [
+                        {
+                          "$ref": "#/definitions/__schema26"
+                        }
+                      ],
+                      "description": "To specify a query pack, use the packId field. Example: \"packId\": \"processes_elastic\""
+                    },
+                    "queries": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "ecs_mapping": {
+                            "allOf": [
+                              {
+                                "$ref": "#/definitions/__schema24"
+                              }
+                            ]
+                          },
+                          "id": {
+                            "description": "Query ID",
+                            "maxLength": 256,
+                            "type": "string"
+                          },
+                          "platform": {
+                            "maxLength": 256,
+                            "type": "string"
+                          },
+                          "query": {
+                            "description": "Query to run",
+                            "maxLength": 30000,
+                            "type": "string"
+                          },
+                          "removed": {
+                            "type": "boolean"
+                          },
+                          "snapshot": {
+                            "type": "boolean"
+                          },
+                          "version": {
+                            "allOf": [
+                              {
+                                "$ref": "#/definitions/__schema25"
+                              }
+                            ],
+                            "description": "Query version"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "query"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "query": {
+                      "allOf": [
+                        {
+                          "$ref": "#/definitions/__schema23"
+                        }
+                      ],
+                      "description": "To run a single query, use the query field and enter a SQL query. Example: \"query\": \"SELECT * FROM processes;\""
+                    },
+                    "saved_query_id": {
+                      "allOf": [
+                        {
+                          "$ref": "#/definitions/__schema27"
+                        }
+                      ],
+                      "description": "To run a saved query, use the saved_query_id field and specify the saved query ID. Example: \"saved_query_id\": \"processes_elastic\""
+                    },
+                    "timeout": {
+                      "allOf": [
+                        {
+                          "$ref": "#/definitions/__schema28"
+                        }
+                      ],
+                      "description": "A timeout period, in seconds, after which the query will stop running. Overwriting the default timeout allows you to support queries that require more time to complete. The default and minimum supported value is 60. The maximum supported value is 900. Example: \"timeout\": 120."
+                    }
+                  },
+                  "type": "object"
+                }
+              },
+              "required": [
+                "action_type_id",
+                "params"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "action_type_id": {
+                  "enum": [
+                    ".endpoint"
+                  ],
+                  "type": "string"
+                },
+                "params": {
+                  "anyOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "command": {
+                          "enum": [
+                            "isolate"
+                          ],
+                          "type": "string"
+                        },
+                        "comment": {
+                          "maxLength": 30000,
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "command"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "oneOf": [
+                        {
+                          "additionalProperties": false,
+                          "properties": {
+                            "command": {
+                              "description": "To run an endpoint response action, specify a value for the command field. Example: \"command\": \"kill-process\"",
+                              "enum": [
+                                "kill-process"
+                              ],
+                              "type": "string"
+                            },
+                            "comment": {
+                              "allOf": [
+                                {
+                                  "$ref": "#/definitions/__schema29"
+                                }
+                              ],
+                              "description": "Add a note that explains or describes the action. You can find your comment in the response actions history log. Example: \"comment\": \"Check processes\""
+                            },
+                            "config": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "field": {
+                                  "description": "Field to use instead of `process.pid`",
+                                  "maxLength": 2000,
+                                  "type": "string"
+                                },
+                                "kill_descendants": {
+                                  "allOf": [
+                                    {
+                                      "$ref": "#/definitions/__schema31"
+                                    }
+                                  ],
+                                  "description": "Whether to also terminate the descendant processes of the targeted process."
+                                },
+                                "overwrite": {
+                                  "allOf": [
+                                    {
+                                      "$ref": "#/definitions/__schema30"
+                                    }
+                                  ],
+                                  "default": true,
+                                  "description": "Whether to overwrite field with `process.pid`"
+                                }
+                              },
+                              "required": [
+                                "field",
+                                "overwrite"
+                              ],
+                              "type": "object"
+                            }
+                          },
+                          "required": [
+                            "command",
+                            "config"
+                          ],
+                          "type": "object"
+                        },
+                        {
+                          "additionalProperties": false,
+                          "properties": {
+                            "command": {
+                              "description": "To run an endpoint response action, specify a value for the command field. Example: \"command\": \"suspend-process\"",
+                              "enum": [
+                                "suspend-process"
+                              ],
+                              "type": "string"
+                            },
+                            "comment": {
+                              "allOf": [
+                                {
+                                  "$ref": "#/definitions/__schema32"
+                                }
+                              ],
+                              "description": "Add a note that explains or describes the action. You can find your comment in the response actions history log. Example: \"comment\": \"Check processes\""
+                            },
+                            "config": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "field": {
+                                  "description": "Field to use instead of process.pid",
+                                  "maxLength": 2000,
+                                  "type": "string"
+                                },
+                                "overwrite": {
+                                  "allOf": [
+                                    {
+                                      "$ref": "#/definitions/__schema33"
+                                    }
+                                  ],
+                                  "default": true,
+                                  "description": "Whether to overwrite field with process.pid"
+                                }
+                              },
+                              "required": [
+                                "field",
+                                "overwrite"
+                              ],
+                              "type": "object"
+                            }
+                          },
+                          "required": [
+                            "command",
+                            "config"
+                          ],
+                          "type": "object"
+                        }
+                      ]
+                    },
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "command": {
+                          "enum": [
+                            "runscript"
+                          ],
+                          "type": "string"
+                        },
+                        "comment": {
+                          "allOf": [
+                            {
+                              "$ref": "#/definitions/__schema34"
+                            }
+                          ],
+                          "description": "Add a note that explains or describes the action. You can find your comment in the response actions history log"
+                        },
+                        "config": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "linux": {
+                              "allOf": [
+                                {
+                                  "$ref": "#/definitions/__schema35"
+                                }
+                              ]
+                            },
+                            "macos": {
+                              "allOf": [
+                                {
+                                  "$ref": "#/definitions/__schema35"
+                                }
+                              ]
+                            },
+                            "windows": {
+                              "allOf": [
+                                {
+                                  "$ref": "#/definitions/__schema35"
+                                }
+                              ]
+                            }
+                          },
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "command"
+                      ],
+                      "type": "object"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "action_type_id",
+                "params"
+              ],
+              "type": "object"
+            }
+          ]
+        },
+        "type": "array"
+      },
+      "__schema23": {
+        "maxLength": 30000,
+        "type": "string"
+      },
+      "__schema24": {
+        "additionalProperties": {
+          "additionalProperties": false,
+          "properties": {
+            "field": {
+              "maxLength": 2000,
+              "type": "string"
+            },
+            "value": {
+              "anyOf": [
+                {
+                  "maxLength": 30000,
+                  "type": "string"
+                },
+                {
+                  "items": {
+                    "maxLength": 30000,
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              ]
+            }
+          },
+          "type": "object"
+        },
+        "properties": {},
+        "type": "object"
+      },
+      "__schema25": {
+        "maxLength": 256,
+        "type": "string"
+      },
+      "__schema26": {
+        "maxLength": 256,
+        "type": "string"
+      },
+      "__schema27": {
+        "maxLength": 256,
+        "type": "string"
+      },
+      "__schema28": {
+        "type": "number"
+      },
+      "__schema29": {
+        "maxLength": 30000,
+        "type": "string"
+      },
+      "__schema3": {
+        "enum": [
+          "low",
+          "medium",
+          "high",
+          "critical"
+        ],
+        "type": "string"
+      },
+      "__schema30": {
+        "type": "boolean"
+      },
+      "__schema31": {
+        "type": "boolean"
+      },
+      "__schema32": {
+        "maxLength": 30000,
+        "type": "string"
+      },
+      "__schema33": {
+        "type": "boolean"
+      },
+      "__schema34": {
+        "maxLength": 30000,
+        "type": "string"
+      },
+      "__schema35": {
+        "additionalProperties": false,
+        "properties": {
+          "scriptId": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema36"
+              }
+            ],
+            "description": "The ID of the script to run (from the Kibana Script library)"
+          },
+          "scriptInput": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema37"
+              }
+            ],
+            "description": "The arguments to pass to the script (if any)"
+          },
+          "timeout": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema38"
+              }
+            ],
+            "description": "Specify the timeout in seconds for the script execution"
+          }
+        },
+        "type": "object"
+      },
+      "__schema36": {
+        "maxLength": 256,
+        "type": "string"
+      },
+      "__schema37": {
+        "maxLength": 8192,
+        "type": "string"
+      },
+      "__schema38": {
+        "maximum": 9007199254740991,
+        "minimum": -9007199254740991,
+        "type": "integer"
+      },
+      "__schema39": {
+        "maximum": 9007199254740991,
+        "minimum": 1,
+        "type": "integer"
+      },
+      "__schema4": {
+        "type": "string"
+      },
+      "__schema40": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "__schema41": {
+        "type": "boolean"
+      },
+      "__schema42": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "field": {
+              "description": "Source event field used to override the default `risk_score`.",
+              "type": "string"
+            },
+            "operator": {
+              "enum": [
+                "equals"
+              ],
+              "type": "string"
+            },
+            "risk_score": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/__schema2"
+                }
+              ]
+            },
+            "value": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "field",
+            "operator",
+            "value"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "__schema43": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "field": {
+              "description": "Source event field used to override the default `severity`.",
+              "type": "string"
+            },
+            "operator": {
+              "enum": [
+                "equals"
+              ],
+              "type": "string"
+            },
+            "severity": {
+              "$ref": "#/definitions/__schema3"
+            },
+            "value": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "field",
+            "operator",
+            "severity",
+            "value"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "__schema44": {
+        "type": "string"
+      },
+      "__schema45": {
+        "type": "string"
+      },
+      "__schema46": {
+        "type": "string"
+      },
+      "__schema47": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema48"
+          }
+        ],
+        "description": "Array defining the automated actions (notifications) taken when alerts are generated."
+      },
+      "__schema48": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "action_type_id": {
+              "description": "The action type used for sending notifications, can be:\n\n  - `.slack`\n  - `.slack_api`\n  - `.email`\n  - `.index`\n  - `.pagerduty`\n  - `.swimlane`\n  - `.webhook`\n  - `.servicenow`\n  - `.servicenow-itom`\n  - `.servicenow-sir`\n  - `.jira`\n  - `.resilient`\n  - `.opsgenie`\n  - `.teams`\n  - `.torq`\n  - `.tines`\n  - `.d3security`\n",
+              "type": "string"
+            },
+            "alerts_filter": {
+              "additionalProperties": {},
+              "properties": {},
+              "type": "object"
+            },
+            "frequency": {
+              "additionalProperties": false,
+              "properties": {
+                "notifyWhen": {
+                  "enum": [
+                    "onActiveAlert",
+                    "onThrottleInterval",
+                    "onActionGroupChange"
+                  ],
+                  "type": "string"
+                },
+                "summary": {
+                  "description": "Action summary indicates whether we will send a summary notification about all the generate alerts or notification per individual alert",
+                  "type": "boolean"
+                },
+                "throttle": {
+                  "allOf": [
+                    {
+                      "$ref": "#/definitions/__schema21"
+                    }
+                  ],
+                  "nullable": true
+                }
+              },
+              "required": [
+                "notifyWhen",
+                "summary",
+                "throttle"
+              ],
+              "type": "object"
+            },
+            "group": {
+              "type": "string"
+            },
+            "id": {
+              "type": "string"
+            },
+            "params": {
+              "additionalProperties": {},
+              "properties": {},
+              "type": "object"
+            },
+            "uuid": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/__schema19"
+                }
+              ]
+            }
+          },
+          "required": [
+            "action_type_id",
+            "id",
+            "params"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "__schema49": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "description": "ID of the exception container",
+              "minLength": 1,
+              "type": "string"
+            },
+            "list_id": {
+              "description": "List ID of the exception container",
+              "minLength": 1,
+              "type": "string"
+            },
+            "namespace_type": {
+              "description": "Determines the exceptions validity in rule's Kibana space",
+              "enum": [
+                "agnostic",
+                "single"
+              ],
+              "type": "string"
+            },
+            "type": {
+              "enum": [
+                "detection",
+                "rule_default",
+                "endpoint",
+                "endpoint_trusted_apps",
+                "endpoint_trusted_devices",
+                "endpoint_events",
+                "endpoint_host_isolation_exceptions",
+                "endpoint_blocklists",
+                "endpoint_custom_yara_signatures"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "list_id",
+            "namespace_type",
+            "type"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "__schema5": {
+        "type": "string"
+      },
+      "__schema50": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "__schema51": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "__schema52": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "__schema53": {
+        "maximum": 9007199254740991,
+        "minimum": 1,
+        "type": "integer"
+      },
+      "__schema54": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "framework": {
+              "description": "Relevant attack framework",
+              "type": "string"
+            },
+            "tactic": {
+              "additionalProperties": false,
+              "properties": {
+                "id": {
+                  "description": "Tactic ID",
+                  "type": "string"
+                },
+                "name": {
+                  "description": "Tactic name",
+                  "type": "string"
+                },
+                "reference": {
+                  "description": "Tactic reference",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "reference"
+              ],
+              "type": "object"
+            },
+            "technique": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/__schema55"
+                }
+              ],
+              "description": "Array containing information on the attack techniques (optional)"
+            }
+          },
+          "required": [
+            "framework",
+            "tactic"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "__schema55": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "description": "Technique ID",
+              "type": "string"
+            },
+            "name": {
+              "description": "Technique name",
+              "type": "string"
+            },
+            "reference": {
+              "description": "Technique reference",
+              "type": "string"
+            },
+            "subtechnique": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/__schema56"
+                }
+              ],
+              "description": "Array containing more specific information on the attack technique.\n"
+            }
+          },
+          "required": [
+            "id",
+            "name",
+            "reference"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "__schema56": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "description": "Subtechnique ID",
+              "type": "string"
+            },
+            "name": {
+              "description": "Subtechnique name",
+              "type": "string"
+            },
+            "reference": {
+              "description": "Subtechnique reference",
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "name",
+            "reference"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "__schema57": {
+        "type": "string"
+      },
+      "__schema58": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "integration": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/__schema19"
+                }
+              ]
+            },
+            "package": {
+              "$ref": "#/definitions/__schema19"
+            },
+            "version": {
+              "$ref": "#/definitions/__schema19"
+            }
+          },
+          "required": [
+            "package",
+            "version"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "__schema59": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "ecs": {
+              "description": "Indicates whether the field is ECS-compliant. This property is only present in responses. Its value is computed based on field’s name and type.",
+              "type": "boolean"
+            },
+            "name": {
+              "description": "Name of an Elasticsearch field",
+              "minLength": 1,
+              "type": "string"
+            },
+            "type": {
+              "description": "Type of the Elasticsearch field",
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "ecs",
+            "name",
+            "type"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "__schema6": {
+        "type": "boolean"
+      },
+      "__schema60": {
+        "format": "uuid",
+        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+        "type": "string"
+      },
+      "__schema61": {
+        "type": "string"
+      },
+      "__schema62": {
+        "type": "boolean"
+      },
+      "__schema63": {
+        "oneOf": [
+          {
+            "additionalProperties": false,
+            "properties": {
+              "customized_fields": {
+                "items": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "field_name": {
+                      "description": "Name of a user-modified field in the rule object.",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "field_name"
+                  ],
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "has_base_version": {
+                "type": "boolean"
+              },
+              "is_customized": {
+                "type": "boolean"
+              },
+              "type": {
+                "enum": [
+                  "external"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "customized_fields",
+              "has_base_version",
+              "is_customized",
+              "type"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "enum": [
+                  "internal"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "type"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "__schema64": {
+        "format": "date-time",
+        "maxLength": 64,
+        "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?Z$",
+        "type": "string"
+      },
+      "__schema65": {
+        "type": "string"
+      },
+      "__schema66": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema67"
+          }
+        ],
+        "description": "The user profile UID of the user who last updated the rule. Only present when the rule was updated through an authenticated Kibana session. Resolve it to a display name with the user profiles API."
+      },
+      "__schema67": {
+        "type": "string"
+      },
+      "__schema68": {
+        "format": "date-time",
+        "maxLength": 64,
+        "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?Z$",
+        "type": "string"
+      },
+      "__schema69": {
+        "type": "string"
+      },
+      "__schema7": {
+        "type": "string"
+      },
+      "__schema70": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema71"
+          }
+        ],
+        "description": "The user profile UID of the user who created the rule. Only present when the rule was created through an authenticated Kibana session. Resolve it to a display name with the user profiles API."
+      },
+      "__schema71": {
+        "type": "string"
+      },
+      "__schema72": {
+        "maximum": 9007199254740991,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema73": {
+        "additionalProperties": false,
+        "properties": {
+          "last_execution": {
+            "additionalProperties": false,
+            "properties": {
+              "date": {
+                "description": "Date of the last execution",
+                "format": "date-time",
+                "maxLength": 64,
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?Z$",
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              },
+              "metrics": {
+                "additionalProperties": false,
+                "properties": {
+                  "execution_gap_duration_s": {
+                    "allOf": [
+                      {
+                        "$ref": "#/definitions/__schema77"
+                      }
+                    ],
+                    "description": "Duration in seconds of execution gap"
+                  },
+                  "frozen_indices_queried_count": {
+                    "allOf": [
+                      {
+                        "$ref": "#/definitions/__schema78"
+                      }
+                    ],
+                    "description": "Count of frozen indices queried during the rule execution. These indices could not be entirely excluded after applying the time range filter."
+                  },
+                  "gap_range": {
+                    "allOf": [
+                      {
+                        "$ref": "#/definitions/__schema79"
+                      }
+                    ],
+                    "description": "Range of the execution gap"
+                  },
+                  "gap_reason": {
+                    "allOf": [
+                      {
+                        "$ref": "#/definitions/__schema80"
+                      }
+                    ],
+                    "description": "Detected reason for the execution gap"
+                  },
+                  "total_enrichment_duration_ms": {
+                    "allOf": [
+                      {
+                        "$ref": "#/definitions/__schema76"
+                      }
+                    ],
+                    "description": "Total time spent enriching documents during current rule execution cycle"
+                  },
+                  "total_indexing_duration_ms": {
+                    "allOf": [
+                      {
+                        "$ref": "#/definitions/__schema75"
+                      }
+                    ],
+                    "description": "Total time spent indexing documents during current rule execution cycle"
+                  },
+                  "total_search_duration_ms": {
+                    "allOf": [
+                      {
+                        "$ref": "#/definitions/__schema74"
+                      }
+                    ],
+                    "description": "Total time spent performing ES searches as measured by Kibana; includes network latency and time spent serializing/deserializing request/response"
+                  }
+                },
+                "type": "object"
+              },
+              "status": {
+                "description": "Status of the last execution",
+                "enum": [
+                  "going to run",
+                  "running",
+                  "partial failure",
+                  "failed",
+                  "succeeded"
+                ],
+                "type": "string"
+              },
+              "status_order": {
+                "maximum": 9007199254740991,
+                "minimum": -9007199254740991,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "date",
+              "message",
+              "metrics",
+              "status",
+              "status_order"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "last_execution"
+        ],
+        "type": "object"
+      },
+      "__schema74": {
+        "maximum": 9007199254740991,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema75": {
+        "maximum": 9007199254740991,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema76": {
+        "maximum": 9007199254740991,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema77": {
+        "maximum": 9007199254740991,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema78": {
+        "maximum": 9007199254740991,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "__schema79": {
+        "additionalProperties": false,
+        "properties": {
+          "gte": {
+            "description": "Start date of the execution gap",
+            "type": "string"
+          },
+          "lte": {
+            "description": "End date of the execution gap",
+            "type": "string"
+          }
+        },
+        "required": [
+          "gte",
+          "lte"
+        ],
+        "type": "object"
+      },
+      "__schema8": {
+        "type": "string"
+      },
+      "__schema80": {
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "description": "The type of reason for the gap (rule_disabled or rule_did_not_run)",
+            "enum": [
+              "rule_disabled",
+              "rule_did_not_run"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
+      "__schema81": {
+        "type": "string"
+      },
+      "__schema82": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "__schema83": {
+        "type": "string"
+      },
+      "__schema84": {
+        "items": {},
+        "type": "array"
+      },
+      "__schema85": {
+        "additionalProperties": false,
+        "properties": {
+          "duration": {
+            "additionalProperties": false,
+            "properties": {
+              "unit": {
+                "$ref": "#/definitions/__schema88"
+              },
+              "value": {
+                "$ref": "#/definitions/__schema87"
+              }
+            },
+            "required": [
+              "unit",
+              "value"
+            ],
+            "type": "object"
+          },
+          "group_by": {
+            "items": {
+              "$ref": "#/definitions/__schema86"
+            },
+            "maxItems": 3,
+            "minItems": 1,
+            "type": "array"
+          },
+          "missing_fields_strategy": {
+            "enum": [
+              "doNotSuppress",
+              "suppress"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "group_by"
+        ],
+        "type": "object"
+      },
+      "__schema86": {
+        "type": "string"
+      },
+      "__schema87": {
+        "maximum": 9007199254740991,
+        "minimum": 1,
+        "type": "integer"
+      },
+      "__schema88": {
+        "enum": [
+          "s",
+          "m",
+          "h"
+        ],
+        "type": "string"
+      },
+      "__schema89": {
+        "type": "string"
+      },
+      "__schema9": {
+        "enum": [
+          "exactMatch",
+          "aliasMatch",
+          "conflict"
+        ],
+        "type": "string"
+      },
+      "__schema90": {
+        "enum": [
+          "kuery",
+          "lucene"
+        ],
+        "type": "string"
+      },
+      "__schema91": {
+        "type": "string"
+      },
+      "__schema92": {
+        "additionalProperties": false,
+        "properties": {
+          "entries": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "field": {
+                  "$ref": "#/definitions/__schema19"
+                },
+                "negate": {
+                  "type": "boolean"
+                },
+                "type": {
+                  "enum": [
+                    "mapping"
+                  ],
+                  "type": "string"
+                },
+                "value": {
+                  "$ref": "#/definitions/__schema19"
+                }
+              },
+              "required": [
+                "field",
+                "type",
+                "value"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "entries"
+        ],
+        "type": "object"
+      },
+      "__schema93": {
+        "type": "string"
+      },
+      "__schema94": {
+        "type": "string"
+      }
+    },
+    "oneOf": [
+      {
+        "additionalProperties": false,
+        "properties": {
+          "actions": {
+            "$ref": "#/definitions/__schema47"
+          },
+          "alert_suppression": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema85"
+              }
+            ]
+          },
+          "alias_purpose": {
+            "$ref": "#/definitions/__schema11"
+          },
+          "alias_target_id": {
+            "$ref": "#/definitions/__schema10"
+          },
+          "author": {
+            "$ref": "#/definitions/__schema50"
+          },
+          "building_block_type": {
+            "$ref": "#/definitions/__schema14"
+          },
+          "created_at": {
+            "$ref": "#/definitions/__schema68"
+          },
+          "created_by": {
+            "$ref": "#/definitions/__schema69"
+          },
+          "created_by_profile_uid": {
+            "$ref": "#/definitions/__schema70"
+          },
+          "data_view_id": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema83"
+              }
+            ]
+          },
+          "description": {
+            "$ref": "#/definitions/__schema1"
+          },
+          "enabled": {
+            "$ref": "#/definitions/__schema41"
+          },
+          "event_category_override": {
+            "type": "string"
+          },
+          "exceptions_list": {
+            "$ref": "#/definitions/__schema49"
+          },
+          "execution_summary": {
+            "$ref": "#/definitions/__schema73"
+          },
+          "false_positives": {
+            "$ref": "#/definitions/__schema51"
+          },
+          "filters": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema84"
+              }
+            ]
+          },
+          "from": {
+            "$ref": "#/definitions/__schema45"
+          },
+          "id": {
+            "$ref": "#/definitions/__schema60"
+          },
+          "immutable": {
+            "$ref": "#/definitions/__schema62"
+          },
+          "index": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema82"
+              }
+            ]
+          },
+          "interval": {
+            "$ref": "#/definitions/__schema44"
+          },
+          "investigation_fields": {
+            "$ref": "#/definitions/__schema18"
+          },
+          "language": {
+            "description": "Query language to use",
+            "enum": [
+              "eql"
+            ],
+            "type": "string"
+          },
+          "license": {
+            "$ref": "#/definitions/__schema12"
+          },
+          "max_signals": {
+            "$ref": "#/definitions/__schema53"
+          },
+          "meta": {
+            "$ref": "#/definitions/__schema17"
+          },
+          "name": {
+            "$ref": "#/definitions/__schema0"
+          },
+          "namespace": {
+            "$ref": "#/definitions/__schema16"
+          },
+          "note": {
+            "$ref": "#/definitions/__schema13"
+          },
+          "outcome": {
+            "$ref": "#/definitions/__schema9"
+          },
+          "output_index": {
+            "$ref": "#/definitions/__schema15"
+          },
+          "query": {
+            "$ref": "#/definitions/__schema81"
+          },
+          "references": {
+            "$ref": "#/definitions/__schema52"
+          },
+          "related_integrations": {
+            "$ref": "#/definitions/__schema58"
+          },
+          "required_fields": {
+            "$ref": "#/definitions/__schema59"
+          },
+          "response_actions": {
+            "$ref": "#/definitions/__schema22"
+          },
+          "revision": {
+            "$ref": "#/definitions/__schema72"
+          },
+          "risk_score": {
+            "$ref": "#/definitions/__schema2"
+          },
+          "risk_score_mapping": {
+            "$ref": "#/definitions/__schema42"
+          },
+          "rule_id": {
+            "$ref": "#/definitions/__schema61"
+          },
+          "rule_name_override": {
+            "$ref": "#/definitions/__schema4"
+          },
+          "rule_source": {
+            "$ref": "#/definitions/__schema63"
+          },
+          "setup": {
+            "$ref": "#/definitions/__schema57"
+          },
+          "severity": {
+            "$ref": "#/definitions/__schema3"
+          },
+          "severity_mapping": {
+            "$ref": "#/definitions/__schema43"
+          },
+          "tags": {
+            "$ref": "#/definitions/__schema40"
+          },
+          "threat": {
+            "$ref": "#/definitions/__schema54"
+          },
+          "throttle": {
+            "$ref": "#/definitions/__schema20"
+          },
+          "tiebreaker_field": {
+            "type": "string"
+          },
+          "timeline_id": {
+            "$ref": "#/definitions/__schema7"
+          },
+          "timeline_title": {
+            "$ref": "#/definitions/__schema8"
+          },
+          "timestamp_field": {
+            "type": "string"
+          },
+          "timestamp_override": {
+            "$ref": "#/definitions/__schema5"
+          },
+          "timestamp_override_fallback_disabled": {
+            "$ref": "#/definitions/__schema6"
+          },
+          "to": {
+            "$ref": "#/definitions/__schema46"
+          },
+          "type": {
+            "description": "Rule type",
+            "enum": [
+              "eql"
+            ],
+            "type": "string"
+          },
+          "updated_at": {
+            "$ref": "#/definitions/__schema64"
+          },
+          "updated_by": {
+            "$ref": "#/definitions/__schema65"
+          },
+          "updated_by_profile_uid": {
+            "$ref": "#/definitions/__schema66"
+          },
+          "version": {
+            "$ref": "#/definitions/__schema39"
+          }
+        },
+        "required": [
+          "actions",
+          "author",
+          "created_at",
+          "created_by",
+          "description",
+          "enabled",
+          "exceptions_list",
+          "false_positives",
+          "from",
+          "id",
+          "immutable",
+          "interval",
+          "language",
+          "max_signals",
+          "name",
+          "query",
+          "references",
+          "related_integrations",
+          "required_fields",
+          "revision",
+          "risk_score",
+          "risk_score_mapping",
+          "rule_id",
+          "rule_source",
+          "setup",
+          "severity",
+          "severity_mapping",
+          "tags",
+          "threat",
+          "to",
+          "type",
+          "updated_at",
+          "updated_by",
+          "version"
+        ],
+        "type": "object"
+      },
+      {
+        "additionalProperties": false,
+        "properties": {
+          "actions": {
+            "$ref": "#/definitions/__schema47"
+          },
+          "alert_suppression": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema85"
+              }
+            ]
+          },
+          "alias_purpose": {
+            "$ref": "#/definitions/__schema11"
+          },
+          "alias_target_id": {
+            "$ref": "#/definitions/__schema10"
+          },
+          "author": {
+            "$ref": "#/definitions/__schema50"
+          },
+          "building_block_type": {
+            "$ref": "#/definitions/__schema14"
+          },
+          "created_at": {
+            "$ref": "#/definitions/__schema68"
+          },
+          "created_by": {
+            "$ref": "#/definitions/__schema69"
+          },
+          "created_by_profile_uid": {
+            "$ref": "#/definitions/__schema70"
+          },
+          "data_view_id": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema83"
+              }
+            ]
+          },
+          "description": {
+            "$ref": "#/definitions/__schema1"
+          },
+          "enabled": {
+            "$ref": "#/definitions/__schema41"
+          },
+          "exceptions_list": {
+            "$ref": "#/definitions/__schema49"
+          },
+          "execution_summary": {
+            "$ref": "#/definitions/__schema73"
+          },
+          "false_positives": {
+            "$ref": "#/definitions/__schema51"
+          },
+          "filters": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema84"
+              }
+            ]
+          },
+          "from": {
+            "$ref": "#/definitions/__schema45"
+          },
+          "id": {
+            "$ref": "#/definitions/__schema60"
+          },
+          "immutable": {
+            "$ref": "#/definitions/__schema62"
+          },
+          "index": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema82"
+              }
+            ]
+          },
+          "interval": {
+            "$ref": "#/definitions/__schema44"
+          },
+          "investigation_fields": {
+            "$ref": "#/definitions/__schema18"
+          },
+          "language": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema90"
+              }
+            ]
+          },
+          "license": {
+            "$ref": "#/definitions/__schema12"
+          },
+          "max_signals": {
+            "$ref": "#/definitions/__schema53"
+          },
+          "meta": {
+            "$ref": "#/definitions/__schema17"
+          },
+          "name": {
+            "$ref": "#/definitions/__schema0"
+          },
+          "namespace": {
+            "$ref": "#/definitions/__schema16"
+          },
+          "note": {
+            "$ref": "#/definitions/__schema13"
+          },
+          "outcome": {
+            "$ref": "#/definitions/__schema9"
+          },
+          "output_index": {
+            "$ref": "#/definitions/__schema15"
+          },
+          "query": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema81"
+              }
+            ]
+          },
+          "references": {
+            "$ref": "#/definitions/__schema52"
+          },
+          "related_integrations": {
+            "$ref": "#/definitions/__schema58"
+          },
+          "required_fields": {
+            "$ref": "#/definitions/__schema59"
+          },
+          "response_actions": {
+            "$ref": "#/definitions/__schema22"
+          },
+          "revision": {
+            "$ref": "#/definitions/__schema72"
+          },
+          "risk_score": {
+            "$ref": "#/definitions/__schema2"
+          },
+          "risk_score_mapping": {
+            "$ref": "#/definitions/__schema42"
+          },
+          "rule_id": {
+            "$ref": "#/definitions/__schema61"
+          },
+          "rule_name_override": {
+            "$ref": "#/definitions/__schema4"
+          },
+          "rule_source": {
+            "$ref": "#/definitions/__schema63"
+          },
+          "saved_id": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema89"
+              }
+            ]
+          },
+          "setup": {
+            "$ref": "#/definitions/__schema57"
+          },
+          "severity": {
+            "$ref": "#/definitions/__schema3"
+          },
+          "severity_mapping": {
+            "$ref": "#/definitions/__schema43"
+          },
+          "tags": {
+            "$ref": "#/definitions/__schema40"
+          },
+          "threat": {
+            "$ref": "#/definitions/__schema54"
+          },
+          "throttle": {
+            "$ref": "#/definitions/__schema20"
+          },
+          "timeline_id": {
+            "$ref": "#/definitions/__schema7"
+          },
+          "timeline_title": {
+            "$ref": "#/definitions/__schema8"
+          },
+          "timestamp_override": {
+            "$ref": "#/definitions/__schema5"
+          },
+          "timestamp_override_fallback_disabled": {
+            "$ref": "#/definitions/__schema6"
+          },
+          "to": {
+            "$ref": "#/definitions/__schema46"
+          },
+          "type": {
+            "description": "Rule type",
+            "enum": [
+              "query"
+            ],
+            "type": "string"
+          },
+          "updated_at": {
+            "$ref": "#/definitions/__schema64"
+          },
+          "updated_by": {
+            "$ref": "#/definitions/__schema65"
+          },
+          "updated_by_profile_uid": {
+            "$ref": "#/definitions/__schema66"
+          },
+          "version": {
+            "$ref": "#/definitions/__schema39"
+          }
+        },
+        "required": [
+          "actions",
+          "author",
+          "created_at",
+          "created_by",
+          "description",
+          "enabled",
+          "exceptions_list",
+          "false_positives",
+          "from",
+          "id",
+          "immutable",
+          "interval",
+          "language",
+          "max_signals",
+          "name",
+          "query",
+          "references",
+          "related_integrations",
+          "required_fields",
+          "revision",
+          "risk_score",
+          "risk_score_mapping",
+          "rule_id",
+          "rule_source",
+          "setup",
+          "severity",
+          "severity_mapping",
+          "tags",
+          "threat",
+          "to",
+          "type",
+          "updated_at",
+          "updated_by",
+          "version"
+        ],
+        "type": "object"
+      },
+      {
+        "additionalProperties": false,
+        "properties": {
+          "actions": {
+            "$ref": "#/definitions/__schema47"
+          },
+          "alert_suppression": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema85"
+              }
+            ]
+          },
+          "alias_purpose": {
+            "$ref": "#/definitions/__schema11"
+          },
+          "alias_target_id": {
+            "$ref": "#/definitions/__schema10"
+          },
+          "author": {
+            "$ref": "#/definitions/__schema50"
+          },
+          "building_block_type": {
+            "$ref": "#/definitions/__schema14"
+          },
+          "created_at": {
+            "$ref": "#/definitions/__schema68"
+          },
+          "created_by": {
+            "$ref": "#/definitions/__schema69"
+          },
+          "created_by_profile_uid": {
+            "$ref": "#/definitions/__schema70"
+          },
+          "data_view_id": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema83"
+              }
+            ]
+          },
+          "description": {
+            "$ref": "#/definitions/__schema1"
+          },
+          "enabled": {
+            "$ref": "#/definitions/__schema41"
+          },
+          "exceptions_list": {
+            "$ref": "#/definitions/__schema49"
+          },
+          "execution_summary": {
+            "$ref": "#/definitions/__schema73"
+          },
+          "false_positives": {
+            "$ref": "#/definitions/__schema51"
+          },
+          "filters": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema84"
+              }
+            ]
+          },
+          "from": {
+            "$ref": "#/definitions/__schema45"
+          },
+          "id": {
+            "$ref": "#/definitions/__schema60"
+          },
+          "immutable": {
+            "$ref": "#/definitions/__schema62"
+          },
+          "index": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema82"
+              }
+            ]
+          },
+          "interval": {
+            "$ref": "#/definitions/__schema44"
+          },
+          "investigation_fields": {
+            "$ref": "#/definitions/__schema18"
+          },
+          "language": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema90"
+              }
+            ]
+          },
+          "license": {
+            "$ref": "#/definitions/__schema12"
+          },
+          "max_signals": {
+            "$ref": "#/definitions/__schema53"
+          },
+          "meta": {
+            "$ref": "#/definitions/__schema17"
+          },
+          "name": {
+            "$ref": "#/definitions/__schema0"
+          },
+          "namespace": {
+            "$ref": "#/definitions/__schema16"
+          },
+          "note": {
+            "$ref": "#/definitions/__schema13"
+          },
+          "outcome": {
+            "$ref": "#/definitions/__schema9"
+          },
+          "output_index": {
+            "$ref": "#/definitions/__schema15"
+          },
+          "query": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema81"
+              }
+            ]
+          },
+          "references": {
+            "$ref": "#/definitions/__schema52"
+          },
+          "related_integrations": {
+            "$ref": "#/definitions/__schema58"
+          },
+          "required_fields": {
+            "$ref": "#/definitions/__schema59"
+          },
+          "response_actions": {
+            "$ref": "#/definitions/__schema22"
+          },
+          "revision": {
+            "$ref": "#/definitions/__schema72"
+          },
+          "risk_score": {
+            "$ref": "#/definitions/__schema2"
+          },
+          "risk_score_mapping": {
+            "$ref": "#/definitions/__schema42"
+          },
+          "rule_id": {
+            "$ref": "#/definitions/__schema61"
+          },
+          "rule_name_override": {
+            "$ref": "#/definitions/__schema4"
+          },
+          "rule_source": {
+            "$ref": "#/definitions/__schema63"
+          },
+          "saved_id": {
+            "type": "string"
+          },
+          "setup": {
+            "$ref": "#/definitions/__schema57"
+          },
+          "severity": {
+            "$ref": "#/definitions/__schema3"
+          },
+          "severity_mapping": {
+            "$ref": "#/definitions/__schema43"
+          },
+          "tags": {
+            "$ref": "#/definitions/__schema40"
+          },
+          "threat": {
+            "$ref": "#/definitions/__schema54"
+          },
+          "throttle": {
+            "$ref": "#/definitions/__schema20"
+          },
+          "timeline_id": {
+            "$ref": "#/definitions/__schema7"
+          },
+          "timeline_title": {
+            "$ref": "#/definitions/__schema8"
+          },
+          "timestamp_override": {
+            "$ref": "#/definitions/__schema5"
+          },
+          "timestamp_override_fallback_disabled": {
+            "$ref": "#/definitions/__schema6"
+          },
+          "to": {
+            "$ref": "#/definitions/__schema46"
+          },
+          "type": {
+            "description": "Rule type",
+            "enum": [
+              "saved_query"
+            ],
+            "type": "string"
+          },
+          "updated_at": {
+            "$ref": "#/definitions/__schema64"
+          },
+          "updated_by": {
+            "$ref": "#/definitions/__schema65"
+          },
+          "updated_by_profile_uid": {
+            "$ref": "#/definitions/__schema66"
+          },
+          "version": {
+            "$ref": "#/definitions/__schema39"
+          }
+        },
+        "required": [
+          "actions",
+          "author",
+          "created_at",
+          "created_by",
+          "description",
+          "enabled",
+          "exceptions_list",
+          "false_positives",
+          "from",
+          "id",
+          "immutable",
+          "interval",
+          "language",
+          "max_signals",
+          "name",
+          "references",
+          "related_integrations",
+          "required_fields",
+          "revision",
+          "risk_score",
+          "risk_score_mapping",
+          "rule_id",
+          "rule_source",
+          "saved_id",
+          "setup",
+          "severity",
+          "severity_mapping",
+          "tags",
+          "threat",
+          "to",
+          "type",
+          "updated_at",
+          "updated_by",
+          "version"
+        ],
+        "type": "object"
+      },
+      {
+        "additionalProperties": false,
+        "properties": {
+          "actions": {
+            "$ref": "#/definitions/__schema47"
+          },
+          "alert_suppression": {
+            "additionalProperties": false,
+            "properties": {
+              "duration": {
+                "additionalProperties": false,
+                "properties": {
+                  "unit": {
+                    "$ref": "#/definitions/__schema88"
+                  },
+                  "value": {
+                    "$ref": "#/definitions/__schema87"
+                  }
+                },
+                "required": [
+                  "unit",
+                  "value"
+                ],
+                "type": "object"
+              }
+            },
+            "required": [
+              "duration"
+            ],
+            "type": "object"
+          },
+          "alias_purpose": {
+            "$ref": "#/definitions/__schema11"
+          },
+          "alias_target_id": {
+            "$ref": "#/definitions/__schema10"
+          },
+          "author": {
+            "$ref": "#/definitions/__schema50"
+          },
+          "building_block_type": {
+            "$ref": "#/definitions/__schema14"
+          },
+          "created_at": {
+            "$ref": "#/definitions/__schema68"
+          },
+          "created_by": {
+            "$ref": "#/definitions/__schema69"
+          },
+          "created_by_profile_uid": {
+            "$ref": "#/definitions/__schema70"
+          },
+          "data_view_id": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema83"
+              }
+            ]
+          },
+          "description": {
+            "$ref": "#/definitions/__schema1"
+          },
+          "enabled": {
+            "$ref": "#/definitions/__schema41"
+          },
+          "exceptions_list": {
+            "$ref": "#/definitions/__schema49"
+          },
+          "execution_summary": {
+            "$ref": "#/definitions/__schema73"
+          },
+          "false_positives": {
+            "$ref": "#/definitions/__schema51"
+          },
+          "filters": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema84"
+              }
+            ]
+          },
+          "from": {
+            "$ref": "#/definitions/__schema45"
+          },
+          "id": {
+            "$ref": "#/definitions/__schema60"
+          },
+          "immutable": {
+            "$ref": "#/definitions/__schema62"
+          },
+          "index": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema82"
+              }
+            ]
+          },
+          "interval": {
+            "$ref": "#/definitions/__schema44"
+          },
+          "investigation_fields": {
+            "$ref": "#/definitions/__schema18"
+          },
+          "language": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema90"
+              }
+            ]
+          },
+          "license": {
+            "$ref": "#/definitions/__schema12"
+          },
+          "max_signals": {
+            "$ref": "#/definitions/__schema53"
+          },
+          "meta": {
+            "$ref": "#/definitions/__schema17"
+          },
+          "name": {
+            "$ref": "#/definitions/__schema0"
+          },
+          "namespace": {
+            "$ref": "#/definitions/__schema16"
+          },
+          "note": {
+            "$ref": "#/definitions/__schema13"
+          },
+          "outcome": {
+            "$ref": "#/definitions/__schema9"
+          },
+          "output_index": {
+            "$ref": "#/definitions/__schema15"
+          },
+          "query": {
+            "$ref": "#/definitions/__schema81"
+          },
+          "references": {
+            "$ref": "#/definitions/__schema52"
+          },
+          "related_integrations": {
+            "$ref": "#/definitions/__schema58"
+          },
+          "required_fields": {
+            "$ref": "#/definitions/__schema59"
+          },
+          "response_actions": {
+            "$ref": "#/definitions/__schema22"
+          },
+          "revision": {
+            "$ref": "#/definitions/__schema72"
+          },
+          "risk_score": {
+            "$ref": "#/definitions/__schema2"
+          },
+          "risk_score_mapping": {
+            "$ref": "#/definitions/__schema42"
+          },
+          "rule_id": {
+            "$ref": "#/definitions/__schema61"
+          },
+          "rule_name_override": {
+            "$ref": "#/definitions/__schema4"
+          },
+          "rule_source": {
+            "$ref": "#/definitions/__schema63"
+          },
+          "saved_id": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema89"
+              }
+            ]
+          },
+          "setup": {
+            "$ref": "#/definitions/__schema57"
+          },
+          "severity": {
+            "$ref": "#/definitions/__schema3"
+          },
+          "severity_mapping": {
+            "$ref": "#/definitions/__schema43"
+          },
+          "tags": {
+            "$ref": "#/definitions/__schema40"
+          },
+          "threat": {
+            "$ref": "#/definitions/__schema54"
+          },
+          "threshold": {
+            "additionalProperties": false,
+            "properties": {
+              "cardinality": {
+                "items": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "field": {
+                      "description": "The field on which to calculate and compare the cardinality.",
+                      "type": "string"
+                    },
+                    "value": {
+                      "description": "The threshold value from which an alert is generated based on unique number of values of cardinality.field.",
+                      "maximum": 9007199254740991,
+                      "minimum": 0,
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "field",
+                    "value"
+                  ],
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "field": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "items": {
+                      "$ref": "#/definitions/__schema91"
+                    },
+                    "maxItems": 5,
+                    "type": "array"
+                  }
+                ]
+              },
+              "value": {
+                "maximum": 9007199254740991,
+                "minimum": 1,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "field",
+              "value"
+            ],
+            "type": "object"
+          },
+          "throttle": {
+            "$ref": "#/definitions/__schema20"
+          },
+          "timeline_id": {
+            "$ref": "#/definitions/__schema7"
+          },
+          "timeline_title": {
+            "$ref": "#/definitions/__schema8"
+          },
+          "timestamp_override": {
+            "$ref": "#/definitions/__schema5"
+          },
+          "timestamp_override_fallback_disabled": {
+            "$ref": "#/definitions/__schema6"
+          },
+          "to": {
+            "$ref": "#/definitions/__schema46"
+          },
+          "type": {
+            "description": "Rule type",
+            "enum": [
+              "threshold"
+            ],
+            "type": "string"
+          },
+          "updated_at": {
+            "$ref": "#/definitions/__schema64"
+          },
+          "updated_by": {
+            "$ref": "#/definitions/__schema65"
+          },
+          "updated_by_profile_uid": {
+            "$ref": "#/definitions/__schema66"
+          },
+          "version": {
+            "$ref": "#/definitions/__schema39"
+          }
+        },
+        "required": [
+          "actions",
+          "author",
+          "created_at",
+          "created_by",
+          "description",
+          "enabled",
+          "exceptions_list",
+          "false_positives",
+          "from",
+          "id",
+          "immutable",
+          "interval",
+          "language",
+          "max_signals",
+          "name",
+          "query",
+          "references",
+          "related_integrations",
+          "required_fields",
+          "revision",
+          "risk_score",
+          "risk_score_mapping",
+          "rule_id",
+          "rule_source",
+          "setup",
+          "severity",
+          "severity_mapping",
+          "tags",
+          "threat",
+          "threshold",
+          "to",
+          "type",
+          "updated_at",
+          "updated_by",
+          "version"
+        ],
+        "type": "object"
+      },
+      {
+        "additionalProperties": false,
+        "properties": {
+          "actions": {
+            "$ref": "#/definitions/__schema47"
+          },
+          "alert_suppression": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema85"
+              }
+            ]
+          },
+          "alias_purpose": {
+            "$ref": "#/definitions/__schema11"
+          },
+          "alias_target_id": {
+            "$ref": "#/definitions/__schema10"
+          },
+          "author": {
+            "$ref": "#/definitions/__schema50"
+          },
+          "building_block_type": {
+            "$ref": "#/definitions/__schema14"
+          },
+          "concurrent_searches": {
+            "maximum": 9007199254740991,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "created_at": {
+            "$ref": "#/definitions/__schema68"
+          },
+          "created_by": {
+            "$ref": "#/definitions/__schema69"
+          },
+          "created_by_profile_uid": {
+            "$ref": "#/definitions/__schema70"
+          },
+          "data_view_id": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema83"
+              }
+            ]
+          },
+          "description": {
+            "$ref": "#/definitions/__schema1"
+          },
+          "enabled": {
+            "$ref": "#/definitions/__schema41"
+          },
+          "exceptions_list": {
+            "$ref": "#/definitions/__schema49"
+          },
+          "execution_summary": {
+            "$ref": "#/definitions/__schema73"
+          },
+          "false_positives": {
+            "$ref": "#/definitions/__schema51"
+          },
+          "filters": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema84"
+              }
+            ]
+          },
+          "from": {
+            "$ref": "#/definitions/__schema45"
+          },
+          "id": {
+            "$ref": "#/definitions/__schema60"
+          },
+          "immutable": {
+            "$ref": "#/definitions/__schema62"
+          },
+          "index": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema82"
+              }
+            ]
+          },
+          "interval": {
+            "$ref": "#/definitions/__schema44"
+          },
+          "investigation_fields": {
+            "$ref": "#/definitions/__schema18"
+          },
+          "items_per_search": {
+            "maximum": 9007199254740991,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "language": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema90"
+              }
+            ]
+          },
+          "license": {
+            "$ref": "#/definitions/__schema12"
+          },
+          "max_signals": {
+            "$ref": "#/definitions/__schema53"
+          },
+          "meta": {
+            "$ref": "#/definitions/__schema17"
+          },
+          "name": {
+            "$ref": "#/definitions/__schema0"
+          },
+          "namespace": {
+            "$ref": "#/definitions/__schema16"
+          },
+          "note": {
+            "$ref": "#/definitions/__schema13"
+          },
+          "outcome": {
+            "$ref": "#/definitions/__schema9"
+          },
+          "output_index": {
+            "$ref": "#/definitions/__schema15"
+          },
+          "query": {
+            "$ref": "#/definitions/__schema81"
+          },
+          "references": {
+            "$ref": "#/definitions/__schema52"
+          },
+          "related_integrations": {
+            "$ref": "#/definitions/__schema58"
+          },
+          "required_fields": {
+            "$ref": "#/definitions/__schema59"
+          },
+          "response_actions": {
+            "$ref": "#/definitions/__schema22"
+          },
+          "revision": {
+            "$ref": "#/definitions/__schema72"
+          },
+          "risk_score": {
+            "$ref": "#/definitions/__schema2"
+          },
+          "risk_score_mapping": {
+            "$ref": "#/definitions/__schema42"
+          },
+          "rule_id": {
+            "$ref": "#/definitions/__schema61"
+          },
+          "rule_name_override": {
+            "$ref": "#/definitions/__schema4"
+          },
+          "rule_source": {
+            "$ref": "#/definitions/__schema63"
+          },
+          "saved_id": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema89"
+              }
+            ]
+          },
+          "setup": {
+            "$ref": "#/definitions/__schema57"
+          },
+          "severity": {
+            "$ref": "#/definitions/__schema3"
+          },
+          "severity_mapping": {
+            "$ref": "#/definitions/__schema43"
+          },
+          "tags": {
+            "$ref": "#/definitions/__schema40"
+          },
+          "threat": {
+            "$ref": "#/definitions/__schema54"
+          },
+          "threat_filters": {
+            "items": {},
+            "type": "array"
+          },
+          "threat_index": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "threat_indicator_path": {
+            "type": "string"
+          },
+          "threat_language": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema90"
+              }
+            ]
+          },
+          "threat_mapping": {
+            "items": {
+              "$ref": "#/definitions/__schema92"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "threat_query": {
+            "type": "string"
+          },
+          "throttle": {
+            "$ref": "#/definitions/__schema20"
+          },
+          "timeline_id": {
+            "$ref": "#/definitions/__schema7"
+          },
+          "timeline_title": {
+            "$ref": "#/definitions/__schema8"
+          },
+          "timestamp_override": {
+            "$ref": "#/definitions/__schema5"
+          },
+          "timestamp_override_fallback_disabled": {
+            "$ref": "#/definitions/__schema6"
+          },
+          "to": {
+            "$ref": "#/definitions/__schema46"
+          },
+          "type": {
+            "description": "Rule type",
+            "enum": [
+              "threat_match"
+            ],
+            "type": "string"
+          },
+          "updated_at": {
+            "$ref": "#/definitions/__schema64"
+          },
+          "updated_by": {
+            "$ref": "#/definitions/__schema65"
+          },
+          "updated_by_profile_uid": {
+            "$ref": "#/definitions/__schema66"
+          },
+          "version": {
+            "$ref": "#/definitions/__schema39"
+          }
+        },
+        "required": [
+          "actions",
+          "author",
+          "created_at",
+          "created_by",
+          "description",
+          "enabled",
+          "exceptions_list",
+          "false_positives",
+          "from",
+          "id",
+          "immutable",
+          "interval",
+          "language",
+          "max_signals",
+          "name",
+          "query",
+          "references",
+          "related_integrations",
+          "required_fields",
+          "revision",
+          "risk_score",
+          "risk_score_mapping",
+          "rule_id",
+          "rule_source",
+          "setup",
+          "severity",
+          "severity_mapping",
+          "tags",
+          "threat",
+          "threat_index",
+          "threat_mapping",
+          "threat_query",
+          "to",
+          "type",
+          "updated_at",
+          "updated_by",
+          "version"
+        ],
+        "type": "object"
+      },
+      {
+        "additionalProperties": false,
+        "properties": {
+          "actions": {
+            "$ref": "#/definitions/__schema47"
+          },
+          "alert_suppression": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema85"
+              }
+            ]
+          },
+          "alias_purpose": {
+            "$ref": "#/definitions/__schema11"
+          },
+          "alias_target_id": {
+            "$ref": "#/definitions/__schema10"
+          },
+          "anomaly_threshold": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "author": {
+            "$ref": "#/definitions/__schema50"
+          },
+          "building_block_type": {
+            "$ref": "#/definitions/__schema14"
+          },
+          "created_at": {
+            "$ref": "#/definitions/__schema68"
+          },
+          "created_by": {
+            "$ref": "#/definitions/__schema69"
+          },
+          "created_by_profile_uid": {
+            "$ref": "#/definitions/__schema70"
+          },
+          "description": {
+            "$ref": "#/definitions/__schema1"
+          },
+          "enabled": {
+            "$ref": "#/definitions/__schema41"
+          },
+          "exceptions_list": {
+            "$ref": "#/definitions/__schema49"
+          },
+          "execution_summary": {
+            "$ref": "#/definitions/__schema73"
+          },
+          "false_positives": {
+            "$ref": "#/definitions/__schema51"
+          },
+          "from": {
+            "$ref": "#/definitions/__schema45"
+          },
+          "id": {
+            "$ref": "#/definitions/__schema60"
+          },
+          "immutable": {
+            "$ref": "#/definitions/__schema62"
+          },
+          "interval": {
+            "$ref": "#/definitions/__schema44"
+          },
+          "investigation_fields": {
+            "$ref": "#/definitions/__schema18"
+          },
+          "license": {
+            "$ref": "#/definitions/__schema12"
+          },
+          "machine_learning_job_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "items": {
+                  "$ref": "#/definitions/__schema93"
+                },
+                "minItems": 1,
+                "type": "array"
+              }
+            ]
+          },
+          "max_signals": {
+            "$ref": "#/definitions/__schema53"
+          },
+          "meta": {
+            "$ref": "#/definitions/__schema17"
+          },
+          "name": {
+            "$ref": "#/definitions/__schema0"
+          },
+          "namespace": {
+            "$ref": "#/definitions/__schema16"
+          },
+          "note": {
+            "$ref": "#/definitions/__schema13"
+          },
+          "outcome": {
+            "$ref": "#/definitions/__schema9"
+          },
+          "output_index": {
+            "$ref": "#/definitions/__schema15"
+          },
+          "references": {
+            "$ref": "#/definitions/__schema52"
+          },
+          "related_integrations": {
+            "$ref": "#/definitions/__schema58"
+          },
+          "required_fields": {
+            "$ref": "#/definitions/__schema59"
+          },
+          "response_actions": {
+            "$ref": "#/definitions/__schema22"
+          },
+          "revision": {
+            "$ref": "#/definitions/__schema72"
+          },
+          "risk_score": {
+            "$ref": "#/definitions/__schema2"
+          },
+          "risk_score_mapping": {
+            "$ref": "#/definitions/__schema42"
+          },
+          "rule_id": {
+            "$ref": "#/definitions/__schema61"
+          },
+          "rule_name_override": {
+            "$ref": "#/definitions/__schema4"
+          },
+          "rule_source": {
+            "$ref": "#/definitions/__schema63"
+          },
+          "setup": {
+            "$ref": "#/definitions/__schema57"
+          },
+          "severity": {
+            "$ref": "#/definitions/__schema3"
+          },
+          "severity_mapping": {
+            "$ref": "#/definitions/__schema43"
+          },
+          "tags": {
+            "$ref": "#/definitions/__schema40"
+          },
+          "threat": {
+            "$ref": "#/definitions/__schema54"
+          },
+          "throttle": {
+            "$ref": "#/definitions/__schema20"
+          },
+          "timeline_id": {
+            "$ref": "#/definitions/__schema7"
+          },
+          "timeline_title": {
+            "$ref": "#/definitions/__schema8"
+          },
+          "timestamp_override": {
+            "$ref": "#/definitions/__schema5"
+          },
+          "timestamp_override_fallback_disabled": {
+            "$ref": "#/definitions/__schema6"
+          },
+          "to": {
+            "$ref": "#/definitions/__schema46"
+          },
+          "type": {
+            "description": "Rule type",
+            "enum": [
+              "machine_learning"
+            ],
+            "type": "string"
+          },
+          "updated_at": {
+            "$ref": "#/definitions/__schema64"
+          },
+          "updated_by": {
+            "$ref": "#/definitions/__schema65"
+          },
+          "updated_by_profile_uid": {
+            "$ref": "#/definitions/__schema66"
+          },
+          "version": {
+            "$ref": "#/definitions/__schema39"
+          }
+        },
+        "required": [
+          "actions",
+          "anomaly_threshold",
+          "author",
+          "created_at",
+          "created_by",
+          "description",
+          "enabled",
+          "exceptions_list",
+          "false_positives",
+          "from",
+          "id",
+          "immutable",
+          "interval",
+          "machine_learning_job_id",
+          "max_signals",
+          "name",
+          "references",
+          "related_integrations",
+          "required_fields",
+          "revision",
+          "risk_score",
+          "risk_score_mapping",
+          "rule_id",
+          "rule_source",
+          "setup",
+          "severity",
+          "severity_mapping",
+          "tags",
+          "threat",
+          "to",
+          "type",
+          "updated_at",
+          "updated_by",
+          "version"
+        ],
+        "type": "object"
+      },
+      {
+        "additionalProperties": false,
+        "properties": {
+          "actions": {
+            "$ref": "#/definitions/__schema47"
+          },
+          "alert_suppression": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema85"
+              }
+            ]
+          },
+          "alias_purpose": {
+            "$ref": "#/definitions/__schema11"
+          },
+          "alias_target_id": {
+            "$ref": "#/definitions/__schema10"
+          },
+          "author": {
+            "$ref": "#/definitions/__schema50"
+          },
+          "building_block_type": {
+            "$ref": "#/definitions/__schema14"
+          },
+          "created_at": {
+            "$ref": "#/definitions/__schema68"
+          },
+          "created_by": {
+            "$ref": "#/definitions/__schema69"
+          },
+          "created_by_profile_uid": {
+            "$ref": "#/definitions/__schema70"
+          },
+          "data_view_id": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema83"
+              }
+            ]
+          },
+          "description": {
+            "$ref": "#/definitions/__schema1"
+          },
+          "enabled": {
+            "$ref": "#/definitions/__schema41"
+          },
+          "exceptions_list": {
+            "$ref": "#/definitions/__schema49"
+          },
+          "execution_summary": {
+            "$ref": "#/definitions/__schema73"
+          },
+          "false_positives": {
+            "$ref": "#/definitions/__schema51"
+          },
+          "filters": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema84"
+              }
+            ]
+          },
+          "from": {
+            "$ref": "#/definitions/__schema45"
+          },
+          "history_window_start": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "id": {
+            "$ref": "#/definitions/__schema60"
+          },
+          "immutable": {
+            "$ref": "#/definitions/__schema62"
+          },
+          "index": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema82"
+              }
+            ]
+          },
+          "interval": {
+            "$ref": "#/definitions/__schema44"
+          },
+          "investigation_fields": {
+            "$ref": "#/definitions/__schema18"
+          },
+          "language": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema90"
+              }
+            ]
+          },
+          "license": {
+            "$ref": "#/definitions/__schema12"
+          },
+          "max_signals": {
+            "$ref": "#/definitions/__schema53"
+          },
+          "meta": {
+            "$ref": "#/definitions/__schema17"
+          },
+          "name": {
+            "$ref": "#/definitions/__schema0"
+          },
+          "namespace": {
+            "$ref": "#/definitions/__schema16"
+          },
+          "new_terms_fields": {
+            "items": {
+              "$ref": "#/definitions/__schema94"
+            },
+            "maxItems": 3,
+            "minItems": 1,
+            "type": "array"
+          },
+          "note": {
+            "$ref": "#/definitions/__schema13"
+          },
+          "outcome": {
+            "$ref": "#/definitions/__schema9"
+          },
+          "output_index": {
+            "$ref": "#/definitions/__schema15"
+          },
+          "query": {
+            "$ref": "#/definitions/__schema81"
+          },
+          "references": {
+            "$ref": "#/definitions/__schema52"
+          },
+          "related_integrations": {
+            "$ref": "#/definitions/__schema58"
+          },
+          "required_fields": {
+            "$ref": "#/definitions/__schema59"
+          },
+          "response_actions": {
+            "$ref": "#/definitions/__schema22"
+          },
+          "revision": {
+            "$ref": "#/definitions/__schema72"
+          },
+          "risk_score": {
+            "$ref": "#/definitions/__schema2"
+          },
+          "risk_score_mapping": {
+            "$ref": "#/definitions/__schema42"
+          },
+          "rule_id": {
+            "$ref": "#/definitions/__schema61"
+          },
+          "rule_name_override": {
+            "$ref": "#/definitions/__schema4"
+          },
+          "rule_source": {
+            "$ref": "#/definitions/__schema63"
+          },
+          "setup": {
+            "$ref": "#/definitions/__schema57"
+          },
+          "severity": {
+            "$ref": "#/definitions/__schema3"
+          },
+          "severity_mapping": {
+            "$ref": "#/definitions/__schema43"
+          },
+          "tags": {
+            "$ref": "#/definitions/__schema40"
+          },
+          "threat": {
+            "$ref": "#/definitions/__schema54"
+          },
+          "throttle": {
+            "$ref": "#/definitions/__schema20"
+          },
+          "timeline_id": {
+            "$ref": "#/definitions/__schema7"
+          },
+          "timeline_title": {
+            "$ref": "#/definitions/__schema8"
+          },
+          "timestamp_override": {
+            "$ref": "#/definitions/__schema5"
+          },
+          "timestamp_override_fallback_disabled": {
+            "$ref": "#/definitions/__schema6"
+          },
+          "to": {
+            "$ref": "#/definitions/__schema46"
+          },
+          "type": {
+            "description": "Rule type",
+            "enum": [
+              "new_terms"
+            ],
+            "type": "string"
+          },
+          "updated_at": {
+            "$ref": "#/definitions/__schema64"
+          },
+          "updated_by": {
+            "$ref": "#/definitions/__schema65"
+          },
+          "updated_by_profile_uid": {
+            "$ref": "#/definitions/__schema66"
+          },
+          "version": {
+            "$ref": "#/definitions/__schema39"
+          }
+        },
+        "required": [
+          "actions",
+          "author",
+          "created_at",
+          "created_by",
+          "description",
+          "enabled",
+          "exceptions_list",
+          "false_positives",
+          "from",
+          "history_window_start",
+          "id",
+          "immutable",
+          "interval",
+          "language",
+          "max_signals",
+          "name",
+          "new_terms_fields",
+          "query",
+          "references",
+          "related_integrations",
+          "required_fields",
+          "revision",
+          "risk_score",
+          "risk_score_mapping",
+          "rule_id",
+          "rule_source",
+          "setup",
+          "severity",
+          "severity_mapping",
+          "tags",
+          "threat",
+          "to",
+          "type",
+          "updated_at",
+          "updated_by",
+          "version"
+        ],
+        "type": "object"
+      },
+      {
+        "additionalProperties": false,
+        "properties": {
+          "actions": {
+            "$ref": "#/definitions/__schema47"
+          },
+          "alert_suppression": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema85"
+              }
+            ]
+          },
+          "alias_purpose": {
+            "$ref": "#/definitions/__schema11"
+          },
+          "alias_target_id": {
+            "$ref": "#/definitions/__schema10"
+          },
+          "author": {
+            "$ref": "#/definitions/__schema50"
+          },
+          "building_block_type": {
+            "$ref": "#/definitions/__schema14"
+          },
+          "created_at": {
+            "$ref": "#/definitions/__schema68"
+          },
+          "created_by": {
+            "$ref": "#/definitions/__schema69"
+          },
+          "created_by_profile_uid": {
+            "$ref": "#/definitions/__schema70"
+          },
+          "description": {
+            "$ref": "#/definitions/__schema1"
+          },
+          "enabled": {
+            "$ref": "#/definitions/__schema41"
+          },
+          "exceptions_list": {
+            "$ref": "#/definitions/__schema49"
+          },
+          "execution_summary": {
+            "$ref": "#/definitions/__schema73"
+          },
+          "false_positives": {
+            "$ref": "#/definitions/__schema51"
+          },
+          "from": {
+            "$ref": "#/definitions/__schema45"
+          },
+          "id": {
+            "$ref": "#/definitions/__schema60"
+          },
+          "immutable": {
+            "$ref": "#/definitions/__schema62"
+          },
+          "interval": {
+            "$ref": "#/definitions/__schema44"
+          },
+          "investigation_fields": {
+            "$ref": "#/definitions/__schema18"
+          },
+          "language": {
+            "enum": [
+              "esql"
+            ],
+            "type": "string"
+          },
+          "license": {
+            "$ref": "#/definitions/__schema12"
+          },
+          "max_signals": {
+            "$ref": "#/definitions/__schema53"
+          },
+          "meta": {
+            "$ref": "#/definitions/__schema17"
+          },
+          "name": {
+            "$ref": "#/definitions/__schema0"
+          },
+          "namespace": {
+            "$ref": "#/definitions/__schema16"
+          },
+          "note": {
+            "$ref": "#/definitions/__schema13"
+          },
+          "outcome": {
+            "$ref": "#/definitions/__schema9"
+          },
+          "output_index": {
+            "$ref": "#/definitions/__schema15"
+          },
+          "query": {
+            "$ref": "#/definitions/__schema81"
+          },
+          "references": {
+            "$ref": "#/definitions/__schema52"
+          },
+          "related_integrations": {
+            "$ref": "#/definitions/__schema58"
+          },
+          "required_fields": {
+            "$ref": "#/definitions/__schema59"
+          },
+          "response_actions": {
+            "$ref": "#/definitions/__schema22"
+          },
+          "revision": {
+            "$ref": "#/definitions/__schema72"
+          },
+          "risk_score": {
+            "$ref": "#/definitions/__schema2"
+          },
+          "risk_score_mapping": {
+            "$ref": "#/definitions/__schema42"
+          },
+          "rule_id": {
+            "$ref": "#/definitions/__schema61"
+          },
+          "rule_name_override": {
+            "$ref": "#/definitions/__schema4"
+          },
+          "rule_source": {
+            "$ref": "#/definitions/__schema63"
+          },
+          "setup": {
+            "$ref": "#/definitions/__schema57"
+          },
+          "severity": {
+            "$ref": "#/definitions/__schema3"
+          },
+          "severity_mapping": {
+            "$ref": "#/definitions/__schema43"
+          },
+          "tags": {
+            "$ref": "#/definitions/__schema40"
+          },
+          "threat": {
+            "$ref": "#/definitions/__schema54"
+          },
+          "throttle": {
+            "$ref": "#/definitions/__schema20"
+          },
+          "timeline_id": {
+            "$ref": "#/definitions/__schema7"
+          },
+          "timeline_title": {
+            "$ref": "#/definitions/__schema8"
+          },
+          "timestamp_override": {
+            "$ref": "#/definitions/__schema5"
+          },
+          "timestamp_override_fallback_disabled": {
+            "$ref": "#/definitions/__schema6"
+          },
+          "to": {
+            "$ref": "#/definitions/__schema46"
+          },
+          "type": {
+            "description": "Rule type",
+            "enum": [
+              "esql"
+            ],
+            "type": "string"
+          },
+          "updated_at": {
+            "$ref": "#/definitions/__schema64"
+          },
+          "updated_by": {
+            "$ref": "#/definitions/__schema65"
+          },
+          "updated_by_profile_uid": {
+            "$ref": "#/definitions/__schema66"
+          },
+          "version": {
+            "$ref": "#/definitions/__schema39"
+          }
+        },
+        "required": [
+          "actions",
+          "author",
+          "created_at",
+          "created_by",
+          "description",
+          "enabled",
+          "exceptions_list",
+          "false_positives",
+          "from",
+          "id",
+          "immutable",
+          "interval",
+          "language",
+          "max_signals",
+          "name",
+          "query",
+          "references",
+          "related_integrations",
+          "required_fields",
+          "revision",
+          "risk_score",
+          "risk_score_mapping",
+          "rule_id",
+          "rule_source",
+          "setup",
+          "severity",
+          "severity_mapping",
+          "tags",
+          "threat",
+          "to",
+          "type",
+          "updated_at",
+          "updated_by",
+          "version"
+        ],
+        "type": "object"
+      }
+    ]
+  },
+  "stability": "tech_preview"
+}

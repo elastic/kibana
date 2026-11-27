@@ -1,0 +1,345 @@
+{
+  "exposure": "open",
+  "id": "threat_intel.fetch_source",
+  "input": {
+    "properties": {
+      "source": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "properties": {
+              "_id": {
+                "type": "string"
+              },
+              "_index": {
+                "type": "string"
+              },
+              "_source": {
+                "properties": {
+                  "adapter_type": {
+                    "enum": [
+                      "rss",
+                      "kev"
+                    ],
+                    "type": "string"
+                  },
+                  "enabled": {
+                    "type": "boolean"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "space_id": {
+                    "type": "string"
+                  },
+                  "tags": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "adapter_type",
+                  "name"
+                ],
+                "type": "object"
+              }
+            },
+            "required": [
+              "_id",
+              "_source"
+            ],
+            "type": "object"
+          }
+        ]
+      }
+    },
+    "required": [
+      "source"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "properties": {
+      "adapter_type": {
+        "enum": [
+          "rss",
+          "kev"
+        ],
+        "type": "string"
+      },
+      "reports": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "@timestamp": {
+              "type": "string"
+            },
+            "content": {
+              "additionalProperties": false,
+              "properties": {
+                "article_url": {
+                  "type": "string"
+                },
+                "body_text": {
+                  "type": "string"
+                },
+                "language": {
+                  "default": "en",
+                  "type": "string"
+                },
+                "published_at": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "body_text",
+                "language",
+                "title"
+              ],
+              "type": "object"
+            },
+            "content_fingerprint": {
+              "type": "string"
+            },
+            "extracted": {
+              "additionalProperties": false,
+              "properties": {
+                "categories": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "iocs": {
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "block_index": {
+                        "type": "number"
+                      },
+                      "defanged": {
+                        "type": "string"
+                      },
+                      "deferred_unreviewed": {
+                        "type": "boolean"
+                      },
+                      "port": {
+                        "type": "number"
+                      },
+                      "reference": {
+                        "type": "string"
+                      },
+                      "tier": {
+                        "type": "string"
+                      },
+                      "tier_basis": {
+                        "type": "string"
+                      },
+                      "tier_heuristic": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "type": "string"
+                      },
+                      "value": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "tier",
+                      "tier_basis",
+                      "tier_heuristic",
+                      "type",
+                      "value"
+                    ],
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "relevance": {
+                  "maximum": 1,
+                  "minimum": 0,
+                  "type": "number"
+                },
+                "vulnerability": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "cve_id": {
+                      "type": "string"
+                    },
+                    "cwes": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "date_added": {
+                      "type": "string"
+                    },
+                    "due_date": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "product": {
+                      "type": "string"
+                    },
+                    "ransomware_use": {
+                      "type": "string"
+                    },
+                    "vendor": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "cve_id",
+                    "date_added",
+                    "due_date",
+                    "name",
+                    "product",
+                    "vendor"
+                  ],
+                  "type": "object"
+                }
+              },
+              "type": "object"
+            },
+            "lineage": {
+              "additionalProperties": false,
+              "properties": {
+                "extracted_at": {
+                  "type": "string"
+                },
+                "extraction_method": {
+                  "enum": [
+                    "pending",
+                    "text_indicator_list",
+                    "kev"
+                  ],
+                  "type": "string"
+                },
+                "ingested_at": {
+                  "type": "string"
+                },
+                "source_doc_ref": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "index": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "index"
+                  ],
+                  "type": "object"
+                }
+              },
+              "required": [
+                "extraction_method",
+                "ingested_at"
+              ],
+              "type": "object"
+            },
+            "rank_score": {
+              "type": "number"
+            },
+            "severity": {
+              "additionalProperties": false,
+              "properties": {
+                "level": {
+                  "enum": [
+                    "low",
+                    "medium",
+                    "high",
+                    "critical"
+                  ],
+                  "type": "string"
+                },
+                "score": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "level",
+                "score"
+              ],
+              "type": "object"
+            },
+            "source": {
+              "additionalProperties": false,
+              "properties": {
+                "adapter_id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "type": {
+                  "enum": [
+                    "rss",
+                    "text_indicator_list",
+                    "kev",
+                    "email",
+                    "manual",
+                    "telemetry"
+                  ],
+                  "type": "string"
+                },
+                "url": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "adapter_id",
+                "name",
+                "type"
+              ],
+              "type": "object"
+            },
+            "space_id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "@timestamp",
+            "content",
+            "content_fingerprint",
+            "lineage",
+            "severity",
+            "source",
+            "space_id"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "source_id": {
+        "type": "string"
+      },
+      "total_fetched": {
+        "type": "number"
+      }
+    },
+    "required": [
+      "adapter_type",
+      "reports",
+      "source_id",
+      "total_fetched"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

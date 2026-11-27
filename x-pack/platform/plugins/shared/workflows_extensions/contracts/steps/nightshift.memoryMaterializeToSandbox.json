@@ -1,0 +1,102 @@
+{
+  "exposure": "open",
+  "id": "nightshift.memoryMaterializeToSandbox",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "maxLength": 65536,
+        "type": "string"
+      },
+      "__schema1": {
+        "maxLength": 1024,
+        "type": "string"
+      },
+      "__schema2": {
+        "maxLength": 1024,
+        "type": "string"
+      }
+    },
+    "properties": {
+      "agent_id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema1"
+          }
+        ],
+        "description": "Agent whose memory store to materialize. Missing agent_id skips memory."
+      },
+      "conversation_id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema2"
+          }
+        ],
+        "description": "Agent Builder conversation id for telemetry correlation."
+      },
+      "prompt": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "The user message for this round, used as a memory search query when present."
+      },
+      "sandbox_id": {
+        "description": "Workspace key from nightshift.obtainSandbox. Already space-scoped.",
+        "maxLength": 1024,
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "required": [
+      "sandbox_id"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "definitions": {
+      "__schema0": {
+        "type": "boolean"
+      },
+      "__schema1": {
+        "type": "string"
+      }
+    },
+    "properties": {
+      "failed": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "The write failed; its contents may be incomplete."
+      },
+      "notification": {
+        "description": "Markdown fragment listing memory pages new this turn, empty when there were none. On failure, the incomplete-materialization notice for /workspace/memories.",
+        "type": "string"
+      },
+      "recalled_ids": {
+        "description": "Memory page ids recalled for this exact conversation round.",
+        "items": {
+          "$ref": "#/definitions/__schema1"
+        },
+        "type": "array"
+      },
+      "sandbox_id": {
+        "description": "Sandbox that received the memory pages.",
+        "type": "string"
+      },
+      "skipped": {
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "notification",
+      "recalled_ids",
+      "sandbox_id"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

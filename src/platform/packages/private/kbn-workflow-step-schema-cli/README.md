@@ -57,8 +57,8 @@ definitions it has registered
 (`GET /internal/workflows_extensions/{step,trigger}_definitions`) and asserts
 every registered id is present in the produced schema (`endpoint ⊆ schema`).
 This is a self-consistency check — it catches the schema dropping a registered
-definition, not registry ↔ approved-fixture parity (owned by the Scout approval
-tests).
+definition, not changes to what a step accepts or returns (see
+[Step contracts](#step-contracts)).
 
 The direction is deliberately one-way: the schema legitimately contains extra
 `type`s the definition endpoints do not list (built-in steps like `if`/`foreach`,
@@ -171,10 +171,29 @@ regular Jest integration lane via `.buildkite/disabled_jest_configs.json` to
 avoid a redundant double boot. Set `WORKFLOW_SCHEMA_OUTPUT_DIR` to write
 elsewhere (e.g. under the gitignored `target/`) when experimenting locally.
 
-The same boot also checks the per-step `definitionHash` approvals (see
-`workflows_extensions/dev_docs/STEPS.md`). Unapproved steps are written to
-`WORKFLOW_STEP_APPROVAL_REPORT` (when set) rather than failing the test, and the
-codegen script fails PR and merge queue builds on a non-empty report.
+### Step contracts
+
+The same boot also writes the contract of every registered custom step, one
+file per step, to
+`x-pack/platform/plugins/shared/workflows_extensions/contracts/steps/<step.id>.json`
+(from `GET /internal/workflows_extensions/step_definitions?include_contracts=true`).
+Feature PRs compare them with their merge base:
+
+```bash
+node scripts/check_workflow_step_contracts --base <merge base> [--report <file>]
+```
+
+The check wraps the contracts of the changed steps in OpenAPI documents (the
+`with` block and the config as the request, the output as the response) and
+runs oasdiff through `@kbn/api-contracts`, then adds its own rules for removed
+steps and narrowed exposure. It fails on breaking changes, unless an entry the
+PR adds to `contracts/breaking_changes_allowlist.json` accepts them, and on
+registered steps missing from `contracts/approved_steps.json`. See
+`workflows_extensions/dev_docs/STEPS.md#step-contract-check`.
+
+The boot uses the default configuration, so only the steps that ship by default
+have a contract. A step behind a flag that is off by default gets one in the PR
+that turns the flag on by default.
 
 ### Who commits the artifact
 
@@ -182,9 +201,9 @@ The codegen script behaves differently per build type:
 
 | Build | Behavior |
 | --- | --- |
-| Feature PR | Generates (guards and approvals still run), annotates the PR when the schema changed, and resets `generated/` to the PR's merge-base (one auto-commit if the PR carried an old copy). The schema is never committed by feature PRs. |
-| Merge queue | Generates for the guards and approvals, then discards the output. |
-| On-merge | Generates; on drift it triggers the sync pipeline (async) and discards the output. |
+| Feature PR | Generates (guards still run), annotates the PR when the schema changed, and resets `generated/` to the PR's merge-base (one auto-commit if the PR carried an old copy). The schema is never committed by feature PRs. Step contract changes are committed in the same auto-commit, and breaking ones fail the build. |
+| Merge queue | Generates for the guards, fails when the committed step contracts are out of date, then discards the output. |
+| On-merge | Generates; on drift it triggers the sync pipeline (async) and discards the output. Step contract drift is only logged. |
 | Sync PR (`workflow_step_schema_sync_*` branch) | Generates and auto-commits as before. |
 
 The `kibana-workflow-step-schema-sync` pipeline

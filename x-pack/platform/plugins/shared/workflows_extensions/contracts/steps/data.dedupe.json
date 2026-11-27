@@ -1,0 +1,43 @@
+{
+  "config": {
+    "properties": {
+      "items": {
+        "items": {},
+        "type": "array"
+      },
+      "strategy": {
+        "default": "keep_first",
+        "enum": [
+          "keep_first",
+          "keep_last"
+        ],
+        "type": "string"
+      }
+    },
+    "required": [
+      "items"
+    ],
+    "type": "object"
+  },
+  "exposure": "open",
+  "id": "data.dedupe",
+  "input": {
+    "properties": {
+      "keys": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "keys"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "items": {},
+    "type": "array"
+  },
+  "stability": "tech_preview"
+}

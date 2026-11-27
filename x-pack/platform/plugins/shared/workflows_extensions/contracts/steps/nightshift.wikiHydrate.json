@@ -1,0 +1,97 @@
+{
+  "exposure": "open",
+  "id": "nightshift.wikiHydrate",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema1"
+          }
+        ],
+        "description": "Workspace key from nightshift.obtainSandbox. Already space-scoped."
+      },
+      "__schema1": {
+        "maxLength": 1024,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema2": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema3"
+          }
+        ],
+        "description": "Legacy unscoped conversation id. Scoped using the workflow Space."
+      },
+      "__schema3": {
+        "maxLength": 1024,
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "properties": {
+      "conversation_id": {
+        "$ref": "#/definitions/__schema2"
+      },
+      "sandbox_id": {
+        "$ref": "#/definitions/__schema0"
+      }
+    },
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "definitions": {
+      "__schema0": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "__schema1": {
+        "type": "boolean"
+      }
+    },
+    "properties": {
+      "conversation_id": {
+        "description": "Unscoped conversation id for legacy consumers.",
+        "type": "string"
+      },
+      "failed": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema1"
+          }
+        ],
+        "description": "The write failed; its contents may be incomplete."
+      },
+      "hydrated_ids": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "Canonical Wiki page ids materialized into the sandbox."
+      },
+      "notification": {
+        "description": "Empty on success. On failure, the incomplete-materialization notice for /workspace/wiki.",
+        "type": "string"
+      },
+      "sandbox_id": {
+        "description": "Sandbox that was hydrated.",
+        "type": "string"
+      },
+      "skipped": {
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "conversation_id",
+      "notification",
+      "sandbox_id"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

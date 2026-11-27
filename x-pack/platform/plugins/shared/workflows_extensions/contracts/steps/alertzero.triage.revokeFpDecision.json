@@ -1,0 +1,51 @@
+{
+  "exposure": "open",
+  "id": "alertzero.triage.revokeFpDecision",
+  "input": {
+    "properties": {
+      "decision_id": {
+        "description": "Id of the decision: `fp-decision-<hash>` or `fp-dismissal-<hash>`.",
+        "pattern": "^fp-(decision|dismissal)-[0-9a-f]{16}$",
+        "type": "string"
+      }
+    },
+    "required": [
+      "decision_id"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "properties": {
+      "alerts_released": {
+        "description": "Alerts the decision kept out of analysis that went back to the backlog.",
+        "type": "number"
+      },
+      "alerts_reopened": {
+        "description": "Alerts the decision closed that were reopened.",
+        "type": "number"
+      },
+      "failures": {
+        "description": "Steps of the revoke that failed. Run it again to finish.",
+        "type": "number"
+      },
+      "status": {
+        "description": "`not_found` when no such decision exists in this space. Alerts that carry its tag are still put back. `denied` when the caller cannot read or write the decisions index: nothing was changed.",
+        "enum": [
+          "ok",
+          "not_found",
+          "denied"
+        ],
+        "type": "string"
+      }
+    },
+    "required": [
+      "alerts_released",
+      "alerts_reopened",
+      "failures",
+      "status"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

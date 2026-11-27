@@ -1,0 +1,450 @@
+{
+  "exposure": "open",
+  "id": "cases.getAllAttachments",
+  "input": {
+    "properties": {
+      "case_id": {
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "required": [
+      "case_id"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "definitions": {
+      "__schema0": {
+        "oneOf": [
+          {
+            "additionalProperties": false,
+            "properties": {
+              "alertId": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "created_at": {
+                "format": "date-time",
+                "maxLength": 64,
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?Z$",
+                "type": "string"
+              },
+              "created_by": {
+                "additionalProperties": false,
+                "properties": {
+                  "email": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "full_name": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "profile_uid": {
+                    "type": "string"
+                  },
+                  "username": {
+                    "nullable": true,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "email",
+                  "full_name",
+                  "username"
+                ],
+                "type": "object"
+              },
+              "id": {
+                "type": "string"
+              },
+              "index": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "owner": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema1"
+                  }
+                ]
+              },
+              "pushed_at": {
+                "format": "date-time",
+                "maxLength": 64,
+                "nullable": true,
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?Z$",
+                "type": "string"
+              },
+              "pushed_by": {
+                "additionalProperties": false,
+                "nullable": true,
+                "properties": {
+                  "email": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "full_name": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "profile_uid": {
+                    "type": "string"
+                  },
+                  "username": {
+                    "nullable": true,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "email",
+                  "full_name",
+                  "username"
+                ],
+                "type": "object"
+              },
+              "rule": {
+                "additionalProperties": false,
+                "properties": {
+                  "id": {
+                    "allOf": [
+                      {
+                        "$ref": "#/definitions/__schema2"
+                      }
+                    ],
+                    "description": "The rule identifier."
+                  },
+                  "name": {
+                    "allOf": [
+                      {
+                        "$ref": "#/definitions/__schema3"
+                      }
+                    ],
+                    "description": "The rule name."
+                  }
+                },
+                "type": "object"
+              },
+              "type": {
+                "enum": [
+                  "alert"
+                ],
+                "type": "string"
+              },
+              "updated_at": {
+                "format": "date-time",
+                "maxLength": 64,
+                "nullable": true,
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?Z$",
+                "type": "string"
+              },
+              "updated_by": {
+                "additionalProperties": false,
+                "nullable": true,
+                "properties": {
+                  "email": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "full_name": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "profile_uid": {
+                    "type": "string"
+                  },
+                  "username": {
+                    "nullable": true,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "email",
+                  "full_name",
+                  "username"
+                ],
+                "type": "object"
+              },
+              "version": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "type"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "created_at": {
+                "format": "date-time",
+                "maxLength": 64,
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?Z$",
+                "type": "string"
+              },
+              "created_by": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema4"
+                  }
+                ]
+              },
+              "eventId": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "id": {
+                "type": "string"
+              },
+              "index": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "owner": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema1"
+                  }
+                ]
+              },
+              "pushed_at": {
+                "format": "date-time",
+                "maxLength": 64,
+                "nullable": true,
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?Z$",
+                "type": "string"
+              },
+              "pushed_by": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema5"
+                  }
+                ]
+              },
+              "type": {
+                "enum": [
+                  "event"
+                ],
+                "type": "string"
+              },
+              "updated_at": {
+                "format": "date-time",
+                "maxLength": 64,
+                "nullable": true,
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?Z$",
+                "type": "string"
+              },
+              "updated_by": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema6"
+                  }
+                ]
+              },
+              "version": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "type"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "comment": {
+                "type": "string"
+              },
+              "created_at": {
+                "format": "date-time",
+                "maxLength": 64,
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?Z$",
+                "type": "string"
+              },
+              "created_by": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema4"
+                  }
+                ]
+              },
+              "id": {
+                "type": "string"
+              },
+              "owner": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema1"
+                  }
+                ]
+              },
+              "pushed_at": {
+                "format": "date-time",
+                "maxLength": 64,
+                "nullable": true,
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?Z$",
+                "type": "string"
+              },
+              "pushed_by": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema5"
+                  }
+                ]
+              },
+              "type": {
+                "enum": [
+                  "user"
+                ],
+                "type": "string"
+              },
+              "updated_at": {
+                "format": "date-time",
+                "maxLength": 64,
+                "nullable": true,
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?Z$",
+                "type": "string"
+              },
+              "updated_by": {
+                "allOf": [
+                  {
+                    "$ref": "#/definitions/__schema6"
+                  }
+                ]
+              },
+              "version": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "type"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "__schema1": {
+        "enum": [
+          "cases",
+          "observability",
+          "securitySolution"
+        ],
+        "type": "string"
+      },
+      "__schema2": {
+        "nullable": true,
+        "type": "string"
+      },
+      "__schema3": {
+        "nullable": true,
+        "type": "string"
+      },
+      "__schema4": {
+        "additionalProperties": false,
+        "properties": {
+          "email": {
+            "nullable": true,
+            "type": "string"
+          },
+          "full_name": {
+            "nullable": true,
+            "type": "string"
+          },
+          "profile_uid": {
+            "type": "string"
+          },
+          "username": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "email",
+          "full_name",
+          "username"
+        ],
+        "type": "object"
+      },
+      "__schema5": {
+        "additionalProperties": false,
+        "nullable": true,
+        "properties": {
+          "email": {
+            "nullable": true,
+            "type": "string"
+          },
+          "full_name": {
+            "nullable": true,
+            "type": "string"
+          },
+          "profile_uid": {
+            "type": "string"
+          },
+          "username": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "email",
+          "full_name",
+          "username"
+        ],
+        "type": "object"
+      },
+      "__schema6": {
+        "additionalProperties": false,
+        "nullable": true,
+        "properties": {
+          "email": {
+            "nullable": true,
+            "type": "string"
+          },
+          "full_name": {
+            "nullable": true,
+            "type": "string"
+          },
+          "profile_uid": {
+            "type": "string"
+          },
+          "username": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "email",
+          "full_name",
+          "username"
+        ],
+        "type": "object"
+      }
+    },
+    "properties": {
+      "attachments": {
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "maxItems": 10000,
+        "type": "array"
+      }
+    },
+    "required": [
+      "attachments"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

@@ -1,0 +1,86 @@
+{
+  "config": {
+    "definitions": {
+      "__schema0": {
+        "type": "boolean"
+      }
+    },
+    "properties": {
+      "recalculate-risk-score": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "default": true,
+        "description": "Whether to trigger a risk score recalculation for the entity after updating its criticality. Defaults to true."
+      }
+    },
+    "type": "object"
+  },
+  "exposure": "open",
+  "id": "entityStore.updateAssetCriticality",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "enum": [
+          "low_impact",
+          "medium_impact",
+          "high_impact",
+          "extreme_impact"
+        ],
+        "type": "string"
+      }
+    },
+    "properties": {
+      "criticality_level": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "The criticality level (\"low_impact\", \"medium_impact\", \"high_impact\", \"extreme_impact\") to assign to the entity. Pass `null` to remove the existing criticality level.",
+        "nullable": true
+      },
+      "entity_id": {
+        "description": "The Entity Store entity ID (EUID), e.g. \"host:my-host\"",
+        "maxLength": 1000,
+        "minLength": 1,
+        "type": "string"
+      },
+      "entity_type": {
+        "description": "The Entity Store entity type, e.g. \"host\", \"user\" or \"service\"",
+        "enum": [
+          "user",
+          "host",
+          "service",
+          "generic"
+        ],
+        "type": "string"
+      }
+    },
+    "required": [
+      "criticality_level",
+      "entity_id",
+      "entity_type"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "properties": {
+      "message": {
+        "maxLength": 1500,
+        "type": "string"
+      },
+      "success": {
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "success"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

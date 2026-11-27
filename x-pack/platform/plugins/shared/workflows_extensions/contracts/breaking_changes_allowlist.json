@@ -1,0 +1,4 @@
+{
+  "description": "Breaking changes to workflow step contracts that workflows-eng accepted. An entry only applies in the pull request that adds it. See dev_docs/STEPS.md#step-contract-check.",
+  "entries": []
+}

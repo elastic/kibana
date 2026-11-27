@@ -1,0 +1,50 @@
+{
+  "config": {
+    "definitions": {
+      "__schema0": {}
+    },
+    "properties": {
+      "arrays": {
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "maxItems": 50,
+        "minItems": 1,
+        "type": "array"
+      }
+    },
+    "required": [
+      "arrays"
+    ],
+    "type": "object"
+  },
+  "exposure": "open",
+  "id": "data.concat",
+  "input": {
+    "properties": {
+      "dedupe": {
+        "default": false,
+        "type": "boolean"
+      },
+      "flatten": {
+        "anyOf": [
+          {
+            "type": "boolean"
+          },
+          {
+            "maximum": 10,
+            "minimum": 1,
+            "type": "integer"
+          }
+        ],
+        "default": false
+      }
+    },
+    "type": "object"
+  },
+  "output": {
+    "items": {},
+    "type": "array"
+  },
+  "stability": "tech_preview"
+}

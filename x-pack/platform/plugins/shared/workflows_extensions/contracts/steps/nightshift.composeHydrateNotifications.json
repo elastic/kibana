@@ -1,0 +1,142 @@
+{
+  "exposure": "open",
+  "id": "nightshift.composeHydrateNotifications",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "properties": {
+          "completed": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema2"
+              }
+            ],
+            "description": "False when the writer produced no output at all (branch killed by branch-timeout)."
+          },
+          "directory": {
+            "description": "Absolute sandbox directory this writer materializes into.",
+            "maxLength": 1024,
+            "type": "string"
+          },
+          "notification": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema1"
+              }
+            ],
+            "description": "The writer's own markdown fragment. Empty when it wrote nothing."
+          }
+        },
+        "required": [
+          "directory"
+        ],
+        "type": "object"
+      },
+      "__schema1": {
+        "type": "string"
+      },
+      "__schema2": {
+        "type": "boolean"
+      },
+      "__schema3": {
+        "type": "string"
+      }
+    },
+    "properties": {
+      "recalled_ids": {
+        "description": "Semantic Memory ids recalled for this exact round.",
+        "items": {
+          "$ref": "#/definitions/__schema3"
+        },
+        "maxItems": 100,
+        "type": "array"
+      },
+      "writers": {
+        "description": "Every workspace writer of this round, in workflow order.",
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "maxItems": 16,
+        "type": "array"
+      }
+    },
+    "required": [
+      "recalled_ids",
+      "writers"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "definitions": {
+      "__schema0": {
+        "type": "string"
+      },
+      "__schema1": {
+        "type": "string"
+      }
+    },
+    "properties": {
+      "model_context": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "Model-only <system_update> block. Absent when there is nothing to report."
+      },
+      "workflow_context": {
+        "additionalProperties": false,
+        "properties": {
+          "nightshift.semantic_memory.recall": {
+            "additionalProperties": false,
+            "properties": {
+              "data": {
+                "additionalProperties": false,
+                "properties": {
+                  "background_trace_id": {
+                    "type": "string"
+                  },
+                  "materialize_execution_id": {
+                    "type": "string"
+                  },
+                  "recalled_ids": {
+                    "items": {
+                      "$ref": "#/definitions/__schema1"
+                    },
+                    "maxItems": 100,
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "recalled_ids"
+                ],
+                "type": "object"
+              },
+              "version": {
+                "enum": [
+                  1
+                ],
+                "type": "number"
+              }
+            },
+            "required": [
+              "data",
+              "version"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "nightshift.semantic_memory.recall"
+        ],
+        "type": "object"
+      }
+    },
+    "required": [
+      "workflow_context"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

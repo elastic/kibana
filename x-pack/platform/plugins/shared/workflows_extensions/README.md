@@ -74,7 +74,7 @@ To run workflows when something happens, your plugin calls **emitEvent** (via th
 
 ## Contributions
 
-- **[Custom step types](dev_docs/STEPS.md)** — Contributing custom steps, step type requirements, and the step definition approval process
+- **[Custom step types](dev_docs/STEPS.md)** — Contributing custom steps, step type requirements, and the step contract check
 - **[Event-driven triggers](dev_docs/TRIGGERS.md)** — Contributing triggers, emitting events, and the trigger definition approval process
 
 ## Dependencies

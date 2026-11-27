@@ -1,0 +1,55 @@
+{
+  "exposure": "open",
+  "id": "security.createNote",
+  "input": {
+    "properties": {
+      "document_id": {
+        "description": "The Elasticsearch `_id` of the alert, attack, or document to attach the note to.",
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "text": {
+        "description": "The text content of the note. Markdown is supported.",
+        "maxLength": 60000,
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "required": [
+      "document_id",
+      "text"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "definitions": {
+      "__schema0": {
+        "type": "string"
+      }
+    },
+    "properties": {
+      "message": {
+        "maxLength": 1000,
+        "type": "string"
+      },
+      "note_id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "The `savedObjectId` of the newly created note."
+      },
+      "success": {
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "success"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

@@ -1,0 +1,43 @@
+{
+  "exposure": "open",
+  "id": "nightshift.handleInvestigationFailure",
+  "input": {
+    "properties": {
+      "investigation_id": {
+        "maxLength": 500,
+        "minLength": 1,
+        "type": "string"
+      },
+      "reason": {
+        "maxLength": 10000,
+        "type": "string"
+      }
+    },
+    "required": [
+      "investigation_id",
+      "reason"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "properties": {
+      "failed": {
+        "type": "number"
+      },
+      "sent": {
+        "type": "number"
+      },
+      "unconfirmed": {
+        "type": "number"
+      }
+    },
+    "required": [
+      "failed",
+      "sent",
+      "unconfirmed"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

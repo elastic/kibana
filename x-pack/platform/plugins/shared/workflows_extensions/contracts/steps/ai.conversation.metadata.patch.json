@@ -1,0 +1,89 @@
+{
+  "exposure": "open",
+  "id": "ai.conversation.metadata.patch",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "anyOf": [
+          {
+            "maxLength": 10000,
+            "type": "string"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "boolean"
+          },
+          {
+            "items": {
+              "$ref": "#/definitions/__schema1"
+            },
+            "maxItems": 100,
+            "type": "array"
+          }
+        ]
+      },
+      "__schema1": {
+        "maxLength": 2000,
+        "type": "string"
+      }
+    },
+    "properties": {
+      "conversation_id": {
+        "description": "The unique identifier of the conversation to update.",
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "updates": {
+        "additionalProperties": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "description": "Key/value pairs to merge into the conversation metadata. Only keys defined by the active template are accepted. Existing keys not included here are left unchanged.",
+        "type": "object"
+      }
+    },
+    "required": [
+      "conversation_id",
+      "updates"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "definitions": {
+      "__schema0": {
+        "type": "string"
+      },
+      "__schema1": {}
+    },
+    "properties": {
+      "changed_fields": {
+        "description": "Names of the metadata fields whose values actually changed. Empty when the patch was a no-op.",
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "type": "array"
+      },
+      "conversation_id": {
+        "description": "The ID of the updated conversation.",
+        "type": "string"
+      },
+      "metadata": {
+        "additionalProperties": {
+          "$ref": "#/definitions/__schema1"
+        },
+        "description": "The full conversation metadata after applying the patch.",
+        "type": "object"
+      }
+    },
+    "required": [
+      "changed_fields",
+      "conversation_id",
+      "metadata"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

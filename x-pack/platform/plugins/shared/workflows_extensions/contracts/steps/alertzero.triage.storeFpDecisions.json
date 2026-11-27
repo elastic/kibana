@@ -1,0 +1,131 @@
+{
+  "exposure": "open",
+  "id": "alertzero.triage.storeFpDecisions",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema1": {
+        "maxLength": 256,
+        "type": "string"
+      }
+    },
+    "properties": {
+      "alert_ids": {
+        "description": "The alerts of the proposal's live revision.",
+        "items": {
+          "$ref": "#/definitions/__schema0"
+        },
+        "maxItems": 1000,
+        "minItems": 1,
+        "type": "array"
+      },
+      "approver": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema1"
+          }
+        ],
+        "description": "Who decided the proposal, for the audit trail."
+      },
+      "autonomy": {
+        "description": "A supervised approval is automatic, so nobody saw the pattern and nothing is stored.",
+        "enum": [
+          "manual",
+          "supervised"
+        ],
+        "type": "string"
+      },
+      "investigation_id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "The proposal's Investigation."
+      },
+      "outcome": {
+        "description": "An approval stores false positive decisions, a dismissal stores do-not-propose items.",
+        "enum": [
+          "approved",
+          "dismissed"
+        ],
+        "type": "string"
+      },
+      "proposal_id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "The proposal that was decided."
+      }
+    },
+    "required": [
+      "alert_ids",
+      "autonomy",
+      "investigation_id",
+      "outcome",
+      "proposal_id"
+    ],
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "properties": {
+      "alerts_without_strict_key": {
+        "type": "number"
+      },
+      "failed": {
+        "type": "number"
+      },
+      "keys_below_minimum": {
+        "description": "Keys seen on too few alerts to become decisions.",
+        "type": "number"
+      },
+      "keys_over_cap": {
+        "description": "Keys left out by the per-approval cap.",
+        "type": "number"
+      },
+      "keys_seen": {
+        "description": "Strict keys among the alerts.",
+        "type": "number"
+      },
+      "keys_with_other_verdicts": {
+        "description": "Keys where an earlier alert is a true positive or inconclusive.",
+        "type": "number"
+      },
+      "skip_reason": {
+        "enum": [
+          "none",
+          "off",
+          "supervised",
+          "disabled",
+          "denied",
+          "storage_failure",
+          "no_strict_keys",
+          "alerts_missing"
+        ],
+        "type": "string"
+      },
+      "written": {
+        "type": "number"
+      }
+    },
+    "required": [
+      "alerts_without_strict_key",
+      "failed",
+      "keys_below_minimum",
+      "keys_over_cap",
+      "keys_seen",
+      "keys_with_other_verdicts",
+      "skip_reason",
+      "written"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

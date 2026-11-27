@@ -1,0 +1,140 @@
+{
+  "exposure": "open",
+  "id": "security.setAttackStatus",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "anyOf": [
+          {
+            "$ref": "#/definitions/__schema1"
+          },
+          {
+            "$ref": "#/definitions/__schema2"
+          }
+        ],
+        "description": "A single attack ID or a list of IDs to support bulk updates"
+      },
+      "__schema1": {
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema2": {
+        "items": {
+          "$ref": "#/definitions/__schema3"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
+      "__schema3": {
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "__schema4": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema5"
+          }
+        ],
+        "default": false,
+        "description": "Whether to apply the status to any related alerts of the attack."
+      },
+      "__schema5": {
+        "type": "boolean"
+      },
+      "__schema6": {
+        "anyOf": [
+          {
+            "enum": [
+              "false_positive",
+              "duplicate",
+              "true_positive",
+              "benign_positive",
+              "automated_closure",
+              "other"
+            ],
+            "type": "string"
+          },
+          {
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
+          }
+        ]
+      }
+    },
+    "oneOf": [
+      {
+        "properties": {
+          "ids": {
+            "$ref": "#/definitions/__schema0"
+          },
+          "reason": {
+            "allOf": [
+              {
+                "$ref": "#/definitions/__schema6"
+              }
+            ],
+            "description": "Optional reason when closing the attack (e.g. duplicate, false_positive)"
+          },
+          "status": {
+            "description": "The new status for the attacks",
+            "enum": [
+              "closed"
+            ],
+            "type": "string"
+          },
+          "update_related_alerts": {
+            "$ref": "#/definitions/__schema4"
+          }
+        },
+        "required": [
+          "ids",
+          "status"
+        ],
+        "type": "object"
+      },
+      {
+        "properties": {
+          "ids": {
+            "$ref": "#/definitions/__schema0"
+          },
+          "status": {
+            "description": "The new status for the attacks",
+            "enum": [
+              "open",
+              "acknowledged"
+            ],
+            "type": "string"
+          },
+          "update_related_alerts": {
+            "$ref": "#/definitions/__schema4"
+          }
+        },
+        "required": [
+          "ids",
+          "status"
+        ],
+        "type": "object"
+      }
+    ]
+  },
+  "output": {
+    "additionalProperties": false,
+    "properties": {
+      "message": {
+        "maxLength": 1000,
+        "type": "string"
+      },
+      "success": {
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "success"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}

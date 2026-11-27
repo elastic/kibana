@@ -1,0 +1,264 @@
+{
+  "exposure": "open",
+  "id": "nightshift.decisionTreePrepare",
+  "input": {
+    "definitions": {
+      "__schema0": {
+        "maxLength": 500,
+        "type": "string"
+      },
+      "__schema1": {
+        "maxLength": 500,
+        "type": "string"
+      },
+      "__schema10": {
+        "maxLength": 128,
+        "type": "string"
+      },
+      "__schema11": {
+        "maxLength": 128,
+        "type": "string"
+      },
+      "__schema2": {
+        "maxLength": 512,
+        "type": "string"
+      },
+      "__schema3": {
+        "maxLength": 1024,
+        "type": "string"
+      },
+      "__schema4": {
+        "maxLength": 1024,
+        "type": "string"
+      },
+      "__schema5": {
+        "items": {
+          "$ref": "#/definitions/__schema6"
+        },
+        "maxItems": 2000,
+        "type": "array"
+      },
+      "__schema6": {
+        "additionalProperties": {},
+        "properties": {
+          "params": {
+            "additionalProperties": {},
+            "type": "object"
+          },
+          "tool_call_id": {
+            "maxLength": 512,
+            "type": "string"
+          },
+          "tool_id": {
+            "maxLength": 512,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "__schema7": {
+        "items": {
+          "$ref": "#/definitions/__schema8"
+        },
+        "maxItems": 2000,
+        "type": "array"
+      },
+      "__schema8": {
+        "additionalProperties": {},
+        "properties": {
+          "results": {
+            "items": {
+              "$ref": "#/definitions/__schema9"
+            },
+            "maxItems": 2000,
+            "type": "array"
+          },
+          "tool_call_id": {
+            "maxLength": 512,
+            "type": "string"
+          },
+          "tool_id": {
+            "maxLength": 512,
+            "type": "string"
+          }
+        },
+        "required": [
+          "results",
+          "tool_call_id"
+        ],
+        "type": "object"
+      },
+      "__schema9": {}
+    },
+    "properties": {
+      "agent_id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema4"
+          }
+        ],
+        "description": "Agent id that produced the round. Rounds from other agents are skipped."
+      },
+      "background_trace_id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema10"
+          }
+        ],
+        "description": "Deterministic T_background trace id from materialize."
+      },
+      "connector_id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "Strict model override for a direct run."
+      },
+      "conversation_id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema2"
+          }
+        ],
+        "description": "The investigation (conversation) the round belongs to."
+      },
+      "prompt": {
+        "description": "The user message that started the round.",
+        "maxLength": 65536,
+        "type": "string"
+      },
+      "response": {
+        "description": "The assistant's final response for the round.",
+        "maxLength": 65536,
+        "type": "string"
+      },
+      "round_connector_id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema1"
+          }
+        ],
+        "description": "Inference connector the triggering agent used for this round."
+      },
+      "round_id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema3"
+          }
+        ],
+        "description": "The completed round."
+      },
+      "round_trace_id": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema11"
+          }
+        ],
+        "description": "Trace id of the agent run for this round, so the step's spans join it."
+      },
+      "tool_calls": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema5"
+          }
+        ],
+        "description": "Investigator tool calls from this round. Used to see which decision-tree files were read."
+      },
+      "tool_results": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema7"
+          }
+        ],
+        "description": "Results of the investigator tool calls, keyed by tool_call_id."
+      }
+    },
+    "type": "object"
+  },
+  "output": {
+    "additionalProperties": false,
+    "definitions": {
+      "__schema0": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "__schema1": {
+        "additionalProperties": false,
+        "properties": {
+          "causal_confirmed": {
+            "description": "The investigation data shows the cause the message states.",
+            "type": "boolean"
+          },
+          "causal_summary": {
+            "description": "What was confirmed, or which evidence is missing.",
+            "type": "string"
+          },
+          "is_feedback": {
+            "description": "The human message speaks to the root cause.",
+            "type": "boolean"
+          },
+          "learning": {
+            "description": "What the human taught the investigator.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "causal_confirmed",
+          "causal_summary",
+          "is_feedback",
+          "learning"
+        ],
+        "type": "object"
+      }
+    },
+    "properties": {
+      "causal_check": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema1"
+          }
+        ],
+        "description": "For a follow-up with trees to edit: what its causal check found."
+      },
+      "message": {
+        "description": "Message to hand the reinforcement agent.",
+        "type": "string"
+      },
+      "opened_ids": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/__schema0"
+          }
+        ],
+        "description": "Canonical symptom:<slug> tree ids opened by the investigator this round."
+      },
+      "skipped": {
+        "description": "True when this round is not eligible for reinforcement.",
+        "type": "boolean"
+      },
+      "tree_count": {
+        "description": "Number of decision trees the agent may edit.",
+        "type": "number"
+      },
+      "turn_kind": {
+        "description": "Whether this round seeds the trees or follows up on them.",
+        "enum": [
+          "initial_investigation",
+          "feedback_reinforcement"
+        ],
+        "type": "string"
+      }
+    },
+    "required": [
+      "message",
+      "skipped",
+      "tree_count",
+      "turn_kind"
+    ],
+    "type": "object"
+  },
+  "stability": "tech_preview"
+}
