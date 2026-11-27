@@ -29,13 +29,18 @@ const stepOutput = <T>(fixture: WorkflowRunFixture, stepId: string): T =>
 
 /**
  * Re-ticks a parked parallel workflow until it leaves WAITING (or the guard trips).
- * Parallel branches with timers/waits park in WAITING and resume across ticks, so
- * tests must pump `resumeWorkflow()` to drive the step to a terminal state.
+ * Each tick runs at the scheduled wake time. An immediate resume would re-enter a
+ * parked `wait` before its `resumeAt` and must not be what completes it.
  */
 const driveToTerminal = async (fixture: WorkflowRunFixture, maxGuard = 10): Promise<void> => {
   let guard = 0;
   while (getExecution(fixture)?.status === ExecutionStatus.WAITING && guard < maxGuard) {
-    await fixture.resumeWorkflow();
+    const resumeTask = fixture.taskManagerMock.schedule.mock.calls.at(-1)?.[0];
+    if (resumeTask?.runAt instanceof Date) {
+      await fixture.resumeWorkflowAtScheduledTime();
+    } else {
+      await fixture.resumeWorkflow();
+    }
     guard += 1;
   }
 };
@@ -741,9 +746,8 @@ steps:
 
     describe('after resumes', () => {
       beforeAll(async () => {
-        // Drive resumes until the workflow is no longer waiting. Each branch's
-        // wait toggles closed on a later tick (resumeAt has passed), then the
-        // post-wait step runs.
+        // Drive resumes at each scheduled wake. A branch wait stays parked until
+        // its own resumeAt, then the post-wait step runs.
         await driveToTerminal(workflowRunFixture);
       });
 
@@ -766,6 +770,78 @@ steps:
         const waitExecutions = stepExecutionsFor(workflowRunFixture, 'waitBranch');
         expect(waitExecutions.length).toBe(items.length);
         expect(waitExecutions.every((se) => se.status === ExecutionStatus.COMPLETED)).toBe(true);
+      });
+    });
+  });
+
+  describe('queued branch re-tick does not finish a longer parked wait', () => {
+    // count-waiting: false frees the slot when the first branch parks, so the
+    // parallel schedules a floor re-tick while that wait's resumeAt is still
+    // in the future. Re-running the wait on that tick must leave it parked.
+    let workflowRunFixture: WorkflowRunFixture;
+    let longResumeAt: string;
+    const durations = ['60s', '8s'];
+
+    beforeAll(async () => {
+      workflowRunFixture = new WorkflowRunFixture();
+      const yaml = `
+consts:
+  items: '${JSON.stringify(durations)}'
+steps:
+  - name: fan
+    type: parallel
+    mode: settled
+    concurrency: { max: 1, count-waiting: false }
+    foreach: '{{ consts.items }}'
+    steps:
+      - name: pause
+        type: wait
+        with:
+          duration: '{{ foreach.item }}'
+`;
+      jest.clearAllMocks();
+      await workflowRunFixture.runWorkflow({ workflowYaml: yaml });
+      const resumeAt = stepExecutionsFor(workflowRunFixture, 'pause')[0]?.state?.resumeAt;
+      if (typeof resumeAt !== 'string') {
+        throw new Error('Expected the first branch wait to park with resumeAt');
+      }
+      longResumeAt = resumeAt;
+    });
+
+    it('parks the long wait and schedules an earlier wake for the queued branch', () => {
+      expect(getExecution(workflowRunFixture)?.status).toBe(ExecutionStatus.WAITING);
+      const scheduledRunAt = workflowRunFixture.taskManagerMock.schedule.mock.calls.at(-1)?.[0]
+        ?.runAt as Date | undefined;
+      expect(scheduledRunAt).toBeInstanceOf(Date);
+      expect(scheduledRunAt?.getTime()).toBeLessThan(new Date(longResumeAt).getTime());
+    });
+
+    describe('after that earlier wake', () => {
+      beforeAll(async () => {
+        await workflowRunFixture.resumeWorkflowAtScheduledTime();
+      });
+
+      it('keeps the long wait parked at its original resumeAt', () => {
+        const longWait = stepExecutionsFor(workflowRunFixture, 'pause').find(
+          (step) => step.state?.resumeAt === longResumeAt
+        );
+        expect(longWait?.status).toBe(ExecutionStatus.WAITING);
+      });
+
+      it('completes the long wait only once its own resumeAt is reached', async () => {
+        await driveToTerminal(workflowRunFixture);
+
+        expect(getExecution(workflowRunFixture)?.status).toBe(ExecutionStatus.COMPLETED);
+        const longWait = stepExecutionsFor(workflowRunFixture, 'pause').find((step) => {
+          if (!step.finishedAt) {
+            return false;
+          }
+          return new Date(step.finishedAt).getTime() - new Date(step.startedAt).getTime() >= 50_000;
+        });
+        expect(longWait?.status).toBe(ExecutionStatus.COMPLETED);
+        expect(new Date(longWait?.finishedAt ?? 0).getTime()).toBeGreaterThanOrEqual(
+          new Date(longResumeAt).getTime()
+        );
       });
     });
   });
