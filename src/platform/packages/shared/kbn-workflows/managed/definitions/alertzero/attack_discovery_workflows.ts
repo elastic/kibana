@@ -139,7 +139,7 @@ export const ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW = {
   id: ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW_ID,
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 3,
+  version: 4,
   get yaml() {
     return readManagedWorkflowYaml(__dirname, 'attack_discovery_fp_tp_analysis.yaml');
   },

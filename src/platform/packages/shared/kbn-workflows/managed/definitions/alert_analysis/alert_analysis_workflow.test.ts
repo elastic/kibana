@@ -280,6 +280,29 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     }
   });
 
+  it.each(['get_global_prevalence_stats', 'get_noise_signal_stats'])(
+    '%s reads the source and actor fields from a flat or a nested alert _source',
+    (stepName) => {
+      // Alerts built from `logsdb_columnar` events store a flat `_source` ({"host.name": ...}),
+      // so a nested-only read (`params._source?.host?.name`) emits nothing for them.
+      const step = findStepByName(workflow.steps, stepName) as {
+        with: { runtime_mappings: Record<string, { script: { source: string } }> };
+      };
+      const { effective_source: sourceField, effective_actor: actorField } =
+        step.with.runtime_mappings;
+
+      for (const { script } of [sourceField, actorField]) {
+        expect(script.source).not.toContain('params._source?.');
+      }
+      expect(sourceField.script.source).toContain(
+        "['host.name', 'host.id', 'cloud.account.id', 'source.ip']"
+      );
+      expect(actorField.script.source).toContain(
+        "['user.name', 'user.id', 'aws.cloudtrail.user_identity.arn', 'azure.auditlogs.properties.initiated_by.user.user_principal_name', 'gcp.audit.authentication_info.principal_email']"
+      );
+    }
+  );
+
   it('skips alerts that were already analyzed, and re-analyzes them when override_previous is set', () => {
     const filterStep = findStepByName(workflow.steps, 'build_pending_filter_expr') as {
       with: { pending_filter_expr: string };

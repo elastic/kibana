@@ -25,6 +25,11 @@ export const buildIgnoreMap = (ignoreEntities: IgnoreEntitiesConfig): Map<string
   return ignoreMap;
 };
 
+/**
+ * Collects the values at `path` from an alert `_source`. Alerts built from `logsdb_columnar` events
+ * keep a flat `_source` ({"host.name": "a"}), so each level also tries the remaining path joined
+ * as one dotted key, which covers flat, nested, and mixed shapes.
+ */
 export const getValuesAtPath = (obj: unknown, path: readonly string[]): unknown[] => {
   if (obj == null) return [];
   if (path.length === 0) return Array.isArray(obj) ? obj : [obj];
@@ -36,9 +41,19 @@ export const getValuesAtPath = (obj: unknown, path: readonly string[]): unknown[
 
   if (typeof obj !== 'object') return [];
 
-  const [head, ...tail] = path;
-  const next = (obj as Record<string, unknown>)[head];
-  return getValuesAtPath(next, tail);
+  const record = obj as Record<string, unknown>;
+  const values: unknown[] = [];
+  for (let end = 1; end <= path.length; end++) {
+    const key = path.slice(0, end).join('.');
+    if (Object.prototype.hasOwnProperty.call(record, key)) {
+      // Appended one by one: spreading a large multivalued field into `push` exceeds the
+      // engine's argument limit.
+      for (const value of getValuesAtPath(record[key], path.slice(end))) {
+        values.push(value);
+      }
+    }
+  }
+  return values;
 };
 
 export const extractEntityValues = (

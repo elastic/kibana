@@ -346,6 +346,44 @@ describe('buildRelatedAlertsGraph — integration', () => {
     );
   });
 
+  it('discovers related alerts when `_source` stores entity fields as flat dotted keys', async () => {
+    // Alerts built from `logsdb_columnar` events keep a flat `_source` ({ 'host.name': 'h1' }),
+    // while the mapping and the search fields are unchanged.
+    await indexAlerts([
+      { _id: 'A', '@timestamp': iso(T0), 'host.name': 'h1', 'user.name': 'u1' },
+      { _id: 'B', '@timestamp': iso(T0 + 10 * 60_000), 'host.name': 'h1', 'user.name': 'u1' },
+      { _id: 'C', '@timestamp': iso(T0 + 20 * 60_000), 'host.name': 'h1', 'user.name': 'u2' },
+      { _id: 'D', '@timestamp': iso(T0 + 30 * 60_000), 'host.name': 'h-unrelated' },
+    ]);
+
+    const stored = await rawClient.get<Record<string, unknown>>({ index: TEST_INDEX, id: 'A' });
+    expect(stored._source).toEqual(expect.objectContaining({ 'host.name': 'h1' }));
+    expect(stored._source).not.toHaveProperty('host');
+
+    const result = await buildRelatedAlertsGraph({
+      esClient,
+      seed: { alertId: 'A', alertIndex: TEST_INDEX },
+      searchIndex: TEST_INDEX,
+      entityFields: ['host.name', 'user.name'],
+      seedWindowMs: 60 * 60_000,
+      expandWindowMs: 60 * 60_000,
+      maxDepth: 3,
+      maxAlerts: 50,
+      pageSize: 100,
+      maxTermsPerQuery: 100,
+      maxEntitiesPerField: 100,
+      ignoreEntities: [],
+      entityFieldScores: { 'host.name': 1, 'user.name': 1 },
+      minEntityScore: 1,
+      includeSeed: true,
+    });
+
+    expect(result.nodes.map((n) => n.id).sort()).toEqual(['A', 'B', 'C']);
+    expect(result.edges.length).toBeGreaterThanOrEqual(1);
+    expect(result.stats?.nodes).toBe(3);
+    expect(result.stats?.depth_reached).toBeGreaterThanOrEqual(1);
+  });
+
   it('returns empty graph when seed has no entity values', async () => {
     await indexAlerts([
       // Seed has a timestamp but no entity fields.

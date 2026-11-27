@@ -789,6 +789,148 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
     });
   });
 
+  // An alert built from an event on a columnar index mode (`logsdb_columnar`) stores a
+  // flat `_source` (`{ 'host.id': ... }`), so the keys must not be read from nested
+  // `_source` paths: the entity and raw-event lookups would silently match nothing.
+  describe('the host and user keys the lookups match on', () => {
+    type KeyField = 'host_ids' | 'host_names' | 'user_names';
+    const KEY_FIELDS: KeyField[] = ['host_ids', 'host_names', 'user_names'];
+
+    const expressionFor = (field: KeyField): string =>
+      String(stepIn('count_alerts')?.with?.[field])
+        .replace(/^\$\{\{/, '')
+        .replace(/\}\}$/, '')
+        .trim();
+
+    const evaluate = (
+      field: KeyField,
+      aggregations: Record<string, unknown>,
+      hits: unknown[] = []
+    ) =>
+      createWorkflowLiquidEngine().evalValueSync(expressionFor(field), {
+        steps: { load_alerts: { output: { aggregations, hits: { hits } } } },
+      });
+
+    const aggregations = {
+      host_ids: {
+        buckets: [
+          { key: 'host-1', doc_count: 3 },
+          { key: 'host-2', doc_count: 1 },
+        ],
+      },
+      host_names: { buckets: [{ key: 'WIN-1', doc_count: 4 }] },
+      user_names: { buckets: [{ key: 'alice', doc_count: 4 }] },
+    };
+
+    it('collects the keys with terms aggregations over the cited alerts', () => {
+      const requested = stepIn('load_alerts')?.with?.aggregations as Record<
+        string,
+        { terms?: { field: string; size: number } }
+      >;
+
+      expect(requested.host_ids.terms?.field).toBe('host.id');
+      expect(requested.host_names.terms?.field).toBe('host.name');
+      expect(requested.user_names.terms?.field).toBe('user.name');
+    });
+
+    it('sizes the aggregations to cover every alert the search can return', () => {
+      const requested = stepIn('load_alerts')?.with?.aggregations as Record<
+        string,
+        { terms?: { size: number } }
+      >;
+      const pageSize = Number(stepIn('load_alerts')?.with?.size);
+
+      KEY_FIELDS.forEach((field) => {
+        expect(requested[field].terms?.size).toBeGreaterThanOrEqual(pageSize);
+      });
+    });
+
+    it.each(KEY_FIELDS)('returns the aggregation bucket keys for %s', (field) => {
+      expect(evaluate(field, aggregations)).toEqual(
+        (aggregations[field].buckets as Array<{ key: string }>).map(({ key }) => key)
+      );
+    });
+
+    it.each(KEY_FIELDS)('returns an empty list for %s when no cited alert has it', (field) => {
+      expect(evaluate(field, { [field]: { buckets: [] } })).toEqual([]);
+    });
+
+    it.each(KEY_FIELDS)('returns %s regardless of the shape of the alert _source', (field) => {
+      const flat = [
+        { _source: { 'host.id': 'host-1', 'host.name': 'WIN-1', 'user.name': 'alice' } },
+      ];
+      const nested = [
+        { _source: { host: { id: 'host-1', name: 'WIN-1' }, user: { name: 'alice' } } },
+      ];
+
+      expect(evaluate(field, aggregations, flat)).toEqual(evaluate(field, aggregations, nested));
+      expect(evaluate(field, aggregations, flat)).not.toEqual([]);
+    });
+
+    it.each(KEY_FIELDS)('does not read a _source path from the alert hits for %s', (field) => {
+      expect(String(stepIn('count_alerts')?.with?.[field])).not.toContain('_source');
+    });
+
+    describe('detecting an incomplete key list', () => {
+      const keysTruncated = (
+        otherDocCount: Record<KeyField, number>,
+        hostIdKeys: string[] = ['host-1'],
+        hostNameKeys: string[] = []
+      ): unknown => {
+        const expression = String(stepIn('count_alerts')?.with?.keys_truncated)
+          .replace(/^\$\{\{/, '')
+          .replace(/\}\}$/, '')
+          .trim();
+        const aggregation = (field: KeyField) => ({
+          buckets: {
+            host_ids: hostIdKeys,
+            host_names: hostNameKeys,
+            user_names: [] as string[],
+          }[field].map((key) => ({ key })),
+          sum_other_doc_count: otherDocCount[field],
+        });
+
+        return createWorkflowLiquidEngine().evalValueSync(expression, {
+          steps: {
+            load_alerts: {
+              output: {
+                aggregations: {
+                  host_ids: aggregation('host_ids'),
+                  host_names: aggregation('host_names'),
+                  user_names: aggregation('user_names'),
+                },
+              },
+            },
+          },
+        });
+      };
+      const complete = { host_ids: 0, host_names: 0, user_names: 0 };
+
+      it('is false when every bucket list is complete', () => {
+        expect(keysTruncated(complete)).toBe(false);
+      });
+
+      it.each(['host_ids', 'user_names'] as const)(
+        'is true when %s has values beyond its buckets',
+        (field) => {
+          expect(keysTruncated({ ...complete, [field]: 3 })).toBe(true);
+        }
+      );
+
+      it('ignores incomplete host names while host ids are present', () => {
+        expect(keysTruncated({ ...complete, host_names: 3 })).toBe(false);
+      });
+
+      it('counts incomplete host names when there are no host ids and events match on names', () => {
+        expect(keysTruncated({ ...complete, host_names: 3 }, [])).toBe(true);
+      });
+
+      it('is false when there are no host ids and the host names are complete', () => {
+        expect(keysTruncated(complete, [], ['WIN-1', 'WIN-2'])).toBe(false);
+      });
+    });
+  });
+
   describe('the truncation clear', () => {
     const contextFor = (
       events: number | undefined,
@@ -890,6 +1032,37 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
 
     it('keeps the model summary when the clear stands', () => {
       expect(render('summary_markdown', 50, 50, 'false_positive', 'Cleared.')).toBe('Cleared.');
+    });
+
+    describe('when the host or user key list is incomplete', () => {
+      const renderWithKeys = (field: string, verdict: string, keysTruncated: boolean): string =>
+        createWorkflowLiquidEngine().parseAndRenderSync(
+          String(stepIn('block_truncated_clear')?.with?.[field]),
+          {
+            steps: {
+              ...contextFor(10, 10, verdict, 'Cleared.').steps,
+              count_alerts: { output: { keys_truncated: keysTruncated } },
+            },
+          }
+        );
+
+      it('returns inconclusive when the incomplete lookup would clear the attack', () => {
+        expect(renderWithKeys('verdict', 'false_positive', true)).toBe('inconclusive');
+      });
+
+      it('replaces the summary when the incomplete lookup blocks a clear', () => {
+        expect(renderWithKeys('summary_markdown', 'false_positive', true)).toBe(
+          'Evidence was truncated, so this cannot be cleared as a false positive.'
+        );
+      });
+
+      it('keeps true_positive', () => {
+        expect(renderWithKeys('verdict', 'true_positive', true)).toBe('true_positive');
+      });
+
+      it('keeps false_positive when the key lists are complete', () => {
+        expect(renderWithKeys('verdict', 'false_positive', false)).toBe('false_positive');
+      });
     });
 
     it('runs after the payload guard and before emit', () => {
