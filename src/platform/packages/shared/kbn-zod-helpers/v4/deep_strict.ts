@@ -8,30 +8,40 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { difference, isArray, isPlainObject } from 'lodash';
+import { isArray, isPlainObject } from 'lodash';
 
-function getFlattenedKeys(obj: unknown, parentKey = '', keys: Set<string> = new Set()) {
-  if (isPlainObject(obj)) {
-    Object.entries(obj as Record<string, any>).forEach(([key, value]) => {
-      getFlattenedKeys(value, parentKey ? `${parentKey}.${key}` : key, keys);
+/**
+ * Walks the raw input and the parsed output in parallel and collects the paths of input keys
+ * that the output no longer has. Array elements are compared index by index so a key kept by one
+ * element (e.g. one union variant) cannot mask the same key being stripped from another.
+ * Array indices are left out of the reported paths.
+ */
+function getExcessKeys(input: unknown, output: unknown, parentKey = '', excess: string[] = []) {
+  if (isPlainObject(input) && isPlainObject(output)) {
+    const outputRecord = output as Record<string, unknown>;
+    Object.entries(input as Record<string, unknown>).forEach(([key, value]) => {
+      const path = parentKey ? `${parentKey}.${key}` : key;
+      if (!Object.prototype.hasOwnProperty.call(outputRecord, key)) {
+        excess.push(path);
+        return;
+      }
+      getExcessKeys(value, outputRecord[key], path, excess);
     });
-  } else if (isArray(obj)) {
-    obj.forEach((value) => {
-      getFlattenedKeys(value, parentKey, keys);
+  } else if (isArray(input) && isArray(output) && input.length === output.length) {
+    input.forEach((value, index) => {
+      getExcessKeys(value, output[index], parentKey, excess);
     });
   }
 
-  keys.add(parentKey);
-
-  return keys;
+  return excess;
 }
 
 /**
  * Wraps a Zod schema to deeply reject any unrecognized keys in the input.
  *
  * This works by trial-parsing the input with the given schema, then comparing
- * the flattened keys of the raw input against the flattened keys of the parsed
- * output. Any excess keys in the input will cause validation to fail.
+ * the raw input against the parsed output, element by element for arrays.
+ * Any excess keys in the input will cause validation to fail.
  *
  * The actual parsing is done by piping through the original schema, so all
  * schema-level errors are preserved.
@@ -47,10 +57,7 @@ export function DeepStrict<TSchema extends z.ZodType>(schema: TSchema) {
       return;
     }
 
-    const allInputKeys = Array.from(getFlattenedKeys(ctx.value));
-    const allOutputKeys = Array.from(getFlattenedKeys(result.data as Record<string, any>));
-
-    const excessKeys = difference(allInputKeys, allOutputKeys);
+    const excessKeys = Array.from(new Set(getExcessKeys(ctx.value, result.data)));
 
     if (excessKeys.length) {
       // Zod >=4.5 pipes do not abort on `unrecognized_keys`; unions drop forwarded issues.
