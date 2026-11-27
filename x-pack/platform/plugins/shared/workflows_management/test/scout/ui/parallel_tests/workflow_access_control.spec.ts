@@ -14,10 +14,15 @@ import { getDummyWorkflowYaml } from '../fixtures/workflows';
 test.describe('Workflow access dialog', { tag: tags.stateful.classic }, () => {
   let workflowId: string | undefined;
   let ownerHeaders: Record<string, string>;
-  let owner: { username: string; displayName: string };
+  let owner: { username: string; displayName: string; profileId: string };
   let viewer: { username: string; displayName: string };
+  const apiHeaders = {
+    'kbn-xsrf': 'scout',
+    'x-elastic-internal-origin': 'kibana',
+    'elastic-api-version': '2023-10-31',
+  };
 
-  test.beforeAll(async ({ scoutSpace, samlAuth }) => {
+  test.beforeAll(async ({ apiClient, scoutSpace, samlAuth }) => {
     await scoutSpace.uiSettings.set({ [WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID]: true });
     // Resolve real identities from the live session — local SAML synthesizes
     // `elastic_<role>` / `test <role>`, while Cloud authenticates real QA accounts.
@@ -27,7 +32,15 @@ test.describe('Workflow access dialog', { tag: tags.stateful.classic }, () => {
       full_name: ownerFullName,
       email: ownerEmail,
     } = await samlAuth.session.getUserData('editor');
-    owner = { username: ownerUsername, displayName: ownerFullName || ownerEmail || ownerUsername };
+    const ownerProfile = await apiClient.get('internal/security/user_profile', {
+      headers: { ...apiHeaders, ...(await samlAuth.asInteractiveUser('editor')).cookieHeader },
+    });
+    expect(ownerProfile.statusCode, JSON.stringify(ownerProfile.body)).toBe(200);
+    owner = {
+      username: ownerUsername,
+      displayName: ownerFullName || ownerEmail || ownerUsername,
+      profileId: ownerProfile.body.uid,
+    };
     const {
       username: viewerUsername,
       full_name: viewerFullName,
@@ -125,6 +138,7 @@ test.describe('Workflow access dialog', { tag: tags.stateful.classic }, () => {
 
   for (const enabled of [true, false]) {
     test(`lets an executor test a saved workflow with enabled=${enabled}`, async ({
+      apiClient,
       browserAuth,
       pageObjects,
       page,
@@ -134,20 +148,29 @@ test.describe('Workflow access dialog', { tag: tags.stateful.classic }, () => {
       test.setTimeout(120_000);
       const editor = pageObjects.workflowEditor;
       ownerHeaders = (await samlAuth.asInteractiveUser('admin')).cookieHeader;
-      await browserAuth.loginAsAdmin();
-      await editor.gotoNewWorkflow();
-      await editor.setYamlEditorValue(
-        getDummyWorkflowYaml('Executor access').replace('enabled: true', `enabled: ${enabled}`)
+      const created = await apiClient.post(`s/${scoutSpace.id}/api/workflows/workflow`, {
+        headers: { ...apiHeaders, ...ownerHeaders },
+        body: {
+          yaml: getDummyWorkflowYaml('Executor access').replace(
+            'enabled: true',
+            `enabled: ${enabled}`
+          ),
+        },
+      });
+      expect(created.statusCode, JSON.stringify(created.body)).toBe(200);
+      workflowId = created.body.id;
+      if (!workflowId) throw new Error('Workflow was not created');
+      const shared = await apiClient.put(
+        `s/${scoutSpace.id}/internal/workflows/${workflowId}/access_control`,
+        {
+          headers: { ...apiHeaders, ...ownerHeaders },
+          body: {
+            access_mode: 'private',
+            entries: [{ type: 'user', id: owner.profileId, role: 'executor' }],
+          },
+        }
       );
-      await editor.saveWorkflow();
-      workflowId = new URL(page.url()).pathname.split('/').at(-1);
-      if (!workflowId || workflowId === 'create') throw new Error('Workflow was not created');
-      await editor.gotoWorkflow(workflowId);
-      await editor.openAccessDialog();
-      await editor.setAccessMode('private');
-      await editor.addAccessUser(owner.displayName);
-      await editor.setAccessRole(owner.username, 'executor');
-      await editor.saveAccess();
+      expect(shared.statusCode, JSON.stringify(shared.body)).toBe(200);
       await browserAuth.loginAsPrivilegedUser();
       await editor.gotoWorkflow(workflowId);
       await expect(editor.saveButton).toBeDisabled();
