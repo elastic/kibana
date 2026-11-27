@@ -172,20 +172,25 @@ Use these utilities from `src/platform/packages/shared/kbn-connector-specs/src/l
 ## Vendor API Contract
 
 The vendor API contract test needs `vendor_api/` artifacts or an exemption for every connector. An
-MCP-native connector calls MCP tools, not operations of an OpenAPI spec, so add it to
+MCP-native connector calls MCP tools, not operations of an OpenAPI spec. Record it as an MCP source
+first: from the tool definitions the vendor publishes (`--tool name=url`), or from a `tools/list`
+captured once with credentials (`captured`). See "GraphQL and MCP sources" in the package README.
+
+Only if neither is possible, add it to
 `src/platform/packages/shared/kbn-connector-specs/src/test/vendor_api/vendor_api_exemptions.json`, in the PR that adds the connector:
 
 ```json
 ".my_connector": {
   "category": "temporary",
-  "blockedBy": 303330,
+  "blockedBy": 123456,
   "apiType": "mcp",
   "reason": "Calls the vendor's hosted MCP server, whose `tools/list` needs authentication"
 }
 ```
 
-Use `temporary` with the issue that would let it be recorded, usually #303330 for MCP servers that need
-credentials, or `permanent` if nothing could. The package README lists the categories and API types.
+Use `temporary` with an open issue that tracks recording this connector in `blockedBy` (open one if
+none does), or `permanent` if nothing could record it. The package README lists the categories and API
+types.
 
 If some actions also call the vendor's REST API directly, record those instead; see "Record the vendor
 API contract" in the skill.
