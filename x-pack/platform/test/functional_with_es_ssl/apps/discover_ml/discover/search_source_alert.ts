@@ -623,7 +623,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should check that there are no errors detected after an alert is created', async () => {
       const newAlert = 'New Alert for checking its status';
-      await createDataView('search-source*');
+      await createDataView(SOURCE_DATA_VIEW);
 
       await PageObjects.common.navigateToApp('management');
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -653,9 +653,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }
       const dataViewsElem = await testSubjects.find('euiSelectableList');
       const sourceDataViewOption = await dataViewsElem.findByCssSelector(
-        `[title="search-source*"]`
+        `[title="${SOURCE_DATA_VIEW}"]`
       );
       await sourceDataViewOption.click();
+
+      await retry.waitFor('selection to happen', async () => {
+        const dataViewSelector = await testSubjects.find('selectDataViewExpression');
+        return (await dataViewSelector.getVisibleText()) === `DATA VIEW\n${SOURCE_DATA_VIEW}`;
+      });
 
       await testSubjects.click('rulePageFooterSaveButton');
 
