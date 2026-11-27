@@ -11,8 +11,9 @@ import type { WorkflowPageOfflineReason, WorkflowPageResponse } from '../../../.
 
 export const WORKFLOW_PAGE_API_VERSION = { version: '1' } as const;
 
+/** Under the workflow's key, so saving or toggling the workflow also refreshes the page status. */
 export const workflowPageQueryKey = (workflowId: string, pageId: string) =>
-  ['workflowPage', workflowId, pageId] as const;
+  ['workflows', workflowId, 'page', pageId] as const;
 
 export const workflowPageApiPath = (workflowId: string, pageId: string, suffix = ''): string =>
   buildPath(`/internal/workflows/workflow/{id}/pages/{pageId}${suffix}`, {

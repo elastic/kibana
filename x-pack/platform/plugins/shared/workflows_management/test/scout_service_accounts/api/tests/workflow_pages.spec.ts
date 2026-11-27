@@ -129,11 +129,14 @@ apiTest.describe(
       return { id, path: (page.body.url as string).replace(/^\//, '') };
     };
 
-    const listExecutions = async (apiClient: ApiClientFixture, id: string) => {
-      const response = await apiClient.get(`api/workflows/workflow/${id}/executions`, {
-        headers: getContext().headers,
-        responseType: 'json',
-      });
+    const listExecutions = async (apiClient: ApiClientFixture, id: string, spacePrefix = '') => {
+      const response = await apiClient.get(
+        `${spacePrefix}api/workflows/workflow/${id}/executions`,
+        {
+          headers: getContext().headers,
+          responseType: 'json',
+        }
+      );
       expect(response).toHaveStatusCode(200);
       return response.body.results as WorkflowExecutionDto[];
     };
@@ -184,13 +187,10 @@ apiTest.describe(
           // The run starts and completes in the page's space, not the default one.
           await expect
             .poll(
-              async () => {
-                const runs = await apiClient.get(
-                  `s/${space}/api/workflows/workflow/${pageC.id}/executions`,
-                  { headers: getContext().headers, responseType: 'json' }
-                );
-                return (runs.body.results as WorkflowExecutionDto[]).map(({ status }) => status);
-              },
+              async () =>
+                (
+                  await listExecutions(apiClient, pageC.id, `s/${space}/`)
+                ).map(({ status }) => status),
               { timeout: RUN_TEST_TIMEOUT_MS / 2 }
             )
             .toStrictEqual(['completed']);
@@ -208,6 +208,14 @@ apiTest.describe(
             );
           }
         } finally {
+          // A run still in flight blocks the delete, so stop it first.
+          await apiClient.put(`s/${space}/api/workflows/workflow/${pageCId}`, {
+            headers: getContext().headers,
+            body: { enabled: false },
+          });
+          await apiClient.post(`s/${space}/api/workflows/workflow/${pageCId}/executions/cancel`, {
+            headers: getContext().headers,
+          });
           await deleteBoundWorkflow(apiClient, getContext().headers, {
             spaceId: space,
             workflowId: pageCId,
