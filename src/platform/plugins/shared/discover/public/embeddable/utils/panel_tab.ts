@@ -7,12 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { pick } from 'lodash';
+import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import {
   discoverSessionApiEmbeddableByReferenceConfigSchema,
+  discoverSessionApiEmbeddableByValueConfigSchema,
   type DiscoverSessionApiEmbeddableOverrides,
   type DiscoverSessionApiEmbeddableTab,
 } from '@kbn/as-code-discover-schema';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { DiscoverTabType } from '@kbn/discover-session-constants';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import {
   areComparatorsEqual,
@@ -20,6 +24,7 @@ import {
   type StateComparators,
 } from '@kbn/presentation-publishing';
 import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
+import type { DiscoverSessionInternalData } from '../../../server/api/internal_schema';
 import { fromStoredEmbeddableTab } from '../../../common/embeddable';
 import { migrateLegacyQuery } from '../../../common/migrate_legacy_query';
 import { getInlineDataView } from '../../../common/session/inline_data_view';
@@ -49,6 +54,44 @@ const TABLE_SETTING_DEFAULTS: TableSettings = { column_order: [], column_setting
 // Changed settings with their panel values, or the empty value of a setting cleared on the panel
 const getChangedTableSettings = (tab: TableSettings, tableSettings: TableSettings) =>
   diffComparators(TABLE_SETTING_COMPARATORS, tab, tableSettings, TABLE_SETTING_DEFAULTS);
+
+const [classicTabSchema, esqlTabSchema, metricsTabSchema] =
+  discoverSessionApiEmbeddableByValueConfigSchema.shape.tabs.element.options;
+
+// Keys come from the panel tab schemas, so session-only fields never reach a panel tab.
+// Like the session API, an ES|QL tab has no sample size, so a panel keeps only its own one.
+const CLASSIC_TAB_KEYS = classicTabSchema.keyof().options;
+const ESQL_TAB_KEYS = esqlTabSchema.omit({ sample_size: true }).keyof().options;
+const METRICS_TAB_KEYS = metricsTabSchema.omit({ sample_size: true }).keyof().options;
+
+/** Reads a session tab returned by the HTTP API as a linked panel shows it. */
+export const fromSessionApiTab = (
+  sessionTab: DiscoverSessionInternalData['tabs'][number]
+): SearchEmbeddableSessionTab => {
+  const { id, label } = sessionTab;
+
+  if (isDiscoverSessionEsqlTab(sessionTab)) {
+    return {
+      id,
+      label,
+      tab:
+        sessionTab.type === DiscoverTabType.Metrics
+          ? pick(sessionTab, METRICS_TAB_KEYS)
+          : pick(sessionTab, ESQL_TAB_KEYS),
+    };
+  }
+
+  const tab = pick(sessionTab, CLASSIC_TAB_KEYS);
+
+  if (tab.data_source.type === AS_CODE_DATA_VIEW_REFERENCE_TYPE) {
+    return { id, label, tab };
+  }
+
+  // The panel keeps the inline Data View ID apart, so its tab stays in the public format
+  const { id: inlineDataViewId, ...dataSource } = tab.data_source;
+
+  return { id, label, tab: { ...tab, data_source: dataSource }, inlineDataViewId };
+};
 
 /** Reads a Content Management session tab as a linked panel shows it. */
 export const fromDiscoverSessionTab = (

@@ -31,6 +31,7 @@ import {
 } from '../../../common/session/session_tab_mapping';
 import { fromStoredSearchAndTable } from '../../../common/session/search_and_table_mapping';
 import { isDiscoverSessionEsqlTab } from '../../../common/session/type_guards';
+import { migrateLegacyQuery } from '../../../common/migrate_legacy_query';
 import { toApiVisContext } from '../../../common/session/vis_context';
 
 interface ConvertedSessionTab {
@@ -100,6 +101,11 @@ const readSessionSearchSource = (
   references: SavedObjectReference[]
 ): SerializedSearchSourceFields => {
   const searchSource = parseSearchSourceJSON(tab.attributes.kibanaSavedObjectMeta.searchSourceJSON);
+
+  // A query stored as a string is Lucene, and the ES|QL check does not accept strings
+  if (typeof searchSource.query === 'string') {
+    searchSource.query = migrateLegacyQuery(searchSource.query);
+  }
 
   // ES|QL does not use Data View or filter references from the stored SearchSource.
   if (isOfAggregateQueryType(searchSource.query)) {
