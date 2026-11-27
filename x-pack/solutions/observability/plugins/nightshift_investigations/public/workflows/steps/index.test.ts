@@ -6,21 +6,23 @@
  */
 
 import { TriggerInvestigationStepId } from '../../../common/workflows/steps/trigger_investigation';
+import { TrackAlertOutcomeStepId } from '../../../common/workflows/steps/track_alert_outcome';
 import { registerInvestigationsWorkflowSteps } from '.';
 
 type Loader = () => Promise<{ id: string }>;
 
 describe('registerInvestigationsWorkflowSteps', () => {
-  it('registers the trigger investigation step as a lazy loader with an icon', async () => {
+  it('registers the public steps as lazy loaders with icons', async () => {
     const registerStepDefinition = jest.fn();
     registerInvestigationsWorkflowSteps({ registerStepDefinition });
 
-    expect(registerStepDefinition).toHaveBeenCalledTimes(1);
-    const [loader]: [Loader] = registerStepDefinition.mock.calls[0];
-    expect(typeof loader).toBe('function');
-    const definition = await loader();
-    expect(definition.id).toBe(TriggerInvestigationStepId);
-    expect(definition).toHaveProperty('icon');
+    const loaders: Loader[] = registerStepDefinition.mock.calls.map(([loader]) => loader);
+    const definitions = await Promise.all(loaders.map((loader) => loader()));
+    expect(definitions.map(({ id }) => id)).toEqual([
+      TriggerInvestigationStepId,
+      TrackAlertOutcomeStepId,
+    ]);
+    for (const definition of definitions) expect(definition).toHaveProperty('icon');
   });
 
   it('does nothing when workflowsExtensions is unavailable', () => {

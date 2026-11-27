@@ -37,6 +37,9 @@ import { createGatedSandboxStart } from './sandbox_gate';
 import { NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER } from './lib/managed_workflows/constants';
 import { createEnsureFailureSweep } from './lib/managed_workflows/ensure_failure_sweep';
 import { sweepInvestigationFailuresStepDefinition } from './step_definitions/sweep_investigation_failures';
+import { trackAlertOutcomeStepDefinition } from './step_definitions/track_alert_outcome';
+import { createAlertOutcomeServices, type AlertOutcomeServices } from './alert_outcomes/deps';
+import { createIsAlertOutcomesEnabled } from './alert_outcomes/is_alert_outcomes_enabled';
 import { installStaticWorkflows } from './lib/managed_workflows/install_static_workflows';
 import { installInvestigationAgent } from './lib/install_investigation_agent';
 import {
@@ -210,6 +213,7 @@ export class NightshiftInvestigationsPlugin
   private slackChannelBindingChecker?: SlackChannelBindingChecker;
   private decisionTreesEnabled = false;
   private assistantEnabled = false;
+  private alertOutcomeServices?: AlertOutcomeServices;
 
   constructor(private readonly ctx: PluginInitializerContext<NightshiftInvestigationsConfig>) {
     this.logger = ctx.logger.get();
@@ -361,6 +365,8 @@ export class NightshiftInvestigationsPlugin
     const listSandboxConnectorTypes = createListSandboxConnectorTypes({
       getActions: () => this.actionsStart,
     });
+
+    const alertOutcomeServices = this.getAlertOutcomeServices(core.getStartServices);
 
     const getTriggerEmitter = (request: KibanaRequest): TriggerEmitter | undefined =>
       createTriggerEmitter({
@@ -660,6 +666,9 @@ export class NightshiftInvestigationsPlugin
             getTriggerEmitter,
             getWorkflowsManagement: () => this.workflowsManagement,
           })
+        );
+        plugins.workflowsExtensions.registerStepDefinition(
+          trackAlertOutcomeStepDefinition(() => alertOutcomeServices)
         );
         plugins.workflowsExtensions.registerStepDefinition(
           handleInvestigationFailureStepDefinition({
@@ -1021,6 +1030,24 @@ export class NightshiftInvestigationsPlugin
       },
     });
     return this.investigationAvailability;
+  };
+
+  private getAlertOutcomeServices = (
+    getStartServices: CoreSetup['getStartServices']
+  ): AlertOutcomeServices => {
+    this.alertOutcomeServices ??= createAlertOutcomeServices({
+      isEnabled: createIsAlertOutcomesEnabled(getStartServices),
+      getInternalEsClient: () => this.elasticsearch?.client.asInternalUser,
+      getActions: () => this.actionsStart,
+      getAgentBuilder: () => this.agentBuilder,
+      getAgenticInvestigations: () => this.agenticInvestigations,
+      getInference: () => this.inference,
+      getSavedObjects: () => this.savedObjects,
+      getUiSettings: () => this.uiSettings,
+      telemetry: this.telemetry,
+      logger: this.logger.get('alert_outcomes'),
+    });
+    return this.alertOutcomeServices;
   };
 
   private ensureFailureSweep = async (request: KibanaRequest, spaceId: string): Promise<void> =>

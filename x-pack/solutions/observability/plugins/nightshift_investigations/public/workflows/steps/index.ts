@@ -21,4 +21,7 @@ export const registerInvestigationsWorkflowSteps = (
       (module) => module.triggerInvestigationPublicStepDefinition
     )
   );
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./track_alert_outcome').then((module) => module.trackAlertOutcomePublicStepDefinition)
+  );
 };

@@ -73,7 +73,7 @@ const workflow = parse(NIGHTSHIFT_INVESTIGATION_WORKFLOW.yaml) as {
 describe('Nightshift investigation workflow', () => {
   it('records the investigation through the agent tools rather than persist steps', () => {
     expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.id).toBe('system-nightshift-investigation');
-    expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.version).toBe(6);
+    expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.version).toBe(7);
     expect(investigation.name).toBe('Nightshift Investigation');
     expect(investigation.steps.map((step) => step.name)).toEqual([
       'resolve_model',
@@ -86,6 +86,7 @@ describe('Nightshift investigation workflow', () => {
       'notify_completed',
       'classify_for_online_evals',
       'start_online_evals',
+      'track_alert_outcome',
     ]);
     expect(requireStep('investigate').with?.message).toContain('{{ inputs.context | json }}');
   });
@@ -385,6 +386,32 @@ describe('Nightshift investigation workflow', () => {
       expect(Date.parse(rendered)).toBe(startedAt.getTime());
       expect(classify.with?.investigation_started_at).toBe(
         start.with.inputs.investigation_started_at
+      );
+    });
+  });
+
+  describe('alert outcome tracking', () => {
+    const track = () =>
+      requireStep('track_alert_outcome') as WorkflowStep & { with: Record<string, string> };
+
+    it('runs last and never fails the investigation', () => {
+      expect(track().type).toBe('nightshift.alertOutcomes.track');
+      expect(track()['on-failure']).toEqual({ continue: true });
+    });
+
+    it.each([
+      ['a first round', {}, undefined],
+      ['a thread follow-up', { is_follow_up: true }, true],
+    ])('passes whether %s is a follow-up', (_, context, expected) => {
+      const expression = track().with.is_follow_up.slice(3, -2);
+      expect(createWorkflowLiquidEngine().evalValueSync(expression, { inputs: { context } })).toBe(
+        expected
+      );
+    });
+
+    it('sends the run start the same way as online evals', () => {
+      expect(track().with.investigation_started_at).toBe(
+        requireStep('classify_for_online_evals').with?.investigation_started_at
       );
     });
   });
