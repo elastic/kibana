@@ -42,10 +42,7 @@ describe('control order after saving a Discover session', () => {
     registerEmbeddablePublicDefinition(ESQL_CONTROL, async () => testControlFactory);
   });
 
-  it.each([
-    { path: 'legacy', useHttpApi: false },
-    { path: 'HTTP', useHttpApi: true },
-  ])('does not mark unchanged controls as unsaved after a $path save', async ({ useHttpApi }) => {
+  it('does not mark unchanged controls as unsaved after a save', async () => {
     const toolkit = getDiscoverInternalStateMock();
     const { services, internalState, runtimeStateManager } = toolkit;
     const controls: ControlPanelsState<OptionsListESQLControlState> = Object.fromEntries(
@@ -93,14 +90,7 @@ describe('control order after saving a Discover session', () => {
       create: jest.fn(),
       upsert: jest.fn().mockResolvedValue(savedResponse),
     };
-    const legacySave = jest
-      .spyOn(services.savedSearch, 'saveDiscoverSession')
-      .mockImplementation(async (session) => ({ ...session, id: 'session-id', managed: false }));
-    const discoverSessionService = createDiscoverSessionService({
-      apiClient,
-      legacyClient: services.savedSearch,
-      useHttpApi,
-    });
+    const discoverSessionService = createDiscoverSessionService({ apiClient });
     jest
       .spyOn(services.discoverSessionService, 'save')
       .mockImplementation(discoverSessionService.save);
@@ -162,23 +152,17 @@ describe('control order after saving a Discover session', () => {
         )
         .unwrap();
     });
-    if (useHttpApi) {
-      expect(apiClient.upsert).toHaveBeenCalledWith(
-        'session-id',
-        expect.objectContaining({
-          tabs: [
-            expect.objectContaining({
-              id: 'tab-id',
-              control_panels: savedResponse.data.tabs[0].control_panels,
-            }),
-          ],
-        })
-      );
-      expect(legacySave).not.toHaveBeenCalled();
-    } else {
-      expect(legacySave).toHaveBeenCalledTimes(1);
-      expect(apiClient.upsert).not.toHaveBeenCalled();
-    }
+    expect(apiClient.upsert).toHaveBeenCalledWith(
+      'session-id',
+      expect.objectContaining({
+        tabs: [
+          expect.objectContaining({
+            id: 'tab-id',
+            control_panels: savedResponse.data.tabs[0].control_panels,
+          }),
+        ],
+      })
+    );
 
     // A child can publish its unchanged state again. The real renderer then combines it with
     // its existing layout; this must not make a successfully saved session look modified.

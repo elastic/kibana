@@ -832,11 +832,7 @@ describe('Discover state', () => {
         ),
         get: jest.fn(async (_id: string) => ({ ...cloneDeep(savedResponse), resolve: {} })),
       };
-      const discoverSessionService = createDiscoverSessionService({
-        apiClient,
-        legacyClient: services.savedSearch,
-        useHttpApi: true,
-      });
+      const discoverSessionService = createDiscoverSessionService({ apiClient });
       jest
         .spyOn(services.discoverSessionService, 'save')
         .mockImplementation(discoverSessionService.save);
