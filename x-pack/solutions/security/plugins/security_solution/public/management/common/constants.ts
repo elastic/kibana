@@ -21,6 +21,7 @@ export const MANAGEMENT_ROUTING_POLICY_DETAILS_BLOCKLISTS_PATH = `${MANAGEMENT_P
 export const MANAGEMENT_ROUTING_POLICY_DETAILS_ENDPOINT_EXCEPTIONS_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.policies})/:policyId/endpointExceptions`;
 export const MANAGEMENT_ROUTING_POLICY_DETAILS_CUSTOM_YARA_SIGNATURES_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.policies})/:policyId/customYaraSignatures`;
 export const MANAGEMENT_ROUTING_POLICY_DETAILS_PROTECTION_UPDATES_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.policies})/:policyId/protectionUpdates`;
+export const MANAGEMENT_ROUTING_POLICY_DETAILS_STORAGE_PROVIDERS_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.policies})/:policyId/storageProviders`;
 export const MANAGEMENT_ROUTING_NOTES_PATH = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.notes})`;
 /** @deprecated use the paths defined above instead */
 export const MANAGEMENT_ROUTING_POLICY_DETAILS_PATH_OLD = `${MANAGEMENT_PATH}/:tabName(${AdministrationSubTab.policies})/:policyId`;

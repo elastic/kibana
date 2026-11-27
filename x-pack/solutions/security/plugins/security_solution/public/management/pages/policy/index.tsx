@@ -22,6 +22,7 @@ import {
   MANAGEMENT_ROUTING_POLICY_DETAILS_HOST_ISOLATION_EXCEPTIONS_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_PATH_OLD,
   MANAGEMENT_ROUTING_POLICY_DETAILS_PROTECTION_UPDATES_PATH,
+  MANAGEMENT_ROUTING_POLICY_DETAILS_STORAGE_PROVIDERS_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_DEVICES_PATH,
 } from '../../common/constants';
@@ -35,6 +36,9 @@ export const PolicyContainer = memo(() => {
   );
   const isCustomYaraSignaturesEnabled = useIsExperimentalFeatureEnabled(
     'customYaraSignaturesEnabled'
+  );
+  const isEndpointFileExportEnabled = useIsExperimentalFeatureEnabled(
+    'responseActionsEndpointFileExport'
   );
   const isEnterprise = useLicense().isEnterprise();
 
@@ -57,6 +61,9 @@ export const PolicyContainer = memo(() => {
             ? [MANAGEMENT_ROUTING_POLICY_DETAILS_CUSTOM_YARA_SIGNATURES_PATH]
             : []),
           ...(isEnterprise ? [MANAGEMENT_ROUTING_POLICY_DETAILS_PROTECTION_UPDATES_PATH] : []),
+          ...(isEndpointFileExportEnabled && isEnterprise
+            ? [MANAGEMENT_ROUTING_POLICY_DETAILS_STORAGE_PROVIDERS_PATH]
+            : []),
         ]}
         exact
         component={PolicyDetails}

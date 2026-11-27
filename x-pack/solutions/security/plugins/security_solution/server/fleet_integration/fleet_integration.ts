@@ -40,6 +40,10 @@ import { updateAntivirusRegistrationEnabled } from '../../common/endpoint/utils/
 import { validatePolicyAgainstProductFeatures } from './handlers/validate_policy_against_product_features';
 import { validateEndpointPackagePolicy } from './handlers/validate_endpoint_package_policy';
 import {
+  removeExportProviderSettings,
+  validateExportProviderSettings,
+} from './handlers/validate_export_providers';
+import {
   isPolicySetToEventCollectionOnly,
   ensureOnlyEventCollectionIsAllowed,
   isBillablePolicy,
@@ -61,7 +65,10 @@ import type { IRequestContextFactory } from '../request_context_factory';
 import { installEndpointSecurityPrebuiltRule } from '../lib/detection_engine/prebuilt_rules/logic/integrations/install_endpoint_security_prebuilt_rule';
 import { createPolicyArtifactManifest } from './handlers/create_policy_artifact_manifest';
 import { createDefaultPolicy } from './handlers/create_default_policy';
-import { validatePolicyAgainstLicense } from './handlers/validate_policy_against_license';
+import {
+  validateExportProvidersAgainstLicense,
+  validatePolicyAgainstLicense,
+} from './handlers/validate_policy_against_license';
 import { validateIntegrationConfig } from './handlers/validate_integration_config';
 import { removePolicyFromArtifacts } from './handlers/remove_policy_from_artifacts';
 import { notifyProtectionFeatureUsage } from './notify_protection_feature_usage';
@@ -130,6 +137,13 @@ const shouldUpdateMetaValues = (
   );
 };
 
+const isExportProvidersEnabled = (
+  productFeatures: ProductFeaturesService,
+  experimentalFeatures: ExperimentalFeatures
+): boolean =>
+  productFeatures.isEnabled(ProductFeatureSecurityKey.endpointResponseActions) &&
+  experimentalFeatures.responseActionsEndpointFileExport;
+
 /**
  * Callback to handle creation of PackagePolicies in Fleet
  */
@@ -154,6 +168,23 @@ export const getPackagePolicyCreateCallback = (
     // callback is called outside request context
     if (!context || !request) {
       logger.debug('PackagePolicyCreateCallback called outside request context. Skipping...');
+
+      const endpointPolicyData = newPackagePolicy as NewPolicyData;
+      const incomingPolicyValue = endpointPolicyData.inputs?.[0]?.config?.policy?.value;
+
+      // The incoming policy is kept here (with a request it's replaced by the defaults below),
+      // so it gets the export provider checks and gating of an update
+      if (isEndpointPackagePolicy(newPackagePolicy) && incomingPolicyValue) {
+        if (isExportProvidersEnabled(productFeatures, experimentalFeatures)) {
+          validateExportProviderSettings(endpointPolicyData.inputs[0].config);
+          validateExportProvidersAgainstLicense(incomingPolicyValue, licenseService, logger);
+        } else {
+          endpointPolicyData.inputs[0].config = removeExportProviderSettings(
+            endpointPolicyData.inputs[0].config
+          );
+        }
+      }
+
       return newPackagePolicy;
     }
 
@@ -351,6 +382,16 @@ export const getPackagePolicyUpdateCallback = (
         );
       }
 
+      // Stripped before license validation for the same reason as custom YARA signatures above.
+      if (
+        !isExportProvidersEnabled(productFeatures, experimentalFeatures) &&
+        endpointIntegrationData.inputs?.[0]?.config?.policy?.value
+      ) {
+        endpointIntegrationData.inputs[0].config = removeExportProviderSettings(
+          endpointIntegrationData.inputs[0].config
+        );
+      }
+
       // Validate that Endpoint Security policy is valid against current license
       if (endpointIntegrationData.inputs?.[0]?.config?.policy?.value) {
         validatePolicyAgainstLicense(
@@ -364,6 +405,10 @@ export const getPackagePolicyUpdateCallback = (
 
       // Make sure policy includes general expected data
       validateEndpointPackagePolicy(endpointIntegrationData.inputs, 'update');
+
+      if (endpointIntegrationData.inputs?.[0]?.config?.policy?.value) {
+        validateExportProviderSettings(endpointIntegrationData.inputs[0].config);
+      }
     } catch (error) {
       // Fleet swallows callback errors lacking `apiPassThrough` and persists the payload unvalidated,
       // so any unexpected failure while checking it must be converted into a rejection.

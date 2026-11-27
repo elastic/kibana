@@ -7,7 +7,12 @@
 
 // eslint-disable-next-line import/no-nodejs-modules
 import { parse } from 'querystring';
-import { fullPolicy, isOnPolicyDetailsPage, license } from '../selectors/policy_settings_selectors';
+import {
+  fullPolicy,
+  isOnPolicyDetailsPage,
+  license,
+  policyIdFromParams,
+} from '../selectors/policy_settings_selectors';
 import type {
   Immutable,
   PolicyConfig,
@@ -45,6 +50,13 @@ export const policySettingsReducer: ImmutableReducer<PolicyDetailsState, AppActi
     action.type === 'serverReturnedPolicyDetailsData' ||
     action.type === 'serverReturnedUpdatedPolicyDetailsData'
   ) {
+    // A response can arrive after the user left its policy (e.g. a save still in flight while they
+    // go to the list or another policy). Storing it would show that policy, and save to it, under
+    // another policy's URL, and would stop the next policy from being fetched.
+    if (action.payload.policyItem?.id !== policyIdFromParams(state)) {
+      return state;
+    }
+
     return {
       ...state,
       ...action.payload,

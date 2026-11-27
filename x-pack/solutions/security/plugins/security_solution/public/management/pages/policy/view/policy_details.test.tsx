@@ -7,10 +7,11 @@
 
 import React from 'react';
 import type { RenderResult } from '@testing-library/react';
-import { act, waitFor } from '@testing-library/react';
+import { act, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AGENT_API_ROUTES, PACKAGE_POLICY_API_ROOT } from '@kbn/fleet-plugin/common';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useLicense as _useLicense } from '../../../../common/hooks/use_license';
@@ -28,24 +29,33 @@ import {
   getPolicyEndpointExceptionsPath,
   getPolicyEventFiltersPath,
   getPolicyHostIsolationExceptionsPath,
+  getPolicyStorageProvidersPath,
   getPolicyTrustedAppsPath,
   getPolicyTrustedDevicesPath,
 } from '../../../common/routing';
 import { policyListApiPathHandlers } from '../store/test_mock_utils';
 import { PolicyDetails } from './policy_details';
+import { PolicyContainer } from '..';
 import { APP_UI_ID } from '../../../../../common/constants';
 import { createLicenseServiceMock } from '../../../../../common/license/mocks';
 import { licenseService as licenseServiceMocked } from '../../../../common/hooks/__mocks__/use_license';
 import { useHostIsolationExceptionsAccess } from '../../../hooks/artifacts/use_host_isolation_exceptions_access';
 import { getUserPrivilegesMockDefaultValue } from '../../../../common/components/user_privileges/__mocks__';
+import { getEndpointPrivilegesInitialStateMock } from '../../../../common/components/user_privileges/endpoint/mocks';
+import { useProductFeatureKeys } from '../../../../common/hooks/use_product_feature_keys';
+import { getPolicySettingsFormTestSubjects } from './policy_settings_form/mocks';
 
 jest.mock('../../../../common/components/user_privileges');
 jest.mock('../../../../common/hooks/use_license');
 jest.mock('../../../hooks/artifacts/use_host_isolation_exceptions_access');
+jest.mock('../../../../common/hooks/use_product_feature_keys', () => ({
+  useProductFeatureKeys: jest.fn(),
+}));
 
 const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
 const useLicenseMock = _useLicense as jest.Mock;
 const useHostIsolationExceptionsAccessMock = useHostIsolationExceptionsAccess as jest.Mock;
+const useProductFeatureKeysMock = useProductFeatureKeys as jest.Mock;
 
 describe('Policy Details', () => {
   const policyDetailsPathUrl = getPolicyDetailPath('1');
@@ -73,6 +83,9 @@ describe('Policy Details', () => {
       return renderResult;
     };
     http = coreStart.http;
+    useProductFeatureKeysMock.mockReturnValue(
+      new Set([ProductFeatureSecurityKey.endpointResponseActions])
+    );
   });
 
   describe('when displayed with invalid id', () => {
@@ -325,6 +338,175 @@ describe('Policy Details', () => {
 
       const tab = await renderResult.findByTestId('policyProtectionUpdatesTab');
       expect(tab).toHaveTextContent('Protection updates');
+    });
+
+    describe('storage providers tab', () => {
+      const getTabTestSubjects = async (): Promise<Array<string | null>> => {
+        const tablist = await renderResult.findByRole('tablist');
+        return within(tablist)
+          .getAllByRole('tab')
+          .map((tab) => tab.getAttribute('data-test-subj'));
+      };
+
+      beforeEach(() => {
+        setExperimentalFlag({ responseActionsEndpointFileExport: true });
+      });
+
+      afterEach(() => {
+        setExperimentalFlag({ responseActionsEndpointFileExport: false });
+        useUserPrivilegesMock.mockImplementation(getUserPrivilegesMockDefaultValue);
+        useLicenseMock.mockReturnValue(licenseServiceMocked);
+      });
+
+      it('should display the tab right after the protection updates tab', async () => {
+        render();
+        await asyncActions;
+
+        const tabTestSubjects = await getTabTestSubjects();
+        const protectionUpdatesIndex = tabTestSubjects.indexOf('policyProtectionUpdatesTab');
+        expect(tabTestSubjects.slice(protectionUpdatesIndex, protectionUpdatesIndex + 2)).toEqual([
+          'policyProtectionUpdatesTab',
+          'policyStorageProvidersTab',
+        ]);
+        expect(renderResult.getByTestId('policyStorageProvidersTab')).toHaveTextContent(
+          'Storage providers'
+        );
+      });
+
+      it('should navigate to the storage providers URL when the tab is clicked', async () => {
+        render();
+        await asyncActions;
+
+        await userEvent.click(await renderResult.findByTestId('policyStorageProvidersTab'));
+
+        expect(history.location.pathname).toBe(getPolicyStorageProvidersPath('1'));
+        expect(await renderResult.findByTestId('storageProvidersLayout')).toBeInTheDocument();
+      });
+
+      it('should show the storage providers when opened from its URL', async () => {
+        act(() => {
+          history.push(getPolicyStorageProvidersPath('1'));
+        });
+        render();
+        await asyncActions;
+
+        expect(await renderResult.findByTestId('storageProvidersLayout')).toBeInTheDocument();
+        expect(renderResult.getByTestId('policyStorageProvidersTab')).toHaveAttribute(
+          'aria-selected',
+          'true'
+        );
+      });
+
+      it.each([
+        [
+          'the feature flag is off',
+          () => setExperimentalFlag({ responseActionsEndpointFileExport: false }),
+        ],
+        [
+          'the license is below Enterprise',
+          () => {
+            const licenseServiceMock = createLicenseServiceMock();
+            licenseServiceMock.isEnterprise.mockReturnValue(false);
+            useLicenseMock.mockReturnValue(licenseServiceMock);
+          },
+        ],
+        [
+          'the user cannot read policy management',
+          () =>
+            useUserPrivilegesMock.mockReturnValue({
+              ...getUserPrivilegesMockDefaultValue(),
+              endpointPrivileges: getEndpointPrivilegesInitialStateMock({
+                canReadPolicyManagement: false,
+              }),
+            }),
+        ],
+        [
+          'the response actions product feature is unavailable',
+          () => useProductFeatureKeysMock.mockReturnValue(new Set()),
+        ],
+      ])('should not display the tab when %s', async (_, setUp) => {
+        setUp();
+        render();
+        await asyncActions;
+
+        const tabTestSubjects = await getTabTestSubjects();
+        expect(tabTestSubjects).toContain('policySettingsTab');
+        expect(tabTestSubjects).not.toContain('policyStorageProvidersTab');
+      });
+
+      it('should show the policy settings instead when the tab is opened from its URL but not available', async () => {
+        useProductFeatureKeysMock.mockReturnValue(new Set());
+        act(() => {
+          history.push(getPolicyStorageProvidersPath('1'));
+        });
+        render();
+        await asyncActions;
+
+        expect(await renderResult.findByTestId('policySettingsTab')).toHaveAttribute(
+          'aria-selected',
+          'true'
+        );
+        expect(renderResult.queryByTestId('storageProvidersLayout')).not.toBeInTheDocument();
+      });
+
+      it('should confirm leaving unsaved policy settings shown in place of the unavailable tab', async () => {
+        useProductFeatureKeysMock.mockReturnValue(new Set());
+        act(() => {
+          history.push(getPolicyStorageProvidersPath('1'));
+        });
+        render();
+        await asyncActions;
+
+        await userEvent.click(
+          await renderResult.findByTestId(
+            getPolicySettingsFormTestSubjects().perOsMalware.enableDisableSwitch
+          )
+        );
+        await userEvent.click(renderResult.getByTestId('policyEventFiltersTab'));
+
+        expect(
+          await renderResult.findByTestId('policyDetailsUnsavedChangesModal')
+        ).toBeInTheDocument();
+        expect(history.location.pathname).toBe(getPolicyStorageProvidersPath('1'));
+      });
+
+      describe('route', () => {
+        // Through the policy routes, which gate the URL on the flag and the license
+        const renderStorageProvidersUrl = async () => {
+          act(() => {
+            history.push(getPolicyStorageProvidersPath('1'));
+          });
+          renderResult = mockedContext.render(<PolicyContainer />);
+          await asyncActions;
+        };
+
+        it('should render the storage providers tab on its URL', async () => {
+          await renderStorageProvidersUrl();
+
+          expect(await renderResult.findByTestId('storageProvidersLayout')).toBeInTheDocument();
+        });
+
+        it.each([
+          [
+            'the feature flag is off',
+            () => setExperimentalFlag({ responseActionsEndpointFileExport: false }),
+          ],
+          [
+            'the license is below Enterprise',
+            () => {
+              const licenseServiceMock = createLicenseServiceMock();
+              licenseServiceMock.isEnterprise.mockReturnValue(false);
+              useLicenseMock.mockReturnValue(licenseServiceMock);
+            },
+          ],
+        ])('should not route to the storage providers URL when %s', async (_, setUp) => {
+          setUp();
+          await renderStorageProvidersUrl();
+
+          expect(await renderResult.findByTestId('notFoundPage')).toBeInTheDocument();
+          expect(renderResult.queryByTestId('storageProvidersLayout')).not.toBeInTheDocument();
+        });
+      });
     });
 
     describe('trusted devices tab', () => {

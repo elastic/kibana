@@ -66,6 +66,11 @@ export const EndpointActionGetFileSchema = {
         ) {
           return `[parameters.export]: is not valid with agent type of ${bodyContent.agent_type}`;
         }
+
+        // An exported file goes to a single blob, so it cannot be shared by several hosts in one action
+        if (bodyContent.parameters.export !== undefined && bodyContent.endpoint_ids.length > 1) {
+          return '[parameters.export]: export supports one host per request';
+        }
       },
     }
   ),
