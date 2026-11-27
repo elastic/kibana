@@ -38,6 +38,40 @@ export const getPartType = (element: unknown, assembly: string): string | undefi
   return typeof value === 'string' ? value : undefined;
 };
 
+/** Matches the static Symbol key written by `tagDeclarativeComponent`: `kbn.<assembly>.part`. */
+const PART_KEY_PATTERN = /^kbn\.(.+)\.part$/;
+
+/**
+ * Gets the assembly and part an element was tagged for, whichever assembly that is.
+ *
+ * {@link getPartType} only answers "does this belong to the assembly I am parsing".
+ * This answers "which assembly does this belong to", which lets a caller tell a part
+ * used at the wrong nesting level apart from ordinary passthrough content. Such a part
+ * renders as `null`, so without this distinction the mistake is invisible.
+ *
+ * @param element - The element to check.
+ * @returns The assembly and part names, or `undefined` for non-declarative elements.
+ */
+export const getDeclarativePartTag = (
+  element: unknown
+): { assembly: string; part: string } | undefined => {
+  if (!isReactLikeElement(element) || !element.type) {
+    return undefined;
+  }
+
+  const { type } = element;
+  for (const key of Object.getOwnPropertySymbols(type)) {
+    const globalKey = Symbol.keyFor(key);
+    const assembly = globalKey ? PART_KEY_PATTERN.exec(globalKey)?.[1] : undefined;
+    const part = assembly === undefined ? undefined : type[key];
+    if (assembly !== undefined && typeof part === 'string') {
+      return { assembly, part };
+    }
+  }
+
+  return undefined;
+};
+
 /**
  * Gets the static preset from a declarative component's Symbol property.
  *
