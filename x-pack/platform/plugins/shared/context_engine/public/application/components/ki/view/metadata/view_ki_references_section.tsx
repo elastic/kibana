@@ -14,7 +14,7 @@ import { useSelectedKi } from '../../../../hooks/use_selected_ki';
 import { parseKiUri } from '../../../../../../common/ki_uri';
 import type { KiReferenceGroup, KiReferenceItem } from './view_ki_document_helpers';
 import { ViewKiSidebarUriLabel } from './view_ki_uri_label';
-import { getKiConversationHref, type KiGetUrlForApp } from './view_ki_uri_helpers';
+import { getKiConversationHref, getKiUriHref, type KiGetUrlForApp } from './view_ki_uri_helpers';
 import {
   ViewKiSidebarBreakableText,
   ViewKiSidebarDescriptionList,
@@ -52,12 +52,14 @@ interface KiReferenceItemContentProps {
   item: KiReferenceItem;
   onSelectKi?: (id: string) => void;
   conversationHref?: string;
+  uriHref?: string;
 }
 
 const KiReferenceItemContent = ({
   item,
   onSelectKi,
   conversationHref,
+  uriHref,
 }: KiReferenceItemContentProps) => {
   const { uri, description } = item;
 
@@ -94,7 +96,15 @@ const KiReferenceItemContent = ({
   }
 
   if (description) {
-    return <ViewKiSidebarBreakableText title={uri}>{description}</ViewKiSidebarBreakableText>;
+    const text = <ViewKiSidebarBreakableText title={uri}>{description}</ViewKiSidebarBreakableText>;
+    if (uriHref) {
+      return (
+        <EuiLink href={uriHref} data-test-subj="contextViewKiReferenceLink">
+          {text}
+        </EuiLink>
+      );
+    }
+    return text;
   }
 
   if (parseKiUri(uri)) {
@@ -135,6 +145,7 @@ const KiReferenceGroupItems = ({ group, onSelectKi, getUrlForApp }: KiReferenceG
                 ? getKiConversationHref(getUrlForApp, item.id)
                 : undefined
             }
+            uriHref={item.kind === 'other' ? getKiUriHref(getUrlForApp, item.uri) : undefined}
           />
         </React.Fragment>
       ))}

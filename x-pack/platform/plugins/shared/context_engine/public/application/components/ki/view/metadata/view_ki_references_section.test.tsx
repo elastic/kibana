@@ -131,7 +131,7 @@ describe('ViewKiReferencesSection', () => {
     expect(within(list).queryByText('workflow')).not.toBeInTheDocument();
   });
 
-  it('shows description for workflow reference when description is set', () => {
+  it('links workflow reference with description to the workflow', () => {
     renderSection({
       references: [
         {
@@ -142,10 +142,12 @@ describe('ViewKiReferencesSection', () => {
       ],
     });
 
-    const list = screen.getByTestId('contextViewKiReferencesList');
-    expect(within(list).getByText('Source workflow')).toBeInTheDocument();
-    expect(within(list).queryByText('workflow')).not.toBeInTheDocument();
-    expect(within(list).queryByText('my-wf')).not.toBeInTheDocument();
+    const link = screen.getByTestId('contextViewKiReferenceLink');
+    expect(link).toHaveAttribute('href', '/app/workflows/my-wf');
+    expect(within(link).getByText('Source workflow')).toBeInTheDocument();
+    expect(
+      within(screen.getByTestId('contextViewKiReferencesList')).queryByText('my-wf')
+    ).not.toBeInTheDocument();
   });
 
   it('calls selectKi with the referenced id and current index when a link is clicked', () => {

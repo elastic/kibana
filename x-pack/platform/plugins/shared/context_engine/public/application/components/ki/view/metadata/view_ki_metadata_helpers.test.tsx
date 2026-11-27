@@ -96,28 +96,28 @@ describe('buildKiMetadataListItems', () => {
   });
 
   describe('Visible in spaces', () => {
-    it('shows All when permissions are absent but created by dreaming', () => {
+    it('shows All spaces when permissions are absent but created by dreaming', () => {
       renderItems(
         'ki-1',
         {},
         { createdBy: { uri: `workflow://${DREAMING_WORKFLOW_ID}`, metadata: {} } }
       );
       expect(screen.getByTestId('title-Visible in spaces')).toBeInTheDocument();
-      expect(screen.getByTestId('contextViewKiVisibleIn')).toHaveTextContent(/^All$/);
+      expect(screen.getByTestId('contextViewKiVisibleIn')).toHaveTextContent(/^All spaces$/);
     });
 
-    it('shows All when any privilege space is *', () => {
+    it('shows All spaces when any privilege space is *', () => {
       renderItems('ki-1', {
         permissions: {
           kibana: { privileges: [{ space: 'default' }, { space: '*' }] },
         },
       });
-      expect(screen.getByTestId('contextViewKiVisibleIn')).toHaveTextContent(/^All$/);
+      expect(screen.getByTestId('contextViewKiVisibleIn')).toHaveTextContent(/^All spaces$/);
     });
 
-    it('shows All when permissions exist but privileges are empty', () => {
+    it('shows All spaces when permissions exist but privileges are empty', () => {
       renderItems('ki-1', { permissions: { kibana: { privileges: [] } } });
-      expect(screen.getByTestId('contextViewKiVisibleIn')).toHaveTextContent(/^All$/);
+      expect(screen.getByTestId('contextViewKiVisibleIn')).toHaveTextContent(/^All spaces$/);
     });
 
     it('shows one space badge', () => {
@@ -128,7 +128,7 @@ describe('buildKiMetadataListItems', () => {
       });
       const visibleIn = screen.getByTestId('contextViewKiVisibleIn');
       expect(within(visibleIn).getByText('marketing')).toBeInTheDocument();
-      expect(within(visibleIn).queryByText('All')).not.toBeInTheDocument();
+      expect(within(visibleIn).queryByText('All spaces')).not.toBeInTheDocument();
     });
 
     it('shows a badge when privileges is a single object', () => {
@@ -137,7 +137,7 @@ describe('buildKiMetadataListItems', () => {
       });
       const visibleIn = screen.getByTestId('contextViewKiVisibleIn');
       expect(within(visibleIn).getByText('marketing')).toBeInTheDocument();
-      expect(within(visibleIn).queryByText('All')).not.toBeInTheDocument();
+      expect(within(visibleIn).queryByText('All spaces')).not.toBeInTheDocument();
     });
 
     it('shows a badge per distinct space', () => {
@@ -157,10 +157,10 @@ describe('buildKiMetadataListItems', () => {
       expect(within(visibleIn).getByText('marketing')).toBeInTheDocument();
     });
 
-    it('shows All without permissions and a non-dreaming creator', () => {
+    it('shows All spaces without permissions and a non-dreaming creator', () => {
       renderItems('ki-1', {}, { createdBy: { uri: 'workflow://custom-wf', metadata: {} } });
       expect(screen.getByTestId('title-Visible in spaces')).toBeInTheDocument();
-      expect(screen.getByTestId('contextViewKiVisibleIn')).toHaveTextContent(/^All$/);
+      expect(screen.getByTestId('contextViewKiVisibleIn')).toHaveTextContent(/^All spaces$/);
     });
   });
 
