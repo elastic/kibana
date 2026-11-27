@@ -83,13 +83,13 @@ describe('transformStorageDocumentToWorkflowDto', () => {
     const source = makeSource({
       templateSlug: 'triage-alerts',
       templateVersion: '1.2.0',
-      templateOrigin: 'install',
+      templateOrigin: 'catalog',
     });
 
     expect(transformStorageDocumentToWorkflowDto('wf-1', source)).toMatchObject({
       templateSlug: 'triage-alerts',
       templateVersion: '1.2.0',
-      templateOrigin: 'install',
+      templateOrigin: 'catalog',
     });
     expect(
       transformStoragePartialToWorkflowDto('wf-1', {

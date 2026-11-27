@@ -172,7 +172,7 @@ When you test the trigger in the workflow editor, use the emitted fields as the 
 | `updateIncident` | Update an incident (at least one of title/customerImpacted/severity/state). Parameters: `incidentId` (required), `title`, `customerImpacted`, `severity`, `state`. |
 | `postEvent` | Post an event to the Events Explorer. Parameters: `title` (required), `text` (required), `tags`, `alertType`, `aggregationKey`, `dateHappened`. |
 | `queryTimeseries` | Query timeseries metrics. Parameters: `query` (required), `from` (required), `to` (required). |
-| `searchLogs` | Search logs over a time range. Parameters: `query` (required), `from` (required), `to` (required), `indexes`, `limit`, `sort`, `storageTier`. |
+| `searchLogs` | Search logs over a time range. Parameters: `query` (required), `from` (required), `to` (required), `indexes`, `limit` (1–5000, default 50), `sort`, `storageTier`. |
 
 ## Connector networking configuration [datadog-connector-networking-configuration]
 

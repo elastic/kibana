@@ -13,8 +13,8 @@ import {
 } from '../../../common/step_types/alert_triage';
 import {
   MAX_REVOKE_PAGES,
-  TRIAGE_CLOSED_BY_DECISION_TAG_PREFIX,
-  TRIAGE_SKIPPED_BY_DECISION_TAG_PREFIX,
+  closedByDecisionTag,
+  skippedByDecisionTag,
   VERDICT_INCONCLUSIVE_TAG,
 } from '../../alert_triage/constants';
 import { FP_DECISION_ID_PREFIX } from '../../alert_triage/fp_decisions';
@@ -46,9 +46,10 @@ import {
  * state of the Context Engine setting, because a decision left active would close the alerts again
  * once the setting is back on.
  *
- * The caller needs write access to the decisions index, which the worker's role has and users do
- * not. Without it the step reports `denied` and touches nothing, because a user cannot tell a hidden
- * decision from a missing one.
+ * The caller needs `read` and `index` on the decisions index, which the worker's role has and users
+ * do not, besides the privileges to run workflows and to manage alerts. Without them the step
+ * reports `denied` and touches nothing, because a user cannot tell a hidden decision from a missing
+ * one.
  */
 export const getTriageRevokeFpDecisionStepDefinition = () =>
   createServerStepDefinition({
@@ -108,9 +109,7 @@ export const getTriageRevokeFpDecisionStepDefinition = () =>
       if (failures > 0 || status === 'denied')
         return { output: { status, alerts_reopened: 0, alerts_released: 0, failures } };
 
-      const tag = `${
-        isApproval ? TRIAGE_CLOSED_BY_DECISION_TAG_PREFIX : TRIAGE_SKIPPED_BY_DECISION_TAG_PREFIX
-      }${id}`;
+      const tag = isApproval ? closedByDecisionTag(id) : skippedByDecisionTag(id);
       const write = tagAlerts(contextManager);
       let reopened = 0;
       let released = 0;
