@@ -323,6 +323,55 @@ describe('getFullAgentPolicy', () => {
     } as any);
   });
 
+  describe('the Fleet Server host agent key', () => {
+    beforeEach(async () => {
+      const related = await mockedFetchRelatedSavedObjects({} as any, {} as any);
+      mockedFetchRelatedSavedObjects.mockResolvedValue({
+        ...related,
+        fleetServerHost: {
+          id: 'default-fleet-server-host',
+          name: 'Default',
+          is_default: true,
+          is_preconfigured: false,
+          host_urls: ['https://fleetserver:8220'],
+          ssl: {
+            agent_certificate_authorities: ['/etc/ca.crt'],
+            agent_certificate: 'agent-cert',
+            agent_key: 'HOST_AGENT_KEY',
+          },
+        },
+      });
+      mockAgentPolicy({ revision: 1 });
+    });
+
+    it('is left out of fleet.ssl when redactSecrets=true, keeping the CAs and certificate', async () => {
+      const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy', {
+        redactSecrets: true,
+      });
+
+      expect(agentPolicy?.fleet).toEqual({
+        hosts: ['https://fleetserver:8220'],
+        ssl: {
+          certificate_authorities: ['/etc/ca.crt'],
+          certificate: 'agent-cert',
+        },
+      });
+    });
+
+    it('is included in fleet.ssl when secrets are not redacted', async () => {
+      const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
+
+      expect(agentPolicy?.fleet).toEqual({
+        hosts: ['https://fleetserver:8220'],
+        ssl: {
+          certificate_authorities: ['/etc/ca.crt'],
+          certificate: 'agent-cert',
+          key: 'HOST_AGENT_KEY',
+        },
+      });
+    });
+  });
+
   it('should return a policy without monitoring if monitoring is not enabled', async () => {
     mockAgentPolicy({
       revision: 1,
@@ -3683,7 +3732,7 @@ ssl.test: 123
     expect((policyOutput as any).ssl?.key).toBeUndefined();
   });
 
-  it('should redact proxy_headers and ssl.key when redactProxySecrets=true', () => {
+  it('should redact proxy_headers and ssl.key when redactSecrets=true', () => {
     const proxy = {
       id: 'proxy-1',
       name: 'proxy1',
@@ -3707,7 +3756,7 @@ ssl.test: 123
       } as any,
       proxy,
       false,
-      true // redactProxySecrets
+      true // redactSecrets
     );
 
     expect(policyOutput.proxy_url).toBe('https://proxy.fr');
@@ -3867,6 +3916,29 @@ describe('generateFleetConfig', () => {
   `);
   });
 
+  it('should leave out an inline agent key when redactSecrets=true', () => {
+    const res = generateFleetConfig(
+      {
+        host_urls: ['https://test.fr'],
+        ssl: {
+          agent_certificate_authorities: ['/tmp/ssl/ca.crt'],
+          agent_certificate: 'my-cert',
+          agent_key: 'my-key',
+        },
+      } as any,
+      [],
+      true // redactSecrets
+    );
+
+    expect(res).toEqual({
+      hosts: ['https://test.fr'],
+      ssl: {
+        certificate: 'my-cert',
+        certificate_authorities: ['/tmp/ssl/ca.crt'],
+      },
+    });
+  });
+
   it('should generate ssl config when a default ES output has ssl options', () => {
     const res = generateFleetConfig(
       {
@@ -3898,7 +3970,7 @@ describe('generateFleetConfig', () => {
     });
   });
 
-  it('should redact proxy_headers and ssl.key when redactProxySecrets=true', () => {
+  it('should redact proxy_headers and ssl.key when redactSecrets=true', () => {
     const res = generateFleetConfig(
       {
         host_urls: ['https://test.fr'],
@@ -3914,7 +3986,7 @@ describe('generateFleetConfig', () => {
           certificate_key: 'PRIVATE_KEY',
         } as any,
       ],
-      true // redactProxySecrets
+      true // redactSecrets
     );
 
     expect(res).toMatchInlineSnapshot(`
@@ -4648,7 +4720,7 @@ describe('getBinarySourceSettings', () => {
       });
     });
 
-    it('should redact proxy_headers and ssl.key when redactProxySecrets=true', () => {
+    it('should redact proxy_headers and ssl.key when redactSecrets=true', () => {
       const result = getBinarySourceSettings([downloadSource], proxy, true);
       expect(result).toEqual({
         proxy_url: 'http://proxy_uri.it',

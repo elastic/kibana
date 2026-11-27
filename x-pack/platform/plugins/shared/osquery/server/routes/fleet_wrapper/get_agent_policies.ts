@@ -6,16 +6,16 @@
  */
 
 import pMap from 'p-map';
-import { filter, uniq, flatMap } from 'lodash';
+import { filter } from 'lodash';
 import { satisfies } from 'semver';
 import type { GetAgentPoliciesResponseItem, PackagePolicy } from '@kbn/fleet-plugin/common';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import { API_VERSIONS } from '../../../common/constants';
-import { OSQUERY_INTEGRATION_NAME, PLUGIN_ID } from '../../../common';
+import { PLUGIN_ID } from '../../../common';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { fetchAllPackagePolicies, isDeliveringPackagePolicy } from '../pack/utils';
 
 export const getAgentPoliciesRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -43,16 +43,51 @@ export const getAgentPoliciesRoute = (router: IRouter, osqueryContext: OsqueryAp
         const agentPolicyService = osqueryContext.service.getAgentPolicyService();
         const packagePolicyService = osqueryContext.service.getPackagePolicyService();
 
-        const { items: packagePolicies } = (await packagePolicyService?.list(spaceScopedClient, {
-          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
-          perPage: 1000,
-          page: 1,
-        })) ?? { items: [] as PackagePolicy[] };
-        const supportedPackagePolicyIds = filter(packagePolicies, (packagePolicy) =>
+        const packagePolicies = await fetchAllPackagePolicies(
+          packagePolicyService,
+          spaceScopedClient
+        );
+        const supportedPackagePolicies = filter(packagePolicies, (packagePolicy) =>
           satisfies(packagePolicy.package?.version ?? '', '>=0.6.0', { includePrerelease: true })
         );
-        const agentPolicyIds = uniq(flatMap(supportedPackagePolicyIds, 'policy_ids'));
-        const agentPolicies = await agentPolicyService?.getByIds(spaceScopedClient, agentPolicyIds);
+        // Every supported integration keeps its agent policies listed, but only the ones
+        // Fleet delivers through (enabled integration and input) count as the owner.
+        const listedAgentPolicyIds = new Set<string>();
+        const packagePoliciesByAgentPolicyId = new Map<
+          string,
+          Array<Pick<PackagePolicy, 'id' | 'name'>>
+        >();
+        for (const packagePolicy of supportedPackagePolicies) {
+          const { id, name, policy_ids: policyIds } = packagePolicy;
+          for (const policyId of policyIds) {
+            listedAgentPolicyIds.add(policyId);
+            if (!isDeliveringPackagePolicy(packagePolicy)) continue;
+            const integrations = packagePoliciesByAgentPolicyId.get(policyId) ?? [];
+            integrations.push({ id, name });
+            packagePoliciesByAgentPolicyId.set(policyId, integrations);
+          }
+        }
+
+        const agentPolicyIds = [...listedAgentPolicyIds];
+        const resolvedAgentPolicies = await agentPolicyService?.getByIds(
+          spaceScopedClient,
+          agentPolicyIds,
+          { ignoreMissing: true }
+        );
+        const agentPolicies = resolvedAgentPolicies?.map((agentPolicy) => {
+          const integrations = packagePoliciesByAgentPolicyId.get(agentPolicy.id) ?? [];
+
+          return {
+            ...agentPolicy,
+            // The singular fields are only unambiguous with exactly one delivering osquery
+            // integration; with several, none is set rather than an arbitrary one picked by
+            // package-policy iteration order.
+            ...(integrations.length === 1 && {
+              package_policy_id: integrations[0].id,
+              package_policy_name: integrations[0].name,
+            }),
+          };
+        });
 
         if (agentPolicies?.length) {
           await pMap(

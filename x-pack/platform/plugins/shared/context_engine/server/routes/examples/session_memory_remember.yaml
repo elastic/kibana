@@ -83,6 +83,30 @@ responses:
               statusCode: 404
               error: Not Found
               message: "AI index 'ops-memory' not found"
+          memoryNotFoundExample:
+            summary: "Session memory not found"
+            description: "`id` does not match an active memory of the target user in this space"
+            value:
+              statusCode: 404
+              error: Not Found
+              message: "Session memory '7c1f0b2e-5a43-4b0e-9a57-2f0f6f1d3a10' not found"
+  429:
+    headers:
+      Retry-After:
+        description: Minimum number of seconds to wait before retrying the request.
+        schema:
+          type: integer
+          example: 1
+    content:
+      application/json:
+        examples:
+          tooManyWritesExample:
+            summary: "Too many background writes"
+            description: "This Kibana instance is at its in-flight background write limit"
+            value:
+              statusCode: 429
+              error: Too Many Requests
+              message: Too many session memory writes are already in progress. Retry shortly.
 x-codeSamples:
   - lang: curl
     source: |

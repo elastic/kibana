@@ -61,9 +61,7 @@ const makeParams = (
     workflowLogger: {
       logWarn: jest.fn(),
     },
-    stepIoService: {
-      flush: jest.fn().mockResolvedValue(undefined),
-    },
+    stepIoService: {},
   } as unknown as jest.Mocked<WorkflowExecutionLoopParams>);
 
 const makeStepRuntime = (
@@ -718,7 +716,7 @@ describe('handleExecutionDelay', () => {
       jest.useRealTimers();
     });
 
-    it('sleeps in-process without changing workflow status, flushing, or parking on TM', async () => {
+    it('sleeps in-process without changing workflow status or parking on TM', async () => {
       const params = makeParams();
       const resumeAt = new Date(Date.now() + 100).toISOString();
       const stepRuntime = makeStepRuntime({
@@ -734,7 +732,6 @@ describe('handleExecutionDelay', () => {
       await delayPromise;
 
       expect(params.workflowTaskManager.scheduleResumeTask).not.toHaveBeenCalled();
-      expect(params.stepIoService.flush).not.toHaveBeenCalled();
       expect(params.workflowExecutionState.updateWorkflowExecution).not.toHaveBeenCalled();
       expect(params.workflowExecutionCursor.stop).not.toHaveBeenCalled();
     });
@@ -799,7 +796,6 @@ describe('handleExecutionDelay', () => {
 
       await handleExecutionDelay(params, stepRuntime);
 
-      expect(params.stepIoService.flush).not.toHaveBeenCalled();
       expect(params.workflowTaskManager.scheduleResumeTask).toHaveBeenCalledTimes(1);
       const call = (params.workflowTaskManager.scheduleResumeTask as jest.Mock).mock.calls[0][0];
       expect(call.workflowExecution).toEqual(expect.objectContaining({ id: 'exec-parent' }));
@@ -955,7 +951,6 @@ describe('handleExecutionDelay', () => {
         await handleExecutionDelay(params, stepRuntime);
 
         expect(params.workflowTaskManager.scheduleResumeTask).toHaveBeenCalledTimes(1);
-        expect(params.stepIoService.flush).not.toHaveBeenCalled();
         expect(params.workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith({
           status: ExecutionStatus.WAITING,
         });

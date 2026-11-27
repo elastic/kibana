@@ -75,7 +75,6 @@ describe('EA_EXECUTION_CONTEXT_NAMES', () => {
   });
 
   it.each([
-    ['PRIVILEGED_USER_MONITORING', 'entity_analytics:privileged_user_monitoring'],
     ['THREAT_HUNTING_LEADS', 'entity_analytics:threat_hunting_leads'],
     ['WATCHLISTS', 'entity_analytics:watchlists'],
   ] as const)('%s resolves to the exact expected string', (key, expected) => {

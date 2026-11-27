@@ -8,10 +8,8 @@
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
-import {
-  getPolicyFieldReferenceParamsSchema,
-  type FieldReferenceResult,
-} from '../services/field_reference';
+import { policyFieldReferenceSelectorInputSchema } from '../../../../../common/workflows/step_types/endpoint/policies/field_reference';
+import { type FieldReferenceResult } from '../../../../endpoint/services/policy_management/services/field_reference';
 import { createPolicyTool } from './create_policy_tool';
 
 export type {
@@ -21,49 +19,40 @@ export type {
   FieldReferenceResult,
   FieldReferenceSearchHit,
   FieldReferenceWritabilityFacts,
-  GetPolicyFieldReferenceParams,
-  GetPolicyFieldReferenceSelector,
   OsLessRemainderFieldReferenceResult,
   PresentedFieldReferenceEntry,
   ProtectionKeyFieldReferenceResult,
   SearchFieldReferenceResult,
   UnknownFieldReferenceResult,
-} from '../services/field_reference';
+} from '../../../../endpoint/services/policy_management/services/field_reference';
 
 export const GET_POLICY_FIELD_REFERENCE_TOOL_ID =
   'security.policy_management.get_policy_field_reference';
 
 export const getPolicyFieldReferenceSchema = lazySchema(() => {
-  const fieldReferencePathSelectorSchema = z
-    .object({
-      path: getPolicyFieldReferenceParamsSchema.shape.path
-        .unwrap()
-        .describe(
-          'Exact registry path, protection key, or supported OS-less remainder, such as linux.events.dns, malware.mode, or behavior_protection.reputation_service. UI setting words belong in a keywords selector; never invent a path from memory. Valid: {"selector":{"path":"windows.events.dns"}}. Do not send null, an empty string, or placeholder text.'
-        ),
-    })
-    .strict();
-
-  const fieldReferenceKeywordsSelectorSchema = z
-    .object({
-      keywords: getPolicyFieldReferenceParamsSchema.shape.keywords
-        .unwrap()
-        .describe(
-          'One to five single words naming a setting the way the policy UI names it, such as antivirus, credential, dns, or blocklist. Each keyword is one word; do not include the desired value or state.'
-        ),
-      os: getPolicyFieldReferenceParamsSchema.shape.os
-        .optional()
-        .describe('Optional operating-system filter. Use only with keywords.'),
-    })
-    .strict();
+  const [pathSelectorSchema, keywordsSelectorSchema] =
+    policyFieldReferenceSelectorInputSchema.options;
+  const selectorSchema = z.union([
+    pathSelectorSchema.extend({
+      path: pathSelectorSchema.shape.path.describe(
+        'Exact registry path, protection key, or supported OS-less remainder, such as linux.events.dns, malware.mode, or behavior_protection.reputation_service. UI setting words belong in a keywords selector; never invent a path from memory. Valid: {"selector":{"path":"windows.events.dns"}}. Do not send null, an empty string, or placeholder text.'
+      ),
+    }),
+    keywordsSelectorSchema.extend({
+      keywords: keywordsSelectorSchema.shape.keywords.describe(
+        'One to five single words naming a setting the way the policy UI names it, such as antivirus, credential, dns, or blocklist. Each keyword is one word; do not include the desired value or state.'
+      ),
+      os: keywordsSelectorSchema.shape.os.describe(
+        'Optional operating-system filter. Use only with keywords.'
+      ),
+    }),
+  ]);
 
   return z
     .object({
-      selector: z
-        .union([fieldReferencePathSelectorSchema, fieldReferenceKeywordsSelectorSchema])
-        .describe(
-          'Exactly one selector object. {"selector":{"path":"windows.events.dns"}} selects an exact registry path, protection key, or supported OS-less remainder; {"selector":{"keywords":["dns"],"os":"mac"}} searches UI words. The selector object carries exactly one required property for path, or keywords with an optional os. Invalid inputs: {"keywords":["dns"]} (no selector wrapper), {"selector":{"path":"windows.events.dns","keywords":["dns"]}}, {"selector":{"path":"windows.events.dns","os":"windows"}}, {"selector":{}}.'
-        ),
+      selector: selectorSchema.describe(
+        'Exactly one selector object. {"selector":{"path":"windows.events.dns"}} selects an exact registry path, protection key, or supported OS-less remainder; {"selector":{"keywords":["dns"],"os":"mac"}} searches UI words. The selector object carries exactly one required property for path, or keywords with an optional os. Invalid inputs: {"keywords":["dns"]} (no selector wrapper), {"selector":{"path":"windows.events.dns","keywords":["dns"]}}, {"selector":{"path":"windows.events.dns","os":"windows"}}, {"selector":{}}.'
+      ),
     })
     .strict();
 });

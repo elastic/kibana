@@ -318,7 +318,7 @@ describe('AwsIdentityFederationSetup', () => {
     });
   });
 
-  describe('without integrations (static template flow, as used by AwsConnectSetup)', () => {
+  describe('without integrations (static template flow)', () => {
     beforeEach(() => {
       // No connectors yet, so the New Identity tab is the initial tab.
       mockGetConnectors({ data: [] });
@@ -632,7 +632,7 @@ describe('AwsIdentityFederationSetup', () => {
         'my-identity'
       );
 
-      expect(mockUseProvisioningCallback).toHaveBeenCalledWith({ enabled: true });
+      expect(mockUseProvisioningCallback).toHaveBeenCalledWith({ enabled: true, provider: 'aws' });
       const { getLaunchStackParams } = mockUseCloudConnectorTemplate.mock.lastCall![0];
       await act(async () => {
         await getLaunchStackParams?.(RENDERED_IAC_CONFIRM);
@@ -656,7 +656,7 @@ describe('AwsIdentityFederationSetup', () => {
         'my-identity'
       );
 
-      expect(mockUseProvisioningCallback).toHaveBeenCalledWith({ enabled: true });
+      expect(mockUseProvisioningCallback).toHaveBeenCalledWith({ enabled: true, provider: 'aws' });
       const { getLaunchStackParams } = mockUseCloudConnectorTemplate.mock.lastCall![0];
       await act(async () => {
         await getLaunchStackParams?.(undefined);
@@ -731,7 +731,7 @@ describe('AwsIdentityFederationSetup', () => {
       mockUseDisabledIdentityFederationProviders.mockReturnValue(['aws']);
       renderSetup({ cloud, integrations });
 
-      expect(mockUseProvisioningCallback).toHaveBeenCalledWith({ enabled: false });
+      expect(mockUseProvisioningCallback).toHaveBeenCalledWith({ enabled: false, provider: 'aws' });
     });
 
     it('shows a spinner with a waiting hint while the stack has not called back yet', () => {

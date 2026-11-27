@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/secrets",
+  "owner": "@elastic/workflows-eng",
+  "group": "platform",
+  "visibility": "private"
+}

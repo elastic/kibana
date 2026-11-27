@@ -18,6 +18,7 @@ import {
 import { SCOUT_SERVERS_ROOT } from '@kbn/scout-info';
 import type { ScoutPlaywrightOptions, ScoutTestOptions } from '../types';
 import { VALID_CONFIG_MARKER } from '../types';
+import { getBrowserEnvWithoutProxy } from '../utils/browser_env';
 
 const DEFAULT_CI_RETRIES = 1;
 
@@ -142,11 +143,16 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
     ...(process.env.KIBANA_TEST_IPV6_ONLY === 'true'
       ? ['--host-resolver-rules=MAP localhost [::1]']
       : []),
-    // Chromium strips credentials embedded in HTTP(S)_PROXY, so it cannot use
-    // Citadel's per-job authenticated proxy URL. Keep only the browser direct;
-    // the Playwright runner and the rest of the job remain proxied.
-    ...(process.env.USE_CITADEL_PROXY === 'true' ? ['--no-proxy-server'] : []),
   ];
+  // Chromium strips credentials embedded in HTTP(S)_PROXY, so it cannot use
+  // Citadel's per-job authenticated proxy URL. Keep only the browser direct;
+  // the Playwright runner and the rest of the job remain proxied.
+  // The headless shell ignores --no-proxy-server, so hide the proxy variables from it.
+  const browserEnv = getBrowserEnvWithoutProxy();
+  const launchOptions = {
+    ...(chromiumArgs.length > 0 ? { args: chromiumArgs } : {}),
+    ...(browserEnv ? { env: browserEnv } : {}),
+  };
 
   return defineConfig<ScoutTestOptions>({
     testDir: options.testDir,
@@ -188,7 +194,7 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
       // storageState: './output/reports/state.json', // Store session state (like cookies)
       timezoneId: 'GMT',
       ignoreHTTPSErrors: true,
-      ...(chromiumArgs.length > 0 ? { launchOptions: { args: chromiumArgs } } : {}),
+      ...(Object.keys(launchOptions).length > 0 ? { launchOptions } : {}),
     },
 
     // Timeout for each test, includes test, hooks and fixtures

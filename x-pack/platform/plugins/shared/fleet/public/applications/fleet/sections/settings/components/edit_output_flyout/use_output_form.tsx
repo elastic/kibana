@@ -932,7 +932,8 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     if (isOtlp) {
       return [
         nameInputValid,
-        validateOtlpInputs(otlpInputs),
+        // an exporter that can not be edited is not sent, so its settings are not checked
+        (output && isOtlpExporterDisabled) || validateOtlpInputs(otlpInputs),
         // an authentication that is kept for the managed OTLP endpoint has to be removed explicitly
         isOtlpAuthEnabled
           ? validateOtlpAuthInputs(otlpAuthInputs, otlpInputs.otlpProtocolInput.value)
@@ -1040,6 +1041,8 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     otlpInputs,
     otlpAuthInputs,
     isOtlpAuthEnabled,
+    isOtlpExporterDisabled,
+    output,
     isLogstash,
     isKafka,
     isRemoteElasticsearch,

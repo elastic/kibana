@@ -6,13 +6,13 @@
  */
 
 import type { ConfirmPromptDefinition } from '@kbn/agent-builder-common/agents';
-import type { ApplyPolicyChangePreview } from '../services/apply_policy_change';
-import type { EndpointCountResult } from '../services/count_endpoints';
+import type { ApplyPolicyChangePreview } from '../../../../endpoint/services/policy_management/services/apply_policy_change';
+import type { EndpointCountResult } from '../../../../endpoint/services/policy_management/services/count_endpoints';
 import {
   DEFAULT_TRIM_LIMITS,
   capPresentedIdentityString,
   presentFromTo,
-} from './trim_policy_result';
+} from '../../../../endpoint/services/policy_management/presentation/trim_policy_result';
 
 export type ApplyPreviewChangeRow = Readonly<{
   path: string;

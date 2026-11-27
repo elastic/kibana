@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
 import { settleIncompleteProposalStepCommonDefinition } from '@kbn/proposals-common';
+import { ProposalsStepIcon } from './proposals_step_icon';
 
 export const settleIncompleteProposalPublicStepDefinition = createPublicStepDefinition({
   ...settleIncompleteProposalStepCommonDefinition,
-  icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/check').then(({ icon }) => ({
-      default: icon,
-    }))
-  ),
+  icon: ProposalsStepIcon,
 });
