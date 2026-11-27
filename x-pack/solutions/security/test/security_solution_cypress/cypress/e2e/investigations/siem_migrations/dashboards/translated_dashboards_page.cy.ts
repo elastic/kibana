@@ -9,6 +9,7 @@ import { TRANSLATED_DASHBOARDS_RESULT_TABLE } from '../../../../screens/siem_mig
 import { deleteConnectors } from '../../../../tasks/api_calls/common';
 import { suppressGlobalAnnouncements } from '../../../../tasks/api_calls/suppress_global_announcements';
 import { createBedrockConnector } from '../../../../tasks/api_calls/connectors';
+import { waitForDashboardMigrationExecutionToFinish } from '../../../../tasks/api_calls/siem_migrations';
 import { visit } from '../../../../tasks/navigation';
 import {
   goToTranslatedDashboardsPageFromOnboarding,
@@ -89,6 +90,9 @@ describe(
         cy.wrap(request.body.settings).should('have.property', 'connector_id', bedrockConnectorId);
         cy.wrap(response?.statusCode).should('eql', 200);
         cy.wrap(response?.body.started).should('eql', true);
+
+        const [, migrationId] = /\/dashboards\/([^/]+)\/start/.exec(request.url) ?? [];
+        waitForDashboardMigrationExecutionToFinish(migrationId);
       });
     });
   }

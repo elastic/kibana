@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { SIEM_DASHBOARD_MIGRATION_STATS_PATH } from '@kbn/security-solution-plugin/common/siem_migrations/dashboards/constants';
+import type { GetDashboardMigrationStatsResponse } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
+import { rootRequest } from './common';
 import { deleteAllDocuments } from './elasticsearch';
 
 const MIGRATION_INDEX_PREFIX = '.kibana-siem-rule-migrations';
@@ -30,4 +33,24 @@ export const cleanDashboardsMigrationData = () => {
 
     deleteAllDocuments(migrationIndices.join(','));
   });
+};
+
+export const getDashboardMigrationStats = (migrationId: string) =>
+  rootRequest<GetDashboardMigrationStatsResponse>({
+    method: 'GET',
+    url: SIEM_DASHBOARD_MIGRATION_STATS_PATH.replace('{migration_id}', migrationId),
+    headers: {
+      'elastic-api-version': '1',
+    },
+  });
+
+/**
+ * Waits until the dashboard migration's current execution has finished, as recorded by `last_execution.finished_at`.
+ */
+export const waitForDashboardMigrationExecutionToFinish = (migrationId: string) => {
+  cy.waitUntil(() =>
+    getDashboardMigrationStats(migrationId).then(({ body }) =>
+      Boolean(body.last_execution?.finished_at)
+    )
+  );
 };
