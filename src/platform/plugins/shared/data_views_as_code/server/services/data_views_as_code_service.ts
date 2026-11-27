@@ -172,9 +172,9 @@ export class DataViewsAsCodeService {
     if (!requestedSpaces) return;
 
     // `*` makes the data view available in every space, including the url one.
-    const includesUrlSpace =
+    const includesCurrentSpace =
       requestedSpaces.includes(currentSpaceId) || requestedSpaces.includes(ALL_SPACES_ID);
-    if (!includesUrlSpace)
+    if (!includesCurrentSpace)
       throw badRequest(
         `The requested spaces must include the current space. Make sure that the spaces array includes ${currentSpaceId}.`
       );
