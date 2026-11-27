@@ -21,6 +21,7 @@ import {
   SecretNotFoundError,
   SecretUndecryptableError,
   SecretValidationError,
+  SECRETS_MAX_PER_SPACE,
 } from '@kbn/secrets';
 import { createSecretsClient } from '../client/secrets_client';
 import type { SecretsClient } from '../client/types';
@@ -192,6 +193,22 @@ describe('secrets on Elasticsearch', () => {
       SecretValidationError
     );
     expect(await getStored(name)).toBeUndefined();
+  });
+
+  it('counts the secrets of a space and refuses one more once it holds the maximum', async () => {
+    const spaceId = 'full';
+    await getClient(spaceId).create({ name: 'first_secret', value: VALUE });
+    await getClient(spaceId).create({ name: 'second_secret', value: VALUE });
+    const storage = createStorage(spaceId);
+    expect(await storage.count()).toBe(2);
+
+    // Storing the maximum for real would take too long, so only the count is replaced.
+    jest.spyOn(storage, 'count').mockResolvedValueOnce(SECRETS_MAX_PER_SPACE);
+    const name = 'one_too_many';
+    await expect(
+      createSecretsClient({ storage, profileId: null }).create({ name, value: VALUE })
+    ).rejects.toThrow(SecretValidationError);
+    expect(await getStored(name, spaceId)).toBeUndefined();
   });
 
   it('keeps a name unique in its space but not across spaces', async () => {

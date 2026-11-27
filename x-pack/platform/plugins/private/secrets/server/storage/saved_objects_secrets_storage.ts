@@ -19,6 +19,7 @@ import {
   SecretAlreadyExistsError,
   SecretConflictError,
   SecretNotFoundError,
+  SECRETS_MAX_PER_SPACE,
   SecretUndecryptableError,
 } from '@kbn/secrets';
 import type { SecretMetadata } from '@kbn/secrets';
@@ -34,15 +35,13 @@ import type {
 } from '../saved_objects/secret_saved_object';
 
 const LIST_PER_PAGE = 100;
-/** Bounds the work of a list, as connectors do. A space is not expected to come close. */
-const MAX_LISTED_SECRETS = 10_000;
 
 export interface CreateSavedObjectsSecretsStorageParams {
   readonly spaceId: string;
   /** Must include the hidden secret type and must not apply the spaces extension. */
   readonly savedObjectsClient: Pick<
     SavedObjectsClientContract,
-    'create' | 'createPointInTimeFinder' | 'delete' | 'get'
+    'create' | 'createPointInTimeFinder' | 'delete' | 'find' | 'get'
   >;
   readonly encryptedClient: Pick<EncryptedSavedObjectsClient, 'getDecryptedAsInternalUser'>;
 }
@@ -116,14 +115,24 @@ export const createSavedObjectsSecretsStorage = ({
         for await (const { saved_objects: page } of finder.find()) {
           // A read that does not decrypt never returns the encrypted `value`.
           secrets.push(...page.map(({ attributes }) => attributes));
-          if (secrets.length >= MAX_LISTED_SECRETS) {
+          // Creation stops at the limit, but two creates at once can pass it.
+          if (secrets.length >= SECRETS_MAX_PER_SPACE) {
             break;
           }
         }
       } finally {
         await finder.close();
       }
-      return secrets.slice(0, MAX_LISTED_SECRETS);
+      return secrets.slice(0, SECRETS_MAX_PER_SPACE);
+    },
+
+    count: async () => {
+      const { total } = await savedObjectsClient.find({
+        type: SECRET_SAVED_OBJECT_TYPE,
+        namespaces: [spaceId],
+        perPage: 0,
+      });
+      return total;
     },
 
     get: async ({ name }) => {

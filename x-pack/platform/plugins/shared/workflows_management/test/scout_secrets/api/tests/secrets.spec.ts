@@ -323,9 +323,10 @@ apiTest.describe('Workflow secrets routes', { tag: LOCAL_STATEFUL_CLASSIC }, () 
           updatedBy: updaterId,
         });
       }
-      // No response contains a value, under any field.
-      for (const body of [created.body, updated.body, listed.body]) {
-        const text = JSON.stringify(body);
+      // No response has a value field, nor contains a value under any other field.
+      for (const secret of [created.body, updated.body, listedSecret]) {
+        expect(secret.value).toBeUndefined();
+        const text = JSON.stringify(secret);
         expect(text).not.toContain(VALUE);
         expect(text).not.toContain(NEW_VALUE);
       }
@@ -359,7 +360,7 @@ apiTest.describe('Workflow secrets routes', { tag: LOCAL_STATEFUL_CLASSIC }, () 
     const name = unique('schema_secret');
 
     expect(await secrets.create({ name, value: VALUE })).toHaveStatusCode(201);
-    expect(await secrets.create({ name: 'valueless_secret' })).toHaveStatusCode(400);
+    expect(await secrets.create({ name: unique('valueless_secret') })).toHaveStatusCode(400);
     expect(
       await secrets.update(name, { name: 'renamed_secret', description: 'Renamed' })
     ).toHaveStatusCode(400);
