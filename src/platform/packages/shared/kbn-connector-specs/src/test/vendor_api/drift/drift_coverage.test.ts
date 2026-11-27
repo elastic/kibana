@@ -188,10 +188,10 @@ describe('summarizeDriftCoverage', () => {
       legacy('.zoom', { rest: { status: 'unreachable', error: '503' } }),
     ];
 
-    const { totals, connectors } = summarizeDriftCoverage(documents, old);
+    const summary = summarizeDriftCoverage(documents, old);
 
-    expect(connectors).toEqual([]);
-    expect(totals).toMatchObject({
+    expect(summary.connectors).toEqual([]);
+    expect(summary.totals).toMatchObject({
       checked: 3,
       withoutCoverage: 3,
       detectVendorChanges: 0,
@@ -199,6 +199,10 @@ describe('summarizeDriftCoverage', () => {
       unreachable: 1,
       detectionUnknown: 1,
     });
+    // Unknown detection is the one fetched connector, not the three without action counts
+    expect(renderCoverageAnnotation(summary)).toContain(
+      "Of the 3 connectors checked, 0 can detect a vendor change (1 only has pinned sources; 1 had a source that couldn't be fetched; unknown for 1 connector the report has no coverage for). The report has no action counts for them."
+    );
   });
 
   it('gives each checked connector one outcome', () => {
