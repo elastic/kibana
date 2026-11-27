@@ -23,6 +23,8 @@ const documentSchema = lazySchema(() => Coerced(z.record(z.string(), z.any())));
 
 export const SecretsSchema = lazySchema(() => z.object({}).strict().default({}));
 
+const documentSchema = z.union([z.string(), z.record(z.string(), z.any())]);
+
 // see: https://www.elastic.co/guide/en/elasticsearch/reference/current/actions-index.html
 // - timeout not added here, as this seems to be a generic thing we want to do
 //   eventually: https://github.com/elastic/kibana/projects/26#card-24087404
