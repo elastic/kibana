@@ -105,7 +105,8 @@ import { createTriggerEmitter, type TriggerEmitter } from './workflows/triggers/
 import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/register_triggers';
 import type { NightshiftAgentTypeOptions } from './agents/investigation';
 import { registerInvestigationAgentType } from './agents/investigation';
-import { registerFindingsRecorder } from './findings_recorder';
+import { FindingsCoordinator, registerFindingsRecorder } from './findings_recorder';
+import { FINDINGS_RECORDER_FINAL_WAIT_MS } from './findings_recorder/constants';
 import { createRecorderProposals } from './findings_recorder/proposals_adapter';
 import { createRecorderWorkspace } from './findings_recorder/workspace_tools';
 import { registerDecisionTreeReinforcementAgentType } from './agents/decision_tree_reinforcement';
@@ -169,6 +170,13 @@ export class NightshiftInvestigationsPlugin implements Plugin<
   NightshiftInvestigationsStartDeps
 > {
   private readonly logger: Logger;
+  private readonly findingsCoordinator = new FindingsCoordinator();
+  private readonly waitForFindings = (investigationId: string, signal: AbortSignal) =>
+    this.findingsCoordinator.waitForFinal({
+      conversationId: investigationId,
+      timeoutMs: FINDINGS_RECORDER_FINAL_WAIT_MS,
+      signal,
+    });
   private workflowsManagement?: NightshiftInvestigationsSetupDeps['workflowsManagement'];
   private workflowsExtensionsStart?: NightshiftInvestigationsStartDeps['workflowsExtensions'];
   private spaces?: NightshiftInvestigationsStartDeps['spaces'];
@@ -472,6 +480,7 @@ export class NightshiftInvestigationsPlugin implements Plugin<
             logger: this.logger.get('findings_recorder'),
           },
           logger: this.logger.get('findings_recorder'),
+          coordinator: this.findingsCoordinator,
         });
       }
       plugins.agentBuilder.tools.register(createTimeConverterTool());
@@ -645,6 +654,7 @@ export class NightshiftInvestigationsPlugin implements Plugin<
             getActions: () => this.actionsStart,
             getIsomerRuntime: this.getIsomerRuntime,
             getRoutingClient: this.getNotificationRoutingClient,
+            waitForFindings: this.waitForFindings,
           })
         );
         plugins.workflowsExtensions.registerStepDefinition(
@@ -673,6 +683,7 @@ export class NightshiftInvestigationsPlugin implements Plugin<
             investigationLocator,
             getInvestigationsClient: this.getInvestigationsClient,
             getIsomerRuntime: this.getIsomerRuntime,
+            waitForFindings: this.waitForFindings,
           })
         );
         // Registered even when disabled: the combined workflow no-ops a writer branch instead
