@@ -41,7 +41,6 @@ describe(
       ftrConfig: {
         kbnServerArgs: [
           `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'perOsPolicySettings',
             'customYaraSignaturesEnabled',
           ])}`,
         ],

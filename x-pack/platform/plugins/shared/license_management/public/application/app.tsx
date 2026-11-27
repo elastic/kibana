@@ -16,11 +16,12 @@ import { APP_PERMISSION } from '../../common/constants';
 import { SectionLoading, useExecutionContext } from '../shared_imports';
 import { UPLOAD_LICENSE_ROUTE } from '../locator';
 import type { TelemetryPluginStart } from './lib/telemetry';
+import type { PermissionsError } from './store/types';
 
 export interface Props {
   hasPermission: boolean | undefined;
   permissionsLoading: boolean | undefined;
-  permissionsError: unknown;
+  permissionsError: PermissionsError | undefined;
   telemetry?: TelemetryPluginStart;
   loadPermissions: () => void;
   executionContext: ExecutionContextStart;
@@ -57,18 +58,7 @@ export const App: FC<Props> = ({
   }
 
   if (permissionsError) {
-    let error: string | undefined;
-    if (
-      typeof permissionsError === 'object' &&
-      permissionsError !== null &&
-      'data' in permissionsError
-    ) {
-      const { data } = permissionsError;
-      if (typeof data === 'object' && data !== null && 'message' in data) {
-        const { message } = data;
-        error = typeof message === 'string' ? message : undefined;
-      }
-    }
+    const { message: error } = permissionsError;
 
     return (
       <EuiPageSection alignment="center" grow={true}>

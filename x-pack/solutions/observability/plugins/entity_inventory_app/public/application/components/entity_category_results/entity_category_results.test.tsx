@@ -9,8 +9,6 @@ import React from 'react';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 import type { EntityInventoryApiClient } from '../../../inventory_api/client';
 import { createFixtureEntityInventoryApiClient } from '../../../__fixtures__/inventory_client';
@@ -23,12 +21,9 @@ import {
   buildScenarioListResponse,
   createScenarioEntityInventoryApiClient,
 } from '../../../__fixtures__/inventory_scenarios';
-import { createAppServicesMock } from '../../../mocks';
+import { createAppServicesMock, MockEntityInventoryProvider } from '../../../mocks';
 import { EntityTablePreferencesProvider } from '../../context/entity_table_preferences_context';
-import {
-  EntityInventorySearchProvider,
-  useEntityInventorySearch,
-} from '../../context/search_context';
+import { useEntityInventorySearch } from '../../context/search_context';
 import { EntityTypesProvider } from '../../context/entity_types_context';
 import { EntityCategoryResults } from './entity_category_results';
 import {
@@ -40,7 +35,6 @@ import {
   getEmptyWithFailuresTitle,
   getTypeNotAvailableTitle,
 } from '../entity_states/translations';
-import { getSourceErrorText } from '../entity_section/translations';
 
 // EuiDataGrid's render cost is largely fixed and can exceed the default 5s budget under parallel CI load.
 jest.setTimeout(30_000);
@@ -77,18 +71,18 @@ const renderResults = (
   const results = (prefix: string | null) => (
     <I18nProvider>
       <EuiProvider>
-        <KibanaContextProvider services={createAppServicesMock({ inventoryApi })}>
-          <EntityTablePreferencesProvider>
-            <Router history={history}>
-              <EntityInventorySearchProvider entityCategory="hosts">
-                <EntityTypesProvider>
-                  <NewRangeButton />
-                  <EntityCategoryResults entityTypeIdPrefix={prefix ?? undefined} />
-                </EntityTypesProvider>
-              </EntityInventorySearchProvider>
-            </Router>
-          </EntityTablePreferencesProvider>
-        </KibanaContextProvider>
+        <EntityTablePreferencesProvider>
+          <MockEntityInventoryProvider
+            entityCategory="hosts"
+            services={createAppServicesMock({ inventoryApi })}
+            history={history}
+          >
+            <EntityTypesProvider>
+              <NewRangeButton />
+              <EntityCategoryResults entityTypeIdPrefix={prefix ?? undefined} />
+            </EntityTypesProvider>
+          </MockEntityInventoryProvider>
+        </EntityTablePreferencesProvider>
       </EuiProvider>
     </I18nProvider>
   );
@@ -217,22 +211,49 @@ describe('EntityCategoryResults', () => {
   });
 
   describe('source errors', () => {
-    const getScenarioErrors = (scenario: FixtureScenario) =>
-      buildScenarioListResponse('host', scenario)?.errors ?? [];
+    const getTooltipProblems = async (section: HTMLElement) => {
+      fireEvent.mouseOver(within(section).getByTestId('entityInventorySourceErrorsIndicator'));
+      const tooltip = await screen.findByRole('tooltip');
+      return within(tooltip)
+        .getAllByRole('listitem')
+        .map(({ textContent }) => textContent);
+    };
 
-    it('keeps the table and lists the failed sources in the tooltip of an indicator in the section header', async () => {
+    it('keeps the table and lists the failed probes, then the partial and failed queries, in the tooltip of an indicator in the section header', async () => {
       renderScenario('withDiagnostics');
 
       const section = await screen.findByTestId('entityInventoryTypeSection');
       expect(await within(section).findByTestId('entityInventoryTable')).toBeInTheDocument();
-      fireEvent.mouseOver(within(section).getByTestId('entityInventorySourceErrorsIndicator'));
 
-      const tooltip = await screen.findByRole('tooltip');
-      const errors = getScenarioErrors('withDiagnostics');
-      expect(errors.length).toBeGreaterThan(0);
-      errors.forEach((sourceError) =>
-        expect(tooltip).toHaveTextContent(getSourceErrorText(sourceError))
-      );
+      expect(await getTooltipProblems(section)).toEqual([
+        'metrics-hostmetricsreceiver.otel-*: timeout: the query did not complete in time',
+        'metrics-system.*-*: partial result: some shards or clusters did not answer, so rows may be missing',
+      ]);
+    });
+
+    it('lists a partial probe, and the partial result before the error of the same query', async () => {
+      renderScenario('partialSources');
+
+      const section = await screen.findByTestId('entityInventoryTypeSection');
+      expect(await within(section).findByTestId('entityInventoryTable')).toBeInTheDocument();
+
+      expect(await getTooltipProblems(section)).toEqual([
+        'metrics-system.*-*: partial result: some shards or clusters did not answer, so rows may be missing',
+        'metrics-hostmetricsreceiver.otel-*: partial result: some shards or clusters did not answer, so rows may be missing',
+        'metrics-hostmetricsreceiver.otel-*: no readable index behind the pattern maps @timestamp',
+      ]);
+    });
+
+    it('lists a failed query with its HTTP status', async () => {
+      renderScenario('allSourcesFailed');
+
+      const section = await screen.findByTestId('entityInventoryTypeSection');
+      await within(section).findByTestId('entityInventoryTableEmpty');
+
+      expect(await getTooltipProblems(section)).toEqual([
+        'metrics-hostmetricsreceiver.otel-*: timeout: the query did not complete in time',
+        'metrics-system.*-* (403): security_exception: action [indices:data/read/esql] is unauthorized',
+      ]);
     });
 
     it('never shows the unavailable columns of the response', async () => {

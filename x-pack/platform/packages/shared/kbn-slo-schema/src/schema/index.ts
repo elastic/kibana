@@ -7,6 +7,7 @@
 
 export * from './common';
 export * from './duration';
+export * from './global_settings';
 export * from './guards';
 export * from './health';
 export * from './indicators';

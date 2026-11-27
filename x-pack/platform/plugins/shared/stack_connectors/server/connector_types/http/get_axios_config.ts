@@ -98,7 +98,7 @@ export const getClientCredentialsAccessToken = async ({
   logger,
   configurationUtilities,
 }: GetOAuthAccessTokenParams): Promise<string | null | undefined> => {
-  const { accessTokenUrl, clientId, scope, additionalFields } = config;
+  const { accessTokenUrl, clientId, scope, additionalFields, tokenType } = config;
   const { clientSecret } = secrets;
 
   // `additionalFields` should be parseable, we do check API schema validation and in
@@ -125,6 +125,7 @@ export const getClientCredentialsAccessToken = async ({
     },
     tokenUrl: accessTokenUrl!,
     connectorTokenClient,
+    tokenType,
   });
 };
 
@@ -147,6 +148,7 @@ export const getPasswordAccessToken = async ({
     password: password!,
     tokenUrl: config.accessTokenUrl!,
     connectorTokenClient,
+    tokenType: config.tokenType,
   });
 };
 

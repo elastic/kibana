@@ -19,5 +19,6 @@
     "@kbn/test-subj-selector",
     "@kbn/core-http-common",
     "@kbn/core-saved-objects-server",
+    "@kbn/esql-utils",
   ]
 }

@@ -148,6 +148,7 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
         triggeredBy:
           exec.triggeredBy === MANUAL_AUTOMATION_TRIGGER_SOURCE ? 'manual' : exec.triggeredBy,
         executedBy: exec.executedBy,
+        runsAsServiceAccount: exec.effectiveIdentity?.type === 'service_account',
         title,
         message: getString(input['message']) ?? getString(input['instructions']),
         investigationId: getString(output['investigation_id']),

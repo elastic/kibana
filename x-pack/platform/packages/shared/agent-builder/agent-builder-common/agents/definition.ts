@@ -218,6 +218,11 @@ export interface AgentCapabilities {
    * The API tools: `discover_apis`, `describe_api`, `describe_api_type` and `execute_api`.
    */
   api_tools?: AgentCapabilityConfig;
+  /**
+   * The virtual filesystem `bash` tool and its line in the system prompt's FILESYSTEM section.
+   * Only has an effect when the `bash` experimental feature is on.
+   */
+  bash_tool?: AgentCapabilityConfig;
 }
 
 /**

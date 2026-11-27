@@ -37,6 +37,8 @@ export interface WriteupRow {
   /** The attachments the reply shows, so the report and agreement see what the reader saw. */
   attachments: ReplyAttachment[];
   error?: string;
+  /** The reply came from the second try; the first ended without one. */
+  retried?: boolean;
   extra_calls: string[];
   gates: ReplyGates | null;
   /** Faithfulness, 1–5. */
@@ -51,6 +53,7 @@ export interface WriteupRow {
     reply: string | null;
     attachments: ReplyAttachment[];
     gates: ReplyGates | null;
+    retried?: boolean;
   } | null;
 }
 
@@ -105,6 +108,7 @@ export const toWriteupRows = (
         reply: output.reply ?? null,
         attachments: shownAttachments(output.reply, [...(output.attachments ?? []), ...recorded]),
         ...(output.error ? { error: output.error } : {}),
+        ...(output.retried ? { retried: true } : {}),
         extra_calls: output.extra_calls,
         gates: gates(output.reply, output.attachments),
         faith: faith?.raw_score ?? null,
@@ -121,6 +125,7 @@ export const toWriteupRows = (
                 ...recorded,
               ]),
               gates: gates(output.baseline.reply, output.baseline.attachments),
+              ...(output.baseline.retried ? { retried: true } : {}),
             }
           : null,
       };
@@ -150,6 +155,23 @@ export const judgeCoverage = (evaluationRuns: readonly EvaluationRun[]) => {
   }
   return { applicable, missing, names };
 };
+
+/**
+ * How many rounds have a reply under both prompts, which is what a head to head can compare, and
+ * which rounds the baseline missed (with its error), so a failing run says why.
+ */
+export const pairedReplies = (
+  outputs: ReadonlyArray<Pick<WriteupTaskOutput, 'case_id' | 'reply' | 'baseline'>>
+) => ({
+  total: outputs.length,
+  compared: outputs.filter(({ reply, baseline }) => reply && baseline?.reply).length,
+  baselineMissing: outputs
+    .filter(({ baseline }) => !baseline?.reply)
+    .map(({ case_id: caseId, baseline }) => ({
+      caseId,
+      error: baseline?.error ?? 'no baseline reply',
+    })),
+});
 
 /**
  * A candidate may replace its golden when every gate passes, faithfulness is at least 4, and it
@@ -190,9 +212,14 @@ interface ArmSummary {
   vsGolden: string;
 }
 
+const retriedNote = (replies: Array<{ gates: ReplyGates | null; retried?: boolean }>) => {
+  const n = replies.filter((r) => r.gates && r.retried).length;
+  return n ? ` (${n} on retry)` : '';
+};
+
 const summarize = (
   arm: string,
-  replies: Array<{ gates: ReplyGates | null }>,
+  replies: Array<{ gates: ReplyGates | null; retried?: boolean }>,
   faith: Array<number | null>,
   vsGolden: Array<PairTally | null> | null
 ): ArmSummary => {
@@ -202,7 +229,9 @@ const summarize = (
   const g = vsGolden ? sumTallies(vsGolden) : null;
   return {
     arm,
-    replies: `${scored.length}/${replies.length}`,
+    // Replies that needed the second try are counted apart, so a prompt that often runs out of
+    // calls before replying shows up even when the retry saves the round.
+    replies: `${scored.length}/${replies.length}${retriedNote(replies)}`,
     gates: `${scored.filter((x) => x.pass).length}/${scored.length}`,
     words: fixed(
       m((x) => x.metrics.words),
@@ -235,7 +264,7 @@ export const formatReport = (results: WriteupResults): { summary: string; report
       ? [
           summarize(
             results.baseline.label,
-            rows.map((r) => ({ gates: r.baseline?.gates ?? null })),
+            rows.map((r) => ({ gates: r.baseline?.gates ?? null, retried: r.baseline?.retried })),
             [],
             null
           ),

@@ -25,6 +25,7 @@ export type { DataClient, WorkflowExecutionsDataClient, StepExecutionsDataClient
 export type { PlainIndexDataClientDeps } from './implementations/plain_index/plain_index_data_client';
 export { PlainIndexDataClient } from './implementations/plain_index/plain_index_data_client';
 export { createDataClientBundle } from './implementations/create_data_client_bundle';
+export { DeferredDataClientBundle } from './implementations/deferred_data_client_bundle';
 
 export {
   getBulkUpdaterWriteResult,

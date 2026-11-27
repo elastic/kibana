@@ -44,7 +44,7 @@ const setup = ({
     canUpdateAgent,
   });
   if (typesError) services.fetchConnectorTypes.mockRejectedValueOnce(typesError);
-  renderWithProviders(<ConnectSourcesGrid filter={filter} trailing={trailing} />);
+  renderWithProviders(<ConnectSourcesGrid filter={filter} trailing={trailing} ebtElement="test" />);
   return services;
 };
 

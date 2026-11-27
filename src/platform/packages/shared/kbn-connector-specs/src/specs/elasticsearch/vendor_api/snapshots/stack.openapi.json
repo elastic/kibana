@@ -1,6 +1,54 @@
 {
   "components": {
     "parameters": {
+      "_spec_utils.CommonCatQueryParameters-bytes": {
+        "deprecated": false,
+        "in": "query",
+        "name": "bytes",
+        "schema": {
+          "$ref": "#/components/schemas/_types.Bytes"
+        },
+        "style": "form"
+      },
+      "_spec_utils.CommonCatQueryParameters-format": {
+        "deprecated": false,
+        "in": "query",
+        "name": "format",
+        "schema": {
+          "default": "text",
+          "type": "string"
+        },
+        "style": "form"
+      },
+      "_spec_utils.CommonCatQueryParameters-help": {
+        "deprecated": false,
+        "in": "query",
+        "name": "help",
+        "schema": {
+          "default": false,
+          "type": "boolean"
+        },
+        "style": "form"
+      },
+      "_spec_utils.CommonCatQueryParameters-time": {
+        "deprecated": false,
+        "in": "query",
+        "name": "time",
+        "schema": {
+          "$ref": "#/components/schemas/_types.TimeUnit"
+        },
+        "style": "form"
+      },
+      "_spec_utils.CommonCatQueryParameters-v": {
+        "deprecated": false,
+        "in": "query",
+        "name": "v",
+        "schema": {
+          "default": false,
+          "type": "boolean"
+        },
+        "style": "form"
+      },
       "cat.indices-expand_wildcards": {
         "deprecated": false,
         "in": "query",
@@ -11,7 +59,7 @@
               "$ref": "#/components/schemas/_types.ExpandWildcards"
             }
           ],
-          "default": "all"
+          "default": "open,closed"
         },
         "style": "form"
       },
@@ -1071,12 +1119,22 @@
               }
             ]
           },
+          "non_passthrough_indices": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/_types.Indices"
+              }
+            ]
+          },
           "non_searchable_indices": {
             "allOf": [
               {
                 "$ref": "#/components/schemas/_types.Indices"
               }
             ]
+          },
+          "passthrough": {
+            "type": "boolean"
           },
           "searchable": {
             "type": "boolean"
@@ -1766,13 +1824,6 @@
       },
       "_global.search._types.FieldCollapse": {
         "properties": {
-          "collapse": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/_global.search._types.FieldCollapse"
-              }
-            ]
-          },
           "field": {
             "allOf": [
               {
@@ -1997,6 +2048,7 @@
       },
       "_global.search._types.HighlighterOrder": {
         "enum": [
+          "none",
           "score"
         ],
         "type": "string"
@@ -2373,6 +2425,12 @@
           "create_weight_count": {
             "type": "number"
           },
+          "into_bit_set": {
+            "type": "number"
+          },
+          "into_bit_set_count": {
+            "type": "number"
+          },
           "match": {
             "type": "number"
           },
@@ -2415,6 +2473,8 @@
           "count_weight_count",
           "create_weight",
           "create_weight_count",
+          "into_bit_set",
+          "into_bit_set_count",
           "match",
           "match_count",
           "next_doc",
@@ -2492,6 +2552,66 @@
         },
         "required": [
           "model_id"
+        ],
+        "type": "object"
+      },
+      "_global.search._types.LearningToRankRescoreProfile": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/_global.search._types.RescoreProfileBase"
+          },
+          {
+            "properties": {
+              "breakdown": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/_global.search._types.LearningToRankRescoreProfileBreakdown"
+                  }
+                ]
+              },
+              "type": {
+                "enum": [
+                  "learning_to_rank"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "breakdown"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "_global.search._types.LearningToRankRescoreProfileBreakdown": {
+        "properties": {
+          "build_feature_extractors": {
+            "type": "number"
+          },
+          "build_feature_extractors_count": {
+            "type": "number"
+          },
+          "feature_extraction": {
+            "type": "number"
+          },
+          "feature_extraction_count": {
+            "type": "number"
+          },
+          "inference": {
+            "type": "number"
+          },
+          "inference_count": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "build_feature_extractors",
+          "build_feature_extractors_count",
+          "feature_extraction",
+          "feature_extraction_count",
+          "inference",
+          "inference_count"
         ],
         "type": "object"
       },
@@ -2645,6 +2765,12 @@
           "create_weight_count": {
             "type": "number"
           },
+          "into_bit_set": {
+            "type": "number"
+          },
+          "into_bit_set_count": {
+            "type": "number"
+          },
           "match": {
             "type": "number"
           },
@@ -2683,6 +2809,8 @@
           "build_scorer_count",
           "create_weight",
           "create_weight_count",
+          "into_bit_set",
+          "into_bit_set_count",
           "match",
           "match_count",
           "shallow_advance",
@@ -2715,6 +2843,12 @@
             },
             "type": "array"
           },
+          "debug": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "type": "object"
+          },
           "description": {
             "type": "string"
           },
@@ -2736,6 +2870,35 @@
           "type"
         ],
         "type": "object"
+      },
+      "_global.search._types.QueryRescoreProfile": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/_global.search._types.RescoreProfileBase"
+          },
+          {
+            "properties": {
+              "breakdown": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/_types.EmptyObject"
+                  }
+                ]
+              },
+              "type": {
+                "enum": [
+                  "query"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "breakdown"
+            ],
+            "type": "object"
+          }
+        ]
       },
       "_global.search._types.Rescore": {
         "allOf": [
@@ -2776,6 +2939,59 @@
             "type": "object"
           }
         ]
+      },
+      "_global.search._types.RescoreProfile": {
+        "discriminator": {
+          "mapping": {
+            "learning_to_rank": "#/components/schemas/_global.search._types.LearningToRankRescoreProfile",
+            "query": "#/components/schemas/_global.search._types.QueryRescoreProfile",
+            "script": "#/components/schemas/_global.search._types.ScriptRescoreProfile"
+          },
+          "propertyName": "type"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/_global.search._types.QueryRescoreProfile"
+          },
+          {
+            "$ref": "#/components/schemas/_global.search._types.ScriptRescoreProfile"
+          },
+          {
+            "$ref": "#/components/schemas/_global.search._types.LearningToRankRescoreProfile"
+          }
+        ]
+      },
+      "_global.search._types.RescoreProfileBase": {
+        "properties": {
+          "debug": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "type": "object"
+          },
+          "description": {
+            "type": "string"
+          },
+          "time": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/_types.Duration"
+              }
+            ]
+          },
+          "time_in_nanos": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/_types.DurationValueUnitNanos"
+              }
+            ]
+          }
+        },
+        "required": [
+          "description",
+          "time_in_nanos"
+        ],
+        "type": "object"
       },
       "_global.search._types.RescoreQuery": {
         "properties": {
@@ -2832,6 +3048,35 @@
           "script"
         ],
         "type": "object"
+      },
+      "_global.search._types.ScriptRescoreProfile": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/_global.search._types.RescoreProfileBase"
+          },
+          {
+            "properties": {
+              "breakdown": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/_types.EmptyObject"
+                  }
+                ]
+              },
+              "type": {
+                "enum": [
+                  "script"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "breakdown"
+            ],
+            "type": "object"
+          }
+        ]
       },
       "_global.search._types.SearchProfile": {
         "properties": {
@@ -3139,6 +3384,12 @@
               }
             ]
           },
+          "rescore": {
+            "items": {
+              "$ref": "#/components/schemas/_global.search._types.RescoreProfile"
+            },
+            "type": "array"
+          },
           "searches": {
             "items": {
               "$ref": "#/components/schemas/_global.search._types.SearchProfile"
@@ -3353,6 +3604,17 @@
       },
       "_spec_utils.Void": {
         "type": "object"
+      },
+      "_types.Bytes": {
+        "enum": [
+          "b",
+          "kb",
+          "mb",
+          "gb",
+          "tb",
+          "pb"
+        ],
+        "type": "string"
       },
       "_types.CartesianPoint": {
         "properties": {
@@ -4480,10 +4742,17 @@
         ]
       },
       "_types.QueryVector": {
-        "items": {
-          "type": "number"
-        },
-        "type": "array"
+        "oneOf": [
+          {
+            "items": {
+              "type": "number"
+            },
+            "type": "array"
+          },
+          {
+            "type": "string"
+          }
+        ]
       },
       "_types.QueryVectorBuilder": {
         "maxProperties": 1,
@@ -5295,6 +5564,18 @@
           }
         ]
       },
+      "_types.TimeUnit": {
+        "enum": [
+          "nanos",
+          "micros",
+          "ms",
+          "s",
+          "m",
+          "h",
+          "d"
+        ],
+        "type": "string"
+      },
       "_types.TimeZone": {
         "type": "string"
       },
@@ -5670,6 +5951,9 @@
           },
           {
             "$ref": "#/components/schemas/_types.aggregations.RateAggregate"
+          },
+          {
+            "$ref": "#/components/schemas/_types.aggregations.RoaringBitmapAggregate"
           },
           {
             "$ref": "#/components/schemas/_types.aggregations.CumulativeCardinalityAggregate"
@@ -6182,6 +6466,13 @@
                 "allOf": [
                   {
                     "$ref": "#/components/schemas/_types.aggregations.ReverseNestedAggregation"
+                  }
+                ]
+              },
+              "roaring_bitmap": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/_types.aggregations.RoaringBitmapAggregation"
                   }
                 ]
               },
@@ -11409,6 +11700,50 @@
           }
         ]
       },
+      "_types.aggregations.RoaringBitmapAggregate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/_types.aggregations.AggregateBase"
+          },
+          {
+            "properties": {
+              "value": {
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "nullable": true,
+                    "type": "string"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "value"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "_types.aggregations.RoaringBitmapAggregation": {
+        "properties": {
+          "field": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/_types.Field"
+              }
+            ]
+          },
+          "missing": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "field"
+        ],
+        "type": "object"
+      },
       "_types.aggregations.SamplerAggregate": {
         "allOf": [
           {
@@ -13030,7 +13365,7 @@
       "_types.aggregations.TopMetricsAggregation": {
         "allOf": [
           {
-            "$ref": "#/components/schemas/_types.aggregations.MetricAggregationBase"
+            "$ref": "#/components/schemas/_types.aggregations.Aggregation"
           },
           {
             "properties": {
@@ -13069,6 +13404,13 @@
             "allOf": [
               {
                 "$ref": "#/components/schemas/_types.Field"
+              }
+            ]
+          },
+          "missing": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/_types.aggregations.Missing"
               }
             ]
           }
@@ -13417,6 +13759,15 @@
         ],
         "type": "object"
       },
+      "_types.mapping.DenseVectorSimilarity": {
+        "enum": [
+          "cosine",
+          "dot_product",
+          "l2_norm",
+          "max_inner_product"
+        ],
+        "type": "string"
+      },
       "_types.mapping.OnScriptError": {
         "enum": [
           "fail",
@@ -13537,6 +13888,32 @@
           "position"
         ],
         "type": "string"
+      },
+      "_types.query_dsl.BitmapTermsQuery": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/_types.query_dsl.QueryBase"
+          },
+          {
+            "properties": {
+              "field": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/_types.Field"
+                  }
+                ]
+              },
+              "value": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "field",
+              "value"
+            ],
+            "type": "object"
+          }
+        ]
       },
       "_types.query_dsl.BoolQuery": {
         "allOf": [
@@ -13899,6 +14276,53 @@
           }
         },
         "type": "object"
+      },
+      "_types.query_dsl.DenseVectorQuery": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/_types.query_dsl.QueryBase"
+          },
+          {
+            "properties": {
+              "field": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/_types.Field"
+                  }
+                ]
+              },
+              "quantized": {
+                "default": false,
+                "type": "boolean"
+              },
+              "query_vector": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/_types.QueryVector"
+                  }
+                ]
+              },
+              "query_vector_builder": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/_types.QueryVectorBuilder"
+                  }
+                ]
+              },
+              "similarity_function": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/_types.mapping.DenseVectorSimilarity"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "field"
+            ],
+            "type": "object"
+          }
+        ]
       },
       "_types.query_dsl.DisMaxQuery": {
         "allOf": [
@@ -14351,7 +14775,7 @@
                     "$ref": "#/components/schemas/_types.query_dsl.GeoValidationMethod"
                   }
                 ],
-                "default": "'strict'"
+                "default": "strict"
               }
             },
             "type": "object"
@@ -14398,7 +14822,7 @@
                     "$ref": "#/components/schemas/_types.GeoDistanceType"
                   }
                 ],
-                "default": "'arc'"
+                "default": "arc"
               },
               "ignore_unmapped": {
                 "default": false,
@@ -14410,7 +14834,7 @@
                     "$ref": "#/components/schemas/_types.query_dsl.GeoValidationMethod"
                   }
                 ],
-                "default": "'strict'"
+                "default": "strict"
               }
             },
             "required": [
@@ -14478,7 +14902,7 @@
                     "$ref": "#/components/schemas/_types.query_dsl.GeoValidationMethod"
                   }
                 ],
-                "default": "'strict'"
+                "default": "strict"
               }
             },
             "type": "object"
@@ -14546,7 +14970,7 @@
                     "$ref": "#/components/schemas/_types.query_dsl.ChildScoreMode"
                   }
                 ],
-                "default": "'none'"
+                "default": "none"
               },
               "type": {
                 "allOf": [
@@ -15122,11 +15546,7 @@
             "type": "object"
           },
           "routing": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/_types.Routing"
-              }
-            ]
+            "type": "string"
           },
           "version": {
             "allOf": [
@@ -15141,7 +15561,7 @@
                 "$ref": "#/components/schemas/_types.VersionType"
               }
             ],
-            "default": "'internal'"
+            "default": "internal"
           }
         },
         "type": "object"
@@ -15211,7 +15631,7 @@
                     "$ref": "#/components/schemas/_types.query_dsl.Operator"
                   }
                 ],
-                "default": "'or'"
+                "default": "or"
               },
               "prefix_length": {
                 "default": 0,
@@ -15298,7 +15718,7 @@
                     "$ref": "#/components/schemas/_types.query_dsl.ZeroTermsQuery"
                   }
                 ],
-                "default": "'none'"
+                "default": "none"
               }
             },
             "required": [
@@ -15365,7 +15785,7 @@
                     "$ref": "#/components/schemas/_types.query_dsl.Operator"
                   }
                 ],
-                "default": "'or'"
+                "default": "or"
               },
               "prefix_length": {
                 "default": 0,
@@ -15390,7 +15810,7 @@
                     "$ref": "#/components/schemas/_types.query_dsl.ZeroTermsQuery"
                   }
                 ],
-                "default": "'none'"
+                "default": "none"
               }
             },
             "required": [
@@ -15471,9 +15891,6 @@
                   }
                 ]
               },
-              "routing": {
-                "type": "string"
-              },
               "stop_words": {
                 "allOf": [
                   {
@@ -15493,21 +15910,6 @@
                     "type": "array"
                   }
                 ]
-              },
-              "version": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/_types.VersionNumber"
-                  }
-                ]
-              },
-              "version_type": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/_types.VersionType"
-                  }
-                ],
-                "default": "'internal'"
               }
             },
             "required": [
@@ -15581,7 +15983,7 @@
                     "$ref": "#/components/schemas/_types.query_dsl.Operator"
                   }
                 ],
-                "default": "'or'"
+                "default": "or"
               },
               "prefix_length": {
                 "default": 0,
@@ -15604,7 +16006,7 @@
                     "$ref": "#/components/schemas/_types.query_dsl.TextQueryType"
                   }
                 ],
-                "default": "'best_fields'"
+                "default": "best_fields"
               },
               "zero_terms_query": {
                 "allOf": [
@@ -15612,7 +16014,7 @@
                     "$ref": "#/components/schemas/_types.query_dsl.ZeroTermsQuery"
                   }
                 ],
-                "default": "'none'"
+                "default": "none"
               }
             },
             "required": [
@@ -15669,7 +16071,7 @@
                     "$ref": "#/components/schemas/_types.query_dsl.ChildScoreMode"
                   }
                 ],
-                "default": "'avg'"
+                "default": "avg"
               }
             },
             "required": [
@@ -15912,6 +16314,13 @@
         "maxProperties": 1,
         "minProperties": 1,
         "properties": {
+          "bitmap_terms": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/_types.query_dsl.BitmapTermsQuery"
+              }
+            ]
+          },
           "bool": {
             "allOf": [
               {
@@ -15946,6 +16355,13 @@
             "allOf": [
               {
                 "$ref": "#/components/schemas/_types.query_dsl.ConstantScoreQuery"
+              }
+            ]
+          },
+          "dense_vector": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/_types.query_dsl.DenseVectorQuery"
               }
             ]
           },
@@ -16406,7 +16822,7 @@
                     "$ref": "#/components/schemas/_types.query_dsl.Operator"
                   }
                 ],
-                "default": "'or'"
+                "default": "or"
               },
               "enable_position_increments": {
                 "default": true,
@@ -16499,7 +16915,7 @@
                     "$ref": "#/components/schemas/_types.query_dsl.TextQueryType"
                   }
                 ],
-                "default": "'best_fields'"
+                "default": "best_fields"
               }
             },
             "required": [
@@ -17086,7 +17502,7 @@
                     "$ref": "#/components/schemas/_types.query_dsl.Operator"
                   }
                 ],
-                "default": "'or'"
+                "default": "or"
               },
               "fields": {
                 "items": {
@@ -18806,7 +19222,7 @@
                 "$ref": "#/components/schemas/_spec_utils.Stringifiedboolean"
               }
             ],
-            "default": "false"
+            "default": false
           },
           "time_zone": {
             "type": "string"
@@ -19178,6 +19594,21 @@
           },
           {
             "$ref": "#/components/parameters/cat.indices-s"
+          },
+          {
+            "$ref": "#/components/parameters/_spec_utils.CommonCatQueryParameters-format"
+          },
+          {
+            "$ref": "#/components/parameters/_spec_utils.CommonCatQueryParameters-help"
+          },
+          {
+            "$ref": "#/components/parameters/_spec_utils.CommonCatQueryParameters-v"
+          },
+          {
+            "$ref": "#/components/parameters/_spec_utils.CommonCatQueryParameters-bytes"
+          },
+          {
+            "$ref": "#/components/parameters/_spec_utils.CommonCatQueryParameters-time"
           }
         ],
         "responses": {
@@ -19214,6 +19645,21 @@
           },
           {
             "$ref": "#/components/parameters/cat.indices-s"
+          },
+          {
+            "$ref": "#/components/parameters/_spec_utils.CommonCatQueryParameters-format"
+          },
+          {
+            "$ref": "#/components/parameters/_spec_utils.CommonCatQueryParameters-help"
+          },
+          {
+            "$ref": "#/components/parameters/_spec_utils.CommonCatQueryParameters-v"
+          },
+          {
+            "$ref": "#/components/parameters/_spec_utils.CommonCatQueryParameters-bytes"
+          },
+          {
+            "$ref": "#/components/parameters/_spec_utils.CommonCatQueryParameters-time"
           }
         ],
         "responses": {

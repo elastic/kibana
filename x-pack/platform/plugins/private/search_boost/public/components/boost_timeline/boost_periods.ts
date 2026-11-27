@@ -6,8 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { timeValueToMs } from '../../../common/time_value';
 import type { BoostPeriod, DataStreamsBoostProfile } from '../../../common/types';
-import { formatBoost } from '../format';
+import { formatBoost, formatDuration } from '../format';
 
 export type BoostPeriodId = 'recent' | 'standard' | 'background';
 
@@ -48,36 +49,11 @@ const STANDARD_SKIPPED_REASON = i18n.translate('xpack.searchBoost.boostPeriods.s
     "The standard max age isn't later than the recent max age, so no data is ever standard.",
 });
 
-const UNIT_IN_MS: Readonly<Record<string, number>> = {
-  h: 60 * 60 * 1000,
-  d: 24 * 60 * 60 * 1000,
-};
-
-// The `_boost` API only accepts max ages in hours or days.
-const AGE_PATTERN = /^(\d+(?:\.\d+)?)([hd])$/;
-
 /** Milliseconds in an Elasticsearch time value such as "7d", or `NaN` when it can't be read. */
-export const parseAge = (age: string): number => {
-  const match = AGE_PATTERN.exec(age.trim());
-  return match ? Number(match[1]) * UNIT_IN_MS[match[2]] : NaN;
-};
+export const parseAge = (age: string): number => timeValueToMs(age);
 
 /** Such as "7 days" for "7d". */
-export const formatAge = (age: string): string => {
-  const match = AGE_PATTERN.exec(age.trim());
-  if (!match) return age;
-
-  const count = Number(match[1]);
-  return match[2] === 'd'
-    ? i18n.translate('xpack.searchBoost.boostPeriods.days', {
-        defaultMessage: '{count, plural, one {# day} other {# days}}',
-        values: { count },
-      })
-    : i18n.translate('xpack.searchBoost.boostPeriods.hours', {
-        defaultMessage: '{count, plural, one {# hour} other {# hours}}',
-        values: { count },
-      });
-};
+export const formatAge = (age: string): string => formatDuration(age.trim());
 
 /** Such as "2–5,000". */
 export const formatBoostRange = ({ min_boost: min, max_boost: max }: BoostPeriod): string =>

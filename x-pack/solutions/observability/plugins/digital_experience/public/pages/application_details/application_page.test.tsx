@@ -7,14 +7,17 @@
 
 import React from 'react';
 import { fireEvent, render as rtlRender, screen } from '@testing-library/react';
+import { EuiProvider } from '@elastic/eui';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { ApplicationPage } from './application_page';
 import { useKibanaServices } from '../../hooks/use_kibana_services';
 import { useRouteBreadcrumb } from '../../breadcrumbs/use_route_breadcrumb';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { useEnvironment } from '../../hooks/use_environment';
 import { useApplicationLinks } from '../../hooks/use_application_links';
+import { useQueryParam } from '../../hooks/use_query_param';
 import { useShareAction } from '../../hooks/use_share_action';
 
 const historyReplace = jest.fn();
@@ -41,6 +44,7 @@ jest.mock('./otel_overview/otel_overview', () => ({
 jest.mock('../../hooks/use_application_links');
 // Its own test covers what it shares; here the page only has to give it to the header.
 jest.mock('../../hooks/use_share_action');
+jest.mock('../../hooks/use_query_param');
 jest.mock('../errors/errors_tab', () => {
   return {
     ErrorsTab: ({ serviceName }: { serviceName: string }) => {
@@ -62,6 +66,23 @@ jest.mock('../reports/reports_tab', () => {
     },
   };
 });
+// Its own test covers the mobile page; here the wrapper only has to pick it.
+jest.mock('./mobile_overview/mobile_application_page', () => {
+  const { useState } = jest.requireActual<typeof import('react')>('react');
+  return {
+    // Shows the application it was mounted for, as its state would: a new mount reads the new one.
+    MobileApplicationPage: ({
+      serviceName,
+      selectedTab,
+    }: {
+      serviceName: string;
+      selectedTab: string;
+    }) => {
+      const [mountedFor] = useState(serviceName);
+      return <div data-test-subj="mobileApplicationPage">{`${mountedFor}:${selectedTab}`}</div>;
+    },
+  };
+});
 jest.mock('../sessions/sessions_tab', () => {
   return {
     SessionsTab: ({ serviceName }: { serviceName: string }) => {
@@ -80,19 +101,37 @@ const useKibanaServicesMock = jest.mocked(useKibanaServices);
 const timeRange = { rangeFrom: 'now-7d', rangeTo: 'now' };
 const setTimeRange = jest.fn();
 
-const render = (ui: React.ReactElement) => rtlRender(ui, { wrapper: MockAppHeaderProvider });
+const render = (ui: React.ReactElement) =>
+  rtlRender(ui, {
+    wrapper: ({ children }) => (
+      <EuiProvider>
+        <MockAppHeaderProvider>{children}</MockAppHeaderProvider>
+      </EuiProvider>
+    ),
+  });
+
+const LINKS: ReturnType<typeof useApplicationLinks> = {
+  overviewHref: '/overview-href',
+  overviewPath: '/my-app?source=classic',
+  errorsHref: '/errors-href',
+  networkHref: '/network-href',
+  reportsHref: '/reports-href',
+  frustrationHref: '/frustration-href',
+  crashesHref: '/crashes-href',
+  sessionsHref: () => '/sessions-href',
+  sessionHref: () => '/session-href',
+};
+
+const setCompare = jest.fn();
+
+const mockCompare = (compare?: 'true') =>
+  jest.mocked(useQueryParam).mockReturnValue({ value: compare, setValue: setCompare });
 
 beforeEach(() => {
   historyReplace.mockClear();
-  jest.mocked(useApplicationLinks).mockReturnValue({
-    overviewHref: '/overview-href',
-    overviewPath: '/my-app?source=classic',
-    errorsHref: '/errors-href',
-    networkHref: '/network-href',
-    reportsHref: '/reports-href',
-    sessionsHref: () => '/sessions-href',
-    sessionHref: () => '/session-href',
-  });
+  setCompare.mockClear();
+  mockCompare();
+  jest.mocked(useApplicationLinks).mockReturnValue(LINKS);
   jest
     .mocked(useEnvironment)
     .mockReturnValue({ environment: undefined, setEnvironment: jest.fn() });
@@ -158,6 +197,39 @@ describe('ApplicationPage', () => {
       tab: 'errors',
     });
     expect(onClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('turns Compare on from the header of the EDOT Browser Overview, in the URL', async () => {
+    useKibanaServicesMock.mockReturnValue({} as ReturnType<typeof useKibanaServices>);
+
+    render(<ApplicationPage serviceName="my-app" source="otel" selectedTab="overview" />);
+    await openAppMenuOverflow();
+    fireEvent.click(screen.getByTestId('digitalExperienceOverviewCompareToggle'));
+
+    expect(useQueryParam).toHaveBeenCalledWith('compare');
+    expect(setCompare).toHaveBeenCalledWith('true');
+  });
+
+  it('turns Compare off from the header when the URL has it on', async () => {
+    mockCompare('true');
+    useKibanaServicesMock.mockReturnValue({} as ReturnType<typeof useKibanaServices>);
+
+    render(<ApplicationPage serviceName="my-app" source="otel" selectedTab="overview" />);
+    await openAppMenuOverflow();
+    fireEvent.click(screen.getByTestId('digitalExperienceOverviewCompareToggle'));
+
+    expect(setCompare).toHaveBeenCalledWith(undefined);
+  });
+
+  it.each([
+    ['another tab', 'otel', 'errors'],
+    ['the Classic RUM Overview', 'classic', 'overview'],
+  ] as const)('has no Compare on %s, whose panels have no previous period', (_, source, tab) => {
+    useKibanaServicesMock.mockReturnValue({} as ReturnType<typeof useKibanaServices>);
+
+    render(<ApplicationPage serviceName="my-app" source={source} selectedTab={tab} />);
+
+    expect(screen.queryByTestId('digitalExperienceOverviewCompareToggle')).not.toBeInTheDocument();
   });
 
   it('has no Share button without a Share action', () => {
@@ -317,6 +389,93 @@ describe('ApplicationPage', () => {
       expect(screen.queryByTestId(`digitalExperienceTab-${tab}`)).not.toBeInTheDocument();
     }
   );
+
+  it.each(['overview', 'errors'] as const)(
+    'opens the mobile page, with the %s tab of the URL, for an EDOT mobile application',
+    (tab) => {
+      useKibanaServicesMock.mockReturnValue({} as ReturnType<typeof useKibanaServices>);
+      jest.mocked(useApplicationLinks).mockClear();
+
+      render(
+        <ApplicationPage
+          serviceName="shop-mobile"
+          source="otel"
+          applicationType="mobile"
+          selectedTab={tab}
+        />
+      );
+
+      expect(screen.getByTestId('mobileApplicationPage')).toHaveTextContent(`shop-mobile:${tab}`);
+      // The mobile page owns its header and tabs: none of the web page renders.
+      expect(screen.queryByTestId(APP_HEADER_TEST_SUBJECTS.title)).toBeNull();
+      expect(screen.queryByTestId('otelOverview')).toBeNull();
+      expect(useApplicationLinks).not.toHaveBeenCalled();
+    }
+  );
+
+  it.each([
+    ['an EDOT Browser application', 'otel', undefined, 'otelOverview'],
+    ['a web application', 'otel', 'web', 'otelOverview'],
+  ] as const)('opens the web page for %s', (_, source, applicationType, overview) => {
+    useKibanaServicesMock.mockReturnValue({} as ReturnType<typeof useKibanaServices>);
+
+    render(
+      <ApplicationPage
+        serviceName="my-app"
+        source={source}
+        applicationType={applicationType}
+        selectedTab="overview"
+      />
+    );
+
+    expect(screen.getByTestId(overview)).toBeInTheDocument();
+    expect(screen.queryByTestId('mobileApplicationPage')).toBeNull();
+  });
+
+  it("mounts a new mobile page per application, so none shows the previous one's KPIs", () => {
+    useKibanaServicesMock.mockReturnValue({} as ReturnType<typeof useKibanaServices>);
+    const page = (serviceName: string) => (
+      <ApplicationPage
+        serviceName={serviceName}
+        source="otel"
+        applicationType="mobile"
+        selectedTab="overview"
+      />
+    );
+
+    const { rerender } = render(page('shop-mobile'));
+    expect(screen.getByTestId('mobileApplicationPage')).toHaveTextContent('shop-mobile:overview');
+
+    rerender(page('trailmap-android'));
+    expect(screen.getByTestId('mobileApplicationPage')).toHaveTextContent(
+      'trailmap-android:overview'
+    );
+  });
+
+  it('never opens the mobile page for Classic RUM data, whatever its type', () => {
+    useKibanaServicesMock.mockReturnValue({} as ReturnType<typeof useKibanaServices>);
+
+    render(
+      <ApplicationPage
+        serviceName="my-app"
+        source="classic"
+        applicationType="mobile"
+        selectedTab="overview"
+      />
+    );
+
+    expect(screen.queryByTestId('mobileApplicationPage')).toBeNull();
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('my-app');
+  });
+
+  it('replaces the Crashes route of an EDOT Browser application, a mobile tab, with its Overview', () => {
+    useKibanaServicesMock.mockReturnValue({} as ReturnType<typeof useKibanaServices>);
+
+    render(<ApplicationPage serviceName="my-app" source="otel" selectedTab="crashes" />);
+
+    expect(historyReplace).toHaveBeenCalled();
+    expect(screen.queryByTestId('digitalExperienceTab-crashes')).not.toBeInTheDocument();
+  });
 
   it('never redirects an EDOT Browser application', () => {
     useKibanaServicesMock.mockReturnValue({} as ReturnType<typeof useKibanaServices>);

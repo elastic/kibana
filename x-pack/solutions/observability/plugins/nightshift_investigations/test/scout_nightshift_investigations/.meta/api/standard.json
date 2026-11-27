@@ -1,5 +1,5 @@
 {
-  "sha1": "19b21440ad2c13a7e6c5a1cf371c25de06e88284",
+  "sha1": "bae59a30b1b1b45c910672c750bfe0e972fd1b60",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -558,7 +558,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/scheduled_automations.spec.ts",
-        "line": 377,
+        "line": 379,
         "column": 66
       }
     },

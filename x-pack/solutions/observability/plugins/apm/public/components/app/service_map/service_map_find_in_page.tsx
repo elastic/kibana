@@ -21,23 +21,47 @@ import { useReactFlow } from '@xyflow/react';
 import { css } from '@emotion/react';
 import type { ServiceMapNode } from '../../../../common/service_map';
 import {
+  isServiceGroupBoxNode,
+  isServiceGroupBoxNodeData,
   isServiceGroupNode,
   isServiceGroupNodeData,
   isServiceNodeData,
 } from '../../../../common/service_map';
 import { NODE_WIDTH, NODE_HEIGHT, CENTER_ANIMATION_DURATION_MS } from './constants';
+import { getAbsoluteNodePosition } from './get_absolute_node_position';
 import { useServiceMapHighlight } from '../../shared/service_map/service_map_search_context';
 
 export const SERVICE_MAP_FIND_INPUT_ID = 'serviceMapFindInPageInput';
 
 const CENTER_ZOOM = 1.2;
 
+/**
+ * A "by calls" group is named after its busiest member, so its open box has the same name as that
+ * member: searching for it would give two matches, the box and the service. Such a box is left out,
+ * but only while that member is shown: when a filter hides it, the name on the box has to find the
+ * box.
+ */
+function isBoxNamedAfterVisibleMember(
+  node: ServiceMapNode,
+  visibleNodeIds: ReadonlySet<string>
+): boolean {
+  if (!isServiceGroupBoxNodeData(node.data)) {
+    return false;
+  }
+  const label = String(node.data.label ?? '').toLowerCase();
+  return node.data.memberServiceIds.some(
+    (memberId) => memberId.toLowerCase() === label && visibleNodeIds.has(memberId)
+  );
+}
+
 function getSearchableNodes(nodes: ServiceMapNode[]): ServiceMapNode[] {
+  const visibleNodeIds = new Set(nodes.filter((n) => !n.hidden).map((n) => n.id));
   return nodes.filter(
     (n) =>
       !n.hidden &&
       ((n.type === 'service' && isServiceNodeData(n.data)) ||
         isServiceGroupNode(n) ||
+        (isServiceGroupBoxNode(n) && !isBoxNamedAfterVisibleMember(n, visibleNodeIds)) ||
         n.type === 'dependency')
   );
 }
@@ -51,27 +75,15 @@ function nodeMatchesSearchQuery(node: ServiceMapNode, query: string): boolean {
   if (isServiceGroupNodeData(node.data)) {
     return node.data.memberServiceIds.some((memberId) => memberId.toLowerCase().includes(query));
   }
+  // Open groups: match the label only. The members are on the map and match as services, and the
+  // id would have the same `calls:` problem as above.
+  if (isServiceGroupBoxNodeData(node.data)) {
+    return false;
+  }
   if (node.id.toLowerCase().includes(query)) {
     return true;
   }
   return false;
-}
-
-function getAbsolutePosition(
-  node: ServiceMapNode,
-  allNodes: ServiceMapNode[]
-): { x: number; y: number } {
-  let x = node.position.x;
-  let y = node.position.y;
-  let current: ServiceMapNode | undefined = node;
-  while (current?.parentId) {
-    const parent = allNodes.find((n) => n.id === current!.parentId);
-    if (!parent) break;
-    x += parent.position.x;
-    y += parent.position.y;
-    current = parent;
-  }
-  return { x, y };
 }
 
 export interface ServiceMapFindInPageProps {
@@ -83,8 +95,8 @@ export interface ServiceMapFindInPageProps {
 }
 
 /**
- * Find-in-page for the service map: filters visible service, closed-group, and dependency nodes,
- * centers the canvas on matches, and keeps `selectedIndex` aligned with the last centered match
+ * Find-in-page for the service map: filters visible service, closed-group, open-group, and
+ * dependency nodes, centers the canvas on matches, and keeps `selectedIndex` aligned with the last centered match
  * (so prev/next stay in sync).
  */
 export function ServiceMapFindInPage({
@@ -148,9 +160,10 @@ export function ServiceMapFindInPage({
 
   const centerMapOnNode = useCallback(
     (node: ServiceMapNode) => {
-      const { x, y } = getAbsolutePosition(node, nodes);
-      const centerX = x + NODE_WIDTH / 2;
-      const centerY = y + NODE_HEIGHT / 2;
+      const { x, y } = getAbsoluteNodePosition(node, new Map(nodes.map((n) => [n.id, n] as const)));
+      // The box of an open group is sized to its members; other nodes have the standard size.
+      const centerX = x + (node.width ?? NODE_WIDTH) / 2;
+      const centerY = y + (node.height ?? NODE_HEIGHT) / 2;
       setCenter(centerX, centerY, {
         zoom: CENTER_ZOOM,
         duration: CENTER_ANIMATION_DURATION_MS,

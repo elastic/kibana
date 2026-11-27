@@ -12,14 +12,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { isNestedField } from '@kbn/data-views-plugin/common';
 import { MetricsEditor } from '../../../components/metrics_editor';
 import { getIndexPatternService } from '../../../kibana_services';
-import type { AggDescriptor } from '../../../../common/descriptor_types';
+import type { AggDescriptor, ESPewPewSourceDescriptor } from '../../../../common/descriptor_types';
 import type { OnSourceChangeArgs } from '../source';
 
 interface Props {
   bucketsName: string;
   indexPatternId: string;
   metrics: AggDescriptor[];
-  onChange: (...args: OnSourceChangeArgs[]) => void;
+  onChange: (...args: OnSourceChangeArgs<ESPewPewSourceDescriptor>[]) => void;
 }
 
 interface State {

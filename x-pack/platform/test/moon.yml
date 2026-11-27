@@ -151,6 +151,7 @@ dependsOn:
   - '@kbn/alerting-v2-schemas'
   - '@kbn/core-chrome-browser-components'
   - '@kbn/content-list-common'
+  - '@kbn/osquery-plugin'
 tags:
   - test-helper
   - package

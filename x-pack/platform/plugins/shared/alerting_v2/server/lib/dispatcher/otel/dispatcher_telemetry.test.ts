@@ -6,7 +6,11 @@
  */
 
 import { metrics } from '@opentelemetry/api';
-import { ALERT_SCAN_TRUNCATED_METRIC, DispatcherTelemetry } from './dispatcher_telemetry';
+import {
+  ALERT_SCAN_TRUNCATED_METRIC,
+  DispatcherTelemetry,
+  OVERSIZED_ALERT_DATA_SKIPPED_METRIC,
+} from './dispatcher_telemetry';
 
 jest.mock('@opentelemetry/api', () => {
   const actual = jest.requireActual('@opentelemetry/api');
@@ -28,6 +32,9 @@ describe('DispatcherTelemetry', () => {
 
     expect(getMeter).toHaveBeenCalledWith('kibana.alerting_v2');
     const createCounter = jest.mocked(getMeter.mock.results[0].value.createCounter);
+    expect(ALERT_SCAN_TRUNCATED_METRIC).toBe(
+      'kibana.alerting_v2.dispatcher.alert_scan_truncated.count'
+    );
     expect(createCounter).toHaveBeenCalledWith(
       ALERT_SCAN_TRUNCATED_METRIC,
       expect.objectContaining({ unit: '1', valueType: expect.any(Number) })
@@ -44,5 +51,23 @@ describe('DispatcherTelemetry', () => {
 
     expect(add).toHaveBeenCalledTimes(1);
     expect(add).toHaveBeenCalledWith(1);
+  });
+
+  it('adds the number of skipped alerts to the oversized data counter', () => {
+    const telemetry = new DispatcherTelemetry();
+    const createCounter = jest.mocked(getMeter.mock.results[0].value.createCounter);
+    expect(createCounter).toHaveBeenCalledWith(
+      OVERSIZED_ALERT_DATA_SKIPPED_METRIC,
+      expect.objectContaining({ unit: '1', valueType: expect.any(Number) })
+    );
+    expect(OVERSIZED_ALERT_DATA_SKIPPED_METRIC).toBe(
+      'kibana.alerting_v2.dispatcher.oversized_alert_data_skipped.count'
+    );
+    const add = jest.mocked(createCounter.mock.results[1].value.add);
+    add.mockClear();
+
+    telemetry.recordOversizedAlertDataSkipped(3);
+
+    expect(add).toHaveBeenCalledWith(3);
   });
 });

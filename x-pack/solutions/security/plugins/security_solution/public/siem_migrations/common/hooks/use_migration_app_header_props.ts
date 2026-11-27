@@ -64,10 +64,14 @@ export const useMigrationAppHeaderProps = ({
       return { items };
     }
 
-    const onboardingCardId =
-      migrationType === 'rule'
-        ? OnboardingCardId.siemMigrationsRules
-        : OnboardingCardId.siemMigrationsDashboards;
+    let onboardingCardId: OnboardingCardId;
+    if (migrationType === 'rule') {
+      onboardingCardId = OnboardingCardId.siemMigrationsRules;
+    } else if (migrationType === 'dashboard') {
+      onboardingCardId = OnboardingCardId.siemMigrationsDashboards;
+    } else {
+      onboardingCardId = OnboardingCardId.siemMigrationsWorkflows;
+    }
     const manageCardPath = `#${onboardingCardId}`;
 
     const addAnotherMigrationHref = getAppUrl({

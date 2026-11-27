@@ -331,7 +331,27 @@ export interface ValidationErrors {
     message: string;
     type: { name: string };
   };
+  namedSubqueryNameNotLowercase: {
+    message: string;
+    type: { name: string };
+  };
+  namedSubqueryDuplicateName: {
+    message: string;
+    type: { name: string };
+  };
+  namedSubqueryForwardReference: {
+    message: string;
+    type: { name: string };
+  };
+  namedSubqueryUnused: {
+    message: string;
+    type: { name: string };
+  };
   subqueryNotSupportedInTs: {
+    message: string;
+    type: {};
+  };
+  subqueryNotSupportedInLookupJoin: {
     message: string;
     type: {};
   };

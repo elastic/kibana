@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   investigationNotificationDestinationSchema,
   MAX_AUTOMATION_INSTRUCTIONS_LENGTH,
 } from '../../../common';
+import { isElasticAppSlackChannelCompletion } from './slack_completion';
 
 // Keep operator guidance bounded independently of trigger evidence in the final agent message.
 export const MAX_PROMPT_TEMPLATE_LENGTH = MAX_AUTOMATION_INSTRUCTIONS_LENGTH;
@@ -30,8 +31,10 @@ export const automationCompletionUpdateSchema = automationCompletionInputSchema.
   connectorId: automationCompletionInputSchema.shape.connectorId.nullable(),
 });
 
-export const automationCompletionSchema = automationCompletionInputSchema.superRefine(
-  (completion, context) => {
+const SLACK_USER_OR_DM_ID_PATTERN = /^[UWD][A-Z0-9]+$/;
+
+export const automationCompletionSchema = lazySchema(() =>
+  automationCompletionInputSchema.superRefine((completion, context) => {
     if (
       completion.action === 'post_to_slack' &&
       completion.targetMode === 'channel' &&
@@ -43,5 +46,20 @@ export const automationCompletionSchema = automationCompletionInputSchema.superR
         message: 'A Slack channel destination is required',
       });
     }
-  }
+  })
+);
+
+export const savedAutomationCompletionSchema = lazySchema(() =>
+  automationCompletionSchema.superRefine((completion, context) => {
+    if (
+      isElasticAppSlackChannelCompletion(completion) &&
+      SLACK_USER_OR_DM_ID_PATTERN.test(completion.destination?.trim() ?? '')
+    ) {
+      context.addIssue({
+        code: 'custom',
+        path: ['destination'],
+        message: 'The Elastic Slack App can only post to channels, not users',
+      });
+    }
+  })
 );

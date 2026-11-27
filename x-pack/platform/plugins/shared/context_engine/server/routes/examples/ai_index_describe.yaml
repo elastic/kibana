@@ -110,7 +110,7 @@ x-codeSamples:
   - lang: curl
     source: |
       curl \
-        -X GET "https://${KIBANA_URL}/api/context_engine/ai_index/customer_support/_describe" \
+        -X GET "${KIBANA_URL}/api/context_engine/ai_index/customer_support/_describe" \
         -H "Authorization: ApiKey ${API_KEY}"
   - lang: Console
     source: |

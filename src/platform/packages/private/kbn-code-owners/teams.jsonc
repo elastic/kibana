@@ -198,21 +198,6 @@
     }
   },
   {
-    "id": "cases",
-    "name": "Cases",
-    "areas": [
-      "security"
-    ],
-    "github": {
-      "team": "elastic/kibana-cases",
-      "label": "Team:Cases"
-    },
-    "responsibilities": [
-      "Security Solution specific connectors",
-      "Security Solution Cases"
-    ]
-  },
-  {
     "id": "kibana-cloud-security-posture",
     "name": "Contextual Security Apps Team",
     "areas": [],
@@ -910,16 +895,6 @@
     "name": "Security Ml",
     "github": {
       "team": "elastic/security-ml"
-    }
-  },
-  {
-    "id": "security-pds-deployment",
-    "name": "Security Pds Deployment",
-    "areas": [
-      "security"
-    ],
-    "github": {
-      "team": "elastic/security-pds-deployment"
     }
   },
   {

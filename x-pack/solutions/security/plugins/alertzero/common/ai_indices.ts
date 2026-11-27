@@ -13,7 +13,7 @@ import { getAiIndexDest } from '@kbn/context-engine-plugin/common/ai_index_dest'
 /**
  * AI index for knowledge indicators one Worker hands to another. The id predates this name. These
  * managed workflow YAMLs name it by the literal, with nothing tying them to this constant:
- * `coverage_worker.yaml`, `forensics_endpoint_analysis.yaml`, `attack_discovery_review.yaml` and
+ * `coverage_sweep.yaml`, `forensics_endpoint_analysis.yaml`, `attack_discovery_review.yaml` and
  * `actions/action_handoff_to_forensics.yaml`.
  */
 export const KNOWLEDGE_INDICATOR_AI_INDEX_ID = 'security-investigations' as const;

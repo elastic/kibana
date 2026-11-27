@@ -69,8 +69,8 @@ export const validateKafkaOAuth2 = (output: UpdateTypedOutput | NewOutput): void
 
 /**
  * Checks the settings the Kerberos authentication method of a Kafka output needs, as the Kafka
- * output of Beats does: the path of the Kerberos configuration and a realm, a keytab for the keytab
- * authentication, or a username and a password for the password authentication.
+ * output of Beats does: the path of the Kerberos configuration, a realm and a username (the
+ * principal), plus a keytab for the keytab authentication or a password for the password one.
  */
 export const validateKafkaKerberos = (output: UpdateTypedOutput | NewOutput): void => {
   if (output.type !== outputType.Kafka || output.auth_type !== kafkaAuthType.Kerberos) {
@@ -88,16 +88,16 @@ export const validateKafkaKerberos = (output: UpdateTypedOutput | NewOutput): vo
     throw new OutputInvalidError('kerberos.realm is required');
   }
 
+  // the schema rejects a missing or empty username, this also rejects a blank one
+  if (!kerberos.username?.trim()) {
+    throw new OutputInvalidError('kerberos.username is required');
+  }
+
   if (kerberos.auth_type === kafkaKerberosAuthType.Keytab) {
     if (!kerberos.keytab) {
       throw new OutputInvalidError('kerberos.keytab is required when kerberos.auth_type is keytab');
     }
   } else {
-    if (!kerberos.username) {
-      throw new OutputInvalidError(
-        'kerberos.username is required when kerberos.auth_type is password'
-      );
-    }
     if (!secrets?.kerberos?.password) {
       throw new OutputInvalidError(
         'secrets.kerberos.password is required when kerberos.auth_type is password'

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreSetup, IScopedClusterClient, Logger } from '@kbn/core/server';
+import type { CoreSetup, IScopedClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type {
   ObservabilityAgentBuilderPluginSetupDependencies,
   ObservabilityAgentBuilderPluginStart,
@@ -33,6 +33,7 @@ export interface IndexPatternsResult {
 export async function getIndexPatternsHandler({
   core,
   plugins,
+  request,
   esClient,
   logger,
 }: {
@@ -41,10 +42,11 @@ export async function getIndexPatternsHandler({
     ObservabilityAgentBuilderPluginStart
   >;
   plugins: ObservabilityAgentBuilderPluginSetupDependencies;
+  request: KibanaRequest;
   esClient: IScopedClusterClient;
   logger: Logger;
 }): Promise<IndexPatternsResult> {
-  const dataSources = await getObservabilityDataSources({ core, plugins, logger });
+  const dataSources = await getObservabilityDataSources({ core, plugins, request, logger });
   const dataStreams = await getDataStreamsHandler({ esClient, dataSources, logger });
 
   return {

@@ -23,7 +23,7 @@ import {
   DIGITAL_EXPERIENCE_EBT_ACTIONS,
 } from '../../../../ebt_constants';
 import type { Formatters } from '../../../../hooks/use_formatters';
-import { FILTER_EBT_ELEMENTS, FILTER_LABELS } from './overview_filter_labels';
+import { FILTER_EBT_ELEMENTS, FILTER_LABELS, FILTER_NOTES } from './overview_filter_labels';
 import { SavedViewsMenu } from './saved_views_menu';
 
 /** The filters that have a button of their own; the others are in the "All filters" flyout. */
@@ -105,6 +105,7 @@ export function OverviewFilterButtons({
           data-test-subj={`digitalExperienceOverviewFilter-${name}`}
           ebtElement={FILTER_EBT_ELEMENTS[name]}
           label={FILTER_LABELS[name]}
+          note={FILTER_NOTES[name]}
           buckets={options?.[name] ?? []}
           values={filters[name] ?? []}
           onChange={(values) => setFilter(name, values)}
@@ -132,22 +133,63 @@ export function OverviewFilterButtons({
   );
 }
 
+/** The values of one filter shown on a pill: all included, or all excluded. */
+export interface FilterPillGroup {
+  name: OverviewFilterName;
+  exclude: boolean;
+  values: string[];
+}
+
+/** How many values a pill lists before it ends in how many more there are. */
+export const PILL_VALUES_SHOWN = 3;
+
 /**
- * The values the filters select, as pills that remove their value, and the button that clears all
- * the filters. Nothing shows while no filter has a value.
+ * The pills for `filters`: one per filter for its included values and one for its excluded values,
+ * so a filter with many values takes one pill, and an exclusion, which drops data, stays apart.
+ * With `isSplit`, one pill per value, for where nothing else lets a single value be removed.
+ */
+export const groupFilterPills = (filters: OverviewFilters, isSplit = false): FilterPillGroup[] =>
+  OVERVIEW_FILTER_NAMES.flatMap((name) =>
+    [false, true].flatMap((exclude) => {
+      const values = (filters[name] ?? [])
+        .filter((item) => item.exclude === exclude)
+        .map(({ value }) => value);
+      if (isSplit) {
+        return values.map((value) => ({ name, exclude, values: [value] }));
+      }
+      return values.length > 0 ? [{ name, exclude, values }] : [];
+    })
+  );
+
+const pillTextCss = css({
+  display: 'flex',
+  minInlineSize: 0,
+  gap: '0.25em',
+});
+const pillPreviewCss = css({
+  minInlineSize: 0,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+});
+
+/**
+ * The values the filters select, as one pill per filter (and one more for its exclusions) that
+ * removes those values, and the button that clears all the filters. Nothing shows while no filter
+ * has a value. With `isSplit`, each value has a pill of its own.
  */
 export function OverviewFilterPills({
   filters,
   setFilter,
   onClear,
+  isSplit = false,
 }: {
   filters: OverviewFilters;
   setFilter: (name: OverviewFilterName, values: FilterValue[]) => void;
   onClear: () => void;
+  isSplit?: boolean;
 }) {
-  const pills = OVERVIEW_FILTER_NAMES.flatMap((name) =>
-    (filters[name] ?? []).map((item) => ({ name, item }))
-  );
+  const pills = groupFilterPills(filters, isSplit);
   if (pills.length === 0) {
     return null;
   }
@@ -160,33 +202,51 @@ export function OverviewFilterPills({
       responsive={false}
       data-test-subj="digitalExperienceOverviewPills"
     >
-      {pills.map(({ name, item }) => {
-        const text = filterPillText(FILTER_LABELS[name], item);
+      {pills.map(({ name, exclude, values }) => {
+        const label = FILTER_LABELS[name];
+        const fullText = filterPillText({ label, values, exclude });
+        const preview = filterPillText({
+          label,
+          values: values.slice(0, PILL_VALUES_SHOWN),
+          exclude,
+        });
+        const hidden = values.length - PILL_VALUES_SHOWN;
+        const testSubj = isSplit ? `${name}-${values[0]}` : `${name}${exclude ? '-excluded' : ''}`;
         return (
-          <EuiFlexItem grow={false} key={`${name}-${item.value}`}>
+          <EuiFlexItem grow={false} key={testSubj}>
             <EuiBadge
-              color={item.exclude ? 'danger' : 'hollow'}
+              color={exclude ? 'danger' : 'hollow'}
               iconType="cross"
               iconSide="right"
               iconOnClick={() =>
                 setFilter(
                   name,
-                  (filters[name] ?? []).filter(({ value }) => value !== item.value)
+                  (filters[name] ?? []).filter(
+                    (item) => item.exclude !== exclude || !values.includes(item.value)
+                  )
                 )
               }
               iconOnClickAriaLabel={i18n.translate(
                 'xpack.digitalExperience.overview.filters.removePillLabel',
-                { defaultMessage: 'Remove {filter}', values: { filter: text } }
+                { defaultMessage: 'Remove {filter}', values: { filter: fullText } }
               )}
-              title={text}
+              title={fullText}
               css={css({ maxInlineSize: '28em' })}
-              data-test-subj={`digitalExperienceOverviewPill-${name}-${item.value}`}
+              data-test-subj={`digitalExperienceOverviewPill-${testSubj}`}
               {...getEbtProps({
                 action: DIGITAL_EXPERIENCE_EBT_ACTIONS.SET_FILTER,
                 element: FILTER_EBT_ELEMENTS[name],
               })}
             >
-              {text}
+              {/* The preview gives way to a long value, never the count of the others. */}
+              <span css={pillTextCss}>
+                <span css={pillPreviewCss}>{preview}</span>
+                {hidden > 0 && (
+                  <span css={{ flexShrink: 0 }} data-test-subj="digitalExperienceOverviewPillMore">
+                    {`+${hidden}`}
+                  </span>
+                )}
+              </span>
             </EuiBadge>
           </EuiFlexItem>
         );

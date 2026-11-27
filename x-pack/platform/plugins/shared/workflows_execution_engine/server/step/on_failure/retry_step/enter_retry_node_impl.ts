@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { SerializedError } from '@kbn/workflows';
+import { computeRetryDelayMs, type SerializedError } from '@kbn/workflows';
 import type { EnterRetryNode } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
 import type { RetryStepState } from './types';
-import { computeRetryDelayMs } from '../../../utils/retry_delay/retry_delay';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
@@ -32,13 +31,17 @@ export class EnterRetryNodeImpl implements NodeImplementation, NodeWithErrorCatc
     this.advanceRetryAttempt();
   }
 
-  public catchError(failedContext: StepExecutionRuntime): void {
-    const error = failedContext.getCurrentStepResult()?.error;
+  public async catchError(failedContext: StepExecutionRuntime): Promise<void> {
+    const error = await failedContext.getCurrentStepError();
     const { condition } = this.node.configuration;
 
     if (!condition && error?.retryable === false) {
       this.workflowLogger.logDebug(`Error "${error.type}" is not retryable, propagating error.`);
       return;
+    }
+
+    if (condition) {
+      await failedContext.contextManager.prepareContext(condition);
     }
 
     if (
@@ -71,9 +74,7 @@ export class EnterRetryNodeImpl implements NodeImplementation, NodeWithErrorCatc
     }
 
     // fail retry with last error after exceeding max attempts
-    this.stepExecutionRuntime.failStep(
-      new ExecutionError(failedContext.getCurrentStepResult()?.error as SerializedError)
-    );
+    this.stepExecutionRuntime.failStep(new ExecutionError(error as SerializedError));
   }
 
   private initializeRetry(): void {

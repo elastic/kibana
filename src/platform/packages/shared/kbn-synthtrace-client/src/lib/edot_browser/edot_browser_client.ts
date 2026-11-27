@@ -143,13 +143,22 @@ export class EdotBrowserClient {
 
   /**
    * The JavaScript engine, which decides how the browser writes stack traces. A browser that isn't
-   * Chromium or Firefox is taken for Safari, the other one that is still around.
+   * Chromium or Firefox is taken for Safari, the other one that is still around. One that EDOT
+   * Browser can't identify still runs an engine, which its user agent tells.
    */
   public get browserEngine(): 'chromium' | 'firefox' | 'webkit' {
     if (this.isChromium) {
       return 'chromium';
     }
-    return this.resourceAttributes['browser.name'] === 'Firefox' ? 'firefox' : 'webkit';
+    const name = this.resourceAttributes['browser.name'];
+    if (name === undefined) {
+      const userAgent = String(this.resourceAttributes['user_agent.original'] ?? '');
+      if (/Firefox\//.test(userAgent)) {
+        return 'firefox';
+      }
+      return /Chrome\/|Edg\//.test(userAgent) ? 'chromium' : 'webkit';
+    }
+    return name === 'Firefox' ? 'firefox' : 'webkit';
   }
 
   public get hasSession(): boolean {
@@ -449,7 +458,7 @@ export class EdotBrowserClient {
   }) {
     const distroVersion = this.resourceAttributes['telemetry.distro.version'];
     return new EdotLog({ _index: BROWSER_LOGS_INDEX })
-      .eventName(`browser.frustration.${kind}`)
+      .eventName(`elastic.frustration.${kind}`)
       .scope({
         name: DISTRO_SCOPE_NAME,
         ...(typeof distroVersion === 'string' ? { version: distroVersion } : {}),
@@ -461,7 +470,7 @@ export class EdotBrowserClient {
         'browser.page.x': Math.round(pageX),
         'browser.page.y': Math.round(pageY),
         'url.full': url,
-        ...(clickCount !== undefined ? { 'browser.frustration.click_count': clickCount } : {}),
+        ...(clickCount !== undefined ? { 'elastic.frustration.click_count': clickCount } : {}),
         ...(exception?.type ? { 'exception.type': exception.type } : {}),
         ...(exception ? { 'exception.message': exception.message } : {}),
         ...this.processorAttributes,

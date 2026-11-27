@@ -72,7 +72,6 @@ describe('getSupportedUrlParams', () => {
       locations: [],
       monitorTypes: [],
       configIds: [],
-      packagePolicyId: undefined,
       projects: [],
       remoteName: undefined,
       remoteNames: [],

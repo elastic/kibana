@@ -78,6 +78,16 @@ describe('entityStoreMetrics', () => {
     );
   });
 
+  it('registers the slice-shape instruments', () => {
+    expect(registeredNames()).toEqual(
+      expect.arrayContaining([
+        'kibana.entity_store.extraction.slice.count',
+        'kibana.entity_store.extraction.slice.entities',
+        'kibana.entity_store.extraction.slice.raw_target',
+      ])
+    );
+  });
+
   it('no longer registers the ambiguous entities.upserted counter', () => {
     // Replaced by the created/updated/noop split: one counter could not say whether a process
     // was discovering entities or re-touching ones the other process already covered.
@@ -192,6 +202,70 @@ describe('entityStoreMetrics', () => {
 
       const nearTheDefaultCap = boundaries.filter((b) => b > 70000 && b < 100000);
       expect(nearTheDefaultCap.length).toBeGreaterThanOrEqual(3);
+    });
+
+    it('gives extraction.slice.entities resolution around the default entity page size', () => {
+      const boundaries = boundariesFor('kibana.entity_store.extraction.slice.entities')!;
+
+      // The metric exists to say whether a slice fills an entity page or leaves most of it
+      // empty, so the default docsLimit must be a boundary rather than fall inside a bucket.
+      expect(boundaries).toContain(10000);
+      const belowTheDefaultPage = boundaries.filter((b) => b > 0 && b < 10000);
+      expect(belowTheDefaultPage.length).toBeGreaterThanOrEqual(4);
+    });
+
+    it('gives extraction.slice.raw_target boundaries above the default per-slice target', () => {
+      const boundaries = boundariesFor('kibana.entity_store.extraction.slice.raw_target')!;
+
+      // A sampled slice can be scaled well past the default maxLogsPerPage, so the histogram
+      // must keep resolving above it instead of clipping every scaled slice into one bucket.
+      expect(boundaries).toContain(50000);
+      expect(Math.max(...boundaries)).toBeGreaterThanOrEqual(1000000);
+      const aboveTheDefaultTarget = boundaries.filter((b) => b > 50000);
+      expect(aboveTheDefaultTarget.length).toBeGreaterThanOrEqual(4);
+    });
+
+    it('resolves fraction histograms to two decimal places near the sampling floor', () => {
+      const boundaries = boundariesFor('kibana.entity_store.extraction.sample.probability')!;
+
+      // Coarse buckets report a bucket centre rather than the configured value, so a 0.2 override
+      // reads back as 0.175 and looks like it never took effect. Every step between the 0.1 floor
+      // and 0.2 must therefore be no wider than 0.01.
+      const nearTheFloor = boundaries.filter((b) => b >= 0.1 && b <= 0.2);
+      for (let i = 1; i < nearTheFloor.length; i++) {
+        expect(nearTheFloor[i] - nearTheFloor[i - 1]).toBeLessThanOrEqual(0.0101);
+      }
+      expect(boundaries).toContain(0.2);
+    });
+
+    it('resolves slice entity counts around each multiple of the default page size', () => {
+      const boundaries = boundariesFor('kibana.entity_store.extraction.slice.entities')!;
+
+      // Whether a slice fills one page, two or three is the signal, so each page multiple needs a
+      // boundary rather than falling inside a bucket spanning several of them.
+      for (const pageMultiple of [10000, 20000, 30000]) {
+        expect(boundaries).toContain(pageMultiple);
+      }
+    });
+
+    it('resolves the slice raw target across every decade it can be scaled into', () => {
+      const boundaries = boundariesFor('kibana.entity_store.extraction.slice.raw_target')!;
+
+      // The applied scale factor is read from this histogram, so each decade above the default
+      // per-slice target needs several boundaries rather than one.
+      for (const [low, high] of [
+        [50000, 500000],
+        [500000, 5000000],
+      ]) {
+        expect(boundaries.filter((b) => b > low && b < high).length).toBeGreaterThanOrEqual(4);
+      }
+    });
+
+    it('resolves task duration on both sides of the extraction timeout', () => {
+      const boundaries = boundariesFor('kibana.entity_store.extraction.task.duration_ms')!;
+
+      // Which side of the 59s timeout the tail sits on separates a completed run from an abort.
+      expect(boundaries.filter((b) => b >= 50000 && b <= 60000).length).toBeGreaterThanOrEqual(3);
     });
 
     it('gives fraction histograms finer resolution between the sampling floor and 0.5', () => {

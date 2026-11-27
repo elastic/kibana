@@ -22,6 +22,7 @@ exports[`ScopeSection false canGetFilters privilege show NoPermissionCallOut whe
         class="euiCheckboxControl emotion-euiCheckboxControl-selected"
       >
         <span
+          aria-hidden="true"
           class="emotion-euiCheckbox__icon-check"
           data-euiicon-type="check"
           role="presentation"
@@ -99,6 +100,7 @@ exports[`ScopeSection renders when enabled with no scope supplied 1`] = `
         class="euiCheckboxControl emotion-euiCheckboxControl-selected"
       >
         <span
+          aria-hidden="true"
           class="emotion-euiCheckbox__icon-check"
           data-euiicon-type="check"
           role="presentation"
@@ -138,6 +140,7 @@ exports[`ScopeSection renders when enabled with no scope supplied 1`] = `
             class="euiCheckboxControl emotion-euiCheckboxControl-unselected"
           >
             <span
+              aria-hidden="true"
               class="emotion-euiCheckbox__icon-check"
               data-euiicon-type="empty"
               role="presentation"
@@ -223,6 +226,7 @@ exports[`ScopeSection renders when enabled with scope supplied 1`] = `
         class="euiCheckboxControl emotion-euiCheckboxControl-selected"
       >
         <span
+          aria-hidden="true"
           class="emotion-euiCheckbox__icon-check"
           data-euiicon-type="check"
           role="presentation"
@@ -262,6 +266,7 @@ exports[`ScopeSection renders when enabled with scope supplied 1`] = `
             class="euiCheckboxControl emotion-euiCheckboxControl-selected"
           >
             <span
+              aria-hidden="true"
               class="emotion-euiCheckbox__icon-check"
               data-euiicon-type="check"
               role="presentation"
@@ -348,6 +353,7 @@ exports[`ScopeSection renders when not enabled 1`] = `
         class="euiCheckboxControl emotion-euiCheckboxControl-unselected"
       >
         <span
+          aria-hidden="true"
           class="emotion-euiCheckbox__icon-check"
           data-euiicon-type="empty"
           role="presentation"
@@ -396,6 +402,7 @@ exports[`ScopeSection show NoFilterListsCallOut when no filter list IDs 1`] = `
         class="euiCheckboxControl emotion-euiCheckboxControl-selected"
       >
         <span
+          aria-hidden="true"
           class="emotion-euiCheckbox__icon-check"
           data-euiicon-type="check"
           role="presentation"

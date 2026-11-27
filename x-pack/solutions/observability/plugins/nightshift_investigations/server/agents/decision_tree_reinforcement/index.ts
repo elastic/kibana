@@ -44,11 +44,14 @@ export const DECISION_TREE_REINFORCEMENT_AGENT_DESCRIPTION =
 
 /**
  * The reinforcement agent edits decision-tree files in the sandbox and submits one result, so it
- * also drops the generic attachment tools, which the investigator and the assistant keep.
+ * also drops the generic attachment tools and Agent Builder's virtual filesystem `bash` tool, which
+ * the investigator and the assistant keep. That `bash` runs in a VFS, not in the sandbox the file tools
+ * edit, so a tree edited through it never reaches the file that gets submitted.
  */
 const DECISION_TREE_REINFORCEMENT_CAPABILITIES: AgentCapabilities = {
   ...NIGHTSHIFT_AGENT_CAPABILITIES,
   attachment_tools: { enabled: false },
+  bash_tool: { enabled: false },
 };
 
 const getBaseConfiguration = (hydrateWorkflowId: string): AgentBaseConfiguration => ({
