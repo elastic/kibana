@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { TestProviders } from '../../../../../common/mock';
 import { useFlyoutApi } from '../../../../use_flyout_api';
 import { createFlyoutApiMock } from '../../../../use_flyout_api.mock';
@@ -72,16 +72,5 @@ describe('AlertsSection', () => {
       `${AGENT_ALERTS_MAX_ROWS}+ alerts in any status`
     );
     expect(screen.getByText('The newest 20 are shown.')).toBeInTheDocument();
-  });
-
-  it('labels alerts built from a generated source document', () => {
-    mockAlerts([
-      alert(1, { ruleName: 'Malware Detection Alert', isMock: true }),
-      alert(2, { ruleName: 'Potential Prompt Injection' }),
-    ]);
-    renderSection();
-    const [, mockRow, realRow] = screen.getAllByRole('row');
-    expect(within(mockRow).getByTestId(AI_AGENT_TEST_IDS.mockBadge)).toBeInTheDocument();
-    expect(within(realRow).queryByTestId(AI_AGENT_TEST_IDS.mockBadge)).not.toBeInTheDocument();
   });
 });

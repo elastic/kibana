@@ -16,7 +16,7 @@ import {
   EuiTab,
   EuiTabs,
 } from '@elastic/eui';
-import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { useAiAgentContext } from '../../../../entity_analytics/components/ai_security/hooks/use_ai_agents';
 import { parseAgentId } from '../../../../entity_analytics/components/ai_security/utils';
 import { useFlyoutApi } from '../../../use_flyout_api';
@@ -28,7 +28,7 @@ import { AlertsSection } from './components/alerts_section';
 import { AgentActivity } from './components/agent_activity';
 import { GraphTab } from './components/graph_tab';
 import { AI_AGENT_TEST_IDS } from './test_ids';
-import { LOAD_ERROR, NOT_IN_STORE, TAB_ACTIVITY, TAB_GRAPH, TAB_OVERVIEW } from './translations';
+import { LOAD_ERROR, TAB_ACTIVITY, TAB_GRAPH, TAB_OVERVIEW } from './translations';
 
 export interface AiAgentProps {
   /** Install ID: `ai_agent:{process.ai_agent.name}@{host.id}@{user.name}`. */
@@ -105,12 +105,6 @@ export const AiAgent: FC<AiAgentProps> = memo(function AiAgent({ entityId, entit
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         {isError && <KbnDangerCallout announceOnMount size="s" title={LOAD_ERROR} />}
-        {!isLoading && !agent && !isError && (
-          <>
-            <KbnWarningCallout announceOnMount size="s" title={NOT_IN_STORE} />
-            <EuiSpacer size="s" />
-          </>
-        )}
         {selectedTab === 'overview' &&
           (isLoading || !data ? (
             <EuiSkeletonText lines={8} />

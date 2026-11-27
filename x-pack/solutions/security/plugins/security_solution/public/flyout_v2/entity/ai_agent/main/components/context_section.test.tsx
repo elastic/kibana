@@ -145,59 +145,6 @@ describe('ContextSection', () => {
     expect(person).toHaveTextContent('Off');
     expect(person).toHaveTextContent('Departing Employees');
     expect(person).toHaveTextContent('Last signed in');
-    expect(screen.queryByTestId(AI_AGENT_TEST_IDS.mockBadge)).not.toBeInTheDocument();
-  });
-
-  it('labels IdP, MFA and HR values whose source document is tagged poc-mock', () => {
-    renderSection({
-      ...fullContext,
-      people: [
-        {
-          ...fullContext.people[0],
-          idpAccounts: [
-            {
-              email: 'alex@example.com',
-              provider: 'Okta',
-              status: 'ACTIVE',
-              mfaEnabled: true,
-              isMock: false,
-            },
-            {
-              email: 'alex@example.com',
-              provider: 'Entra ID',
-              enabled: true,
-              mfaEnabled: false,
-              isMock: true,
-            },
-          ],
-          hr: { email: 'alex@example.com', status: 'Active', isMock: true },
-        },
-      ],
-    });
-    const idp = screen.getByTestId(AI_AGENT_TEST_IDS.personIdp);
-    expect(idp).toHaveTextContent('Okta: ACTIVEEntra ID: EnabledMock data');
-    expect(within(idp).getAllByTestId(AI_AGENT_TEST_IDS.mockBadge)).toHaveLength(1);
-    const mfa = screen.getByTestId(AI_AGENT_TEST_IDS.personMfa);
-    expect(mfa).toHaveTextContent('Off');
-    expect(within(mfa).getByTestId(AI_AGENT_TEST_IDS.mockBadge)).toBeInTheDocument();
-    expect(
-      within(screen.getByTestId(AI_AGENT_TEST_IDS.personHr)).getByTestId(
-        AI_AGENT_TEST_IDS.mockBadge
-      )
-    ).toBeInTheDocument();
-  });
-
-  it('links MFA to its collection gap, without a mock label when no tagged document is behind it', () => {
-    renderSection(fullContext);
-    const mfa = screen.getByTestId(AI_AGENT_TEST_IDS.personMfa);
-    expect(
-      within(mfa).getByTestId(`${AI_AGENT_TEST_IDS.gapLink}-no_mfa_state`)
-    ).toBeInTheDocument();
-    expect(within(mfa).queryByTestId(AI_AGENT_TEST_IDS.mockBadge)).not.toBeInTheDocument();
-    fireEvent.click(within(mfa).getByTestId(`${AI_AGENT_TEST_IDS.gapLink}-no_mfa_state`));
-    expect(
-      screen.getByText('Okta and Entra ID integrations do not send MFA state')
-    ).toBeInTheDocument();
   });
 
   it('marks older accounts as used before, and only the last signed-in account with a time', () => {
@@ -244,7 +191,6 @@ describe('ContextSection', () => {
       people: [{ email: 'alex@example.com', rows: [], idpAccounts: [], watchlistIds: [] }],
     });
     expect(screen.getByTestId(AI_AGENT_TEST_IDS.person)).toHaveTextContent('alex@example.com');
-    expect(screen.getByTestId(AI_AGENT_TEST_IDS.personNotFound)).toBeInTheDocument();
   });
 
   it('shows HR status and reads MFA from the user row when the IdP read has none', () => {
@@ -285,63 +231,15 @@ describe('ContextSection', () => {
       otherAgentsOnHost: [],
       otherInstallsOnAccount: [],
     });
-    expect(screen.getByTestId(AI_AGENT_TEST_IDS.actsForNone)).toBeInTheDocument();
-    expect(screen.getByText('The host is not in the Entity Store.')).toBeInTheDocument();
-    expect(screen.getByText('Runs as root')).toBeInTheDocument();
-    expect(screen.getByTestId(AI_AGENT_TEST_IDS.runsAs)).toHaveTextContent('No local user row');
-    expect(screen.getByTestId(AI_AGENT_TEST_IDS.otherInstalls)).toHaveTextContent(
-      'No other install has used these accounts.'
+    expect(screen.getByTestId(AI_AGENT_TEST_IDS.actsForNone)).toHaveTextContent(
+      'No signed-in account'
     );
+    expect(screen.getByTestId(AI_AGENT_TEST_IDS.host)).toHaveTextContent('build-01');
+    expect(screen.getByText('Runs as root')).toBeInTheDocument();
+    expect(screen.queryByTestId(AI_AGENT_TEST_IDS.otherInstalls)).not.toBeInTheDocument();
   });
 
-  it('links IdP status to the gap that keeps it off user rows', () => {
-    renderSection(fullContext);
-    expect(
-      within(screen.getByTestId(AI_AGENT_TEST_IDS.personIdp)).getByTestId(
-        `${AI_AGENT_TEST_IDS.gapLink}-user_rows_no_idp_status`
-      )
-    ).toBeInTheDocument();
-  });
-
-  describe('store context', () => {
-    it("lists the facts on the agent's row, saying they are kept by the maintainer", () => {
-      renderSection({ ...fullContext, agent: { ...agent, storeContext } });
-      const panel = screen.getByTestId(AI_AGENT_TEST_IDS.storeContext);
-      expect(panel).toHaveTextContent('From the Entity Store');
-      expect(screen.getByTestId(AI_AGENT_TEST_IDS.storeContextUpdated)).toHaveTextContent(
-        /AI agent context maintainer, not queried when the flyout opens\. Updated 5 minutes ago/
-      );
-      expect(screen.getByTestId(AI_AGENT_TEST_IDS.storeContextWatchlists)).toHaveTextContent(
-        'Privileged Users'
-      );
-      expect(screen.getByTestId(AI_AGENT_TEST_IDS.storeContextMfa)).toHaveTextContent('On');
-      expect(panel).toHaveTextContent('Host criticalityHigh Impact');
-      expect(panel).toHaveTextContent('Account shared with 2 other installs');
-      expect(panel).not.toHaveTextContent("Person's criticality");
-    });
-
-    it('shows person criticality only when the row has it', () => {
-      renderSection({
-        ...fullContext,
-        agent: {
-          ...agent,
-          storeContext: {
-            ...storeContext,
-            personCriticality: 'extreme_impact',
-            sharedAccountInstalls: 0,
-          },
-        },
-      });
-      const panel = screen.getByTestId(AI_AGENT_TEST_IDS.storeContext);
-      expect(panel).toHaveTextContent("Person's criticalityExtreme Impact");
-      expect(panel).not.toHaveTextContent('Account shared');
-    });
-
-    it('says when the maintainer has not written the row yet', () => {
-      renderSection(fullContext);
-      expect(screen.getByTestId(AI_AGENT_TEST_IDS.storeContextMissing)).toBeInTheDocument();
-    });
-
+  describe('row facts', () => {
     it("prefers the row's MFA and watchlists on the only person's card", () => {
       renderSection({ ...fullContext, agent: { ...agent, storeContext } });
       expect(screen.getByTestId(AI_AGENT_TEST_IDS.personMfa)).toHaveTextContent('On');
@@ -370,7 +268,7 @@ describe('ContextSection', () => {
     });
   });
 
-  it('places the risk summary between the store context and the people the agent acts for', () => {
+  it('places the risk summary above the people the agent acts for', () => {
     render(
       <TestProviders>
         <ContextSection
@@ -380,12 +278,8 @@ describe('ContextSection', () => {
         />
       </TestProviders>
     );
-    const storeContextPanel = screen.getByTestId(AI_AGENT_TEST_IDS.storeContext);
     const riskSummary = screen.getByTestId('riskSummarySlot');
     const person = screen.getByTestId(AI_AGENT_TEST_IDS.person);
-    expect(storeContextPanel.compareDocumentPosition(riskSummary)).toBe(
-      Node.DOCUMENT_POSITION_FOLLOWING
-    );
     expect(riskSummary.compareDocumentPosition(person)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 });

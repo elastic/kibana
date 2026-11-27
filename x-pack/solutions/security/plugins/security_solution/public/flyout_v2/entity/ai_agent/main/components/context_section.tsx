@@ -35,10 +35,6 @@ import type {
   RelatedEntity,
 } from '../../../../../entity_analytics/components/ai_security/types';
 import { getAgentDisplayName } from '../../../../../entity_analytics/components/ai_security/utils';
-import { GAP_IDS } from '../../../../../entity_analytics/components/ai_security/gaps';
-import { GapLink } from './missing_layer_note';
-import { GeneratedDataBadge } from './generated_data_badge';
-import { StoreContextPanel } from './store_context_panel';
 import { WatchlistBadges } from './watchlist_badges';
 import { AI_AGENT_TEST_IDS } from '../test_ids';
 import {
@@ -47,7 +43,6 @@ import {
   CRITICALITY_LABEL,
   DEPROVISIONED,
   ENABLED,
-  HOST_NOT_FOUND,
   HOST_TITLE,
   HR_LABEL,
   IDP_STATUS_LABEL,
@@ -57,12 +52,9 @@ import {
   MFA_OFF,
   MFA_ON,
   OTHER_AGENTS_ON_HOST,
-  OTHER_INSTALLS_NONE,
   OTHER_INSTALLS_TITLE,
-  PERSON_NOT_FOUND,
   PREVIOUS_ACCOUNT,
   RISK_LABEL,
-  RUNS_AS_NOT_FOUND,
   RUNS_AS_ROOT,
   RUNS_AS_TITLE,
   SUSPENDED,
@@ -113,12 +105,7 @@ const ALWAYS_RELATIVE_HOURS = 24 * 365;
 
 interface MfaState {
   readonly enabled?: boolean;
-  /** An IdP document behind the value is tagged `poc-mock`. */
-  readonly isMock: boolean;
 }
-
-const hasMockMfa = ({ idpAccounts }: AgentPerson): boolean =>
-  idpAccounts.some((account) => account.mfaEnabled !== undefined && account.isMock);
 
 /**
  * MFA for one person. The agent row's value comes first, when it speaks for this person alone.
@@ -126,15 +113,14 @@ const hasMockMfa = ({ idpAccounts }: AgentPerson): boolean =>
  * source reports off.
  */
 const getMfaState = (person: AgentPerson, rowFacts?: AgentStoreContext): MfaState => {
-  const isMock = hasMockMfa(person);
   if (rowFacts?.personMfaEnabled !== undefined) {
-    return { enabled: rowFacts.personMfaEnabled, isMock };
+    return { enabled: rowFacts.personMfaEnabled };
   }
   const known = [
     ...person.idpAccounts.map((account) => account.mfaEnabled),
     ...person.rows.map((personRow) => personRow.mfaEnabled),
   ].filter((value): value is boolean => value !== undefined);
-  return { enabled: known.length === 0 ? undefined : !known.includes(false), isMock };
+  return { enabled: known.length === 0 ? undefined : !known.includes(false) };
 };
 
 const getPersonWatchlistIds = (
@@ -223,11 +209,6 @@ const PersonCard = memo(
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="xs" />
-        {!primary && (
-          <EuiText size="xs" color="subdued" data-test-subj={AI_AGENT_TEST_IDS.personNotFound}>
-            {PERSON_NOT_FOUND} <GapLink gapId={GAP_IDS.noIdpData} />
-          </EuiText>
-        )}
         <EuiDescriptionList
           compressed
           type="column"
@@ -247,33 +228,21 @@ const PersonCard = memo(
                     data-test-subj={AI_AGENT_TEST_IDS.personIdp}
                   >
                     {idpAccounts.map((account) => (
-                      <React.Fragment key={account.provider}>
-                        <EuiFlexItem grow={false}>
-                          <EuiBadge
-                            color={account.deprovisioned || account.suspended ? 'danger' : 'hollow'}
-                          >
-                            <FormattedMessage
-                              id="xpack.securitySolution.flyout.entityDetails.aiAgent.context.idpAccountStatus"
-                              defaultMessage="{provider}: {status}"
-                              values={{
-                                provider: account.provider,
-                                status: idpStatusText(account),
-                              }}
-                            />
-                          </EuiBadge>
-                        </EuiFlexItem>
-                        {account.isMock && (
-                          <EuiFlexItem grow={false}>
-                            <GeneratedDataBadge />
-                          </EuiFlexItem>
-                        )}
-                      </React.Fragment>
+                      <EuiFlexItem grow={false} key={account.provider}>
+                        <EuiBadge
+                          color={account.deprovisioned || account.suspended ? 'danger' : 'hollow'}
+                        >
+                          <FormattedMessage
+                            id="xpack.securitySolution.flyout.entityDetails.aiAgent.context.idpAccountStatus"
+                            defaultMessage="{provider}: {status}"
+                            values={{
+                              provider: account.provider,
+                              status: idpStatusText(account),
+                            }}
+                          />
+                        </EuiBadge>
+                      </EuiFlexItem>
                     ))}
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="xs">
-                        <GapLink gapId={GAP_IDS.userRowsNoIdpStatus} />
-                      </EuiText>
-                    </EuiFlexItem>
                   </EuiFlexGroup>
                 ),
             },
@@ -295,16 +264,6 @@ const PersonCard = memo(
                         {mfa.enabled ? MFA_ON : MFA_OFF}
                       </EuiBadge>
                     )}
-                  </EuiFlexItem>
-                  {mfa.isMock && (
-                    <EuiFlexItem grow={false}>
-                      <GeneratedDataBadge />
-                    </EuiFlexItem>
-                  )}
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="xs">
-                      <GapLink gapId={GAP_IDS.noMfaState} />
-                    </EuiText>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               ),
@@ -343,11 +302,6 @@ const PersonCard = memo(
                       )}
                     </EuiBadge>
                   </EuiFlexItem>
-                  {person.hr.isMock && (
-                    <EuiFlexItem grow={false}>
-                      <GeneratedDataBadge />
-                    </EuiFlexItem>
-                  )}
                 </EuiFlexGroup>
               ) : (
                 IDP_UNKNOWN
@@ -393,15 +347,13 @@ const AgentList = ({ rows, onOpen }: { rows: readonly RelatedEntity[]; onOpen: O
 export interface ContextSectionProps {
   readonly context: AgentContext;
   readonly scopeId: string;
-  /** Rendered below the "From the Entity Store" panel. */
   readonly riskSummary?: React.ReactNode;
 }
 
 /**
- * Identity and context: the facts the context maintainer keeps on the agent row, the person the
- * agent acts for (IdP status, MFA, watchlists), the host (criticality, risk, other agents), the
- * local user it runs as, and other installs on the same account. Each card opens that entity's
- * flyout.
+ * Identity and context: the person the agent acts for (IdP status, MFA, watchlists), the host
+ * (criticality, risk, other agents), the local user it runs as, and other installs on the same
+ * account. Each card opens that entity's flyout.
  */
 export const ContextSection = memo(({ context, scopeId, riskSummary }: ContextSectionProps) => {
   const { openEntityDetailsAsChild } = useFlyoutApi();
@@ -446,18 +398,12 @@ export const ContextSection = memo(({ context, scopeId, riskSummary }: ContextSe
 
   return (
     <>
-      <StoreContextPanel
-        storeContext={storeContext}
-        watchlistLookup={watchlistLookup}
-        mfaIsMock={people.some(hasMockMfa)}
-      />
-      <EuiSpacer size="m" />
       {riskSummary}
 
       <SectionTitle>{ACTS_FOR_TITLE}</SectionTitle>
       {sortedPeople.length === 0 ? (
         <EuiText size="xs" color="subdued" data-test-subj={AI_AGENT_TEST_IDS.actsForNone}>
-          {ACTS_FOR_NONE} <GapLink gapId={GAP_IDS.emailAfterSignIn} />
+          {ACTS_FOR_NONE}
         </EuiText>
       ) : (
         <EuiFlexGroup direction="column" gutterSize="s">
@@ -509,9 +455,7 @@ export const ContextSection = memo(({ context, scopeId, riskSummary }: ContextSe
                 />
               </>
             ) : (
-              <EuiText size="xs" color="subdued">
-                {HOST_NOT_FOUND}
-              </EuiText>
+              <EuiText size="s">{agent?.hostName ?? agent?.hostId}</EuiText>
             )}
             {otherAgentsOnHost.length > 0 && (
               <>
@@ -547,11 +491,6 @@ export const ContextSection = memo(({ context, scopeId, riskSummary }: ContextSe
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>
-            {!runsAs && (
-              <EuiText size="xs" color="subdued">
-                {RUNS_AS_NOT_FOUND}
-              </EuiText>
-            )}
             {runsAs && (
               <>
                 <EuiSpacer size="xs" />
@@ -567,25 +506,12 @@ export const ContextSection = memo(({ context, scopeId, riskSummary }: ContextSe
       </EuiFlexGroup>
       <EuiSpacer size="m" />
 
-      <div data-test-subj={AI_AGENT_TEST_IDS.otherInstalls}>
-        <SectionTitle>{OTHER_INSTALLS_TITLE}</SectionTitle>
-        {otherInstallsOnAccount.length === 0 ? (
-          <EuiText size="xs" color="subdued">
-            {OTHER_INSTALLS_NONE}
-          </EuiText>
-        ) : (
-          <>
-            <EuiText size="xs" color="subdued">
-              <FormattedMessage
-                id="xpack.securitySolution.flyout.entityDetails.aiAgent.context.otherInstallsCount"
-                defaultMessage="{count, plural, one {# other install has} other {# other installs have}} signed in with an account this install used."
-                values={{ count: otherInstallsOnAccount.length }}
-              />
-            </EuiText>
-            <AgentList rows={otherInstallsOnAccount} onOpen={onOpen} />
-          </>
-        )}
-      </div>
+      {otherInstallsOnAccount.length > 0 && (
+        <div data-test-subj={AI_AGENT_TEST_IDS.otherInstalls}>
+          <SectionTitle>{OTHER_INSTALLS_TITLE}</SectionTitle>
+          <AgentList rows={otherInstallsOnAccount} onOpen={onOpen} />
+        </div>
+      )}
     </>
   );
 });

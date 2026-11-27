@@ -30,7 +30,6 @@ import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
 import { useAiAgentAlerts } from '../../../../../entity_analytics/components/ai_security/hooks/use_ai_agents';
 import { AGENT_ALERTS_MAX_ROWS } from '../../../../../entity_analytics/components/ai_security/constants';
 import type { AgentAlert } from '../../../../../entity_analytics/components/ai_security/types';
-import { GeneratedDataBadge } from './generated_data_badge';
 import { AI_AGENT_TEST_IDS } from '../test_ids';
 import {
   ALERT_RULE,
@@ -77,20 +76,11 @@ export const AlertsSection = memo(({ entityId }: { entityId: string }) => {
             >
               {ruleName ?? alert.id}
             </EuiLink>
-            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
-              {[alert.processName, alert.status].some(Boolean) && (
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued">
-                    {[alert.processName, alert.status].filter(Boolean).join(' · ')}
-                  </EuiText>
-                </EuiFlexItem>
-              )}
-              {alert.isMock && (
-                <EuiFlexItem grow={false}>
-                  <GeneratedDataBadge />
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
+            {[alert.processName, alert.status].some(Boolean) && (
+              <EuiText size="xs" color="subdued">
+                {[alert.processName, alert.status].filter(Boolean).join(' · ')}
+              </EuiText>
+            )}
           </div>
         ),
       },

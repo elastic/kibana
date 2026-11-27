@@ -43,13 +43,7 @@ import type {
   AgentIdentity,
   AgentRow,
 } from '../../../../../entity_analytics/components/ai_security/types';
-import {
-  getToolShellCommand,
-  isClaudeCode,
-} from '../../../../../entity_analytics/components/ai_security/utils';
-import { GAP_IDS } from '../../../../../entity_analytics/components/ai_security/gaps';
-import { GapLink, MissingLayerNote } from './missing_layer_note';
-import { GeneratedDataBadge } from './generated_data_badge';
+import { getToolShellCommand } from '../../../../../entity_analytics/components/ai_security/utils';
 import { AI_AGENT_TEST_IDS } from '../test_ids';
 
 const LAUNCH_MODE_LABELS: Readonly<Record<LaunchMode, string>> = {
@@ -245,11 +239,6 @@ const StepRow = memo(
                 {step.text ?? <em>{PROMPT_TEXT_NOT_LOGGED}</em>}
               </EuiText>
             </EuiFlexItem>
-            {step.isMock && (
-              <EuiFlexItem grow={false}>
-                <GeneratedDataBadge />
-              </EuiFlexItem>
-            )}
           </EuiFlexGroup>
         );
         break;
@@ -292,11 +281,6 @@ const StepRow = memo(
                 </EuiBadge>
               </EuiFlexItem>
             )}
-            {step.isMock && (
-              <EuiFlexItem grow={false}>
-                <GeneratedDataBadge />
-              </EuiFlexItem>
-            )}
           </EuiFlexGroup>
         );
         break;
@@ -312,11 +296,6 @@ const StepRow = memo(
                 {step.mcpServer ? ` (${step.mcpServer})` : ''}
               </EuiText>
             </EuiFlexItem>
-            {step.isMock && (
-              <EuiFlexItem grow={false}>
-                <GeneratedDataBadge />
-              </EuiFlexItem>
-            )}
           </EuiFlexGroup>
         );
         break;
@@ -432,12 +411,10 @@ const RunView = memo(
   ({
     run,
     showSetup,
-    showInteractivePromptNote,
     onOpenProcessTree,
   }: {
     run: AgentRun;
     showSetup: boolean;
-    showInteractivePromptNote: boolean;
     onOpenProcessTree: (step: ProcessStep) => void;
   }) => {
     const rootStep: ProcessStep = {
@@ -479,7 +456,7 @@ const RunView = memo(
         <EuiSpacer size="xs" />
         <ProcessStepRow step={rootStep} onOpenProcessTree={onOpenProcessTree} />
         <EuiSpacer size="xs" />
-        {run.isHeadless ? (
+        {run.isHeadless && (
           <EuiText size="xs" data-test-subj={AI_AGENT_TEST_IDS.headlessPrompt}>
             <strong>
               <FormattedMessage
@@ -496,20 +473,6 @@ const RunView = memo(
               </em>
             )}
           </EuiText>
-        ) : (
-          showInteractivePromptNote && (
-            <EuiText
-              size="xs"
-              color="subdued"
-              data-test-subj={AI_AGENT_TEST_IDS.missingInteractivePrompt}
-            >
-              <FormattedMessage
-                id="xpack.securitySolution.flyout.entityDetails.aiAgent.activity.interactiveNoPrompt"
-                defaultMessage="Interactive run: the prompt is not on the command line."
-              />{' '}
-              <GapLink gapId={GAP_IDS.defendHeadlessOnly} />
-            </EuiText>
-          )
         )}
         <EuiSpacer size="s" />
         {run.sections.map((section, index) => (
@@ -531,15 +494,14 @@ export interface AgentActivityProps {
 }
 
 /**
- * Agent activity: one panel per run (launch), with the steps from every source that exists.
- * Missing sources show a short note linking to their gaps row, and no step is hidden because a
- * field is missing. Process steps open the existing process tree tool for their terminal session.
+ * Agent activity: one panel per run (launch), with the steps from every source that exists. No
+ * step is hidden because a field is missing. Process steps open Session View for their terminal
+ * session.
  */
 export const AgentActivity = memo(({ agent }: AgentActivityProps) => {
   const { data, isLoading, isError } = useAiAgentActivity(agent);
   const { openSessionView } = useFlyoutApi();
   const [showSetup, setShowSetup] = useState(false);
-  const claude = isClaudeCode(agent.agentName);
 
   const onOpenProcessTree = useCallback(
     ({ process }: ProcessStep) => {
@@ -597,70 +559,6 @@ export const AgentActivity = memo(({ agent }: AgentActivityProps) => {
   }
 
   const { layers } = data;
-  const notes: Array<{
-    testId: string;
-    message: string;
-    gapId: (typeof GAP_IDS)[keyof typeof GAP_IDS];
-  }> = [];
-  if (!layers.sessionIds) {
-    notes.push({
-      testId: AI_AGENT_TEST_IDS.missingSessionId,
-      message: i18n.translate(
-        'xpack.securitySolution.flyout.entityDetails.aiAgent.activity.noSessionId',
-        {
-          defaultMessage:
-            'Defend reports no session ID for this agent, so runs are grouped by process tree only.',
-        }
-      ),
-      gapId: claude ? GAP_IDS.claudeSessionIdUnmapped : GAP_IDS.cursorNoSessionId,
-    });
-  }
-  if (!layers.otelToolCalls) {
-    notes.push({
-      testId: AI_AGENT_TEST_IDS.missingToolCalls,
-      message: i18n.translate(
-        'xpack.securitySolution.flyout.entityDetails.aiAgent.activity.noToolCalls',
-        {
-          defaultMessage: 'Tool calls are not collected for this agent.',
-        }
-      ),
-      gapId: claude ? GAP_IDS.claudeOtelNotCollected : GAP_IDS.cursorNoPromptSource,
-    });
-  }
-  if (!layers.otelPrompts) {
-    notes.push({
-      testId: AI_AGENT_TEST_IDS.missingPrompts,
-      message: layers.headlessPrompts
-        ? i18n.translate(
-            'xpack.securitySolution.flyout.entityDetails.aiAgent.activity.onlyHeadlessPrompts',
-            {
-              defaultMessage:
-                'Prompts are not collected for this agent. Headless runs show the prompt from the command line.',
-            }
-          )
-        : i18n.translate('xpack.securitySolution.flyout.entityDetails.aiAgent.activity.noPrompts', {
-            defaultMessage: 'Prompts are not collected for this agent.',
-          }),
-      gapId: !claude
-        ? GAP_IDS.cursorNoPromptSource
-        : layers.otelEvents
-        ? GAP_IDS.claudePromptOptIn
-        : GAP_IDS.claudeOtelNotCollected,
-    });
-  }
-  if (data.otelMatch === 'account') {
-    notes.push({
-      testId: AI_AGENT_TEST_IDS.otelByAccount,
-      message: i18n.translate(
-        'xpack.securitySolution.flyout.entityDetails.aiAgent.activity.otelByAccount',
-        {
-          defaultMessage:
-            'OTel is matched to this install by account and time, because Defend has no session ID. Another install on the same account could show here.',
-        }
-      ),
-      gapId: GAP_IDS.claudeSessionIdUnmapped,
-    });
-  }
 
   return (
     <div data-test-subj={AI_AGENT_TEST_IDS.activity}>
@@ -681,12 +579,6 @@ export const AgentActivity = memo(({ agent }: AgentActivityProps) => {
           <EuiSpacer size="s" />
         </>
       )}
-      {notes.map((note) => (
-        <React.Fragment key={note.testId}>
-          <MissingLayerNote message={note.message} gapId={note.gapId} testId={note.testId} />
-          <EuiSpacer size="xs" />
-        </React.Fragment>
-      ))}
       {data.truncated && (
         <EuiText size="xs" color="warning">
           <FormattedMessage
@@ -716,12 +608,7 @@ export const AgentActivity = memo(({ agent }: AgentActivityProps) => {
       )}
       {data.runs.map((run) => (
         <React.Fragment key={run.id}>
-          <RunView
-            run={run}
-            showSetup={showSetup}
-            showInteractivePromptNote={!layers.otelPrompts}
-            onOpenProcessTree={onOpenProcessTree}
-          />
+          <RunView run={run} showSetup={showSetup} onOpenProcessTree={onOpenProcessTree} />
           <EuiSpacer size="s" />
         </React.Fragment>
       ))}

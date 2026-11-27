@@ -15,10 +15,6 @@ export const NO_SCORE_YET = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.aiAgent.noScoreYet',
   { defaultMessage: 'Risk: no score yet' }
 );
-export const NOT_IN_STORE = i18n.translate(
-  'xpack.securitySolution.flyout.entityDetails.aiAgent.notInStore',
-  { defaultMessage: 'This agent has no Entity Store row. Details are read from events only.' }
-);
 export const LOAD_ERROR = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.aiAgent.loadError',
   { defaultMessage: 'Agent details could not be loaded' }
@@ -72,14 +68,7 @@ export const ACTS_FOR_TITLE = i18n.translate(
 );
 export const ACTS_FOR_NONE = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.aiAgent.context.actsForNone',
-  {
-    defaultMessage:
-      'No account has been seen on this install. It may use an API key, or never have signed in.',
-  }
-);
-export const PERSON_NOT_FOUND = i18n.translate(
-  'xpack.securitySolution.flyout.entityDetails.aiAgent.context.personNotFound',
-  { defaultMessage: 'No identity provider user has this email.' }
+  { defaultMessage: 'No signed-in account' }
 );
 export const IDP_STATUS_LABEL = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.aiAgent.context.idpStatus',
@@ -130,39 +119,6 @@ export const watchlistRiskModifierTooltip = (modifier: number) =>
     values: { modifier },
   });
 
-export const STORE_CONTEXT_TITLE = i18n.translate(
-  'xpack.securitySolution.flyout.entityDetails.aiAgent.storeContext.title',
-  { defaultMessage: 'From the Entity Store' }
-);
-export const STORE_CONTEXT_MISSING = i18n.translate(
-  'xpack.securitySolution.flyout.entityDetails.aiAgent.storeContext.missing',
-  {
-    defaultMessage:
-      "The AI agent context maintainer hasn't written to this agent's row yet, so the cards below are read from the source indices.",
-  }
-);
-export const PERSON_WATCHLISTS_LABEL = i18n.translate(
-  'xpack.securitySolution.flyout.entityDetails.aiAgent.storeContext.personWatchlists',
-  { defaultMessage: "Person's watchlists" }
-);
-export const PERSON_MFA_LABEL = i18n.translate(
-  'xpack.securitySolution.flyout.entityDetails.aiAgent.storeContext.personMfa',
-  { defaultMessage: "Person's MFA" }
-);
-export const PERSON_CRITICALITY_LABEL = i18n.translate(
-  'xpack.securitySolution.flyout.entityDetails.aiAgent.storeContext.personCriticality',
-  { defaultMessage: "Person's criticality" }
-);
-export const HOST_CRITICALITY_LABEL = i18n.translate(
-  'xpack.securitySolution.flyout.entityDetails.aiAgent.storeContext.hostCriticality',
-  { defaultMessage: 'Host criticality' }
-);
-export const sharedAccountBadge = (count: number) =>
-  i18n.translate('xpack.securitySolution.flyout.entityDetails.aiAgent.storeContext.sharedAccount', {
-    defaultMessage:
-      'Account shared with {count, plural, one {# other install} other {# other installs}}',
-    values: { count },
-  });
 export const CRITICALITY_LABEL = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.aiAgent.context.criticality',
   { defaultMessage: 'Criticality' }
@@ -184,10 +140,6 @@ export const HOST_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.aiAgent.context.hostTitle',
   { defaultMessage: 'Host' }
 );
-export const HOST_NOT_FOUND = i18n.translate(
-  'xpack.securitySolution.flyout.entityDetails.aiAgent.context.hostNotFound',
-  { defaultMessage: 'The host is not in the Entity Store.' }
-);
 export const OTHER_AGENTS_ON_HOST = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.aiAgent.context.otherAgentsOnHost',
   { defaultMessage: 'Other agents on this host' }
@@ -197,13 +149,6 @@ export const RUNS_AS_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.aiAgent.context.runsAsTitle',
   { defaultMessage: 'Runs as (local user)' }
 );
-export const RUNS_AS_NOT_FOUND = i18n.translate(
-  'xpack.securitySolution.flyout.entityDetails.aiAgent.context.runsAsNotFound',
-  {
-    defaultMessage:
-      'No local user row. The Entity Store leaves out system accounts such as root and jenkins.',
-  }
-);
 export const RUNS_AS_ROOT = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.aiAgent.context.runsAsRoot',
   { defaultMessage: 'Runs as root' }
@@ -212,10 +157,6 @@ export const RUNS_AS_ROOT = i18n.translate(
 export const OTHER_INSTALLS_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.aiAgent.context.otherInstalls',
   { defaultMessage: 'Other installs on the same account' }
-);
-export const OTHER_INSTALLS_NONE = i18n.translate(
-  'xpack.securitySolution.flyout.entityDetails.aiAgent.context.otherInstallsNone',
-  { defaultMessage: 'No other install has used these accounts.' }
 );
 
 export const ALERTS_TITLE = i18n.translate(
@@ -246,25 +187,4 @@ export const ALERT_TIME = i18n.translate(
 export const GRAPH_OPEN_FULL = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.aiAgent.graph.openFull',
   { defaultMessage: 'Open graph view' }
-);
-
-export const GAP_LINK = i18n.translate(
-  'xpack.securitySolution.flyout.entityDetails.aiAgent.gaps.link',
-  { defaultMessage: 'Collection gap' }
-);
-export const GAP_BLOCKS = i18n.translate(
-  'xpack.securitySolution.flyout.entityDetails.aiAgent.gaps.blocks',
-  { defaultMessage: 'What it blocks' }
-);
-export const GAP_STATUS = i18n.translate(
-  'xpack.securitySolution.flyout.entityDetails.aiAgent.gaps.status',
-  { defaultMessage: 'Status or who could close it' }
-);
-export const GAP_WORKAROUND = i18n.translate(
-  'xpack.securitySolution.flyout.entityDetails.aiAgent.gaps.workaround',
-  { defaultMessage: 'PoC workaround' }
-);
-export const GAP_REGISTER = i18n.translate(
-  'xpack.securitySolution.flyout.entityDetails.aiAgent.gaps.register',
-  { defaultMessage: 'Row in the gaps register' }
 );

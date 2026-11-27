@@ -153,17 +153,3 @@ export const LOAD_ERROR = i18n.translate(
     defaultMessage: 'AI agents could not be loaded',
   }
 );
-
-export const MOCK_DATA_BADGE = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.aiSecurity.mockDataBadge',
-  {
-    defaultMessage: 'Mock data',
-  }
-);
-export const MOCK_DATA_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.aiSecurity.mockDataTooltip',
-  {
-    defaultMessage:
-      'Generated from a published schema because the real source was not collected. Tagged poc-mock.',
-  }
-);

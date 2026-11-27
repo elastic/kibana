@@ -27,12 +27,6 @@ const claude: AgentIdentity = {
   hostId: 'host-1',
   userName: 'ec2-user',
 };
-const cursor: AgentIdentity = {
-  ...claude,
-  entityId: 'ai_agent:cursor@host-1@ec2-user',
-  agentName: 'cursor',
-};
-
 const proc = (overrides: Partial<ProcessRecord> & { entityId: string }): ProcessRecord => ({
   timestamp: '2026-11-26T10:00:00.000Z',
   ancestry: [],
@@ -65,7 +59,7 @@ describe('AgentActivity', () => {
     jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
   });
 
-  it('shows a note with a gaps link for each missing layer of a Defend-only Claude agent', () => {
+  it('shows a Defend-only run without notes about missing layers', () => {
     mockActivity(
       buildAgentActivity({
         identity: claude,
@@ -78,63 +72,9 @@ describe('AgentActivity', () => {
     );
     renderActivity();
 
-    expect(screen.getByTestId(AI_AGENT_TEST_IDS.missingSessionId)).toHaveTextContent(
-      'Defend reports no session ID'
-    );
-    expect(screen.getByTestId(AI_AGENT_TEST_IDS.missingToolCalls)).toHaveTextContent(
-      'Tool calls are not collected for this agent.'
-    );
-    expect(screen.getByTestId(AI_AGENT_TEST_IDS.missingPrompts)).toHaveTextContent(
-      'Prompts are not collected for this agent.'
-    );
-    expect(
-      screen.getByTestId(`${AI_AGENT_TEST_IDS.gapLink}-claude_session_id_unmapped`)
-    ).toBeInTheDocument();
-    expect(
-      screen.getAllByTestId(`${AI_AGENT_TEST_IDS.gapLink}-claude_otel_not_collected`)
-    ).toHaveLength(2);
-    expect(screen.getByTestId(AI_AGENT_TEST_IDS.missingInteractivePrompt)).toBeInTheDocument();
     expect(screen.getAllByTestId(AI_AGENT_TEST_IDS.run)).toHaveLength(1);
-  });
-
-  it('opens the gaps row behind a note', () => {
-    mockActivity(
-      buildAgentActivity({
-        identity: claude,
-        ownEvents: [proc({ entityId: 'agent', isDescendant: false })],
-        descendantEvents: [],
-        sideEffects: new Map(),
-        otelEvents: [],
-        otelMatch: 'none',
-      })
-    );
-    renderActivity();
-
-    fireEvent.click(screen.getByTestId(`${AI_AGENT_TEST_IDS.gapLink}-claude_session_id_unmapped`));
-    expect(
-      screen.getByText('Defend Claude session ID unmapped in package 9.6.1')
-    ).toBeInTheDocument();
-  });
-
-  it('points Cursor notes at the Cursor gaps rows', () => {
-    mockActivity(
-      buildAgentActivity({
-        identity: cursor,
-        ownEvents: [proc({ entityId: 'agent', isDescendant: false })],
-        descendantEvents: [],
-        sideEffects: new Map(),
-        otelEvents: [],
-        otelMatch: 'none',
-      })
-    );
-    renderActivity(cursor);
-
-    expect(
-      screen.getByTestId(`${AI_AGENT_TEST_IDS.gapLink}-cursor_no_session_id`)
-    ).toBeInTheDocument();
-    expect(
-      screen.getAllByTestId(`${AI_AGENT_TEST_IDS.gapLink}-cursor_no_prompt_source`)
-    ).toHaveLength(2);
+    expect(screen.getByTestId(AI_AGENT_TEST_IDS.activity)).not.toHaveTextContent('not collected');
+    expect(screen.queryByTestId(AI_AGENT_TEST_IDS.headlessPrompt)).not.toBeInTheDocument();
   });
 
   it('shows a step with no name or command line instead of hiding it', () => {
@@ -153,7 +93,7 @@ describe('AgentActivity', () => {
     expect(screen.getByText('Process with no name or command line recorded')).toBeInTheDocument();
   });
 
-  it('shows the headless prompt, sessions and OTel steps, with no missing-layer notes', () => {
+  it('shows the headless prompt, sessions and OTel steps', () => {
     mockActivity(
       buildAgentActivity({
         identity: claude,
@@ -201,10 +141,7 @@ describe('AgentActivity', () => {
     expect(screen.getByText('Ran as root')).toBeInTheDocument();
     expect(screen.getByText('Agent session session-1')).toBeInTheDocument();
     expect(screen.getByText('Tool call: Bash')).toBeInTheDocument();
-    expect(screen.getAllByText('Mock data')).toHaveLength(2);
-    expect(screen.queryByTestId(AI_AGENT_TEST_IDS.missingSessionId)).not.toBeInTheDocument();
-    expect(screen.queryByTestId(AI_AGENT_TEST_IDS.missingToolCalls)).not.toBeInTheDocument();
-    expect(screen.queryByTestId(AI_AGENT_TEST_IDS.missingPrompts)).not.toBeInTheDocument();
+    expect(screen.queryByText('Mock data')).not.toBeInTheDocument();
   });
 
   it('hides setup commands behind a toggle and counts them', () => {
