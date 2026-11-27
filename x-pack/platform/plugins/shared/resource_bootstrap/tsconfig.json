@@ -1,0 +1,24 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "common/**/*",
+    "server/**/*",
+  ],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/logging",
+    "@kbn/config-schema",
+    "@kbn/task-manager-plugin",
+    "@kbn/logging-mocks",
+    "@kbn/core-test-helpers-kbn-server",
+    "@kbn/lock-manager",
+    "@kbn/std",
+    "@kbn/core-spaces-common",
+    "@kbn/resource-bootstrap-server",
+    "@kbn/test",
+  ]
+}
