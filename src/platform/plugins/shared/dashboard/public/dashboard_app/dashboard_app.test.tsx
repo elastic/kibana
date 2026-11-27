@@ -115,7 +115,7 @@ describe('Dashboard App', () => {
   });
 
   describe('same-dashboard incoming embeddables', () => {
-    const addIncomingEmbeddablesSpy = jest.spyOn(dashboardApi, 'addIncomingEmbeddables');
+    const addIncomingEmbeddablesSpy = jest.spyOn(dashboardInternalApi, 'addIncomingEmbeddables');
     const setViewModeSpy = jest.spyOn(dashboardApi, 'setViewMode');
     const stateTransferMock = embeddableService.getStateTransfer();
     const transferSubject$ = new Subject<unknown>();

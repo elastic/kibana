@@ -281,8 +281,6 @@ export type DashboardApi = CanExpandPanels &
     user?: DashboardUser;
     userActivity$: Subject<UserActivity>;
     isAccessControlEnabled?: boolean;
-
-    addIncomingEmbeddables: (embeddables?: EmbeddablePackageState[]) => void;
   };
 
 type ActivityType = 'view' | 'refresh';
@@ -295,6 +293,7 @@ export type DashboardInternalApi = ReturnType<
 >['internalApi'] &
   ReturnType<typeof startTrackingHistory<DashboardState>>['api'] & {
     gridLayout$: BehaviorSubject<GridLayoutData>;
+    addIncomingEmbeddables: (embeddables?: EmbeddablePackageState[]) => Promise<void>;
     serializeLayout: () => Pick<DashboardState, 'panels' | 'pinned_panels'>;
     isSectionCollapsed: (sectionId?: string) => boolean;
     dashboardContainerRef$: BehaviorSubject<HTMLElement | null>;

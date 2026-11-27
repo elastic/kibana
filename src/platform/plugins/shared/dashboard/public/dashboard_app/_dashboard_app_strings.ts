@@ -15,6 +15,11 @@ export const getDashboardPageTitle = () =>
     defaultMessage: 'Dashboards',
   });
 
+export const getIncomingEmbeddablesErrorTitle = () =>
+  i18n.translate('dashboard.incomingEmbeddables.errorTitle', {
+    defaultMessage: 'Unable to add panels to the dashboard',
+  });
+
 export const dashboardReadonlyBadge = {
   getText: () =>
     i18n.translate('dashboard.badge.readOnly.text', {

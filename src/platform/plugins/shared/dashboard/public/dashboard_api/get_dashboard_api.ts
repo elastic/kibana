@@ -12,6 +12,7 @@ import { BehaviorSubject, combineLatest, concatMap, map, merge, of, Subject } fr
 import { v4 } from 'uuid';
 
 import type { EuiFlyoutProps } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
@@ -20,6 +21,7 @@ import { getLastSavedState } from '../../common/default_dashboard_state';
 import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
 import type { DashboardReadResponseBody } from '../../server';
 import { initializeAccessControlManager } from './access_control_manager';
+import { prepareIncomingEmbeddables } from './load_dashboard_api/prepare_incoming_embeddables';
 import { initializeApproximationManager } from './approximation_manager';
 import { initializeChangeSourceTracker, type LatestChangeBySource } from './change_source_tracker';
 import { initializeDataLoadingManager } from './data_loading_manager';
@@ -259,7 +261,14 @@ export function getDashboardApi({
   if (incomingEmbeddables?.length) {
     // allow incoming embeddables to be undone
     initialState$.next(getHistoryState());
-    layoutManager.api.addIncomingEmbeddables(incomingEmbeddables);
+    layoutManager.internalApi.addIncomingEmbeddables(incomingEmbeddables).catch((error) => {
+      coreServices.notifications.toasts.addDanger({
+        title: i18n.translate('dashboard.addIncomingEmbeddablesError', {
+          defaultMessage: 'Unable to add all incoming panels to the dashboard',
+        }),
+        text: error instanceof Error ? error.message : String(error),
+      });
+    });
   }
 
   const pauseFetchManager = initializePauseFetchManager(filtersManager);
@@ -437,6 +446,11 @@ export function getDashboardApi({
   const internalApi: DashboardInternalApi = {
     ...historyManager.internalApi,
     ...layoutManager.internalApi,
+    addIncomingEmbeddables: async (embeddables?: EmbeddablePackageState[]) => {
+      await layoutManager.internalApi.addIncomingEmbeddables(
+        await prepareIncomingEmbeddables(embeddables, getState)
+      );
+    },
     ...unifiedSearchManager.internalApi,
     ...unsavedChangesManager.internalApi,
     ...esqlVariablesManager.api,

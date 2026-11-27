@@ -205,7 +205,7 @@ describe('layout manager', () => {
       trackPanelMock
     );
 
-    layoutManager.api.addIncomingEmbeddables(incomingEmbeddables);
+    await layoutManager.internalApi.addIncomingEmbeddables(incomingEmbeddables);
     await waitFor(() => expect(Object.keys(layoutManager.api.layout$.value.panels).length).toBe(3));
     const layout = layoutManager.api.layout$.value;
     expect(layout.panels.panelTwo).toEqual({
@@ -251,7 +251,7 @@ describe('layout manager', () => {
       },
     } as NonNullable<DashboardState['pinned_panels']>[number];
 
-    test('should update an existing pinned ES|QL control in place when incoming control has the same id', () => {
+    test('should update an existing pinned ES|QL control in place when incoming control has the same id', async () => {
       const layoutManager = initializeLayoutManager(
         viewModeManagerMock,
         [panel1],
@@ -259,7 +259,7 @@ describe('layout manager', () => {
         trackPanelMock
       );
 
-      layoutManager.api.addIncomingEmbeddables([
+      await layoutManager.internalApi.addIncomingEmbeddables([
         {
           embeddableId: 'pinnedEsqlControl',
           type: ESQL_CONTROL,
@@ -291,7 +291,7 @@ describe('layout manager', () => {
       });
     });
 
-    test('should scroll to and highlight the new grid panel, not the pinned control it updates', () => {
+    test('should scroll to and highlight the new grid panel, not the pinned control it updates', async () => {
       const layoutManager = initializeLayoutManager(
         viewModeManagerMock,
         [panel1],
@@ -299,7 +299,7 @@ describe('layout manager', () => {
         trackPanelMock
       );
 
-      layoutManager.api.addIncomingEmbeddables([
+      await layoutManager.internalApi.addIncomingEmbeddables([
         {
           embeddableId: 'pinnedEsqlControl',
           type: ESQL_CONTROL,
@@ -366,7 +366,7 @@ describe('layout manager', () => {
         hasUnsavedChanges$: new BehaviorSubject(false),
       } as DefaultEmbeddableApi);
 
-      layoutManager.api.addIncomingEmbeddables([
+      const addPromise = layoutManager.internalApi.addIncomingEmbeddables([
         {
           embeddableId: 'pinnedEsqlControl',
           type: ESQL_CONTROL,
@@ -375,6 +375,7 @@ describe('layout manager', () => {
       ]);
 
       expect(layoutManager.internalApi.applyingChildState$.value).toBe(true);
+      await addPromise;
       await waitFor(() => {
         expect(applySerializedState).toHaveBeenCalledWith(updatedState);
         expect(layoutManager.internalApi.applyingChildState$.value).toBe(false);
@@ -407,7 +408,7 @@ describe('layout manager', () => {
         hasUnsavedChanges$: new BehaviorSubject(false),
       } as DefaultEmbeddableApi);
 
-      layoutManager.api.addIncomingEmbeddables([
+      const addPromise = layoutManager.internalApi.addIncomingEmbeddables([
         {
           embeddableId: PANEL_ONE_ID,
           type: panel1.type,
@@ -416,6 +417,7 @@ describe('layout manager', () => {
       ]);
 
       expect(layoutManager.internalApi.applyingChildState$.value).toBe(true);
+      await addPromise;
       await waitFor(() => {
         expect(applySerializedState).toHaveBeenCalledWith({ title: 'Updated Panel One' });
         expect(layoutManager.internalApi.applyingChildState$.value).toBe(false);

@@ -13,7 +13,6 @@ import {
   DEFAULT_PINNED_CONTROL_STATE,
   ESQL_CONTROL,
 } from '@kbn/controls-constants';
-import { embeddableService } from '../../services/kibana_services';
 import { getDuplicate, type PanelsCache } from './get_duplicate';
 
 const createControlState = (variableName: string, selectedOptions: string[] = ['US']) => ({
@@ -24,6 +23,20 @@ const createControlState = (variableName: string, selectedOptions: string[] = ['
   variable_type: 'values' as const,
   selected_options: selectedOptions,
 });
+
+const isDuplicate = (
+  incomingState: { variable_name?: string },
+  existingState: { variable_name?: string }
+) =>
+  Boolean(
+    incomingState.variable_name && incomingState.variable_name === existingState.variable_name
+  );
+
+const definition = {
+  type: ESQL_CONTROL,
+  buildEmbeddable: jest.fn(),
+  isDuplicate,
+};
 
 describe('getDuplicate', () => {
   const initialState: Pick<DashboardState, 'panels' | 'pinned_panels'> = {
@@ -59,135 +72,47 @@ describe('getDuplicate', () => {
     ],
   };
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-    jest
-      .spyOn(embeddableService, 'getEmbeddableDefinition')
-      .mockImplementation(async (type: string) =>
-        type === ESQL_CONTROL
-          ? {
-              type: ESQL_CONTROL,
-              buildEmbeddable: jest.fn(),
-              isDuplicate: (
-                incomingState: { variable_name?: string },
-                existingState: { variable_name?: string }
-              ) =>
-                Boolean(
-                  incomingState.variable_name &&
-                    incomingState.variable_name === existingState.variable_name
-                ),
-            }
-          : {
-              type,
-              buildEmbeddable: jest.fn(),
-            }
-      );
+  const controlPackage = (variableName: string, selectedOptions: string[]) => ({
+    type: ESQL_CONTROL,
+    serializedState: createControlState(variableName, selectedOptions),
   });
 
-  afterEach(() => {
-    jest.restoreAllMocks();
+  test('returns the matching grid or pinned panel', () => {
+    expect(
+      getDuplicate(controlPackage('service_name', ['api']), definition, initialState, new Map())?.id
+    ).toBe('gridControl');
+    expect(
+      getDuplicate(controlPackage('geo_dest', ['CN']), definition, initialState, new Map())?.id
+    ).toBe('pinnedControl');
   });
 
-  test('returns the matching grid or pinned panel', async () => {
-    const cache: PanelsCache = new Map();
-
-    await expect(
-      getDuplicate(
-        {
-          type: ESQL_CONTROL,
-          serializedState: createControlState('service_name', ['api']),
-        },
-        initialState,
-        cache
-      )
-    ).resolves.toEqual({
-      id: 'gridControl',
-      type: ESQL_CONTROL,
-      state: createControlState('service_name', ['web']),
-    });
-
-    await expect(
-      getDuplicate(
-        {
-          type: ESQL_CONTROL,
-          serializedState: createControlState('geo_dest', ['CN']),
-        },
-        initialState,
-        cache
-      )
-    ).resolves.toEqual({
-      id: 'pinnedControl',
-      type: ESQL_CONTROL,
-      state: createControlState('geo_dest', ['US']),
-    });
+  test('does not match a panel inside a section', () => {
+    expect(
+      getDuplicate(controlPackage('env_name', ['staging']), definition, initialState, new Map())
+    ).toBeUndefined();
   });
 
-  test('does not match a panel inside a section', async () => {
-    await expect(
+  test('returns undefined when isDuplicate returns false', () => {
+    expect(
+      getDuplicate(controlPackage('geo_src', ['FR']), definition, initialState, new Map())
+    ).toBeUndefined();
+  });
+
+  test('returns undefined when there is no definition or the definition has no isDuplicate', () => {
+    expect(
+      getDuplicate(controlPackage('geo_dest', ['US']), undefined, initialState, new Map())
+    ).toBeUndefined();
+    expect(
       getDuplicate(
-        {
-          type: ESQL_CONTROL,
-          serializedState: createControlState('env_name', ['staging']),
-        },
+        controlPackage('geo_dest', ['US']),
+        { ...definition, isDuplicate: undefined },
         initialState,
         new Map()
       )
-    ).resolves.toBeUndefined();
+    ).toBeUndefined();
   });
 
-  test('returns undefined when isDuplicate returns false or the type has no isDuplicate', async () => {
-    const cache: PanelsCache = new Map();
-
-    await expect(
-      getDuplicate(
-        {
-          type: ESQL_CONTROL,
-          serializedState: createControlState('geo_src', ['FR']),
-        },
-        initialState,
-        cache
-      )
-    ).resolves.toBeUndefined();
-
-    await expect(
-      getDuplicate(
-        {
-          type: 'lens',
-          serializedState: { title: 'Chart' },
-        },
-        {
-          panels: [
-            {
-              id: 'existingChart',
-              type: 'lens',
-              grid: { w: 1, h: 1, x: 0, y: 0 },
-              config: { title: 'Chart' },
-            },
-          ],
-          pinned_panels: [],
-        },
-        cache
-      )
-    ).resolves.toBeUndefined();
-  });
-
-  test('skips a package that already has an embeddableId without loading its definition', async () => {
-    await expect(
-      getDuplicate(
-        {
-          embeddableId: 'existingId',
-          type: ESQL_CONTROL,
-          serializedState: createControlState('geo_dest', ['CN']),
-        },
-        initialState,
-        new Map()
-      )
-    ).resolves.toBeUndefined();
-
-    expect(embeddableService.getEmbeddableDefinition).not.toHaveBeenCalled();
-  });
-
-  test('reuses the per-type panel cache when provided', async () => {
+  test('reuses the per-type panel cache when provided', () => {
     const cachedPanel = {
       id: 'cachedControl',
       type: ESQL_CONTROL,
@@ -195,53 +120,40 @@ describe('getDuplicate', () => {
     };
     const cache: PanelsCache = new Map([[ESQL_CONTROL, [cachedPanel]]]);
 
-    await expect(
+    expect(
       getDuplicate(
-        {
-          type: ESQL_CONTROL,
-          serializedState: createControlState('cached_var', ['CN']),
-        },
+        controlPackage('cached_var', ['CN']),
+        definition,
         { panels: [], pinned_panels: [] },
         cache
       )
-    ).resolves.toBe(cachedPanel);
+    ).toBe(cachedPanel);
   });
 
-  test('returns undefined when loading the embeddable definition rejects', async () => {
-    jest
-      .spyOn(embeddableService, 'getEmbeddableDefinition')
-      .mockRejectedValueOnce(new Error('ChunkLoadError'));
-
-    await expect(
+  test('skips a package that already has an embeddableId', () => {
+    expect(
       getDuplicate(
+        { ...controlPackage('geo_dest', ['CN']), embeddableId: 'existingId' },
+        definition,
+        initialState,
+        new Map()
+      )
+    ).toBeUndefined();
+  });
+
+  test('returns undefined when isDuplicate throws', () => {
+    expect(
+      getDuplicate(
+        controlPackage('geo_dest', ['CN']),
         {
-          type: ESQL_CONTROL,
-          serializedState: createControlState('geo_dest', ['CN']),
+          ...definition,
+          isDuplicate: () => {
+            throw new Error('Unexpected state');
+          },
         },
         initialState,
         new Map()
       )
-    ).resolves.toBeUndefined();
-  });
-
-  test('returns undefined when isDuplicate throws', async () => {
-    jest.spyOn(embeddableService, 'getEmbeddableDefinition').mockResolvedValueOnce({
-      type: ESQL_CONTROL,
-      buildEmbeddable: jest.fn(),
-      isDuplicate: () => {
-        throw new Error('Unexpected state');
-      },
-    });
-
-    await expect(
-      getDuplicate(
-        {
-          type: ESQL_CONTROL,
-          serializedState: createControlState('geo_dest', ['CN']),
-        },
-        initialState,
-        new Map()
-      )
-    ).resolves.toBeUndefined();
+    ).toBeUndefined();
   });
 });
