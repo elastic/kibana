@@ -7,7 +7,7 @@
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { usePerformanceContext } from '@kbn/ebt-tools';
+import { usePerformanceContext } from '@kbn/ebt-tools/react';
 import { i18n } from '@kbn/i18n';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { orderBy } from 'lodash';

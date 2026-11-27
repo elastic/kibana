@@ -8,12 +8,16 @@
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { type EvalConnector } from '@kbn/evals';
-import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
+import {
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+} from '@kbn/management-settings-ids';
 import {
   ALERTZERO_BALANCED_INFERENCE_FEATURE_ID,
   ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
   ALERTZERO_ENABLED_SETTING_ID,
   ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
+  ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID,
   ALERTZERO_WORKERS_URL,
   API_VERSIONS,
   buildWorkerUrl,
@@ -49,50 +53,133 @@ const DEFAULT_INDEX_SETTING_ID = 'securitySolution:defaultIndex';
  * both happen to be `'1'` today. */
 const SEARCH_INFERENCE_ENDPOINTS_API_VERSION = '1';
 
-const NON_DEFAULT_EVAL_SPACE_IDS = EVAL_SPACE_IDS.filter((id) => id !== DEFAULT_EVAL_SPACE_ID);
+/** The same plugin's `APIRoutes.GET_INFERENCE_CONNECTORS`, inlined for the same reason. */
+const INFERENCE_CONNECTORS_PATH = '/internal/search_inference_endpoints/connectors';
 
-const ALERTZERO_TIER_FEATURE_IDS: readonly string[] = [
+/** The same plugin's `APIRoutes.PUT_INFERENCE_SETTINGS`, inlined for the same reason. */
+const INFERENCE_SETTINGS_PATH = '/internal/search_inference_endpoints/settings';
+
+interface InferenceSettingsResponse {
+  data: { features: Array<{ feature_id: string; endpoints: Array<{ id: string }> }> };
+}
+
+/** The three AlertZero cost tiers the connectors route can assert the subject on. */
+const ALERTZERO_COST_TIER_FEATURE_IDS: readonly string[] = [
   ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
   ALERTZERO_BALANCED_INFERENCE_FEATURE_ID,
   ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
 ];
 
-const ensureSpaceExists = async ({
+/**
+ * Every feature the bridge pins through the inference-settings saved object. Includes the Cyber
+ * row on top of the cost tiers: a saved Cyber pick replaces the tier in `selectHuntCallModel`,
+ * so a pick left in place by an earlier run on a reused stack would score another model under
+ * the subject's name while the tier assertions still pass. The Cyber row itself is registered
+ * with `allowTemplateRequiredModels: true`, so the connectors route filters out every ordinary
+ * connector for it and a normal subject resolves to nothing there; its pick is asserted from the
+ * saved settings instead (`assertCyberPickPinned`).
+ */
+const ALERTZERO_BRIDGED_FEATURE_IDS: readonly string[] = [
+  ...ALERTZERO_COST_TIER_FEATURE_IDS,
+  ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID,
+];
+
+/** The `solution` view value AlertZero requires; any other value (or none) is a Classic space. */
+const SECURITY_SOLUTION_VIEW = 'security';
+
+interface SpaceBody {
+  id: string;
+  name: string;
+  solution?: string;
+  [field: string]: unknown;
+}
+
+/**
+ * AlertZero routes 404 in a Classic space (`isSpaceSupported`), `default` included. The spaces
+ * PUT replaces the whole object, so an existing space is written back as read. On serverless
+ * the space is still created when missing, but without a `solution` and never converted.
+ */
+const ensureSecuritySpace = async ({
   fetch,
   log,
   spaceId,
+  isServerless,
 }: {
   fetch: HttpHandler;
   log: ToolingLog;
   spaceId: string;
+  isServerless: boolean;
 }): Promise<void> => {
-  const exists = await fetch(`/api/spaces/space/${encodeURIComponent(spaceId)}`, {
+  const existing = await fetch<SpaceBody>(`/api/spaces/space/${encodeURIComponent(spaceId)}`, {
     method: 'GET',
     headers: apiVersion(PUBLIC_API_VERSION),
-  })
-    .then(() => true)
-    .catch((err) => {
-      if (httpStatus(err) !== 404) throw err;
-      return false;
-    });
-  if (exists) return;
+  }).catch((err) => {
+    if (httpStatus(err) !== 404) throw err;
+    return undefined;
+  });
 
-  log.info(`[hunt-watch] creating eval space "${spaceId}"`);
-  await fetch('/api/spaces/space', {
-    method: 'POST',
+  if (!existing) {
+    log.info(`[hunt-watch] creating eval space "${spaceId}"`);
+    await fetch('/api/spaces/space', {
+      method: 'POST',
+      headers: apiVersion(PUBLIC_API_VERSION),
+      body: JSON.stringify({
+        id: spaceId,
+        name: spaceId,
+        description: 'Eval-only space created by the hunt-watch suite preflight fixture.',
+        disabledFeatures: [],
+        // Serverless spaces have no solution view, so the field is omitted there.
+        ...(isServerless ? {} : { solution: SECURITY_SOLUTION_VIEW }),
+      }),
+    });
+    return;
+  }
+
+  // Serverless spaces have no `solution` field, so an existing one has nothing to convert.
+  if (isServerless || existing.solution === SECURITY_SOLUTION_VIEW) return;
+
+  // The conversion is never reverted, so it is only done on a disposable CI stack. On a
+  // developer's long-lived stack it would silently change the `default` space's navigation.
+  if (spaceId === DEFAULT_EVAL_SPACE_ID && process.env.CI?.toLowerCase() !== 'true') {
+    throw new Error(
+      `[hunt-watch] the "${spaceId}" space uses the "${
+        existing.solution ?? 'classic'
+      }" solution view, but AlertZero routes 404 outside a Security space. The suite only ` +
+        `converts "${spaceId}" automatically when CI=true because the change is not ` +
+        `reverted. Switch it to the Security solution view in Stack Management > Spaces, ` +
+        `or run the suite on a throwaway stack.`
+    );
+  }
+
+  log.info(
+    `[hunt-watch] switching space "${spaceId}" from solution "${
+      existing.solution ?? 'classic'
+    }" to the Security solution view`
+  );
+  await fetch(`/api/spaces/space/${encodeURIComponent(spaceId)}`, {
+    method: 'PUT',
     headers: apiVersion(PUBLIC_API_VERSION),
-    body: JSON.stringify({
-      id: spaceId,
-      name: spaceId,
-      description: 'Eval-only space created by the hunt-watch suite preflight fixture.',
-      disabledFeatures: [],
-    }),
+    body: JSON.stringify({ ...existing, id: spaceId, solution: SECURITY_SOLUTION_VIEW }),
   });
 };
 
 interface UiSettingsGetResponse {
   settings: Record<string, { userValue?: unknown }>;
 }
+
+const getUiSettings = async ({
+  fetch,
+  spaceId,
+}: {
+  fetch: HttpHandler;
+  spaceId: string;
+}): Promise<UiSettingsGetResponse['settings']> => {
+  const response = await fetch<UiSettingsGetResponse>(
+    spacePath(spaceId, '/internal/kibana/settings'),
+    { method: 'GET' }
+  );
+  return response.settings;
+};
 
 const getUiSetting = async <T>({
   fetch,
@@ -102,13 +189,8 @@ const getUiSetting = async <T>({
   fetch: HttpHandler;
   spaceId: string;
   key: string;
-}): Promise<T | undefined> => {
-  const response = await fetch<UiSettingsGetResponse>(
-    spacePath(spaceId, '/internal/kibana/settings'),
-    { method: 'GET' }
-  );
-  return response.settings[key]?.userValue as T | undefined;
-};
+}): Promise<T | undefined> =>
+  (await getUiSettings({ fetch, spaceId }))[key]?.userValue as T | undefined;
 
 const setUiSettings = async ({
   fetch,
@@ -162,71 +244,189 @@ const configureIndexScope = async ({
   }
 };
 
+/** The settings the bridge overwrites, restored by the cleanup. */
+const BRIDGED_SETTING_IDS = [
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+] as const;
+
+/** Each bridged setting's user value per space before the bridge, `null` when it had none. */
+type PreviousSettings = Map<string, Record<string, unknown>>;
+
 /**
- * Bridges the subject model into the Worker: sets `genAiSettings:defaultAIConnector` to the
- * subject connector id in each eval space, then asserts no `alertzero_*` tier inference feature
- * has an endpoint assigned. `scoped_model.ts` resolves the Worker's model from tier endpoints
- * first — if one is assigned, the connector set here is silently ignored and every weekly run
- * tests whatever model that tier endpoint points at instead of the six subject models under
- * test. Fails loud rather than lying about which model actually ran.
+ * Each bridged tier's saved per-feature endpoint rows, keyed by space id: `null` when the space
+ * had no `inference-settings` saved object at all. Restored by the cleanup.
+ */
+type PreviousTierPicks = Map<string, InferenceSettingsResponse['data'] | null>;
+
+/**
+ * Bridges the subject model into the Worker. The tier features register with
+ * `ignoreGlobalDefault: true` and recommended endpoints, so `genAiSettings:defaultAIConnector`
+ * alone never reaches a tier, and `genAiSettings:defaultAIConnectorOnly` cannot be used either:
+ * it would 400-reject the judge's explicit connector calls in the default space. Instead each
+ * bridged feature (the three tiers plus the Cyber template-models row, which `selectHuntCallModel`
+ * prefers over the tiers) gets an operator-style pick through the per-space `inference-settings`
+ * saved object, which resolution consults before recommendations and `ignoreGlobalDefault`, in
+ * both the connectors route and the Worker's `endpoints.getForFeature` contract. The
+ * default-connector setting is still written (without `Only`) so non-tier consumers resolve to
+ * the subject too.
+ *
+ * Fills `previousSettings` and `previousTierPicks` space by space before each write, so a write
+ * that throws partway still leaves the cleanup everything it needs to put back.
  */
 const bridgeSubjectModel = async ({
   fetch,
   log,
   connectorId,
+  previousSettings,
+  previousTierPicks,
 }: {
   fetch: HttpHandler;
   log: ToolingLog;
   connectorId: string;
-}): Promise<Map<string, string | null>> => {
-  // Checked in every space before anything is written: a throw here must not leave the spaces
-  // already visited pointed at the subject connector with no cleanup to put them back.
-  // `/internal/search_inference_endpoints/settings` reports which inference endpoint (if any)
-  // is assigned per feature id; a non-empty `endpoints` array for a tier feature means that
-  // tier takes precedence over the genAiSettings bridge below.
+  previousSettings: PreviousSettings;
+  previousTierPicks: PreviousTierPicks;
+}): Promise<void> => {
   for (const spaceId of EVAL_SPACE_IDS) {
-    const settingsResponse = await fetch<{
-      data: { features: Array<{ feature_id: string; endpoints: Array<{ id: string }> }> };
-    }>(spacePath(spaceId, '/internal/search_inference_endpoints/settings'), {
-      method: 'GET',
-      headers: apiVersion(SEARCH_INFERENCE_ENDPOINTS_API_VERSION),
-    });
-
-    const assignedTierFeatures = settingsResponse.data.features.filter(
-      (feature) =>
-        ALERTZERO_TIER_FEATURE_IDS.includes(feature.feature_id) && feature.endpoints.length > 0
-    );
-    if (assignedTierFeatures.length > 0) {
-      throw new Error(
-        `[hunt-watch] space "${spaceId}" has a tier inference endpoint assigned for ` +
-          `${assignedTierFeatures.map((f) => f.feature_id).join(', ')}. Tier endpoints take ` +
-          `precedence over "genAiSettings:defaultAIConnector" in scoped_model.ts, so the Worker ` +
-          `would silently ignore the subject connector this suite bridges. Unassign the tier ` +
-          `endpoint(s) in this deployment before running this suite. A per-tier bridge is a follow-up.`
-      );
-    }
-  }
-
-  const previous = new Map<string, string | null>();
-  for (const spaceId of EVAL_SPACE_IDS) {
-    // Remembered so the cleanup can put the space back the way it was. The Worker stays enabled
-    // in every eval space between runs, and on a long-lived stack the default space is the
-    // developer's own: clearing the connector there would leave their Worker with no model.
-    previous.set(
+    // The Worker stays enabled in every eval space between runs, and on a long-lived stack the
+    // default space is the developer's own, so the cleanup restores values rather than clearing.
+    const settings = await getUiSettings({ fetch, spaceId });
+    previousSettings.set(
       spaceId,
-      (await getUiSetting<string>({ fetch, spaceId, key: GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR })) ??
-        null
+      Object.fromEntries(BRIDGED_SETTING_IDS.map((key) => [key, settings[key]?.userValue ?? null]))
     );
+
+    // A 404 means no saved picks exist yet; anything else set here must round-trip on cleanup.
+    let existingPicks: InferenceSettingsResponse['data'] | null = null;
+    try {
+      existingPicks = (
+        await fetch<InferenceSettingsResponse>(spacePath(spaceId, INFERENCE_SETTINGS_PATH), {
+          method: 'GET',
+          headers: apiVersion(SEARCH_INFERENCE_ENDPOINTS_API_VERSION),
+        })
+      ).data;
+    } catch (err) {
+      if (httpStatus(err) !== 404) throw err;
+    }
+    previousTierPicks.set(spaceId, existingPicks);
+
+    // Keep any non-pinned picks the space already had; only the four bridged features move.
+    const keptFeatures = (existingPicks?.features ?? []).filter(
+      ({ feature_id }) => !ALERTZERO_BRIDGED_FEATURE_IDS.includes(feature_id)
+    );
+    const pinnedFeatures = ALERTZERO_BRIDGED_FEATURE_IDS.map((feature_id) => ({
+      feature_id,
+      endpoints: [{ id: connectorId }],
+    }));
+
     log.info(
-      `[hunt-watch] setting genAiSettings:defaultAIConnector="${connectorId}" in space "${spaceId}"`
+      `[hunt-watch] pinning Hunt tiers and the Cyber template-models pick to "${connectorId}" ` +
+        `via inference settings and setting genAiSettings:defaultAIConnector="${connectorId}" ` +
+        `in space "${spaceId}"`
     );
+    await fetch(spacePath(spaceId, INFERENCE_SETTINGS_PATH), {
+      method: 'PUT',
+      headers: apiVersion(SEARCH_INFERENCE_ENDPOINTS_API_VERSION),
+      body: JSON.stringify({ features: [...keptFeatures, ...pinnedFeatures] }),
+    });
     await setUiSettings({
       fetch,
       spaceId,
-      changes: { [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: connectorId },
+      changes: {
+        [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: connectorId,
+        // Clear the flag rather than leaving it set: it survives as a user value and 400-blocks
+        // explicit connector calls (the judge's) until it is overwritten.
+        [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]: false,
+      },
     });
   }
-  return previous;
+};
+
+interface InferenceConnectorsResponse {
+  connectors: Array<{ connectorId: string }>;
+}
+
+/**
+ * Asks the server which connector each bridged feature resolves to in each eval space. The
+ * connectors route runs `resolveModelsForFeature`, as the Worker's `endpoints.getForFeature` does,
+ * so this fails before any example runs if the Worker would use another model than the one scored.
+ * A `.inference` stack connector resolves to its inference endpoint, so either id matches.
+ */
+const assertTiersResolveToSubject = async ({
+  fetch,
+  log,
+  subjectIds,
+}: {
+  fetch: HttpHandler;
+  log: ToolingLog;
+  subjectIds: readonly string[];
+}): Promise<void> => {
+  for (const spaceId of EVAL_SPACE_IDS) {
+    for (const featureId of ALERTZERO_COST_TIER_FEATURE_IDS) {
+      const { connectors } = await fetch<InferenceConnectorsResponse>(
+        spacePath(spaceId, INFERENCE_CONNECTORS_PATH),
+        {
+          method: 'GET',
+          headers: apiVersion(SEARCH_INFERENCE_ENDPOINTS_API_VERSION),
+          query: { featureId },
+        }
+      );
+      const resolved = connectors[0]?.connectorId;
+      if (!resolved || !subjectIds.includes(resolved)) {
+        throw new Error(
+          `[hunt-watch] feature "${featureId}" resolves to "${
+            resolved ?? 'no connector'
+          }" in space "${spaceId}", not the subject model (${subjectIds.join(
+            ' / '
+          )}). The Worker ` +
+            `would run on that model and the scores would be attributed to the wrong one.`
+        );
+      }
+    }
+    log.info(`[hunt-watch] every cost tier resolves to "${subjectIds[0]}" in space "${spaceId}"`);
+  }
+};
+
+/**
+ * The Cyber row is the one bridged feature the connectors route cannot validate: it is registered
+ * with `allowTemplateRequiredModels: true`, so the route filters out ordinary connectors for it
+ * and the subject would resolve to nothing there even when its pick is saved. This reads the
+ * saved inference settings back instead — the same saved object `resolveFeatureEndpoints` returns
+ * first, before any filtering — and fails unless the pick is the subject.
+ */
+const assertCyberPickPinned = async ({
+  fetch,
+  log,
+  subjectIds,
+}: {
+  fetch: HttpHandler;
+  log: ToolingLog;
+  subjectIds: readonly string[];
+}): Promise<void> => {
+  for (const spaceId of EVAL_SPACE_IDS) {
+    const { data } = await fetch<InferenceSettingsResponse>(
+      spacePath(spaceId, INFERENCE_SETTINGS_PATH),
+      {
+        method: 'GET',
+        headers: apiVersion(SEARCH_INFERENCE_ENDPOINTS_API_VERSION),
+      }
+    );
+    const pick = data.features.find(
+      ({ feature_id }) => feature_id === ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID
+    );
+    const resolved = pick?.endpoints[0]?.id;
+    if (!resolved || !subjectIds.includes(resolved)) {
+      throw new Error(
+        `[hunt-watch] the Cyber template-models pick resolves to "${
+          resolved ?? 'no connector'
+        }" in space "${spaceId}", not the subject model (${subjectIds.join(' / ')}). The Worker ` +
+          `would run on that model and the scores would be attributed to the wrong one.`
+      );
+    }
+    log.info(
+      `[hunt-watch] the Cyber template-models pick is "${subjectIds[0]}" in space "${spaceId}"`
+    );
+  }
 };
 
 interface ServiceAccountEntry {
@@ -257,16 +457,21 @@ const listServiceAccounts = async (fetch: HttpHandler): Promise<ServiceAccountEn
   return accounts;
 };
 
-/** The suite runs on the stateful Scout stack, where the Worker role is an ES reserved role. */
-const IS_SERVERLESS = false;
-
 /**
  * Requires the Worker's built-in role to exist in this deployment. AlertZero no longer creates
  * Worker roles: stateful ships them as Elasticsearch reserved roles, so an ES snapshot without
  * them refuses to enable the Worker, and the suite should say so by name.
  */
-const findBuiltInWorkerRole = async (fetch: HttpHandler, accountName: string): Promise<string> => {
-  const roleName = getWorkerRoleName(accountName, { isServerless: IS_SERVERLESS });
+const findBuiltInWorkerRole = async ({
+  fetch,
+  accountName,
+  isServerless,
+}: {
+  fetch: HttpHandler;
+  accountName: string;
+  isServerless: boolean;
+}): Promise<string> => {
+  const roleName = getWorkerRoleName(accountName, { isServerless });
   const missing = () =>
     new Error(
       `[hunt-watch] Elasticsearch has no built-in "${roleName}" role for the Worker. ` +
@@ -295,10 +500,12 @@ const ensureWorkerServiceAccount = async ({
   fetch,
   log,
   workerId,
+  isServerless,
 }: {
   fetch: HttpHandler;
   log: ToolingLog;
   workerId: string;
+  isServerless: boolean;
 }): Promise<string> => {
   const name = WORKER_SERVICE_ACCOUNT_NAMES[workerId];
   if (!name) {
@@ -318,7 +525,7 @@ const ensureWorkerServiceAccount = async ({
     return existing.id;
   }
 
-  const roleName = await findBuiltInWorkerRole(fetch, name);
+  const roleName = await findBuiltInWorkerRole({ fetch, accountName: name, isServerless });
   try {
     const created = await fetch<{ id: string }>(SECURITY_SERVICE_ACCOUNT_URL, {
       method: 'POST',
@@ -345,13 +552,16 @@ const ensureWorkerServiceAccount = async ({
 const enableWorkerInEvalSpaces = async ({
   fetch,
   log,
+  isServerless,
 }: {
   fetch: HttpHandler;
   log: ToolingLog;
+  isServerless: boolean;
 }): Promise<void> => {
   const serviceAccountId = await ensureWorkerServiceAccount({
     fetch,
     log,
+    isServerless,
     workerId: SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   });
 
@@ -430,46 +640,66 @@ export type PreflightCleanup = () => Promise<void>;
  * before any example runs, failing loud with the named missing gate rather than letting a
  * misconfigured stack silently score zeros.
  *
- * Ordering is load-bearing: (1) spaces must exist before anything is configured in them;
- * (2) index scope before the Worker is enabled (resolveHuntScope reads it); (3) the subject-model
- * bridge before Worker enablement (enabling without a model throws `noModel`); (4) TI supply and
- * Entity Store are independent readiness checks that can run after enablement.
+ * Ordering is load-bearing: (1) spaces must exist, as Security-solution spaces, before anything
+ * is configured in them; (2) index scope before the Worker is enabled (resolveHuntScope reads
+ * it); (3) the subject-model bridge, and the check that every tier resolves to it, before Worker
+ * enablement (enabling without a model throws `noModel`); (4) TI supply and Entity Store are
+ * independent readiness checks that can run after enablement.
  */
 export const runPreflight = async ({
   fetch,
   log,
   connectorId,
+  subjectInferenceId,
   evaluationConnector,
+  isServerless = false,
 }: {
   fetch: HttpHandler;
   log: ToolingLog;
   connectorId: string;
+  /** The subject's inference endpoint id when it has one; a tier may resolve to either id. */
+  subjectInferenceId?: string;
   evaluationConnector: EvalConnector;
+  /** `config.serverless` from the Scout test config; defaults to the stateful stack. */
+  isServerless?: boolean;
 }): Promise<PreflightCleanup> => {
-  for (const spaceId of NON_DEFAULT_EVAL_SPACE_IDS) {
-    await ensureSpaceExists({ fetch, log, spaceId });
+  for (const spaceId of EVAL_SPACE_IDS) {
+    await ensureSecuritySpace({ fetch, log, spaceId, isServerless });
   }
   await configureIndexScope({ fetch, log });
-  const previousConnectors = await bridgeSubjectModel({ fetch, log, connectorId });
 
   // The eval spaces are left in place on purpose. Deleting them here and recreating them on the
   // next run races the per-space Worker install, its service-account binding and the managed
   // workflow reconcile (seen as a 404 on the TI supply route and a 403 "service account binding
   // does not match" on the next run against a long-lived stack). They are eval-only and
-  // `ensureSpaceExists` is idempotent, so a CI stack discards them and a local one reuses them.
+  // `ensureSecuritySpace` is idempotent, so a CI stack discards them and a local one reuses them.
+  // The Security solution view is not reverted either, `default` included: the Worker stays
+  // enabled there between runs. That is why `default` is only converted when CI=true.
+  const previous: PreviousSettings = new Map();
+  const previousTierPicks: PreviousTierPicks = new Map();
+  // Only spaces the bridge reached are restored, so a space it never wrote is left alone.
   const restoreConnectors: PreflightCleanup = async () => {
-    for (const spaceId of EVAL_SPACE_IDS) {
+    for (const [spaceId, changes] of previous) {
       try {
-        await setUiSettings({
-          fetch,
-          spaceId,
-          changes: {
-            [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: previousConnectors.get(spaceId) ?? null,
-          },
+        await setUiSettings({ fetch, spaceId, changes });
+      } catch (err) {
+        log.warning(
+          `[hunt-watch] failed to restore ${BRIDGED_SETTING_IDS.join(
+            ' and '
+          )} in space "${spaceId}": ${errorMessage(err)}`
+        );
+      }
+    }
+    for (const [spaceId, picks] of previousTierPicks) {
+      try {
+        await fetch(spacePath(spaceId, INFERENCE_SETTINGS_PATH), {
+          method: 'PUT',
+          headers: apiVersion(SEARCH_INFERENCE_ENDPOINTS_API_VERSION),
+          body: JSON.stringify({ features: picks?.features ?? [] }),
         });
       } catch (err) {
         log.warning(
-          `[hunt-watch] failed to restore genAiSettings:defaultAIConnector in space "${spaceId}": ${errorMessage(
+          `[hunt-watch] failed to restore the inference settings in space "${spaceId}": ${errorMessage(
             err
           )}`
         );
@@ -477,10 +707,22 @@ export const runPreflight = async ({
     }
   };
 
-  // Every gate below can throw, and a worker fixture that throws before `use()` never runs the
-  // cleanup it would have returned, so the connectors are put back here before the error leaves.
+  // Every step below can throw, and a worker fixture that throws before `use()` never runs the
+  // cleanup it would have returned, so the settings are put back here before the error leaves.
+  const subjectIds = [
+    ...new Set([connectorId, ...(subjectInferenceId ? [subjectInferenceId] : [])]),
+  ];
   try {
-    await enableWorkerInEvalSpaces({ fetch, log });
+    await bridgeSubjectModel({
+      fetch,
+      log,
+      connectorId,
+      previousSettings: previous,
+      previousTierPicks,
+    });
+    await assertTiersResolveToSubject({ fetch, log, subjectIds });
+    await assertCyberPickPinned({ fetch, log, subjectIds });
+    await enableWorkerInEvalSpaces({ fetch, log, isServerless });
     await assertThreatIntelSupplyReady({ fetch, log });
     await ensureEntityStoreRunning({ fetch, log });
     await ensureJudgeConnectorAccessible({ fetch, connector: evaluationConnector, log });

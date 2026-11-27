@@ -16,9 +16,15 @@ import {
   createAttachmentAlreadyExistsError,
 } from '@kbn/agent-builder-common';
 import type { AttachmentPublicClient, ConversationPublicClient } from '@kbn/agent-builder-server';
+import { createKibanaIsomerRuntime } from '@kbn/isomer';
+import { componentsPack } from '@kbn/isomer-components';
 import { notificationRoutingAttachment } from './notification_routing';
 import type { StoredNotificationRouting } from './notification_routing';
 import { NotificationRoutingClient } from './notification_routing_client';
+
+export const testIsomerRuntime = createKibanaIsomerRuntime({ packs: [componentsPack] });
+
+export const getTestIsomerRuntime = async () => testIsomerRuntime;
 
 interface StoredEntry<TStored> {
   source: TStored;

@@ -7,11 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, firstValueFrom, map, ReplaySubject, zip } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, map, ReplaySubject, Subject, zip } from 'rxjs';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { Logger } from '@kbn/logging';
-import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
+import type {
+  InternalHttpServicePreboot,
+  InternalHttpServiceSetup,
+} from '@kbn/core-http-server-internal';
 import type { InternalElasticsearchServiceSetup } from '@kbn/core-elasticsearch-server-internal';
+import { EventLoopUtilizationMonitor } from '@kbn/core-metrics-collectors-server-internal';
 import type {
   EluMetrics,
   OpsMetrics,
@@ -36,6 +40,10 @@ export enum EluTerm {
   Long = 60000,
 }
 
+export interface MetricsServicePrebootDeps {
+  http: InternalHttpServicePreboot;
+}
+
 export interface MetricsServiceSetupDeps {
   http: InternalHttpServiceSetup;
   elasticsearchService: InternalElasticsearchServiceSetup;
@@ -55,6 +63,8 @@ export class MetricsService
   private readonly opsMetricsLogger: Logger;
   private metricsCollector?: OpsMetricsCollector;
   private collectInterval?: NodeJS.Timeout;
+  private eluCollectInterval?: NodeJS.Timeout;
+  private readonly eluUtilization$ = new Subject<number>();
   private metrics$ = new ReplaySubject<OpsMetrics>(1);
   private elu$ = new BehaviorSubject<EluMetrics>({
     long: 0,
@@ -68,13 +78,20 @@ export class MetricsService
     this.opsMetricsLogger = coreContext.logger.get('metrics', 'ops');
   }
 
+  /**
+   * Starts collecting the ELU history and exposes it on the preboot HTTP server, so it's available while Kibana boots.
+   */
+  public async preboot({ http }: MetricsServicePrebootDeps): Promise<void> {
+    const config = await this.getOpsConfig();
+    this.startEluCollection(config.interval.asMilliseconds());
+    http.registerRoutes('', (router) => registerEluHistoryRoute(router, () => this.elu$.value));
+  }
+
   public async setup({
     http,
     elasticsearchService,
   }: MetricsServiceSetupDeps): Promise<InternalMetricsServiceSetup> {
-    const config = await firstValueFrom(
-      this.coreContext.configService.atPath<OpsConfigType>(OPS_CONFIG_PATH)
-    );
+    const config = await this.getOpsConfig();
     const collectionInterval = config.interval.asMilliseconds();
 
     this.metricsCollector = new OpsMetricsCollector(
@@ -94,17 +111,7 @@ export class MetricsService
       this.refreshMetrics();
     }, collectionInterval);
 
-    this.metrics$
-      .pipe(
-        map((opsMetrics) => opsMetrics.process.event_loop_utilization.utilization),
-        (elu$) =>
-          zip(
-            elu$.pipe(exponentialMovingAverage(EluTerm.Short, collectionInterval)),
-            elu$.pipe(exponentialMovingAverage(EluTerm.Medium, collectionInterval)),
-            elu$.pipe(exponentialMovingAverage(EluTerm.Long, collectionInterval))
-          ).pipe(map(([short, medium, long]) => ({ short, medium, long })))
-      )
-      .subscribe(this.elu$);
+    this.startEluCollection(collectionInterval);
     this.registerEluHistoryMetrics();
     registerEluHistoryRoute(http.createRouter(''), () => this.elu$.value);
 
@@ -139,7 +146,42 @@ export class MetricsService
     if (this.collectInterval) {
       clearInterval(this.collectInterval);
     }
+    if (this.eluCollectInterval) {
+      clearInterval(this.eluCollectInterval);
+    }
     this.metrics$.complete();
+    this.eluUtilization$.complete();
+  }
+
+  private getOpsConfig() {
+    return firstValueFrom(this.coreContext.configService.atPath<OpsConfigType>(OPS_CONFIG_PATH));
+  }
+
+  /**
+   * Samples the ELU independently of the ops metrics, which depend on services that are only available from `setup`.
+   * It's started only once, so the moving averages are not reset when moving from `preboot` to `setup`.
+   */
+  private startEluCollection(collectionInterval: number) {
+    if (this.eluCollectInterval) {
+      return;
+    }
+
+    this.eluUtilization$
+      .pipe((utilization$) =>
+        zip(
+          utilization$.pipe(exponentialMovingAverage(EluTerm.Short, collectionInterval)),
+          utilization$.pipe(exponentialMovingAverage(EluTerm.Medium, collectionInterval)),
+          utilization$.pipe(exponentialMovingAverage(EluTerm.Long, collectionInterval))
+        ).pipe(map(([short, medium, long]) => ({ short, medium, long })))
+      )
+      .subscribe(this.elu$);
+
+    const eluMonitor = new EventLoopUtilizationMonitor();
+    this.eluCollectInterval = setInterval(() => {
+      const { utilization } = eluMonitor.collect();
+      eluMonitor.reset();
+      this.eluUtilization$.next(utilization);
+    }, collectionInterval);
   }
 
   private registerEluHistoryMetrics() {

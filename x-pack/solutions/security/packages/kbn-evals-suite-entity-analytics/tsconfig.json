@@ -14,7 +14,6 @@
     "@kbn/evals",
     "@kbn/tooling-log",
     "@kbn/core",
-    "@kbn/test-suites-security-solution-apis",
     "@kbn/security-solution-plugin",
     "@kbn/detections-response-ftr-services",
     "@kbn/es-archiver",

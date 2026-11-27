@@ -15,6 +15,7 @@ import {
   getStreamCounts,
   lastHourRange,
   postDocCounts,
+  refreshFailureStore,
 } from '../../lib/doc_counts';
 import { failingClassicUpsertRequest } from '../../lib/streams';
 
@@ -48,6 +49,7 @@ apiTest.describe(
           document: { '@timestamp': new Date().toISOString(), message: 'failing document' },
         });
         expect(indexResponse.result).toBe('created');
+        await refreshFailureStore(esClient, STREAM);
 
         await expect
           .poll(

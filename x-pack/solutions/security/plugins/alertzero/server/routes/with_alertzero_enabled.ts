@@ -12,7 +12,7 @@ import type { AlertZeroRequestHandlerContext } from '../types';
 
 /**
  * Gates an AlertZero route on subscription eligibility and the per-space `securitySolution:enableAlertZero` advanced setting.
- * While the setting is off, or the space uses the Classic solution view, the route 404s as if it had never been registered.
+ * While the setting is off, or the space uses a solution view other than Security or Classic, the route 404s as if it had never been registered.
  *
  * The setting is registered next to the routes, inside the `xpack.alertzero.enabled` guard in
  * `server/plugin.ts`, so a deployment with the kill switch off registers neither. Should the key be

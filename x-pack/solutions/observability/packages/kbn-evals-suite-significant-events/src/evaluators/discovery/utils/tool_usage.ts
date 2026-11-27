@@ -302,11 +302,17 @@ export function extractEventSearchCandidateCount(steps: ConverseStep[]): number 
   return candidateCount;
 }
 
+const getEsqlValues = (result: unknown): unknown[] | undefined =>
+  isRecord(result) && isRecord(result.data) && Array.isArray(result.data.values)
+    ? result.data.values
+    : undefined;
+
 /** Whether an `execute_esql` call returned at least one row (`data.values` on a results entry). */
 function didExecuteEsqlToolReturnRows(results: unknown[]): boolean {
   for (const result of results) {
-    if (isRecord(result) && isRecord(result.data) && Array.isArray(result.data.values)) {
-      return result.data.values.length > 0;
+    const values = getEsqlValues(result);
+    if (values) {
+      return values.length > 0;
     }
   }
   return false;
@@ -321,12 +327,18 @@ export interface EsqlGroundingSummary {
   noOfToolCalls: number;
   /** How many of those returned at least one row. */
   noOfToolCallsWithResults: number;
+  /** How many returned an error result (query rejected), counted whether or not rows came back too. */
+  noOfToolCallsWithErrors: number;
+  /** How many carried neither a `data.values` array nor an error result (response not captured). */
+  noOfToolCallsWithoutResult: number;
 }
 
-/** `execute_esql` call count and how many returned rows. */
+/** `execute_esql` call count, how many returned rows, and how many failed. */
 export function summarizeEsqlGrounding(steps: ConverseStep[]): EsqlGroundingSummary {
   let noOfToolCalls = 0;
   let noOfToolCallsWithResults = 0;
+  let noOfToolCallsWithErrors = 0;
+  let noOfToolCallsWithoutResult = 0;
 
   for (const step of steps) {
     if (
@@ -341,7 +353,20 @@ export function summarizeEsqlGrounding(steps: ConverseStep[]): EsqlGroundingSumm
     if (didExecuteEsqlToolReturnRows(results)) {
       noOfToolCallsWithResults++;
     }
+    const hasError = results.some((result) => isRecord(result) && result.type === 'error');
+    if (hasError) {
+      noOfToolCallsWithErrors++;
+    }
+    const hasPayload = results.some((result) => getEsqlValues(result) !== undefined);
+    if (!hasError && !hasPayload) {
+      noOfToolCallsWithoutResult++;
+    }
   }
 
-  return { noOfToolCalls, noOfToolCallsWithResults };
+  return {
+    noOfToolCalls,
+    noOfToolCallsWithResults,
+    noOfToolCallsWithErrors,
+    noOfToolCallsWithoutResult,
+  };
 }

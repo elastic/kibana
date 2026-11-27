@@ -6,13 +6,14 @@
  */
 
 import type { DashboardDatasetExample } from '../../../src/types';
-import { enhanceExample } from './factories';
+import { enhanceExample, scopedEnhanceExample } from './factories';
 
 /**
  * Enhance (prettify) over one seeded dashboard with declared defects. The
  * first prompt is the one the "Enhance this dashboard" action sends: the
  * `/dashboards` skill badge, which asks the agent to load the skill, plus the
  * request. The agent should ask for the mode and is answered "Appearance only".
+ * When the answer instead names specific charts, only those charts change.
  */
 export const DASHBOARD_ENHANCE_EXAMPLES: DashboardDatasetExample[] = [
   enhanceExample({
@@ -29,5 +30,10 @@ export const DASHBOARD_ENHANCE_EXAMPLES: DashboardDatasetExample[] = [
     question: 'Enhance the attached dashboard, appearance and content.',
     mode: 'content',
     asksMode: false,
+  }),
+  scopedEnhanceExample({
+    question: '[/dashboards](skill://dashboards) Enhance this dashboard',
+    answer: 'Only improve the requests over time chart and the operating system pie chart.',
+    panelIds: ['requests-over-time', 'requests-by-os'],
   }),
 ];

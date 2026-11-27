@@ -20,6 +20,9 @@ import type {
 // The native SDK versions that `@elastic/otel-react-native` pins
 export const EDOT_ANDROID_VERSION = '1.10.0';
 export const EDOT_IOS_VERSION = '2.3.0';
+// The upstream SDKs that those versions are built on
+const OTEL_JAVA_VERSION = '1.66.0';
+const OTEL_SWIFT_VERSION = '2.3.0';
 
 const CLIENT_CLASSES: Readonly<
   Record<
@@ -31,16 +34,22 @@ const CLIENT_CLASSES: Readonly<
   ios: EdotIosClient,
 };
 
-const TELEMETRY_SDK_ATTRIBUTES: Readonly<Record<MobilePlatform, Record<string, string>>> = {
+// The upstream SDK values, which replace the legacy `telemetry.sdk.name` of `android` and `iOS`;
+// a mobile app is told apart by `telemetry.distro.name` and its platform by `os.name`
+const TELEMETRY_ATTRIBUTES: Readonly<Record<MobilePlatform, Readonly<Record<string, string>>>> = {
   android: {
-    'telemetry.sdk.name': 'android',
+    'telemetry.sdk.name': 'opentelemetry',
     'telemetry.sdk.language': 'java',
-    'telemetry.sdk.version': EDOT_ANDROID_VERSION,
+    'telemetry.sdk.version': OTEL_JAVA_VERSION,
+    'telemetry.distro.name': 'elastic',
+    'telemetry.distro.version': EDOT_ANDROID_VERSION,
   },
   ios: {
-    'telemetry.sdk.name': 'iOS',
+    'telemetry.sdk.name': 'opentelemetry',
     'telemetry.sdk.language': 'swift',
-    'telemetry.sdk.version': EDOT_IOS_VERSION,
+    'telemetry.sdk.version': OTEL_SWIFT_VERSION,
+    'telemetry.distro.name': 'elastic',
+    'telemetry.distro.version': EDOT_IOS_VERSION,
   },
 };
 
@@ -53,6 +62,11 @@ export interface EdotReactNativeAppOptions {
   appId?: string;
   /** Android `versionCode` and iOS `CFBundleVersion`. */
   buildNumber?: number;
+  /**
+   * An app built with EDOT Android or EDOT iOS directly, without React Native: it has no JavaScript
+   * runtime, so no JavaScript crashes, no `RNSScreen` and no React Native instrumentation scopes.
+   */
+  native?: boolean;
 }
 
 /**
@@ -62,6 +76,8 @@ export interface EdotReactNativeAppOptions {
 export class EdotReactNativeApp {
   readonly serviceName: string;
   private readonly appId: string;
+  private readonly native: boolean;
+  private readonly environment?: string;
   private readonly resourceAttributesByPlatform: Readonly<
     Record<MobilePlatform, Readonly<Record<string, unknown>>>
   >;
@@ -72,9 +88,12 @@ export class EdotReactNativeApp {
     environment,
     appId = `com.example.${serviceName.replace(/[^a-z0-9]/gi, '').toLowerCase()}`,
     buildNumber = 1,
+    native = false,
   }: EdotReactNativeAppOptions) {
     this.serviceName = serviceName;
     this.appId = appId;
+    this.native = native;
+    this.environment = environment;
     const service = { 'service.name': serviceName, 'service.version': serviceVersion };
     this.resourceAttributesByPlatform = {
       android: {
@@ -84,14 +103,14 @@ export class EdotReactNativeApp {
         'app.build_id': createHash('sha256')
           .update(`${appId}-${serviceVersion}-${buildNumber}`)
           .digest('hex'),
-        ...TELEMETRY_SDK_ATTRIBUTES.android,
+        ...TELEMETRY_ATTRIBUTES.android,
       },
       ios: {
         ...service,
         // EDOT iOS writes `default` unless the app configures an environment
         'deployment.environment.name': environment ?? 'default',
         'app.build_id': String(buildNumber),
-        ...TELEMETRY_SDK_ATTRIBUTES.ios,
+        ...TELEMETRY_ATTRIBUTES.ios,
       },
     };
   }
@@ -103,6 +122,12 @@ export class EdotReactNativeApp {
       ...profile.resourceAttributes,
     };
     const clientOptions = { ...options, slowdown: options.slowdown ?? profile.slowdown };
-    return new CLIENT_CLASSES[profile.platform](resourceAttributes, clientOptions, this.appId);
+    return new CLIENT_CLASSES[profile.platform](
+      resourceAttributes,
+      clientOptions,
+      this.appId,
+      this.native,
+      this.environment
+    );
   }
 }

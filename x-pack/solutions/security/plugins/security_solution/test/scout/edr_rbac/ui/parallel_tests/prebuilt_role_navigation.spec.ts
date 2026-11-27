@@ -40,8 +40,7 @@ spaceTest.describe(
         await browserAuth.loginAsSecurityRole('detections_admin');
         await nav.gotoSecurityRoot();
 
-        await expect(nav.managementGroupToggle).toBeVisible();
-        await nav.openManagementGroup();
+        await nav.revealManagementAreas();
 
         await expect(nav.navItem(SecurityPageName.artifacts)).toBeVisible();
 
@@ -63,8 +62,7 @@ spaceTest.describe(
         await browserAuth.loginAsSecurityRole('soc_manager');
         await nav.gotoSecurityRoot();
 
-        await expect(nav.managementGroupToggle).toBeVisible();
-        await nav.openManagementGroup();
+        await nav.revealManagementAreas();
 
         for (const linkId of ENDPOINT_MANAGEMENT_LINK_IDS) {
           await expect(nav.navItem(linkId)).toBeVisible();

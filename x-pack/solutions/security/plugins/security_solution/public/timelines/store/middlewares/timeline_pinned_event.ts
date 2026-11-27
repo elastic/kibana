@@ -19,6 +19,7 @@ import {
   updateTimeline,
   startTimelineSaving,
   showCallOutUnauthorizedMsg,
+  setSavePromptDismissed,
 } from '../actions';
 import { persistPinnedEvent } from '../../containers/pinned_event/api';
 import { ensureTimelineIsSaved, isHttpFetchError, refreshTimelines } from './helpers';
@@ -65,6 +66,8 @@ export const addPinnedEventToTimelineMiddleware: (kibana: CoreStart) => Middlewa
         });
 
         refreshTimelines(store.getState());
+        // Pins do not go through `setChanged`, so re-arm the unsaved changes prompt here.
+        store.dispatch(setSavePromptDismissed({ id: localTimelineId, dismissed: false }));
 
         const currentTimeline = selectTimelineById(store.getState(), action.payload.id);
         if ('unpinned' in response) {

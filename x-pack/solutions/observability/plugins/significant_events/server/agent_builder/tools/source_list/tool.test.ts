@@ -87,7 +87,7 @@ describe('source_list tool', () => {
       results: [
         {
           type: 'error',
-          data: { message: expect.stringContaining('requires the Nightshift read privilege') },
+          data: { message: expect.stringContaining('requires the nightshift read privilege') },
         },
       ],
     });

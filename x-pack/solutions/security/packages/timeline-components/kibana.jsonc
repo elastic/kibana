@@ -2,7 +2,7 @@
   "type": "shared-browser",
   "id": "@kbn/securitysolution-timeline-components",
   "owner": [
-    "@elastic/security-threat-hunting"
+    "@elastic/security-investigations"
   ],
   "group": "security",
   "visibility": "private"

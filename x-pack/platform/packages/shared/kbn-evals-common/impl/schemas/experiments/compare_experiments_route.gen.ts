@@ -16,6 +16,11 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+export const RepetitionPolicy = lazySchema(() => z.enum(['mean', 'median']));
+export type RepetitionPolicy = z.infer<typeof RepetitionPolicy>;
+export type RepetitionPolicyEnum = typeof RepetitionPolicy.enum;
+export const RepetitionPolicyEnum = RepetitionPolicy.enum;
+
 /**
  * Paired hypothesis test applied to one (dataset, evaluator) slice. `paired_t` compares mean differences, `wilcoxon_signed_rank` is its rank-based alternative, `mcnemar` compares paired binary outcomes.
  */
@@ -81,23 +86,55 @@ export const HypothesisTest = lazySchema(() =>
 );
 export type HypothesisTest = z.infer<typeof HypothesisTest>;
 
+/**
+ * One experiment's scores in a (dataset, evaluator) slice.
+ */
+export const ComparisonSide = lazySchema(() =>
+  z.object({
+    /**
+     * Mean of the paired scores
+     */
+    mean: z.number().describe('Mean of the paired scores'),
+    /**
+     * Valid repetition scores
+     */
+    used: z.number().int().describe('Valid repetition scores'),
+    /**
+     * Repetitions without a valid score
+     */
+    missing: z.number().int().describe('Repetitions without a valid score'),
+    /**
+     * Mean of the sample standard deviations of each paired example's valid repetitions, over the examples with at least two. Null when no example has two.
+     */
+    stability: z
+      .number()
+      .nullable()
+      .describe(
+        "Mean of the sample standard deviations of each paired example's valid repetitions, over the examples with at least two. Null when no example has two."
+      ),
+  })
+);
+export type ComparisonSide = z.infer<typeof ComparisonSide>;
+
 export const ComparisonResult = lazySchema(() =>
   z.object({
     datasetId: z.string().max(1024),
     datasetName: z.string().max(256),
     evaluatorName: z.string().max(256),
     /**
-     * Number of paired scores in this slice
+     * Number of examples tested in this slice
      */
-    sampleSize: z.number().int().describe('Number of paired scores in this slice'),
+    sampleSize: z.number().int().describe('Number of examples tested in this slice'),
+    baseline: ComparisonSide,
+    target: ComparisonSide,
     /**
-     * Mean score of the baseline experiment
+     * True when an example in this slice has a different number of valid repetitions in the two experiments, or a repetition without a valid score.
      */
-    meanBaseline: z.number().describe('Mean score of the baseline experiment'),
-    /**
-     * Mean score of the target experiment
-     */
-    meanTarget: z.number().describe('Mean score of the target experiment'),
+    repetitionWarning: z
+      .boolean()
+      .describe(
+        'True when an example in this slice has a different number of valid repetitions in the two experiments, or a repetition without a valid score.'
+      ),
     /**
      * Two-sided p-value of `hypothesisTest`, null when the test could not run
      */
@@ -140,6 +177,14 @@ export const CompareExperimentsRequestQuery = lazySchema(() =>
      * Target experiment or execution ID (depends on type)
      */
     target_id: z.string().max(1024).describe('Target experiment or execution ID (depends on type)'),
+    /**
+     * How repetitions of one example are compared. `mean` and `median` reduce each example to one score per experiment and test one pair per example.
+     */
+    repetition_policy: RepetitionPolicy.optional()
+      .default('mean')
+      .describe(
+        'How repetitions of one example are compared. `mean` and `median` reduce each example to one score per experiment and test one pair per example.'
+      ),
   })
 );
 export type CompareExperimentsRequestQuery = z.infer<typeof CompareExperimentsRequestQuery>;
@@ -149,9 +194,35 @@ export const CompareExperimentsResponse = lazySchema(() =>
   z.object({
     results: z.array(ComparisonResult),
     pairing: z.object({
-      totalPairs: z.number().int(),
-      skippedMissingPairs: z.number().int(),
+      repetitionPolicy: RepetitionPolicy,
+      /**
+       * Number of pairs tested over all slices
+       */
+      totalPairs: z.number().int().describe('Number of pairs tested over all slices'),
+      /**
+       * Unpaired examples. A target example with only null scores counts in `skippedNullScores` instead.
+       */
+      skippedMissingPairs: z
+        .number()
+        .int()
+        .describe(
+          'Unpaired examples. A target example with only null scores counts in `skippedNullScores` instead.'
+        ),
       skippedNullScores: z.number().int(),
+      /**
+       * Only for `median`: slices left out of `results` because a score is outside [0, 1].
+       */
+      rejectedSlices: z
+        .array(
+          z.object({
+            datasetName: z.string(),
+            evaluatorName: z.string(),
+          })
+        )
+        .optional()
+        .describe(
+          'Only for `median`: slices left out of `results` because a score is outside [0, 1].'
+        ),
       /**
        * Whether the baseline scores were truncated due to size limits
        */

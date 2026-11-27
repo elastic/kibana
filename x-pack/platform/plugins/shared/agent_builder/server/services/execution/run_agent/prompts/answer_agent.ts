@@ -9,7 +9,7 @@ import type { BaseMessageLike } from '@langchain/core/messages';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import { renderVisibleContext } from '../utils/visible_context';
 import { customInstructionsBlock } from './utils/custom_instructions';
-import { attachmentToolsInstructions } from './utils/attachments';
+import { attachmentToolsInstructions, attachmentToolsUnavailableNotice } from './utils/attachments';
 import type { PromptFactoryParams, AnswerAgentPromptRuntimeParams } from './types';
 
 type AnswerAgentPromptParams = PromptFactoryParams & AnswerAgentPromptRuntimeParams;
@@ -18,7 +18,10 @@ export const getStructuredAnswerPrompt = async (
   params: AnswerAgentPromptParams
 ): Promise<BaseMessageLike[]> => {
   const {
-    configuration: { instructions: customInstructions },
+    configuration: {
+      instructions: customInstructions,
+      capabilities: { attachmentTools },
+    },
     conversationTimestamp,
     run,
     handover,
@@ -70,7 +73,7 @@ Your role is to be the **final answering agent** in a multi-agent flow. You must
 
 ${customInstructionsBlock(customInstructions)}
 
-${attachmentToolsInstructions()}
+${attachmentTools ? attachmentToolsInstructions() : attachmentToolsUnavailableNotice()}
 
 ## OUTPUT STYLE
 - Clear, direct, and scoped. No extraneous commentary.

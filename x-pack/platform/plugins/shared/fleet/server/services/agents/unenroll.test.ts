@@ -105,6 +105,32 @@ describe('unenroll', () => {
       expect(calledWith[0] as estypes.UpdateRequest).toHaveProperty('doc.unenrolled_at');
     });
 
+    it('sets the unenrolled reason when force unenrolling with a reason', async () => {
+      const { soClient, esClient, agentInAgentlessDoc } = createClientMock();
+      esClient.search.mockResponse({ hits: { hits: [agentInAgentlessDoc] } } as any);
+      await unenrollAgent(soClient, esClient, agentInAgentlessDoc._id, {
+        force: true,
+        revoke: true,
+        unenrolledReason: 'agentless',
+      });
+      const calledWith = esClient.update.mock.calls[0];
+      expect(calledWith[0] as estypes.UpdateRequest).toHaveProperty(
+        'doc.unenrolled_reason',
+        'agentless'
+      );
+    });
+
+    it('does not set an unenrolled reason by default', async () => {
+      const { soClient, esClient, agentInAgentlessDoc } = createClientMock();
+      esClient.search.mockResponse({ hits: { hits: [agentInAgentlessDoc] } } as any);
+      await unenrollAgent(soClient, esClient, agentInAgentlessDoc._id, {
+        force: true,
+        revoke: true,
+      });
+      const calledWith = esClient.update.mock.calls[0];
+      expect(calledWith[0] as estypes.UpdateRequest).not.toHaveProperty('doc.unenrolled_reason');
+    });
+
     it('can unenroll an agentless agent with skipAgentlessValidation=true', async () => {
       const { soClient, esClient, agentInAgentlessDoc } = createClientMock();
       esClient.search.mockResponse({ hits: { hits: [agentInAgentlessDoc] } } as any);
@@ -288,12 +314,11 @@ describe('unenroll', () => {
         }
 
         if (request?.index === AGENT_ACTIONS_RESULTS_INDEX) {
+          // the agents that already have a result come back as aggregation buckets, so that
+          // several results for one agent cannot crowd another agent's out of a page of hits
           return {
-            hits: {
-              hits: [
-                { _source: { action_id: 'other-action1', agent_id: 'agent-in-regular-policy' } },
-              ],
-            },
+            hits: { hits: [] },
+            aggregations: { agent_ids: { buckets: [{ key: 'agent-in-regular-policy' }] } },
           };
         }
 

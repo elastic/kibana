@@ -33,9 +33,11 @@ const typesLoadErrorTitle = i18n.translate('xpack.nightshift.connectSources.load
 export function ConnectSourcesGrid({
   filter,
   trailing,
+  ebtElement,
 }: {
   filter: (actionTypeId: string) => boolean;
   trailing?: React.ReactNode;
+  ebtElement: string;
 }): React.ReactElement | null {
   const { triggersActionsUi } = useKibana().services;
   const { groups, isLoading, error, typesError, refetch } = useConnectorsByType();
@@ -63,7 +65,7 @@ export function ConnectSourcesGrid({
       data-test-subj="nightshiftConnectSourcesGrid"
     >
       {shown.map((typeGroup) => (
-        <ConnectTypeCard key={typeGroup.actionType.id} group={typeGroup} />
+        <ConnectTypeCard key={typeGroup.actionType.id} group={typeGroup} ebtElement={ebtElement} />
       ))}
       {trailing}
     </div>

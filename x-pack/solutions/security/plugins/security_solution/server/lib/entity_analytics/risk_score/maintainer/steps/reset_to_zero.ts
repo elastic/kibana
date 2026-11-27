@@ -32,7 +32,6 @@ export interface ResetToZeroDependencies {
   logger: ScopedLogger;
   crudClient: EntityUpdateClient;
   watchlistConfigs: Map<string, WatchlistObject>;
-  idBasedRiskScoringEnabled: boolean;
   calculationRunId: string;
   now: string;
 }
@@ -59,7 +58,6 @@ export const resetToZero = async ({
   logger,
   crudClient,
   watchlistConfigs,
-  idBasedRiskScoringEnabled,
   calculationRunId,
   now,
 }: ResetToZeroDependencies): Promise<ResetToZeroSummary> => {
@@ -200,7 +198,6 @@ export const resetToZero = async ({
       logger,
       entityType,
       scores,
-      enabled: idBasedRiskScoringEnabled,
     });
 
   return {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { TimelineEventsDetailsItem } from '@kbn/securitysolution-timeline-search-strategy';
 import { useAssistantContext, useAssistantOverlay } from '@kbn/elastic-assistant';
 import { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';

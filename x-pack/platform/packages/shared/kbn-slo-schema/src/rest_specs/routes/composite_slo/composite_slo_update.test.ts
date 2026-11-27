@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Duration, DurationUnit } from '../../../models/duration';
 import { updateCompositeSLOParamsSchema } from './composite_slo_update';
 
 const buildRequest = (members?: Array<{ sloId: string; weight: number; instanceId?: string }>) => ({
@@ -13,6 +14,30 @@ const buildRequest = (members?: Array<{ sloId: string; weight: number; instanceI
 });
 
 describe('UpdateCompositeSLO schema validation', () => {
+  it.each([
+    ['name', 'a'.repeat(1024), 'a'.repeat(1025)],
+    ['description', 'a'.repeat(10000), 'a'.repeat(10001)],
+  ])('bounds %s', (field, valid, tooLong) => {
+    const parse = (value: string) =>
+      updateCompositeSLOParamsSchema.safeParse({
+        path: { id: 'composite-slo-id' },
+        body: { [field]: value },
+      });
+
+    expect(parse(valid).success).toBe(true);
+    expect(parse(tooLong).success).toBe(false);
+  });
+
+  it('decodes the time window duration into a Duration', () => {
+    const result = updateCompositeSLOParamsSchema.parse({
+      path: { id: 'composite-slo-id' },
+      body: { timeWindow: { duration: '7d', type: 'rolling' } },
+    });
+
+    expect(result.body.timeWindow?.duration).toBeInstanceOf(Duration);
+    expect(result.body.timeWindow?.duration.isEqual(new Duration(7, DurationUnit.Day))).toBe(true);
+  });
+
   it('accepts a request without members', () => {
     const result = updateCompositeSLOParamsSchema.safeParse(buildRequest());
 

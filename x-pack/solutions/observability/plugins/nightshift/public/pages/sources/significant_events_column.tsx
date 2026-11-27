@@ -43,7 +43,14 @@ export function SignificantEventsColumn({ sourceId }: SignificantEventsColumnPro
   if (significantEventsFetchState.isError || !significantEventsFetchState.data) {
     return (
       <ErrorMessage
-        error={significantEventsFetchState.error ?? new Error('Failed to load significant events')}
+        error={
+          significantEventsFetchState.error ??
+          new Error(
+            i18n.translate('xpack.nightshift.sources.significantEventsColumn.loadErrorMessage', {
+              defaultMessage: 'Failed to load significant events',
+            })
+          )
+        }
       />
     );
   }

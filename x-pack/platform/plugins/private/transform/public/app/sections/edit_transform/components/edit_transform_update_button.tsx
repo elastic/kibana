@@ -19,6 +19,8 @@ import {
   useEditTransformFlyoutActions,
   useEditTransformFlyoutContext,
 } from '../state_management/edit_transform_flyout_state';
+import { useAreNonRetentionFieldsValid } from '../state_management/selectors/are_non_retention_fields_valid';
+import { useHasAttemptedSubmit } from '../state_management/selectors/has_attempted_submit';
 import { useIsFormTouched } from '../state_management/selectors/is_form_touched';
 import { useIsFormValid } from '../state_management/selectors/is_form_valid';
 import { useUpdatedTransformConfig } from '../state_management/selectors/updated_transform_config';
@@ -29,19 +31,27 @@ interface EditTransformUpdateButtonProps {
 
 export const EditTransformUpdateButton: FC<EditTransformUpdateButtonProps> = ({ closeFlyout }) => {
   const { config } = useEditTransformFlyoutContext();
+  const areNonRetentionFieldsValid = useAreNonRetentionFieldsValid();
   const isFormValid = useIsFormValid();
   const isFormTouched = useIsFormTouched();
+  const hasAttemptedSubmit = useHasAttemptedSubmit();
   const requestConfig = useUpdatedTransformConfig();
-  const isUpdateButtonDisabled = !isFormValid || !isFormTouched;
+  const isUpdateButtonDisabled =
+    !isFormTouched || !areNonRetentionFieldsValid || (hasAttemptedSubmit && !isFormValid);
 
-  const { setApiError } = useEditTransformFlyoutActions();
+  const { attemptSubmit, setApiError } = useEditTransformFlyoutActions();
 
-  const updateTransfrom = useUpdateTransform(config.id, requestConfig);
+  const updateTransform = useUpdateTransform(config.id, requestConfig);
 
   async function submitFormHandler() {
+    attemptSubmit();
+    if (!isFormValid) {
+      return;
+    }
+
     setApiError(undefined);
 
-    updateTransfrom(undefined, {
+    updateTransform(undefined, {
       onError: (error) => setApiError(getErrorMessage(error)),
       onSuccess: () => closeFlyout(),
     });
@@ -52,10 +62,11 @@ export const EditTransformUpdateButton: FC<EditTransformUpdateButtonProps> = ({ 
       data-test-subj="transformEditFlyoutUpdateButton"
       onClick={submitFormHandler}
       fill
+      size="s"
       isDisabled={isUpdateButtonDisabled}
     >
       {i18n.translate('xpack.transform.transformList.editFlyoutUpdateButtonText', {
-        defaultMessage: 'Update',
+        defaultMessage: 'Save',
       })}
     </EuiButton>
   );

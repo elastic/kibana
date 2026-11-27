@@ -6,6 +6,7 @@
  */
 
 export type RuleDetailsTabs =
+  | 'overview'
   | 'alerts'
   | 'rule_exceptions'
   | 'endpoint_exceptions'

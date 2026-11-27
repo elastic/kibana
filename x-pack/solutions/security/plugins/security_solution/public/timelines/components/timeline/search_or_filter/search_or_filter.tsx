@@ -7,7 +7,7 @@
 
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import type { Filter } from '@kbn/es-query';
 
 import type { FilterManager } from '@kbn/data-plugin/public';

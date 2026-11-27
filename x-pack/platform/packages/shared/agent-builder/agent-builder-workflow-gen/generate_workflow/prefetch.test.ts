@@ -6,7 +6,7 @@
  */
 
 import type { ConnectorContractUnion } from '@kbn/workflows';
-import { getAllConnectors } from '@kbn/workflows-management-plugin/common/schema';
+import { getAllConnectors, getStepExposure } from '@kbn/workflows-management-plugin/common/schema';
 import {
   prefetchConnectors,
   prefetchStepDefinitions,
@@ -15,24 +15,31 @@ import {
 
 jest.mock('@kbn/workflows-management-plugin/common/schema', () => ({
   getAllConnectors: jest.fn().mockReturnValue([]),
+  getStepExposure: jest.fn().mockReturnValue('open'),
 }));
 
 const getAllConnectorsMock = getAllConnectors as jest.MockedFunction<typeof getAllConnectors>;
+const getStepExposureMock = jest.mocked(getStepExposure);
 
 const buildApi = (
   overrides: Partial<{
     getAvailableConnectors: jest.Mock;
+    getTriggerSchemaOptions: jest.Mock;
   }> = {}
 ) =>
   ({
     getAvailableConnectors:
       overrides.getAvailableConnectors ??
       jest.fn().mockResolvedValue({ connectorTypes: {}, totalConnectors: 0 }),
+    getTriggerSchemaOptions:
+      overrides.getTriggerSchemaOptions ?? jest.fn().mockReturnValue({ includePageTrigger: false }),
   } as any);
 
 beforeEach(() => {
   getAllConnectorsMock.mockReset();
   getAllConnectorsMock.mockReturnValue([]);
+  getStepExposureMock.mockReset();
+  getStepExposureMock.mockReturnValue('open');
 });
 
 describe('prefetch helpers', () => {
@@ -140,11 +147,69 @@ describe('prefetch helpers', () => {
         })
       );
     });
+
+    it('keeps internal steps and excludes managed-only steps', async () => {
+      const createStep = (type: string) =>
+        ({
+          type,
+          summary: type,
+          description: type,
+          paramsSchema: {},
+          outputSchema: {},
+        } as unknown as ConnectorContractUnion);
+
+      getAllConnectorsMock.mockReturnValue([
+        createStep('custom.internal'),
+        createStep('custom.managedOnly'),
+      ]);
+      getStepExposureMock.mockImplementation((stepType: string) => {
+        if (stepType === 'custom.internal') return 'internal';
+        if (stepType === 'custom.managedOnly') return 'managed_only';
+        return 'open';
+      });
+
+      const result = await prefetchStepDefinitions({
+        api: buildApi(),
+        spaceId: 'default',
+        request: {} as any,
+      });
+
+      const ids = result.map((d) => d.id);
+      expect(ids).toContain('custom.internal');
+      expect(ids).not.toContain('custom.managedOnly');
+    });
+
+    it('does not let a dynamic connector of the same type bring back a managed-only step', async () => {
+      getStepExposureMock.mockImplementation((stepType: string) =>
+        stepType === 'custom.managedOnly' ? 'managed_only' : 'open'
+      );
+
+      const result = await prefetchStepDefinitions({
+        api: buildApi({
+          getAvailableConnectors: jest.fn().mockResolvedValue({
+            connectorTypes: {
+              '.custom': {
+                instances: [],
+                subActions: [{ name: 'managedOnly' }, { name: 'open' }],
+                enabled: true,
+              },
+            },
+            totalConnectors: 1,
+          }),
+        }),
+        spaceId: 'default',
+        request: {} as any,
+      });
+
+      const ids = result.map((d) => d.id);
+      expect(ids).toContain('custom.open');
+      expect(ids).not.toContain('custom.managedOnly');
+    });
   });
 
   describe('prefetchTriggerDefinitions', () => {
     it('returns id/label/description for the built-in triggers', async () => {
-      const result = await prefetchTriggerDefinitions();
+      const result = await prefetchTriggerDefinitions({ api: buildApi() });
       const ids = result.map((t) => t.id);
       expect(ids).toEqual(expect.arrayContaining(['manual', 'scheduled', 'alert']));
       for (const def of result) {
@@ -152,6 +217,20 @@ describe('prefetch helpers', () => {
           expect.objectContaining({ id: expect.any(String), label: expect.any(String) })
         );
       }
+    });
+
+    it('includes the page trigger only with workflowsManagement.pages.enabled', async () => {
+      const ids = async (includePageTrigger: boolean) =>
+        (
+          await prefetchTriggerDefinitions({
+            api: buildApi({
+              getTriggerSchemaOptions: jest.fn().mockReturnValue({ includePageTrigger }),
+            }),
+          })
+        ).map((t) => t.id);
+
+      expect(await ids(false)).not.toContain('page');
+      expect(await ids(true)).toContain('page');
     });
   });
 });

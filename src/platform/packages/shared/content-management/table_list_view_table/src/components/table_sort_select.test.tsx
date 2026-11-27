@@ -7,8 +7,47 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { sortByRecentlyAccessed } from './table_sort_select';
+import React, { useState } from 'react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { I18nProvider } from '@kbn/i18n-react';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
+import type { State } from '../table_list_view_table';
+import { sortByRecentlyAccessed, TableSortSelect } from './table_sort_select';
+
+describe('TableSortSelect', () => {
+  const ControlledSortSelect = ({
+    hasUpdatedAtMetadata = false,
+  }: {
+    hasUpdatedAtMetadata?: boolean;
+  }) => {
+    const [tableSort, setTableSort] = useState<State['tableSort']>({
+      field: 'attributes.title',
+      direction: 'asc',
+    });
+    return (
+      <I18nProvider>
+        <TableSortSelect
+          tableSort={tableSort}
+          hasUpdatedAtMetadata={hasUpdatedAtMetadata}
+          hasRecentlyAccessedMetadata={false}
+          onChange={(field, direction) => setTableSort({ field, direction })}
+        />
+      </I18nProvider>
+    );
+  };
+
+  test('updates the available options when metadata becomes available after mount', async () => {
+    const user = userEvent.setup();
+    const { rerender } = render(<ControlledSortSelect />);
+
+    rerender(<ControlledSortSelect hasUpdatedAtMetadata />);
+    await user.click(screen.getByTestId('tableSortSelectBtn'));
+
+    expect(await screen.findByRole('option', { name: /Recent-Old/ })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: /Old-Recent/ })).toBeInTheDocument();
+  });
+});
 
 describe('sortByRecentlyAccessed', () => {
   const items: UserContentCommonSchema[] = [

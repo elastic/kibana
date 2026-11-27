@@ -29,7 +29,7 @@ const getDefaultValues = (sourceType: SourceType): SourceCreationFormData => ({
 export interface SourceCreationForm {
   methods: UseFormReturn<SourceCreationFormData>;
   formData: SourceCreationFormData;
-  /** Errors of touched fields, or all of them once submitted. */
+  /** Errors of touched fields and of the name once edited, or all of them once submitted. */
   formErrors: SourceCreationFormErrors;
   canSubmit: boolean;
   /** Switches the type and resets the signals to its defaults. */
@@ -49,7 +49,7 @@ export const useSourceCreationForm = ({
   });
   const { setValue } = methods;
   const formData = methods.watch();
-  const { touchedFields, isSubmitted } = useFormState({ control: methods.control });
+  const { touchedFields, dirtyFields, isSubmitted } = useFormState({ control: methods.control });
 
   const selectSourceType = (sourceType: SourceType) => {
     setValue('sourceType', sourceType, { shouldDirty: true });
@@ -72,6 +72,8 @@ export const useSourceCreationForm = ({
     formErrors: getVisibleFormErrors({
       errors: getSourceCreationFormErrors({ formData, unitDefinition }),
       touchedFields,
+      dirtyFields,
+      revealWhenDirty: ['sourceName'],
       isSubmitted,
     }),
     canSubmit: canSubmitSourceForm({ formData, unitDefinition, availableSourceTypes }),

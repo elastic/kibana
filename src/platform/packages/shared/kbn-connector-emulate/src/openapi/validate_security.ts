@@ -59,10 +59,6 @@ const describe = (credential: Credential): string => {
 const isSatisfied = (requirement: SecurityRequirement, input: SecurityInput): boolean =>
   requirement.every(({ credential }) => !credential || isPresent(credential, input));
 
-const requiredScopes = (requirement: SecurityRequirement): string[] => [
-  ...new Set(requirement.flatMap(({ scopes = [] }) => scopes)),
-];
-
 const bearerScopes = ({ headers }: SecurityInput): readonly string[] | undefined => {
   const [scheme, token] = (headers.authorization ?? '').trim().split(/\s+/);
   return scheme?.toLowerCase() === 'bearer' && token ? grantedScopes(token) : undefined;
@@ -71,13 +67,19 @@ const bearerScopes = ({ headers }: SecurityInput): readonly string[] | undefined
 /**
  * The scopes the token lacks for the satisfied requirement it is closest to, or undefined when
  * scopes aren't checked: the token wasn't issued by the mock for specific scopes, or one of the
- * satisfied requirements needs no scope it lacks.
+ * satisfied requirements is met. A scheme's scopes are read as alternatives, so a token needs one
+ * of them: vendors list the scopes that each allow an operation (Google, Zoom, Slack, Figma),
+ * although OpenAPI reads the list as all of them.
  */
 const missingScopes = (
   { security }: ContractOperation,
   input: SecurityInput
 ):
-  | { readonly granted: readonly string[]; readonly required: string[]; readonly missing: string[] }
+  | {
+      readonly granted: readonly string[];
+      /** Per scheme the token doesn't meet, the scopes any one of which would. */
+      readonly missing: ReadonlyArray<readonly string[]>;
+    }
   | undefined => {
   const granted = bearerScopes(input);
   if (!granted) {
@@ -85,10 +87,12 @@ const missingScopes = (
   }
   const candidates = security
     .filter((requirement) => isSatisfied(requirement, input))
-    .map((requirement) => {
-      const required = requiredScopes(requirement);
-      return { granted, required, missing: required.filter((scope) => !granted.includes(scope)) };
-    })
+    .map((requirement) => ({
+      granted,
+      missing: requirement
+        .map(({ scopes = [] }) => scopes)
+        .filter((scopes) => scopes.length > 0 && !scopes.some((scope) => granted.includes(scope))),
+    }))
     .sort((a, b) => a.missing.length - b.missing.length);
   const [closest] = candidates;
   return closest && closest.missing.length > 0 ? closest : undefined;
@@ -96,14 +100,18 @@ const missingScopes = (
 
 /**
  * The `WWW-Authenticate` challenge for a request whose token lacks scopes (RFC 6750 §3.1), naming
- * the scopes of the requirement it is closest to; undefined when the token's scopes suffice.
+ * the scopes that would satisfy the requirement it is closest to; undefined when the token's
+ * scopes suffice.
  */
 export const insufficientScopeChallenge = (
   operation: ContractOperation,
   input: SecurityInput
 ): string | undefined => {
   const found = missingScopes(operation, input);
-  return found && `Bearer error="insufficient_scope", scope="${found.required.join(' ')}"`;
+  return (
+    found &&
+    `Bearer error="insufficient_scope", scope="${[...new Set(found.missing.flat())].join(' ')}"`
+  );
 };
 
 /**
@@ -145,9 +153,9 @@ export const validateSecurity = (
     {
       path: ['security'],
       code: 'insufficient_scope',
-      message: `Token was granted ${granted}, but the operation also needs ${found.missing.join(
-        ' '
-      )} (requires ${found.required.join(' ')})`,
+      message: `Token was granted ${granted}, but the operation needs ${found.missing
+        .map((scopes) => `one of ${scopes.join(' ')}`)
+        .join(', and ')}`,
     },
   ];
 };

@@ -19,6 +19,7 @@ export {
   withToolResults,
   type InvestigationTranscriptStep,
   type LoadedInvestigationRound,
+  type PersistedEarlierRound,
   type RawRoundResult,
   type RawRoundStep,
   type ResolvedConversationRound,

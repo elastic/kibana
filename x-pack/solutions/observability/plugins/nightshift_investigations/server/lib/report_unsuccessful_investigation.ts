@@ -15,18 +15,28 @@ import {
   type InvestigationNotificationSource,
 } from './notifications/send_investigation_notifications';
 
-/** Reconciles a persisted failed or timed-out run using its original context and destinations. */
+/**
+ * Reconciles a persisted failed, timed-out or cancelled run using its original context and
+ * destinations.
+ */
 export const reportUnsuccessfulInvestigation = async (
   deps: InvestigationNotificationDeps & { getTriggerEmitter: GetTriggerEmitter },
   source: InvestigationNotificationSource
 ): Promise<void> => {
   if (source.abortSignal.aborted) return;
   const client = deps.getInvestigationsClient(source.request, source.spaceId);
-  const { execution, investigationId } = await client.getUnsuccessfulRun(source.executionId);
-  const phase = execution.status === ExecutionStatus.TIMED_OUT ? 'timed_out' : 'failed';
+  const run = await client.getUnsuccessfulRun(source.executionId);
+  if (!run) return;
+  const { execution, investigationId, cause } = run;
+  const runSource = { ...source, executionId: execution.id };
+  const phase = cause.status === ExecutionStatus.TIMED_OUT ? 'timed_out' : 'failed';
   const reason = (
-    execution.error?.message?.trim() ||
-    (phase === 'timed_out'
+    (cause.status === ExecutionStatus.CANCELLED
+      ? i18n.translate('xpack.nightshiftInvestigations.sweep.cancelledErrorMessage', {
+          defaultMessage: 'Investigation was stopped',
+        })
+      : cause.error?.message?.trim()) ||
+    (phase === 'timed_out' || cause.error?.type === 'TimeoutError'
       ? i18n.translate('xpack.nightshiftInvestigations.sweep.timeoutErrorMessage', {
           defaultMessage: 'Investigation exceeded its workflow timeout',
         })
@@ -57,7 +67,7 @@ export const reportUnsuccessfulInvestigation = async (
     );
   }
   try {
-    await sendInvestigationNotificationsForExecution(deps, source, {
+    await sendInvestigationNotificationsForExecution(deps, runSource, {
       investigationId,
       phase,
       reason,
@@ -67,10 +77,16 @@ export const reportUnsuccessfulInvestigation = async (
               const emitter = deps.getTriggerEmitter(source.request);
               const subject = await client.getLifecycleSubject(investigationId);
               if (!emitter || !subject) return;
+              const correlation = await client.getLifecycleCorrelation(
+                investigationId,
+                execution.id
+              );
               // Timeouts remain unsuccessful outcomes for existing failure-trigger subscribers.
               emitter(INVESTIGATION_FAILED_TRIGGER_ID, {
                 investigation_id: investigationId,
+                workflow_execution_id: execution.id,
                 execution_id: execution.id,
+                ...correlation,
                 subject: subject.subject,
                 trigger_type: subject.triggerType,
                 started_at: execution.startedAt || subject.startedAt,

@@ -7,7 +7,7 @@
 
 import { createContext, useContext } from 'react';
 import type { EuiDataGridColumn, EuiDataGridStyleCellPaddings } from '@elastic/eui';
-import type { TimeRange } from '../common';
+import type { TimeRange } from '../../queries/time_range';
 import type { RowActions } from './cells/row_actions_cell';
 import type {
   EntityGridCellContext,

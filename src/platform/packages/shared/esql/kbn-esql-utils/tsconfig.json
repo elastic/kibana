@@ -33,5 +33,6 @@
     "@kbn/core",
     "@kbn/index-management-shared-types",
     "@kbn/licensing-types",
+    "@kbn/geo-precision",
   ]
 }

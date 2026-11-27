@@ -94,6 +94,11 @@ export interface SignificantEventsMaintenanceService {
    */
   clearContinuousOnboardingRestore(params: { request: KibanaRequest }): Promise<void>;
   /**
+   * While paused, forget that scheduled discovery should resume. Used when the last source is
+   * deleted so Resume cannot restore a setting that no longer matches the source catalog.
+   */
+  clearScheduledDiscoveryRestore(params: { request: KibanaRequest }): Promise<void>;
+  /**
    * In the caller's space only: disable the per-space managed workflows, cancel
    * in-flight executions (including those of the shared workflows), turn off
    * continuous/scheduled Settings toggles (recording which were on), and disable
@@ -558,6 +563,37 @@ export const createSignificantEventsMaintenanceService = ({
       });
     },
 
+    async clearScheduledDiscoveryRestore({ request }) {
+      return withTransitionLock(async () => {
+        const { spaceId } = request;
+        const existing = await readState(spaceId);
+        if (!existing || normalizeState(existing.state) !== 'paused') {
+          return;
+        }
+
+        const pausedSettings = existing.pausedSettings;
+        if (!pausedSettings) {
+          return;
+        }
+        const scheduledDiscoveryEnabledSpaceIds =
+          pausedSettings.scheduledDiscoveryEnabledSpaceIds.filter((id) => id !== spaceId);
+        if (
+          scheduledDiscoveryEnabledSpaceIds.length ===
+          pausedSettings.scheduledDiscoveryEnabledSpaceIds.length
+        ) {
+          return;
+        }
+
+        await writeState(spaceId, {
+          ...existing,
+          pausedSettings: {
+            ...pausedSettings,
+            scheduledDiscoveryEnabledSpaceIds,
+          },
+        });
+      });
+    },
+
     async pause({ request, updatedBy }) {
       return withTransitionLock(async () => {
         const { spaceId } = request;
@@ -621,7 +657,7 @@ export const createSignificantEventsMaintenanceService = ({
 
             logFailures(
               log,
-              `Significant Events paused space "${spaceId}" because Nightshift was turned off: disabled ${summary.workflowsDisabled} workflow(s) and ${summary.rulesDisabled} rule(s), ${sweep.failures.length} failure(s)`,
+              `Significant Events paused space "${spaceId}" because nightshift was turned off: disabled ${summary.workflowsDisabled} workflow(s) and ${summary.rulesDisabled} rule(s), ${sweep.failures.length} failure(s)`,
               sweep.failures
             );
           },

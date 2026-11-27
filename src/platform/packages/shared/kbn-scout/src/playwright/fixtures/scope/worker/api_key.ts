@@ -41,8 +41,8 @@ export interface RequestAuthFixture {
    */
   getApiKey: (role: string) => Promise<RoleApiCredentials>;
   /**
-   * Creates an API key for a custom role defined inline via a Kibana or Elasticsearch
-   * role descriptor. The role is created on-the-fly and cleaned up after the worker completes.
+   * Creates an API key scoped to an inline Kibana or Elasticsearch role descriptor
+   * without creating or changing the worker's persisted custom role.
    * @param role - A Kibana or Elasticsearch role descriptor with specific permissions.
    */
   getApiKeyForCustomRole: (
@@ -78,6 +78,34 @@ export interface RequestAuthFixture {
   getApiKeyForBuiltInRole: (roleName: string) => Promise<RoleApiCredentials>;
 }
 
+// Bounded so cleanup requests stay small and match Kibana's invalidation route limit.
+const MAX_INVALIDATION_BATCH_SIZE = 1000;
+// Leaves room in the worker teardown budget to revoke keys that arrive during the drain.
+export const PENDING_CREDENTIALS_DRAIN_TIMEOUT_MS = 20_000;
+// Backstop for keys whose IDs never reach the fixture, for example when a create is still running
+// after the worker exits; outlives any worker so tests never hit it.
+export const API_KEY_EXPIRATION = '1d';
+
+const describeFailure = (reason: unknown): string =>
+  reason instanceof Error ? reason.message : String(reason);
+
+// Throws the only failure as-is, or every failure together, from a set of settled results.
+const throwIfAnyRejected = (results: PromiseSettledResult<unknown>[], message: string) => {
+  const failures = results.flatMap((result) =>
+    result.status === 'rejected' ? [result.reason] : []
+  );
+  if (failures.length === 1) {
+    throw failures[0];
+  }
+  if (failures.length > 1) {
+    // Reporters record only message and stack, so the message carries every underlying failure.
+    throw new AggregateError(
+      failures,
+      `${message}: ${failures.map((reason) => describeFailure(reason)).join('; ')}`
+    );
+  }
+};
+
 export const requestAuthFixture = coreWorkerFixtures.extend<
   {},
   {
@@ -87,8 +115,33 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
   }
 >({
   requestAuth: [
-    async ({ log, config, samlAuth, defaultRoles, apiClient }, use, workerInfo) => {
+    async ({ log, config, esClient, samlAuth, defaultRoles, apiClient }, use, workerInfo) => {
       const generatedApiKeys: ApiKey[] = [];
+      const pendingOperations = new Set<Promise<RoleApiCredentials>>();
+      let acceptingCredentials = true;
+      // Set when the drain deadline passes; requests are left running so late keys can be revoked.
+      let pendingOperationsAbandoned = false;
+      // Revocations started by abandoned operations; teardown waits for any still running.
+      const abandonedRevocations = new Set<Promise<void>>();
+
+      const runCredentialOperation = (
+        create: () => Promise<RoleApiCredentials>
+      ): Promise<RoleApiCredentials> => {
+        if (!acceptingCredentials) {
+          return Promise.reject(
+            new Error('Cannot create API credentials after teardown has started')
+          );
+        }
+
+        // Register before any side effects, and observe rejections without changing the caller's result.
+        const operation = Promise.resolve().then(create);
+        pendingOperations.add(operation);
+        void operation.then(
+          () => pendingOperations.delete(operation),
+          () => pendingOperations.delete(operation)
+        );
+        return operation;
+      };
 
       const createApiKeyPayload = (
         apiKeyName: string,
@@ -99,6 +152,7 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
 
         return {
           name: apiKeyName,
+          expiration: API_KEY_EXPIRATION,
           metadata: {},
           ...(isElasticsearchRole(roleDescriptor)
             ? { role_descriptors: descriptors }
@@ -118,10 +172,13 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
           workerInfo.parallelIndex + 1
         }`;
 
+        // Avoid starting a SAML login for an operation that can no longer record its key.
+        throwIfAbandoned();
         const adminCookieHeader = await samlAuth.session.getApiCredentialsForRole('admin');
+        throwIfAbandoned();
 
         const payload = createApiKeyPayload(apiKeyName, roleName, roleDescriptors);
-        const response = await apiClient.post('internal/security/api_key', {
+        const response = await apiClient.post<ApiKey>('internal/security/api_key', {
           headers: {
             'kbn-xsrf': 'some-xsrf-token',
             'x-elastic-internal-origin': 'kibana',
@@ -137,7 +194,13 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
           );
         }
 
-        const apiKey = response.body as ApiKey;
+        const apiKey = response.body;
+        if (pendingOperationsAbandoned) {
+          // Teardown has stopped collecting keys, so revoke this one before reporting the failure.
+          await revokeAbandonedApiKey(apiKey);
+          throwIfAbandoned();
+        }
+
         const apiKeyHeader = { Authorization: `ApiKey ${apiKey.encoded}` };
 
         log.info(`Created API key for ${roleName} role: ${apiKey.name}`);
@@ -145,42 +208,148 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
         return { apiKey, apiKeyHeader };
       };
 
+      // Elasticsearch omits already-invalidated keys from invalidation results, so look them up.
+      const findActiveApiKeyIds = async (ids: string[]): Promise<string[]> => {
+        if (ids.length === 0) {
+          return [];
+        }
+
+        const { api_keys: apiKeys } = await esClient.security.queryApiKeys({
+          query: { ids: { values: ids } },
+          size: ids.length,
+        });
+        if (!Array.isArray(apiKeys)) {
+          throw new Error('Invalid API key query response');
+        }
+        // A key that is no longer returned has been removed, so it cannot authenticate.
+        const activeIds = new Set(
+          apiKeys.filter(({ invalidated }) => invalidated !== true).map(({ id }) => id)
+        );
+        return ids.filter((id) => activeIds.has(id));
+      };
+
+      const invalidateApiKeyBatch = async (apiKeys: ApiKey[]) => {
+        const ids = apiKeys.map(({ id }) => id);
+        // Elasticsearch reports per-key revocation results; Kibana's internal route discards them.
+        const {
+          error_count: errorCount,
+          error_details: errorDetails,
+          invalidated_api_keys: invalidatedIds,
+          previously_invalidated_api_keys: previouslyInvalidatedIds,
+        } = await esClient.security.invalidateApiKey({ ids });
+
+        if (
+          typeof errorCount !== 'number' ||
+          !Array.isArray(invalidatedIds) ||
+          !Array.isArray(previouslyInvalidatedIds)
+        ) {
+          throw new Error('Invalid API key invalidation response');
+        }
+        if (errorCount !== 0) {
+          throw new Error(
+            `API key invalidation reported ${errorCount} error(s): ${JSON.stringify(errorDetails)}`
+          );
+        }
+
+        const revokedIds = new Set([...invalidatedIds, ...previouslyInvalidatedIds]);
+        const unreportedIds = ids.filter((id) => !revokedIds.has(id));
+        const missingIds = await findActiveApiKeyIds(unreportedIds);
+        if (missingIds.length > 0) {
+          throw new Error(
+            `Incomplete API key invalidation: ${missingIds.length} of ${
+              ids.length
+            } key(s) still active after invalidation; missing IDs: ${missingIds.join(', ')}`
+          );
+        }
+      };
+
       const invalidateApiKeys = async (apiKeys: ApiKey[]) => {
         if (apiKeys.length === 0) {
           return;
         }
 
-        // Get admin credentials once for all invalidations
-        const adminCookieHeader = await samlAuth.session.getApiCredentialsForRole('admin');
-
-        // Batch invalidate all API keys in a single request (API supports up to 1000 keys)
-        const response = await apiClient.post('internal/security/api_key/invalidate', {
-          headers: {
-            'kbn-xsrf': 'some-xsrf-token',
-            'x-elastic-internal-origin': 'kibana',
-            ...adminCookieHeader,
-          },
-          body: {
-            apiKeys: apiKeys.map((apiKey) => ({ id: apiKey.id, name: apiKey.name })),
-            isAdmin: true,
-          },
-          responseType: 'json',
-        });
-
-        if (response.statusCode !== 200) {
-          log.info(`Failed to invalidate ${apiKeys.length} API keys`);
-        } else {
-          const invalidatedCount = response.body?.itemsInvalidated?.length || 0;
-          const errorCount = response.body?.errors?.length || 0;
-          log.info(
-            `Invalidated ${invalidatedCount} API keys${
-              errorCount > 0 ? ` (${errorCount} errors)` : ''
-            }`
-          );
-          if (errorCount > 0) {
-            log.debug(`API key invalidation errors: ${JSON.stringify(response.body.errors)}`);
-          }
+        const batches: ApiKey[][] = [];
+        for (let start = 0; start < apiKeys.length; start += MAX_INVALIDATION_BATCH_SIZE) {
+          batches.push(apiKeys.slice(start, start + MAX_INVALIDATION_BATCH_SIZE));
         }
+        // Attempt every batch so one failure does not leave the remaining keys active.
+        throwIfAnyRejected(
+          await Promise.allSettled(batches.map(invalidateApiKeyBatch)),
+          'API key invalidation failed'
+        );
+        log.info(`Invalidated ${apiKeys.length} API keys`);
+      };
+
+      const revokeAbandonedApiKey = (apiKey: ApiKey): Promise<void> => {
+        const revocation = invalidateApiKeys([apiKey]).catch((error) => {
+          // Logged even after teardown finishes, so the key can be revoked by hand.
+          log.error(
+            `Failed to revoke API key '${apiKey.id}' (${
+              apiKey.name
+            }) that arrived after teardown timed out: ${describeFailure(error)}`
+          );
+          throw new Error(
+            `Failed to revoke late API key '${apiKey.id}': ${describeFailure(error)}`
+          );
+        });
+        abandonedRevocations.add(revocation);
+        void revocation.then(
+          () => abandonedRevocations.delete(revocation),
+          () => abandonedRevocations.delete(revocation)
+        );
+        return revocation;
+      };
+
+      const throwIfAbandoned = () => {
+        if (pendingOperationsAbandoned) {
+          throw new Error('API credential request abandoned because teardown timed out');
+        }
+      };
+
+      const drainPendingOperations = async () => {
+        if (pendingOperations.size === 0) {
+          return;
+        }
+
+        let timer: NodeJS.Timeout | undefined;
+        const timedOut = new Promise<boolean>((resolve) => {
+          timer = setTimeout(() => resolve(true), PENDING_CREDENTIALS_DRAIN_TIMEOUT_MS);
+        });
+        const settled = Promise.allSettled(pendingOperations).then(() => false);
+        const didTimeOut = await Promise.race([settled, timedOut]);
+        clearTimeout(timer);
+
+        if (didTimeOut) {
+          // Late keys are revoked only while this worker is alive; API_KEY_EXPIRATION covers the rest.
+          const stalledCount = pendingOperations.size;
+          pendingOperationsAbandoned = true;
+          throw new Error(
+            `Timed out after ${PENDING_CREDENTIALS_DRAIN_TIMEOUT_MS}ms waiting for ${stalledCount} pending API credential operation(s)`
+          );
+        }
+      };
+
+      // Revoke known keys right away; revoke late keys as soon as the drain settles, independently.
+      const cleanUpApiKeys = async () => {
+        const knownKeys = generatedApiKeys.slice();
+        const drainThenRevokeLateKeys = async () => {
+          const drainResults = await Promise.allSettled([drainPendingOperations()]);
+          // After a timeout, abandoned operations revoke their own keys instead of recording them.
+          const lateResults = await Promise.allSettled([
+            invalidateApiKeys(generatedApiKeys.slice(knownKeys.length)),
+          ]);
+          return [...drainResults, ...lateResults];
+        };
+        const [knownResult, lateResults] = await Promise.all([
+          Promise.allSettled([invalidateApiKeys(knownKeys)]),
+          drainThenRevokeLateKeys(),
+        ]);
+        // Keys that arrived after the deadline while cleanup ran; each is bounded by the ES timeout.
+        const abandonedResults = await Promise.allSettled(abandonedRevocations);
+        throwIfAnyRejected(
+          [...knownResult, ...lateResults, ...abandonedResults],
+          'API key cleanup failed'
+        );
       };
 
       const getApiKey = async (predefinedRole: string): Promise<RoleApiCredentials> => {
@@ -196,16 +365,12 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
         return await createApiKeyWithAdminCredentials(predefinedRole, roleDescriptors);
       };
 
-      const getApiKeyForCustomRole = async (
+      const getApiKeyForCustomRole = (
         roleDescriptor: KibanaRole | ElasticsearchRoleDescriptor
-      ): Promise<RoleApiCredentials> => {
-        await samlAuth.setCustomRole(roleDescriptor);
-
-        const result = await createApiKeyWithAdminCredentials(samlAuth.customRoleName, {
+      ): Promise<RoleApiCredentials> =>
+        createApiKeyWithAdminCredentials(samlAuth.customRoleName, {
           [samlAuth.customRoleName]: roleDescriptor,
         });
-        return result;
-      };
 
       const getApiKeyForAdmin = () => getApiKey('admin');
       const getApiKeyForViewer = () => getApiKey('viewer');
@@ -223,22 +388,36 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
         return createApiKeyWithAdminCredentials(roleName, { [roleName]: descriptor });
       };
 
-      await use({
-        getApiKey,
-        getApiKeyForCustomRole,
-        getApiKeyForAdmin,
-        getApiKeyForViewer,
-        getApiKeyForPrivilegedUser,
-        getApiKeyForBuiltInRole,
-      });
+      // Preserve use failures while still cleaning up, including when use throws synchronously.
+      const useResults = await Promise.allSettled([
+        Promise.resolve().then(() =>
+          use({
+            getApiKey: (role) => runCredentialOperation(() => getApiKey(role)),
+            getApiKeyForCustomRole: (role) =>
+              runCredentialOperation(() => getApiKeyForCustomRole(role)),
+            getApiKeyForAdmin: () => runCredentialOperation(getApiKeyForAdmin),
+            getApiKeyForViewer: () => runCredentialOperation(getApiKeyForViewer),
+            getApiKeyForPrivilegedUser: () => runCredentialOperation(getApiKeyForPrivilegedUser),
+            getApiKeyForBuiltInRole: (role) =>
+              runCredentialOperation(() => getApiKeyForBuiltInRole(role)),
+          })
+        ),
+      ]);
 
-      // Invalidate all API Keys after tests
-      await measurePerformanceAsync(log, `Delete all API Keys`, async () => {
-        log.debug(`Delete all API Keys`);
-        return invalidateApiKeys(generatedApiKeys);
-      });
+      // Hook timeouts do not cancel requests: stop new calls, then clean up known and late keys.
+      acceptingCredentials = false;
+      const cleanupResults = await Promise.allSettled([
+        measurePerformanceAsync(log, `Delete all API Keys`, async () => {
+          log.debug(`Delete all API Keys`);
+          return cleanUpApiKeys();
+        }),
+      ]);
+      throwIfAnyRejected(
+        [...useResults, ...cleanupResults],
+        'API credential use and cleanup failed'
+      );
 
-      // Note: the custom role will be deleted in the samlAuth fixture cleanup
+      // The dependent samlAuth cleanup can now proceed after credential cleanup.
     },
     { scope: 'worker' },
   ],

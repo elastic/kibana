@@ -9,8 +9,6 @@ import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/
 
 import { intersection } from 'lodash';
 
-import { AGENT_ACTIONS_RESULTS_INDEX } from '../../../common';
-
 import type { Agent } from '../../types';
 
 import {
@@ -35,6 +33,7 @@ import {
   bulkCreateAgentActionResults,
   createAgentAction,
   createErrorActionResults,
+  getAgentsWithoutActionResults,
   getUnenrollAgentActions,
 } from './actions';
 import { getAgentPolicyRestrictions, isAgentlessAgent, isHostedAgent } from './hosted_agent';
@@ -216,7 +215,7 @@ export async function updateActionsForForceUnenroll(
       // filtering out agents with action results
       const agentsToUpdate = await getAgentsWithoutActionResults(
         esClient,
-        action.action_id!,
+        [action.action_id!],
         commonAgents
       );
       if (agentsToUpdate.length > 0) {
@@ -230,36 +229,6 @@ export async function updateActionsForForceUnenroll(
       }
     }
   }
-}
-
-async function getAgentsWithoutActionResults(
-  esClient: ElasticsearchClient,
-  actionId: string,
-  commonAgents: string[]
-): Promise<string[]> {
-  try {
-    const res = await esClient.search({
-      index: AGENT_ACTIONS_RESULTS_INDEX,
-      query: {
-        bool: {
-          must: [{ term: { action_id: actionId } }, { terms: { agent_id: commonAgents } }],
-        },
-      },
-      size: commonAgents.length,
-    });
-    const agentsToUpdate = commonAgents.filter(
-      (agentId) => !res.hits.hits.find((hit) => (hit._source as any)?.agent_id === agentId)
-    );
-    return agentsToUpdate;
-  } catch (err) {
-    if (err.statusCode === 404) {
-      // .fleet-actions-results does not yet exist
-      appContextService.getLogger().debug(err);
-    } else {
-      throw err;
-    }
-  }
-  return commonAgents;
 }
 
 export async function invalidateAPIKeysForAgents(agents: Agent[]) {

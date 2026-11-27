@@ -1,5 +1,5 @@
 {
-  "sha1": "456b529ef960f6262c18ddaf9c1c351dbc07be47",
+  "sha1": "fbc408792ba83a9f34aa0a1315bfde000e8caac8",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -7,15 +7,15 @@
     {
       "id": "dc7479c9232fce9-71b670e4054330e",
       "title": "automatic_import Data Stream API (manager) manager flow: upload samples, patch pipeline, read results, delete data stream",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/api/tests/data_stream_api_manager.spec.ts",
-        "line": 32,
-        "column": 10
+        "line": 44,
+        "column": 8
       }
     },
     {
@@ -98,7 +98,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/api/tests/input_validation_api_manager.spec.ts",
-        "line": 71,
+        "line": 72,
         "column": 10
       }
     },
@@ -112,7 +112,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/api/tests/input_validation_api_manager.spec.ts",
-        "line": 83,
+        "line": 84,
         "column": 62
       }
     },
@@ -126,7 +126,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/api/tests/input_validation_api_manager.spec.ts",
-        "line": 107,
+        "line": 108,
         "column": 41
       }
     },
@@ -140,7 +140,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/api/tests/input_validation_api_manager.spec.ts",
-        "line": 126,
+        "line": 127,
         "column": 62
       }
     },
@@ -154,7 +154,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/api/tests/input_validation_api_manager.spec.ts",
-        "line": 138,
+        "line": 139,
         "column": 100
       }
     },
@@ -168,7 +168,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/api/tests/input_validation_api_manager.spec.ts",
-        "line": 149,
+        "line": 150,
         "column": 36
       }
     },
@@ -182,7 +182,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/api/tests/input_validation_api_manager.spec.ts",
-        "line": 161,
+        "line": 162,
         "column": 11
       }
     },
@@ -196,7 +196,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/api/tests/input_validation_api_manager.spec.ts",
-        "line": 174,
+        "line": 175,
         "column": 12
       }
     },
@@ -210,7 +210,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/api/tests/input_validation_api_manager.spec.ts",
-        "line": 193,
+        "line": 194,
         "column": 38
       }
     },
@@ -224,7 +224,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/api/tests/input_validation_api_manager.spec.ts",
-        "line": 209,
+        "line": 210,
         "column": 38
       }
     },
@@ -238,7 +238,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/api/tests/input_validation_api_manager.spec.ts",
-        "line": 221,
+        "line": 222,
         "column": 9
       }
     },
@@ -252,8 +252,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/api/tests/input_validation_api_manager.spec.ts",
-        "line": 231,
+        "line": 232,
         "column": 62
+      }
+    },
+    {
+      "id": "437c4f794ffbbb4-ede0d7b8e04597a",
+      "title": "automatic_import input validation & abuse sketches (manager) POST .../upload: rejects samples that are clearly not logs (binary content, shebang script)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/api/tests/input_validation_api_manager.spec.ts",
+        "line": 257,
+        "column": 11
       }
     },
     {
@@ -266,8 +280,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/api/tests/input_validation_api_manager.spec.ts",
-        "line": 256,
-        "column": 11
+        "line": 290,
+        "column": 27
       }
     },
     {
@@ -280,8 +294,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/api/tests/input_validation_api_manager.spec.ts",
-        "line": 277,
-        "column": 41
+        "line": 307,
+        "column": 48
       }
     },
     {
@@ -294,8 +308,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/api/tests/input_validation_api_manager.spec.ts",
-        "line": 292,
-        "column": 73
+        "line": 323,
+        "column": 18
       }
     },
     {
@@ -308,8 +322,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/api/tests/input_validation_api_manager.spec.ts",
-        "line": 305,
-        "column": 13
+        "line": 335,
+        "column": 29
       }
     },
     {
@@ -322,8 +336,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/api/tests/input_validation_api_manager.spec.ts",
-        "line": 314,
-        "column": 35
+        "line": 344,
+        "column": 10
       }
     },
     {
@@ -336,8 +350,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/api/tests/input_validation_api_manager.spec.ts",
-        "line": 328,
-        "column": 50
+        "line": 358,
+        "column": 30
       }
     },
     {
@@ -350,8 +364,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/api/tests/input_validation_api_manager.spec.ts",
-        "line": 342,
-        "column": 62
+        "line": 372,
+        "column": 49
       }
     },
     {
@@ -364,8 +378,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/api/tests/input_validation_api_manager.spec.ts",
-        "line": 355,
-        "column": 62
+        "line": 385,
+        "column": 71
       }
     },
     {
@@ -378,8 +392,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/api/tests/input_validation_api_manager.spec.ts",
-        "line": 371,
-        "column": 19
+        "line": 400,
+        "column": 63
       }
     },
     {
@@ -392,8 +406,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/automatic_import/test/scout_automatic_import/api/tests/input_validation_api_manager.spec.ts",
-        "line": 386,
-        "column": 41
+        "line": 416,
+        "column": 76
       }
     },
     {

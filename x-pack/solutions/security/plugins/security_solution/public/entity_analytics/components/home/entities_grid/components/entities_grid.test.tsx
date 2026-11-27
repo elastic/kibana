@@ -102,6 +102,8 @@ describe('EntitiesGrid', () => {
   beforeAll(() => {
     jest.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockReturnValue(800);
     jest.spyOn(HTMLElement.prototype, 'offsetWidth', 'get').mockReturnValue(1000);
+    jest.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockReturnValue(800);
+    jest.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(1000);
   });
   afterAll(() => {
     jest.restoreAllMocks();
@@ -137,9 +139,14 @@ describe('EntitiesGrid', () => {
     renderGrid();
 
     const expanders = screen.getAllByRole('button', {
-      name: 'Show records resolved to this entity',
+      name: 'Show records resolved to alpha',
     });
     expect(expanders).toHaveLength(1);
+    // beta has a single record, so it must not get an expander of its own
+    expect(screen.getAllByRole('button', { name: /^Show records resolved to/ })).toHaveLength(1);
+    expect(
+      screen.queryByRole('button', { name: 'Show records resolved to beta' })
+    ).not.toBeInTheDocument();
 
     fireEvent.click(expanders[0]);
 
@@ -210,7 +217,7 @@ describe('EntitiesGrid', () => {
     renderGrid({ rowsMode: 'individual', columns: INDIVIDUAL_ROWS_COLUMNS });
 
     expect(
-      screen.queryByRole('button', { name: 'Show records resolved to this entity' })
+      screen.queryByRole('button', { name: 'Show records resolved to alpha' })
     ).not.toBeInTheDocument();
   });
 

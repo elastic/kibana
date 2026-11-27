@@ -6,6 +6,10 @@ against a Kibana instance with specific test plugins available.
 To add a plugin to the instance, just place the plugin folder in the `plugins`
 directory.
 
+The custom visualizations test plugin lives in
+`src/platform/test_plugins/kbn_tp_custom_visualizations` and is loaded by
+`config.ts` alongside the plugins in this directory.
+
 Add new test suites into the `test_suites` folder and reference them from the
 `config.js` file. These test suites work the same as regular functional test
 except that they are executed against a Kibana with all plugins (from the
@@ -30,6 +34,9 @@ test plugin), you can just run:
 ```
 pnpm start --plugin-path=test/plugin_functional/plugins/<plugin_folder>
 ```
+
+For the custom visualizations plugin, use
+`pnpm start --plugin-path=src/platform/test_plugins/kbn_tp_custom_visualizations`.
 
 If you wish to start Kibana with multiple test plugins, you can run:
 

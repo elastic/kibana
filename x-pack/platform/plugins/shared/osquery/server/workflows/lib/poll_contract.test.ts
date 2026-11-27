@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { deriveStepStatus, parseWaitTimeoutMs } from './poll_contract';
+import { deriveStepStatus, parseWaitTimeoutMs, rollupPackStatus } from './poll_contract';
+import type { StepStatus } from '../../../common/workflows/contract/schemas';
 
 describe('poll_contract', () => {
   describe('deriveStepStatus', () => {
@@ -115,6 +116,27 @@ describe('poll_contract', () => {
 
     it('clamps values above the cap', () => {
       expect(parseWaitTimeoutMs('5h', bounds)).toBe(1_800_000);
+    });
+  });
+
+  describe('rollupPackStatus', () => {
+    it.each<[string, StepStatus[], StepStatus]>([
+      ['all success', ['success', 'success'], 'success'],
+      ['one query, success', ['success'], 'success'],
+      ['all timed_out', ['timed_out', 'timed_out'], 'timed_out'],
+      ['all failed', ['failed', 'failed'], 'failed'],
+      ['failed and timed_out, none succeeded', ['failed', 'timed_out'], 'failed'],
+      ['success and failed', ['success', 'failed'], 'partial'],
+      ['success and timed_out', ['success', 'timed_out'], 'partial'],
+      ['a partial query counts as some success', ['partial', 'failed'], 'partial'],
+      ['all partial', ['partial', 'partial'], 'partial'],
+      ['success and partial', ['success', 'partial'], 'partial'],
+    ])('%s', (_name, statuses, expected) => {
+      expect(rollupPackStatus(statuses)).toBe(expected);
+    });
+
+    it('is failed for an empty list (never reached: packs without enabled queries fail first)', () => {
+      expect(rollupPackStatus([])).toBe('failed');
     });
   });
 });

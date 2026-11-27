@@ -9,10 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { DataQualityCard } from './data_quality_card';
-import {
-  createMockWiredStreamDefinition,
-  createMockQueryStreamDefinition,
-} from '../stream_management/data_management/shared/mocks';
+import { createMockWiredStreamDefinition } from '../stream_management/data_management/shared/mocks';
 
 const mockUseStreamDetail = jest.fn();
 const mockUseStreamsAppFetch = jest.fn();
@@ -62,16 +59,6 @@ describe('DataQualityCard', () => {
       value: 100,
       loading: false,
     }));
-  });
-
-  it('returns null for non-ingest (query) stream', () => {
-    mockUseStreamDetail.mockReturnValue({
-      definition: createMockQueryStreamDefinition(),
-    });
-
-    const { container } = renderWithI18n(<DataQualityCard />);
-
-    expect(container.firstChild).toBeNull();
   });
 
   it('renders Dataset quality title, indicator, and View all link for ingest stream', () => {

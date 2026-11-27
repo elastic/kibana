@@ -404,6 +404,197 @@
         "max_pages_matching": []
       },
       "metadata": { "case_id": "synthetic-noop-no-evidence", "kind": "noop" }
+    },
+    {
+      "input": {
+        "rounds": [
+          {
+            "kind": "initial",
+            "user_message": "The invoice-export alert fired for invoice-worker. Investigate.",
+            "assistant_message": "invoice-worker is failing its exports with timeouts while writing to the report store. The cause is unverified.",
+            "tool_calls": [
+              {
+                "tool_id": "nightshift_sandbox_bash",
+                "params": {
+                  "command": "q 'FROM logging-eu-west:logs-invoice-worker.log-default | WHERE log.level == \"error\" | STATS c=COUNT(*) BY message | SORT c DESC | LIMIT 5'"
+                },
+                "result": "       c       |            message            \n---------------+-------------------------------\n211            |export write timed out        "
+              }
+            ]
+          },
+          {
+            "kind": "follow_up",
+            "user_message": "This is the saved search for the failing exports: https://kibana.example.com/app/r/s/Ab3dE. It is a known pattern, tracked in https://github.com/acme/widgets/issues/4821.",
+            "previous_assistant_message": "invoice-worker is failing its exports with timeouts while writing to the report store. The cause is unverified.",
+            "assistant_message": "Thanks. I could not open the saved search and I could not read the issue, so I am not relying on either.",
+            "tool_calls": [
+              {
+                "tool_id": "nightshift_sandbox_bash",
+                "params": {
+                  "command": "curl --fail-with-body -sS -H \"Authorization: $CONNECTOR_HEADER_AUTHORIZATION\" https://api.github.com/repos/acme/widgets/issues/4821"
+                },
+                "result": "error: curl: (22) The requested URL returned error: 403"
+              }
+            ]
+          }
+        ],
+        "seed_pages": []
+      },
+      "output": {
+        "must_capture": [
+          { "section": "related links", "terms": ["issues/4821"] },
+          { "terms": ["app/r/s/Ab3dE"] }
+        ],
+        "must_not": [],
+        "effects": [],
+        "max_pages_written": 6,
+        "max_pages_matching": []
+      },
+      "metadata": { "case_id": "synthetic-follow-up-unreadable-links", "kind": "follow_up" }
+    },
+    {
+      "input": {
+        "rounds": [
+          {
+            "kind": "initial",
+            "user_message": "The checkout latency alert fired for checkout-api. Investigate.",
+            "assistant_message": "Checkout requests time out at the gateway because checkout-api waits on session-cache, which is evicting keys under memory pressure, so every cache miss is slow.",
+            "tool_calls": [
+              {
+                "tool_id": "nightshift_sandbox_bash",
+                "params": {
+                  "command": "q 'FROM logging-eu-west:logs-session-cache.log-default | STATS c=COUNT(*) BY message | SORT c DESC | LIMIT 5'"
+                },
+                "result": "       c       |             message             \n---------------+---------------------------------\n18044          |evicting keys under memory pressure\n902            |client connected                "
+              }
+            ]
+          },
+          {
+            "kind": "follow_up",
+            "user_message": "thanks, that helps",
+            "previous_user_message": "The checkout latency alert fired for checkout-api. Investigate.",
+            "previous_assistant_message": "Checkout requests time out at the gateway because checkout-api waits on session-cache, which is evicting keys under memory pressure, so every cache miss is slow.",
+            "assistant_message": "You're welcome.",
+            "tool_calls": []
+          },
+          {
+            "kind": "follow_up",
+            "user_message": "got it, I'll tell the team",
+            "previous_user_message": "thanks, that helps",
+            "previous_assistant_message": "You're welcome.",
+            "assistant_message": "Sounds good.",
+            "tool_calls": []
+          },
+          {
+            "kind": "follow_up",
+            "user_message": "does checkout-api depend on session-cache?",
+            "previous_user_message": "got it, I'll tell the team",
+            "previous_assistant_message": "Sounds good.",
+            "assistant_message": "Yes. checkout-api reads the user session from session-cache on every request.",
+            "tool_calls": []
+          },
+          {
+            "kind": "follow_up",
+            "user_message": "ok great",
+            "previous_user_message": "does checkout-api depend on session-cache?",
+            "previous_assistant_message": "Yes. checkout-api reads the user session from session-cache on every request.",
+            "assistant_message": "Great.",
+            "tool_calls": []
+          },
+          {
+            "kind": "follow_up",
+            "user_message": "what does a 504 from the gateway mean?",
+            "previous_user_message": "ok great",
+            "previous_assistant_message": "Great.",
+            "assistant_message": "checkout-gateway returns a 504 when checkout-api does not answer in time.",
+            "tool_calls": []
+          },
+          {
+            "kind": "follow_up",
+            "user_message": "thanks again",
+            "previous_user_message": "what does a 504 from the gateway mean?",
+            "previous_assistant_message": "checkout-gateway returns a 504 when checkout-api does not answer in time.",
+            "assistant_message": "Anytime.",
+            "tool_calls": []
+          }
+        ],
+        "seed_pages": [
+          {
+            "entity_type": "service",
+            "slug": "checkout-api",
+            "title": "checkout-api",
+            "content": "## Overview\nServes checkout requests behind checkout-gateway.\n\n## Dependencies\n- session-cache: reads the user session on every request.\n\n## Telemetry\n- Logs: logging-eu-west:logs-checkout-api.log-default.\n\n## Failure modes\n- Slow responses when session-cache is slow.",
+            "status": "tentative"
+          },
+          {
+            "entity_type": "service",
+            "slug": "checkout-gateway",
+            "title": "checkout-gateway",
+            "content": "## Overview\nFront door for checkout requests; forwards them to checkout-api.\n\n## Failure modes\n- Returns a 504 when checkout-api does not answer in time.",
+            "status": "tentative"
+          },
+          {
+            "entity_type": "topic",
+            "slug": "session-cache-evicts-under-memory-pressure",
+            "title": "session-cache evicts keys under memory pressure",
+            "content": "## Overview\nsession-cache evicts keys when memory is short, so reads miss and checkout-api waits.\n\n## Established facts\n- The cache logs 'evicting keys under memory pressure' when this happens.",
+            "status": "tentative"
+          }
+        ]
+      },
+      "output": {
+        "must_capture": [],
+        "must_not": [],
+        "effects": [
+          {
+            "match": {
+              "terms": ["checkout"]
+            },
+            "round": 1,
+            "effect": "untouched"
+          },
+          {
+            "match": {
+              "terms": ["checkout"]
+            },
+            "round": 2,
+            "effect": "untouched"
+          },
+          {
+            "match": {
+              "terms": ["checkout"]
+            },
+            "round": 3,
+            "effect": "untouched"
+          },
+          {
+            "match": {
+              "terms": ["checkout"]
+            },
+            "round": 4,
+            "effect": "untouched"
+          },
+          {
+            "match": {
+              "terms": ["checkout"]
+            },
+            "round": 5,
+            "effect": "untouched"
+          },
+          {
+            "match": {
+              "terms": ["checkout"]
+            },
+            "round": 6,
+            "effect": "untouched"
+          }
+        ],
+        "max_pages_matching": []
+      },
+      "metadata": {
+        "case_id": "synthetic-follow-up-no-new-information",
+        "kind": "noop"
+      }
     }
   ]
 }

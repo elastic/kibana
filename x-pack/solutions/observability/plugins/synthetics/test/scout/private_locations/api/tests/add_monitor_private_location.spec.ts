@@ -124,10 +124,12 @@ apiTest.describe('PrivateLocationAddMonitor', { tag: ['@local-stateful-classic']
   });
 
   apiTest('handles spaces', async ({ apiClient }) => {
+    // Omit `namespace` so the server falls back to the Kibana space namespace; an explicit
+    // value (even `default`) is honored verbatim.
+    const { namespace: _fixtureNamespace, ...httpMonitorWithoutNamespace } = httpMonitorFixture;
     const monitor = {
-      ...httpMonitorFixture,
+      ...httpMonitorWithoutNamespace,
       name: `Test monitor ${uuidv4()}`,
-      namespace: 'default',
       locations: [privateLocation],
       // `httpMonitorFixture` hard-codes `spaces: ['default']`; posting that to a
       // non-default space is rejected by server validation (the monitor's spaces

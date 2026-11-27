@@ -227,6 +227,80 @@ const cutText = (text: string, maxLength: number): string => {
   return text.slice(0, splitsPair ? maxLength - 1 : maxLength);
 };
 
+const SLACK_BROADCASTS = new Set(['!here', '!channel', '!everyone']);
+const SLACK_MENTION = /^(?:@|!(?:here|channel|everyone|subteam\^))/;
+
+const toTokenPrefix = (target: string): string => {
+  if (target.startsWith('#')) {
+    return '#';
+  }
+  return SLACK_MENTION.test(target) ? '@' : '';
+};
+
+const toPlainToken = (token: string): string => {
+  const separator = token.indexOf('|');
+  const target = separator === -1 ? token : token.slice(0, separator);
+  const label = separator === -1 ? '' : token.slice(separator + 1);
+  const prefix = toTokenPrefix(target);
+  if (label) {
+    return label.startsWith(prefix) ? label : `${prefix}${label}`;
+  }
+  if (!/^[#@!]/.test(target)) {
+    return target;
+  }
+  return SLACK_BROADCASTS.has(target) ? `@${target.slice(1)}` : '';
+};
+
+/** Code spans and `<...>` tokens, which emphasis never applies inside. */
+const SLACK_VERBATIM = /```[\s\S]*?```|`[^`\n]+`|<[^<>]*>/g;
+const SLACK_TOKEN = /<([^<>]*)>/g;
+const SLACK_QUOTE = /^&gt; /gm;
+
+const toVerbatim = (span: string): string =>
+  span.startsWith('<')
+    ? toPlainToken(span.slice(1, -1))
+    : span.replace(SLACK_TOKEN, (_, token: string) => toPlainToken(token));
+
+/**
+ * Bold, italic and strikethrough pairs at word edges. The marker only appears inside a pair within a
+ * word (`snake_case`, `5*3`), so each scan stops at the next marker and stays linear.
+ */
+const toEmphasisPattern = (marker: string): RegExp => {
+  const m = `\\${marker}`;
+  return new RegExp(
+    `(^|[\\s(*_~\\uE001])${m}([^\\s${m}](?:(?:[^${m}\\n]|(?<=\\w)${m}(?=\\w))*?[^\\s${m}])?)${m}(?=$|[\\s).,!?:;*_~\\uE000])`,
+    'g'
+  );
+};
+
+const SLACK_EMPHASIS = ['*', '_', '~'].map(toEmphasisPattern);
+
+const stripMarkup = (text: string): string => {
+  let markerPrefix = '\uE000';
+  while (text.includes(markerPrefix)) markerPrefix += '\uE000';
+
+  const spans: string[] = [];
+  const masked = text
+    .replace(SLACK_VERBATIM, (span) => `${markerPrefix}${spans.push(toVerbatim(span)) - 1}\uE001`)
+    .replace(SLACK_QUOTE, '');
+  return SLACK_EMPHASIS.reduce(
+    (result, pattern) => result.replace(pattern, '$1$2'),
+    masked
+  ).replace(
+    new RegExp(`${markerPrefix}(\\d+)\\uE001`, 'g'),
+    (_, index: string) => spans[Number(index)]
+  );
+};
+
+/** Slack markup as one readable line; ids Slack sends without a name are dropped. */
+export const toSlackPlainText = (text: string | undefined): string =>
+  stripMarkup(text ?? '')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&')
+    .replace(/\s+/g, ' ')
+    .trim();
+
 /** The message's `text` plus the block and attachment lines it does not already contain. */
 export const readSlackMessageText = (
   source: SlackRecord,

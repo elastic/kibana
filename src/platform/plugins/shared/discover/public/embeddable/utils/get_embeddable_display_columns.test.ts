@@ -8,6 +8,11 @@
  */
 
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { createEsqlDataSource } from '../../../common/data_sources';
+import { createProfileProviderSharedServicesMock } from '../../context_awareness/__mocks__';
+import { createPatternsDataSourceProfileProvider } from '../../context_awareness/profile_providers/common/patterns_data_source_profile/profile';
+import { SolutionType } from '../../context_awareness/profiles';
+import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../context_awareness/toolkit';
 import { getEmbeddableDisplayColumns } from './get_embeddable_display_columns';
 
 const categorizeResultColumnNames = ['Count', 'Sparkline', 'Pattern'];
@@ -16,6 +21,59 @@ const categorizeQuery =
   'FROM kibana_sample_data_logs | STATS Count = COUNT(*), Sparkline = SPARKLINE(COUNT(*), @timestamp) BY Pattern = CATEGORIZE(message)';
 
 describe('getEmbeddableDisplayColumns', () => {
+  it.each([
+    {
+      esql: 'FROM logs | STATS count = COUNT(*) BY Pattern = CATEGORIZE(message) | SORT count DESC',
+      columns: ['count', 'Pattern'],
+    },
+    {
+      esql: 'FROM logs | STATS total = COUNT(*), average = AVG(bytes) BY category = CATEGORIZE(message)',
+      columns: ['total', 'average', 'category'],
+    },
+    {
+      esql: `${categorizeQuery} | RENAME Count AS total, Sparkline AS trend`,
+      columns: ['total', 'trend', 'Pattern'],
+    },
+    {
+      esql: `${categorizeQuery} | KEEP Pattern, Count`,
+      columns: ['Pattern', 'Count'],
+    },
+    {
+      esql: `${categorizeQuery} | DROP Sparkline`,
+      columns: ['Count', 'Pattern'],
+    },
+  ])('preserves result columns with the Patterns profile for $esql', async ({ esql, columns }) => {
+    const provider = createPatternsDataSourceProfileProvider({
+      ...createProfileProviderSharedServicesMock(),
+      aiops: undefined,
+    });
+    const resolution = await provider.resolve({
+      rootContext: { profileId: 'default-root-profile', solutionType: SolutionType.Default },
+      dataSource: createEsqlDataSource(),
+      query: { esql },
+    });
+    expect(resolution.isMatch).toBe(true);
+    if (!resolution.isMatch) {
+      throw new Error('Expected the Patterns profile to match');
+    }
+    const defaults = provider.profile.getDefaultAppState?.(() => ({}), {
+      context: resolution.context,
+      toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+    })({ dataView: dataViewMock });
+
+    expect(
+      getEmbeddableDisplayColumns({
+        autoApplyDiscoverColumnDefaults: true,
+        persistedColumns: [],
+        profileColumns: defaults?.columns,
+        dataView: dataViewMock,
+        isEsql: true,
+        esql,
+        esqlResultColumnNames: columns,
+      })
+    ).toEqual({ columns, grid: undefined });
+  });
+
   it('preserves persisted columns when auto-apply is disabled', () => {
     expect(
       getEmbeddableDisplayColumns({

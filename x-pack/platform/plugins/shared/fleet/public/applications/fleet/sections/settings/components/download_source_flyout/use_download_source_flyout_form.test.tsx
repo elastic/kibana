@@ -139,6 +139,70 @@ describe('useDowloadSourceFlyoutForm SSL certificate path validation', () => {
   });
 });
 
+describe('useDowloadSourceFlyoutForm reserve_diskspace', () => {
+  it('should default to enabled and send reserve_diskspace: true', async () => {
+    const testRenderer = createFleetTestRendererMock();
+    const onSuccess = jest.fn();
+    testRenderer.startServices.http.post.mockResolvedValue({ item: {} });
+    const { result } = testRenderer.renderHook(() =>
+      useDowloadSourceFlyoutForm(onSuccess, undefined)
+    );
+
+    expect(result.current.inputs.reserveDiskspaceInput.value).toBe(true);
+
+    act(() => {
+      result.current.inputs.nameInput.setValue('My Source');
+      result.current.inputs.hostInput.setValue('https://artifacts.example.com');
+    });
+
+    await act(() => result.current.submit());
+
+    await testRenderer.waitFor(() => expect(onSuccess).toHaveBeenCalled());
+    expect(testRenderer.startServices.http.post).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({ body: expect.stringContaining('"reserve_diskspace":true') })
+    );
+  });
+
+  it('should send reserve_diskspace: false when toggled off', async () => {
+    const testRenderer = createFleetTestRendererMock();
+    const onSuccess = jest.fn();
+    testRenderer.startServices.http.post.mockResolvedValue({ item: {} });
+    const { result } = testRenderer.renderHook(() =>
+      useDowloadSourceFlyoutForm(onSuccess, undefined)
+    );
+
+    act(() => {
+      result.current.inputs.nameInput.setValue('My Source');
+      result.current.inputs.hostInput.setValue('https://artifacts.example.com');
+      result.current.inputs.reserveDiskspaceInput.setValue(false);
+    });
+
+    await act(() => result.current.submit());
+
+    await testRenderer.waitFor(() => expect(onSuccess).toHaveBeenCalled());
+    expect(testRenderer.startServices.http.post).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({ body: expect.stringContaining('"reserve_diskspace":false') })
+    );
+  });
+
+  it('should initialize from an existing download source', () => {
+    const testRenderer = createFleetTestRendererMock();
+    const { result } = testRenderer.renderHook(() =>
+      useDowloadSourceFlyoutForm(jest.fn(), {
+        id: 'ds-1',
+        name: 'My Source',
+        host: 'https://artifacts.example.com',
+        is_default: false,
+        reserve_diskspace: false,
+      })
+    );
+
+    expect(result.current.inputs.reserveDiskspaceInput.value).toBe(false);
+  });
+});
+
 describe('Download source form validation', () => {
   describe('validateHost', () => {
     it('should not work without any urls', () => {

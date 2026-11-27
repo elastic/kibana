@@ -104,10 +104,10 @@ describe('useTransactionFlyoutFooterMenu', () => {
     expect(result.current.panels.map(({ id }) => id)).toEqual([0]);
     expect(investigateItem(result.current.panels).key).toBe('investigate');
 
-    expect(screen.getByRole('heading', { name: 'Trace details' })).toBeInTheDocument();
+    expect(screen.getByText('Trace details')).toBeInTheDocument();
     expect(screen.getByText('View trace logs to get further details.')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Trace logs' })).toHaveAttribute('href', '/logs');
-    expect(screen.getByRole('heading', { name: 'Service map' })).toBeInTheDocument();
+    expect(screen.getByText('Service map')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Show in service map' })).toHaveAttribute(
       'href',
       '/map'

@@ -378,7 +378,7 @@ describe('pull_request pipeline generation', () => {
     const changes = [
       {
         filename:
-          'x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/ui/tests/automated_response_actions.spec.ts',
+          'x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/shared_host/ui/tests/automated_response_actions.spec.ts',
       },
     ];
     mockGetPrChangesCached.mockResolvedValue(changes);
@@ -472,7 +472,10 @@ describe('pull_request pipeline generation', () => {
     expect(output).toContain('Build Storybooks');
     expect(mockGetAffectedPackages).toHaveBeenCalledWith(
       undefined,
-      expect.objectContaining({ changedFiles: expect.any(Array) })
+      expect.objectContaining({
+        changedFiles: expect.any(Array),
+        ignorePatterns: expect.arrayContaining(['packages/kbn-rspack-optimizer/limits.yml']),
+      })
     );
   });
 

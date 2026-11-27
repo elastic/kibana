@@ -11,8 +11,8 @@ import {
   ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
 } from './constants';
-import ALERTZERO_CREATE_PROPOSAL_YAML from './create_proposal.yaml';
 import type { ManagedWorkflowDefinition } from '../../types';
+import { readManagedWorkflowYaml } from '../read_managed_workflow_yaml';
 
 export const ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID = 'system-create-alertzero-proposal';
 
@@ -26,5 +26,7 @@ export const ALERTZERO_CREATE_PROPOSAL_WORKFLOW = {
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
   version: 3,
-  yaml: ALERTZERO_CREATE_PROPOSAL_YAML,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'create_proposal.yaml');
+  },
 } as const satisfies ManagedWorkflowDefinition;

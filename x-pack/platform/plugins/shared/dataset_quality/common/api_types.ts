@@ -29,13 +29,6 @@ const datasetUserPrivilegesRt = rt.type({
 });
 
 export type DatasetUserPrivileges = rt.TypeOf<typeof datasetUserPrivilegesRt>;
-export type DatasetTypesPrivileges = rt.TypeOf<typeof datasetPrivilegeRt>;
-
-export const getDataStreamsTypesPrivilegesResponseRt = rt.exact(
-  rt.type({
-    datasetTypesPrivileges: datasetPrivilegeRt,
-  })
-);
 
 export const dataStreamStatRt = rt.intersection([
   rt.type({
@@ -272,7 +265,7 @@ export type DataStreamDetails = rt.TypeOf<typeof dataStreamDetailsRt>;
 
 export const getDataStreamsStatsResponseRt = rt.exact(
   rt.type({
-    datasetUserPrivileges: datasetUserPrivilegesRt,
+    canViewIntegrations: rt.boolean,
     dataStreamsStats: rt.array(dataStreamStatRt),
   })
 );

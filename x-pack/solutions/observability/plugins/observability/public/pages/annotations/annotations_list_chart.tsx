@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import type { BrushEndListener, XYChartElementEvent } from '@elastic/charts';
+import type { BrushEndListener, TooltipValue, XYChartElementEvent } from '@elastic/charts';
 import {
   Axis,
   Chart,
@@ -21,7 +21,6 @@ import {
 import { EuiHorizontalRule, formatDate } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { parse } from '@kbn/datemath';
-import type { TooltipValue } from '@elastic/charts/dist/specs';
 import { useChartThemes } from '../../hooks/use_chart_themes';
 import type { useAnnotations } from '../../components/annotations/use_annotations';
 import type { Annotation } from '../../../common/annotations';

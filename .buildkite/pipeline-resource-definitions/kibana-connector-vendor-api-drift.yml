@@ -23,7 +23,7 @@ spec:
         # Repository the drift issues are filed in: '' for a dry run against elastic/kibana that
         # writes nothing, a sandbox repository to try the issues out, or elastic/kibana to go live
         # (which also opens the refresh PR).
-        CONNECTOR_VENDOR_API_GITHUB_REPO: ''
+        CONNECTOR_VENDOR_API_GITHUB_REPO: 'elastic/kibana'
         # A connector metadata.id to check only that one; set it on a manual build
         CONNECTOR_VENDOR_API_CONNECTOR: ''
       allow_rebuilds: true

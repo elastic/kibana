@@ -23,6 +23,7 @@ import { executeEsqlQuery } from '../utils/execute_esql_query';
 import {
   EMPTY_SOURCE_ERRORS,
   fetchFromV2AndSource,
+  resolveEpisodeSourceQueries,
   type EpisodeSourceError,
 } from '../utils/fetch_from_sources';
 import { buildAlertEventsTimeRangeFilter } from '../utils/build_alert_events_time_range_filter';
@@ -114,6 +115,11 @@ export const useEpisodesHistogramQuery = ({
       const nowMs = Date.now();
       const buckets = resolveHistogramBuckets(timeRange, bucketInterval, nowMs);
       const timeRangeFilter = buildAlertEventsTimeRangeFilter(timeRange);
+      const sourceQueries = resolveEpisodeSourceQueries({
+        sources: filterState?.sources,
+        queryV2Source,
+        additionalSource: additionalEpisodesDataSource,
+      });
       const { v2, additional, errors } = await fetchFromV2AndSource({
         v2: () =>
           executeEsqlQuery<HistogramEpisodeRow>({
@@ -126,7 +132,7 @@ export const useEpisodesHistogramQuery = ({
             },
             abortSignal: signal,
           }),
-        source: additionalEpisodesDataSource,
+        source: sourceQueries.additionalSource,
         fromSource: (source) =>
           source.fetchHistogram?.({
             services,
@@ -137,7 +143,7 @@ export const useEpisodesHistogramQuery = ({
             nowMs,
             abortSignal: signal,
           }),
-        queryV2Source,
+        queryV2Source: sourceQueries.queryV2Source,
       });
 
       const v2Rows = v2 ?? [];

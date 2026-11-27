@@ -133,14 +133,15 @@ describe('ErrorsTab', () => {
     });
   });
 
-  it('asks for the errors of the filters and the KQL query of the URL, without the page', async () => {
+  it('asks for the errors of the filters, the page included, and the KQL query, without the URL text', async () => {
     mockSearch({
       filters: {
         browser: [
           { value: 'Chrome', exclude: false },
           { value: 'Safari', exclude: true },
         ],
-        pageUrl: [{ value: 'https://shop.example.com/', exclude: false }],
+        pageUrl: [{ value: '/products/{slug}', exclude: false }],
+        pageContains: [{ value: 'cart', exclude: false }],
       },
       kuery: 'user_agent.name: Chrome',
     });
@@ -161,6 +162,7 @@ describe('ErrorsTab', () => {
                   { value: 'Chrome', exclude: false },
                   { value: 'Safari', exclude: true },
                 ],
+                pageUrl: [{ value: '/products/{slug}', exclude: false }],
               }),
               kuery: 'user_agent.name: Chrome',
             },
@@ -170,11 +172,12 @@ describe('ErrorsTab', () => {
     });
   });
 
-  it('shows what narrows the errors, so it can be removed, but not the page, which does not', async () => {
+  it('shows what narrows the errors, so it can be removed, but not the URL text, which does not', async () => {
     mockSearch({
       filters: {
         browser: [{ value: 'Chrome', exclude: false }],
-        pageUrl: [{ value: 'https://shop.example.com/', exclude: false }],
+        pageUrl: [{ value: '/products/{slug}', exclude: false }],
+        pageContains: [{ value: 'cart', exclude: false }],
       },
       kuery: 'user_agent.name: Chrome',
     });
@@ -182,15 +185,18 @@ describe('ErrorsTab', () => {
 
     expect(await screen.findByTestId('digitalExperienceOverviewPill-browser-Chrome')).toBeVisible();
     expect(
-      screen.queryByTestId('digitalExperienceOverviewPill-pageUrl-https://shop.example.com/')
+      screen.getByTestId('digitalExperienceOverviewPill-pageUrl-/products/{slug}')
+    ).toBeVisible();
+    expect(
+      screen.queryByTestId('digitalExperienceOverviewPill-pageContains-cart')
     ).not.toBeInTheDocument();
     expect(screen.getByTestId('digitalExperienceErrorsKuery')).toHaveTextContent(
       'user_agent.name: Chrome'
     );
 
-    // Clears what shows, and leaves the page, which the Overview shows.
+    // Clears what shows, and leaves the URL text, which the Overview shows.
     fireEvent.click(screen.getByTestId('digitalExperienceOverviewClearFilters'));
-    expect(setFilters).toHaveBeenCalledWith({ browser: [] });
+    expect(setFilters).toHaveBeenCalledWith({ browser: [], pageUrl: [] });
   });
 
   it('clears the KQL query from the tab, as it is the only thing that narrows the errors', async () => {

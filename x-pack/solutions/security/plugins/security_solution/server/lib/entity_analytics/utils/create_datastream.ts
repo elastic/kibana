@@ -8,8 +8,11 @@
 // This file is a copy of x-pack/platform/plugins/shared/alerting/server/alerts_service/lib/create_concrete_write_index.ts
 // The original function created an index, while here we create a datastream. If and when responseOps develops first-party code to work with datastreams (https://github.com/elastic/kibana/issues/140403), this file should be removed.
 
-import { get } from 'lodash';
-import type { IndicesSimulateIndexTemplateResponse } from '@elastic/elasticsearch/lib/api/types';
+import { get, isEqual } from 'lodash';
+import type {
+  IndicesSimulateIndexTemplateResponse,
+  MappingTypeMapping,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { retryTransientEsErrors } from './retry_transient_es_errors';
 
@@ -112,6 +115,10 @@ export const updateUnderlyingMapping = async ({ logger, esClient, index }: Updat
     return;
   }
 
+  if (await areMappingsUpToDate({ logger, esClient, index, simulatedMapping })) {
+    return;
+  }
+
   try {
     await retryTransientEsErrors(
       () => esClient.indices.putMapping({ index, ...simulatedMapping }),
@@ -123,6 +130,29 @@ export const updateUnderlyingMapping = async ({ logger, esClient, index }: Updat
     throw err;
   }
 };
+// Falls back to `false` when current mappings can't be read, so the caller still PUTs them.
+const areMappingsUpToDate = async ({
+  logger,
+  esClient,
+  index,
+  simulatedMapping,
+}: UpdateIndexOpts & { simulatedMapping: MappingTypeMapping }): Promise<boolean> => {
+  try {
+    const currentMappings = await retryTransientEsErrors(
+      () => esClient.indices.getMapping({ index }),
+      { logger }
+    );
+    const backingIndices = Object.values(currentMappings);
+    return (
+      backingIndices.length > 0 &&
+      backingIndices.every(({ mappings }) => isEqual(mappings, simulatedMapping))
+    );
+  } catch (err) {
+    logger.debug(`Failed to get current mappings for index ${index}: ${err.message}`);
+    return false;
+  }
+};
+
 /**
  * Updates the underlying mapping for any existing concrete indices
  */

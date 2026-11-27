@@ -30,7 +30,7 @@ import {
 } from '../rule_event_publisher/events';
 import type { AlertingDomainEvent, AlertingPublisherContext } from '../domain_events';
 import { createEventBusMock } from '../event_bus/event_bus.mock';
-import type { EventBus, Subscription } from '../event_bus';
+import type { EventBus } from '../event_bus';
 import { RuleTelemetrySubscriber } from './rule_telemetry_subscriber';
 
 type CapturedHandler = (
@@ -74,30 +74,6 @@ describe('RuleTelemetrySubscriber', () => {
       request: httpServerMock.createKibanaRequest() as KibanaRequest,
       origin: { actor: 'user', channel: 'api' },
     };
-  });
-
-  describe('start()', () => {
-    it('subscribes a handler to each reported rule event type', () => {
-      subscriber.start();
-
-      expect(bus.subscribe).toHaveBeenCalledTimes(RULE_OPERATIONS.length);
-      for (const type of [
-        RULE_CREATED_EVENT_TYPE,
-        RULE_UPDATED_EVENT_TYPE,
-        RULE_DELETED_EVENT_TYPE,
-        RULE_ENABLED_EVENT_TYPE,
-        RULE_DISABLED_EVENT_TYPE,
-      ]) {
-        expect(bus.subscribe).toHaveBeenCalledWith(type, expect.any(Function));
-      }
-    });
-
-    it('is idempotent: a second call does not double-subscribe', () => {
-      subscriber.start();
-      subscriber.start();
-
-      expect(bus.subscribe).toHaveBeenCalledTimes(RULE_OPERATIONS.length);
-    });
   });
 
   describe('event dispatch', () => {
@@ -268,30 +244,6 @@ describe('RuleTelemetrySubscriber', () => {
         rule_id: 'rule-1',
         origin: { actor: 'user', channel: 'system', app: 'nightshift' },
       });
-    });
-  });
-
-  describe('stop()', () => {
-    it('unsubscribes active subscriptions', () => {
-      const unsubscribe = jest.fn();
-      bus.subscribe.mockReturnValue({ unsubscribe } satisfies Subscription);
-
-      subscriber.start();
-      subscriber.stop();
-
-      expect(unsubscribe).toHaveBeenCalledTimes(RULE_OPERATIONS.length);
-    });
-
-    it('allows a subsequent start() to re-subscribe', () => {
-      subscriber.start();
-      subscriber.stop();
-      subscriber.start();
-
-      expect(bus.subscribe).toHaveBeenCalledTimes(RULE_OPERATIONS.length * 2);
-    });
-
-    it('is safe to call when no subscriptions are active', () => {
-      expect(() => subscriber.stop()).not.toThrow();
     });
   });
 });

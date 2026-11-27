@@ -29,12 +29,17 @@ const EVIDENCE_DESCRIPTION_SHARED_CRITERIA: EvaluationCriterion[] = [
 const EVIDENCE_DESCRIPTION_CRITERIA: EvaluationCriterion[] = [
   {
     id: 'evidence_description_is_grounded_check',
-    text: 'Every fresh signal must set `verdict` to `confirms`, `refutes`, `off_topic`, `inconclusive`, or `not_checked`. Do not repeat a Verdict label in the description or add process narration and a "Testing: … Expected: …" preamble. Stating that a figure was not measured, and why in a few words, is required content, not narration. For `confirms`, `refutes`, and `off_topic`, the description states the observed row signature and impact. For `inconclusive`, the description states why the query could not establish a conclusion (empty, error, or ambiguous result). For `not_checked`, the description states that no query ran and why. Entries carried forward unchanged from prior cycles (older `collected_at`) are acceptable in any format. Informational entries need no structured verification account: quiet-rule signals (evidence is null) and "no confirming query available" dispositions are acceptable as written.',
+    text: 'Every fresh signal must set `verdict` to `confirms`, `refutes`, `off_topic`, `inconclusive`, or `not_checked`. Do not repeat a Verdict label in the description or add process narration and a "Testing: … Expected: …" preamble. Stating that a figure was not measured, and why in a few words, is required content, not narration. For `confirms`, `refutes`, and `off_topic`, the description states the observed row signature and its measured size and reach, as observations only: it states only the outcome the rows report, infers no cause or impact, and describes the lines, not how the numbers were obtained. For `inconclusive`, the description states why the query could not establish a conclusion (empty, error, or ambiguous result). For `not_checked`, the description states that no query ran and why. Entries carried forward unchanged from prior cycles (older `collected_at`) are acceptable in any format. Informational entries need no structured verification account: quiet-rule signals (evidence is null) and "no confirming query available" dispositions are acceptable as written.',
     score: 1,
   },
   {
     id: 'evidence_description_coverage_and_sampling_scope',
     text: 'Descriptions must preserve the evidence scope. When dimensions show one distinct non-null value (`f = 1`) but the field is present in fewer failing rows than the dimensions query counted, state the partial coverage and do not claim that every failing row carries that value. Repeated identical example messages are still sampled observations, not proof of population-wide uniformity, unless dimensions explicitly establish full row coverage.',
+    score: 1,
+  },
+  {
+    id: 'evidence_description_populations_stated',
+    text: 'The description keeps one failure as one problem and does not lose a distinct one. Categories that say the same thing and differ only in where, how or against which target it was logged are one problem, written once with their combined share and the targets named together; a category that says something different (another error, code or level) is its own problem, listed with what it reports, the level or status its lines carry and its share (a small minority by its count, not a rounded percent), largest first. Groups of a breakdown that differ in what they report or in level are stated as several populations, each with its figures; every group share is a part of the one failing total, and a group’s share of its own lines stays out of the description. A field with several values per row puts a row in several groups: the description says the rows carry several values and names them, with no count or share per value. When the breakdown was sent and failed and a reporter or target field takes two or more values, the description says the rule may match more than one population and that the sampled row’s population is one of several. The reporting service (who wrote the line) and the reported component (who the line is about) are named separately when they differ, and a line whose level is below the failure its message names is described as a report, not as the reporter failing. The share and wording of each problem line come from the message categories; a breakdown group share is the share of the failing lines in that group, not a message category. Judge only against what the rows and results in the trace show.',
     score: 1,
   },
   ...EVIDENCE_DESCRIPTION_SHARED_CRITERIA,
@@ -43,12 +48,22 @@ const EVIDENCE_DESCRIPTION_CRITERIA: EvaluationCriterion[] = [
 const NARRATIVE_FIELDS_CRITERIA: EvaluationCriterion[] = [
   {
     id: 'narrative_fields_bounded_and_safe',
-    text: `symptom_hypothesis, summary, and assessment_note are each at most three sentences. Judge sentence counts, not character counts: a sentence ends at a full stop, question mark or exclamation mark, so clauses joined by a comma, semicolon or "while" are one sentence. Judge only sentence counts and sensitive values here; counts, timestamps, wording and format belong to the other criteria. ${NO_RAW_SENSITIVE_VALUES_RULE}`,
+    text: `symptom_hypothesis and assessment_note are each at most three sentences. Judge sentence counts, not character counts: a sentence ends at a full stop, question mark or exclamation mark, so clauses joined by a comma, semicolon or "while" are one sentence. The summary has no sentence bound: it is short paragraphs, one idea each, as its field contract says. Judge only these bounds and sensitive values here; counts, timestamps, wording and format belong to the other criteria. ${NO_RAW_SENSITIVE_VALUES_RULE}`,
     score: 1,
   },
   {
     id: 'symptom_hypothesis_mechanism',
-    text: `symptom_hypothesis follows its field contract:\n${SYMPTOM_HYPOTHESIS_ROLE_RULE}\nJudge the mechanism against what this event's own signals, causal_features and blast_radius evidence. Do not require a cause, component or propagation that the evidence does not show: an evidenced failure path with no evidenced root cause meets the contract, and naming an unevidenced cause does not.`,
+    text: `symptom_hypothesis follows its field contract:\n${SYMPTOM_HYPOTHESIS_ROLE_RULE}\nJudge the mechanism against what this event's own signals, causal_features and blast_radius evidence. A proposed reason meets the contract when it is stated as a hypothesis and the components it names appear in the rows or topology. Do not require a cause, component or propagation that the evidence does not show: an evidenced failure path with no evidenced root cause also meets it.`,
+    score: 1,
+  },
+  {
+    id: 'populations_led_by_the_largest',
+    text: 'For a new event: when a confirming signal description shows that one rule matched several populations (different components, or messages of different kinds), the event says so instead of describing one sampled row. The title and the lead of symptom_hypothesis name the population with the largest measured share of the failing lines; the summary names a minority when its failure differs from the main one and says populations that behave alike once. When no measured share shows one population dominating, the event is described as matching several populations, naming the sampled one, without per-population counts. When the description presents the lines as one problem, or as several values of one field, the event describes one problem. On a continuation the title is preserved verbatim, so judge a continuation on symptom_hypothesis and summary only, and only for the fields it extends or rewrites. Judge this only against the signal descriptions: do not require a population they do not show.',
+    score: 1,
+  },
+  {
+    id: 'relations_stated_on_evidence',
+    text: 'The summary says how the problems connect, in the order they began, naming which component reports which problem. Each link is stated only as far as a signal description or the topology supports it: a pair the signals leave open is stated once as not established, naming the pair, and only where it changes what the reader should believe or do, and a single problem has no relation to state. No cause, order or relation appears that no signal supports, and symptom_hypothesis carries the mechanism behind a link, while the summary states a link only as far as the signals support it.',
     score: 1,
   },
   {
@@ -81,7 +96,7 @@ const NARRATIVE_FIELDS_CRITERIA: EvaluationCriterion[] = [
 const SIGNAL_EVIDENCE_CONSISTENCY_CRITERIA: EvaluationCriterion[] = [
   {
     id: 'signal_confirmation_matches_evidence',
-    text: 'Use `confirms` only when a found row directly supports the rule’s failure, degradation, exposure, or evidenced cascade; a failure the system caught, retried or handled still confirms, because containment is rated in severity and not by the verdict. Use `refutes` for verified healthy, positive, or no-failure evidence; `off_topic` for unrelated found rows; `inconclusive` when a query cannot establish a conclusion; and `not_checked` when no query ran.',
+    text: 'Use `confirms` only when a found row directly supports the rule’s failure, degradation, exposure, or evidenced cascade; a failure the system caught, retried or handled still confirms, because containment is rated in severity and not by the verdict. Use `refutes` for verified healthy, positive, or no-failure evidence; `off_topic` for unrelated found rows; `inconclusive` when a query cannot establish a conclusion; and `not_checked` when no query ran. A keyword-substring match is not on-topic: the row must corroborate the rule’s service, error type and mechanism, and when the rule names alternatives (A or B) a row matching either is on-topic. A row with no failure signature once its level, status and message are read together (a metric, a generic or routine log, a healthy result) is not `confirms`; a line whose message reports a failure of another component is a report of that failure and does support it, even when the line’s own level is low. A figure that was not measured never changes the verdict.',
     score: 1,
   },
   {

@@ -41,7 +41,7 @@ spaceTest.describe(
         // `gotoSecurityRoot` settles on the navigation having rendered, so the expectations below
         // cannot pass against a nav that has yet to populate.
         await nav.gotoSecurityRoot();
-        await nav.openManagementGroup();
+        await nav.openManagementGroupIfPresent();
 
         for (const linkId of ENDPOINT_MANAGEMENT_LINK_IDS) {
           await expect(nav.navItem(linkId)).toBeHidden();
@@ -71,8 +71,7 @@ spaceTest.describe(
             await browserAuth.loginWithCustomRole(getSingleAreaRole(privilegePrefix, access));
             await nav.gotoSecurityRoot();
 
-            await expect(nav.managementGroupToggle).toBeVisible();
-            await nav.openManagementGroup();
+            await nav.revealManagementAreas();
             await expect(nav.navItem(linkId)).toBeVisible();
 
             for (const otherLinkId of otherLinkIds) {

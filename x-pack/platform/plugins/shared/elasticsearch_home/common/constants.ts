@@ -7,6 +7,9 @@
 
 export const PLUGIN_ID = 'elasticsearchHome';
 
+/** Gates the home page with integrated onboarding for the hosts that render it. Defaults to off. */
+export const INTEGRATED_ONBOARDING_FEATURE_FLAG = 'elasticsearchHome.integratedOnboarding.enabled';
+
 /**
  * Elasticsearch currently reports dense vector `value_count` as 0 on stateless
  * (https://github.com/elastic/elasticsearch/pull/158563), so this stat is
@@ -15,9 +18,18 @@ export const PLUGIN_ID = 'elasticsearchHome';
  */
 export const VECTOR_COUNT_ENABLED = false;
 
+export const HOME_PATHS = {
+  home: '/',
+  sampleApp: '/sample_app',
+  guidedApi: '/guided_api',
+  uploadFile: '/upload_file',
+};
+
 export const DEPLOYMENT_STATS_PATH = '/internal/elasticsearch_home/deployment_stats';
+
 export const STARRED_DASHBOARDS_COUNT_PATH =
   '/internal/elasticsearch_home/starred_dashboards_count';
+
 export const WORKFLOWS_STATS_PATH = '/api/workflows/stats';
 
 /**

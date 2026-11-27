@@ -12,7 +12,7 @@ import { configServiceMock } from '@kbn/config-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { ServiceStatusLevels, type ServiceStatus } from '@kbn/core-status-common';
-import { opsConfig } from '../ops_config';
+import { opsConfig, PROFILING_DIR_MAX_LENGTH } from '../ops_config';
 import { EventLoopWatchdog } from './event_loop_watchdog';
 import {
   EVENT_LOOP_WATCHDOG_FEATURE_FLAG,
@@ -32,8 +32,6 @@ const available: ServiceStatus = { level: ServiceStatusLevels.available, summary
 const degraded: ServiceStatus = { level: ServiceStatusLevels.degraded, summary: '' };
 const BG_PROFILING_FLAG = 'core.eventLoopWatchdog.profiling.backgroundTasks.enabled';
 const UI_PROFILING_FLAG = 'core.eventLoopWatchdog.profiling.ui.enabled';
-const ON = 'Event loop watchdog profiling flag on for this node';
-const OFF = 'Event loop watchdog profiling flag off for this node';
 
 describe('EventLoopWatchdogService', () => {
   let overall$: BehaviorSubject<ServiceStatus>;
@@ -43,11 +41,6 @@ describe('EventLoopWatchdogService', () => {
   let logger: ReturnType<typeof loggingSystemMock.create>;
 
   const watchdog = () => EventLoopWatchdogMock.mock.instances[0] as jest.Mocked<EventLoopWatchdog>;
-  const profilingLines = () =>
-    loggingSystemMock
-      .collect(logger)
-      .info.map(([message]) => message)
-      .filter((message) => String(message).includes('profiling flag'));
   const params = () => EventLoopWatchdogMock.mock.calls[0][0];
 
   const setup = async (
@@ -143,7 +136,25 @@ describe('EventLoopWatchdogService', () => {
       });
     });
 
-    it('leaves the diagnostic directory unset when Node has none', async () => {
+    it('uses profiling.dir when set', async () => {
+      await setup({ profiling: { dir: '/configured' } });
+      expect(params().profiling.diagnosticDir).toBe('/configured');
+      expect(resolveDiagnosticDirMock).not.toHaveBeenCalled();
+    });
+
+    it('uses diagnostic directory when profiling.dir is not set', async () => {
+      await setup();
+      expect(params().profiling.diagnosticDir).toBe('/diag');
+    });
+
+    it('uses a diagnostic directory longer than PROFILING_DIR_MAX_LENGTH', async () => {
+      const long = `/${'a'.repeat(PROFILING_DIR_MAX_LENGTH)}`;
+      resolveDiagnosticDirMock.mockReturnValue(long);
+      await setup();
+      expect(params().profiling.diagnosticDir).toBe(long);
+    });
+
+    it('leaves the directory unset when neither diagnostic dir nor profiling.dir set', async () => {
       resolveDiagnosticDirMock.mockReturnValue(undefined);
       await setup();
       expect(params().profiling.diagnosticDir).toBeUndefined();
@@ -313,52 +324,96 @@ describe('EventLoopWatchdogService', () => {
     it.each([
       ['background_tasks', BG_PROFILING_FLAG],
       ['ui', UI_PROFILING_FLAG],
-    ])('logs the profiling flag state with the %s flag', async (role, flag) => {
+    ])('turns profiling on and off with the %s flag', async (role, flag) => {
       await start({}, [role]);
       profilingFlags[flag].next(false);
       profilingFlags[flag].next(true);
+      expect(watchdog().setProfiling).toHaveBeenLastCalledWith(true);
       profilingFlags[flag].next(false);
-      expect(profilingLines()).toEqual([ON, OFF]);
+      expect(watchdog().setProfiling).toHaveBeenLastCalledWith(false);
     });
 
-    it("is on when any of the node's role flags are on, and logs only changes", async () => {
+    it('does nothing while the profiling flags have never been on', async () => {
+      await start({}, ['background_tasks', 'ui']);
+      profilingFlags[BG_PROFILING_FLAG].next(false);
+      profilingFlags[UI_PROFILING_FLAG].next(false);
+      profilingFlags[UI_PROFILING_FLAG].next(false);
+      expect(watchdog().setProfiling).not.toHaveBeenCalled();
+    });
+
+    it("profiles when any of the node's role flags are on", async () => {
       await start({}, ['background_tasks', 'ui']);
       profilingFlags[BG_PROFILING_FLAG].next(false);
       profilingFlags[UI_PROFILING_FLAG].next(false);
       profilingFlags[UI_PROFILING_FLAG].next(true);
+      expect(watchdog().setProfiling).toHaveBeenLastCalledWith(true);
       profilingFlags[BG_PROFILING_FLAG].next(true);
       profilingFlags[UI_PROFILING_FLAG].next(false);
+      expect(watchdog().setProfiling).toHaveBeenLastCalledWith(true);
       profilingFlags[BG_PROFILING_FLAG].next(false);
-      expect(profilingLines()).toEqual([ON, OFF]);
+      expect(watchdog().setProfiling).toHaveBeenLastCalledWith(false);
     });
 
-    it('logs nothing while the profiling flags have never been on', async () => {
-      await start({}, ['background_tasks', 'ui']);
-      profilingFlags[BG_PROFILING_FLAG].next(false);
-      profilingFlags[UI_PROFILING_FLAG].next(false);
-      profilingFlags[UI_PROFILING_FLAG].next(false);
-      expect(profilingLines()).toEqual([]);
-    });
-
-    it("doesn't log the profiling flag state for a node without a matching role flag", async () => {
+    it("doesn't profile a node without a matching role flag", async () => {
       await start({}, ['migrator']);
       flag$.next(true);
-      expect(profilingLines()).toEqual([]);
+      expect(watchdog().setProfiling).not.toHaveBeenCalled();
     });
 
-    it('logs a profiling flag error and keeps the watchdog running', async () => {
+    it('only updates profiling when the combined state changes', async () => {
+      await start({}, ['background_tasks', 'ui']);
+      profilingFlags[BG_PROFILING_FLAG].next(true);
+      profilingFlags[UI_PROFILING_FLAG].next(false);
+      profilingFlags[UI_PROFILING_FLAG].next(true);
+      profilingFlags[BG_PROFILING_FLAG].next(false);
+      expect(watchdog().setProfiling).toHaveBeenCalledTimes(1);
+    });
+
+    it.each(['before', 'after'])(
+      'applies profiling when its flag arrives %s the watchdog flag',
+      async (order) => {
+        await start();
+        const enableProfiling = () => profilingFlags[BG_PROFILING_FLAG].next(true);
+        if (order === 'before') {
+          enableProfiling();
+        }
+        flag$.next(true);
+        if (order === 'after') {
+          enableProfiling();
+        }
+        expect(watchdog().start).toHaveBeenCalledTimes(1);
+        expect(watchdog().setProfiling).toHaveBeenLastCalledWith(true);
+      }
+    );
+
+    it('toggles profiling without restarting the watchdog', async () => {
       await start();
       flag$.next(true);
       profilingFlags[BG_PROFILING_FLAG].next(true);
+      profilingFlags[BG_PROFILING_FLAG].next(false);
+      profilingFlags[BG_PROFILING_FLAG].next(true);
+      await Promise.resolve();
+      expect(watchdog().start).toHaveBeenCalledTimes(1);
+      expect(watchdog().stop).not.toHaveBeenCalled();
+    });
+
+    it("treats a failed profiling flag as off and keeps following the node's other flag", async () => {
+      await start({}, ['background_tasks', 'ui']);
+      flag$.next(true);
+      profilingFlags[BG_PROFILING_FLAG].next(true);
+      profilingFlags[UI_PROFILING_FLAG].next(false);
       expect(() =>
         profilingFlags[BG_PROFILING_FLAG].error(new Error('provider failed'))
       ).not.toThrow();
       expect(logger.get().error).toHaveBeenCalledWith(
-        'Event loop watchdog profiling flag failed, treating it as off: provider failed'
+        `Profiling flag ${BG_PROFILING_FLAG} failed, treating it as off: provider failed`
       );
       expect(logger.get().debug).toHaveBeenCalledWith(
         expect.stringMatching(/treating it as off: Error: provider failed\n\s+at /)
       );
+      expect(watchdog().setProfiling).toHaveBeenLastCalledWith(false);
+      profilingFlags[UI_PROFILING_FLAG].next(true);
+      expect(watchdog().setProfiling).toHaveBeenLastCalledWith(true);
       expect(watchdog().stop).not.toHaveBeenCalled();
     });
   });
@@ -370,7 +425,7 @@ describe('EventLoopWatchdogService', () => {
       expect(watchdog().stop).toHaveBeenCalledTimes(1);
       flag$.next(true);
       profilingFlags[BG_PROFILING_FLAG].next(true);
-      expect(profilingLines()).toEqual([]);
+      expect(watchdog().setProfiling).not.toHaveBeenCalled();
       overall$.next(available);
       jest.advanceTimersByTime(RUNNING_FALLBACK_MS);
       expect(watchdog().start).not.toHaveBeenCalled();

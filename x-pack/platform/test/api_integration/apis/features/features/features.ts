@@ -125,6 +125,7 @@ export default function ({ getService }: FtrProviderContext) {
             'savedObjectsTagging',
             'ml',
             'apm',
+            'digital_experience',
             'automatic_import',
             'stackAlerts',
             'stackAlertsOnly',

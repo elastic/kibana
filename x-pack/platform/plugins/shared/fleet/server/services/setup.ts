@@ -46,6 +46,7 @@ import type { UpgradeManagedPackagePoliciesResult } from './setup/managed_packag
 import { setupUpgradeManagedPackagePolicies } from './setup/managed_package_policies';
 import { upgradePackageInstallVersion } from './setup/upgrade_package_install_version';
 import { upgradeAgentPolicySchemaVersion } from './setup/upgrade_agent_policy_schema_version';
+import { removeDeniedAgentPolicyOverrides } from './setup/remove_denied_agent_policy_overrides';
 import { migrateSettingsToFleetServerHost } from './fleet_server_host';
 import {
   ensurePreconfiguredFleetServerHosts,
@@ -288,6 +289,20 @@ async function createSetupSideEffects(
   await upgradeAgentPolicySchemaVersion(soClient);
   stepSpan?.end();
 
+  // After preconfiguration, which already strips the denied overrides of preconfigured policies.
+  // Non-fatal: the keys are still stripped whenever a policy is deployed, so a failure here must not
+  // fail Fleet setup.
+  let removeDeniedAgentPolicyOverridesError;
+  stepSpan = apm.startSpan('Remove denied agent policy overrides', 'preconfiguration');
+  try {
+    logger.debug('Removing denied overrides from stored agent policies');
+    await removeDeniedAgentPolicyOverrides(esClient);
+  } catch (error) {
+    logger.warn(`Failed to remove denied overrides from stored agent policies: ${error.message}`);
+    removeDeniedAgentPolicyOverridesError = { error };
+  }
+  stepSpan?.end();
+
   // Bump the revision of agent policies whose package policies were flagged for a bump by a
   // saved object migration (no span: this only schedules a background task).
   logger.debug('Scheduling agent policy revision bump for migrated package policies');
@@ -326,6 +341,7 @@ async function createSetupSideEffects(
   const rawNonFatalErrors = [
     ...preconfiguredPackagesNonFatalErrors,
     ...(messageSigningServiceNonFatalError ? [messageSigningServiceNonFatalError] : []),
+    ...(removeDeniedAgentPolicyOverridesError ? [removeDeniedAgentPolicyOverridesError] : []),
     ...(backfillPackagePolicySupportsAgentlessError
       ? [backfillPackagePolicySupportsAgentlessError]
       : []),

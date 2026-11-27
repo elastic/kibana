@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-export type { AuthenticationProviderOptions, AuthenticationProviderSpecificOptions } from './base';
+export type {
+  AuthenticationOptions,
+  AuthenticationProviderOptions,
+  AuthenticationProviderSpecificOptions,
+} from './base';
 export { BaseAuthenticationProvider } from './base';
 export { AnonymousAuthenticationProvider } from './anonymous';
 export { BasicAuthenticationProvider } from './basic';

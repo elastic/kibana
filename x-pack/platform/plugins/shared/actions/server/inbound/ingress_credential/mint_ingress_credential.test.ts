@@ -6,13 +6,13 @@
  */
 
 import { SavedObjectsUtils } from '@kbn/core/server';
+import { computeTokenHmac } from '@kbn/crypto';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 
 import { INBOUND_EVENTS_TOKEN_MAX_LENGTH } from '../../../common/inbound_events';
 import { CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE } from '../../constants/saved_objects';
-import { computeIngestTokenHash } from '../compute_ingest_token_hash';
 import { mintIngressCredential } from './mint_ingress_credential';
 import { parseIngestToken } from './parse_ingest_token';
 
@@ -65,11 +65,7 @@ describe('mintIngressCredential', () => {
       CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
       {
         connectorId: 'connector-1',
-        ingestTokenHash: computeIngestTokenHash({
-          connectorId: 'connector-1',
-          spaceId: 'default',
-          token: result.ingestToken,
-        }),
+        ingestTokenHash: computeTokenHmac(result.ingestToken, 'connector-1', 'default'),
         createdAt: expect.any(String),
       },
       expect.objectContaining({

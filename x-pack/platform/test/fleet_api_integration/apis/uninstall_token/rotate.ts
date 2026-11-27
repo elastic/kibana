@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
+
 import expect from '@kbn/expect';
 import { uninstallTokensRouteService } from '@kbn/fleet-plugin/common/services';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
@@ -18,6 +20,7 @@ export default function (providerContext: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const kibanaServer = getService('kibanaServer');
   const fleetAndAgents = getService('fleetAndAgents');
+  const es = getService('es');
 
   // Creates an agent policy with tamper protection enabled by adding Elastic Defend,
   // which is the only production path that allows is_protected: true.
@@ -110,6 +113,20 @@ export default function (providerContext: FtrProviderContext) {
     return updatedPolicy;
   };
 
+  const getLatestDeployedPolicy = async (policyId: string) => {
+    const res = await es.search<{
+      revision_idx: number;
+      data: { agent: { protection: { uninstall_token_hash: string } } };
+    }>({
+      index: '.fleet-policies',
+      query: { term: { policy_id: policyId } },
+      sort: [{ revision_idx: 'desc' }],
+      size: 1,
+    });
+
+    return res.hits.hits[0]?._source;
+  };
+
   describe('Rotate Uninstall Token API', () => {
     skipIfNoDockerRegistry(providerContext);
 
@@ -168,6 +185,45 @@ export default function (providerContext: FtrProviderContext) {
         const secondTokenId = secondTokenResponse.body.items[0].id;
 
         expect(secondTokenId).not.to.equal(firstTokenId);
+      });
+
+      it('should deploy the rotated token to a new policy revision for agents to pick up', async () => {
+        const agentPolicy = await generateProtectedAgentPolicy();
+
+        const deployedBefore = await getLatestDeployedPolicy(agentPolicy.id);
+        expect(deployedBefore?.revision_idx).to.equal(agentPolicy.revision);
+
+        await supertest
+          .post(uninstallTokensRouteService.getRotatePath(agentPolicy.id))
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
+        const {
+          body: { item: rotatedPolicy },
+        } = await supertest.get(`/api/fleet/agent_policies/${agentPolicy.id}`).expect(200);
+        expect(rotatedPolicy.revision).to.equal(agentPolicy.revision + 1);
+
+        const {
+          body: { items },
+        } = await supertest
+          .get(uninstallTokensRouteService.getListPath())
+          .query({ policyId: agentPolicy.id })
+          .expect(200);
+        const {
+          body: { item: rotatedToken },
+        } = await supertest.get(uninstallTokensRouteService.getInfoPath(items[0].id)).expect(200);
+
+        // fleet-server only hands a policy to agents when its revision_idx increases, so the rotated
+        // token hash must land in a new revision instead of overwriting the one agents already have.
+        const deployedAfter = await getLatestDeployedPolicy(agentPolicy.id);
+        expect(deployedAfter?.revision_idx).to.equal(rotatedPolicy.revision);
+        expect(deployedAfter?.revision_idx).to.be.greaterThan(agentPolicy.revision);
+        expect(deployedAfter?.data.agent.protection.uninstall_token_hash).to.equal(
+          createHash('sha256').update(rotatedToken.token).digest('base64')
+        );
+        expect(deployedAfter?.data.agent.protection.uninstall_token_hash).not.to.equal(
+          deployedBefore?.data.agent.protection.uninstall_token_hash
+        );
       });
 
       it('should return a success message', async () => {

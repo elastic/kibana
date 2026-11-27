@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { BehaviorSubject, combineLatest, map, of } from 'rxjs';
-import type { AppUpdater, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { BehaviorSubject, combineLatest, map, of, type Subscription } from 'rxjs';
+import type { AppDeepLink, AppUpdater, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { hasSeenOnboarding } from '@kbn/vectordb-onboarding';
@@ -27,6 +27,17 @@ import type {
   ServerlessVectordbStartDependencies,
 } from './types';
 
+const ONBOARDING_DEEP_LINKS: AppDeepLink[] = [
+  {
+    id: GETTING_STARTED_DEEP_LINK_ID,
+    path: GETTING_STARTED_PATH,
+    title: i18n.translate('xpack.serverlessVectordb.gettingStarted.title', {
+      defaultMessage: 'Getting started',
+    }),
+    visibleIn: ['globalSearch', 'projectSideNav'],
+  },
+];
+
 export class ServerlessVectordbPlugin
   implements
     Plugin<
@@ -36,6 +47,11 @@ export class ServerlessVectordbPlugin
       ServerlessVectordbStartDependencies
     >
 {
+  private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+  private hideChrome = false;
+  private integratedOnboardingEnabled = false;
+  private integratedOnboardingSubscription?: Subscription;
+
   public setup(
     core: CoreSetup<ServerlessVectordbStartDependencies, ServerlessVectordbPluginStart>,
     { console: consolePlugin }: ServerlessVectordbSetupDependencies
@@ -44,9 +60,12 @@ export class ServerlessVectordbPlugin
 
     // Read once: updaters re-run on every applications$ change, and the landing page marks
     // onboarding seen on mount, so a lazy read would show the chrome mid-wizard.
-    const hideChrome = !hasSeenOnboarding();
-    const appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({ hideChrome }));
-    const showChrome = () => appUpdater$.next(() => ({ hideChrome: false }));
+    this.hideChrome = !hasSeenOnboarding();
+    this.updateApp();
+    const showChrome = () => {
+      this.hideChrome = false;
+      this.updateApp();
+    };
 
     core.application.register({
       id: VECTORDB_APP_ID,
@@ -56,17 +75,8 @@ export class ServerlessVectordbPlugin
       appRoute: '/app/vectordb',
       euiIconType: 'logoVectorDB',
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      updater$: appUpdater$,
-      deepLinks: [
-        {
-          id: GETTING_STARTED_DEEP_LINK_ID,
-          path: GETTING_STARTED_PATH,
-          title: i18n.translate('xpack.serverlessVectordb.gettingStarted.title', {
-            defaultMessage: 'Getting started',
-          }),
-          visibleIn: ['globalSearch', 'projectSideNav'],
-        },
-      ],
+      updater$: this.appUpdater$,
+      deepLinks: ONBOARDING_DEEP_LINKS,
       async mount(params) {
         const [coreStart, depsStart] = await core.getStartServices();
         const { renderApp } = await import('./application');
@@ -88,8 +98,16 @@ export class ServerlessVectordbPlugin
 
   public start(
     core: CoreStart,
-    { navigation }: ServerlessVectordbStartDependencies
+    { navigation, elasticsearchHome }: ServerlessVectordbStartDependencies
   ): ServerlessVectordbPluginStart {
+    // `hideChrome` is read in setup, before feature flag values exist, so the flag is applied here.
+    this.integratedOnboardingSubscription = elasticsearchHome
+      .getIntegratedOnboardingEnabled$()
+      .subscribe((enabled) => {
+        this.integratedOnboardingEnabled = enabled;
+        this.updateApp();
+      });
+
     const chatExperience$ = core.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
 
     const navigationTree$ = combineLatest([of(core.application), chatExperience$]).pipe(
@@ -102,9 +120,20 @@ export class ServerlessVectordbPlugin
         });
       })
     );
-    navigation.initNavigation('vectordb', navigationTree$);
+    navigation.initNavigation('vectordb', navigationTree$, 'serverlessVectordb');
     return {};
   }
 
-  public stop() {}
+  public stop() {
+    this.integratedOnboardingSubscription?.unsubscribe();
+  }
+
+  private updateApp() {
+    if (this.integratedOnboardingEnabled) {
+      this.appUpdater$.next(() => ({ hideChrome: false, deepLinks: [] }));
+      return;
+    }
+    const { hideChrome } = this;
+    this.appUpdater$.next(() => ({ hideChrome }));
+  }
 }

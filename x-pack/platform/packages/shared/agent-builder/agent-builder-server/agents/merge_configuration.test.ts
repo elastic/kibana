@@ -253,6 +253,35 @@ describe('mergeAgentConfiguration', () => {
     });
   });
 
+  describe('capabilities (per-key merge)', () => {
+    const off = { attachment_tools: { enabled: false } };
+    const on = { attachment_tools: { enabled: true } };
+
+    it('uses the base value when the agent leaves it unset', () => {
+      expect(mergeAgentConfiguration({ capabilities: off }, { tools: [] }).capabilities).toEqual(
+        off
+      );
+    });
+
+    it("keeps the agent's value when the base leaves it unset", () => {
+      expect(mergeAgentConfiguration({}, { tools: [], capabilities: off }).capabilities).toEqual(
+        off
+      );
+    });
+
+    it("lets the agent's value win for the same key", () => {
+      expect(
+        mergeAgentConfiguration({ capabilities: off }, { tools: [], capabilities: on }).capabilities
+      ).toEqual(on);
+    });
+
+    it('leaves capabilities undefined when neither side sets it', () => {
+      expect(mergeAgentConfiguration({ tools: [] }, { tools: [] })).not.toHaveProperty(
+        'capabilities'
+      );
+    });
+  });
+
   it('does not mutate its inputs', () => {
     const base: AgentBaseConfiguration = { skill_ids: ['s1'], tools: [{ tool_ids: ['a'] }] };
     const delta: AgentConfiguration = { tools: [{ tool_ids: ['b'] }], skill_ids: ['s2'] };

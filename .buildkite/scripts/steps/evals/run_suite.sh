@@ -39,6 +39,11 @@ EVAL_SUITE_NAME="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.name // empty' 2>/
 EVAL_SUITE_SLACK_CHANNEL="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.slackChannel // empty' 2>/dev/null || true)"
 # Per-suite step timeout for suites that legitimately need longer than the 120m default.
 EVAL_SUITE_STEP_TIMEOUT="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.stepTimeoutInMinutes // empty' 2>/dev/null || true)"
+# A one-shard step runs a fraction of the suite, so a suite can give it a shorter budget than a
+# step that runs every spec (a grep run, or a suite without shards).
+EVAL_SUITE_SHARD_STEP_TIMEOUT="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.shardStepTimeoutInMinutes // empty' 2>/dev/null || true)"
+# Per-suite fanout concurrency for suites with more shards than the default 4 lets run at once.
+EVAL_SUITE_FANOUT_CONCURRENCY="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.fanoutConcurrency // empty' 2>/dev/null || true)"
 # The suite's Scout arch/domain, for steps (e.g. the weekly pipeline) that don't pass them. The
 # suite's domain only applies to its own arch, so an EVAL_SCOUT_ARCH override falls back to the
 # run_suite.sh default domain for that arch instead of e.g. `stateful/observability_complete`.
@@ -133,7 +138,7 @@ source .buildkite/scripts/steps/evals/setup_connectors.sh
 # This is the only practical way to run all connector projects within the 1h job timeout.
 EVAL_FANOUT="${EVAL_FANOUT:-}"
 EVAL_PROJECT="${EVAL_PROJECT:-}"
-EVAL_FANOUT_CONCURRENCY="${EVAL_FANOUT_CONCURRENCY:-4}"
+EVAL_FANOUT_CONCURRENCY="${EVAL_FANOUT_CONCURRENCY:-${EVAL_SUITE_FANOUT_CONCURRENCY:-4}}"
 
 # Optional: extend eval connectors with EIS models (Elastic Inference Service).
 # This is intentionally done here (post-bootstrap) so Node scripts can import repo packages if needed.
@@ -270,6 +275,25 @@ EOF
         row_judge="$(jq -r '.judge // ""' <<<"$row")"
         step_judge_connector="${row_judge:-${EVAL_CONNECTOR_ID:-}}"
 
+        # A shard in one of the suite's `concurrencyGroups` shares that group's limit, across builds,
+        # instead of the suite-wide one, so heavy shards can be capped without holding back the rest.
+        step_timeout_in_minutes="${timeout_in_minutes}"
+        if [[ -n "$shard_id" && -z "${EVAL_STEP_TIMEOUT_IN_MINUTES:-}" && -n "${EVAL_SUITE_SHARD_STEP_TIMEOUT:-}" ]]; then
+          step_timeout_in_minutes="${EVAL_SUITE_SHARD_STEP_TIMEOUT}"
+        fi
+
+        step_concurrency_group="kbn-evals-${group_key_safe}"
+        step_concurrency="${EVAL_FANOUT_CONCURRENCY}"
+        row_concurrency_group="$(jq -r '.concurrencyGroup // ""' <<<"$row")"
+        if [[ -n "$row_concurrency_group" ]]; then
+          step_concurrency="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r --arg group "$row_concurrency_group" '.concurrencyGroups[$group] // empty')"
+          if [[ ! "$step_concurrency" =~ ^[1-9][0-9]*$ ]]; then
+            echo "Shard ${shard_id} names concurrencyGroup \"${row_concurrency_group}\", which the suite's concurrencyGroups does not define" >&2
+            exit 1
+          fi
+          step_concurrency_group="${step_concurrency_group}-$(printf '%s' "$row_concurrency_group" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_-]+/-/g; s/-+/-/g; s/^-|-$//g')"
+        fi
+
         cat >>"$FANOUT_PIPELINE_FILE" <<EOF
       - label: "${step_label}"
         key: "${step_key}"
@@ -296,9 +320,9 @@ EOF
           EVAL_SPEC_FILES: "${shard_spec_file_args}"
           EVAL_REPETITIONS: "${EVAL_REPETITIONS:-}"
           EVAL_CONCURRENCY: "${EVAL_CONCURRENCY:-}"
-        timeout_in_minutes: ${timeout_in_minutes}
-        concurrency_group: "kbn-evals-${group_key_safe}"
-        concurrency: ${EVAL_FANOUT_CONCURRENCY}
+        timeout_in_minutes: ${step_timeout_in_minutes}
+        concurrency_group: "${step_concurrency_group}"
+        concurrency: ${step_concurrency}
         agents:
           image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
@@ -342,7 +366,7 @@ EOF
       EVAL_NOTIFY_BRANCH="${BUILDKITE_PIPELINE_DEFAULT_BRANCH:-main}"
       
       # Enable the suite owner notify step when there is somewhere to send triage:
-      # - weekly: the suite's team channel
+      # - weekly and daily: their channel, on the default branch only
       # - any run: a PR comment (PR context) or EVAL_SLACK_NOTIFICATION_CHANNEL
       enable_suite_owner_notify="false"
       if [[ "${KBN_EVALS_WEEKLY:-}" =~ ^(1|true)$ ]] && [[ -n "${EVAL_SUITE_SLACK_CHANNEL:-}" ]] && [[ "${BUILDKITE_BRANCH:-}" == "${EVAL_NOTIFY_BRANCH}" ]]; then
@@ -350,10 +374,17 @@ EOF
       elif [[ -n "${resolved_pr_number}" ]]; then
         enable_suite_owner_notify="true"
       elif [[ -n "${EVAL_SLACK_NOTIFICATION_CHANNEL:-}" ]]; then
-        enable_suite_owner_notify="true"
+        # A daily build on another branch (possible by overriding the pipeline's branch filter)
+        # would otherwise report that branch as a daily regression.
+        if [[ "${KBN_EVALS_DAILY:-}" =~ ^(1|true)$ ]] && [[ "${BUILDKITE_BRANCH:-}" != "${EVAL_NOTIFY_BRANCH}" ]]; then
+          echo "Daily evals on ${BUILDKITE_BRANCH:-?}: skipping the Slack notification (only ${EVAL_NOTIFY_BRANCH} posts)"
+        else
+          enable_suite_owner_notify="true"
+        fi
       fi
 
       if [[ "${enable_suite_owner_notify}" == "true" ]]; then
+        fanout_step_keys_csv="$(IFS=,; echo "${fanout_step_keys[*]}")"
         cat >>"$FANOUT_PIPELINE_FILE" <<EOF
       - label: "LLM Evals: ${EVAL_SUITE_ID} (suite owner notify)"
         key: "kbn-evals-${group_key_safe}-suite-owner-notify"
@@ -361,11 +392,13 @@ EOF
         env:
           KBN_EVALS: "1"
           KBN_EVALS_WEEKLY: "${KBN_EVALS_WEEKLY:-}"
+          KBN_EVALS_DAILY: "${KBN_EVALS_DAILY:-}"
           EVAL_SUITE_ID: "${EVAL_SUITE_ID}"
           EVAL_SUITE_SLACK_CHANNEL: "${EVAL_SUITE_SLACK_CHANNEL:-}"
           EVAL_SLACK_NOTIFICATION_CHANNEL: "${EVAL_SLACK_NOTIFICATION_CHANNEL:-}"
           EVAL_PR_NUMBER: "${resolved_pr_number}"
           EVAL_SUITE_NAME: "${EVAL_SUITE_NAME:-}"
+          EVAL_FANOUT_STEP_KEYS: "${fanout_step_keys_csv}"
         depends_on:
 EOF
         for key in "${fanout_step_keys[@]}"; do
@@ -494,6 +527,12 @@ EOF
           | awk 'NF && !seen[$0]++' | tr '\n' ',' | sed 's/,$//'
       )"
       buildkite-agent meta-data set "kbn-evals:connectors:${EVAL_SUITE_ID}" "$_connectors_csv" 2>/dev/null || true
+
+      # The `evals gate` waits on this status until the post-comparison step replaces it with the
+      # verdict. No-op for suites without a regressionGate.
+      if [[ -n "${BUILDKITE_PULL_REQUEST:-}" && "${BUILDKITE_PULL_REQUEST}" != "false" ]]; then
+        node .buildkite/scripts/steps/evals/regression_gate.ts pending "$EVAL_SUITE_ID" || true
+      fi
 
       echo "Fanout uploaded. Exiting parent step."
       exit 0

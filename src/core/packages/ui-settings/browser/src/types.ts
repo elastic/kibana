@@ -8,14 +8,17 @@
  */
 
 import type { Observable } from 'rxjs';
-import type { UiSettingsParams, UserProvidedValues } from '@kbn/core-ui-settings-common';
+import type {
+  UiSettingsParams,
+  UiSettingsRuntimeEntry,
+  UiSettingsScope,
+  UserProvidedValues,
+} from '@kbn/core-ui-settings-common';
 
 export type PublicUiSettingsParams = Omit<UiSettingsParams, 'schema'>;
 
 /** @public */
-export interface UiSettingsState {
-  [key: string]: PublicUiSettingsParams & UserProvidedValues;
-}
+export type UiSettingsRuntimeState = Record<string, UiSettingsRuntimeEntry & UserProvidedValues>;
 
 export interface ValueValidation {
   successfulValidation: boolean;
@@ -48,10 +51,10 @@ export interface IUiSettingsClient {
   get$: <T = any>(key: string, defaultOverride?: T) => Observable<T>;
 
   /**
-   * Gets the metadata about all uiSettings, including the type, default value, and user value
-   * for each key.
+   * Gets all uiSettings entries, including the type, default value, and user value
+   * for each key. Does not include display metadata such as description and category.
    */
-  getAll: () => Readonly<Record<string, PublicUiSettingsParams & UserProvidedValues>>;
+  getAll: () => Readonly<UiSettingsRuntimeState>;
 
   /**
    * Sets the value for a uiSetting. If the setting is not registered by any plugin
@@ -114,10 +117,27 @@ export interface IUiSettingsClient {
   validateValue: (key: string, value: any) => Promise<ValueValidation>;
 }
 
+/**
+ * Full settings metadata including display information (name, description, category, etc.).
+ * It holds the registered definitions only. Current values come from `IUiSettingsClient.getAll()`.
+ * Used by the Advanced Settings management UI.
+ * @public
+ */
+export type UiSettingsMetadataState = Record<string, PublicUiSettingsParams>;
+
+/**
+ * Client that fetches the full setting definitions from the server on demand.
+ * @public
+ */
+export interface IUiSettingsMetadataClient {
+  getAll: (scope: UiSettingsScope) => Promise<UiSettingsMetadataState>;
+}
+
 /** @public */
 export interface SettingsStart {
   client: IUiSettingsClient;
   globalClient: IUiSettingsClient;
+  metadata: IUiSettingsMetadataClient;
 }
 
 /** @public */

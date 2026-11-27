@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Fs from 'node:fs/promises';
 import type { ManagedWorker, WorkerLoggingConfig } from '@kbn/core-threads-server-internal';
 import { createManagedWorker } from '@kbn/core-threads-server-internal';
 import type { Logger } from '@kbn/logging';
@@ -20,8 +21,8 @@ import {
   monotonicUs,
 } from './constants';
 
-// The worker used 20-24 MB of heap over 10 minutes in dev, with the require hook loaded.
-const WORKER_MAX_OLD_GENERATION_SIZE_MB = 32;
+// The worker needs enough memory to hold at least a large profile and its JSON string during a write
+const WORKER_MAX_OLD_GENERATION_SIZE_MB = 64;
 const WORKER_MAX_YOUNG_GENERATION_SIZE_MB = 16;
 
 export interface EventLoopWatchdogParams {
@@ -41,6 +42,8 @@ export class EventLoopWatchdog {
   private stopping?: Promise<void>;
   private shared?: BigInt64Array;
   private runningSinceUs = 0;
+  private profilingEnabled = false;
+  private profilingLoggedOn = false;
 
   constructor(private readonly params: EventLoopWatchdogParams) {}
 
@@ -61,6 +64,7 @@ export class EventLoopWatchdog {
     Atomics.store(shared, Slot.heartbeat, BigInt(monotonicUs()));
     Atomics.store(shared, Slot.runningSince, BigInt(this.runningSinceUs));
     this.shared = shared;
+    this.writeProfilingSlot();
     this.heartbeatTimer = setInterval(
       () => Atomics.store(shared, Slot.heartbeat, BigInt(monotonicUs())),
       HEARTBEAT_INTERVAL_MS
@@ -91,6 +95,7 @@ export class EventLoopWatchdog {
     });
     this.worker.start();
     logger.info('Event loop watchdog started');
+    this.logProfiling();
     this.warnIfSilent();
   }
 
@@ -131,6 +136,65 @@ export class EventLoopWatchdog {
     }
   }
 
+  /**
+   * Updates the profiling flag for the running worker. The setting is retained when the worker
+   * stops and applied if it starts again.
+   */
+  public setProfiling(enabled: boolean): void {
+    this.profilingEnabled = enabled;
+    this.writeProfilingSlot();
+    this.logProfiling();
+  }
+
+  private writeProfilingSlot(): void {
+    if (this.shared) {
+      Atomics.store(this.shared, Slot.profiling, this.profilingEnabled ? 1n : 0n);
+    }
+  }
+
+  /** Logs whether a running worker can profile, not what the flags ask for. */
+  private logProfiling(): void {
+    const on = this.shared !== undefined && this.profilingEnabled;
+    if (on !== this.profilingLoggedOn) {
+      this.profilingLoggedOn = on;
+      const { diagnosticDir } = this.params.profiling;
+      // The full directory: capture lines only give the file name.
+      const dir = on && diagnosticDir ? `. Profile directory: ${diagnosticDir}` : '';
+      this.params.logger.info(
+        `Event loop watchdog profiling ${on ? 'on' : 'off'} for this node${dir}`
+      );
+      if (on) {
+        void this.checkProfileDir();
+      }
+    }
+  }
+
+  /** Warns each time profiling turns on if profile files can't be written. */
+  private async checkProfileDir(): Promise<void> {
+    const { logger, profiling } = this.params;
+    const dir = profiling.diagnosticDir;
+    if (dir === undefined) {
+      logger.warn(
+        "Event loop watchdog profiling is on, but no profile directory is set. Set ops.eventLoopWatchdog.profiling.dir or Node's --diagnostic-dir to write profile files."
+      );
+      return;
+    }
+    try {
+      await Fs.access(dir, Fs.constants.W_OK);
+    } catch (error) {
+      // Profiling can turn off while the check runs; the warning would then be out of date.
+      if (!this.profilingLoggedOn) {
+        return;
+      }
+      // The error code, not the message: the message repeats the directory.
+      logger.warn(
+        `Event loop watchdog profiling is on, but the profile directory ${dir} can't be written (${
+          error.code ?? error.message
+        }). Profile file writes will fail.`
+      );
+    }
+  }
+
   public stop(): Promise<void> {
     if (this.stopping) {
       return this.stopping;
@@ -141,6 +205,7 @@ export class EventLoopWatchdog {
     }
     this.worker = undefined;
     this.shared = undefined;
+    this.logProfiling();
     this.clearHeartbeat();
     this.stopping = worker
       .stop()

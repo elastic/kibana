@@ -8,11 +8,11 @@
 import type React from 'react';
 import type {
   EntityNodeDataModel,
-  GroupNodeDataModel,
-  LabelNodeDataModel,
+  ConnectorGroupNodeDataModel,
+  EventNodeDataModel,
   RelationshipNodeDataModel,
   EdgeDataModel,
-  NodeShape,
+  NodeKind,
   NodeColor,
   NodeDocumentDataModel,
 } from '@kbn/cloud-security-posture-common/types/graph/latest';
@@ -71,20 +71,20 @@ export interface EntityNodeViewModel
   countryClickHandler?: CountryClickCallback;
 }
 
-export interface GroupNodeViewModel
+export interface ConnectorGroupNodeViewModel
   extends Record<string, unknown>,
-    GroupNodeDataModel,
+    ConnectorGroupNodeDataModel,
     BaseNodeDataViewModel {}
 
 export type NodeDocumentDataViewModel = NodeDocumentDataModel;
 
-export interface LabelNodeViewModel
+export interface EventNodeViewModel
   extends Record<string, unknown>,
-    LabelNodeDataModel,
+    EventNodeDataModel,
     BaseNodeDataViewModel {
   expandButtonClick?: ExpandButtonClickCallback;
   /**
-   * Returns the toolbar action items for this specific label node. When provided, actions
+   * Returns the toolbar action items for this specific event node. When provided, actions
    * are rendered as individual icon buttons in a floating NodeToolbar above the node
    * instead of behind the hover expand button.
    */
@@ -102,8 +102,8 @@ export interface RelationshipNodeViewModel
 
 export type NodeViewModel =
   | EntityNodeViewModel
-  | GroupNodeViewModel
-  | LabelNodeViewModel
+  | ConnectorGroupNodeViewModel
+  | EventNodeViewModel
   | RelationshipNodeViewModel;
 
 export type NodeProps = xyNodeProps<Node<NodeViewModel>>;
@@ -113,9 +113,9 @@ export interface EdgeViewModel extends Record<string, unknown>, EdgeDataModel {}
 export type EdgeProps = xyEdgeProps<
   Edge<
     EdgeViewModel & {
-      sourceShape: NodeShape;
+      sourceKind: NodeKind;
       sourceColor: NodeColor;
-      targetShape: NodeShape;
+      targetKind: NodeKind;
       targetColor: NodeColor;
     }
   >

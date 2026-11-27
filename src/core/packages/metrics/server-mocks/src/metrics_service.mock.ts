@@ -81,6 +81,7 @@ type MetricsServiceContract = PublicMethodsOf<MetricsService>;
 
 const createMock = () => {
   const mocked: jest.Mocked<MetricsServiceContract> = lazyObject({
+    preboot: jest.fn(),
     setup: jest.fn().mockReturnValue(createSetupContractMock()),
     start: jest.fn().mockReturnValue(createStartContractMock()),
     stop: jest.fn(),

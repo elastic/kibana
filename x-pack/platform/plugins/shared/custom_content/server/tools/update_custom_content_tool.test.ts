@@ -52,9 +52,8 @@ const callHandler = async (
   params: {
     embeddable_id?: string;
     prompt?: string;
-    esqlQuery?: string | null;
-    regenerateEsql?: boolean;
-    index?: string;
+    removeAllQueries?: boolean;
+    dataQueries?: Array<{ description?: string; esql?: string; index?: string }>;
   },
   attachmentData?: Record<string, unknown>
 ) => {
@@ -71,7 +70,7 @@ describe('createUpdateCustomContentTool handler', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockBuild.mockResolvedValue({
-      esqlQuery: 'FROM logs',
+      esqlQueries: ['FROM logs'],
       template: '<div>generated</div>',
       height: 320,
     });
@@ -116,22 +115,105 @@ describe('createUpdateCustomContentTool handler', () => {
     };
 
     it('hands the prompt and the stored query and template to the builder', async () => {
-      await callHandler({ embeddable_id: 'p1', prompt: 'Show KPIs', index: 'logs-*' }, existing);
+      await callHandler({ embeddable_id: 'p1', prompt: 'Show KPIs' }, existing);
 
       expect(mockBuild).toHaveBeenCalledWith(
         expect.objectContaining({
           nlQuery: 'Show KPIs',
-          index: 'logs-*',
-          esql: undefined,
-          regenerateESQL: undefined,
-          existing: { esqlQuery: 'FROM logs', template: '<p>old</p>' },
+          existing: { esqlQueries: ['FROM logs'], template: '<p>old</p>' },
         })
+      );
+    });
+
+    it('hands the additional queries of the panel to the builder, to keep through the edit', async () => {
+      await callHandler(
+        { embeddable_id: 'p1', prompt: 'Restyle' },
+        { ...existing, additional_esql_queries: ['FROM metrics', 'FROM traces'] }
+      );
+
+      expect(mockBuild).toHaveBeenCalledWith(
+        expect.objectContaining({
+          existing: expect.objectContaining({
+            esqlQueries: ['FROM logs', 'FROM metrics', 'FROM traces'],
+          }),
+        })
+      );
+    });
+
+    it('stores the additional queries the builder keeps, and none when it returns none', async () => {
+      mockBuild.mockResolvedValueOnce({
+        esqlQueries: ['FROM logs', 'FROM metrics'],
+        template: '<div>kept</div>',
+        height: 320,
+      });
+      const kept = await callHandler({ embeddable_id: 'p1', prompt: 'Restyle' }, existing);
+
+      expect(kept.ctx.update).toHaveBeenCalledWith(
+        'att-1',
+        expect.objectContaining({
+          data: expect.objectContaining({ additional_esql_queries: ['FROM metrics'] }),
+        }),
+        ATTACHMENT_REF_ACTOR.agent
+      );
+      expect(kept.ctx.sendUiEvent).toHaveBeenCalledWith(
+        CUSTOM_CONTENT_UPDATED_UI_EVENT,
+        expect.objectContaining({
+          data: expect.objectContaining({ additional_esql_queries: ['FROM metrics'] }),
+        })
+      );
+
+      const none = await callHandler({ embeddable_id: 'p1', prompt: 'Restyle' }, existing);
+      const [, { data }] = none.ctx.update.mock.calls[0];
+      expect(data).not.toHaveProperty('additional_esql_queries');
+    });
+
+    it('hands the data queries to the builder, in place of the single-query fields', async () => {
+      const dataQueries = [{}, { description: 'the ten busiest services' }];
+
+      await callHandler(
+        { embeddable_id: 'p1', prompt: 'Show the busiest services', dataQueries },
+        { ...existing, additional_esql_queries: ['FROM metrics'] }
+      );
+
+      expect(mockBuild).toHaveBeenCalledWith(
+        expect.objectContaining({
+          dataQueries,
+          existing: expect.objectContaining({ esqlQueries: ['FROM logs', 'FROM metrics'] }),
+        })
+      );
+    });
+
+    it('stores the queries the builder returns after a data query adds one', async () => {
+      mockBuild.mockResolvedValueOnce({
+        esqlQueries: ['FROM logs', 'FROM metrics', 'FROM errors'],
+        template: '<div>three tables</div>',
+        height: 320,
+      });
+
+      const { ctx } = await callHandler(
+        {
+          embeddable_id: 'p1',
+          prompt: 'Add an errors table',
+          dataQueries: [{}, {}, { description: 'errors by service' }],
+        },
+        { ...existing, additional_esql_queries: ['FROM metrics'] }
+      );
+
+      expect(ctx.update).toHaveBeenCalledWith(
+        'att-1',
+        expect.objectContaining({
+          data: expect.objectContaining({
+            esql_query: 'FROM logs',
+            additional_esql_queries: ['FROM metrics', 'FROM errors'],
+          }),
+        }),
+        ATTACHMENT_REF_ACTOR.agent
       );
     });
 
     it('stores the template and the query the builder returns', async () => {
       mockBuild.mockResolvedValue({
-        esqlQuery: 'FROM logs | STATS count = COUNT(*) BY host',
+        esqlQueries: ['FROM logs | STATS count = COUNT(*) BY host'],
         template: '<div>generated</div>',
         height: 320,
       });
@@ -150,21 +232,15 @@ describe('createUpdateCustomContentTool handler', () => {
       );
     });
 
-    it('forwards regenerateEsql and a supplied query', async () => {
+    it('forwards the data queries to the builder, as they are', async () => {
+      const dataQueries = [{}, { description: 'Also show the error count', index: 'logs-*' }];
+
       await callHandler(
-        { embeddable_id: 'p1', prompt: 'Also show the error count', regenerateEsql: true },
+        { embeddable_id: 'p1', prompt: 'Also show the errors', dataQueries },
         existing
       );
-      await callHandler({ embeddable_id: 'p1', esqlQuery: 'FROM metrics-*' }, existing);
 
-      expect(mockBuild).toHaveBeenNthCalledWith(
-        1,
-        expect.objectContaining({ regenerateESQL: true })
-      );
-      expect(mockBuild).toHaveBeenNthCalledWith(
-        2,
-        expect.objectContaining({ nlQuery: undefined, esql: 'FROM metrics-*' })
-      );
+      expect(mockBuild).toHaveBeenCalledWith(expect.objectContaining({ dataQueries }));
     });
 
     it('lets the builder read the control values the panel was sent with', async () => {
@@ -184,12 +260,38 @@ describe('createUpdateCustomContentTool handler', () => {
       expect(mockBuild.mock.calls[0][0].resolveEsqlVariables).toBeUndefined();
     });
 
-    it('forwards esqlQuery: null, which removes the query, and stores none', async () => {
-      mockBuild.mockResolvedValue({ template: '<p>static</p>', height: 200 });
+    it('needs a prompt when a data query adds a query, since the template must learn how to use it', async () => {
+      const { results, ctx } = await callHandler(
+        { embeddable_id: 'p1', dataQueries: [{}, { esql: 'FROM metrics-*' }] },
+        existing
+      );
 
-      const { ctx } = await callHandler({ embeddable_id: 'p1', esqlQuery: null }, existing);
+      const result = results[0] as ToolResult;
+      if (!isErrorResult(result)) throw new Error('Expected error result');
+      expect(result.data.message).toContain('needs a "prompt"');
+      expect(mockBuild).not.toHaveBeenCalled();
+      expect(ctx.update).not.toHaveBeenCalled();
+    });
 
-      expect(mockBuild).toHaveBeenCalledWith(expect.objectContaining({ esql: null }));
+    it('lets data queries that only replace existing queries go without a prompt', async () => {
+      await callHandler(
+        { embeddable_id: 'p1', dataQueries: [{ esql: 'FROM metrics-*' }] },
+        existing
+      );
+
+      expect(mockBuild).toHaveBeenCalled();
+    });
+
+    it('forwards removeAllQueries, which removes the queries, and stores none', async () => {
+      mockBuild.mockResolvedValue({
+        esqlQueries: [],
+        template: '<p>static</p>',
+        height: 200,
+      });
+
+      const { ctx } = await callHandler({ embeddable_id: 'p1', removeAllQueries: true }, existing);
+
+      expect(mockBuild).toHaveBeenCalledWith(expect.objectContaining({ removeAllQueries: true }));
       expect(ctx.update).toHaveBeenCalledWith(
         'att-1',
         expect.objectContaining({
@@ -209,7 +311,7 @@ describe('createUpdateCustomContentTool handler', () => {
       );
 
       expect(mockBuild).toHaveBeenCalledWith(
-        expect.objectContaining({ existing: { esqlQuery: undefined, template: undefined } })
+        expect.objectContaining({ existing: { esqlQueries: [], template: undefined } })
       );
     });
 
@@ -219,7 +321,7 @@ describe('createUpdateCustomContentTool handler', () => {
       );
 
       const { results, ctx } = await callHandler(
-        { embeddable_id: 'p1', prompt: 'Show hosts', regenerateEsql: true },
+        { embeddable_id: 'p1', prompt: 'Show hosts', dataQueries: [{ description: 'hosts' }] },
         existing
       );
 

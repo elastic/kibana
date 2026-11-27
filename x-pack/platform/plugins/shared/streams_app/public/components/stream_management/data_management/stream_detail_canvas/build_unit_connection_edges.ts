@@ -6,7 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { UnitLineOrigin } from '../../../../services/unit_connections';
+import {
+  canRouteLine,
+  type UnitLineOrigin,
+  type UnitRoutableLine,
+} from '../../../../services/unit_connections';
 import {
   GRAPH_ENDPOINT_KIND,
   LINE_TARGET_KIND,
@@ -24,6 +28,7 @@ import type { UnitSignal } from '../../../../services/unit_pipeline';
 import type { Unit } from '../../../../services/unit_repository';
 import { DESTINATION_SIGNAL_LABELS } from '../../../streams_layout/destinations/destination_type_config';
 import type { DestinationSignal } from '../../../streams_layout/destinations/types';
+import type { RoutingDiagnostic } from '../../../../services/unit_diagnostics';
 import {
   ANIMATED_EDGE_TYPE,
   DESTINATION_NODE_TYPE,
@@ -220,7 +225,8 @@ const buildRoutingNode = (routing: UnitGraphRoutingNode): RoutingNode => {
     position: { x: 0, y: 0 },
     deletable: false,
     ariaLabel: i18n.translate('xpack.streams.canvas.routingNode.ariaLabel', {
-      defaultMessage: 'Routing: {name}, {count, plural, one {# rule} other {# rules}}',
+      defaultMessage:
+        'Routing: {name}, {count, plural, one {# rule} other {# rules}}. Press Enter to configure.',
       values: { name, count: routing.rules.length },
     }),
     data: {
@@ -236,6 +242,35 @@ const buildRoutingNode = (routing: UnitGraphRoutingNode): RoutingNode => {
     },
   };
 };
+
+/**
+ * Marks the routing nodes, and their rules, that the last failed save rejected.
+ * Other nodes are returned as they are.
+ */
+export const withRoutingDiagnostics = (
+  routingNodes: readonly RoutingNode[],
+  diagnostics: readonly RoutingDiagnostic[]
+): RoutingNode[] =>
+  routingNodes.map((node) => {
+    const own = diagnostics.filter(({ pipelineId }) => pipelineId === node.data.pipelineId);
+    if (own.length === 0) {
+      return node;
+    }
+    return {
+      ...node,
+      data: {
+        ...node.data,
+        diagnostics: own.map(({ message }) => message),
+        rules: node.data.rules.map((rule) => {
+          const ruleIndex = readRoutingRuleIndex(rule.handleId);
+          const messages = own
+            .filter((diagnostic) => diagnostic.ruleIndex === ruleIndex)
+            .map(({ message }) => message);
+          return messages.length > 0 ? { ...rule, diagnostics: messages } : rule;
+        }),
+      },
+    };
+  });
 
 const processingOutput = (
   graph: UnitGraph,
@@ -258,13 +293,31 @@ const processingOutput = (
   return feedsRouting ? 'fixed' : 'connect';
 };
 
-const buildEdge = (edge: UnitGraphEdge): ClassicCanvasEdge => {
+/** The line "Add routing" puts a routing node on, when the edge ends at a destination it can route. */
+const routableLine = (
+  unit: Unit,
+  { source, target }: UnitGraphEdge
+): UnitRoutableLine | undefined => {
+  if (
+    target.kind !== GRAPH_ENDPOINT_KIND.destination ||
+    source.kind === GRAPH_ENDPOINT_KIND.destination ||
+    source.kind === GRAPH_ENDPOINT_KIND.routing
+  ) {
+    return undefined;
+  }
+  const line: UnitRoutableLine = { origin: source, destinationId: target.id };
+  return canRouteLine(unit, line) ? line : undefined;
+};
+
+const buildEdge = (unit: Unit, edge: UnitGraphEdge): ClassicCanvasEdge => {
   const { source, target, forwarding, reference, editable, processingTarget } = edge;
+  const routingLine = routableLine(unit, edge);
   const data: UnitEdgeData = {
     editable,
     forwarding,
     ...(reference ? { reference } : {}),
     ...(processingTarget ? { processingTarget } : {}),
+    ...(routingLine ? { routingLine } : {}),
   };
   const sourceHandle = endpointHandleId(source);
   return {
@@ -302,6 +355,6 @@ export const buildUnitCanvasGraph = (
       buildProcessingNode(node, processingOutput(graph, node))
     ),
     routingNodes: graph.routingNodes.map(buildRoutingNode),
-    edges: graph.edges.map(buildEdge),
+    edges: graph.edges.map((edge) => buildEdge(unit, edge)),
   };
 };

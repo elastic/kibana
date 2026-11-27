@@ -13,6 +13,11 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 
 export type EntityInventoryEntityCategory = 'all' | 'hosts' | 'kubernetes';
 
+/** The `xpack.entityInventoryApp` settings exposed to the browser. */
+export interface EntityInventoryAppPublicConfig {
+  readonly timeRangeLimit: { readonly disabled: boolean };
+}
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EntityInventoryAppSetupDependencies {}
 

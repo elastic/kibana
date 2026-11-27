@@ -18,7 +18,6 @@ import { createSearchKnowledgeIndicatorsTool } from './search_knowledge_indicato
 import { createSearchEventsTool } from './event_search/tool';
 import { createEventTool } from './event_create/tool';
 import { createEventStatusUpdateTool } from './event_status_update/tool';
-import { createEventInvestigationAttachTool } from './event_investigation_attach/tool';
 import { createEventsWriteTool } from './event_write/tool';
 import { createSourceListTool } from './source_list/tool';
 import { createSourceGetTool } from './source_get/tool';
@@ -32,7 +31,6 @@ export {
   SIGNIFICANT_EVENTS_SEARCH_EVENTS_TOOL_ID,
   SIGNIFICANT_EVENTS_EVENT_CREATE_TOOL_ID,
   SIGNIFICANT_EVENTS_EVENT_STATUS_UPDATE_TOOL_ID,
-  SIGNIFICANT_EVENTS_EVENT_INVESTIGATION_ATTACH_TOOL_ID,
   SIGNIFICANT_EVENTS_FEATURE_SIMILARITY_SEARCH_TOOL_ID,
   NIGHTSHIFT_SOURCE_LIST_TOOL_ID,
   NIGHTSHIFT_SOURCE_GET_TOOL_ID,
@@ -66,11 +64,13 @@ export function registerAgentBuilderTools({
       getScopedClients,
       server,
       logger: logger.get('ki_search_tool'),
+      telemetry,
     }),
     createFeatureSimilaritySearchTool({
       getScopedClients,
       server,
       logger: logger.get('ki_feature_similarity_search_tool'),
+      telemetry,
     }),
     createFeatureKnowledgeIndicatorTool({
       getScopedClients,
@@ -102,12 +102,6 @@ export function registerAgentBuilderTools({
       logger: logger.get('event_status_update_tool'),
       telemetry,
     }),
-    createEventInvestigationAttachTool({
-      getScopedClients,
-      server,
-      logger: logger.get('event_investigation_attach_tool'),
-      telemetry,
-    }),
     createEventsWriteTool({
       getScopedClients,
       server,
@@ -119,28 +113,33 @@ export function registerAgentBuilderTools({
       getScopedClients,
       server,
       logger: logger.get('source_list_tool'),
+      telemetry,
     }),
     createSourceGetTool({
       getScopedClients,
       server,
       logger: logger.get('source_get_tool'),
+      telemetry,
     }),
     createSourceCreateTool({
       getScopedClients,
       server,
       logger: logger.get('source_create_tool'),
+      telemetry,
       maintenanceService,
     }),
     createSourceUpdateTool({
       getScopedClients,
       server,
       logger: logger.get('source_update_tool'),
+      telemetry,
       maintenanceService,
     }),
     createSourceDeleteTool({
       getScopedClients,
       server,
       logger: logger.get('source_delete_tool'),
+      telemetry,
     }),
   ];
 

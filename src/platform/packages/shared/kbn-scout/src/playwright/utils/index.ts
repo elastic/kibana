@@ -17,3 +17,4 @@ export {
 export { resolveSelector, type SelectorInput } from './locator_helper';
 export { keyTo } from './a11y_utils';
 export { checkA11y, type RunA11yScanOptions } from './axe';
+export { findImportedSavedObjectId } from './saved_objects';

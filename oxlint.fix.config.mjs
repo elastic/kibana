@@ -11,5 +11,6 @@
 // errors are autofixed. It sits at the repo root for the same path-resolution reason.
 import config from './.oxlint/index.mts';
 import { errorsOnly } from './.oxlint/errors_only.mts';
+import { forPass } from './.oxlint/passes.mts';
 
-export default errorsOnly(config);
+export default forPass(errorsOnly(config), process.env.OXLINT_PASS);

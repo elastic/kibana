@@ -27,6 +27,7 @@ import { mergeEpisodes } from '../utils/merge_episodes';
 import {
   EMPTY_SOURCE_ERRORS,
   fetchFromV2AndSource,
+  resolveEpisodeSourceQueries,
   type EpisodeSourceError,
 } from '../utils/fetch_from_sources';
 import { useToastSourceErrors } from './use_toast_source_errors';
@@ -90,6 +91,11 @@ export const useFetchAlertingEpisodesQuery = ({
     enabled: dataView != null,
     queryKey,
     queryFn: async ({ signal: abortSignal }) => {
+      const sourceQueries = resolveEpisodeSourceQueries({
+        sources: filterState?.sources,
+        queryV2Source,
+        additionalSource: additionalEpisodesDataSource,
+      });
       const { v2, additional, errors } = await fetchFromV2AndSource({
         v2: () =>
           fetchAlertingEpisodes({
@@ -101,7 +107,7 @@ export const useFetchAlertingEpisodesQuery = ({
             sortState,
             timeRange,
           }),
-        source: additionalEpisodesDataSource,
+        source: sourceQueries.additionalSource,
         fromSource: (source) =>
           source
             .fetchEpisodes({
@@ -113,7 +119,7 @@ export const useFetchAlertingEpisodesQuery = ({
               timeRange,
             })
             .then((episodes) => episodes.map((episode) => ({ ...episode, source_id: source.id }))),
-        queryV2Source,
+        queryV2Source: sourceQueries.queryV2Source,
       });
 
       const v2Episodes: AlertEpisode[] = (v2 ?? []).map((ep) => ({

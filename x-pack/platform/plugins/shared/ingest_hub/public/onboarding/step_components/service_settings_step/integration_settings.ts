@@ -6,9 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CLOUD_ONBOARDING_INTEGRATION_NAME_MAX_LENGTH } from '@kbn/fleet-plugin/common';
+import {
+  CLOUD_ONBOARDING_INTEGRATION_NAME_MAX_LENGTH,
+  PACKAGE_POLICY_CONDITION_MAX_LENGTH,
+  VALIDATE_DATASTREAMS_PERMISSION_REGEX,
+  formatAgentConditionErrors,
+} from '@kbn/fleet-plugin/common';
+import { validateAgentConditionExpression } from '@kbn/elastic-agent-condition-language';
 
 import type { AwsServiceMatrixEntry, DeploymentMethod } from '../../aws_service_matrix';
+import { serializeCustomFields, type CustomField } from '../../common/policy_settings';
 
 /** Fleet's package policy name limit. */
 export const MAX_POLICY_NAME_LENGTH = 255;
@@ -51,6 +58,26 @@ export const getIntegrationNameError = (name: string): string | undefined => {
   }
 };
 
+/** Fleet's package policy condition limit. */
+export const MAX_CONDITION_LENGTH = PACKAGE_POLICY_CONDITION_MAX_LENGTH;
+
+/**
+ * Checks the condition as Fleet's Add integration form does, plus Fleet's API length limit. A blank
+ * one is no condition.
+ */
+export const getConditionErrors = (condition: string): string[] | undefined => {
+  if (condition.length > MAX_CONDITION_LENGTH) {
+    return [
+      i18n.translate('xpack.ingestHub.integrationSettings.condition.tooLongError', {
+        defaultMessage: 'The condition must be {max} characters or less.',
+        values: { max: MAX_CONDITION_LENGTH },
+      }),
+    ];
+  }
+  const errors = validateAgentConditionExpression(condition);
+  return errors.length ? formatAgentConditionErrors(errors) : undefined;
+};
+
 export const getDescriptionError = (description: string): string | undefined => {
   if (description.length > MAX_DESCRIPTION_LENGTH) {
     return i18n.translate('xpack.ingestHub.integrationSettings.description.tooLongError', {
@@ -60,7 +87,40 @@ export const getDescriptionError = (description: string): string | undefined => 
   }
 };
 
-/** The longest value Fleet stores for a setting of the onboarding record. */
+/** The limits of Fleet's package policy `additional_datastreams_permissions`. */
+export const MAX_REROUTE_PERMISSIONS = 100;
+export const MAX_REROUTE_PERMISSION_LENGTH = 256;
+
+/**
+ * The reroute permissions are optional. Each entry must be a data stream name Fleet accepts, which
+ * starts with a data stream type (the same rule as Fleet's Add integration and its API).
+ */
+export const getReroutePermissionsError = (permissions: string[]): string | undefined => {
+  const entries = [...new Set(permissions.map((entry) => entry.trim()).filter(Boolean))];
+  if (entries.length > MAX_REROUTE_PERMISSIONS) {
+    return i18n.translate('xpack.ingestHub.integrationSettings.reroutePermissions.tooManyError', {
+      defaultMessage: 'Add at most {max} permissions.',
+      values: { max: MAX_REROUTE_PERMISSIONS },
+    });
+  }
+  const tooLong = entries.find((entry) => entry.length > MAX_REROUTE_PERMISSION_LENGTH);
+  if (tooLong !== undefined) {
+    return i18n.translate('xpack.ingestHub.integrationSettings.reroutePermissions.tooLongError', {
+      defaultMessage: 'Each permission must be {max} characters or less.',
+      values: { max: MAX_REROUTE_PERMISSION_LENGTH },
+    });
+  }
+  const invalid = entries.find((entry) => !VALIDATE_DATASTREAMS_PERMISSION_REGEX.test(entry));
+  if (invalid !== undefined) {
+    return i18n.translate('xpack.ingestHub.integrationSettings.reroutePermissions.invalidError', {
+      defaultMessage:
+        '{entry} is not a valid permission. It must start with logs-, metrics-, traces-, synthetics-, or profiles-.',
+      values: { entry: invalid },
+    });
+  }
+};
+
+/** The longest proxy URL, well within what Fleet stores for a setting of the onboarding record. */
 export const MAX_PROXY_URL_LENGTH = 1024;
 
 /** `http://` or `https://` followed by the start of a host (not another slash, a path or a space). */
@@ -92,4 +152,94 @@ export const getProxyUrlError = (proxyUrl: string): string | undefined => {
       defaultMessage: 'Enter a valid proxy URL starting with http:// or https://.',
     });
   }
+};
+
+/**
+ * The limits of the agentless policy API's `global_data_tags`, which onboarding sends them to. A
+ * package policy sets no length for a value and only warns on a name past 255 characters, so these
+ * are a defensive bound rather than a Fleet-wide rule.
+ */
+export const MAX_CUSTOM_FIELDS = 100;
+export const MAX_CUSTOM_FIELD_LENGTH = 1024;
+
+/** What the onboarding record keeps for one setting, which the serialized fields must fit. */
+const MAX_CUSTOM_FIELDS_TEXT_LENGTH = PACKAGE_POLICY_CONDITION_MAX_LENGTH;
+
+export interface CustomFieldsErrors {
+  /** The error of each row, in the order of the fields. A row left entirely blank has none. */
+  rows: Array<{ name?: string; value?: string }>;
+  /** An error of the list as a whole. */
+  list?: string;
+}
+
+const getCustomFieldTooLongError = (): string =>
+  i18n.translate('xpack.ingestHub.integrationSettings.customFields.tooLongError', {
+    defaultMessage: 'Must be {max} characters or less.',
+    values: { max: MAX_CUSTOM_FIELD_LENGTH },
+  });
+
+const getCustomFieldNameError = (name: string, isDuplicate: boolean): string | undefined => {
+  if (!name) {
+    return i18n.translate('xpack.ingestHub.integrationSettings.customFields.nameRequiredError', {
+      defaultMessage: 'Name cannot be empty.',
+    });
+  }
+  if (/\s/.test(name)) {
+    return i18n.translate('xpack.ingestHub.integrationSettings.customFields.nameSpacesError', {
+      defaultMessage: 'Name cannot contain spaces.',
+    });
+  }
+  if (name.length > MAX_CUSTOM_FIELD_LENGTH) return getCustomFieldTooLongError();
+  if (isDuplicate) {
+    return i18n.translate('xpack.ingestHub.integrationSettings.customFields.nameUniqueError', {
+      defaultMessage: 'Name must be unique.',
+    });
+  }
+};
+
+const getCustomFieldValueError = (value: string): string | undefined => {
+  if (!value) {
+    return i18n.translate('xpack.ingestHub.integrationSettings.customFields.valueRequiredError', {
+      defaultMessage: 'Value cannot be empty.',
+    });
+  }
+  if (value.length > MAX_CUSTOM_FIELD_LENGTH) return getCustomFieldTooLongError();
+};
+
+const getCustomFieldsListError = (filled: CustomField[]): string | undefined => {
+  if (filled.length > MAX_CUSTOM_FIELDS) {
+    return i18n.translate('xpack.ingestHub.integrationSettings.customFields.tooManyError', {
+      defaultMessage: 'Add at most {max} custom fields.',
+      values: { max: MAX_CUSTOM_FIELDS },
+    });
+  }
+  if (serializeCustomFields(filled).length > MAX_CUSTOM_FIELDS_TEXT_LENGTH) {
+    return i18n.translate('xpack.ingestHub.integrationSettings.customFields.tooLargeError', {
+      defaultMessage: 'The custom fields are too long in total. Remove some or shorten them.',
+    });
+  }
+};
+
+/**
+ * Custom fields are optional. As in Fleet's Add integration, a name is required, cannot contain
+ * spaces and must be unique, and a value is required. A row left entirely blank is not a field,
+ * it is dropped when the settings are saved.
+ */
+export const getCustomFieldsErrors = (fields: CustomField[]): CustomFieldsErrors | undefined => {
+  const trimmed = fields.map(({ name, value }) => ({ name: name.trim(), value: value.trim() }));
+  const filled = trimmed.filter(({ name, value }) => name !== '' || value !== '');
+  const nameCounts = new Map<string, number>();
+  filled.forEach(({ name }) => nameCounts.set(name, (nameCounts.get(name) ?? 0) + 1));
+
+  const rows = trimmed.map(({ name, value }) =>
+    name === '' && value === ''
+      ? {}
+      : {
+          name: getCustomFieldNameError(name, (nameCounts.get(name) ?? 0) > 1),
+          value: getCustomFieldValueError(value),
+        }
+  );
+  const list = getCustomFieldsListError(filled);
+
+  return list || rows.some(({ name, value }) => name || value) ? { rows, list } : undefined;
 };

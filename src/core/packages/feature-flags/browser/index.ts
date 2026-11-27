@@ -13,4 +13,5 @@ export type {
   SingleContextEvaluationContext,
   FeatureFlagsSetup,
   FeatureFlagsStart,
+  InternalFeatureFlagsStart,
 } from './src/types';

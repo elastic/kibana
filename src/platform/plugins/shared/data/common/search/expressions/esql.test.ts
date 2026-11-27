@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { UiSettingsCommon } from '../..';
 import { getEsqlFn } from './esql';
 import type { ExecutionContext } from '@kbn/expressions-plugin/common';
 import type {
@@ -45,14 +46,47 @@ const getMockSearchService = (): MockTypedSearchService => ({
   }),
 });
 
-const createEsqlFn = (mockSearchService: MockTypedSearchService) =>
+const createUiSettings = (dateFormatTZ?: string): UiSettingsCommon =>
+  ({
+    get: async (key: string) => (key === 'dateFormat:tz' ? dateFormatTZ : undefined),
+  } as unknown as UiSettingsCommon);
+
+const createEsqlFn = (mockSearchService: MockTypedSearchService, dateFormatTZ?: string) =>
   getEsqlFn({
     getStartDependencies: async () => ({
       searchService: mockSearchService as unknown as ISearchMethods,
+      uiSettings: createUiSettings(dateFormatTZ),
     }),
   });
 
 describe('getEsqlFn', () => {
+  it('sends the dateFormat:tz time zone and the locale argument', async () => {
+    const mockSearchService = getMockSearchService();
+
+    await createEsqlFn(mockSearchService, 'Europe/Paris').fn(
+      null,
+      { query: 'FROM index', locale: 'fr-FR' },
+      createExecutionContext()
+    );
+
+    const [params] = mockSearchService.esql.mock.calls[0];
+    expect(params.timeZone).toBe('Europe/Paris');
+    expect(params.locale).toBe('fr-FR');
+  });
+
+  it('sends UTC when dateFormat:tz is not set', async () => {
+    const mockSearchService = getMockSearchService();
+
+    await createEsqlFn(mockSearchService).fn(
+      null,
+      { query: 'FROM index' },
+      createExecutionContext()
+    );
+
+    const [params] = mockSearchService.esql.mock.calls[0];
+    expect(params.timeZone).toBe('UTC');
+  });
+
   it('returns the datatable from the search service', async () => {
     const mockSearchService = getMockSearchService();
     const esqlFn = createEsqlFn(mockSearchService);
@@ -131,6 +165,26 @@ describe('getEsqlFn', () => {
       expect(params.query).toBe('FROM index');
       expect(params.kibanaQueryContext?.kibanaFilters).toEqual([]);
       expect(params.kibanaQueryContext?.kqlQuery).toBeUndefined();
+    });
+  });
+
+  it('resolves the relative time range using now from the expression context', async () => {
+    const mockSearchService = getMockSearchService();
+
+    await createEsqlFn(mockSearchService).fn(
+      {
+        type: 'kibana_context',
+        timeRange: { from: 'now-15m', to: 'now' },
+        now: Date.parse('2024-01-02T12:00:00.000Z'),
+      },
+      { query: 'FROM index', timeField: '@timestamp' },
+      createExecutionContext()
+    );
+
+    const [params] = mockSearchService.esql.mock.calls[0];
+    expect(params.kibanaQueryContext?.timeRange).toEqual({
+      from: '2024-01-02T11:45:00.000Z',
+      to: '2024-01-02T12:00:00.000Z',
     });
   });
 

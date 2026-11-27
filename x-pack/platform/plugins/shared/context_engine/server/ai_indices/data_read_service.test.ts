@@ -8,7 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { AuditLogger } from '@kbn/core-security-server';
-import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
+import type { AiIndexItem } from '../../common/http_api/ai_indices';
 import { buildAiIndexSpaceFilter } from '../../common/space_filter';
 import { AiIndexDataReadService } from './data_read_service';
 import { describeAiIndex } from './describe';
@@ -22,11 +22,10 @@ const describeAiIndexMock = jest.mocked(describeAiIndex);
 const filterReadableAiIndicesMock = jest.mocked(filterReadableAiIndices);
 const probeAiIndicesMock = jest.mocked(probeAiIndices);
 
-const aiIndex: AiIndexHttpItem = {
+const aiIndex: AiIndexItem = {
   id: 'support',
   dest: { type: 'index', value: 'ai-index-idx-support' },
   managed: false,
-  memory_enabled: true,
   automations: [],
   sources: [],
   traces: [],
@@ -163,6 +162,17 @@ describe('AiIndexDataReadService', () => {
       );
     });
 
+    it('passes the user scope through', async () => {
+      aiIndexService.get.mockResolvedValue(aiIndex);
+      describeAiIndexMock.mockResolvedValue(contextBlock);
+
+      await service.describe('support', { userId: 'alice' });
+
+      expect(describeAiIndexMock).toHaveBeenCalledWith(
+        expect.objectContaining({ spaceId: 'marketing', userId: 'alice' })
+      );
+    });
+
     it('does not describe an entry the caller cannot read', async () => {
       aiIndexService.get.mockResolvedValue(aiIndex);
       probeAiIndicesMock.mockResolvedValue([
@@ -218,7 +228,7 @@ describe('AiIndexDataReadService', () => {
   });
 
   describe('list', () => {
-    const withId = (id: string): AiIndexHttpItem => ({ ...aiIndex, id });
+    const withId = (id: string): AiIndexItem => ({ ...aiIndex, id });
     const registry = ['readable', 'forbidden'].map(withId);
 
     it('lists the space registry filtered to readable entries and audit-logs success', async () => {

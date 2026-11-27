@@ -262,7 +262,8 @@ export const EventTimeline = ({
     })
   );
 
-  items.sort((first, second) => Date.parse(first.timestamp) - Date.parse(second.timestamp));
+  // Newest first, matching the detection history in the detection flyout.
+  items.sort((first, second) => Date.parse(second.timestamp) - Date.parse(first.timestamp));
 
   return <EuiTimeline items={items.map(({ item }) => item)} gutterSize="l" />;
 };

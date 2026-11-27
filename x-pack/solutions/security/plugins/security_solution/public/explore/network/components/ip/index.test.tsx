@@ -12,7 +12,6 @@ import { Ip } from '.';
 import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
 import { mockFlyoutApi } from '../../../../flyout/document_details/shared/mocks/mock_flyout_context';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useWhichFlyout } from '../../../../flyout/document_details/shared/hooks/use_which_flyout';
 import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../../../flyout_v2/use_flyout_api.mock';
 
@@ -48,9 +47,6 @@ jest.mock('@kbn/expandable-flyout', () => ({
   ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
 }));
 
-jest.mock('../../../../flyout/document_details/shared/hooks/use_which_flyout', () => ({
-  useWhichFlyout: jest.fn(),
-}));
 jest.mock('../../../../flyout_v2/use_flyout_api');
 
 const mockOpenFlyoutLink = jest.fn();
@@ -80,7 +76,6 @@ jest.mock('../../../../common/components/links/link_props');
 
 describe('Port', () => {
   beforeEach(() => {
-    jest.mocked(useWhichFlyout).mockReturnValue(null);
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
     jest.mocked(useFlyoutApi).mockReturnValue(createFlyoutApiMock());
     mockOpenFlyoutLink.mockClear();

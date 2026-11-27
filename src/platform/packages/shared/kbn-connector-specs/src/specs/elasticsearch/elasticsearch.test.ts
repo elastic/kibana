@@ -471,8 +471,87 @@ describe('Elasticsearch connector', () => {
 
       const result = await Elasticsearch.test.handler(mockContext);
 
-      expect(result.message).toMatch('my-cluster');
-      expect(result.message).toMatch('8.14.0');
+      expect(result.message).toBe(
+        'Successfully connected to Elasticsearch cluster "my-cluster" (version: 8.14.0).'
+      );
+      expect(mockRequest).toHaveBeenCalledTimes(1);
+      expect(mockRequest).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ url: `${CLUSTER_URL}/`, method: 'GET' })
+      );
+    });
+
+    it.each([
+      { status: 403 },
+      {
+        status: 403,
+        data: { error: { type: 'security_exception', reason: 'missing cluster privileges' } },
+      },
+    ])('falls back to authentication for a forbidden cluster request: %j', async (response) => {
+      mockRequest
+        .mockRejectedValueOnce({ response })
+        .mockResolvedValueOnce(jsonResponse({ username: 'test-user' }));
+
+      const result = await Elasticsearch.test.handler(mockContext);
+
+      expect(result.message).toBe('Successfully authenticated to Elasticsearch.');
+      expect(mockRequest).toHaveBeenCalledTimes(2);
+      expect(mockRequest).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ url: `${CLUSTER_URL}/`, method: 'GET' })
+      );
+      expect(mockRequest).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({ url: `${CLUSTER_URL}/_security/_authenticate`, method: 'GET' })
+      );
+    });
+
+    it('surfaces an authentication fallback failure', async () => {
+      mockRequest.mockRejectedValueOnce({ response: { status: 403 } }).mockRejectedValueOnce({
+        response: {
+          status: 401,
+          data: { error: { type: 'security_exception', reason: 'unable to authenticate' } },
+        },
+      });
+
+      await expect(Elasticsearch.test.handler(mockContext)).rejects.toThrow(
+        'Elasticsearch error (security_exception): unable to authenticate'
+      );
+      expect(mockRequest).toHaveBeenCalledTimes(2);
+      expect(mockRequest).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ url: `${CLUSTER_URL}/`, method: 'GET' })
+      );
+      expect(mockRequest).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({ url: `${CLUSTER_URL}/_security/_authenticate`, method: 'GET' })
+      );
+    });
+
+    it.each([
+      [
+        { response: { status: 401 } },
+        'Elasticsearch authentication failed. Check your API key or username/password.',
+      ],
+      [
+        { response: { status: 500, statusText: 'Internal Server Error' } },
+        'Elasticsearch request failed: Internal Server Error',
+      ],
+      [
+        { response: { status: 503, statusText: 'Service Unavailable' } },
+        'Elasticsearch request failed: Service Unavailable',
+      ],
+      [new Error('Network Error'), 'Elasticsearch request failed: Network Error'],
+      [new Error('403 Forbidden'), 'Elasticsearch request failed: 403 Forbidden'],
+    ])('does not fall back for other errors: %j', async (error, message) => {
+      mockRequest.mockRejectedValueOnce(error);
+
+      await expect(Elasticsearch.test.handler(mockContext)).rejects.toThrow(message);
+      expect(mockRequest).toHaveBeenCalledTimes(1);
+      expect(mockRequest).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ url: `${CLUSTER_URL}/`, method: 'GET' })
+      );
     });
   });
 

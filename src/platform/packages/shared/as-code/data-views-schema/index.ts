@@ -26,7 +26,10 @@ export {
   dataViewSchema,
   dataViewSpecSchema,
 } from './src/data_views/schema_embedded_data_view';
-export { savedDataViewSpecSchema } from './src/data_views/schema_saved_data_view';
+export {
+  savedDataViewSpecSchema,
+  savedDataViewSpecWithScriptedFieldsSchema,
+} from './src/data_views/schema_saved_data_view';
 export { esqlDataSourceSchema } from './src/schema_esql_data_source';
 export type {
   AsCodeCompositeRuntimeField,
@@ -45,6 +48,8 @@ export type {
   AsCodeSavedPrimitiveRuntimeField,
   AsCodeSavedRuntimeField,
   AsCodeSavedDataView,
+  AsCodeSavedDataViewWithScriptedFields,
+  AsCodeSavedScriptedField,
   AsCodeSavedFieldSettings,
 } from './src/types';
 

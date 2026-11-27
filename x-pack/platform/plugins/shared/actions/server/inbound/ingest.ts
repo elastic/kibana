@@ -30,6 +30,7 @@ import {
   INBOUND_EVENTS_UNEXPECTED_ERROR_MESSAGE,
 } from './constants';
 import { logInboundIngressOutcome } from './log_inbound_ingress_outcome';
+import { publishConnectorEvent } from './publish_connector_event';
 import type { ConnectorEventEmitParams, DispatchConnectorEventsResult } from './types';
 import { resolveKibanaInboundRequest } from './resolve_kibana_inbound_request';
 import { extractIngestToken, verifyIngestToken } from './verify_ingress_auth';
@@ -91,6 +92,7 @@ const toEmittedHttpResult = (
   };
 };
 
+/** Legacy `config.ingestTokenHash`. Nothing reads it; the live hash is on the ingress credential. */
 const stripIngestTokenHash = (config: Record<string, unknown>): Record<string, unknown> => {
   const { ingestTokenHash: _omit, ...spokeConfig } = config;
   return spokeConfig;
@@ -396,6 +398,16 @@ export async function ingestInboundEvent({
         outcome: 'accepted',
       });
       return finishEmit();
+    }
+
+    for (const event of result.events) {
+      await publishConnectorEvent(event.eventId, {
+        ...event.payload,
+        connectorId,
+        connectorTypeId,
+        spaceId,
+        correlationKey: event.correlationKey,
+      });
     }
 
     let scheduleRequest = kibanaScheduleRequest;

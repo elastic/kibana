@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 
 import type { SectionConfig } from './expanded_row_column_view';
 import { ExpandedRowColumnView, Section } from './expanded_row_column_view';
@@ -29,6 +29,40 @@ describe('Transform: Job List Expanded Row <ExpandedRowDetailsPane />', () => {
     expect(container.textContent).toContain('the-section-title');
     expect(container.textContent).toContain('the-item-title');
     expect(container.textContent).toContain('the-item-description');
+    expect(screen.getAllByTestId('transformExpandedRowColumn')).toHaveLength(1);
+    expect(screen.queryByTestId('transformExpandedRowColumnWithDivider')).not.toBeInTheDocument();
+  });
+
+  test('renders a divider only when both columns have content', () => {
+    render(
+      <ExpandedRowColumnView
+        sections={[
+          section,
+          {
+            ...section,
+            title: 'the-right-section-title',
+            position: 'right',
+          },
+        ]}
+      />
+    );
+
+    expect(screen.getByTestId('transformExpandedRowColumnWithDivider')).toHaveTextContent(
+      'the-right-section-title'
+    );
+  });
+
+  test('uses the full width when only right-positioned content is available', () => {
+    render(
+      <ExpandedRowColumnView
+        sections={[{ ...section, title: 'the-right-section-title', position: 'right' }]}
+      />
+    );
+
+    expect(screen.getByTestId('transformExpandedRowColumn')).toHaveTextContent(
+      'the-right-section-title'
+    );
+    expect(screen.queryByTestId('transformExpandedRowColumnWithDivider')).not.toBeInTheDocument();
   });
 });
 

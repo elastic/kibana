@@ -19,7 +19,7 @@ export const buildAiIndexOnboardingPrompt = ({
 }: AiIndexOnboardingPromptParams): string => `
 # You are connecting this project to the "${aiIndexId}" AI index in Elastic Context Engine
 
-Context Engine turns raw source data and agent memory into Knowledge Indicators (KIs) that agents retrieve to solve problems faster. This AI index stores its Knowledge Indicators in \`${aiIndexDest}\`.
+Context Engine turns raw source data and agent memory into knowledge documents (KIs) that agents retrieve to solve problems faster. This AI index stores its knowledge documents in \`${aiIndexDest}\`.
 
 ## Kibana API
 
@@ -44,7 +44,7 @@ Every HTTP call below authenticates with:
 | Operation | Endpoint | Use when |
 |---|---|---|
 | Describe | GET /api/context_engine/ai_index/${aiIndexId}/_describe | Learn this index's fields, semantic fields, KI types/tags and example ES\\|QL. Call it once before writing your first query against this index. |
-| Query (retrieve) | POST /api/context_engine/ai_index/_query | Run ES\\|QL, keyword and semantic search fused, over this index's Knowledge Indicators |
+| Query (retrieve) | POST /api/context_engine/ai_index/_query | Run ES\\|QL, keyword and semantic search fused, over this index's knowledge documents |
 | List | GET /api/context_engine/ai_index | See every AI index you can read in this space |
 | Add a source | PUT /api/context_engine/ai_index/${aiIndexId} | Point this index at a new ES\\|QL query or connector so Context Engine turns that data into KIs |
 | Remember / Forget | MCP tools \`platform_context_engine_remember\` / \`platform_context_engine_forget\` | Save or retract a fact or session memory on this index (only if memory is enabled on it) |

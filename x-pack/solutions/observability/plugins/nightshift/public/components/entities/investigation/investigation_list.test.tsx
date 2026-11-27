@@ -50,6 +50,7 @@ const makeSection = (
   id,
   investigations: [],
   total: 0,
+  matchTotal: 0,
   hasMore: false,
   isInitialLoading: false,
   isFetchingNextPage: false,
@@ -97,15 +98,51 @@ describe('InvestigationList', () => {
   });
 
   it('shows a single empty state when every section is empty', () => {
-    renderSections([makeSection('in-progress'), makeSection('critical')]);
+    const onStartInvestigation = jest.fn();
+    const onCreateAutomation = jest.fn();
+    render(
+      <I18nProvider>
+        <InvestigationList
+          sections={[makeSection('in-progress'), makeSection('critical')]}
+          onStartInvestigation={onStartInvestigation}
+          onCreateAutomation={onCreateAutomation}
+        />
+      </I18nProvider>
+    );
 
     expect(screen.getByTestId('nightshiftInvestigationsEmpty')).toHaveTextContent(
-      'No investigations found'
+      'No open investigations'
     );
+    expect(screen.getByTestId('nightshiftInvestigationsEmpty')).toHaveTextContent(
+      "Ask Elastic nightshift to look into a problem, or set up an automation so it starts investigations for you — and you don't repeat the same work."
+    );
+    fireEvent.click(screen.getByTestId('nightshiftInvestigationsEmptyInvestigate'));
+    expect(onStartInvestigation).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByTestId('nightshiftInvestigationsEmptyCreateAutomation'));
+    expect(onCreateAutomation).toHaveBeenCalledTimes(1);
     expect(
       screen.queryByTestId('nightshiftInvestigationSection-in-progress')
     ).not.toBeInTheDocument();
     expect(screen.queryByTestId('nightshiftInvestigationSection-critical')).not.toBeInTheDocument();
+  });
+
+  it('shows filtered empty title when a search matches nothing', () => {
+    render(
+      <I18nProvider>
+        <InvestigationList
+          sections={[makeSection('in-progress'), makeSection('critical')]}
+          hasActiveSearch
+          onStartInvestigation={jest.fn()}
+          onCreateAutomation={jest.fn()}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByTestId('nightshiftInvestigationsEmpty')).toHaveTextContent(
+      'No investigations found'
+    );
+    expect(screen.getByTestId('nightshiftInvestigationsEmptyInvestigate')).toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftInvestigationsEmptyCreateAutomation')).toBeInTheDocument();
   });
 
   it('renders in progress first and not rated last', () => {
@@ -146,6 +183,67 @@ describe('InvestigationList', () => {
 
       expect(toggle('critical')).toHaveAttribute('aria-expanded', 'false');
       expect(toggle('high')).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    it.each([{ savedSections: undefined }, { savedSections: [] }, { savedSections: ['high'] }])(
+      'starts Closed collapsed with existing preferences $savedSections and preserves severity preferences',
+      ({ savedSections }) => {
+        if (savedSections) {
+          window.localStorage.setItem(
+            'nightshift.investigations.collapsedSections:default',
+            JSON.stringify(savedSections)
+          );
+        }
+        const sections = [
+          makeSection('critical', { investigations: [investigation], total: 1 }),
+          makeSection('high', { investigations: [investigation], total: 1 }),
+          makeSection('closed', { investigations: [investigation], total: 1 }),
+        ];
+        renderSections(sections);
+        const severityPreferences = window.localStorage.getItem(
+          'nightshift.investigations.collapsedSections:default'
+        );
+
+        expect(toggle('closed')).toHaveAttribute('aria-expanded', 'false');
+        expect(toggle('critical')).toHaveAttribute('aria-expanded', 'true');
+        expect(toggle('high')).toHaveAttribute(
+          'aria-expanded',
+          savedSections?.includes('high') ? 'false' : 'true'
+        );
+
+        fireEvent.click(toggle('closed'));
+        cleanup();
+        renderSections(sections);
+        expect(toggle('closed')).toHaveAttribute('aria-expanded', 'true');
+        expect(toggle('high')).toHaveAttribute(
+          'aria-expanded',
+          savedSections?.includes('high') ? 'false' : 'true'
+        );
+
+        fireEvent.click(toggle('closed'));
+        cleanup();
+        renderSections(sections);
+        expect(toggle('closed')).toHaveAttribute('aria-expanded', 'false');
+        expect(
+          window.localStorage.getItem('nightshift.investigations.collapsedSections:default')
+        ).toBe(severityPreferences);
+      }
+    );
+
+    it('keeps Closed expansion scoped to its space', () => {
+      const sections = [makeSection('closed', { investigations: [investigation], total: 1 })];
+      renderSections(sections);
+      fireEvent.click(toggle('closed'));
+      cleanup();
+
+      mockBasePath = '/s/other-space';
+      renderSections(sections);
+      expect(toggle('closed')).toHaveAttribute('aria-expanded', 'false');
+      cleanup();
+
+      mockBasePath = '';
+      renderSections(sections);
+      expect(toggle('closed')).toHaveAttribute('aria-expanded', 'true');
     });
 
     it('remembers a closed section in its own space', () => {

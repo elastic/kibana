@@ -7,10 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  isRunQuotaReached,
-  type RunQuotaGroup,
-  type RunQuotasResponse,
-} from '@kbn/significant-events-plugin/common';
+  isInvestigationQuotaReached,
+  type InvestigationQuotaGroup,
+  type InvestigationQuotasResponse,
+} from '@kbn/nightshift-investigations-plugin/common';
 import type { Automation } from '../../../data/automations/use_automations';
 import { getTriggerDisplay } from './trigger_display';
 
@@ -67,21 +67,19 @@ export const isAutomationRateLimited = (
   isEnabled && runtime.dailyDispatchLimit !== undefined && usedToday >= runtime.dailyDispatchLimit;
 
 export type AutomationBlockingLimit = Extract<
-  RunQuotaGroup,
-  'investigation' | 'total_investigation'
+  InvestigationQuotaGroup,
+  'automatic_investigation' | 'total_investigation'
 >;
 
 /** The deployment-wide limit that blocks every automation today, if any. */
 export const getAutomationBlockingLimit = (
-  quotas?: RunQuotasResponse
+  quotas?: InvestigationQuotasResponse
 ): AutomationBlockingLimit | undefined =>
   quotas === undefined
     ? undefined
-    : (['total_investigation', 'investigation'] as const).find((group) =>
-        isRunQuotaReached({
-          group,
+    : (['total_investigation', 'automatic_investigation'] as const).find((group) =>
+        isInvestigationQuotaReached({
           enabled: quotas.enabled,
-          investigationLimitsEnabled: quotas.investigationLimitsEnabled,
           limit: quotas.limits[group],
           count: quotas.counts[group],
         })

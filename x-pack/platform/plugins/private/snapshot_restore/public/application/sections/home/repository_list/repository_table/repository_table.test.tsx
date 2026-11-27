@@ -34,7 +34,7 @@ const mockToastNotifications = {
 jest.mock('../../../../app_context', () => {
   const actual =
     jest.requireActual<typeof import('../../../../app_context')>('../../../../app_context');
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
   const { createMemoryHistory: createHistory } = require('history');
   const history = createHistory();
 

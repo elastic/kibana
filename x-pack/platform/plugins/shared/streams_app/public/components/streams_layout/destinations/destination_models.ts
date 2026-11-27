@@ -10,11 +10,13 @@ import {
   INVALID_STREAM_NAME_PREFIXES,
   RESERVED_STREAM_NAMES,
   UNIT_DESTINATION_SIGNALS,
+  composeOtelDataStreamName,
   getUnitDestinationSignalTargets,
   readUnitDestinationConfigValue,
   readUnitDestinationSignals,
+  validateOtelDataStreamName,
 } from '@kbn/streams-schema';
-import type { UnitDestination } from '@kbn/streams-schema';
+import type { OtelDataStreamName, UnitDestination } from '@kbn/streams-schema';
 import type { Unit } from '../../../services/unit_repository';
 import {
   REMOTE_ELASTICSEARCH_TYPE,
@@ -25,10 +27,10 @@ import {
   type DocsWritePatternValidationError,
   type ElasticsearchDestinationFormData,
   type FreeFormIndexValidationError,
+  type OtelNameValidationError,
   type PrefixedDestinationSignal,
   type RemoteElasticsearchDestinationViewModel,
   type S3DestinationViewModel,
-  type StaticIndexValidationError,
 } from './types';
 
 /** An index containing `{{` or `${` is a template, which the transpiler rejects (E035). */
@@ -40,6 +42,8 @@ const exceedsIndexNameBytes = (value: string): boolean =>
   new TextEncoder().encode(value).length > MAX_INDEX_NAME_BYTES;
 
 const LOCAL_ELASTICSEARCH_TYPE = 'elasticsearch' as const;
+
+export const localElasticsearchCredentialName = (id: string): string => `${id}-api-key`;
 
 export const DESTINATION_SIGNALS: DestinationSignal[] = [...UNIT_DESTINATION_SIGNALS];
 
@@ -64,32 +68,25 @@ export const SIGNAL_INDEX_FIELDS: Record<
   traces: 'tracesIndex',
 };
 
-export const getStaticIndexRemainder = (
+/** The fixed index for a signal, or '' when the dataset is empty and the signal is not sent. */
+export const composeOtelIndex = (
   signal: PrefixedDestinationSignal,
-  index: string
-): string => {
-  const prefix = `${signal}-`;
-  return index.startsWith(prefix) ? index.slice(prefix.length) : index;
-};
+  name: OtelDataStreamName
+): string => (name.dataset.trim() ? composeOtelDataStreamName(signal, name) : '');
 
-export const composeStaticIndex = (
-  signal: PrefixedDestinationSignal,
-  remainder: string
-): string => {
-  const value = remainder.trim();
-  if (!value) {
-    return '';
+export const validateOtelName = ({
+  dataset,
+  namespace,
+}: OtelDataStreamName): OtelNameValidationError | undefined => {
+  if (!dataset.trim()) {
+    return undefined;
   }
-  return value.startsWith(`${signal}-`) ? value : `${signal}-${value}`;
+  const error = validateOtelDataStreamName({
+    dataset: dataset.trim(),
+    namespace: namespace.trim(),
+  });
+  return error === 'datasetRequired' ? undefined : error;
 };
-
-export const composeStaticIndexesForAll = (
-  remainder: string
-): Pick<ElasticsearchDestinationFormData, 'logsIndex' | 'metricsIndex' | 'tracesIndex'> => ({
-  logsIndex: composeStaticIndex('logs', remainder),
-  metricsIndex: composeStaticIndex('metrics', remainder),
-  tracesIndex: composeStaticIndex('traces', remainder),
-});
 
 export const getUnitDestinations = (unit: Unit): UnitDestination[] => unit.unit.destinations ?? [];
 
@@ -236,7 +233,7 @@ export const getConfiguredDestinations = (unit: Unit): DestinationViewModel[] =>
  * (https://github.com/elastic/streams-spec/pull/393).
  *
  * Each signal gets either a scoped `index` (static) or, when routed from document
- * metadata (auto), an optional scoped `write_patterns`. The `api_key` is shared.
+ * metadata (auto), an optional scoped `write_patterns`. The `api_key` is a credential reference.
  */
 export const createUnitDestination = ({
   id,
@@ -245,12 +242,12 @@ export const createUnitDestination = ({
   signals,
   indexBySignal,
   writePatternsBySignal,
-  apiKey,
+  apiKeyCredential,
 }: DestinationSignalTargets & {
   id: string;
   name: string;
   description?: string;
-  apiKey?: string;
+  apiKeyCredential?: string;
 }): UnitDestination => {
   const config: NonNullable<UnitDestination['config']> = [];
   for (const signal of signals) {
@@ -268,8 +265,8 @@ export const createUnitDestination = ({
     }
   }
 
-  if (apiKey) {
-    config.push({ name: 'api_key', value: apiKey });
+  if (apiKeyCredential) {
+    config.push({ name: 'api_key', value: { credential: apiKeyCredential } });
   }
 
   const trimmedDescription = description?.trim();
@@ -348,20 +345,6 @@ export const validateFreeFormIndexName = (
     return 'invalidName';
   }
   return undefined;
-};
-
-export const validateStaticSignalIndex = (
-  signal: PrefixedDestinationSignal,
-  index: string
-): StaticIndexValidationError | undefined => {
-  const value = index.trim();
-  if (!value) {
-    return undefined;
-  }
-  return (
-    validateFreeFormIndexName(value) ??
-    (hasSignalDataStreamShape(signal, value) ? undefined : 'signalPattern')
-  );
 };
 
 export const validateDocsWritePattern = (

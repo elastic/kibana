@@ -95,13 +95,6 @@ export interface DocLinks {
     readonly auditdModule: string;
     readonly systemModule: string;
   };
-  readonly searchHomepage: {
-    readonly visitSearchLabs: string;
-    readonly notebooksExamples: string;
-    readonly customerEngineerRequestForm: string;
-    readonly elasticCommunity: string;
-    readonly elasticCloud: string;
-  };
   readonly searchGettingStarted: {
     readonly visitSearchLabs: string;
     readonly notebooksExamples: string;
@@ -340,6 +333,7 @@ export interface DocLinks {
     readonly attackDiscovery: string;
     readonly mitreCoverage: string;
     readonly remapMitreAttack: string;
+    readonly valueReport: string;
   };
   readonly server: {
     readonly protocol: string;
@@ -419,12 +413,18 @@ export interface DocLinks {
     readonly siemMigrations: string;
     readonly llmPerformanceMatrix: string;
     readonly alertZero: {
+      readonly overview: string;
+      readonly setUp: string;
+      readonly proposedActions: string;
+      readonly escalations: string;
+      readonly watches: string;
       readonly continuousThreatHunt: string;
     };
   };
   readonly query: {
     readonly eql: string;
     readonly kueryQuerySyntax: string;
+    readonly kueryQueryNestedFields: string;
     readonly luceneQuery: string;
     readonly luceneQuerySyntax: string;
     readonly percolate: string;
@@ -629,6 +629,7 @@ export interface DocLinks {
     grantESAccessToStandaloneAgents: string;
     packageSignatures: string;
     upgradeElasticAgent: string;
+    unenrollElasticAgent: string;
     learnMoreBlog: string;
     apiKeysLearnMore: string;
     onPremRegistry: string;
@@ -810,6 +811,8 @@ export interface DocLinks {
   readonly contextEngine: {
     readonly overview: string;
     readonly aiIndices: string;
+    readonly sources: string;
+    readonly memory: string;
   };
   readonly agentBuilder: {
     readonly agentBuilder: string;
@@ -829,6 +832,7 @@ export interface DocLinks {
     readonly limitationsKnownIssues: string;
     readonly learnMore: string;
     readonly aiAssistant: string;
+    readonly replaceKnowledgeBaseContent: string;
   };
   readonly applicationConnections: {
     readonly oauthClients: string;

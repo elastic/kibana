@@ -27,6 +27,8 @@
 import {
   createSeededRandom,
   edotReactNative,
+  MOBILE_PLATFORM,
+  MOBILE_PLATFORMS,
   type EdotReactNativeAppModel,
   type EdotReactNativeDocument,
   type HealthProfileName,
@@ -95,10 +97,11 @@ const parsePositiveInteger = (key: string, value: unknown): number => {
 
 const scenario: Scenario<OtelDocument> = async ({ scenarioOpts = {}, logger, from }) => {
   const opts = {
-    platform: parseOneOf<MobilePlatform>('platform', scenarioOpts.platform ?? 'android', [
-      'android',
-      'ios',
-    ]),
+    platform: parseOneOf<MobilePlatform>(
+      'platform',
+      scenarioOpts.platform ?? MOBILE_PLATFORM.ANDROID,
+      MOBILE_PLATFORMS
+    ),
     health: parseOneOf<HealthProfileName>('health', scenarioOpts.health ?? 'healthy', [
       'healthy',
       'slow',

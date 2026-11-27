@@ -24,6 +24,7 @@ import type {
 import {
   ConversationRoundStatus,
   ConversationRoundStepType,
+  EventActorType,
   ExecutionStatus,
   TimelineEventType,
   isTimelineEvent,
@@ -41,6 +42,7 @@ import type { ProcessedConversation } from './prepare_conversation';
 import { attachmentTypeInstructions } from '../prompts/utils/attachments';
 import {
   T0,
+  T1,
   abortedExec0Timeline,
   attachmentEventFixture,
   completedRoundTimeline,
@@ -50,6 +52,8 @@ import {
   pausedRoundTimeline,
   pausedThenInterruptedResumeTimeline,
   processedCustomEventFixture,
+  terminatedExecutionEvents,
+  userMessageEvent,
   roundsOfTimeline,
   timelineFromRounds,
   type ProcessedConversationRound,
@@ -528,6 +532,66 @@ describe('prepareMessages', () => {
     expect(isAIMessage(toolCallAIMessage)).toBe(true);
     expect((toolCallAIMessage as AIMessage).tool_calls).toHaveLength(1);
     expect((toolCallAIMessage as AIMessage).tool_calls![0].name).toBe(sanitizeToolId('.search'));
+  });
+
+  describe('agent messages', () => {
+    const reportActor = { type: EventActorType.agent, id: 'child-agent', username: 'child-agent' };
+    const report = 'Background sub-agent execution child-1 finished.\n\nResult:\nPEAR';
+    const expectNotice = (message: { content: unknown }) => {
+      const content = String(message.content);
+      expect(isHumanMessage(message as HumanMessage)).toBe(true);
+      expect(content).toContain('<system_notice>');
+      expect(content).toContain('<agent-id>child-agent</agent-id>');
+      expect(content).toContain(report);
+      expect(content).not.toContain('[User:');
+    };
+
+    it('renders the input of a wake run as a notice, not as a user turn of the owner', async () => {
+      const result = await prepareMessages({
+        conversation: createConversation({
+          nextInput: {
+            ...makeRoundInput(report),
+            author: { id: 'owner', username: 'owner' },
+            actor: reportActor,
+          },
+        }),
+      });
+
+      expect(result).toHaveLength(1);
+      expectNotice(result[0]);
+    });
+
+    it('renders a completed wake round in history as a notice', async () => {
+      const result = await prepareMessages({
+        conversation: createConversation({
+          previousRounds: [
+            createRound({ input: { ...makeRoundInput(report), actor: reportActor } }),
+          ],
+          nextInput: makeRoundInput('what did it say?'),
+        }),
+      });
+
+      expectNotice(result[0]);
+      expect(result[result.length - 1].content).toBe('what did it say?');
+    });
+
+    it('renders a standalone agent message as a notice', async () => {
+      const conversation = createConversation({ nextInput: makeRoundInput('next') });
+      conversation.timeline = [
+        {
+          id: 'report-1',
+          type: TimelineEventType.agentMessage,
+          created_at: now,
+          actor: reportActor,
+          data: { message: report, attachments: [], actor: reportActor },
+        } as unknown as ProcessedTimelineEvent,
+      ];
+
+      const result = await prepareMessages({ conversation });
+
+      expect(result).toHaveLength(2);
+      expectNotice(result[0]);
+    });
   });
 
   describe('with attachments', () => {
@@ -1383,6 +1447,33 @@ describe('prepareMessages', () => {
       expect(String(messages[0].content)).toContain('note');
       expect(String(messages[0].content).match(/<conversation_event /g)).toHaveLength(1);
     });
+
+    it('renders a steer its run never read as earlier context, not a user turn', async () => {
+      const unread = {
+        id: 'steer-1',
+        type: TimelineEventType.userMessage,
+        created_at: T0,
+        actor: { type: 'user', id: 'u', username: 'sid' },
+        data: makeRoundInput('use a table'),
+        unread_steer: true,
+      } as unknown as ProcessedTimelineEvent;
+      const messages = await prepareMessages({
+        conversation: {
+          timeline: [unread],
+          nextInput: makeRoundInput('next'),
+          attachmentTypes: [],
+          attachmentStateManager: createAttachmentStateManager([], {
+            getTypeDefinition: () => undefined,
+          }),
+        } as ProcessedConversation,
+      });
+      expect(messages).toHaveLength(2);
+      const content = String(messages[0].content);
+      expect(content).toContain('<system_notice>');
+      expect(content).toContain('ended before reading it');
+      expect(content).toContain('<user_message>use a table</user_message>');
+      expect(String(messages[1].content)).toBe('next');
+    });
   });
 
   describe('background execution notices (from round steps)', () => {
@@ -1445,7 +1536,7 @@ describe('prepareMessages', () => {
         (msg) => isHumanMessage(msg) && (msg as any).content.includes('<system_notice>')
       );
       expect(noticeMessage).toBeDefined();
-      expect((noticeMessage as any).content).toContain('has failed');
+      expect((noticeMessage as any).content).toContain('finished with status failed');
       expect((noticeMessage as any).content).toContain('Something broke');
     });
 
@@ -1468,6 +1559,63 @@ describe('prepareMessages', () => {
         (msg) => isHumanMessage(msg) && (msg as any).content.includes('<system_notice>')
       );
       expect(noticeMessages).toHaveLength(0);
+    });
+  });
+
+  describe('dynamic tool definitions after compaction', () => {
+    const compactionSummary: CompactionSummary = {
+      summarized_round_count: 1,
+      created_at: '2024-01-01T00:00:00.000Z',
+      token_count: 100,
+      structured_data: {
+        discussion_summary: 'User loaded a skill.',
+        user_intent: 'Use the skill',
+        key_topics: [],
+        outcomes_and_decisions: [],
+        agent_actions: [],
+        entities: [],
+        unanswered_questions: [],
+        tool_calls_summary: [],
+      },
+    };
+    const definition = {
+      tool_id: 'platform.core.cases',
+      description: 'Search cases',
+      parameters: { type: 'object' as const },
+    };
+
+    it('re-injects the definitions right after the summary', async () => {
+      const result = await prepareMessages({
+        conversation: createConversation({ nextInput: makeRoundInput('follow-up') }),
+        compactionSummary,
+        dynamicToolDefinitions: [definition],
+      });
+
+      // compaction user + compaction assistant + definitions notice + nextInput user
+      expect(result).toHaveLength(4);
+      expect(isHumanMessage(result[2])).toBe(true);
+      expect(result[2].content).toContain('<dynamic_tools>');
+      expect(result[2].content).toContain(JSON.stringify(definition));
+    });
+
+    it('renders no notice when there are no definitions', async () => {
+      const result = await prepareMessages({
+        conversation: createConversation({ nextInput: makeRoundInput('follow-up') }),
+        compactionSummary,
+        dynamicToolDefinitions: [],
+      });
+
+      expect(result).toHaveLength(3);
+      expect(result.some((msg) => String(msg.content).includes('<dynamic_tools>'))).toBe(false);
+    });
+
+    it('renders no notice without a compaction summary', async () => {
+      const result = await prepareMessages({
+        conversation: createConversation({ nextInput: makeRoundInput('follow-up') }),
+        dynamicToolDefinitions: [definition],
+      });
+
+      expect(result.some((msg) => String(msg.content).includes('<dynamic_tools>'))).toBe(false);
     });
   });
 });
@@ -1852,6 +2000,38 @@ describe('prepareMessages — multi-execution (HITL) timelines', () => {
       expect(types.at(-2)).toBe('human');
       expect(String(messages.at(-2)?.content)).toContain('<system_notice>');
       expect(String(messages.at(-1)?.content)).toContain('bye');
+    });
+
+    it('renders a steer read by an interrupted run with its text, in that round', async () => {
+      const delivered: ConversationRoundStep = {
+        type: ConversationRoundStepType.deliveredMessage,
+        event_id: 'read',
+        author: { type: 'user', id: 'u1' },
+        is_run_owner: true,
+        message: 'text of read',
+        delivered_at: T0,
+        cycle: 1,
+      } as ConversationRoundStep;
+      const events: TimelineEvent[] = [
+        ...failedExec0Timeline('r1', [delivered], T0),
+        userMessageEvent('r2', T1),
+        ...terminatedExecutionEvents({
+          roundId: 'r2',
+          createdAt: T1,
+          steps: [],
+          outcome: { type: 'responded', response: { message: 'done' } },
+        }),
+      ];
+
+      const messages = await prepareMessages({
+        conversation: conversationOf(processedTimeline(events)),
+      });
+
+      const contents = messages.map((message) => String(message.content));
+      expect(contents.filter((content) => content.includes('text of read'))).toHaveLength(1);
+      expect(contents.findIndex((content) => content.includes('text of read'))).toBeLessThan(
+        contents.findIndex((content) => content.includes('done'))
+      );
     });
 
     it('end to end: a confirmation-blocked call + prompt_response + failed setup-window resume renders the call as interrupted', async () => {

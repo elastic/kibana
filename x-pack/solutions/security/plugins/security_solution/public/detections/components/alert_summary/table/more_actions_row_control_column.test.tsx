@@ -122,8 +122,9 @@ describe('MoreActionsRowControlColumn', () => {
         <MoreActionsRowControlColumn alert={mockAlert} onRemoveFromCase={onRemoveFromCase} />
       );
 
-      await userEvent.click(getByTestId(MORE_ACTIONS_BUTTON_TEST_ID));
-      await userEvent.click(getByTestId(REMOVE_FROM_CASE_ACTION_ID));
+      const user = userEvent.setup({ pointerEventsCheck: 0 });
+      await user.click(getByTestId(MORE_ACTIONS_BUTTON_TEST_ID));
+      await user.click(getByTestId(REMOVE_FROM_CASE_ACTION_ID));
 
       expect(onRemoveFromCase).toHaveBeenCalledWith('_id');
     });

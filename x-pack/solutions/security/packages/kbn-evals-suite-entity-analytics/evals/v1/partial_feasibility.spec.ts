@@ -8,15 +8,26 @@
 import { tags } from '@kbn/scout-security';
 import { evaluate } from '../../src/evaluate';
 import { padJobIds, lmdJobIds } from '../../src/ml_helpers';
+import { deleteEntityEngines, installEntityStoreV2AndWait } from '../../src/setup_helpers';
 
 /**
  * Tier 2b partial-feasibility prompts. The system may produce a reasonable answer;
  * criteria use looser assertions (e.g. query structure, tool usage). Some may need data seeding.
+ * The entity store is installed because security.search_entities stays unavailable
+ * until the latest-entities index exists.
  */
 evaluate.describe(
   'SIEM Entity Analytics - Partial Feasibility',
   { tag: tags.serverless.security.complete },
   () => {
+    evaluate.beforeAll(async ({ log, supertest }) => {
+      await installEntityStoreV2AndWait({ supertest, log });
+    });
+
+    evaluate.afterAll(async ({ log, supertest }) => {
+      await deleteEntityEngines({ supertest, log });
+    });
+
     evaluate('entity analytics partial feasibility questions', async ({ evaluateDataset }) => {
       await evaluateDataset({
         dataset: {
@@ -35,8 +46,7 @@ evaluate.describe(
                 ],
                 toolCalls: [
                   {
-                    id: 'security.entity_analytics.risk_score',
-                    acceptableAlternativeToolIds: ['security.entity_analytics.asset_criticality'],
+                    id: 'security.search_entities',
                     criteria: [
                       'The response uses entity analytics risk score (or related) capability; ESQL may use MIN/MAX or time-bounded query.',
                     ],
@@ -55,8 +65,7 @@ evaluate.describe(
                 ],
                 toolCalls: [
                   {
-                    id: 'security.entity_analytics.risk_score',
-                    acceptableAlternativeToolIds: ['security.entity_analytics.asset_criticality'],
+                    id: 'security.search_entities',
                     criteria: [
                       'The response uses at least one of risk_score or asset_criticality to surface hosts by risk or criticality.',
                     ],
@@ -75,10 +84,9 @@ evaluate.describe(
                 ],
                 toolCalls: [
                   {
-                    id: 'security.entity_analytics.risk_score',
-                    acceptableAlternativeToolIds: ['security.entity_analytics.asset_criticality'],
+                    id: 'security.get_entity_risk_score_history',
                     criteria: [
-                      'The response uses entity analytics with ESQL over risk-score indices, optionally filtering by user (e.g. user.name or id).',
+                      'The response uses risk score history for John Smith, by name or entity id.',
                     ],
                   },
                 ],
@@ -131,8 +139,7 @@ evaluate.describe(
                 ],
                 toolCalls: [
                   {
-                    id: 'security.entity_analytics.risk_score',
-                    acceptableAlternativeToolIds: ['security.entity_analytics.asset_criticality'],
+                    id: 'security.search_entities',
                     criteria: [
                       'The response uses entity analytics risk score with a time-bounded or scoring-over-time query where applicable.',
                     ],

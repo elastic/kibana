@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { timeoutSignal } from '@kbn/std';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { KIBANA_API_VERSION } from './constants';
+import type { RegisteredStepHash } from './step_approval';
 import type { JsonObject, JsonValue } from './types';
 
 export interface KibanaConnection {
@@ -69,29 +71,36 @@ const kibanaGet = async (connection: KibanaConnection, path: string): Promise<Js
     headers.Authorization = authHeader;
   }
 
-  let response: Response;
+  const deadline = timeoutSignal(REQUEST_TIMEOUT_MS);
   try {
-    response = await fetch(url, {
-      method: 'GET',
-      headers,
-      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
-    });
-  } catch (error) {
-    const name = error instanceof Error ? error.name : '';
-    if (name === 'AbortError' || name === 'TimeoutError') {
+    let response: Response;
+    try {
+      response = await fetch(url, {
+        method: 'GET',
+        headers,
+        signal: deadline,
+      });
+    } catch (error) {
+      const name = error instanceof Error ? error.name : '';
+      if (name === 'AbortError' || name === 'TimeoutError') {
+        throw new Error(
+          `GET ${url} timed out after ${REQUEST_TIMEOUT_MS}ms - is Kibana reachable at ${connection.kibanaUrl}?`
+        );
+      }
+      throw error;
+    }
+
+    if (!response.ok) {
+      const text = await response.text().catch(() => '');
       throw new Error(
-        `GET ${url} timed out after ${REQUEST_TIMEOUT_MS}ms - is Kibana reachable at ${connection.kibanaUrl}?`
+        `GET ${url} failed: ${response.status} ${response.statusText} ${text}`.trim()
       );
     }
-    throw error;
-  }
 
-  if (!response.ok) {
-    const text = await response.text().catch(() => '');
-    throw new Error(`GET ${url} failed: ${response.status} ${response.statusText} ${text}`.trim());
+    return (await response.json()) as JsonObject;
+  } finally {
+    deadline.dispose();
   }
-
-  return (await response.json()) as JsonObject;
 };
 
 export interface KibanaBuildInfo {
@@ -174,6 +183,32 @@ export const fetchStepDefinitionIds = async (
   );
   const body = await kibanaGet(connection, '/internal/workflows_extensions/step_definitions');
   return extractDefinitionIds(body.steps);
+};
+
+/**
+ * Fetch the registered step definitions with their `definitionHash` from the
+ * internal `workflows_extensions` route. Used by the step approval check.
+ */
+export const fetchStepDefinitionHashes = async (
+  connection: KibanaConnection,
+  log: ToolingLog
+): Promise<RegisteredStepHash[]> => {
+  log.info(
+    'Fetching registered step definition hashes (GET /internal/workflows_extensions/step_definitions)'
+  );
+  const body = await kibanaGet(connection, '/internal/workflows_extensions/step_definitions');
+  if (!Array.isArray(body.steps)) {
+    return [];
+  }
+  return body.steps.flatMap((entry) =>
+    entry !== null &&
+    typeof entry === 'object' &&
+    !Array.isArray(entry) &&
+    typeof entry.id === 'string' &&
+    typeof entry.definitionHash === 'string'
+      ? [{ id: entry.id, definitionHash: entry.definitionHash }]
+      : []
+  );
 };
 
 /** Fetch the ids of registered trigger definitions from the internal route. */

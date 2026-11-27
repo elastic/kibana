@@ -8,7 +8,8 @@
 import { useMemo } from 'react';
 import { useInstalledSecurityJobsIds } from '../../../../../common/components/ml/hooks/use_installed_security_jobs';
 import { useTileQueryInputs } from './use_tile_query_inputs';
-import type { EntityFilters, TimeRange } from '../../entities_grid/common';
+import type { TimeRange } from '../../queries/time_range';
+import type { EntityFilters } from '../../entities_grid/common';
 import { EMPTY_ENTITY_FILTERS } from '../../entities_grid/common';
 import {
   anomaliesSeriesColumn,

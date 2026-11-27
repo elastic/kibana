@@ -33,6 +33,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 
 import type { LogRateAnalysisEmbeddableState } from '@kbn/aiops-server-schemas/embeddables/log_rate_analysis';
 import { TimeFieldWarning } from '../../components/time_field_warning';
+import { getLogRateAnalysisDefaultTitle } from './default_title';
 
 export interface LogRateAnalysisEmbeddableInitializerProps {
   dataViews: DataViewsPublicPluginStart;
@@ -77,13 +78,9 @@ export const LogRateAnalysisEmbeddableInitializer: FC<
   const updatedProps = useMemo(() => {
     return {
       ...formInput,
-      title: isPopulatedObject(formInput)
-        ? i18n.translate('xpack.aiops.embeddableLogRateAnalysis.attachmentTitle', {
-            defaultMessage: 'Log rate analysis',
-          })
-        : '',
+      title: initialInput?.title?.trim() || getLogRateAnalysisDefaultTitle(),
     };
-  }, [formInput]);
+  }, [formInput, initialInput?.title]);
 
   useEffect(
     function previewChanges() {

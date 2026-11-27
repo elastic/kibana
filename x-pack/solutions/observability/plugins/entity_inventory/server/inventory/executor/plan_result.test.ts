@@ -22,7 +22,6 @@ const result = (types: Record<string, string>): PlanResult => ({
   plan,
   columns: Object.entries(types).map(([name, type]): ESQLColumn => ({ name, type })),
   rows: [],
-  isPartial: false,
 });
 
 const outputColumns: OutputColumn[] = [

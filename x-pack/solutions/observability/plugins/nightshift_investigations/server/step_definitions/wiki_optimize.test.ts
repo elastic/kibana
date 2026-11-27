@@ -105,6 +105,7 @@ describe('wikiOptimizeStepDefinition', () => {
       getInference,
       getSavedObjects,
       getUiSettings,
+      modelUsage: expect.anything(),
     });
     expect(result).toEqual({ output: { status: 'ok' } });
   });

@@ -29,7 +29,7 @@ const setup = () => {
 describe('OnboardingIntroBanner', () => {
   beforeEach(() => window.localStorage.clear());
 
-  it('pitches Nightshift next to the video, without a live example to point to yet', () => {
+  it('pitches Nightshift next to the video', () => {
     setup();
 
     expect(screen.getByTestId('nightshiftOnboardingIntroBanner')).toHaveTextContent(
@@ -38,7 +38,7 @@ describe('OnboardingIntroBanner', () => {
     expect(screen.getByTestId('nightshiftOnboardingIntroBanner')).toHaveTextContent(
       'It helps you detect, investigate and resolve problems faster'
     );
-    expect(screen.queryByTestId('nightshiftOnboardingExploreLiveExample')).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Explore live example' })).not.toBeInTheDocument();
   });
 
   it('is dismissed for the space in this browser', () => {

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { createHash } from 'crypto';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
@@ -15,14 +14,12 @@ import {
 } from '../../common/constants';
 import type { AiIndexFeedbackAnalysis } from '../../common/http_api/ai_indices';
 import { parseIntervalMinutes } from '../../common/validation';
-
-/** 64 bits of SHA-256, hex-encoded: fixed width, and wide enough not to collide across spaces. */
-const SPACE_HASH_LENGTH = 16;
+import { managedWorkflowIdSuffixFor } from '../utils/managed_workflow_suffix';
 
 /**
- * The one workflows management call this plugin makes, declared structurally rather than imported:
+ * The workflows management calls this plugin makes, declared structurally rather than imported:
  * workflows management reaches back here through Agent Builder, so depending on its contract would
- * close a project reference cycle.
+ * close a project reference cycle. Only the fields that are read are named.
  */
 export interface WorkflowEnablementApi {
   updateWorkflow(
@@ -31,6 +28,11 @@ export interface WorkflowEnablementApi {
     spaceId: string,
     request: KibanaRequest
   ): Promise<unknown>;
+  getWorkflow(
+    workflowId: string,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<{ yaml: string } | null>;
 }
 
 export interface ReconcileScheduleParams {
@@ -66,25 +68,11 @@ export const createFeedbackAnalysisScheduleService = ({
 }): FeedbackAnalysisScheduleService => {
   const log = logger.get('feedback_analysis_schedule');
 
-  /**
-   * A managed workflow document id is `<definition id>-<suffix>` and is the ES `_id`, which is
-   * unique per index regardless of the document's `spaceId`. An AI index id is only unique within
-   * its space, so the suffix has to carry the space too or the same id in two spaces shares one
-   * document: the second install silently keeps the first space's `spaceId`, and either space's
-   * delete tears down the other's schedule.
-   *
-   * The space is hashed rather than appended: both ids allow hyphens, so `<space>-<aiIndexId>`
-   * would make `('a-b', 'c')` and `('a', 'b-c')` collide, and space ids have no length cap while
-   * the `_id` does.
-   */
-  const workflowIdSuffixFor = (aiIndexId: string, spaceId: string) =>
-    `${aiIndexId}-${createHash('sha256')
-      .update(spaceId)
-      .digest('hex')
-      .slice(0, SPACE_HASH_LENGTH)}`;
-
   const workflowDocumentIdFor = (aiIndexId: string, spaceId: string) =>
-    `${CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID}-${workflowIdSuffixFor(aiIndexId, spaceId)}`;
+    `${CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID}-${managedWorkflowIdSuffixFor(
+      aiIndexId,
+      spaceId
+    )}`;
 
   const intervalMinutesFor = (feedbackAnalysis: AiIndexFeedbackAnalysis): number => {
     const interval = feedbackAnalysis.schedule?.interval ?? DEFAULT_FEEDBACK_ANALYSIS_INTERVAL;
@@ -95,7 +83,7 @@ export const createFeedbackAnalysisScheduleService = ({
     const client = await getManagedWorkflowsClient();
     await client.uninstall(CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID, {
       spaceId,
-      workflowIdSuffix: workflowIdSuffixFor(aiIndexId, spaceId),
+      workflowIdSuffix: managedWorkflowIdSuffixFor(aiIndexId, spaceId),
     });
   };
 
@@ -121,7 +109,7 @@ export const createFeedbackAnalysisScheduleService = ({
       const client = await getManagedWorkflowsClient();
       await client.install(CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID, {
         spaceId,
-        workflowIdSuffix: workflowIdSuffixFor(aiIndexId, spaceId),
+        workflowIdSuffix: managedWorkflowIdSuffixFor(aiIndexId, spaceId),
         values: {
           aiIndexId,
           intervalMinutes,

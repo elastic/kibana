@@ -7,6 +7,8 @@
 
 export * from '../../../common/ui/fixtures';
 export {
+  mockAttachActionPolicy,
   mockFinalAnswerRenderingActionPolicyAttachment,
   mockManageActionPolicy,
+  mockManageAttachedActionPolicy,
 } from './llm_mocks';

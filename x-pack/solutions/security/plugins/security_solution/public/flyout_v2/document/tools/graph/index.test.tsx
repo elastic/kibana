@@ -11,7 +11,13 @@ import '@testing-library/jest-dom';
 import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import { rawEventData, TestProviders } from '../../../../common/mock';
 import { noopCellActionRenderer } from '../../../shared/components/cell_actions';
+import { useGraphTelemetry } from '../../../shared/hooks/use_graph_telemetry';
+import { useOpenFlyout } from '../../../shared/hooks/use_open_flyout';
 import { GRAPH_TOOLS_TEST_ID, GraphDetails } from '.';
+import { GraphVisualization } from './components/graph_visualization';
+
+jest.mock('../../../shared/hooks/use_graph_telemetry');
+jest.mock('../../../shared/hooks/use_open_flyout');
 
 jest.mock('./components/graph_visualization', () => ({
   GraphVisualization: jest.fn(({ mode, scopeId, eventIds, timestamp, isAlert }) => (
@@ -36,6 +42,8 @@ jest.mock('../../main/hooks/use_graph_preview', () => ({
 }));
 
 const mockOnAlertUpdated = jest.fn();
+const mockOnTelemetryEvent = jest.fn();
+const mockOpen = jest.fn();
 
 const createHit = (
   fields: Record<string, unknown[]> = {}
@@ -60,6 +68,14 @@ const renderGraphDetails = (fields: Record<string, unknown[]> = {}) =>
 describe('<GraphDetails />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.mocked(useGraphTelemetry).mockReturnValue({
+      onTelemetryEvent: mockOnTelemetryEvent,
+      reportGraphPreviewShown: jest.fn(),
+      reportGraphPreviewExpanded: jest.fn(),
+      reportGraphOpened: jest.fn(),
+      reportDrillThrough: jest.fn(),
+    });
+    jest.mocked(useOpenFlyout).mockReturnValue(mockOpen);
   });
 
   it('renders the graph tools wrapper', () => {
@@ -124,5 +140,34 @@ describe('<GraphDetails />', () => {
 
     const { container } = renderGraphDetails();
     expect(container).toBeEmptyDOMElement();
+  });
+
+  describe('grouped node panel telemetry', () => {
+    const openGroupedPanel = () => {
+      const { onShowGrouped } = jest.mocked(GraphVisualization).mock.calls[0][0];
+      onShowGrouped({
+        docMode: 'grouped-events',
+        scopeId: 'graph-scope',
+        dataViewId: 'data-view-id',
+        documentIds: ['doc-1'],
+        entityItems: [],
+      });
+      const [panel] = mockOpen.mock.calls[0];
+      return panel;
+    };
+
+    it('reports through useGraphTelemetry with the alert entry point for an alert', () => {
+      renderGraphDetails({ 'event.kind': ['signal'] });
+
+      expect(useGraphTelemetry).toHaveBeenCalledWith('alert_flyout');
+      expect(openGroupedPanel().props.onTelemetryEvent).toBe(mockOnTelemetryEvent);
+    });
+
+    it('reports through useGraphTelemetry with the event entry point for an event', () => {
+      renderGraphDetails({ 'event.kind': ['event'] });
+
+      expect(useGraphTelemetry).toHaveBeenCalledWith('event_flyout');
+      expect(openGroupedPanel().props.onTelemetryEvent).toBe(mockOnTelemetryEvent);
+    });
   });
 });

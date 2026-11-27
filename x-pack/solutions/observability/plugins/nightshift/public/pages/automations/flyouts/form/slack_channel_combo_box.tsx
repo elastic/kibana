@@ -13,25 +13,16 @@ import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SlackChannelBinding } from '@kbn/significant-events-plugin/common';
+import { parseSlackChannelInput } from '@kbn/nightshift-investigations-plugin/common';
 import { PrivateChannelIcon } from '../../../../components/ui/channel_label';
-import { parseSlackChannelInput } from '../../../../common/parse_slack_channel_input';
+import { findUnconnectedChannels } from '../../utils/unconnected_slack_channels';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../../common/ebt_constants';
 import { useKibana } from '../../../../hooks/use_kibana';
 import {
   formatChannelLabel,
   formatChannelValue,
   useAllRelayAppBindings,
-  type UseAllRelayAppBindings,
 } from '../../../../data/relay_apps/use_relay_app_bindings';
-
-/** Selected values that are not connected channels; none unless the full connected list loaded. */
-export const findUnconnectedChannels = (
-  values: string[],
-  { bindings, isLoading, isError, isComplete }: UseAllRelayAppBindings
-): string[] =>
-  isLoading || isError || !isComplete || bindings.length === 0
-    ? []
-    : values.filter((value) => !bindings.some(({ channel }) => channel === value));
 
 // Private channels are never suggested; a user can still enter one by ID or link.
 const isSuggestedChannel = ({ visibility }: SlackChannelBinding): boolean =>
@@ -57,7 +48,13 @@ const labels = {
     }),
 };
 
-const ConnectChannelsLink = ({ testSubject }: { testSubject: string }) => {
+const ConnectChannelsLink = ({
+  testSubject,
+  children,
+}: {
+  testSubject: string;
+  children: React.ReactNode;
+}) => {
   const { application } = useKibana().services;
   return (
     <EuiLink
@@ -68,10 +65,7 @@ const ConnectChannelsLink = ({ testSubject }: { testSubject: string }) => {
         element: NIGHTSHIFT_EBT_ELEMENTS.AUTOMATIONS_FORM,
       })}
     >
-      <FormattedMessage
-        id="xpack.nightshift.automations.flyout.slackChannelsConnectLink"
-        defaultMessage="Connect channels in Settings"
-      />
+      {children}
     </EuiLink>
   );
 };
@@ -149,6 +143,27 @@ export const SlackChannelComboBox = ({
         customOptionText={labels.customOption}
         data-test-subj={testSubject}
       />
+      {!isEmpty && (
+        <>
+          <EuiSpacer size="xs" />
+          <EuiText size="xs" color="subdued" data-test-subj={`${testSubject}Scope`}>
+            <FormattedMessage
+              id="xpack.nightshift.automations.flyout.slackChannelsScope"
+              defaultMessage="Only channels where @Elastic is a member and that are connected are listed. To add one, invite @Elastic, then connect the channel in {settingsLink}."
+              values={{
+                settingsLink: (
+                  <ConnectChannelsLink testSubject={`${testSubject}Scope`}>
+                    <FormattedMessage
+                      id="xpack.nightshift.automations.flyout.slackChannelsScopeLink"
+                      defaultMessage="Slack settings"
+                    />
+                  </ConnectChannelsLink>
+                ),
+              }}
+            />
+          </EuiText>
+        </>
+      )}
       {(isError || isEmpty || isTruncated || unconnected.length > 0) && (
         <>
           <EuiSpacer size="xs" />
@@ -163,7 +178,16 @@ export const SlackChannelComboBox = ({
               <FormattedMessage
                 id="xpack.nightshift.automations.flyout.slackChannelsEmpty"
                 defaultMessage="No Slack channels are connected. {connectLink}"
-                values={{ connectLink: <ConnectChannelsLink testSubject={testSubject} /> }}
+                values={{
+                  connectLink: (
+                    <ConnectChannelsLink testSubject={testSubject}>
+                      <FormattedMessage
+                        id="xpack.nightshift.automations.flyout.slackChannelsConnectLink"
+                        defaultMessage="Connect channels in Settings"
+                      />
+                    </ConnectChannelsLink>
+                  ),
+                }}
               />
             )}
             {unconnected.length > 0 &&

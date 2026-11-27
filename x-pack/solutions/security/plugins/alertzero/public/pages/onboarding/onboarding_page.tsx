@@ -15,6 +15,7 @@ import { ALERTZERO_FEATURE_ID } from '@kbn/alertzero-common';
 import { AlertZeroPageHeader } from '../../components/alertzero_page_header';
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
 import { ScanFailureCallout } from '../../components/scan_failure_callout/scan_failure_callout';
+import { useAppHeadingDocLink } from '../../components/app_chrome';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
 import { ONBOARDING_CONTENT_MAX_WIDTH } from './constants';
 import { OnboardingEnableFooter } from './onboarding_enable_footer';
@@ -39,6 +40,7 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
   const [step, setStep] = useState<'intro' | 'workers'>('intro');
 
   useAlertZeroDocTitle();
+  useAppHeadingDocLink('setUp');
 
   const canWrite = Boolean(application.capabilities[ALERTZERO_FEATURE_ID]?.write);
 

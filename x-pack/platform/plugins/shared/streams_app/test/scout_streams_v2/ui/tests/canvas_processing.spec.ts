@@ -24,7 +24,7 @@ const elasticsearchDestination = (id: string) => ({
   name: id,
   type: 'elasticsearch',
   supported_telemetry: ['logs'],
-  config: [{ name: 'index', value: `logs-${id}` }],
+  config: [{ name: 'index', value: `logs-${id.replaceAll('-', '_')}.otel-default` }],
 });
 
 /**
@@ -124,7 +124,10 @@ test.describe('Stream canvas - processing', { tag: tags.serverless.observability
 
     await expect(
       streams.processingFlyout.getByTestId('streamsProcessingFlyoutStepSummary')
-    ).toHaveText('upsert record.team = "core"');
+    ).toHaveText('upsert attributes.team = "core"');
+    await expect(
+      streams.processingFlyout.getByTestId('streamsProcessingFlyoutStepSignal-logs')
+    ).toHaveText('Logs');
 
     const saveRequest = page.waitForRequest(
       (request) =>
@@ -133,6 +136,15 @@ test.describe('Stream canvas - processing', { tag: tags.serverless.observability
     await streams.processingFlyoutSave.click();
     const { unit } = (await saveRequest).postDataJSON();
 
+    // The summary reads the same for the field shape the catalogue no longer accepts, so the
+    // body is what tells them apart.
+    expect(unit.processors).toHaveLength(1);
+    const [processor] = unit.processors;
+    expect(processor).toMatchObject({ id: 'add-fields-1', type: 'add_fields' });
+    const fields = processor.config.find(({ name }: { name: string }) => name === 'fields');
+    expect(fields.value).toHaveLength(1);
+    expect(fields.value[0]).toMatchObject({ location: 'attributes', name: 'team', value: 'core' });
+    expect(fields.value[0]).not.toHaveProperty('path');
     expect(unit.pipelines).toContainEqual({
       id: `p-${SOURCE_ID}`,
       supported_telemetry: ['logs'],
@@ -201,7 +213,7 @@ test.describe('Stream canvas - processing', { tag: tags.serverless.observability
           {
             severity: 'error',
             code: 'E028_INVALID_CONFIG_TYPE',
-            message: 'action must be one of upsert, update, insert, delete',
+            message: 'action must be one of upsert, update, insert',
           },
         ],
       },

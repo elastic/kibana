@@ -9,7 +9,7 @@ import React, { lazy, useMemo } from 'react';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { QueryClientProvider } from '@kbn/react-query';
-import { PerformanceContextProvider } from '@kbn/ebt-tools';
+import { PerformanceContextProvider } from '@kbn/ebt-tools/react';
 import {
   rulesAppDetailsRoute,
   createRuleRoute,

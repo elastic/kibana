@@ -29,7 +29,7 @@ export const KiTypeDisplay = ({ type, as, 'data-test-subj': dataTestSubj }: KiTy
       return null;
     }
     return (
-      <EuiBadge color="hollow" data-test-subj={dataTestSubj} css={kiLabelCapitalizeCss}>
+      <EuiBadge color="default" data-test-subj={dataTestSubj} css={kiLabelCapitalizeCss}>
         {content}
       </EuiBadge>
     );

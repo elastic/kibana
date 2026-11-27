@@ -29,6 +29,7 @@ export function getTabRuntimeStateMock(
       undefined
     ),
     unifiedHistogramConfig$: new BehaviorSubject({ layoutPropsMap: {} }),
+    chartBreakdownFieldNames$: new BehaviorSubject<string[] | undefined>(undefined),
     scopedProfilesManager$: new BehaviorSubject({} as ScopedProfilesManager),
     scopedEbtManager$: new BehaviorSubject({} as ScopedDiscoverEBTManager),
     cascadedDocumentsFetcher$: new BehaviorSubject<CascadedDocumentsFetcher>(

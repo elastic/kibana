@@ -10,6 +10,7 @@
 import './feature_flags_service.test.mocks';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { BehaviorSubject } from 'rxjs';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { configServiceMock } from '@kbn/config-mocks';
@@ -35,7 +36,10 @@ describe('OFREP routes', () => {
         logger,
       })
     );
-    const setup = service.setup({ http });
+    const setup = service.setup({
+      http,
+      savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
+    });
     return { service, setup, router, logger };
   };
 

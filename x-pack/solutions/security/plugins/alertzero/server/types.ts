@@ -14,6 +14,7 @@ import type {
 import type { ProposalsPluginSetup, ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
+import type { CPSServerSetup } from '@kbn/cps/server';
 import type {
   SearchInferenceEndpointsPluginSetup,
   SearchInferenceEndpointsPluginStart,
@@ -31,6 +32,7 @@ import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugi
 import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { SubscriptionAvailability } from '../common/availability';
+import type { AlertZeroAiIndexId } from './context_engine/ai_index_registry';
 
 export type AlertZeroRequestHandlerContext = CustomRequestHandlerContext<{
   licensing: LicensingApiRequestHandlerContext;
@@ -78,11 +80,11 @@ export interface AlertZeroPluginStart {
     installer: ThreatIntelSupplyWorkflowInstaller
   ) => void;
   /**
-   * False while the fingerprint template install is in flight, and after it fails. The
-   * matcher reads this on each run and does not auto-create the index from the generic
-   * template until the install has succeeded.
+   * False while a space-scoped AI index's template install is in flight, and after it fails, so
+   * its writer does not auto-create the index from the base template. True for any other index.
+   * Read it before each write: the value changes after `start` returns.
    */
-  readonly attackFingerprintWritesAllowed: boolean;
+  isAiIndexWritable: (aiIndexId: AlertZeroAiIndexId) => boolean;
 }
 
 export interface AlertZeroSetupDependencies {
@@ -94,6 +96,7 @@ export interface AlertZeroSetupDependencies {
   proposals?: ProposalsPluginSetup;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
   contextEngine?: ContextEnginePluginSetup;
+  cps?: CPSServerSetup;
 }
 
 export interface AlertZeroStartDependencies {

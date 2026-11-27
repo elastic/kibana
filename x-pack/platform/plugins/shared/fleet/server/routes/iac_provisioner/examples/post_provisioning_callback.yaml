@@ -1,0 +1,91 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        receiveProvisioningCallbackRequestExample:
+          summary: AWS report of a created IAM role
+          description: 'What the CloudFormation stack launched from Kibana sends once its IAM role exists; other providers report their own values and proof'
+          value:
+            role_arn: 'arn:aws:iam::123456789012:role/ElasticWorkloadIdentity-abc123'
+            stack_arn: 'arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-identity/11111111-2222-3333-4444-555555555555'
+            origin_proof:
+              region: 'us-east-1'
+              headers:
+                Authorization: 'AWS4-HMAC-SHA256 Credential=ASIAEXAMPLE/20261113/us-east-1/sts/aws4_request, SignedHeaders=content-type;host;x-amz-date;x-amz-security-token;x-elastic-callback-id;x-elastic-report-sha256, Signature=5d41402abc4b2a76b9719d911017c592e5c0c8d3b0d4c3d6b0b1e0d8f9a1b2c3'
+                Content-Type: 'application/x-www-form-urlencoded'
+                X-Amz-Date: '20261113T100000Z'
+                X-Amz-Security-Token: 'IQoJb3JpZ2luX2VjEXAMPLE'
+                x-elastic-callback-id: '0f5d7a5e-2b1c-4a3d-9e8f-123456789abc'
+                x-elastic-report-sha256: '9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08'
+              body: 'Action=GetCallerIdentity&Version=2011-06-15'
+responses:
+  200:
+    description: 'The values were stored, or were already stored'
+    content:
+      application/json:
+        examples:
+          receiveProvisioningCallbackExample:
+            summary: Identity created
+            description: 'The report was applied and the federated identity exists'
+            value:
+              status: 'received'
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            summary: Role and stack accounts differ
+            description: 'The role and the stack are in different AWS accounts'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'role_arn and stack_arn must be in the same AWS account'
+  401:
+    description: 'Unauthorized'
+    content:
+      application/json:
+        examples:
+          unverifiedExample:
+            summary: Proof of the sending account did not verify
+            description: 'For AWS: STS did not vouch that the report was signed from the account and partition of the reported role, the signer is not named as the stack callback function, or the proof was made for another callback or other values'
+            value:
+              statusCode: 401
+              error: 'Unauthorized'
+              message: 'The report was not signed from the account of what it reports'
+  404:
+    description: 'Not Found'
+    content:
+      application/json:
+        examples:
+          notFoundExample:
+            summary: Unknown callback or token
+            description: 'No record has this ID, or the token is not the one issued for it'
+            value:
+              statusCode: 404
+              error: 'Not Found'
+              message: 'Callback not found'
+  409:
+    description: 'Conflict'
+    content:
+      application/json:
+        examples:
+          conflictExample:
+            summary: Different values already received
+            description: 'A report with different values was already received'
+            value:
+              statusCode: 409
+              error: 'Conflict'
+              message: 'Callback already received with different values'
+  410:
+    description: 'Gone'
+    content:
+      application/json:
+        examples:
+          goneExample:
+            summary: Callback expired or cancelled
+            description: 'The record expired or was cancelled before the report arrived'
+            value:
+              statusCode: 410
+              error: 'Gone'
+              message: 'Callback is no longer accepting values'

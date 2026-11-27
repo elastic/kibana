@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import fsPromises from 'node:fs/promises';
 import type { ManagedWorker, ManagedWorkerOptions } from '@kbn/core-threads-server-internal';
 import { createManagedWorker } from '@kbn/core-threads-server-internal';
 import { loggerMock } from '@kbn/logging-mocks';
 import { EventLoopWatchdog } from './event_loop_watchdog';
 import type { WatchdogWorkerData } from './types';
 import { HEARTBEAT_INTERVAL_MS, Slot, WATCHDOG_WORKER_NAME } from './constants';
+import { PROFILING_DIR_MAX_LENGTH } from './sanitize';
 
 jest.mock('@kbn/core-threads-server-internal', () => ({ createManagedWorker: jest.fn() }));
 
@@ -43,13 +45,13 @@ describe('EventLoopWatchdog', () => {
         createWorker.mock.calls[call][0] as ManagedWorkerOptions<WatchdogWorkerData>
       ).workerData!.shared
     );
-  const create = () =>
+  const create = ({ diagnosticDir }: { diagnosticDir?: string } = profiling) =>
     new EventLoopWatchdog({
       logger,
       thresholdsMs: { starting: 300, running: 200 },
       statsIntervalMs: 600_000,
       logging,
-      profiling,
+      profiling: { ...profiling, diagnosticDir },
       workerEntry: '/entry.js',
     });
 
@@ -76,7 +78,7 @@ describe('EventLoopWatchdog', () => {
       entry: '/entry.js',
       unref: true,
       logger,
-      resourceLimits: { maxOldGenerationSizeMb: 32, maxYoungGenerationSizeMb: 16 },
+      resourceLimits: { maxOldGenerationSizeMb: 64, maxYoungGenerationSizeMb: 16 },
       restart: { maxAttempts: Infinity },
       workerData: {
         shared: expect.any(SharedArrayBuffer),
@@ -161,6 +163,213 @@ describe('EventLoopWatchdog', () => {
     watchdog.markRunning();
     watchdog.start();
     expect(slots()[Slot.runningSince]).toBeGreaterThan(0n);
+  });
+
+  it('starts with CPU profiling disabled', () => {
+    create().start();
+    expect(slots()[Slot.profiling]).toBe(0n);
+  });
+
+  it('updates CPU profiling state without restarting the worker', () => {
+    const watchdog = create();
+    watchdog.start();
+    watchdog.setProfiling(true);
+    expect(slots()[Slot.profiling]).toBe(1n);
+    watchdog.setProfiling(false);
+    expect(slots()[Slot.profiling]).toBe(0n);
+    expect(createWorker).toHaveBeenCalledTimes(1);
+    expect(worker.stop).not.toHaveBeenCalled();
+  });
+
+  it('carries profiling over to a worker started later', async () => {
+    const watchdog = create();
+    watchdog.setProfiling(true);
+    watchdog.start();
+    expect(slots()[Slot.profiling]).toBe(1n);
+    const stopped = watchdog.stop();
+    watchdog.setProfiling(false);
+    watchdog.setProfiling(true);
+    resolveStop();
+    await stopped;
+    watchdog.start();
+    expect(slots(1)[Slot.profiling]).toBe(1n);
+  });
+
+  describe('profiling log line', () => {
+    const ON = 'Event loop watchdog profiling on for this node. Profile directory: /diag';
+    const OFF = 'Event loop watchdog profiling off for this node';
+    const profilingLines = () =>
+      logger.info.mock.calls
+        .map(([message]) => message)
+        .filter((message) => String(message).includes('profiling o'));
+
+    it('logs each change while the worker runs', () => {
+      const watchdog = create();
+      watchdog.start();
+      watchdog.setProfiling(true);
+      watchdog.setProfiling(true);
+      watchdog.setProfiling(false);
+      expect(profilingLines()).toEqual([ON, OFF]);
+    });
+
+    it('logs the full directory when profiling turns on', () => {
+      const long = `/${'d'.repeat(200)}`;
+      const watchdog = create({ diagnosticDir: long });
+      watchdog.start();
+      watchdog.setProfiling(true);
+      expect(profilingLines()).toEqual([
+        `Event loop watchdog profiling on for this node. Profile directory: ${long}`,
+      ]);
+    });
+
+    it('omits the directory from the log when no directory is set', () => {
+      const watchdog = create({});
+      watchdog.start();
+      watchdog.setProfiling(true);
+      expect(profilingLines()).toEqual(['Event loop watchdog profiling on for this node']);
+    });
+
+    it('logs nothing while the worker is stopped, and on once it starts', () => {
+      const watchdog = create();
+      watchdog.setProfiling(true);
+      expect(profilingLines()).toEqual([]);
+      watchdog.start();
+      expect(profilingLines()).toEqual([ON]);
+    });
+
+    it('logs off when the worker stops', async () => {
+      const watchdog = create();
+      watchdog.start();
+      watchdog.setProfiling(true);
+      const stopped = watchdog.stop();
+      expect(profilingLines()).toEqual([ON, OFF]);
+      resolveStop();
+      await stopped;
+    });
+  });
+
+  describe('profile directory check', () => {
+    const NO_DIR_WARNING =
+      "Event loop watchdog profiling is on, but no profile directory is set. Set ops.eventLoopWatchdog.profiling.dir or Node's --diagnostic-dir to write profile files.";
+    const fsError = (code: string, message: string) => Object.assign(new Error(message), { code });
+    const warnings = () => logger.warn.mock.calls;
+    /** Lets the asynchronous directory check finish. */
+    const settle = async () => {
+      for (let i = 0; i < 5; i++) {
+        await Promise.resolve();
+      }
+    };
+    let access: jest.SpyInstance;
+
+    beforeEach(() => {
+      access = jest.spyOn(fsPromises, 'access').mockResolvedValue();
+    });
+    afterEach(() => access.mockRestore());
+
+    it("doesn't check the directory while profiling stays off", async () => {
+      const watchdog = create();
+      watchdog.start();
+      watchdog.setProfiling(false);
+      await settle();
+      expect(access).not.toHaveBeenCalled();
+      expect(warnings()).toEqual([]);
+    });
+
+    it("doesn't check the directory while the worker is stopped, and checks once it starts", async () => {
+      const watchdog = create({});
+      watchdog.setProfiling(true);
+      await settle();
+      expect(warnings()).toEqual([]);
+      watchdog.start();
+      await settle();
+      expect(warnings()).toEqual([[NO_DIR_WARNING]]);
+    });
+
+    it("doesn't warn when profiling turns on with a writable directory", async () => {
+      const watchdog = create();
+      watchdog.start();
+      watchdog.setProfiling(true);
+      await settle();
+      expect(access).toHaveBeenCalledWith('/diag', fsPromises.constants.W_OK);
+      expect(warnings()).toEqual([]);
+    });
+
+    it('warns when profiling turns on without a directory, and still turns profiling on', async () => {
+      const watchdog = create({});
+      watchdog.start();
+      watchdog.setProfiling(true);
+      await settle();
+      expect(access).not.toHaveBeenCalled();
+      expect(warnings()).toEqual([[NO_DIR_WARNING]]);
+      expect(slots()[Slot.profiling]).toBe(1n);
+    });
+
+    it("warns when profiling turns on and the directory doesn't exist", async () => {
+      access.mockRejectedValue(
+        fsError('ENOENT', "ENOENT: no such file or directory, access '/diag'")
+      );
+      const watchdog = create();
+      watchdog.start();
+      watchdog.setProfiling(true);
+      await settle();
+      expect(warnings()).toEqual([
+        [
+          "Event loop watchdog profiling is on, but the profile directory /diag can't be written (ENOENT). Profile file writes will fail.",
+        ],
+      ]);
+      expect(slots()[Slot.profiling]).toBe(1n);
+    });
+
+    it("warns when profiling turns on and the directory can't be written", async () => {
+      access.mockRejectedValue(fsError('EACCES', "EACCES: permission denied, access '/diag'"));
+      const watchdog = create();
+      watchdog.start();
+      watchdog.setProfiling(true);
+      await settle();
+      expect(warnings()).toEqual([
+        [
+          "Event loop watchdog profiling is on, but the profile directory /diag can't be written (EACCES). Profile file writes will fail.",
+        ],
+      ]);
+    });
+
+    it('shows the full directory in the warning', async () => {
+      const long = `/${'a'.repeat(PROFILING_DIR_MAX_LENGTH - 2)}z`;
+      access.mockRejectedValue(fsError('EACCES', `EACCES: permission denied, access '${long}'`));
+      const watchdog = create({ diagnosticDir: long });
+      watchdog.start();
+      watchdog.setProfiling(true);
+      await settle();
+      expect(warnings()).toEqual([
+        [
+          `Event loop watchdog profiling is on, but the profile directory ${long} can't be written (EACCES). Profile file writes will fail.`,
+        ],
+      ]);
+    });
+
+    it("doesn't warn if profiling turns off before the check finishes", async () => {
+      let rejectAccess: (error: Error) => void = () => {};
+      access.mockReturnValue(new Promise((_, reject) => (rejectAccess = reject)));
+      const watchdog = create();
+      watchdog.start();
+      watchdog.setProfiling(true);
+      watchdog.setProfiling(false);
+      rejectAccess(fsError('EACCES', "EACCES: permission denied, access '/diag'"));
+      await settle();
+      expect(warnings()).toEqual([]);
+    });
+
+    it('warns again each time profiling turns back on', async () => {
+      const watchdog = create({});
+      watchdog.start();
+      watchdog.setProfiling(true);
+      await settle();
+      expect(warnings()).toEqual([[NO_DIR_WARNING]]);
+      watchdog.setProfiling(false);
+      watchdog.setProfiling(true);
+      await settle();
+      expect(warnings()).toEqual([[NO_DIR_WARNING], [NO_DIR_WARNING]]);
+    });
   });
 
   it('stops the heartbeat and the worker', async () => {

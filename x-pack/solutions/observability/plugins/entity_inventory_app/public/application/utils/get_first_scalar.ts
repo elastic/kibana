@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { InventoryCellScalar, InventoryCellValue } from '../../inventory_api/types';
+import type { ESQLValue } from '@kbn/entity-inventory-plugin/common';
 
 /** The value of a cell, or the first value of a multi-value cell; `null` when there is none. */
-export const getFirstScalar = (value: InventoryCellValue | undefined): InventoryCellScalar =>
+export const getFirstScalar = (value: ESQLValue | undefined): Exclude<ESQLValue, unknown[]> =>
   (Array.isArray(value) ? value[0] : value) ?? null;

@@ -6,6 +6,7 @@
  */
 
 import type { RegistryVarGroup, RegistryVarsEntry } from '@kbn/fleet-plugin/common';
+import { GENERIC_DATASET_NAME } from '@kbn/fleet-plugin/common';
 import {
   getVarsControlledByVarGroups,
   isVarRequiredByVarGroup,
@@ -303,10 +304,24 @@ export function getDefaultInput(service: AwsServiceMatrixEntry | undefined): str
   return service?.defaultEnabledInputs?.[0] ?? service?.inputs?.[0] ?? null;
 }
 
-// TODO: add the "Create dedicated index template for custom dataset (recommended)" switch
-// that Fleet shows in advanced options for input packages when data_stream.dataset is customised
-// (package_policy_input_stream.tsx, rendered after advancedVars when showPipelinesAndMappings is true).
-// It is a Fleet UI construct, not a manifest var — needs Fleet's useIndexTemplateExists hook.
+export const DATASET_VAR_NAME = 'data_stream.dataset';
+
+/**
+ * Whether Fleet offers the dedicated index template switch for `input`: the dataset is set and,
+ * as for an input package in Fleet's form, is not `generic`. A dataset not entered yet is the
+ * manifest default, which is what the form shows.
+ */
+export function offersDatasetTemplates(
+  service: AwsServiceMatrixEntry,
+  input: string,
+  vars: Record<string, string | string[]> | undefined
+): boolean {
+  const meta = resolveFieldMeta(service, input, DATASET_VAR_NAME);
+  if (!meta) return false;
+  const value = vars?.[DATASET_VAR_NAME] ?? meta.def.default;
+  return typeof value === 'string' && !!value.trim() && value.trim() !== GENERIC_DATASET_NAME;
+}
+
 export function getFlyoutFields(
   service: AwsServiceMatrixEntry,
   activeInput: string | null,

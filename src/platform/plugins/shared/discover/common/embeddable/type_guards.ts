@@ -32,5 +32,9 @@ export function isSearchEmbeddableByValueState(
 export function isSearchEmbeddableLegacyPanelState(
   state: SearchEmbeddablePanelApiState
 ): state is SearchEmbeddableState {
+  // Declarative keys win: Dashboard can merge a package from Discover over a restored legacy state
+  if ('tabs' in state || 'ref_id' in state) {
+    return false;
+  }
   return 'savedObjectId' in state || isSearchEmbeddableByValueState(state);
 }

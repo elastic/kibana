@@ -16,7 +16,9 @@ import { RulesClient, type CreateRulesClientOptions } from '../lib/rules_client'
 import { RulesClientOptionsToken } from '../lib/rules_client/tokens';
 import { ActionPolicyClient } from '../lib/action_policy_client';
 import { ArtifactTypeRegistry } from '../lib/artifact_types';
+import { BuilderTypeRegistry } from '../lib/builder_types';
 import { AlertEventsClient } from '../lib/alert_events_client';
+import { AlertActionsClient } from '../lib/alert_actions_client';
 import { AlertStatusChangedOptIns } from '../lib/alert_status_changed';
 import { RequestSpaceIdToken } from '../lib/services/spaces_service/tokens';
 import { InternalRulesClient } from '../lib/internal_rules_client';
@@ -26,19 +28,24 @@ import type {
   RulesClientApi,
   InternalRulesClientApi,
   ActionPolicyClientApi,
+  AlertActionsClientApi,
   AlertEventsClientApi,
 } from '../types';
 
 /** Builds the plugin's setup contract from its injected registries. */
 const createSetupContract = (
   registry: ArtifactTypeRegistry,
-  alertStatusChangedOptIns: AlertStatusChangedOptIns
+  alertStatusChangedOptIns: AlertStatusChangedOptIns,
+  builderTypes: BuilderTypeRegistry
 ): AlertingServerSetup => ({
   registerArtifactType: (definition) => {
     registry.register(definition);
   },
   enableAlertStatusChanged: (optIn) => {
     alertStatusChangedOptIns.register(optIn);
+  },
+  registerBuilderType: (definition) => {
+    builderTypes.register(definition);
   },
 });
 
@@ -98,6 +105,9 @@ const createStartContract = (
     async getAlertEventsClientWithRequest(request: KibanaRequest): Promise<AlertEventsClientApi> {
       return buildScope(request).get(AlertEventsClient);
     },
+    async getAlertActionsClientWithRequest(request: KibanaRequest): Promise<AlertActionsClientApi> {
+      return buildScope(request).get(AlertActionsClient);
+    },
   };
 };
 
@@ -105,6 +115,7 @@ export function bindContract({ bind }: ContainerModuleLoadOptions) {
   bind(Setup).toResolvedValue(createSetupContract, [
     ArtifactTypeRegistry,
     AlertStatusChangedOptIns,
+    BuilderTypeRegistry,
   ]);
 
   bind(Start).toResolvedValue(createStartContract, [CoreStart('injection'), InternalRulesClient]);

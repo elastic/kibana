@@ -41,7 +41,18 @@ paths:
                     items:
                       type: string
                       maxLength: 512
-                    description: The positive patterns of the space's default data view.
+                    description: >-
+                      The positive patterns of the space's default data view, without the
+                      policy-skipped entries.
+                  policy_skipped:
+                    type: array
+                    maxItems: 500
+                    items:
+                      type: string
+                      maxLength: 512
+                    description: >-
+                      Default data view entries the hunt never searches because their index name
+                      is dot-prefixed (hidden or alerts indices).
                   unreadable_by_worker:
                     type: array
                     maxItems: 500
@@ -55,13 +66,20 @@ paths:
                     items:
                       type: string
                       maxLength: 512
-                    description: Patterns that resolve to nothing for the caller either.
+                    description: >-
+                      Patterns that resolve to nothing for the caller: not found, closed,
+                      or not visible to the caller.
                   source:
                     type: string
                     enum: [last_sweep, role, unavailable]
                   unavailable_reason:
                     type: string
-                    enum: [role_unreadable, discovery_failed, caller_unreadable]
+                    enum: [role_unreadable, discovery_failed, caller_unreadable, empty_universe]
+                    description: >-
+                      Why `source` is `unavailable`. `role_unreadable`: the Worker's role
+                      could not be read. `discovery_failed`: resolving the default data view
+                      failed. `caller_unreadable`: the caller may not resolve indices at all.
+                      `empty_universe`: the default data view has no pattern a hunt may search.
                   checked_at:
                     type: string
                     nullable: true

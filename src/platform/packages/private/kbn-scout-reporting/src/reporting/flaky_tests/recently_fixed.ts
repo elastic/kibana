@@ -8,6 +8,7 @@
  */
 
 import type { SetupBuilds } from './breakages';
+import { describeScope, scopeKey, type JudgedScope } from './judged_scope';
 
 /** A test may be fixed once its last failure on a branch is at least this old. */
 export const MIN_HOURS_SINCE_LAST_FAILURE = 24;
@@ -18,9 +19,11 @@ export const MIN_HOURS_SINCE_LAST_FAILURE = 24;
  */
 export const MIN_MISSED_FAILURES = 1.5;
 
-/** When a test last failed on a branch, and how many builds ran it without failing since. */
-export interface LastFailure {
-  branch: string;
+/**
+ * When a test last failed on a branch, of a pipeline when it is judged on its own, and how many
+ * builds ran it without failing since.
+ */
+export interface LastFailure extends JudgedScope {
   at: Date;
   cleanBuilds: number;
 }
@@ -34,20 +37,24 @@ const latest = (a?: Date, b?: Date): Date | undefined => (!a || (b && b > a) ? b
  * test can only look less fixed for it.
  */
 export const lastFailures = (setups: readonly SetupBuilds[]): LastFailure[] => {
-  const byBranch = new Map<string, Map<string, { ranAt: Date; failedAt?: Date }>>();
-  for (const { branch, builds } of setups) {
-    const branchBuilds = byBranch.get(branch) ?? new Map();
+  const byScope = new Map<
+    string,
+    { scope: JudgedScope; builds: Map<string, { ranAt: Date; failedAt?: Date }> }
+  >();
+  for (const { branch, pipeline, builds } of setups) {
+    const scope = { branch, ...(pipeline ? { pipeline } : {}) };
+    const scoped = byScope.get(scopeKey(scope)) ?? { scope, builds: new Map() };
     for (const { buildId, ranAt, failedAt } of builds) {
-      const existing = branchBuilds.get(buildId);
-      branchBuilds.set(buildId, {
+      const existing = scoped.builds.get(buildId);
+      scoped.builds.set(buildId, {
         ranAt: existing && existing.ranAt < ranAt ? existing.ranAt : ranAt,
         failedAt: latest(existing?.failedAt, failedAt),
       });
     }
-    byBranch.set(branch, branchBuilds);
+    byScope.set(scopeKey(scope), scoped);
   }
 
-  return [...byBranch].flatMap(([branch, builds]) => {
+  return [...byScope.values()].flatMap(({ scope, builds }) => {
     const failures = [...builds.values()].flatMap(({ failedAt }) =>
       failedAt ? [failedAt.getTime()] : []
     );
@@ -56,7 +63,7 @@ export const lastFailures = (setups: readonly SetupBuilds[]): LastFailure[] => {
     }
     const at = Math.max(...failures);
     const cleanBuilds = [...builds.values()].filter(({ ranAt }) => ranAt.getTime() > at).length;
-    return [{ branch, at: new Date(at), cleanBuilds }];
+    return [{ ...scope, at: new Date(at), cleanBuilds }];
   });
 };
 
@@ -68,5 +75,7 @@ export const looksFixed = ({ at, cleanBuilds }: LastFailure, rate: number, now: 
   cleanBuilds * rate >= MIN_MISSED_FAILURES;
 
 /** `no failures in the 73 builds on 9.5 since 2026-10-20` */
-export const describeFix = ({ branch, at, cleanBuilds }: LastFailure): string =>
-  `no failures in the ${cleanBuilds} builds on ${branch} since ${at.toISOString().slice(0, 10)}`;
+export const describeFix = (lastFailure: LastFailure): string =>
+  `no failures in the ${lastFailure.cleanBuilds} builds on ${describeScope(
+    lastFailure
+  )} since ${lastFailure.at.toISOString().slice(0, 10)}`;

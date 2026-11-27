@@ -6,15 +6,24 @@
  */
 
 import React from 'react';
+import type { History } from 'history';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
+import { Router } from '@kbn/shared-ux-router';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import type { StartServices } from './hooks/use_kibana';
-import { createFixtureEntityInventoryApiClient } from './inventory_api/fixture_client';
-import type { EntityInventoryAppStartDependencies } from './types';
+import { createFixtureEntityInventoryApiClient } from './__fixtures__/inventory_client';
+import { EntityInventoryDateRangeProvider } from './application/context/date_range_context';
+import { EntityInventorySearchProvider } from './application/context/search_context';
+import type {
+  EntityInventoryAppPublicConfig,
+  EntityInventoryAppStartDependencies,
+  EntityInventoryEntityCategory,
+} from './types';
 
 const MockPageTemplate = ({ children }: { children?: React.ReactNode }) => (
   <div data-test-subj="mockPageTemplate">{children}</div>
@@ -36,6 +45,13 @@ export const createStartDependenciesMock = (): EntityInventoryAppStartDependenci
   };
 };
 
+/** Browser config of the app, with the time range limit on unless it is disabled. */
+export const createPublicConfigMock = ({
+  timeRangeLimitDisabled = false,
+}: { timeRangeLimitDisabled?: boolean } = {}): EntityInventoryAppPublicConfig => ({
+  timeRangeLimit: { disabled: timeRangeLimitDisabled },
+});
+
 /** Core start mock whose rendering context also supplies the chrome that `AppHeader` reads. */
 export const createCoreStartMock = () => {
   const core = coreMock.createStart();
@@ -51,5 +67,28 @@ export const createAppServicesMock = (overrides: Partial<StartServices> = {}): S
   ...createCoreStartMock(),
   ...createStartDependenciesMock(),
   inventoryApi: createFixtureEntityInventoryApiClient(),
+  config: createPublicConfigMock(),
   ...overrides,
 });
+
+export const MockEntityInventoryProvider = ({
+  entityCategory,
+  services,
+  history,
+  children,
+}: {
+  entityCategory: EntityInventoryEntityCategory;
+  services: React.ComponentProps<typeof KibanaContextProvider>['services'];
+  history: History;
+  children?: React.ReactNode;
+}) => (
+  <KibanaContextProvider services={services}>
+    <Router history={history}>
+      <EntityInventoryDateRangeProvider>
+        <EntityInventorySearchProvider entityCategory={entityCategory}>
+          {children}
+        </EntityInventorySearchProvider>
+      </EntityInventoryDateRangeProvider>
+    </Router>
+  </KibanaContextProvider>
+);

@@ -43,28 +43,27 @@ test.describe('Appearance selector modal', { tag: tags.stateful.classic }, () =>
       await appearance.open();
       await appearance.selectColorMode('dark');
       await appearance.save();
-      await page.reload();
-      expect(await appearance.getThemeTag()).toBe('borealisdark');
+      await expect.poll(() => appearance.getThemeTag()).toBe('borealisdark');
     });
 
     await test.step('light mode is applied after selecting light', async () => {
       await appearance.open();
       await appearance.selectColorMode('light');
       await appearance.save();
-      await page.reload();
-      expect(await appearance.getThemeTag()).toBe('borealislight');
+      await expect.poll(() => appearance.getThemeTag()).toBe('borealislight');
     });
 
     await test.step('space_default follows the space theme:darkMode setting', async () => {
-      // Set the space default theme to dark
+      // Set the space default theme to dark. The reload loads the new value into the browser.
       await uiSettings.set({ 'theme:darkMode': 'enabled' });
+      await page.reload();
+      expect(await appearance.getThemeTag()).toBe('borealislight');
 
       // User profile is on light; switch to space_default to inherit the space theme
       await appearance.open();
       await appearance.selectColorMode('space_default');
       await appearance.save();
-      await page.reload();
-      expect(await appearance.getThemeTag()).toBe('borealisdark');
+      await expect.poll(() => appearance.getThemeTag()).toBe('borealisdark');
     });
   });
 });

@@ -79,6 +79,12 @@ export const getCommandContext = async (
         supportsControls: callbacks?.canSuggestVariables?.() ?? false,
       };
       break;
+    case 'fillnull':
+      context = {
+        supportsControls: callbacks?.canSuggestVariables?.() ?? false,
+        variables: callbacks?.getVariables?.(),
+      };
+      break;
     case 'stats':
       const histogramBarTarget = (await callbacks?.getPreferences?.())?.histogramBarTarget || 50;
       context = {

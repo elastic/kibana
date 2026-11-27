@@ -65,6 +65,7 @@ responses:
               error: "Not Found"
               message: "Conversation 696ccd6d-4bff-4b26-a62e-522ccf2dcd16 not found"
               attributes:
+                code: "conversationNotFound"
                 trace_id: "8d4f2a3b-1c5e-4a9b-9f0d-2e6c1a3d4f5e"
 x-codeSamples:
 - lang: curl

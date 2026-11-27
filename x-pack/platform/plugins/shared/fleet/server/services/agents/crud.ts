@@ -18,7 +18,11 @@ import type { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
 import { appContextService, agentPolicyService } from '..';
 import { getAgentPolicySavedObjectType } from '../agent_policy';
 import type { AgentStatus, FleetServerAgent } from '../../../common/types';
-import { ALL_SPACES_ID, SO_SEARCH_LIMIT } from '../../../common/constants';
+import {
+  AGENTLESS_UNENROLLED_REASON,
+  ALL_SPACES_ID,
+  SO_SEARCH_LIMIT,
+} from '../../../common/constants';
 import { getSortConfig } from '../../../common';
 import { isAgentUpgradeAvailable } from '../../../common/services';
 import {
@@ -31,7 +35,9 @@ import {
   isESClientError,
   AgentNotFoundError,
   FleetUnauthorizedError,
+  AgentRequestInvalidError,
 } from '../../errors';
+import { validateAgentField, validateAgentKueryFields } from '../../routes/utils/filter_utils';
 import { auditLoggingService } from '../audit_logging';
 import { getCurrentNamespace } from '../spaces/get_current_namespace';
 import { isSpaceAwarenessEnabled } from '../spaces/helpers';
@@ -71,6 +77,22 @@ function kueryReferencesStatusField(kuery?: string): boolean {
     return referencesStatus(fromKueryExpression(removeSOAttributes(kuery)));
   } catch (error) {
     return kuery.toLowerCase().includes('status:');
+  }
+}
+
+/**
+ * Rejects a sort field or kuery field that is not in `AGENT_QUERYABLE_MAPPINGS`. The kuery is checked
+ * after `removeSOAttributes`, as it is searched, so prefixed fields such as `fleet-agents.<field>`
+ * are validated too. Runs for every caller of {@link getAgentsByKuery}, including those that do not
+ * validate the kuery at the route (e.g. the Osquery fleet wrapper).
+ */
+export function assertAgentFieldsAreMapped(sortField?: string, kuery?: string): void {
+  if (sortField && validateAgentField(sortField)) {
+    throw new AgentRequestInvalidError(`Sorting by '${sortField}' is not supported`);
+  }
+  const kueryError = validateAgentKueryFields(kuery ? removeSOAttributes(kuery) : undefined);
+  if (kueryError) {
+    throw new AgentRequestInvalidError(`Kuery is not supported: ${kueryError}`);
   }
 }
 
@@ -291,6 +313,9 @@ export async function getAgentsByKuery(
     spaceId,
     includeStatusRuntimeField = true,
   } = options;
+
+  assertAgentFieldsAreMapped(sortField, kuery);
+
   const filters = await getSpaceAwarenessFilterForAgents(spaceId);
 
   if (kuery && kuery !== '') {
@@ -447,11 +472,15 @@ export async function getAgentsByKuery(
       sort,
       query: (() => {
         const baseQuery = kueryNode ? toElasticsearchQuery(kueryNode) : undefined;
-        if (!agentlessExcludeFilter) return baseQuery;
+        if (showAgentless !== false) return baseQuery;
+        // Agents of already deleted agentless policies are not matched by the policy id filter.
         return {
           bool: {
             ...(baseQuery ? { filter: [baseQuery] } : {}),
-            must_not: [agentlessExcludeFilter],
+            must_not: [
+              ...(agentlessExcludeFilter ? [agentlessExcludeFilter] : []),
+              { term: { unenrolled_reason: AGENTLESS_UNENROLLED_REASON } },
+            ],
           },
         };
       })(),

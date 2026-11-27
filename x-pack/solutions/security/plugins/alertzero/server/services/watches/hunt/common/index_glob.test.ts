@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { clusterCovers, compileGlob, exclusionReachesCluster, globsOverlap } from './index_glob';
+import {
+  clusterCovers,
+  compileGlob,
+  globMatches,
+  exclusionReachesCluster,
+  globsOverlap,
+} from './index_glob';
 
 describe('compileGlob', () => {
   it('treats only `*` as a wildcard', () => {
@@ -51,5 +57,26 @@ describe('exclusionReachesCluster', () => {
     expect(exclusionReachesCluster('*', 'remote')).toBe(true);
     expect(exclusionReachesCluster('remote', '*')).toBe(true);
     expect(exclusionReachesCluster('remote', 'other')).toBe(false);
+  });
+});
+
+describe('globMatches', () => {
+  it.each([
+    ['logs-*', 'logs-okta', true],
+    ['*', '', true],
+    ['a*b*c', 'axxbyyc', true],
+    ['a*b*c', 'axxbyy', false],
+    ['arch*-west', 'archive-west', true],
+    ['arch*-west', 'archive-east', false],
+    ['abc', 'abc', true],
+    ['abc', 'abd', false],
+    ['**a', 'xa', true],
+  ])('%s against %s is %s', (pattern, text, expected) => {
+    expect(globMatches(pattern, text)).toBe(expected);
+  });
+
+  it('answers a many-star pattern against a near-match', () => {
+    // A backtracking matcher would not finish this input at all.
+    expect(globMatches(`${'a*'.repeat(30)}b`, 'a'.repeat(60))).toBe(false);
   });
 });

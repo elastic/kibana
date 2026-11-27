@@ -375,6 +375,14 @@ export const withPublishedTelemetry = (unit: Unit): Unit => {
   );
 };
 
+/**
+ * The unit as it is sent on save: wiring the schema and the distributor reject is
+ * left out, and routing pipelines are narrowed to the signals their routes export.
+ * Save diagnostics point into this unit, not the staged one.
+ */
+export const toPublishedUnit = (stagedUnit: Unit): Unit =>
+  withPublishedTelemetry(withoutUnconnectedWiring(stagedUnit));
+
 /** Like `writePipeline`, but keeps a pipeline that forwards nowhere, as a staged, unconnected node. */
 const replacePipelineConfig = (
   unit: Unit,
@@ -733,47 +741,142 @@ export const isolateSourceLine = (
   };
 };
 
-/** Condition of the placeholder rule {@link addTestRoutingToLine} creates. */
-const TEST_ROUTING_CONDITION = 'true';
+/** Config with `routes` as its one `routes` entry, in place of the first existing one. */
+const withRoutes = (config: PipelineConfig, routes: readonly RouteRule[]): PipelineConfig => {
+  const entry: PipelineConfigEntry = { name: PIPELINE_ENTRY.routes, value: [...routes] };
+  const firstIndex = config.findIndex(({ name }) => name === PIPELINE_ENTRY.routes);
+  if (firstIndex === -1) {
+    return [...config, entry];
+  }
+  return config.flatMap((current, index): PipelineConfigEntry[] => {
+    if (current.name !== PIPELINE_ENTRY.routes) {
+      return [current];
+    }
+    return index === firstIndex ? [entry] : [];
+  });
+};
 
 /**
- * Testing aid: routes one drawn line through a routing node with a single
- * placeholder rule. A source line is first moved onto a pipeline of its own; a
- * processing line is only routed when it is its pipeline's one destination.
- * Returns `unit` unchanged when the line cannot be routed. TO BE REMOVED
+ * The rules of the routing node of `pipelineId`. A routed child pipeline with a
+ * plain destinations list reads as one rule with no condition.
  */
-export const addTestRoutingToLine = (
-  unit: Unit,
-  origin: UnitConnectionOrigin,
-  destinationId: string
-): Unit => {
-  let routable = unit;
-  let pipelineIndex: number;
-  if (origin.kind === GRAPH_ENDPOINT_KIND.source) {
-    const isolated = isolateSourceLine(unit, origin.id, destinationId);
-    if (!isolated) {
-      return unit;
-    }
-    routable = isolated.unit;
-    pipelineIndex = findPipelineIndex(routable, isolated.pipelineId);
-  } else {
-    pipelineIndex = findWirableProcessingPipelineIndex(unit, origin.ref);
+export const getPipelineRoutes = (unit: Unit, pipelineId: string): RouteRule[] => {
+  const pipeline = findPipeline(unit, pipelineId);
+  if (!pipeline) {
+    return [];
   }
-  const pipeline = routable.unit.pipelines[pipelineIndex];
-  if (
-    !pipeline ||
-    pipelineUsesRoutes(pipeline.config) ||
-    !isEqual(readEntryIds(pipeline.config, PIPELINE_ENTRY.destinations), [destinationId])
-  ) {
+  if (pipelineUsesRoutes(pipeline.config)) {
+    return readRoutes(pipeline.config);
+  }
+  const destinations = readEntryIds(pipeline.config, PIPELINE_ENTRY.destinations);
+  return destinations.length > 0 ? [{ destinations }] : [];
+};
+
+/** Whether the routing node of `pipelineId` can have its rules replaced. */
+export const canEditPipelineRoutes = (unit: Unit, pipelineId: string): boolean => {
+  const pipeline = findPipeline(unit, pipelineId);
+  return pipeline !== undefined && !hasScopedWiring(pipeline.config);
+};
+
+/**
+ * Drops the rule targets of a routing pipeline that no longer share a signal
+ * with what the rule carries, then does the same for the routing pipelines it
+ * delegates to, whose incoming signals narrow with it. A rule left without
+ * targets stays, unconnected, so it can be wired again.
+ */
+const withoutUnfitRuleTargets = (unit: Unit, pipelineId: string): Unit =>
+  [...delegatedFrom(unit.unit.pipelines, [pipelineId])].reduce((current, id) => {
+    const pipelineIndex = findPipelineIndex(current, id);
+    const pipeline = current.unit.pipelines[pipelineIndex];
+    if (!pipeline || !pipelineUsesRoutes(pipeline.config) || hasScopedWiring(pipeline.config)) {
+      return current;
+    }
+    let fitted: UnitPipeline = pipeline;
+    readRoutes(pipeline.config).forEach((route, ruleIndex) => {
+      const targets = routeTargets(route);
+      const kept = targets.filter(
+        (target) =>
+          intersectSignals(
+            routeFit(current, pipeline, ruleIndex, target),
+            pipeline.supported_telemetry
+          ).length > 0
+      );
+      const config =
+        kept.length < targets.length ? withRuleTargets(fitted, ruleIndex, kept) : undefined;
+      if (config) {
+        fitted = { ...fitted, config };
+      }
+    });
+    return fitted === pipeline
+      ? current
+      : replacePipelineConfig(current, pipelineIndex, fitted.config);
+  }, unit);
+
+/**
+ * Removes only the routing node of `pipeline`: its processing node stays, left
+ * without outputs. A pipeline with no processing goes, and rules that
+ * delegated to it stay, without that target.
+ */
+const removePipelineRouting = (unit: Unit, pipeline: UnitPipeline): Unit => {
+  if (pipelineHasProcessors(pipeline.config)) {
+    return replacePipelines(
+      unit,
+      unit.unit.pipelines.map((current) =>
+        current.id === pipeline.id
+          ? {
+              ...current,
+              config: current.config.filter(
+                ({ name }) => name !== PIPELINE_ENTRY.routes && name !== PIPELINE_ENTRY.destinations
+              ),
+            }
+          : current
+      )
+    );
+  }
+  return replacePipelines(
+    unit,
+    unit.unit.pipelines.flatMap((current) =>
+      current.id === pipeline.id
+        ? []
+        : [
+            keepRoutes(current, (route) =>
+              isDelegatingRoute(route) && route.pipelines.includes(pipeline.id)
+                ? [{ ...route, pipelines: route.pipelines.filter((id) => id !== pipeline.id) }]
+                : [route]
+            ),
+          ]
+    )
+  );
+};
+
+/**
+ * Replaces the rules of a routing node. A routed child pipeline with a plain
+ * destinations list is turned into routes, and no `routes` removes the node.
+ * Returns `unit` unchanged when the pipeline is missing or scoped.
+ */
+export const writePipelineRoutes = (
+  unit: Unit,
+  pipelineId: string,
+  routes: readonly RouteRule[],
+  supportedTelemetry?: readonly UnitSignal[]
+): Unit => {
+  const pipelineIndex = findPipelineIndex(unit, pipelineId);
+  const pipeline = unit.unit.pipelines[pipelineIndex];
+  if (!pipeline || hasScopedWiring(pipeline.config)) {
     return unit;
   }
-  return writePipeline(routable, pipelineIndex, [
-    ...withIdentifiers(pipeline.config, PIPELINE_ENTRY.destinations, []),
-    {
-      name: PIPELINE_ENTRY.routes,
-      value: [{ when: TEST_ROUTING_CONDITION, destinations: [destinationId] }],
-    },
-  ]);
+  if (routes.length === 0) {
+    return removePipelineRouting(unit, pipeline);
+  }
+  return withoutUnfitRuleTargets(
+    writePipeline(
+      unit,
+      pipelineIndex,
+      withRoutes(withIdentifiers(pipeline.config, PIPELINE_ENTRY.destinations, []), routes),
+      supportedTelemetry
+    ),
+    pipelineId
+  );
 };
 
 /**
@@ -1552,3 +1655,206 @@ const removeComponentReferences = (unit: Unit, componentId: string): Unit =>
  */
 export const removeComponentFromPipelines = (unit: Unit, componentId: string): Unit =>
   pruneUnit(unit, removeComponentReferences(unit, componentId));
+
+/** A drawn line into a destination that a routing node can be put on. */
+export interface UnitRoutableLine {
+  origin: UnitLineOrigin;
+  destinationId: string;
+}
+
+/**
+ * Routes a source or processing line through the pipeline the line runs on. A
+ * source line is first moved onto a pipeline of its own; a processing line is
+ * only routable when it is its pipeline's one destination.
+ */
+const routePipelineLine = (
+  unit: Unit,
+  origin: UnitConnectionOrigin,
+  destinationId: string,
+  routes: readonly RouteRule[],
+  supportedTelemetry?: readonly UnitSignal[]
+): Unit => {
+  let routable = unit;
+  let pipelineIndex: number;
+  if (origin.kind === GRAPH_ENDPOINT_KIND.source) {
+    const isolated = isolateSourceLine(unit, origin.id, destinationId);
+    if (!isolated) {
+      return unit;
+    }
+    routable = isolated.unit;
+    pipelineIndex = findPipelineIndex(routable, isolated.pipelineId);
+  } else {
+    pipelineIndex = findWirableProcessingPipelineIndex(unit, origin.ref);
+  }
+  const pipeline = routable.unit.pipelines[pipelineIndex];
+  const destinations = pipeline ? readEntryIds(pipeline.config, PIPELINE_ENTRY.destinations) : [];
+  // A processing node may fan out; its other destinations are kept by the rules
+  // from `getNewRoutingRules`. A source line is isolated onto its own pipeline first.
+  const isRoutable =
+    origin.kind === GRAPH_ENDPOINT_KIND.source
+      ? isEqual(destinations, [destinationId])
+      : destinations.includes(destinationId);
+  if (!pipeline || pipelineUsesRoutes(pipeline.config) || !isRoutable) {
+    return unit;
+  }
+  return withoutUnfitRuleTargets(
+    writePipeline(
+      routable,
+      pipelineIndex,
+      withRoutes(withIdentifiers(pipeline.config, PIPELINE_ENTRY.destinations, []), routes),
+      supportedTelemetry
+    ),
+    pipeline.id
+  );
+};
+
+/** A child routing node only receives what its parent rule carries, so requested signals are narrowed to those. */
+const childSignals = (
+  carried: readonly UnitSignal[],
+  requested: readonly UnitSignal[] | undefined
+): UnitSignal[] => {
+  const narrowed = intersectSignals(carried, requested);
+  return narrowed.length > 0 ? narrowed : [...carried];
+};
+
+/**
+ * Routes a rule's line through a new child routing pipeline the rule delegates
+ * to. Only a rule whose one target is the line's destination is routable, since
+ * a rule lists either destinations or pipelines.
+ */
+const routeRuleLine = (
+  unit: Unit,
+  rule: RouteRuleRef,
+  destinationId: string,
+  routes: readonly RouteRule[],
+  supportedTelemetry?: readonly UnitSignal[]
+): Unit => {
+  const pipelineIndex = findPipelineIndex(unit, rule.pipelineId);
+  const pipeline = unit.unit.pipelines[pipelineIndex];
+  const targets = pipeline ? readRuleTargets(pipeline, rule.ruleIndex) : undefined;
+  if (
+    !pipeline ||
+    !pipelineUsesRoutes(pipeline.config) ||
+    !isEqual(targets, [{ kind: LINE_TARGET_KIND.destination, id: destinationId }])
+  ) {
+    return unit;
+  }
+  const childId = allocateComponentId(`${pipeline.id}-routing`, usedComponentIds(unit), {
+    bareFirst: true,
+  });
+  const config = withRuleTargets(pipeline, rule.ruleIndex, [
+    { kind: LINE_TARGET_KIND.pipeline, id: childId },
+  ]);
+  if (!config) {
+    return unit;
+  }
+  const withChild = replacePipelines(unit, [
+    ...unit.unit.pipelines,
+    {
+      id: childId,
+      supported_telemetry: childSignals(
+        ruleSignals(unit, pipeline, rule.ruleIndex),
+        supportedTelemetry
+      ),
+      config: [{ name: PIPELINE_ENTRY.routes, value: [...routes] }],
+    },
+  ]);
+  return withoutUnfitRuleTargets(writePipeline(withChild, pipelineIndex, config), childId);
+};
+
+/**
+ * Routes one drawn line through a new routing node with `routes`, handling
+ * `supportedTelemetry` when given. Returns `unit` unchanged when the line
+ * cannot be routed or `routes` is empty.
+ */
+export const routeLine = (
+  unit: Unit,
+  { origin, destinationId }: UnitRoutableLine,
+  routes: readonly RouteRule[],
+  supportedTelemetry?: readonly UnitSignal[]
+): Unit => {
+  if (routes.length === 0) {
+    return unit;
+  }
+  const from = lineOrigin(origin);
+  return from.kind === GRAPH_ENDPOINT_KIND.rule
+    ? routeRuleLine(unit, from.rule, destinationId, routes, supportedTelemetry)
+    : routePipelineLine(unit, from, destinationId, routes, supportedTelemetry);
+};
+
+/**
+ * The rules a new routing node on the line starts with: one with no condition
+ * that keeps the line's destination. A processing node's other destinations
+ * keep receiving all data through a copy rule with no condition ahead of it.
+ */
+export const getNewRoutingRules = (
+  unit: Unit,
+  { origin, destinationId }: UnitRoutableLine
+): RouteRule[] => {
+  const from = lineOrigin(origin);
+  const pipeline =
+    from.kind === GRAPH_ENDPOINT_KIND.processing
+      ? unit.unit.pipelines[findWirableProcessingPipelineIndex(unit, from.ref)]
+      : undefined;
+  const others = pipeline
+    ? readEntryIds(pipeline.config, PIPELINE_ENTRY.destinations).filter(
+        (id) => id !== destinationId
+      )
+    : [];
+  return [
+    ...(others.length > 0 ? [{ action: 'copy' as const, destinations: others }] : []),
+    { destinations: [destinationId] },
+  ];
+};
+
+/** Whether {@link routeLine} can put a routing node on the line. */
+export const canRouteLine = (unit: Unit, line: UnitRoutableLine): boolean =>
+  routeLine(unit, line, [{ destinations: [line.destinationId] }]) !== unit;
+
+/** The signals a routing node handles, and those it could handle from what flows into it. */
+export interface RoutingSignals {
+  current: UnitSignal[];
+  available: UnitSignal[];
+}
+
+const withCurrent = (
+  current: readonly UnitSignal[],
+  incoming: readonly UnitSignal[]
+): RoutingSignals => ({
+  current: [...current],
+  available: orderSignals([...incoming, ...current]),
+});
+
+/**
+ * Signals of the routing node of `pipelineId`. A node narrowed on publish can
+ * be widened again up to the signals that arrive at it.
+ */
+export const getPipelineRoutingSignals = (unit: Unit, pipelineId: string): RoutingSignals => {
+  const pipeline = findPipeline(unit, pipelineId);
+  return pipeline
+    ? withCurrent(pipeline.supported_telemetry, upstreamSignals(unit, pipelineId))
+    : withCurrent([], []);
+};
+
+/** Signals a new routing node on the line starts with, and those it can take on. */
+export const getRoutableLineSignals = (
+  unit: Unit,
+  { origin: drawnOrigin, destinationId }: UnitRoutableLine
+): RoutingSignals => {
+  const origin = lineOrigin(drawnOrigin);
+  if (origin.kind === GRAPH_ENDPOINT_KIND.rule) {
+    const pipeline = findPipeline(unit, origin.rule.pipelineId);
+    // The child node only receives what the rule carries, not everything its pipeline does.
+    const carried = pipeline ? ruleSignals(unit, pipeline, origin.rule.ruleIndex) : [];
+    return withCurrent(carried, carried);
+  }
+  if (origin.kind === GRAPH_ENDPOINT_KIND.source) {
+    const pipeline =
+      unit.unit.pipelines[
+        findUnprocessedSourcePipelineIndex(unit.unit.pipelines, origin.id, destinationId)
+      ];
+    const incoming = orderSignals(componentSignals(unit.unit.sources, [origin.id]) ?? []);
+    return withCurrent(pipeline?.supported_telemetry ?? incoming, incoming);
+  }
+  return getPipelineRoutingSignals(unit, origin.ref.pipelineId);
+};

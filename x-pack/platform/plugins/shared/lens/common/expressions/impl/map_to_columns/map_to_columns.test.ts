@@ -486,5 +486,32 @@ describe('map_to_columns', () => {
 
       expect(result.columns[0].meta.sourceParams?.params).toStrictEqual({});
     });
+
+    it('keeps the number_range format on range columns and applies the format to others', async () => {
+      const input: Datatable = {
+        type: 'datatable',
+        columns: [
+          { id: 'a', name: 'A', meta: { type: 'number', params: { id: 'number' } } },
+          { id: 'b', name: 'B', meta: { type: 'number_range', params: { id: 'number_range' } } },
+        ],
+        rows: [{ a: 1, b: '0.3..0.4' }],
+      };
+      const format = { id: 'number', params: { decimals: 0, compact: true } };
+      const idMap = {
+        a: [{ id: 'a', label: 'A', format }],
+        b: [{ id: 'b', label: 'B', format }],
+      };
+
+      const result = await mapToColumns.fn(
+        input,
+        { idMap: JSON.stringify(idMap), isTextBased: true },
+        createMockExecutionContext()
+      );
+
+      expect(result.columns.map((column) => column.meta.params)).toStrictEqual([
+        format,
+        { id: 'number_range' },
+      ]);
+    });
   });
 });

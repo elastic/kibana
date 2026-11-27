@@ -138,7 +138,7 @@ describe('classifyOnlineEvalsRoundStepDefinition', () => {
     });
   });
 
-  it('skips an alert recovery that leaves no confirmed root cause to grade against', async () => {
+  it('scores an alert recovery that dismisses the confirmed root cause without confirming another', async () => {
     const { run } = setup({
       rounds: recoveryRounds,
       attachments: hypotheses([END_OF_ROUND_1, 'confirmed'], [END_OF_RUN, 'dismissed']),
@@ -146,11 +146,26 @@ describe('classifyOnlineEvalsRoundStepDefinition', () => {
 
     await expect(run({ follow_up: 'alert_recovered' })).resolves.toEqual({
       output: {
-        should_score: false,
+        should_score: true,
         round_kind: 'alert_recovery',
         round_id: 'round-2',
         root_cause_outcome: 'withdrawn',
-        skip_reason: 'recovery_unresolved',
+      },
+    });
+  });
+
+  it('scores an alert recovery that leaves no hypothesis confirmed, such as a benign self-resolution', async () => {
+    const { run } = setup({
+      rounds: recoveryRounds,
+      attachments: hypotheses([END_OF_ROUND_1, 'investigating'], [END_OF_RUN, 'dismissed']),
+    });
+
+    await expect(run({ follow_up: 'alert_recovered' })).resolves.toEqual({
+      output: {
+        should_score: true,
+        round_kind: 'alert_recovery',
+        round_id: 'round-2',
+        root_cause_outcome: 'unchanged',
       },
     });
   });

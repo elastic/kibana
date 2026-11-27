@@ -6,12 +6,7 @@
  */
 
 import { MockUrlService } from '@kbn/share-plugin/common/mocks';
-import {
-  ExecutionStatus,
-  StepCategory,
-  WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG,
-} from '@kbn/workflows';
-import { of } from 'rxjs';
+import { ExecutionStatus, StepCategory } from '@kbn/workflows';
 import {
   NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
   NIGHTSHIFT_INVESTIGATION_FAILURE_SWEEP_WORKFLOW_ID,
@@ -40,7 +35,10 @@ import {
 import { InvestigationLocatorDefinition } from '../common/locators';
 import { NightshiftInvestigationsClient } from '../server/client/investigations_client';
 import type { WorkflowSubjectInput } from '../server/client/investigation_subjects';
-import { createRoutingTestContext } from '../server/lib/notifications/notification_routing.mock';
+import {
+  createRoutingTestContext,
+  getTestIsomerRuntime,
+} from '../server/lib/notifications/notification_routing.mock';
 import type { NotificationExecution } from '../server/lib/notifications/notification_delivery';
 import { handleInvestigationFailureStepDefinition } from '../server/step_definitions/handle_investigation_failure';
 import { sweepInvestigationFailuresStepDefinition } from '../server/step_definitions/sweep_investigation_failures';
@@ -72,9 +70,6 @@ const setup = (failure?: Failure, persistenceFailures = 0, eventWriteFailure = f
     .mockResolvedValue('default-nightshift-connector');
   const fixture = createNightshiftWorkflowFixture();
   const { engine } = fixture;
-  engine.dependencies.coreStart.featureFlags.getBooleanValue$.mockImplementation(
-    (flag, defaultValue) => of(flag === WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG || defaultValue)
-  );
   const routing = createRoutingTestContext('default');
   const destinations = [{ type: 'slack', connector_id: 'slack', params: { channel: '#alerts' } }];
   const delivered: NotificationExecution[] = [];
@@ -211,6 +206,8 @@ const setup = (failure?: Failure, persistenceFailures = 0, eventWriteFailure = f
       getUnsuccessfulRun: client.getUnsuccessfulRun.bind(client),
       isLatestInvestigationRun: client.isLatestInvestigationRun.bind(client),
       getInvestigationExecutionContext: client.getInvestigationExecutionContext.bind(client),
+      getLifecycleCorrelation: client.getLifecycleCorrelation.bind(client),
+      reportRunEnded: client.reportRunEnded.bind(client),
       getLifecycleSubject: async () => ({
         subject: { type: 'manual', id: 'question' },
         triggerType: 'manual',
@@ -218,6 +215,7 @@ const setup = (failure?: Failure, persistenceFailures = 0, eventWriteFailure = f
       }),
     })) as never,
     getActions: () => ({ getActionsClientWithRequestInSpace: async () => ({ execute }) } as never),
+    getIsomerRuntime: getTestIsomerRuntime,
     getRoutingClient: async () => routing.client,
     getTriggerEmitter: () => emitter,
   };
