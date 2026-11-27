@@ -14,6 +14,7 @@ import {
   type StreamsUnit,
 } from '@kbn/streams-schema';
 import { UnitStatsClient } from './client';
+import { UNIT_HEARTBEAT_DOWN_THRESHOLD_MS } from './constants';
 
 const unit: StreamsUnit.Configuration = {
   sources: [{ id: 'otlp-input', type: 'otlp', supported_telemetry: ['logs'] }],
@@ -1293,5 +1294,87 @@ describe('UnitStatsClient.getDestinationCollections', () => {
     await expect(
       getCollections(collectionsEsql(failWith(responseError(403))))
     ).rejects.toMatchObject({ code: 'forbidden', statusCode: 403 });
+  });
+});
+
+describe('UnitStatsClient.getUnitLiveness', () => {
+  /** The row of the heartbeat query for a heartbeat this long before now, or none when null. */
+  const heartbeatAgo = (ms: number | null): EsqlResponse => ({
+    columns: [{ name: 'last_seen', type: 'date' }],
+    values: [[ms === null ? null : new Date(now.getTime() - ms).toISOString()]],
+  });
+
+  const heartbeatEsql = (respond: () => EsqlResponse = () => heartbeatAgo(30_000)) =>
+    jest.fn(async ({ query }: { query: string }) => (isProbe(query) ? responses.probe : respond()));
+
+  const getLiveness = (esql: jest.Mock, logger = loggingSystemMock.createLogger()) =>
+    new UnitStatsClient({
+      esClient: {
+        esql: { query: esql },
+        security: { hasPrivileges },
+      } as unknown as ElasticsearchClient,
+      logger,
+    }).getUnitLiveness({ unitId: 'default', now });
+
+  beforeEach(() => {
+    hasPrivileges.mockReset().mockResolvedValue({ has_all_requested: true });
+  });
+
+  it('is up, with the time it was last seen, for a recent heartbeat', async () => {
+    await expect(getLiveness(heartbeatEsql())).resolves.toEqual({
+      state: 'up',
+      last_seen: new Date(now.getTime() - 30_000).toISOString(),
+    });
+  });
+
+  it('is down for a heartbeat older than the down threshold', async () => {
+    const esql = heartbeatEsql(() => heartbeatAgo(UNIT_HEARTBEAT_DOWN_THRESHOLD_MS + 1));
+
+    await expect(getLiveness(esql)).resolves.toMatchObject({ state: 'down' });
+  });
+
+  it('is no heartbeat when the unit has none in the lookback', async () => {
+    await expect(getLiveness(heartbeatEsql(() => heartbeatAgo(null)))).resolves.toEqual({
+      state: 'no_heartbeat',
+      last_seen: null,
+    });
+  });
+
+  it('asks for the heartbeat of the unit up to the time it is read', async () => {
+    const esql = heartbeatEsql();
+    await getLiveness(esql);
+
+    const [query] = statsQueries(esql);
+    expect(statsQueries(esql)).toHaveLength(1);
+    expect(query).toContain('resource.attributes.unit.id == "default"');
+    expect(query).toContain('metrics.streams.unit.uptime IS NOT NULL');
+    expect(query).toContain(`@timestamp < "${now.toISOString()}"`);
+  });
+
+  it('is no heartbeat, with no heartbeat query, while the stats stream does not exist', async () => {
+    const esql = jest.fn(async () => {
+      throw unknownIndexError();
+    });
+
+    await expect(getLiveness(esql)).resolves.toEqual({ state: 'no_heartbeat', last_seen: null });
+    expect(esql).toHaveBeenCalledTimes(1);
+  });
+
+  it('throws forbidden when the stream does not exist and the user cannot read it', async () => {
+    hasPrivileges.mockResolvedValue({ has_all_requested: false });
+    const esql = jest.fn(async () => {
+      throw unknownIndexError();
+    });
+
+    await expect(getLiveness(esql)).rejects.toMatchObject({ code: 'forbidden', statusCode: 403 });
+  });
+
+  it('throws the mapped error, and logs it once at warn, when the heartbeat query fails', async () => {
+    const logger = loggingSystemMock.createLogger();
+
+    await expect(
+      getLiveness(heartbeatEsql(failWith(responseError(500))), logger)
+    ).rejects.toMatchObject({ code: 'error', statusCode: 500 });
+    expect(logger.warn).toHaveBeenCalledTimes(1);
   });
 });

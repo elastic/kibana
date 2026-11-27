@@ -19,6 +19,7 @@ export {
   streamsPipelineSchema,
   streamsSignalSchema,
   streamsSupportedTelemetrySchema,
+  streamsUnitHealthResponseSchema,
   streamsUnitIdentifierSchema,
   streamsUnitResponseSchema,
   streamsUnitSchema,

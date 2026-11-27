@@ -75,6 +75,18 @@ export const STEP_ROUTE_INDEX_FIELD = 'scope.attributes.streams.route.index';
 export const STEP_ITEMS_FIELD = 'metrics.streams.step.items';
 export const STEP_DURATION_FIELD = 'metrics.streams.step.duration';
 
+/**
+ * The unit heartbeat: the collector reports its uptime every export interval, with or without
+ * traffic. The field is a counter, so a query can test it for presence but not aggregate it.
+ */
+export const UNIT_UPTIME_FIELD = 'metrics.streams.unit.uptime';
+
+/** A unit whose newest heartbeat is older than this is down. The export interval is 30 seconds. */
+export const UNIT_HEARTBEAT_DOWN_THRESHOLD_MS = 2 * 60 * 1000;
+
+/** How far back to look for a heartbeat. A unit that has been silent for longer has none. */
+export const UNIT_HEARTBEAT_LOOKBACK_MS = 24 * 60 * 60 * 1000;
+
 /** Columns the stats queries return and the mappers read into the response. */
 export const STATS_COLUMN = {
   id: 'id',
@@ -98,6 +110,7 @@ export const STATS_COLUMN = {
   authenticationItems: 'authentication_items',
   authorizationItems: 'authorization_items',
   avgDurationPerItem: 'avg_duration_per_item',
+  lastSeen: 'last_seen',
 } as const;
 
 /**
