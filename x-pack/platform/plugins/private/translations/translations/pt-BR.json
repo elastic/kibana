@@ -15105,7 +15105,6 @@
     "workflowsExtensions.triggers.workflowExecutionFailed.schema.workflow.spaceId": "O espaço em que o fluxo de trabalho foi executado.",
     "workflowsExtensions.triggers.workflowExecutionFailed.schema.workflowGroup": "Detalhes do fluxo de trabalho que falhou.",
     "workflowsExtensions.triggers.workflowExecutionFailed.title": "Falha no fluxo de trabalho",
-    "workflowsUi.bottomBar.editorViewGraph": "Graph",
     "workflowsUi.bottomBar.editorViewLegend": "Visualização do editor",
     "workflowsUi.bottomBar.editorViewYaml": "YAML",
     "workflowsUi.bottomBar.expandControls": "Exibir barra de ferramentas",

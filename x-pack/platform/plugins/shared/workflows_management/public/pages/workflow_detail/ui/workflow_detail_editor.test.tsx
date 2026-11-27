@@ -559,11 +559,11 @@ describe('WorkflowDetailEditor', () => {
 
     it('floats above the validation panel docked under the YAML editor', () => {
       const { getByTestId } = renderEditor();
-      expect(getBottomBarOffset(getByTestId)).toBe('12px');
+      expect(getBottomBarOffset(getByTestId)).toBe('16px');
 
       fireEvent.click(getByTestId('report-validation-panel-height'));
 
-      expect(getBottomBarOffset(getByTestId)).toBe('60px');
+      expect(getBottomBarOffset(getByTestId)).toBe('64px');
     });
 
     it('ignores the validation panel height in graph view', () => {
@@ -575,7 +575,7 @@ describe('WorkflowDetailEditor', () => {
 
       fireEvent.click(getByTestId('report-validation-panel-height'));
 
-      expect(getBottomBarOffset(getByTestId)).toBe('12px');
+      expect(getBottomBarOffset(getByTestId)).toBe('16px');
     });
   });
 
