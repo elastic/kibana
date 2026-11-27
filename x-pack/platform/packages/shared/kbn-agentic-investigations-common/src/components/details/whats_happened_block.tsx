@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useMemo, useState } from 'react';
-import { EuiButtonEmpty, EuiMarkdownFormat } from '@elastic/eui';
+import { EuiButtonEmpty, EuiMarkdownFormat, EuiSkeletonText } from '@elastic/eui';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import {
   FLYOUT_GROUPED_ATTACHMENTS_ORDER,
@@ -22,11 +22,16 @@ export interface WhatsHappenedBlockProps {
   summary?: string;
   attachments: VersionedAttachment[] | undefined;
   groupedAttachments: FlyoutGroupedAttachmentsRegistry;
+  /** While true and there is no summary yet, the block shows a skeleton instead of vanishing. */
+  isLoading?: boolean;
 }
 
-/** The summary and the grouped attachments card; renders nothing when there is neither. */
+/**
+ * The summary and the grouped attachments card. Renders nothing when there is neither, unless the
+ * summary is still loading.
+ */
 export const WhatsHappenedBlock = memo<WhatsHappenedBlockProps>(
-  ({ summary, attachments, groupedAttachments }) => {
+  ({ summary, attachments, groupedAttachments, isLoading = false }) => {
     const [expanded, setExpanded] = useState(false);
 
     const hasAttachments = useMemo(
@@ -44,7 +49,9 @@ export const WhatsHappenedBlock = memo<WhatsHappenedBlockProps>(
     const isCondensed = leadParagraph !== undefined && leadParagraph !== trimmedSummary;
     const displayedSummary = isCondensed && !expanded ? leadParagraph : summary;
 
-    if (!summary && !hasAttachments) {
+    const showSkeleton = isLoading && !summary;
+
+    if (!summary && !hasAttachments && !showSkeleton) {
       return null;
     }
 
@@ -54,6 +61,15 @@ export const WhatsHappenedBlock = memo<WhatsHappenedBlockProps>(
           <EuiMarkdownFormat textSize="s" color="subdued">
             {displayedSummary ?? ''}
           </EuiMarkdownFormat>
+        )}
+        {showSkeleton && (
+          <EuiSkeletonText
+            lines={2}
+            size="s"
+            isLoading
+            contentAriaLabel={DETAILS_FLYOUT_LABELS.sections.overview}
+            data-test-subj="investigationOverviewSummarySkeleton"
+          />
         )}
         {isCondensed && (
           <div>

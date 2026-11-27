@@ -252,9 +252,39 @@ describe('OverviewTab', () => {
     renderTab({ showLoadingSection: true });
 
     expect(screen.getByTestId('investigationOverviewLoadingSection')).toBeInTheDocument();
-    expect(
-      screen.getByText('Still investigating. This flyout will update with new findings.')
-    ).toBeInTheDocument();
+    expect(screen.getByText('Investigating…')).toBeInTheDocument();
+  });
+
+  it('shows a "What\'s happened" skeleton while loading without a summary', () => {
+    renderTab({
+      attachments: [],
+      investigationOverrides: { summary: undefined },
+      showLoadingSection: true,
+    });
+
+    expect(screen.getByText("What's happened")).toBeInTheDocument();
+    expect(screen.getByTestId('investigationOverviewSummarySkeleton')).toBeInTheDocument();
+  });
+
+  it('shows the summary instead of the skeleton once it arrives', () => {
+    renderTab({ attachments: [], showLoadingSection: true });
+
+    expect(screen.getByText(investigation.summary)).toBeInTheDocument();
+    expect(screen.queryByTestId('investigationOverviewSummarySkeleton')).not.toBeInTheDocument();
+  });
+
+  it('holds back the "Proposed actions" block while loading', () => {
+    renderTab({ proposedActionsContent: <div>Rows</div>, showLoadingSection: true });
+
+    expect(screen.queryByText('Proposed actions')).not.toBeInTheDocument();
+    expect(screen.queryByText('Rows')).not.toBeInTheDocument();
+  });
+
+  it('shows the "Proposed actions" block when not loading', () => {
+    renderTab({ proposedActionsContent: <div>Rows</div>, showLoadingSection: false });
+
+    expect(screen.getByText('Proposed actions')).toBeInTheDocument();
+    expect(screen.getByText('Rows')).toBeInTheDocument();
   });
 
   it('renders no loading skeleton otherwise', () => {

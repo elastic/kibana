@@ -138,4 +138,50 @@ describe('WhatsHappenedBlock', () => {
 
     expect(screen.queryByRole('button', { name: 'Show more' })).not.toBeInTheDocument();
   });
+
+  describe('while loading', () => {
+    it('renders the heading with a skeleton when there is no summary', () => {
+      render(
+        <WhatsHappenedBlock isLoading attachments={[]} groupedAttachments={groupedAttachments} />
+      );
+
+      expect(screen.getByText("What's happened")).toBeInTheDocument();
+      expect(screen.getByTestId('investigationOverviewSummarySkeleton')).toBeInTheDocument();
+    });
+
+    it('still renders the attachments next to the skeleton', () => {
+      render(
+        <WhatsHappenedBlock
+          isLoading
+          attachments={[attachment]}
+          groupedAttachments={groupedAttachments}
+        />
+      );
+
+      expect(screen.getByTestId('investigationOverviewSummarySkeleton')).toBeInTheDocument();
+      expect(screen.getByText('Session cookie replayed')).toBeInTheDocument();
+    });
+
+    it('renders the summary instead of the skeleton when there is one', () => {
+      render(
+        <WhatsHappenedBlock
+          isLoading
+          summary="Only a narrative"
+          attachments={[]}
+          groupedAttachments={groupedAttachments}
+        />
+      );
+
+      expect(screen.getByText('Only a narrative')).toBeInTheDocument();
+      expect(screen.queryByTestId('investigationOverviewSummarySkeleton')).not.toBeInTheDocument();
+    });
+
+    it('renders nothing when not loading, without a summary or attachments', () => {
+      const { container } = render(
+        <WhatsHappenedBlock attachments={[]} groupedAttachments={groupedAttachments} />
+      );
+
+      expect(container).toBeEmptyDOMElement();
+    });
+  });
 });
