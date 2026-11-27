@@ -27,6 +27,7 @@ export const kibanaRules: DummyRuleMap = {
   '@kbn/eslint/no_conditional_saved_object_type_registration': 'error',
   '@kbn/eslint/no_unsafe_console': 'error',
   '@kbn/eslint/no_unsafe_hash': 'error',
+  '@kbn/eslint/valid_nav_tree_owner_plugin_id': 'error',
   '@kbn/eslint/no_unsafe_dynamic_http_path': 'warn',
   '@kbn/eslint/no_wrapped_error_in_logger': 'error',
   '@kbn/eslint/no_npx_playwright': 'error',

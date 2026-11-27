@@ -23,6 +23,23 @@
       "cloud"
     ],
     "optionalPlugins": [],
+    // Solution-nav targets. Also an allowlist for dynamic contract resolution.
+    "runtimePluginDependencies": [
+      "agentBuilder",
+      "canvas",
+      "contextEngine",
+      "devTools",
+      "discover",
+      "fleet",
+      "graph",
+      "ingestHub",
+      "maps",
+      "ml",
+      "monitoring",
+      "osquery",
+      "streamsApp",
+      "workflowsManagement"
+    ],
     "requiredBundles": [
       "kibanaReact"
     ]

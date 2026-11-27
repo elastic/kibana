@@ -28,6 +28,16 @@
       "console",
       "cloud"
     ],
+    // Solution-nav targets. Also an allowlist for dynamic contract resolution.
+    "runtimePluginDependencies": [
+      "contextEngine",
+      "dashboard",
+      "devTools",
+      "discover",
+      "management",
+      "triggersActionsUi",
+      "workflowsManagement"
+    ],
     "requiredBundles": [
       "kibanaReact"
     ]

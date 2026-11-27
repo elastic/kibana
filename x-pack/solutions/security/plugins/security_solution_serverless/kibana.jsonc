@@ -29,6 +29,17 @@
       "usageApi",
       "workflowsManagement",
       "alertzero"
+    ],
+    // Solution-nav targets. Also an allowlist for dynamic contract resolution.
+    "runtimePluginDependencies": [
+      "agentBuilder",
+      "contextEngine",
+      "devTools",
+      "ingestHub",
+      "maps",
+      "ml",
+      "osquery",
+      "streamsApp"
     ]
   }
 }
