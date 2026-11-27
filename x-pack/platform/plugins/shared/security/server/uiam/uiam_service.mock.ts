@@ -25,6 +25,7 @@ export const uiamServiceMock = {
       .fn()
       .mockResolvedValue({ accessToken: 'new-access', refreshToken: 'new-refresh' }),
     invalidateSessionTokens: jest.fn().mockResolvedValue(undefined),
+    cloneApiKey: jest.fn(),
     grantApiKey: jest.fn().mockResolvedValue({
       id: 'mock-api-key-id',
       key: 'mock-api-key-value',

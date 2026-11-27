@@ -44,6 +44,8 @@ export class CoreSecurityRouteHandlerContext implements SecurityRequestHandlerCo
           uiam: uiam
             ? {
                 grant: (grantUiamApiKeyParams) => uiam.grant(this.request, grantUiamApiKeyParams),
+                grantOrClone: (grantOrCloneUiamApiKeyParams) =>
+                  uiam.grantOrClone(this.request, grantOrCloneUiamApiKeyParams),
                 invalidate: (invalidateUiamApiKeyParams) =>
                   uiam.invalidate(this.request, invalidateUiamApiKeyParams),
                 convert: (convertUiamApiKeyParams) => uiam.convert(convertUiamApiKeyParams),

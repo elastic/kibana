@@ -10,6 +10,7 @@
 import type { GrantAPIKeyResult, InvalidateAPIKeyResult } from '../api_keys';
 import type {
   ConvertUiamAPIKeysResponse,
+  GrantOrCloneUiamAPIKeyParams,
   GrantUiamAPIKeyParams,
   InvalidateUiamAPIKeyParams,
 } from './uiam_api_keys';
@@ -28,6 +29,16 @@ export interface UiamAPIKeysWithContextType {
    * @throws {Error} If the request does not contain an authorization header or if the credential is not a UIAM credential.
    */
   grant(params: GrantUiamAPIKeyParams): Promise<GrantAPIKeyResult | null>;
+
+  /**
+   * Grants a new internal API key from the request's credential, like `grant`, or clones it when it
+   * is itself a UIAM API key, so the new key keeps the source key's creator.
+   *
+   * @param params The parameters for creating the API key (name).
+   * @returns A promise that resolves to a GrantAPIKeyResult object containing the API key details, or null if the license is not enabled.
+   * @throws {Error} If the request does not contain an authorization header or if the credential is not a UIAM credential.
+   */
+  grantOrClone(params: GrantOrCloneUiamAPIKeyParams): Promise<GrantAPIKeyResult | null>;
 
   /**
    * Invalidates an API key via the UIAM service.

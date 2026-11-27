@@ -6,4 +6,4 @@
  */
 
 export { extractAttributeValue } from './utils';
-export { COMMON_HEADERS, COMMON_UNSAFE_HEADERS } from './constants';
+export { COMMON_HEADERS, COMMON_UNSAFE_HEADERS, UIAM_PROJECT_TYPES } from './constants';

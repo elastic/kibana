@@ -551,6 +551,7 @@ export class AuthenticationService {
         uiam: uiamAPIKeys
           ? {
               grant: uiamAPIKeys.grant.bind(uiamAPIKeys),
+              grantOrClone: uiamAPIKeys.grantOrClone.bind(uiamAPIKeys),
               invalidate: uiamAPIKeys.invalidate.bind(uiamAPIKeys),
               convert: uiamAPIKeys.convert.bind(uiamAPIKeys),
               getInternalCallerAttestationHeaders:

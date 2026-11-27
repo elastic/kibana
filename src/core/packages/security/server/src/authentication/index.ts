@@ -32,6 +32,7 @@ export type {
   UiamAPIKeysType,
   UiamAPIKeysWithContextType,
   GrantUiamAPIKeyParams,
+  GrantOrCloneUiamAPIKeyParams,
   InvalidateUiamAPIKeyParams,
   ConvertUiamAPIKeyResult,
   ConvertUiamAPIKeyResultSuccess,

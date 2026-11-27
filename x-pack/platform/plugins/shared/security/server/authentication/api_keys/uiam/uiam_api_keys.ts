@@ -17,6 +17,7 @@ import {
 import type {
   ConvertUiamAPIKeysResponse,
   GrantAPIKeyResult,
+  GrantOrCloneUiamAPIKeyParams,
   GrantUiamAPIKeyParams,
   InvalidateAPIKeyResult,
   InvalidateUiamAPIKeyParams,
@@ -42,8 +43,14 @@ export interface UiamAPIKeysOptions {
 }
 
 /**
+ * UIAM answers a clone with these when it refuses Kibana rather than the source key: the caller is
+ * not accepted (401, 403) or there is no clone endpoint (404).
+ */
+const CLONE_REFUSAL_STATUS_CODES = new Set([401, 403, 404]);
+
+/**
  * Class responsible for managing UIAM-specific API key operations.
- * This class handles API key grants and invalidations through the UIAM service.
+ * This class handles API key grants, clones and invalidations through the UIAM service.
  */
 export class UiamAPIKeys implements UiamAPIKeysType {
   private readonly logger: Logger;
@@ -150,6 +157,71 @@ export class UiamAPIKeys implements UiamAPIKeysType {
       // indefinitely on a broken session, so a second failure must reach the normal error handler.
       return grantOnce(renewedCredentials);
     }
+  }
+
+  /**
+   * Grants a new internal UIAM API key from the request's credential (a session or an access token),
+   * like `grant`. When the credential is itself a UIAM API key, internal or user-created, it clones
+   * that key instead, so the new key keeps the source key's creator and expiration, and is limited to
+   * the applications of projects.
+   *
+   * If UIAM answers the clone with a 401, 403 or 404 (a client certificate it does not accept, no
+   * clone endpoint, or a source key without access to the project), it throws a server error (500):
+   * that points at the project's UIAM configuration, to fix and not to hide behind a grant that
+   * loses the creator. Any other clone failure, such as a revoked source key (UIAM's 400), is thrown
+   * as UIAM's own error.
+   *
+   * @param request The Kibana request carrying the credential to grant or clone from.
+   * @param params The name of the new API key.
+   * @returns The new API key, or null if the license is not enabled.
+   */
+  async grantOrClone(
+    request: KibanaRequest,
+    { name }: GrantOrCloneUiamAPIKeyParams
+  ): Promise<GrantAPIKeyResult | null> {
+    if (!this.license.isEnabled()) {
+      return null;
+    }
+
+    const authorization = UiamAPIKeys.getAuthorizationHeader(request);
+
+    if (!this.canClone(authorization)) {
+      return this.grant(request, { name });
+    }
+
+    this.logger.debug('Trying to clone an API key');
+    try {
+      const { id, key, description } = await this.uiam.cloneApiKey(authorization.credentials, name);
+      this.logger.debug('API key was cloned successfully');
+      return { id, name: description, api_key: key };
+    } catch (e) {
+      this.logger.error(`Failed to clone API key: ${getDetailedErrorMessage(e)}`);
+      if (!UiamAPIKeys.isCloneRefusal(e)) {
+        throw e;
+      }
+
+      // The caller must not see UIAM's 401 or 403 as if its own credentials were wrong. The message
+      // carries UIAM's compact `[code/type] message`; the whole payload is in the log above.
+      throw Boom.badImplementation(
+        `UIAM refused to clone an API key (${e.output.statusCode}). This points to the project's ` +
+          `UIAM configuration, such as the client certificate or the UIAM version, or to the ` +
+          `source key's access to the project: ${e.message}`,
+        e
+      );
+    }
+  }
+
+  /** Whether UIAM refused the clone because of Kibana (see {@link CLONE_REFUSAL_STATUS_CODES}). */
+  private static isCloneRefusal(error: unknown): error is Boom.Boom {
+    return Boom.isBoom(error) && CLONE_REFUSAL_STATUS_CODES.has(error.output.statusCode);
+  }
+
+  /**
+   * Only a UIAM API key can be cloned: `_clone` takes an API key as its source, so a session or an
+   * access token has none to clone. UIAM clones an external (user-created) key too.
+   */
+  private canClone(authorization: HTTPAuthorizationHeader): boolean {
+    return isUiamCredential(authorization) && authorization.scheme.toLowerCase() === 'apikey';
   }
 
   /**
