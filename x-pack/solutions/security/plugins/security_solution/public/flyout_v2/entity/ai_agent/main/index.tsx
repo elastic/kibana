@@ -9,6 +9,7 @@ import type { FC } from 'react';
 import React, { memo, useCallback, useRef, useState } from 'react';
 import {
   EuiFlyoutBody,
+  EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiHorizontalRule,
   EuiSkeletonText,
@@ -22,6 +23,7 @@ import { parseAgentId } from '../../../../entity_analytics/components/ai_securit
 import { useFlyoutApi } from '../../../use_flyout_api';
 import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 import { AiAgentHeader } from './header';
+import { Footer } from './footer';
 import { AttributionSection } from './components/attribution_section';
 import { RiskSummarySection } from './components/risk_summary_section';
 import { AlertsSection } from './components/alerts_section';
@@ -152,6 +154,9 @@ export const AiAgent: FC<AiAgentProps> = memo(function AiAgent({ entityId, entit
           />
         )}
       </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <Footer identity={identity} />
+      </EuiFlyoutFooter>
     </>
   );
 });

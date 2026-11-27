@@ -31,6 +31,7 @@ export const AI_AGENT_TEST_IDS = {
   alerts: `${PREFIX}Alerts`,
   alertsNone: `${PREFIX}AlertsNone`,
   alertsCount: `${PREFIX}AlertsCount`,
+  alertsShowAll: `${PREFIX}AlertsShowAll`,
   activity: `${PREFIX}Activity`,
   run: `${PREFIX}Run`,
   step: `${PREFIX}Step`,

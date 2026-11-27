@@ -251,7 +251,7 @@ export const useAiAgentContext = (entityId: string) => {
   });
 };
 
-/** Alerts stamped with the agent ID. */
+/** Open alerts stamped with the agent ID. */
 export const useAiAgentAlerts = (entityId: string) => {
   const { data } = useKibana().services;
   const spaceId = useSpaceId();

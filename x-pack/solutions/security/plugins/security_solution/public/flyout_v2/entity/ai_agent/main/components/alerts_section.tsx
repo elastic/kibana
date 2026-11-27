@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiBasicTable,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
@@ -20,69 +21,75 @@ import {
   useEuiTheme,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { noop } from 'lodash/fp';
-import { FormattedRelativePreferenceDate } from '../../../../../common/components/formatted_date';
 import { getSeverityColor } from '../../../../../detections/components/alerts_kpis/severity_level_panel/helpers';
 import { useFlyoutApi } from '../../../../use_flyout_api';
 import { cellActionRenderer } from '../../../../shared/components/cell_actions';
 import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
 import { useAiAgentAlerts } from '../../../../../entity_analytics/components/ai_security/hooks/use_ai_agents';
 import { AGENT_ALERTS_MAX_ROWS } from '../../../../../entity_analytics/components/ai_security/constants';
-import type { AgentAlert } from '../../../../../entity_analytics/components/ai_security/types';
+import { countBySeverity, groupAlertsByRule, type AlertGroup } from './alert_groups';
 import { AI_AGENT_TEST_IDS } from '../test_ids';
 import {
+  ALERT_COUNT,
   ALERT_RULE,
   ALERT_SEVERITY,
-  ALERT_TIME,
   ALERTS_NONE,
   ALERTS_TITLE,
   ALERTS_UNAVAILABLE,
+  alertsTitleWithCount,
+  SHOW_FEWER_RULES,
+  showAllRules,
 } from '../translations';
 
-/** Rows shown in the table; the count above it covers every alert read. */
-const ALERTS_TABLE_ROWS = 20;
-
-/** Relative time keeps the column narrow; the tooltip has the full date. */
-const ALWAYS_RELATIVE_HOURS = 24 * 365;
+/** Rule groups shown before "Show all". */
+const COLLAPSED_GROUPS = 5;
 
 /**
- * Alerts stamped with the agent ID, including those on its descendants, in every workflow status
- * (the AI security page counts open alerts only). Each opens the alert flyout.
+ * Open alerts stamped with the agent ID, including those on its descendants, grouped by rule with
+ * the worst first. Each group opens its newest alert in the alert flyout.
  */
 export const AlertsSection = memo(({ entityId }: { entityId: string }) => {
   const { data, isLoading } = useAiAgentAlerts(entityId);
   const { openDocumentFlyoutFromIndexAsChild } = useFlyoutApi();
   const { euiTheme } = useEuiTheme();
+  const [showAll, setShowAll] = useState(false);
+  const alerts = useMemo(() => data?.alerts ?? [], [data]);
+  const groups = useMemo(() => groupAlertsByRule(alerts), [alerts]);
+  const bySeverity = useMemo(() => countBySeverity(alerts), [alerts]);
 
-  const columns = useMemo<Array<EuiBasicTableColumn<AgentAlert>>>(
+  const columns = useMemo<Array<EuiBasicTableColumn<AlertGroup>>>(
     () => [
       {
         field: 'ruleName',
         name: ALERT_RULE,
-        render: (ruleName: string | undefined, alert: AgentAlert) => (
-          <div>
-            <EuiLink
-              onClick={() =>
-                openDocumentFlyoutFromIndexAsChild({
-                  documentId: alert.id,
-                  indexName: alert.index,
-                  renderCellActions: cellActionRenderer,
-                  onAlertUpdated: noop,
-                  origin: FLYOUT_ORIGIN.INSIGHTS_ALERTS,
-                  title: ruleName,
-                })
-              }
-            >
-              {ruleName ?? alert.id}
-            </EuiLink>
-            {[alert.processName, alert.status].some(Boolean) && (
-              <EuiText size="xs" color="subdued">
-                {[alert.processName, alert.status].filter(Boolean).join(' · ')}
-              </EuiText>
-            )}
-          </div>
-        ),
+        render: (ruleName: string | undefined, { newest }: AlertGroup) => {
+          const status = newest.status !== 'open' ? newest.status : undefined;
+          const details = [newest.processName, status].filter(Boolean).join(' · ');
+          return (
+            <div>
+              <EuiLink
+                onClick={() =>
+                  openDocumentFlyoutFromIndexAsChild({
+                    documentId: newest.id,
+                    indexName: newest.index,
+                    renderCellActions: cellActionRenderer,
+                    onAlertUpdated: noop,
+                    origin: FLYOUT_ORIGIN.INSIGHTS_ALERTS,
+                    title: ruleName,
+                  })
+                }
+              >
+                {ruleName ?? newest.id}
+              </EuiLink>
+              {details && (
+                <EuiText size="xs" color="subdued">
+                  {details}
+                </EuiText>
+              )}
+            </div>
+          );
+        },
       },
       {
         field: 'severity',
@@ -94,91 +101,70 @@ export const AlertsSection = memo(({ entityId }: { entityId: string }) => {
           ) : null,
       },
       {
-        field: 'timestamp',
-        name: ALERT_TIME,
-        width: '104px',
-        render: (timestamp: string) => (
-          <EuiText size="xs">
-            <FormattedRelativePreferenceDate
-              value={timestamp}
-              relativeThresholdInHrs={ALWAYS_RELATIVE_HOURS}
-            />
-          </EuiText>
-        ),
+        field: 'count',
+        name: ALERT_COUNT,
+        width: '64px',
+        align: 'right',
       },
     ],
     [openDocumentFlyoutFromIndexAsChild, euiTheme]
   );
 
-  const bySeverity = useMemo(() => {
-    const counts = new Map<string, number>();
-    for (const alert of data?.alerts ?? []) {
-      const severity = alert.severity ?? 'unknown';
-      counts.set(severity, (counts.get(severity) ?? 0) + 1);
-    }
-    return [...counts.entries()];
-  }, [data]);
+  const hasAlerts = !isLoading && !data?.unavailable && alerts.length > 0;
+  const title = hasAlerts
+    ? alertsTitleWithCount(
+        alerts.length >= AGENT_ALERTS_MAX_ROWS ? `${AGENT_ALERTS_MAX_ROWS}+` : `${alerts.length}`
+      )
+    : ALERTS_TITLE;
 
   return (
     <div data-test-subj={AI_AGENT_TEST_IDS.alerts}>
-      <EuiTitle size="xxs">
-        <h3>{ALERTS_TITLE}</h3>
-      </EuiTitle>
-      <EuiSpacer size="xs" />
+      <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false} wrap>
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <h3 data-test-subj={AI_AGENT_TEST_IDS.alertsCount}>{title}</h3>
+          </EuiTitle>
+        </EuiFlexItem>
+        {hasAlerts &&
+          bySeverity.map(([severity, count]) => (
+            <EuiFlexItem grow={false} key={severity}>
+              <EuiHealth color={getSeverityColor(severity, euiTheme)}>
+                <EuiText size="xs">{`${severity} ${count}`}</EuiText>
+              </EuiHealth>
+            </EuiFlexItem>
+          ))}
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
       {isLoading ? (
         <EuiSkeletonText lines={2} />
       ) : data?.unavailable ? (
-        <EuiText size="xs" color="subdued">
+        <EuiText size="s" color="subdued">
           {ALERTS_UNAVAILABLE}
         </EuiText>
-      ) : !data || data.alerts.length === 0 ? (
-        <EuiText size="xs" color="subdued" data-test-subj={AI_AGENT_TEST_IDS.alertsNone}>
+      ) : !hasAlerts ? (
+        <EuiText size="s" color="subdued" data-test-subj={AI_AGENT_TEST_IDS.alertsNone}>
           {ALERTS_NONE}
         </EuiText>
       ) : (
         <>
-          <EuiFlexGroup gutterSize="m" responsive={false} wrap>
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs" data-test-subj={AI_AGENT_TEST_IDS.alertsCount}>
-                {data.alerts.length >= AGENT_ALERTS_MAX_ROWS ? (
-                  <FormattedMessage
-                    id="xpack.securitySolution.flyout.entityDetails.aiAgent.alerts.countCapped"
-                    defaultMessage="{max}+ alerts in any status"
-                    values={{ max: AGENT_ALERTS_MAX_ROWS }}
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="xpack.securitySolution.flyout.entityDetails.aiAgent.alerts.countAnyStatus"
-                    defaultMessage="{count, plural, one {# alert} other {# alerts}} in any status"
-                    values={{ count: data.alerts.length }}
-                  />
-                )}
-              </EuiText>
-            </EuiFlexItem>
-            {bySeverity.map(([severity, count]) => (
-              <EuiFlexItem grow={false} key={severity}>
-                <EuiHealth color={getSeverityColor(severity, euiTheme)}>
-                  <EuiText size="xs">{`${severity} ${count}`}</EuiText>
-                </EuiHealth>
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
-          <EuiSpacer size="xs" />
-          <EuiBasicTable<AgentAlert>
-            items={data.alerts.slice(0, ALERTS_TABLE_ROWS)}
+          <EuiBasicTable<AlertGroup>
+            items={showAll ? groups : groups.slice(0, COLLAPSED_GROUPS)}
+            itemId="key"
             columns={columns}
             compressed
             responsiveBreakpoint={false}
-            tableCaption={ALERTS_TITLE}
+            tableCaption={title}
           />
-          {data.alerts.length > ALERTS_TABLE_ROWS && (
-            <EuiText size="xs" color="subdued">
-              <FormattedMessage
-                id="xpack.securitySolution.flyout.entityDetails.aiAgent.alerts.newestShown"
-                defaultMessage="The newest {shown} are shown."
-                values={{ shown: ALERTS_TABLE_ROWS }}
-              />
-            </EuiText>
+          {groups.length > COLLAPSED_GROUPS && (
+            <EuiButtonEmpty
+              size="xs"
+              flush="left"
+              iconType={showAll ? 'chevronSingleUp' : 'chevronSingleDown'}
+              onClick={() => setShowAll((current) => !current)}
+              data-test-subj={AI_AGENT_TEST_IDS.alertsShowAll}
+            >
+              {showAll ? SHOW_FEWER_RULES : showAllRules(groups.length)}
+            </EuiButtonEmpty>
           )}
         </>
       )}

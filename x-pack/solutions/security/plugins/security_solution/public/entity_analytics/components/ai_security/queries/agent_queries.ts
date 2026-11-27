@@ -244,15 +244,18 @@ export const buildSignedInAsQuery = (namespace: string, identity: AgentIdentity)
   ].join('\n');
 
 /**
- * Alerts stamped with the agent ID, including alerts on its descendants, in every workflow status.
- * Detection copies the source event's `tags` onto the alert, so `tags` says whether the alert was
- * built from a generated document.
+ * Open alerts stamped with the agent ID, including alerts on its descendants. "Open" is the same
+ * filter the AI security page counts with, so the flyout and the table agree. Detection copies the
+ * source event's `tags` onto the alert, so `tags` says whether the alert was built from a
+ * generated document.
  */
 export const buildAgentAlertsQuery = (spaceId: string, entityId: string): string =>
   [
     SET_UNMAPPED_NULLIFY,
     `FROM ${getAlertsIndex(spaceId)} METADATA _id, _index`,
-    `| WHERE MV_CONTAINS(kibana.alert.entity.id, ${escapeStringValue(entityId)})`,
+    `| WHERE MV_CONTAINS(kibana.alert.entity.id, ${escapeStringValue(
+      entityId
+    )}) AND (${ALERT_OPEN_STATUS_FILTER})`,
     '| KEEP @timestamp, _id, _index, kibana.alert.rule.name, kibana.alert.severity,',
     '    kibana.alert.workflow_status, kibana.alert.risk_score, process.name, user.name, tags',
     '| SORT @timestamp DESC',

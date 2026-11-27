@@ -32,6 +32,9 @@ jest.mock('./components/agent_activity', () => ({
 jest.mock('./components/graph_tab', () => ({
   GraphTab: () => <div data-test-subj="mockGraph" />,
 }));
+jest.mock('./footer', () => ({
+  Footer: () => <div data-test-subj="mockFooter" />,
+}));
 
 const renderFlyout = () =>
   render(
@@ -65,6 +68,7 @@ describe('AiAgent', () => {
     sections.slice(1).forEach((section, index) => {
       expect(isBefore(sections[index], section)).toBe(true);
     });
+    expect(screen.getByTestId('mockFooter')).toBeInTheDocument();
   });
 
   it('keeps related agents closed until the shared account line opens them', () => {

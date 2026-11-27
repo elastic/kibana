@@ -114,13 +114,19 @@ export const ALERTS_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.aiAgent.alerts.title',
   { defaultMessage: 'Alerts' }
 );
+/** `count` is a number, or the read limit followed by "+". */
+export const alertsTitleWithCount = (count: string) =>
+  i18n.translate('xpack.securitySolution.flyout.entityDetails.aiAgent.alerts.titleWithCount', {
+    defaultMessage: 'Alerts ({count})',
+    values: { count },
+  });
 export const ALERTS_NONE = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.aiAgent.alerts.none',
-  { defaultMessage: 'No alerts carry this agent ID.' }
+  { defaultMessage: 'No alerts' }
 );
 export const ALERTS_UNAVAILABLE = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.aiAgent.alerts.unavailable',
-  { defaultMessage: 'The alerts index could not be read.' }
+  { defaultMessage: 'Alerts could not be loaded' }
 );
 export const ALERT_RULE = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.aiAgent.alerts.rule',
@@ -130,9 +136,18 @@ export const ALERT_SEVERITY = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.aiAgent.alerts.severity',
   { defaultMessage: 'Severity' }
 );
-export const ALERT_TIME = i18n.translate(
-  'xpack.securitySolution.flyout.entityDetails.aiAgent.alerts.time',
-  { defaultMessage: 'Time' }
+export const ALERT_COUNT = i18n.translate(
+  'xpack.securitySolution.flyout.entityDetails.aiAgent.alerts.count',
+  { defaultMessage: 'Count' }
+);
+export const showAllRules = (count: number) =>
+  i18n.translate('xpack.securitySolution.flyout.entityDetails.aiAgent.alerts.showAllRules', {
+    defaultMessage: 'Show all {count} rules',
+    values: { count },
+  });
+export const SHOW_FEWER_RULES = i18n.translate(
+  'xpack.securitySolution.flyout.entityDetails.aiAgent.alerts.showFewerRules',
+  { defaultMessage: 'Show fewer rules' }
 );
 
 export const GRAPH_OPEN_FULL = i18n.translate(
