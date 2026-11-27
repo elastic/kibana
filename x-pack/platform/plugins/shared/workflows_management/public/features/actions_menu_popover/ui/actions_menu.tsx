@@ -24,6 +24,10 @@ import { componentStyles } from './actions_menu.styles';
 import { getOptionActionId, renderActionOption } from './actions_menu_option';
 import { ActionsMenuPreviewPanel } from './actions_menu_preview_panel';
 import { useKibana } from '../../../hooks/use_kibana';
+import {
+  filterOptionsForInsertionContext,
+  omitDisabledTriggers,
+} from '../lib/filter_options_for_insertion_context';
 import { flattenOptions, getActionOptions } from '../lib/get_action_options';
 import {
   getActionMatchRank,
@@ -33,6 +37,7 @@ import {
 } from '../lib/use_display_options';
 import {
   type ActionOptionData,
+  type ActionsMenuInsertionContext,
   type EditorCommand,
   getMenuItemData,
   isActionConnectorGroup,
@@ -40,7 +45,7 @@ import {
   type JumpToStepEntry,
 } from '../types';
 
-export type { EditorCommand, JumpToStepEntry };
+export type { ActionsMenuInsertionContext, EditorCommand, JumpToStepEntry };
 
 const SEARCH_INPUT_NAME = 'actions-menu-search';
 const SELECTABLE_ID = 'actions-menu-selectable';
@@ -77,7 +82,31 @@ export interface ActionsMenuProps {
   jumpToStepEntries?: JumpToStepEntry[];
   onCommandSelected?: (commandId: string) => void;
   onJumpToStep?: (lineNumber: number) => void;
+  insertionContext?: ActionsMenuInsertionContext;
+  /**
+   * Trigger option ids to hide (e.g. `manual` when a Manual trigger already exists).
+   * Applies in every insertion mode so a second Manual cannot be added from Actions.
+   */
+  disabledTriggerIds?: readonly string[];
 }
+
+const getContextLabel = (context: ActionsMenuInsertionContext): string => {
+  switch (context.mode) {
+    case 'trigger':
+      return i18n.translate('workflows.actionsMenu.context.addingTrigger', {
+        defaultMessage: 'Adding a trigger',
+      });
+    case 'error':
+      return i18n.translate('workflows.actionsMenu.context.addingErrorRoute', {
+        defaultMessage: 'Adding an error-handling route',
+      });
+    case 'step':
+    default:
+      return i18n.translate('workflows.actionsMenu.context.insertingStep', {
+        defaultMessage: 'Inserting a step',
+      });
+  }
+};
 
 function resolvePathLabels(
   path: string[],
@@ -104,6 +133,8 @@ export function ActionsMenu({
   jumpToStepEntries,
   onCommandSelected,
   onJumpToStep,
+  insertionContext,
+  disabledTriggerIds,
 }: ActionsMenuProps) {
   const styles = useMemoCss(componentStyles);
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -113,9 +144,13 @@ export function ActionsMenu({
   const menuContainerRef = useRef<HTMLDivElement | null>(null);
   const pendingListFocusRef = useRef<PendingListFocus | null>(null);
   const keyboardIndexRef = useRef<number | null>(null);
+  const allOptions = useMemo(
+    () => omitDisabledTriggers(getActionOptions(euiTheme, workflowsExtensions), disabledTriggerIds),
+    [euiTheme, workflowsExtensions, disabledTriggerIds]
+  );
   const defaultOptions = useMemo(
-    () => getActionOptions(euiTheme, workflowsExtensions),
-    [euiTheme, workflowsExtensions]
+    () => filterOptionsForInsertionContext(allOptions, insertionContext),
+    [allOptions, insertionContext]
   );
   const flatOptions = useMemo(() => flattenOptions(defaultOptions), [defaultOptions]);
 
@@ -164,6 +199,12 @@ export function ActionsMenu({
       });
   }, [currentPath, defaultOptions, flatOptions, searchTerm]);
 
+  const addGroupContent = useMemo(() => {
+    if (!insertionContext) return 'both' as const;
+    if (insertionContext.mode === 'trigger') return 'triggers' as const;
+    return 'steps' as const;
+  }, [insertionContext]);
+
   const displayOptions = useDisplayOptions({
     options,
     categoryTree: defaultOptions,
@@ -171,6 +212,7 @@ export function ActionsMenu({
     commands,
     jumpToStepEntries,
     currentPath,
+    addGroupContent,
   });
 
   const selectableOptions = useMemo(
@@ -669,17 +711,24 @@ export function ActionsMenu({
       height="full"
     >
       {(list, search) => (
-        <div ref={menuContainerRef} css={styles.fill}>
+        <div ref={menuContainerRef} css={styles.fill} data-test-subj="actionsMenuFull">
           <EuiFlexGroup direction="column" gutterSize="s" responsive={false} css={styles.header}>
             <EuiFlexItem grow={false} css={styles.headerTitle}>
-              <EuiTitle size="xxs">
-                <h3>
-                  <FormattedMessage
-                    id="workflows.actionsMenu.title"
-                    defaultMessage="Actions menu"
-                  />
-                </h3>
-              </EuiTitle>
+              <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
+                <EuiTitle size="xxs">
+                  <h3>
+                    <FormattedMessage
+                      id="workflows.actionsMenu.title"
+                      defaultMessage="Actions menu"
+                    />
+                  </h3>
+                </EuiTitle>
+                {insertionContext && (
+                  <EuiText size="xs" color="subdued" data-test-subj="actionsMenuContextLabel">
+                    {getContextLabel(insertionContext)}
+                  </EuiText>
+                )}
+              </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>{search}</EuiFlexItem>
           </EuiFlexGroup>

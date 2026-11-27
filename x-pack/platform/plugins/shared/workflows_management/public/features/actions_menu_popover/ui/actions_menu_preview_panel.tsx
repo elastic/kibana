@@ -36,6 +36,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getBaseConnectorType } from '@kbn/workflows-ui';
 import { getActionIconTileVariantStyle } from './action_icon_tile.styles';
+import { ActionsMenuIcon } from './actions_menu_icon';
 import { panelStyles, previewStepRowStyles } from './actions_menu_preview_panel.styles';
 import { ActionsMenuAiIcon } from './ai_icon_tile';
 import { WORKFLOWS_DOCUMENTATION_URL } from '../../../../common';
@@ -652,7 +653,7 @@ function PreviewStepIcon({
     );
   }
   if (isActionGroup(step) || isActionOption(step)) {
-    return <EuiIcon type={step.iconType} size="m" color={glyphColor} aria-hidden />;
+    return <ActionsMenuIcon type={step.iconType} size="m" color={glyphColor} aria-hidden />;
   }
   return null;
 }
