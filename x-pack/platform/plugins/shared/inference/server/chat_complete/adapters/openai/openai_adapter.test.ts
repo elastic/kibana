@@ -1050,6 +1050,7 @@ describe('openAIAdapter', () => {
           {
             content: 'Hello',
             tool_calls: [],
+            finish_reason: 'stop',
             type: ChatCompletionEventType.ChatCompletionChunk,
           },
         ]);
@@ -1106,6 +1107,7 @@ describe('openAIAdapter', () => {
                 toolCallId: '0',
               },
             ],
+            finish_reason: 'stop',
             type: ChatCompletionEventType.ChatCompletionChunk,
           },
         ]);
@@ -1144,6 +1146,7 @@ describe('openAIAdapter', () => {
 
         expect(allChunks).toEqual([
           {
+            finish_reason: 'stop',
             type: ChatCompletionEventType.ChatCompletionChunk,
             content: 'response',
             tool_calls: [],
@@ -1188,6 +1191,7 @@ describe('openAIAdapter', () => {
 
         expect(allChunks).toHaveLength(2);
         expect(allChunks[0]).toEqual({
+          finish_reason: 'stop',
           type: ChatCompletionEventType.ChatCompletionChunk,
           content: 'response',
           tool_calls: [],
