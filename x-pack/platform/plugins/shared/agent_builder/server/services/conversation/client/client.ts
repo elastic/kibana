@@ -40,7 +40,9 @@ import {
   isConversationAccessControlRole,
   isPublicConversation,
   isSteerMessageEvent,
+  isUserMessageEvent,
   normalizeConversationAccessControl,
+  runTriggerEvent,
   createBackgroundExecutionAlreadyReportedError,
   createBadRequestError,
   createConversationAlreadyExistsError,
@@ -285,6 +287,20 @@ export interface ConversationClient {
  * Caps `title` at the stored bound. HTTP routes already validate it, but server-side callers
  * (LLM title generation in particular) do not, so enforce it here to cover every write path.
  */
+/** The last message that could have started a run: a prompt answer, or a user message that is not a steer. */
+const lastPlainMessage = (events: ConversationEvent[]): ConversationEvent | undefined => {
+  for (let index = events.length - 1; index >= 0; index--) {
+    const event = events[index];
+    if (
+      event.type === TimelineEventType.promptResponse ||
+      (isUserMessageEvent(event) && !isSteerMessageEvent(event))
+    ) {
+      return event;
+    }
+  }
+  return undefined;
+};
+
 const withBoundedTitle = <T extends { title?: string }>(fields: T): T =>
   fields.title === undefined
     ? fields
@@ -915,6 +931,11 @@ class ConversationClientImpl implements ConversationClient {
                   ? 'awaiting_prompt'
                   : 'no_active_execution',
             });
+          }
+          const sender = (runTriggerEvent(currentEvents, held) ?? lastPlainMessage(currentEvents))
+            ?.actor;
+          if (sender?.id !== actor.id) {
+            throw new SteerSignal({ kind: 'not_steerable' });
           }
           // Five per run in total, read or not: what the run has read is in the execution document.
           if (pendingSteersFor(currentEvents, held).length >= STEERS_PER_RUN_MAX) {

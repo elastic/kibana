@@ -17,7 +17,8 @@ const labels = {
     defaultMessage: 'The agent is waiting for your answer to its question. Answer it first.',
   }),
   notSteerable: i18n.translate('xpack.agentBuilder.conversationInput.steer.notSteerable', {
-    defaultMessage: 'Messages cannot be sent to a running agent in a public conversation.',
+    defaultMessage:
+      "This run can't take messages: the conversation is public, or someone else's message started it.",
   }),
   tooManyPending: i18n.translate('xpack.agentBuilder.conversationInput.steer.tooManyPending', {
     defaultMessage: 'You can send up to {max} messages to a running agent. Wait for it to finish.',

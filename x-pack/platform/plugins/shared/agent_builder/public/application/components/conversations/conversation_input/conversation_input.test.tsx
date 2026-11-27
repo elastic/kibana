@@ -25,6 +25,7 @@ import {
 } from '../../../hooks/use_conversation';
 import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
 import { useIsAwaitingPrompt } from '../../../hooks/use_is_awaiting_prompt';
+import { useCanSteerRun } from '../../../hooks/use_can_steer_run';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { useSubmitMessage } from '../../../hooks/use_submit_message';
@@ -63,6 +64,9 @@ jest.mock('../../../hooks/use_conversation', () => ({
 jest.mock('../../../hooks/use_experimental_features', () => ({
   useExperimentalFeatures: jest.fn(),
 }));
+jest.mock('../../../hooks/use_can_steer_run', () => ({
+  useCanSteerRun: jest.fn(),
+}));
 jest.mock('../../../hooks/use_is_awaiting_prompt', () => ({
   useIsAwaitingPrompt: jest.fn(),
 }));
@@ -100,16 +104,21 @@ jest.mock('./message_editor', () => ({
   MessageEditor: ({
     onSubmit,
     onPasteFile,
+    placeholder,
   }: {
     onSubmit: () => void;
     onPasteFile?: (file: File) => string | undefined;
+    placeholder: string;
   }) => {
     mockOnEditorRender();
     mockEditorProps.onPasteFile = onPasteFile;
     return (
-      <button data-test-subj="mock-message-editor-submit" type="button" onClick={onSubmit}>
-        submit
-      </button>
+      <>
+        <button data-test-subj="mock-message-editor-submit" type="button" onClick={onSubmit}>
+          submit
+        </button>
+        <span data-test-subj="mock-message-editor-placeholder">{placeholder}</span>
+      </>
     );
   },
   CommandBadgeSerializationError: class extends Error {},
@@ -132,16 +141,19 @@ jest.mock('@kbn/ebt-click', () => ({ getEbtProps: () => ({}) }));
 jest.mock('./input_actions', () => ({
   InputActions: ({
     showTriggerModeSelector,
+    showSubmitWhileRunning,
     triggerMode,
     onTriggerModeChange,
     onMentionClick,
   }: {
     showTriggerModeSelector: boolean;
+    showSubmitWhileRunning: boolean;
     triggerMode: string;
     onTriggerModeChange: (mode: string) => void;
     onMentionClick?: () => void;
   }) => (
     <>
+      {showSubmitWhileRunning && <span data-test-subj="mock-submit-while-running" />}
       {onMentionClick && (
         <button type="button" data-test-subj="mock-mention-button" onClick={onMentionClick} />
       )}
@@ -226,6 +238,7 @@ const mockedUseHasActiveConversation = jest.mocked(useHasActiveConversation);
 const mockedUseIsSharedConversation = jest.mocked(useIsSharedConversation);
 const mockedUseExperimentalFeatures = jest.mocked(useExperimentalFeatures);
 const mockedUseIsAwaitingPrompt = jest.mocked(useIsAwaitingPrompt);
+const mockedUseCanSteerRun = jest.mocked(useCanSteerRun);
 const mockedUseConversationId = jest.mocked(useConversationId);
 const mockedUseConversationContext = jest.mocked(useConversationContext);
 const mockedUseSubmitMessage = jest.mocked(useSubmitMessage);
@@ -286,6 +299,7 @@ describe('ConversationInput', () => {
     mockedUseIsSharedConversation.mockReturnValue(false);
     mockedUseExperimentalFeatures.mockReturnValue(false);
     mockedUseIsAwaitingPrompt.mockReturnValue(false);
+    mockedUseCanSteerRun.mockReturnValue({ canSteer: true });
     mockedUseConversationId.mockReturnValue(undefined);
     mockedUseConversationContext.mockReturnValue({
       attachments: [],
@@ -400,6 +414,74 @@ describe('ConversationInput', () => {
     expect(mockSendSteer).toHaveBeenCalledWith('hello agent', { onUnsent: expect.any(Function) });
     expect(submitMessage).not.toHaveBeenCalled();
     await waitFor(() => expect(editorController.clear).toHaveBeenCalledTimes(1));
+  });
+
+  describe("another user's run", () => {
+    const runningStream = {
+      pendingMessage: undefined,
+      isResuming: false,
+      isResponseLoading: true,
+      canCancel: true,
+    } as never;
+
+    beforeEach(() => {
+      mockedUseConversationId.mockReturnValue('conv-1');
+    });
+
+    it('offers a steer to the user whose message started the run', () => {
+      mockedUseConversationStream.mockReturnValue(runningStream);
+
+      renderInput(<ConversationInput />);
+
+      expect(screen.getByTestId('mock-submit-while-running')).toBeInTheDocument();
+      expect(screen.getByTestId('mock-message-editor-placeholder')).toHaveTextContent(
+        'Ask anything'
+      );
+      fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
+      expect(mockSendSteer).toHaveBeenCalledWith('hello agent', { onUnsent: expect.any(Function) });
+    });
+
+    it('does not offer a steer to anyone else, and says why', () => {
+      mockedUseCanSteerRun.mockReturnValue({ canSteer: false, reason: 'another_users_run' });
+      mockedUseConversationStream.mockReturnValue(runningStream);
+
+      renderInput(<ConversationInput />);
+
+      expect(screen.queryByTestId('mock-submit-while-running')).not.toBeInTheDocument();
+      expect(screen.getByTestId('mock-message-editor-placeholder')).toHaveTextContent(
+        'Only the person whose message started this run can send it messages'
+      );
+      expect(screen.getByTestId('mock-message-editor-submit')).toBeInTheDocument();
+      fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
+      expect(mockSendSteer).not.toHaveBeenCalled();
+      expect(submitMessage).not.toHaveBeenCalled();
+      expect(editorController.clear).not.toHaveBeenCalled();
+    });
+
+    it('does not offer a steer in a public conversation, and says why', () => {
+      mockedUseCanSteerRun.mockReturnValue({ canSteer: false, reason: 'public_conversation' });
+      mockedUseConversationStream.mockReturnValue(runningStream);
+
+      renderInput(<ConversationInput />);
+
+      expect(screen.queryByTestId('mock-submit-while-running')).not.toBeInTheDocument();
+      expect(screen.getByTestId('mock-message-editor-placeholder')).toHaveTextContent(
+        "Messages can't be sent to a running agent in a public conversation"
+      );
+      fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
+      expect(mockSendSteer).not.toHaveBeenCalled();
+      expect(submitMessage).not.toHaveBeenCalled();
+    });
+
+    it('shows the usual placeholder once that run is over', () => {
+      mockedUseCanSteerRun.mockReturnValue({ canSteer: false, reason: 'another_users_run' });
+
+      renderInput(<ConversationInput />);
+
+      expect(screen.getByTestId('mock-message-editor-placeholder')).toHaveTextContent(
+        'Ask anything'
+      );
+    });
   });
 
   it('holds the submit until it knows whether the agent picks its own model', () => {

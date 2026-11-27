@@ -24,6 +24,7 @@ import {
   isExecutionTerminalEvent,
   isTimelineEvent,
   lastExecutionTerminal,
+  runTriggerEvent,
   parseExecutionId,
   pendingPromptRequest,
   resumeExecutionId,
@@ -350,5 +351,41 @@ describe('getEventActorDisplayName', () => {
 
   it('returns undefined when the actor has no name', () => {
     expect(getEventActorDisplayName({ type: EventActorType.system, id: 'kibana' })).toBeUndefined();
+  });
+});
+
+describe('runTriggerEvent', () => {
+  const sender = { type: EventActorType.user, id: 'user-1', username: 'one' };
+  const ask: ConversationEvent = {
+    id: 'ask-1',
+    type: TimelineEventType.userMessage,
+    created_at: '2026-01-01T00:00:00.000Z',
+    actor: sender,
+    data: { message: 'go' },
+  } as ConversationEvent;
+  const started: ConversationEvent = {
+    id: 'started-1',
+    type: TimelineEventType.executionStarted,
+    created_at: '2026-01-01T00:00:01.000Z',
+    actor: { type: EventActorType.agent, id: 'agent-1' },
+    execution_id: 'r1::execution',
+    trigger_event_id: 'ask-1',
+    data: { trigger_type: 'user_message' },
+  } as ConversationEvent;
+
+  it('is the event the run started from', () => {
+    expect(runTriggerEvent([ask, started], 'r1::execution')?.actor).toEqual(sender);
+  });
+
+  it('is undefined for a run that has not stored its start', () => {
+    expect(runTriggerEvent([ask], 'r1::execution')).toBeUndefined();
+  });
+
+  it('is undefined when the start names a trigger that is not stored', () => {
+    expect(runTriggerEvent([started], 'r1::execution')).toBeUndefined();
+  });
+
+  it('does not answer for another run', () => {
+    expect(runTriggerEvent([ask, started], 'r2::execution')).toBeUndefined();
   });
 });

@@ -302,6 +302,7 @@ export {
   isExecutionTerminalEvent,
   answeredPromptRequestIds,
   lastExecutionTerminal,
+  runTriggerEvent,
   pendingPromptRequest,
   interruptionOfTerminal,
   type AttachmentEventSource,
