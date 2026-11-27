@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { escapeRegExp } from 'lodash';
 import type { Locator, ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { setComboBoxValue } from '../combo_box_helpers';
@@ -61,9 +62,11 @@ export class DataDrift {
 
   async waitForDataViewTitle(expectedTitle: string) {
     await this.dataSourceSelectorButton.waitFor({ state: 'visible' });
-    await expect(this.dataSourceSelectorButton).toHaveAccessibleName(expectedTitle, {
-      timeout: 5000,
-    });
+    // The accessible name includes the visible "Data view" label prefix.
+    await expect(this.dataSourceSelectorButton).toHaveAccessibleName(
+      new RegExp(`^(Data view )?${escapeRegExp(expectedTitle)}$`),
+      { timeout: 5000 }
+    );
   }
 
   async waitForDataViewTitleIfNeeded(dataViewName?: string) {
