@@ -11,6 +11,7 @@ import { parseDocument } from 'yaml';
 
 import {
   deleteStep,
+  detectIndent,
   insertStep,
   modifyStep,
   modifyStepProperty,
@@ -1471,5 +1472,17 @@ steps:
       expect(result.success).toBe(true);
       expect(result.yaml).toContain('timeout: 30s');
     });
+  });
+});
+
+describe('detectIndent', () => {
+  it.each([
+    ['two spaces', 'a:\n  b: 1\n', 2],
+    ['four spaces', 'a:\n    b: 1\n', 4],
+    ['the first indented line, whichever later ones do', 'a:\n   b: 1\n  c: 2\n', 3],
+    ['nothing indented', 'a: 1\nb: 2\n', 2],
+    ['an empty text', '', 2],
+  ])('is read from %s', (_label, yaml, expected) => {
+    expect(detectIndent(yaml)).toBe(expected);
   });
 });

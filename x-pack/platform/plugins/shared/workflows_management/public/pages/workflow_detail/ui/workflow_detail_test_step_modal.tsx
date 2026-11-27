@@ -17,10 +17,12 @@ import {
   selectExecution,
   selectReplayStepExecutionId,
   selectTestStepModalOpenStepId,
+  selectTestStepModalStayInEditor,
   selectWorkflowGraph,
   selectWorkflowId,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import {
+  addTreeRun,
   setReplayStepExecutionId,
   setTestStepModalOpenStepId,
 } from '../../../entities/workflows/store/workflow_detail/slice';
@@ -40,6 +42,7 @@ export const WorkflowDetailTestStepModal = React.memo(() => {
 
   const workflowId = useSelector(selectWorkflowId);
   const testStepModalOpenStepId = useSelector(selectTestStepModalOpenStepId);
+  const stayInEditor = useSelector(selectTestStepModalStayInEditor);
   const replayStepExecutionId = useSelector(selectReplayStepExecutionId);
   const execution = useSelector(selectExecution);
   const editorYaml = useSelector(selectEditorYaml) ?? '';
@@ -84,7 +87,16 @@ export const WorkflowDetailTestStepModal = React.memo(() => {
           executionContext,
           triggerTab,
         });
-        selectEditorRun(response.workflowExecutionId);
+        if (stayInEditor) {
+          dispatch(
+            addTreeRun({
+              executionId: response.workflowExecutionId,
+              stepId: testStepModalOpenStepId,
+            })
+          );
+        } else {
+          selectEditorRun(response.workflowExecutionId);
+        }
         closeModal();
       } catch (error) {
         const errorMessage =
@@ -102,6 +114,8 @@ export const WorkflowDetailTestStepModal = React.memo(() => {
       testStepModalOpenStepId,
       runIndividualStep,
       editorYaml,
+      stayInEditor,
+      dispatch,
       selectEditorRun,
       closeModal,
       notifications.toasts,

@@ -1,6 +1,6 @@
 # ADR-0006 — Graph mutations reuse the snippet insertion path
 
-**Status:** Accepted
+**Status:** Superseded by ADR-0015
 **Date:** 2026-09-16
 **Deciders:** @elastic/workflows-eng
 

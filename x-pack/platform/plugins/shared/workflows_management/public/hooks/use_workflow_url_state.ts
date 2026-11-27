@@ -6,8 +6,9 @@
  */
 
 import queryString from 'query-string';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useSyncExternalStore } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   type ExecutionStatus,
   ExecutionStatusValues,
@@ -15,12 +16,16 @@ import {
   ExecutionTypeValues,
   type LayoutDirection,
 } from '@kbn/workflows';
-import { WORKFLOW_RUN_NAME_FILTER_MAX_LENGTH } from '@kbn/workflows/common/constants';
+import {
+  WORKFLOW_RUN_NAME_FILTER_MAX_LENGTH,
+  WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID,
+} from '@kbn/workflows/common/constants';
 import {
   getStoredEditorView,
   getStoredGraphDirection,
   setStoredEditorView,
   setStoredGraphDirection,
+  subscribeToStoredEditorView,
 } from '../lib/workflow_editor_preferences';
 
 export type WorkflowUrlStateTabType = 'workflow' | 'executions';
@@ -131,6 +136,20 @@ function boundedToken(value: string | undefined): string | undefined {
 export function useWorkflowUrlState() {
   const history = useHistory();
   const location = useLocation();
+  // The visual editor is the default view while the experimental features are on; otherwise the
+  // YAML editor is, and the graph is a read-only view the user can switch to.
+  const {
+    services: { settings },
+  } = useKibana();
+  const defaultView: WorkflowEditorView = settings?.client.get<boolean>(
+    WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID,
+    false
+  )
+    ? 'graph'
+    : 'yaml';
+  // The stored view beats the URL, and a switch to the default view leaves the URL unchanged, so
+  // `location.search` alone cannot tell when the view changed: follow the stored value itself.
+  const storedEditorView = useSyncExternalStore(subscribeToStoredEditorView, getStoredEditorView);
 
   const urlState = useMemo((): {
     tab: WorkflowUrlStateTabType;
@@ -155,10 +174,8 @@ export function useWorkflowUrlState() {
     return {
       tab: (firstString(params.tab) as WorkflowUrlStateTabType) || 'workflow',
       view:
-        getStoredEditorView() ??
-        (params.view === 'graph' || params.view === 'yaml'
-          ? (params.view as WorkflowEditorView)
-          : 'yaml'),
+        storedEditorView ??
+        (params.view === 'graph' || params.view === 'yaml' ? params.view : defaultView),
       direction:
         getStoredGraphDirection() ??
         (params.direction === 'LR' || params.direction === 'TB'
@@ -185,7 +202,7 @@ export function useWorkflowUrlState() {
       },
       lastViewedExecutionId: boundedToken(firstString(params.lastViewedExecutionId)),
     };
-  }, [location.search]);
+  }, [location.search, defaultView, storedEditorView]);
 
   const updateUrlState = useCallback(
     (updates: Partial<WorkflowUrlState>, { replace = true }: WorkflowUrlUpdateOptions = {}) => {
@@ -377,12 +394,13 @@ export function useWorkflowUrlState() {
     (view: WorkflowEditorView) => {
       setStoredEditorView(view);
       updateUrlState({
-        view,
+        // Omit the default view to keep the URL clean
+        view: view === defaultView ? undefined : view,
         // Clear the flyout selection when switching views
         stepId: undefined,
       });
     },
-    [updateUrlState]
+    [updateUrlState, defaultView]
   );
 
   const setGraphDirection = useCallback(

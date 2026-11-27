@@ -40,6 +40,7 @@ import { WORKFLOW_CHANGE_HISTORY_VALIDATION_MARKER_REUSE_MAX_WAIT_MS } from './w
 import { getWorkflowZodSchema } from '../../../common/schema';
 import { useAvailableConnectors } from '../../entities/connectors/model/use_available_connectors';
 import { triggerSchemas } from '../../trigger_schemas';
+import { STEP_FRAGMENT_SCHEMA_FILE_MATCH_EXCLUSION } from '../../widgets/workflow_yaml_editor/lib/step_fragment/step_fragment_models';
 import { navigateToErrorPosition } from '../../widgets/workflow_yaml_editor/lib/utils';
 import {
   getWorkflowYamlValidationContextError,
@@ -132,7 +133,10 @@ export const useWorkflowChangeHistoryPreviewValidation = ({
 
     return [
       {
-        fileMatch: ['*'],
+        // Keep step-fragment editors (the graph flyout's YAML tab) excluded
+        // from this schema too — it shares the `yamlLanguageService`
+        // singleton with the main editor (see `workflow_yaml_editor.tsx`).
+        fileMatch: ['*', STEP_FRAGMENT_SCHEMA_FILE_MATCH_EXCLUSION],
         schema: workflowJsonSchema as SchemasSettings['schema'],
         uri: workflowSchemaUri,
       },

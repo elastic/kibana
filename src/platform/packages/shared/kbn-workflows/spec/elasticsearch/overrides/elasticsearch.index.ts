@@ -13,19 +13,19 @@
  * Source: elasticsearch-specification repository, operations: index, index-1, index-2
  * This override is used to add the `document` parameter (body in OpenAPI) to the paramsSchema
  * and also modify the methods to just POST, since PUT and POST are interchangeable for "{index}/_doc/{id}', but POST is needed for "{index}/_doc"
+ * `id` is optional: the request builder picks "{index}/_doc/{id}" when it is set and "{index}/_doc" otherwise.
  *
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 
 import { getShapeAt } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
 import type { InternalConnectorContract } from '../../../types/latest';
 import {
-  index1_request,
-  index2_request,
   index_request,
+  types_id,
   types_write_response_base,
 } from '../generated/schemas/es_openapi_zod.gen';
 
@@ -178,22 +178,13 @@ Even the simple case of updating the Elasticsearch index using data from a datab
     ],
     bodyParams: [],
   },
-  paramsSchema: z.union([
+  paramsSchema: lazySchema(() =>
     z.strictObject({
       document: index_request.shape.body.optional(),
       ...getShapeAt(index_request, 'path'),
+      id: z.optional(types_id),
       ...getShapeAt(index_request, 'query'),
-    }),
-    z.strictObject({
-      document: index1_request.shape.body.optional(),
-      ...getShapeAt(index1_request, 'path'),
-      ...getShapeAt(index1_request, 'query'),
-    }),
-    z.strictObject({
-      document: index2_request.shape.body.optional(),
-      ...getShapeAt(index2_request, 'path'),
-      ...getShapeAt(index2_request, 'query'),
-    }),
-  ]),
+    })
+  ),
   outputSchema: types_write_response_base,
 };

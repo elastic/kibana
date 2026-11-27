@@ -1,0 +1,388 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { normalizeFieldsToJsonSchema } from '@kbn/workflows/spec/lib/field_conversion';
+import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
+import type { JsonSchema } from '@kbn/workflows/spec/schema/common/json_model_shape_schema';
+import {
+  SCALAR_SCHEMA_PROPERTY_TYPES,
+  type SchemaPropertyField,
+  type SchemaPropertyNameError,
+  type SchemaPropertyType,
+} from './types';
+
+let nextId = 0;
+const createId = (): string => {
+  nextId += 1;
+  return `schema-prop-${nextId}`;
+};
+
+export const createEmptySchemaProperty = (
+  overrides: Partial<SchemaPropertyField> = {}
+): SchemaPropertyField => ({
+  id: createId(),
+  name: '',
+  type: 'string',
+  description: '',
+  required: false,
+  hasDefault: false,
+  defaultValue: '',
+  allowedValues: [],
+  allowOtherValues: false,
+  ...overrides,
+});
+
+const IDENTIFIER_RE = /^[A-Za-z_][A-Za-z0-9_]*$/;
+
+/** Assigning `__proto__` on a plain object changes its prototype instead of adding a key. */
+const RESERVED_NAMES: ReadonlySet<string> = new Set(['__proto__']);
+
+/** The only parts of a sibling the name check reads. */
+export type SchemaPropertySibling = Pick<SchemaPropertyField, 'id' | 'name'>;
+
+export const validateSchemaPropertyName = (
+  name: string,
+  siblings: ReadonlyArray<SchemaPropertySibling>,
+  selfId: string
+): SchemaPropertyNameError | null => {
+  const trimmed = name.trim();
+  if (!trimmed) return 'empty';
+  if (!IDENTIFIER_RE.test(trimmed)) return 'invalid';
+  if (RESERVED_NAMES.has(trimmed)) return 'reserved';
+  const duplicate = siblings.some((s) => s.id !== selfId && s.name.trim() === trimmed);
+  if (duplicate) return 'duplicate';
+  return null;
+};
+
+const readType = (schema: JsonSchema): SchemaPropertyType => {
+  if (schema.format === 'date' || schema.format === 'date-time') return 'date';
+  const t = schema.type;
+  if (t === 'number' || t === 'integer') return 'number';
+  if (t === 'boolean') return 'boolean';
+  if (t === 'object') return 'object';
+  if (t === 'array') return 'array';
+  return 'string';
+};
+
+const defaultToString = (value: unknown): string => {
+  if (value === undefined || value === null) return '';
+  if (typeof value === 'string') return value;
+  if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return '';
+  }
+};
+
+const coerceDefault = (type: SchemaPropertyType, raw: string): unknown => {
+  const trimmed = raw.trim();
+  if (!trimmed) return undefined;
+  if (type === 'number') {
+    const n = Number(trimmed);
+    return Number.isFinite(n) ? n : trimmed;
+  }
+  if (type === 'boolean') {
+    if (trimmed === 'true') return true;
+    if (trimmed === 'false') return false;
+    return trimmed;
+  }
+  if (type === 'object' || type === 'array') {
+    try {
+      return JSON.parse(trimmed);
+    } catch {
+      return trimmed;
+    }
+  }
+  return trimmed;
+};
+
+const enumToStrings = (values: unknown[] | undefined): string[] => {
+  if (!values) return [];
+  return values.map((v) => (typeof v === 'string' ? v : String(v)));
+};
+
+/** `anyOf` of bare `string` / `number` / `boolean` schemas: what a legacy `array` input gets as its items. */
+const isScalarUnion = (node: JsonSchema): boolean =>
+  Array.isArray(node.anyOf) &&
+  node.anyOf.length > 0 &&
+  node.anyOf.every((option) => {
+    if (!option || typeof option !== 'object') return false;
+    const { type, ...rest } = option as { type?: unknown };
+    return (
+      (type === 'string' || type === 'number' || type === 'boolean') &&
+      Object.keys(rest).length === 0
+    );
+  });
+
+const parseProperty = (
+  name: string,
+  schema: JsonSchema,
+  requiredNames: ReadonlySet<string>
+): SchemaPropertyField => {
+  const type = readType(schema);
+  const enumValues = Array.isArray(schema.enum) ? enumToStrings(schema.enum) : [];
+  const examplesRaw = (schema as { examples?: unknown }).examples;
+  const examples = Array.isArray(examplesRaw) ? enumToStrings(examplesRaw) : [];
+  const hasEnum = enumValues.length > 0;
+  const allowedValues = hasEnum ? enumValues : examples;
+  const allowOtherValues = !hasEnum && examples.length > 0;
+
+  let properties: SchemaPropertyField[] | undefined;
+  if (type === 'object' && schema.properties) {
+    const nestedRequired = new Set(schema.required ?? []);
+    properties = Object.entries(schema.properties).map(([childName, childSchema]) =>
+      parseProperty(childName, childSchema as JsonSchema, nestedRequired)
+    );
+  }
+
+  let itemType: SchemaPropertyType | undefined;
+  let itemProperties: SchemaPropertyField[] | undefined;
+  let itemSchema: JsonSchema | undefined;
+  if (type === 'array') {
+    const items = Array.isArray(schema.items) ? schema.items[0] : schema.items;
+    if (items && typeof items === 'object') {
+      itemType = readType(items as JsonSchema);
+      if (isScalarUnion(items as JsonSchema)) itemSchema = items as JsonSchema;
+      const nestedProperties = (items as JsonSchema).properties;
+      if (itemType === 'object' && nestedProperties) {
+        const nestedRequired = new Set((items as JsonSchema).required ?? []);
+        itemProperties = Object.entries(nestedProperties).map(([childName, childSchema]) =>
+          parseProperty(childName, childSchema as JsonSchema, nestedRequired)
+        );
+      }
+    } else {
+      itemType = 'string';
+    }
+  }
+
+  const hasDefault = schema.default !== undefined && schema.default !== null;
+
+  return {
+    id: createId(),
+    name,
+    type,
+    description: typeof schema.description === 'string' ? schema.description : '',
+    required: requiredNames.has(name),
+    hasDefault,
+    defaultValue: defaultToString(schema.default),
+    allowedValues,
+    allowOtherValues,
+    properties,
+    itemType,
+    itemProperties,
+    itemSchema,
+  };
+};
+
+/**
+ * Returns true when the schema can be edited by the visual builder (no $ref /
+ * composition keywords the builder does not author).
+ */
+export const isBuilderEditableSchema = (schema: JsonModelSchemaType | undefined): boolean => {
+  if (!schema?.properties) return true;
+  const walk = (node: JsonSchema): boolean => {
+    if (!node || typeof node !== 'object') return true;
+    if (node.$ref || node.anyOf || node.oneOf) return false;
+    if (node.properties) {
+      for (const child of Object.values(node.properties)) {
+        if (!walk(child as JsonSchema)) return false;
+      }
+    }
+    if (node.items) {
+      const items = Array.isArray(node.items) ? node.items : [node.items];
+      for (const item of items) {
+        // A union of scalar types is how a legacy `array` input describes its items; the builder keeps it as it is.
+        if (
+          item &&
+          typeof item === 'object' &&
+          !isScalarUnion(item as JsonSchema) &&
+          !walk(item as JsonSchema)
+        ) {
+          return false;
+        }
+      }
+    }
+    return true;
+  };
+  return walk(schema as JsonSchema);
+};
+
+/** Parse workflow trigger `inputs` (legacy array or JSON Schema) into builder fields. */
+export const parseInputsToSchemaProperties = (
+  inputs: unknown
+): SchemaPropertyField[] | 'unsupported' => {
+  if (inputs == null) return [];
+  const normalized = normalizeFieldsToJsonSchema(inputs);
+  if (!normalized) return [];
+  if (!isBuilderEditableSchema(normalized)) return 'unsupported';
+  const required = new Set(normalized.required ?? []);
+  return Object.entries(normalized.properties ?? {}).map(([name, schema]) =>
+    parseProperty(name, schema as JsonSchema, required)
+  );
+};
+
+const propertyToJsonSchema = (field: SchemaPropertyField): JsonSchema => {
+  const schema: JsonSchema = {};
+
+  if (field.type === 'date') {
+    schema.type = 'string';
+    schema.format = 'date';
+  } else if (field.type === 'number') {
+    schema.type = 'number';
+  } else if (field.type === 'boolean') {
+    schema.type = 'boolean';
+  } else if (field.type === 'object') {
+    schema.type = 'object';
+  } else if (field.type === 'array') {
+    schema.type = 'array';
+  } else {
+    schema.type = 'string';
+  }
+
+  if (field.description.trim()) {
+    schema.description = field.description.trim();
+  }
+
+  if (field.hasDefault) {
+    const def = coerceDefault(field.type, field.defaultValue);
+    // An enabled default left empty is the empty string, which only a string can hold.
+    if (def !== undefined) schema.default = def as JsonSchema['default'];
+    else if (field.type === 'string') schema.default = '';
+  }
+
+  if (SCALAR_SCHEMA_PROPERTY_TYPES.has(field.type) && field.allowedValues.length > 0) {
+    const values = [...field.allowedValues];
+    if (field.allowOtherValues) {
+      Object.assign(schema, { examples: values });
+    } else {
+      schema.enum = values;
+    }
+  }
+
+  if (field.type === 'object') {
+    const nested = schemaPropertiesToJsonSchema(field.properties ?? []);
+    schema.properties = nested.properties;
+    if (nested.required?.length) schema.required = nested.required;
+  }
+
+  if (field.type === 'array') {
+    const itemType = field.itemType ?? 'string';
+    if (field.itemSchema && itemType === 'string') {
+      schema.items = field.itemSchema;
+    } else if (itemType === 'object') {
+      const nested = schemaPropertiesToJsonSchema(field.itemProperties ?? []);
+      schema.items = {
+        type: 'object',
+        properties: nested.properties,
+        ...(nested.required?.length ? { required: nested.required } : {}),
+      };
+    } else if (itemType === 'date') {
+      schema.items = { type: 'string', format: 'date' };
+    } else if (itemType === 'number') {
+      schema.items = { type: 'number' };
+    } else if (itemType === 'boolean') {
+      schema.items = { type: 'boolean' };
+    } else {
+      schema.items = { type: 'string' };
+    }
+  }
+
+  return schema;
+};
+
+/**
+ * Serialize builder fields to JSON Schema.
+ * `required` is a parent-level array (JSON Schema), not a per-property flag.
+ */
+export const schemaPropertiesToJsonSchema = (
+  fields: readonly SchemaPropertyField[]
+): JsonModelSchemaType => {
+  const named = fields
+    .map((field) => ({ field, name: field.name.trim() }))
+    .filter(({ name }) => name !== '');
+  // `Object.fromEntries` defines own properties, so a name like `__proto__` cannot alter the prototype.
+  const properties: Record<string, JsonSchema> = Object.fromEntries(
+    named.map(({ field, name }) => [name, propertyToJsonSchema(field)] as const)
+  );
+  const required = named.filter(({ field }) => field.required).map(({ name }) => name);
+
+  return {
+    type: 'object',
+    properties,
+    ...(required.length > 0 ? { required } : {}),
+  };
+};
+
+/** Clear required/default/allowed values that are incompatible after a type change. */
+export const applyTypeChange = (
+  field: SchemaPropertyField,
+  nextType: SchemaPropertyType
+): SchemaPropertyField => {
+  const next: SchemaPropertyField = {
+    ...field,
+    type: nextType,
+    required: false,
+    hasDefault: false,
+    defaultValue: '',
+    allowedValues: [],
+    allowOtherValues: false,
+    properties: nextType === 'object' ? field.properties ?? [] : undefined,
+    itemType: nextType === 'array' ? field.itemType ?? 'string' : undefined,
+    itemProperties:
+      nextType === 'array' && (field.itemType ?? 'string') === 'object'
+        ? field.itemProperties ?? []
+        : undefined,
+    itemSchema: undefined,
+  };
+  return next;
+};
+
+/**
+ * Find step names that reference `prefix.<name>` (or nested paths under it)
+ * in the workflow YAML document.
+ */
+export const findStepsReferencingPath = (
+  workflowYaml: string,
+  prefix: string,
+  name: string
+): string[] => {
+  if (!name.trim() || !workflowYaml) return [];
+  const escapedPrefix = prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const refRe = new RegExp(`${escapedPrefix}\\.${escaped}(?:\\b|[^A-Za-z0-9_])`);
+  const steps: string[] = [];
+  const lines = workflowYaml.split('\n');
+  let currentStep: string | null = null;
+  const seen = new Set<string>();
+  for (const line of lines) {
+    const nameMatch = line.match(/^\s*-\s*name:\s*['"]?([A-Za-z0-9_]+)['"]?\s*$/);
+    if (nameMatch) {
+      currentStep = nameMatch[1];
+    } else {
+      const bareName = line.match(/^\s+name:\s*['"]?([A-Za-z0-9_]+)['"]?\s*$/);
+      if (bareName && currentStep === null) {
+        currentStep = bareName[1];
+      }
+      if (currentStep && refRe.test(line) && !seen.has(currentStep)) {
+        seen.add(currentStep);
+        steps.push(currentStep);
+      }
+    }
+  }
+  if (steps.length === 0 && refRe.test(workflowYaml)) {
+    return ['(workflow)'];
+  }
+  return steps;
+};
+
+/**
+ * Find step names that reference `inputs.<name>` (or nested paths under it)
+ * in the workflow YAML document.
+ */
+export const findStepsReferencingInput = (workflowYaml: string, inputName: string): string[] =>
+  findStepsReferencingPath(workflowYaml, 'inputs', inputName);

@@ -7,32 +7,37 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DagPositionedEdge, DagPositionedNode } from '@kbn/dag-layout';
+import type { DagPositionedNode } from '@kbn/dag-layout';
 import { dagLayout } from '@kbn/dag-layout';
 import type { LayoutDirection, TransformResult } from '@kbn/workflows';
 import { packCrossAxis } from './pack_workflow_structure';
+import {
+  FORK_HEAD_MIN_GAP,
+  WORKFLOW_COMPOUND_PADDING,
+  WORKFLOW_NODE_SEP,
+  WORKFLOW_RANK_SEP,
+} from './workflow_graph_geometry';
 
-// Workflow-specific layout constants. These encode domain knowledge (foreach
-// header height, gutter widths) that does not belong in @kbn/dag-layout.
-// Exported so tests can import the real values instead of re-declaring them.
-export const WORKFLOW_COMPOUND_PADDING = { top: 70, right: 32, bottom: 32, left: 32 } as const;
-export const WORKFLOW_NODE_SEP = 50;
-export const WORKFLOW_RANK_SEP = 70;
+// Re-exported from the geometry module so tests keep importing the real values from here.
+export {
+  WORKFLOW_COMPOUND_PADDING,
+  WORKFLOW_NODE_SEP,
+  WORKFLOW_RANK_SEP,
+} from './workflow_graph_geometry';
 
 export interface LayoutSnapshot {
   nodes: DagPositionedNode[];
-  edges: DagPositionedEdge[];
 }
 
 /**
- * Pure data pipeline: TransformResult → dagLayout → packCrossAxis → positioned nodes + edges.
+ * Pure data pipeline: TransformResult → dagLayout → packCrossAxis → positioned nodes.
  *
  * Maps domain nodes/edges/groups to the @kbn/dag-layout format and runs the layout
  * engine, which decides the main axis (ranks, sizes, container heights). The cross
  * axis is then set from the workflow's block structure (see `packCrossAxis`), so forks,
- * containers and lanes are placed by rule instead of being repaired afterwards. The
- * engine's edge waypoints refer to its own cross positions, so they are dropped and
- * edges are routed by `computeEdgePath` from the final handle positions.
+ * containers and lanes are placed by rule instead of being repaired afterwards. Edges
+ * are not part of the result: they are routed by `computeEdgePath` from the final
+ * handle positions.
  * Throws on layout failure (e.g. a cyclic compound graph) — callers are responsible
  * for error handling and any perf instrumentation.
  */
@@ -42,12 +47,24 @@ export const computeWorkflowLayout = (
 ): LayoutSnapshot => {
   const { nodes, edges, foreachGroups, bypassLaneNodes } = transformed;
 
-  const dagNodes = [
-    ...nodes.map((n) => ({
+  // Extra main-axis space added symmetrically to each fork node so the fork-head +
+  // button fits between the chip and the branch card without overlapping. Undone
+  // right after dagLayout. Zero when WORKFLOW_RANK_SEP already provides enough room.
+  const forkHeadReserve = Math.max(0, FORK_HEAD_MIN_GAP - WORKFLOW_RANK_SEP);
+  const forkNodeIds = new Set(transformed.forkNodeToJoinId.keys());
+  const isTB = direction === 'TB';
+
+  const inflatedSize = (n: { id: string; style: { width: number; height: number } }) => {
+    const grow = forkNodeIds.has(n.id) ? forkHeadReserve * 2 : 0;
+    return {
       id: n.id,
-      width: n.style.width,
-      height: n.style.height,
-    })),
+      width: isTB ? n.style.width : n.style.width + grow,
+      height: isTB ? n.style.height + grow : n.style.height,
+    };
+  };
+
+  const dagNodes = [
+    ...nodes.map(inflatedSize),
     // Bypass lane nodes live outside domain `nodes` — add them here so dagre
     // sees them and allocates lanes for unbalanced if/switch branches.
     ...bypassLaneNodes.map((n) => ({
@@ -60,11 +77,7 @@ export const computeWorkflowLayout = (
   const dagGroups = foreachGroups.map((g) => ({
     id: g.id,
     innerNodes: [
-      ...g.innerNodes.map((n) => ({
-        id: n.id,
-        width: n.style.width,
-        height: n.style.height,
-      })),
+      ...g.innerNodes.map(inflatedSize),
       ...g.bypassLaneNodes.map((n) => ({
         id: n.id,
         width: n.style.width,
@@ -113,14 +126,25 @@ export const computeWorkflowLayout = (
     })),
   });
 
+  // Give fork nodes back their real card size. The inflation was symmetric, so shifting
+  // by the reserve and shrinking by twice that keeps the card centre fixed.
+  const deflatedNodes =
+    forkHeadReserve > 0
+      ? laid.nodes.map((n) => {
+          if (!forkNodeIds.has(n.id)) return n;
+          return isTB
+            ? { ...n, y: n.y + forkHeadReserve, height: n.height - forkHeadReserve * 2 }
+            : { ...n, x: n.x + forkHeadReserve, width: n.width - forkHeadReserve * 2 };
+        })
+      : laid.nodes;
+
   return {
     nodes: packCrossAxis({
       structure: transformed.structure,
-      nodes: laid.nodes,
+      nodes: deflatedNodes,
       direction,
       nodeSep: WORKFLOW_NODE_SEP,
       compoundPadding: WORKFLOW_COMPOUND_PADDING,
     }),
-    edges: laid.edges.map((edge) => ({ ...edge, points: [] })),
   };
 };

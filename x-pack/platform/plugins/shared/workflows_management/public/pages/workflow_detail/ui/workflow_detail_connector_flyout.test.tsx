@@ -8,14 +8,18 @@
 import { act, render } from '@testing-library/react';
 import React from 'react';
 import { monaco } from '@kbn/monaco';
-import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
+import type {
+  ActionConnector,
+  TriggersAndActionsUIPublicPluginStart,
+} from '@kbn/triggers-actions-ui-plugin/public';
 import { WorkflowDetailConnectorFlyout } from './workflow_detail_connector_flyout';
 import {
   openCreateConnectorFlyout,
   openEditConnectorFlyout,
 } from '../../../entities/workflows/store';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
-import { TestWrapper } from '../../../shared/test_utils';
+import type { useAsyncThunk } from '../../../hooks/use_async_thunk';
+import { createMockMonacoEditor, TestWrapper } from '../../../shared/test_utils';
 
 // Mock hooks
 const mockUseKibana = jest.fn();
@@ -27,7 +31,7 @@ jest.mock('../../../hooks/use_kibana', () => ({
 }));
 
 jest.mock('../../../hooks/use_async_thunk', () => ({
-  useAsyncThunk: (thunk: any) => mockUseAsyncThunk(thunk),
+  useAsyncThunk: (thunk: Parameters<typeof useAsyncThunk>[0]) => mockUseAsyncThunk(thunk),
 }));
 
 jest.mock('../../../entities/connectors/model/use_available_connectors', () => ({
@@ -38,8 +42,14 @@ describe('WorkflowDetailConnectorFlyout', () => {
   const mockEditorRef = {
     current: null,
   } as React.MutableRefObject<monaco.editor.IStandaloneCodeEditor | null>;
-  const mockGetAddConnectorFlyout = jest.fn();
-  const mockGetEditConnectorFlyout = jest.fn();
+  const mockGetAddConnectorFlyout = jest.fn<
+    ReturnType<TriggersAndActionsUIPublicPluginStart['getAddConnectorFlyout']>,
+    Parameters<TriggersAndActionsUIPublicPluginStart['getAddConnectorFlyout']>
+  >();
+  const mockGetEditConnectorFlyout = jest.fn<
+    ReturnType<TriggersAndActionsUIPublicPluginStart['getEditConnectorFlyout']>,
+    Parameters<TriggersAndActionsUIPublicPluginStart['getEditConnectorFlyout']>
+  >();
   const mockLoadConnectors = jest.fn();
 
   const mockConnector = {
@@ -59,15 +69,14 @@ describe('WorkflowDetailConnectorFlyout', () => {
     column: 10,
   };
 
+  // A real model, so `getLineMaxColumn` and `pushEditOperations` are Monaco's own; the editor
+  // around it is the shared double (its single cast lives in `createMockMonacoEditor`).
   const createMockEditor = (): monaco.editor.IStandaloneCodeEditor => {
-    const mockModel = {
-      getLineMaxColumn: jest.fn((lineNumber: number) => 50),
-      pushEditOperations: jest.fn(),
-    } as any;
-
-    return {
-      getModel: jest.fn(() => mockModel),
-    } as any;
+    const model = monaco.editor.createModel(
+      Array.from({ length: 10 }, () => 'a'.repeat(49)).join('\n')
+    );
+    jest.spyOn(model, 'pushEditOperations');
+    return createMockMonacoEditor('', { getModel: () => model }).editor;
   };
 
   const renderComponent = (store = createMockStore()) => {
@@ -83,7 +92,7 @@ describe('WorkflowDetailConnectorFlyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    mockEditorRef.current = createMockEditor() as monaco.editor.IStandaloneCodeEditor;
+    mockEditorRef.current = createMockEditor();
 
     mockUseKibana.mockReturnValue({
       services: {
@@ -105,6 +114,10 @@ describe('WorkflowDetailConnectorFlyout', () => {
     mockGetEditConnectorFlyout.mockReturnValue(<div data-test-subj="edit-connector-flyout" />);
   });
 
+  afterEach(() => {
+    mockEditorRef.current?.getModel()?.dispose();
+  });
+
   describe('when flyout is closed', () => {
     it('should return null', () => {
       const { container } = renderComponent();
@@ -118,7 +131,7 @@ describe('WorkflowDetailConnectorFlyout', () => {
       act(() => {
         store.dispatch(
           openCreateConnectorFlyout({
-            connectorType: undefined as any,
+            connectorType: '',
           })
         );
       });
@@ -148,7 +161,7 @@ describe('WorkflowDetailConnectorFlyout', () => {
 
     it('should call closeConnectorFlyout when onClose is triggered', () => {
       let onCloseCallback: (() => void) | undefined;
-      mockGetAddConnectorFlyout.mockImplementation((config: any) => {
+      mockGetAddConnectorFlyout.mockImplementation((config) => {
         onCloseCallback = config.onClose;
         return <div data-test-subj="add-connector-flyout" />;
       });
@@ -172,7 +185,7 @@ describe('WorkflowDetailConnectorFlyout', () => {
     it('reloads connectors when a created connector is edited without inserting the id again', () => {
       let onConnectorCreatedCallback: ((connector: ActionConnector) => void) | undefined;
       let onConnectorUpdatedCallback: ((connector: ActionConnector) => void) | undefined;
-      mockGetAddConnectorFlyout.mockImplementation((config: any) => {
+      mockGetAddConnectorFlyout.mockImplementation((config) => {
         onConnectorCreatedCallback = config.onConnectorCreated;
         onConnectorUpdatedCallback = config.onConnectorUpdated;
         return <div data-test-subj="add-connector-flyout" />;
@@ -217,7 +230,7 @@ describe('WorkflowDetailConnectorFlyout', () => {
 
     it('should insert connector ID and reload connectors when onConnectorCreated is triggered', () => {
       let onConnectorCreatedCallback: ((connector: ActionConnector) => void) | undefined;
-      mockGetAddConnectorFlyout.mockImplementation((config: any) => {
+      mockGetAddConnectorFlyout.mockImplementation((config) => {
         onConnectorCreatedCallback = config.onConnectorCreated;
         return <div data-test-subj="add-connector-flyout" />;
       });
@@ -256,7 +269,7 @@ describe('WorkflowDetailConnectorFlyout', () => {
 
     it('should not insert connector ID when insertPosition is not provided', () => {
       let onConnectorCreatedCallback: ((connector: ActionConnector) => void) | undefined;
-      mockGetAddConnectorFlyout.mockImplementation((config: any) => {
+      mockGetAddConnectorFlyout.mockImplementation((config) => {
         onConnectorCreatedCallback = config.onConnectorCreated;
         return <div data-test-subj="add-connector-flyout" />;
       });
@@ -283,9 +296,53 @@ describe('WorkflowDetailConnectorFlyout', () => {
       expect(editorModel?.pushEditOperations).not.toHaveBeenCalled();
     });
 
+    it('hands the created connector id back to the form field that asked for it', () => {
+      let onConnectorCreatedCallback: ((connector: ActionConnector) => void) | undefined;
+      mockGetAddConnectorFlyout.mockImplementation((config) => {
+        onConnectorCreatedCallback = config.onConnectorCreated;
+        return <div data-test-subj="add-connector-flyout" />;
+      });
+
+      const { store } = renderComponent();
+      act(() => {
+        store.dispatch(
+          openCreateConnectorFlyout({ connectorType: 'test-action-type', requestId: 'field-1' })
+        );
+      });
+      act(() => {
+        onConnectorCreatedCallback!(mockConnector);
+      });
+
+      expect(store.getState().detail.lastCreatedConnector).toEqual({
+        requestId: 'field-1',
+        id: 'connector-123',
+      });
+      expect(mockLoadConnectors).toHaveBeenCalled();
+      expect(store.getState().detail.connectorFlyout.isOpen).toBe(false);
+      expect(mockEditorRef.current?.getModel()?.pushEditOperations).not.toHaveBeenCalled();
+    });
+
+    it('reports no created connector when no form field asked for it', () => {
+      let onConnectorCreatedCallback: ((connector: ActionConnector) => void) | undefined;
+      mockGetAddConnectorFlyout.mockImplementation((config) => {
+        onConnectorCreatedCallback = config.onConnectorCreated;
+        return <div data-test-subj="add-connector-flyout" />;
+      });
+
+      const { store } = renderComponent();
+      act(() => {
+        store.dispatch(openCreateConnectorFlyout({ connectorType: 'test-action-type' }));
+      });
+      act(() => {
+        onConnectorCreatedCallback!(mockConnector);
+      });
+
+      expect(store.getState().detail.lastCreatedConnector).toBeUndefined();
+    });
+
     it('keeps the flyout open after creating an inbound webhook so the ingest token remains visible', () => {
       let onConnectorCreatedCallback: ((connector: ActionConnector) => void) | undefined;
-      mockGetAddConnectorFlyout.mockImplementation((config: any) => {
+      mockGetAddConnectorFlyout.mockImplementation((config) => {
         onConnectorCreatedCallback = config.onConnectorCreated;
         return <div data-test-subj="add-connector-flyout" />;
       });
@@ -325,7 +382,7 @@ describe('WorkflowDetailConnectorFlyout', () => {
 
     it('closes after creating a dual connector with inbound events off', () => {
       let onConnectorCreatedCallback: ((connector: ActionConnector) => void) | undefined;
-      mockGetAddConnectorFlyout.mockImplementation((config: any) => {
+      mockGetAddConnectorFlyout.mockImplementation((config) => {
         onConnectorCreatedCallback = config.onConnectorCreated;
         return <div data-test-subj="add-connector-flyout" />;
       });
@@ -352,7 +409,7 @@ describe('WorkflowDetailConnectorFlyout', () => {
 
     it('keeps the flyout open after creating a dual connector with inbound events on', () => {
       let onConnectorCreatedCallback: ((connector: ActionConnector) => void) | undefined;
-      mockGetAddConnectorFlyout.mockImplementation((config: any) => {
+      mockGetAddConnectorFlyout.mockImplementation((config) => {
         onConnectorCreatedCallback = config.onConnectorCreated;
         return <div data-test-subj="add-connector-flyout" />;
       });
@@ -425,7 +482,7 @@ describe('WorkflowDetailConnectorFlyout', () => {
 
     it('should call closeConnectorFlyout when onClose is triggered', () => {
       let onCloseCallback: (() => void) | undefined;
-      mockGetEditConnectorFlyout.mockImplementation((config: any) => {
+      mockGetEditConnectorFlyout.mockImplementation((config) => {
         onCloseCallback = config.onClose;
         return <div data-test-subj="edit-connector-flyout" />;
       });
@@ -453,8 +510,8 @@ describe('WorkflowDetailConnectorFlyout', () => {
     });
 
     it('should reload connectors and close flyout when onConnectorUpdated is triggered', () => {
-      let onConnectorUpdatedCallback: (() => void) | undefined;
-      mockGetEditConnectorFlyout.mockImplementation((config: any) => {
+      let onConnectorUpdatedCallback: ((connector: ActionConnector) => void) | undefined;
+      mockGetEditConnectorFlyout.mockImplementation((config) => {
         onConnectorUpdatedCallback = config.onConnectorUpdated;
         return <div data-test-subj="edit-connector-flyout" />;
       });
@@ -476,7 +533,7 @@ describe('WorkflowDetailConnectorFlyout', () => {
 
       expect(onConnectorUpdatedCallback).toBeDefined();
       act(() => {
-        onConnectorUpdatedCallback!();
+        onConnectorUpdatedCallback!(mockConnector);
       });
 
       expect(mockLoadConnectors).toHaveBeenCalled();
@@ -486,10 +543,10 @@ describe('WorkflowDetailConnectorFlyout', () => {
 
   describe('insertConnectorId function', () => {
     it('should handle errors gracefully when editor model is unavailable', () => {
-      mockEditorRef.current = null as any;
+      mockEditorRef.current = null;
 
       let onConnectorCreatedCallback: ((connector: ActionConnector) => void) | undefined;
-      mockGetAddConnectorFlyout.mockImplementation((config: any) => {
+      mockGetAddConnectorFlyout.mockImplementation((config) => {
         onConnectorCreatedCallback = config.onConnectorCreated;
         return <div data-test-subj="add-connector-flyout" />;
       });
@@ -514,18 +571,14 @@ describe('WorkflowDetailConnectorFlyout', () => {
     });
 
     it('should handle errors gracefully when pushEditOperations fails', () => {
-      const mockModel = {
-        getLineMaxColumn: jest.fn(() => 50),
-        pushEditOperations: jest.fn(() => {
-          throw new Error('Edit operation failed');
-        }),
-      };
-      mockEditorRef.current = {
-        getModel: jest.fn(() => mockModel),
-      } as any;
+      const model = mockEditorRef.current?.getModel();
+      if (!model) throw new Error('the mock editor has no model');
+      jest.spyOn(model, 'pushEditOperations').mockImplementation(() => {
+        throw new Error('Edit operation failed');
+      });
 
       let onConnectorCreatedCallback: ((connector: ActionConnector) => void) | undefined;
-      mockGetAddConnectorFlyout.mockImplementation((config: any) => {
+      mockGetAddConnectorFlyout.mockImplementation((config) => {
         onConnectorCreatedCallback = config.onConnectorCreated;
         return <div data-test-subj="add-connector-flyout" />;
       });
@@ -547,6 +600,7 @@ describe('WorkflowDetailConnectorFlyout', () => {
           onConnectorCreatedCallback!(mockConnector);
         });
       }).not.toThrow();
+      expect(model.pushEditOperations).toHaveBeenCalledTimes(1);
     });
   });
 });

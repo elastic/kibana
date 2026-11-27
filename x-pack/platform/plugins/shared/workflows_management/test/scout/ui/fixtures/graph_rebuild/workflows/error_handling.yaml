@@ -1,0 +1,63 @@
+name: Rebuild error handling
+description: on-failure with continue, retry and fallback steps, also inside a loop.
+tags:
+  - scout
+  - graph-rebuild
+consts:
+  items:
+    - a
+    - b
+triggers:
+  - type: manual
+steps:
+  - name: continue_on_failure
+    type: console
+    on-failure:
+      continue: true
+    with:
+      message: "keeps going when this fails"
+  - name: retry_twice
+    type: console
+    on-failure:
+      retry:
+        max-attempts: 2
+        delay: 5s
+    with:
+      message: "retried before failing"
+  - name: retry_then_fallback
+    type: console
+    on-failure:
+      retry:
+        max-attempts: 1
+        delay: 5s
+      continue: true
+      fallback:
+        - name: record_failure
+          type: console
+          with:
+            message: "first fallback step"
+        - name: notify_failure
+          type: console
+          with:
+            message: "second fallback step"
+    with:
+      message: "retried, then handled by a fallback"
+  - name: each_with_fallback
+    type: foreach
+    foreach: "{{ consts.items }}"
+    steps:
+      - name: risky_item
+        type: console
+        on-failure:
+          continue: true
+          fallback:
+            - name: log_item_failure
+              type: console
+              with:
+                message: "item {{ foreach.item }} failed"
+        with:
+          message: "processing {{ foreach.item }}"
+  - name: after_errors
+    type: console
+    with:
+      message: "done"

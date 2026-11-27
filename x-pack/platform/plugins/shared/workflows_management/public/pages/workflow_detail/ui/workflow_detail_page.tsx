@@ -22,8 +22,9 @@ import { isHttpFetchError } from '@kbn/core-http-browser';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/workflows';
 import { useWorkflowsCapabilities, type WorkflowsCreateRouteState } from '@kbn/workflows-ui';
-import { workflowDefaultYaml } from './workflow_default_yml';
+import { workflowDefaultYaml, workflowYamlEditorSeedYaml } from './workflow_default_yml';
 import { WorkflowDetailEditor } from './workflow_detail_editor';
 import { WorkflowDetailHeader } from './workflow_detail_header';
 import { WorkflowEditorLayout } from './workflow_detail_layout';
@@ -36,12 +37,12 @@ import type { WorkflowDetailTab } from '../../../common/lib/telemetry/events/wor
 import { AgenticFirstEmptyStateLive } from '../../../components';
 import { WorkflowsPageName } from '../../../deep_links';
 import {
+  seedCreateYaml,
   setActiveTab,
   setExecution,
   setIsTestModalOpen,
   setRemixTemplate,
   setReplayExecutionId,
-  setYamlString,
 } from '../../../entities/workflows/store';
 import {
   selectActiveTab,
@@ -67,6 +68,7 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { useTelemetry } from '../../../hooks/use_telemetry';
 import { useWorkflowsBreadcrumbs } from '../../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
+import { useWorkflowsExperimentalUiSetting } from '../../../hooks/use_workflows_experimental_ui_setting';
 import {
   navigateToWorkflowsList,
   type WorkflowDetailRouteState,
@@ -126,6 +128,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     replayExecutionId,
     replayIsTestRun,
     clearReplayExecutionId,
+    editorView,
   } = useWorkflowUrlState();
 
   useEffect(() => {
@@ -167,6 +170,16 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   // already seeded so URL-state churn and re-renders never clobber in-progress
   // edits or re-fire telemetry.
   const seededRef = useRef(false);
+  // Read at seed time only — must not be an effect dependency or Graph↔YAML
+  // toggles re-run this effect and reload the workflow (skeleton flash).
+  const editorViewRef = useRef(editorView);
+  editorViewRef.current = editorView;
+  const isVisualEditorEnabled = useWorkflowsExperimentalUiSetting(
+    WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID
+  );
+  // Read at seed time only, for the same reason as the editor view.
+  const isVisualEditorEnabledRef = useRef(isVisualEditorEnabled);
+  isVisualEditorEnabledRef.current = isVisualEditorEnabled;
 
   // A navigation can hand `/create` its initial content through history
   // state (`WorkflowsCreateRouteState`) — e.g. the Template library's
@@ -179,7 +192,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   const remixTemplateSlug = remixTemplate?.slug;
   const remixTemplateVersion = remixTemplate?.version;
 
-  // Load workflow when id changes
+  // Load workflow when id changes; seed create once.
   useEffect(() => {
     if (id) {
       seededRef.current = false;
@@ -191,7 +204,12 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     }
     seededRef.current = true;
 
-    dispatch(setYamlString(initialYaml || workflowDefaultYaml));
+    // Without the visual editor the user lands in the YAML editor, so they get the runnable
+    // hello-world sample instead of the empty structure the canvas starts from.
+    const isVisual = isVisualEditorEnabledRef.current;
+    dispatch(
+      seedCreateYaml(initialYaml || (isVisual ? workflowDefaultYaml : workflowYamlEditorSeedYaml))
+    );
     // Reset on every create session, so a plain create never inherits an earlier remix.
     dispatch(
       setRemixTemplate(
@@ -200,7 +218,9 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
           : undefined
       )
     );
-    telemetry.reportWorkflowCreateOpened({ editorType: 'yaml' });
+    telemetry.reportWorkflowCreateOpened({
+      editorType: isVisual && editorViewRef.current === 'graph' ? 'visual' : 'yaml',
+    });
   }, [loadWorkflow, id, dispatch, telemetry, initialYaml, remixTemplateSlug, remixTemplateVersion]);
 
   // The store tab picks what the editor shows: a run snapshot only once a run is selected.

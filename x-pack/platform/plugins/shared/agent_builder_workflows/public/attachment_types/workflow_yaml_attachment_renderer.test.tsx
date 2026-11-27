@@ -37,6 +37,7 @@ jest.mock('@kbn/workflows-ui', () => {
   const actual = jest.requireActual('@kbn/workflows-ui');
   return {
     ...actual,
+    preloadWorkflowGraphCanvas: jest.fn(() => Promise.resolve()),
     useWorkflowsApi: jest.fn(() => mockWorkflowApi),
     useWorkflowsCapabilities: jest.fn(() => mockAllWorkflowCapabilitiesTrue),
   };

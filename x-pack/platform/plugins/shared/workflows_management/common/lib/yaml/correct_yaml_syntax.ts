@@ -23,29 +23,32 @@
  * including multi-line JSON objects are also parsed correctly by the YAML parser.
  *
  * @param _yaml - The YAML string to correct
+ * @param skipLines - 1-based numbers of lines to leave untouched, such as the continuation lines
+ *   of a multi-line scalar, whose text is content and must not be read as `key: value`
  * @returns The corrected YAML string
  */
-export function correctYamlSyntax(_yaml: string): string {
-  return wrapDangerousCharacters(_yaml);
+export function correctYamlSyntax(_yaml: string, skipLines?: ReadonlySet<number>): string {
+  return wrapDangerousCharacters(_yaml, skipLines);
 }
 
 /**
  * Wraps characters that cause the YAML parser to silently produce incorrect values or crash.
  * @param yaml - The YAML string
+ * @param skipLines - 1-based numbers of lines to leave untouched
  * @returns The YAML string with dangerous characters wrapped in quotes
  */
-function wrapDangerousCharacters(yaml: string): string {
+function wrapDangerousCharacters(yaml: string, skipLines?: ReadonlySet<number>): string {
   const lines = yaml.split('\n');
   const correctedLines: string[] = [];
 
   // Characters that cause data loss or crashes when used as bare values in YAML
   const dangerousCharacters = ['!', '#', '&', '*'];
 
-  for (const line of lines) {
+  for (const [index, line] of lines.entries()) {
     let correctedLine = line;
 
-    // Skip comment lines
-    if (line.trim().startsWith('#')) {
+    // Skip comment lines and lines the caller knows are scalar content
+    if (line.trim().startsWith('#') || skipLines?.has(index + 1)) {
       correctedLines.push(correctedLine);
       // eslint-disable-next-line no-continue
       continue;

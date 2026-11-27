@@ -8,7 +8,7 @@
 import type { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { CSSInterpolation } from '@emotion/serialize';
-import { aiIconTileCss } from './ai_icon_tile';
+import { aiIconTileCss } from '@kbn/workflows-ui';
 import type { IconVariant } from '../types';
 
 /** Shared 40×40 category icon tile used in the actions list and preview rows. */

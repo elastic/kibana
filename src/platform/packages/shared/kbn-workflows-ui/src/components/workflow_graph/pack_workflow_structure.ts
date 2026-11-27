@@ -128,9 +128,16 @@ export const packCrossAxis = ({
 
   const packSequence = (items: StructureSequence): Packed => {
     const packed = items.map(packItem);
+    // Reductions, not `Math.max(...spread)`, which overflows the call stack on very long sequences.
+    let left = 0;
+    let right = 0;
+    packed.forEach((piece) => {
+      left = Math.max(left, piece.left);
+      right = Math.max(right, piece.right);
+    });
     return {
-      left: Math.max(0, ...packed.map((piece) => piece.left)),
-      right: Math.max(0, ...packed.map((piece) => piece.right)),
+      left,
+      right,
       place: (spine) => packed.forEach((piece) => piece.place(spine)),
     };
   };

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
 import { lazySchema, z } from '@kbn/zod/v4';
 import { convertLegacyFieldsToJsonSchema } from './lib/field_conversion';
 import { BaseEventSchema } from './schema/common/base_event';
@@ -260,15 +261,23 @@ export const MaxStepSizePropSchema = z.object({
 });
 export type MaxStepSizeProp = z.infer<typeof MaxStepSizePropSchema>;
 
-export const MaxIterationsObjectSchema = z.object({
-  limit: z.number().int().positive(),
-  'on-limit': z.enum(['continue', 'fail']),
-});
+export const MaxIterationsObjectSchema = lazySchema(() =>
+  z
+    .object({
+      limit: z.number().int().positive(),
+      'on-limit': z.enum(['continue', 'fail']),
+    })
+    .meta({
+      label: i18n.translate('workflows.spec.maxIterations.limitAndBehaviorLabel', {
+        defaultMessage: 'Limit + behavior',
+      }),
+    })
+);
 
-export const MaxIterationsSchema = z.union([
-  z.number().int().positive(),
-  MaxIterationsObjectSchema,
-]);
+// The engine reads loop caps exactly as typed, so the form must not offer references for them.
+export const MaxIterationsSchema = lazySchema(() =>
+  z.union([z.number().int().positive(), MaxIterationsObjectSchema]).meta({ templatable: false })
+);
 export type MaxIterations = z.infer<typeof MaxIterationsSchema>;
 
 export const DEFAULT_LOOP_MAX_ITERATIONS = 2000;
@@ -631,11 +640,18 @@ export const WaitForApprovalStepSchema = BaseStepSchema.extend({
   .merge(StepWithOnFailureSchema);
 export type WaitForApprovalStep = z.infer<typeof WaitForApprovalStepSchema>;
 
-export const DataSetStepInputSchema = z
-  .record(z.string(), z.unknown())
-  .describe(
-    'Key-value pairs where keys are variable names and values are the data to store. Values support Liquid expressions. Access via {{ variables.key_name }}'
-  );
+export const DataSetStepInputSchema = lazySchema(() =>
+  z
+    .record(z.string(), z.unknown())
+    .describe(
+      'Key-value pairs where keys are variable names and values are the data to store. Values support Liquid expressions. Access via {{ variables.key_name }}'
+    )
+    .meta({
+      label: i18n.translate('workflows.spec.dataSet.variablesLabel', {
+        defaultMessage: 'Variables',
+      }),
+    })
+);
 export const DataSetStepSchema = BaseStepSchema.extend({
   type: z.literal('data.set').describe('Set variables in the workflow context'),
   with: DataSetStepInputSchema,

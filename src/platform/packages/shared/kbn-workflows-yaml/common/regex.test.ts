@@ -10,6 +10,7 @@
 import {
   ALLOWED_KEY_REGEX,
   isLiquidTagValue,
+  isReferenceValue,
   LIQUID_FILTER_REGEX,
   matchAllVariables,
   matchLastUnfinishedVariable,
@@ -315,6 +316,30 @@ critical
       expect(isLiquidTagValue('regular string')).toBe(false);
       expect(isLiquidTagValue('{{ variable }}')).toBe(false);
       expect(isLiquidTagValue('${{ dynamic }}')).toBe(false);
+    });
+  });
+
+  describe('isReferenceValue', () => {
+    it('should return true for a whole {{ }} value', () => {
+      expect(isReferenceValue('{{ steps.a.output }}')).toBe(true);
+    });
+
+    it('should return true for a whole ${{ }} value', () => {
+      expect(isReferenceValue('${{ steps.a.output }}')).toBe(true);
+    });
+
+    it('should return true when a Liquid tag appears anywhere', () => {
+      expect(isReferenceValue('x {% if a %}y{% endif %}')).toBe(true);
+    });
+
+    it('should return false for a sentence that only embeds a {{ }} reference', () => {
+      expect(isReferenceValue('Found {{ steps.a.output.total }} alerts')).toBe(false);
+    });
+
+    it('should return false for plain text and non-strings', () => {
+      expect(isReferenceValue('10')).toBe(false);
+      expect(isReferenceValue(10)).toBe(false);
+      expect(isReferenceValue(undefined)).toBe(false);
     });
   });
 });
