@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ConnectorCoverageDocument } from '../connector_coverage/connector_coverage';
 import type { ConnectorDrift, DriftReportEntry, FailedDrift } from './detect_drift';
+import type { DriftCoverageSummary } from './drift_coverage';
+import { renderCoverageAnnotation, summarizeDriftCoverage } from './drift_coverage';
 import { connectorOf, DRIFT_ISSUE_LABEL, markerOf } from './issue_marker';
 import { findingsOf, renderDriftIssue } from './drift_issue';
 import { renderRefreshPr } from './refresh_issue/refresh_pr';
@@ -62,6 +65,10 @@ export interface DriftSummary {
   /** Connectors whose artifacts a refresh PR should update. */
   readonly refresh: readonly string[];
   readonly refreshPrBody: string;
+  /** What the check covers, when surfacing was given the coverage report. */
+  readonly coverage?: DriftCoverageSummary;
+  /** The coverage as Markdown, for the build annotation. */
+  readonly coverageAnnotation?: string;
 }
 
 export interface SurfaceDriftOptions {
@@ -76,6 +83,8 @@ export interface SurfaceDriftOptions {
   readonly knownConnectors: ReadonlySet<string>;
   /** The build that ran the check, linked from comments. */
   readonly buildUrl?: string;
+  /** The coverage report of every connector, which the summary combines with the drift report. */
+  readonly coverageDocuments?: readonly ConnectorCoverageDocument[];
   readonly log: VendorApiLog;
 }
 
@@ -95,6 +104,7 @@ export const surfaceDrift = async ({
   ownersOf,
   knownConnectors,
   buildUrl,
+  coverageDocuments,
   log,
 }: SurfaceDriftOptions): Promise<DriftSummary> => {
   const issues = await tracker.list();
@@ -212,5 +222,14 @@ export const surfaceDrift = async ({
     actions,
     refresh: refreshed.map(({ connector }) => connector),
     refreshPrBody: renderRefreshPr(refreshed, buildUrl),
+    ...(coverageDocuments ? describeCoverage(coverageDocuments, report) : {}),
   };
+};
+
+const describeCoverage = (
+  documents: readonly ConnectorCoverageDocument[],
+  report: readonly DriftReportEntry[]
+): Pick<DriftSummary, 'coverage' | 'coverageAnnotation'> => {
+  const coverage = summarizeDriftCoverage(documents, report);
+  return { coverage, coverageAnnotation: renderCoverageAnnotation(coverage) };
 };

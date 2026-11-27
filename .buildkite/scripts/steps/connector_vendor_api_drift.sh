@@ -189,6 +189,8 @@ fi
     echo
     echo "Refresh PR: $refresh_pr"
   fi
+  # Recorded, exempt and unrecorded connectors, and tracked and total actions per connector
+  jq -r '.coverageAnnotation // empty | "\n" + .' "$SUMMARY_PATH"
   echo
   echo "Report: <a href=\"artifact://${REPORT_PATH}\">${REPORT_PATH}</a>"
 } | buildkite-agent annotate --style "$style" --context connector-vendor-api-drift

@@ -197,6 +197,9 @@ run(
             .map(({ connector }) => connector.metadata.id)
         ),
         buildUrl: process.env.BUILDKITE_BUILD_URL,
+        // Read from the committed artifacts, as --coverage does, so the summary can say what
+        // share of the repository's connectors and actions the check covers.
+        coverageDocuments: await collectCoverage(REPO_ROOT),
         log,
       });
       const summaryPath = path.resolve(flagsReader.string('summary') ?? DRIFT_SUMMARY);
@@ -428,6 +431,7 @@ run(
                      with --json)
         --surface    Turn the --report into GitHub issues in --github-repo, with gh and its
                      GITHUB_TOKEN, and write a summary listing the connectors to refresh
+                     and how much of every connector the check covers
         --github-repo  With --surface, the repository of the issues, for example elastic/kibana
         --coverage   Write one document per connector with its direction, API type, emulator and
                      drift coverage, read from the committed artifacts; needs no network

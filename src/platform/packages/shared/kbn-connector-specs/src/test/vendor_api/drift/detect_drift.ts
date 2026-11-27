@@ -15,6 +15,8 @@ import type { ConnectorSpec } from '../../../connector_spec';
 import { loadVendorSpec } from '../spec/load_vendor_spec';
 import { MANIFEST, OVERLAY, readOptional, snapshotFile } from '../spec/load_vendor_specs';
 import { compareFields } from './compare_fields';
+import type { DriftCoverage } from './drift_coverage';
+import { driftCoverageOf } from './drift_coverage';
 import { fieldTypesOf } from './refresh_issue/field_type';
 import type { SnapshotDocuments } from './refresh_issue/field_type';
 import type { OperationLocation } from './locate_operation';
@@ -172,6 +174,8 @@ export interface ConnectorDrift {
   readonly checkedAt?: string;
   /** Every action of the connector. */
   readonly actions?: readonly ActionDrift[];
+  /** How many of its actions and sources the check covers. */
+  readonly coverage?: DriftCoverage;
   /** Problems that concern no single action, e.g. a missing pagination declaration. */
   readonly otherProblems?: {
     readonly snapshot: readonly DriftProblem[];
@@ -643,6 +647,18 @@ export const detectDrift = async ({
     /^\$\.servers\b/.test(target.trim())
   );
 
+  const actions = Object.keys(connector.actions)
+    .sort()
+    .map((action) =>
+      describeAction({
+        action,
+        manifest,
+        snapshotResult,
+        latestResult: latest?.result,
+        snapshotSpecs: snapshotResult?.specs,
+        latestSpecs,
+      })
+    );
   const drift = {
     connector: connector.metadata.id,
     sources: latest?.sources ?? sources,
@@ -654,18 +670,8 @@ export const detectDrift = async ({
     displayName: connector.metadata.displayName,
     ...(folder === undefined ? {} : { folder }),
     checkedAt,
-    actions: Object.keys(connector.actions)
-      .sort()
-      .map((action) =>
-        describeAction({
-          action,
-          manifest,
-          snapshotResult,
-          latestResult: latest?.result,
-          snapshotSpecs: snapshotResult?.specs,
-          latestSpecs,
-        })
-      ),
+    actions,
+    coverage: driftCoverageOf(manifest, actions),
     otherProblems: {
       snapshot: snapshotResult?.otherProblems ?? snapshotFailure ?? [],
       ...(latest ? { latest: latest.result?.otherProblems ?? latest.failure ?? [] } : {}),
