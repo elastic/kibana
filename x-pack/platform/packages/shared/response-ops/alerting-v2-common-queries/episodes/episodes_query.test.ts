@@ -40,6 +40,9 @@ describe('buildEpisodesBaseQuery', () => {
       'reason = LAST(event_reason, @timestamp) WHERE event_reason IS NOT NULL'
     );
     expect(queryString).toContain('EVAL event_reason = TO_STRING(reason)');
+    expect(queryString.indexOf('EVAL event_reason')).toBeLessThan(
+      queryString.indexOf('INLINE STATS')
+    );
     expect(queryString).toContain('BY episode.id');
     expect(queryString).toContain('EVAL duration = DATE_DIFF');
     expect(queryString).toContain('"ms"');
