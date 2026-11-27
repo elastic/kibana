@@ -9,6 +9,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { CRUDClient } from '@kbn/entity-store/server/domain/crud/crud_client';
 
 import { uniq } from 'lodash';
+import { isNotFoundError } from '@kbn/es-errors';
 
 import type { WatchlistEntityAssignResponseItem } from '../../../../../../common/api/entity_analytics/watchlists/entities/assign.gen';
 import type { WatchlistEntityUnassignResponseItem } from '../../../../../../common/api/entity_analytics/watchlists/entities/unassign.gen';
@@ -217,20 +218,30 @@ const findManualWatchlistDocs = async (
   watchlist: { id: string; index: string },
   euids: string[]
 ) => {
-  const response = await esClient.search<WatchlistEntityDoc>({
-    index: watchlist.index,
-    size: euids.length,
-    query: {
-      bool: {
-        must: [
-          { terms: { 'entity.id': euids } },
-          { term: { 'watchlist.id': watchlist.id } },
-          { term: { 'labels.source_ids': MANUAL_SOURCE_ID } },
-        ],
+  let response;
+  try {
+    response = await esClient.search<WatchlistEntityDoc>({
+      index: watchlist.index,
+      size: euids.length,
+      query: {
+        bool: {
+          must: [
+            { terms: { 'entity.id': euids } },
+            { term: { 'watchlist.id': watchlist.id } },
+            { term: { 'labels.source_ids': MANUAL_SOURCE_ID } },
+          ],
+        },
       },
-    },
-    _source: ['entity.id'],
-  });
+      _source: ['entity.id'],
+    });
+  } catch (error) {
+    // The backing index is created by the maintainer, so it may not exist yet. No index means
+    // there are no manual memberships to find.
+    if (isNotFoundError(error)) {
+      return [];
+    }
+    throw error;
+  }
 
   return response.hits.hits.flatMap((hit) => {
     const euid = hit._source?.entity?.id;

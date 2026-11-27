@@ -138,7 +138,6 @@ Do NOT use this tool to add or remove entities — that is a separate action.`,
         const client = new WatchlistConfigClient({
           soClient: savedObjectsClient,
           esClient: esClient.asCurrentUser,
-          internalEsClient: esClient.asInternalUser,
           namespace: spaceId,
           logger,
         });

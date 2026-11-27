@@ -66,7 +66,6 @@ export const createWatchlistRoute = (
               namespace,
               soClient,
               esClient: core.elasticsearch.client.asCurrentUser,
-              internalEsClient: core.elasticsearch.client.asInternalUser,
             });
 
             const { entitySources: entitySourceInputs, ...watchlistInput } = request.body;
