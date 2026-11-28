@@ -298,6 +298,7 @@ export class AdHocTaskRunner implements CancellableTask {
       taskRunnerContext: this.context,
       taskInstance: this.taskInstance,
       ruleRunMetricsStore,
+      ruleResultService: this.ruleResult,
       apiKey: effectiveApiKey,
       apiKeyId,
       ruleConsumer: rule.consumer,
