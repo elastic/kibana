@@ -50,6 +50,7 @@ export const RulesListPage = () => {
     confirmationModal,
     openCreateFlyout,
     openCreateBuilderFlyout,
+    openCreateFromTemplateFlyout,
     openEditFlyout,
     openCloneFlyout,
     isOpen: isAuthoringFlyoutOpen,
@@ -89,6 +90,7 @@ export const RulesListPage = () => {
     onCreateEsqlRule: openCreateFlyout,
     onCreateThresholdRule: onCreateThresholdRuleFromOptionsFlyout,
     onBuildSequence: showBuildSequence ? onBuildSequenceFromOptionsFlyout : undefined,
+    onSelectTemplate: openCreateFromTemplateFlyout,
   });
 
   const emptyState = canWrite ? (

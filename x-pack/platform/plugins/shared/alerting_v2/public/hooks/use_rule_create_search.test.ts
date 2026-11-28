@@ -6,14 +6,24 @@
  */
 
 import { act, renderHook } from '@testing-library/react';
+import type { RuleCreateSearchSectionResult } from '../components/rule_create_search';
 import { getCreateRuleWithAgentPrompt } from '../constants';
 import { useRuleCreateSearch } from './use_rule_create_search';
+import type { TemplatesSearchSectionHandlers } from './use_templates_search_section';
 
 let mockUnifiedRuleCreationEnabled = true;
 let mockAgentBuilderAvailable = true;
 let mockCanWriteRules = true;
 let mockExperimentalFeaturesEnabled = true;
 const mockOpenAgentBuilderChat = jest.fn();
+const mockTemplatesSection: RuleCreateSearchSectionResult = {
+  items: [{ id: 'tpl-cpu', title: 'High CPU', onSelect: jest.fn() }],
+  isLoading: false,
+};
+const mockUseTemplatesSearchSection = jest.fn<
+  RuleCreateSearchSectionResult,
+  [string, TemplatesSearchSectionHandlers]
+>(() => mockTemplatesSection);
 
 jest.mock('@kbn/core-di-browser', () => ({
   ...jest.requireActual('@kbn/core-di-browser'),
@@ -33,18 +43,24 @@ jest.mock('./use_open_agent_builder_chat', () => ({
 jest.mock('./use_alerting_v2_experimental_features', () => ({
   useAlertingV2ExperimentalFeatures: () => mockExperimentalFeaturesEnabled,
 }));
+jest.mock('./use_templates_search_section', () => ({
+  useTemplatesSearchSection: (query: string, handlers: TemplatesSearchSectionHandlers) =>
+    mockUseTemplatesSearchSection(query, handlers),
+}));
 
 describe('useRuleCreateSearch', () => {
   const onClose = jest.fn();
   const onCreateEsqlRule = jest.fn();
   const onCreateThresholdRule = jest.fn();
   const onBuildSequence = jest.fn();
+  const onSelectTemplate = jest.fn();
 
   const defaultOptions = {
     onClose,
     onCreateEsqlRule,
     onCreateThresholdRule,
     onBuildSequence,
+    onSelectTemplate,
   };
 
   beforeEach(() => {
@@ -53,6 +69,7 @@ describe('useRuleCreateSearch', () => {
     mockAgentBuilderAvailable = true;
     mockCanWriteRules = true;
     mockExperimentalFeaturesEnabled = true;
+    mockUseTemplatesSearchSection.mockReturnValue(mockTemplatesSection);
   });
 
   it('returns undefined while the unified rule creation flag is off', () => {
@@ -76,6 +93,19 @@ describe('useRuleCreateSearch', () => {
 
     result.current?.sections.universal?.items[0].onSelect();
     expect(onCreateThresholdRule).toHaveBeenCalledTimes(1);
+  });
+
+  it('wires the templates section and forwards query updates and selection handler', () => {
+    const { result } = renderHook(() => useRuleCreateSearch(defaultOptions));
+
+    expect(mockUseTemplatesSearchSection).toHaveBeenLastCalledWith('', { onSelectTemplate });
+    expect(result.current?.sections['universal.templates']).toBe(mockTemplatesSection);
+
+    act(() => {
+      result.current?.onQueryChange('cpu');
+    });
+
+    expect(mockUseTemplatesSearchSection).toHaveBeenLastCalledWith('cpu', { onSelectTemplate });
   });
 
   it('keeps onQueryChange stable across renders so the search does not re-report the query', () => {

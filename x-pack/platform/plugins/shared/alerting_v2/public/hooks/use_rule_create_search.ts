@@ -10,13 +10,19 @@ import type { RuleCreateSearchProps } from '../components/rule_create_search';
 import { getCreateRuleWithAgentPrompt } from '../constants';
 import { useAreAgentBuilderSkillsAvailable } from './use_are_agent_builder_skills_available';
 import { useOpenAgentBuilderChat } from './use_open_agent_builder_chat';
+import {
+  useTemplatesSearchSection,
+  type TemplatesSearchSectionHandlers,
+} from './use_templates_search_section';
 import { useUnifiedRuleCreationEnabled } from './use_unified_rule_creation_enabled';
 import {
   useUniversalSearchSection,
   type UniversalSearchSectionHandlers,
 } from './use_universal_search_section';
 
-interface UseRuleCreateSearchOptions extends UniversalSearchSectionHandlers {
+interface UseRuleCreateSearchOptions
+  extends UniversalSearchSectionHandlers,
+    TemplatesSearchSectionHandlers {
   /** Called before the typed text is sent to the agent, to close the create rule flyout. */
   onClose: () => void;
 }
@@ -30,6 +36,7 @@ export const useRuleCreateSearch = ({
   onCreateEsqlRule,
   onCreateThresholdRule,
   onBuildSequence,
+  onSelectTemplate,
 }: UseRuleCreateSearchOptions): RuleCreateSearchProps | undefined => {
   const isUnifiedRuleCreationEnabled = useUnifiedRuleCreationEnabled();
   const areAgentBuilderSkillsAvailable = useAreAgentBuilderSkillsAvailable();
@@ -41,10 +48,14 @@ export const useRuleCreateSearch = ({
     onCreateThresholdRule,
     onBuildSequence,
   });
+  const templatesSection = useTemplatesSearchSection(query, { onSelectTemplate });
 
   const sections = useMemo<RuleCreateSearchProps['sections']>(
-    () => ({ universal: universalSection }),
-    [universalSection]
+    () => ({
+      universal: universalSection,
+      'universal.templates': templatesSection,
+    }),
+    [templatesSection, universalSection]
   );
 
   if (!isUnifiedRuleCreationEnabled) {

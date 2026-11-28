@@ -34,10 +34,14 @@ let mockAlertingV2ExperimentalFeaturesEnabled = true;
 let mockCanWriteRules = true;
 let mockUnifiedRuleCreationEnabled = false;
 const mockOpenChat = jest.fn();
+const mockListRuleTemplates = jest.fn();
 
 jest.mock('@kbn/core-di-browser', () => {
   const { UserCapabilities: ActualUserCapabilities } = jest.requireActual(
     '../../services/user_capabilities'
+  );
+  const { RuleTemplatesApi: ActualRuleTemplatesApi } = jest.requireActual(
+    '../../services/rule_templates_api'
   );
   return {
     useService: (token: unknown) => {
@@ -50,6 +54,10 @@ jest.mock('@kbn/core-di-browser', () => {
           canRead: () => true,
           can: () => mockCanWriteRules,
         };
+      }
+
+      if (token === ActualRuleTemplatesApi) {
+        return { listRuleTemplates: mockListRuleTemplates };
       }
 
       if (token === Symbol.for('plugin.start.agentBuilder')) {
@@ -272,6 +280,7 @@ describe('RulesListPage', () => {
     mockCanWriteRules = true;
     mockUnifiedRuleCreationEnabled = false;
     latestComposeHistoryBack = undefined;
+    mockListRuleTemplates.mockResolvedValue({ items: [], total: 0, page: 1, per_page: 10 });
     mockUseDeleteRule.mockReturnValue({
       mutate: mockDeleteMutate,
       isLoading: false,
@@ -764,6 +773,78 @@ describe('RulesListPage', () => {
 
     expect(screen.queryByTestId('ruleCreateOptionsFlyout')).not.toBeInTheDocument();
     expect(locators.rulesLocators.navigateSync).toHaveBeenCalledWith({ page: 'sequence_create' });
+  });
+
+  it('lists matching v2 templates in the search dropdown and installs from the selected template', async () => {
+    mockUnifiedRuleCreationEnabled = true;
+    mockListRuleTemplates.mockResolvedValue({
+      items: [
+        {
+          id: 'tpl-high-cpu',
+          engine: 'v2',
+          rule: {
+            kind: 'alert',
+            metadata: {
+              name: 'High CPU utilization',
+              description: 'Monitors CPU saturation on hosts',
+            },
+            schedule: { every: '1m' },
+            query: { base: 'FROM metrics-* | LIMIT 1' },
+            time_field: '@timestamp',
+          },
+        },
+      ],
+      total: 1,
+      page: 1,
+      per_page: 10,
+    });
+
+    renderPage();
+    await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());
+    fireEvent.click(screen.getByTestId('createRuleButton'));
+
+    fireEvent.change(screen.getByTestId('ruleCreateSearchInput'), {
+      target: { value: 'cpu' },
+    });
+
+    const templateItem = await screen.findByTestId(
+      'ruleCreateSearchItem-universal.templates-tpl-high-cpu'
+    );
+    expect(screen.getByText('From templates')).toBeInTheDocument();
+    expect(templateItem).toHaveTextContent('High CPU utilization');
+    expect(templateItem).toHaveTextContent('Monitors CPU saturation on hosts');
+
+    fireEvent.click(templateItem);
+
+    expect(screen.getByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
+    expect(screen.getByTestId('composeDiscoverFlyout')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('composeDiscoverFlyout'));
+
+    expect(mockCreateRuleMutate).toHaveBeenCalledWith(
+      { payload: {}, templateId: 'tpl-high-cpu' },
+      expect.objectContaining({ onSuccess: expect.any(Function) })
+    );
+  });
+
+  it('hides the templates section on request failure without affecting other sections', async () => {
+    mockUnifiedRuleCreationEnabled = true;
+    mockListRuleTemplates.mockRejectedValue(new Error('Forbidden'));
+
+    renderPage();
+    await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());
+    fireEvent.click(screen.getByTestId('createRuleButton'));
+
+    fireEvent.change(screen.getByTestId('ruleCreateSearchInput'), {
+      target: { value: 'threshold' },
+    });
+
+    expect(
+      await screen.findByTestId('ruleCreateSearchItem-universal-threshold')
+    ).toBeInTheDocument();
+    await waitFor(() => expect(mockListRuleTemplates).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(screen.queryByText('From templates')).not.toBeInTheDocument());
+    expect(screen.getByTestId('ruleCreateSearchItem-universal-threshold')).toBeInTheDocument();
   });
 
   it('closes create rule options flyout without navigating', async () => {
