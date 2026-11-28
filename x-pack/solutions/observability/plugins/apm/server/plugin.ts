@@ -46,6 +46,7 @@ import {
   apmServerSettings,
   apmServiceGroups,
   apmTelemetry,
+  tailSampling,
 } from './saved_objects';
 import { tutorialProvider } from './tutorial';
 import type {
@@ -79,6 +80,7 @@ export class APMPlugin implements Plugin<
     core.savedObjects.registerType(apmServerSettings);
     core.savedObjects.registerType(apmServiceGroups);
     core.savedObjects.registerType(apmCustomDashboards);
+    core.savedObjects.registerType(tailSampling);
 
     const currentConfig = this.initContext.config.get<APMConfig>();
     this.currentConfig = currentConfig;
