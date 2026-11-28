@@ -126,12 +126,7 @@ export const createPatternsDataSourceProfileProvider = (
               return patternColumns.includes(field.name);
             },
             execute: async (executeContext) => {
-              const index = executeContext.dataView?.getIndexPattern();
-              if (
-                !isOfAggregateQueryType(executeContext.query) ||
-                !executeContext.value ||
-                !index
-              ) {
+              if (!isOfAggregateQueryType(executeContext.query) || !executeContext.value) {
                 return;
               }
 
@@ -152,6 +147,11 @@ export const createPatternsDataSourceProfileProvider = (
                   toolkit.actions.updateESQLQuery(matchingMessages);
                   return;
                 }
+              }
+
+              const index = executeContext.dataView?.getIndexPattern();
+              if (!index) {
+                return;
               }
 
               const query = {
