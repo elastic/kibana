@@ -454,6 +454,7 @@ export const ConnectorIconsMap: Map<
         )
     ),
   ],
+  ['.idira', lazy(() => import(/* webpackChunkName: "connectorIconIdira" */ './specs/idira/icon'))],
   [
     '.microsoft_defender_endpoint2',
     lazy(
