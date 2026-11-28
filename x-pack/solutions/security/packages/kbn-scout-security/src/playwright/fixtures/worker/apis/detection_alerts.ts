@@ -5,11 +5,20 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import type { EsClient, ScoutLogger, ScoutParallelWorkerFixtures } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
 
 const DEFAULT_ALERTS_INDEX_PATTERN = '.alerts-security.alerts-';
 const WAIT_FOR_ALERTS_POLL_INTERVAL_MS = 1_000;
+const RETRYABLE_ES_STATUS_CODES: readonly number[] = [408, 410, 429, 502, 503, 504];
+
+const isTransientEsError = (error: unknown): error is errors.ElasticsearchClientError =>
+  error instanceof errors.NoLivingConnectionsError ||
+  error instanceof errors.ConnectionError ||
+  error instanceof errors.TimeoutError ||
+  (error instanceof errors.ResponseError &&
+    RETRYABLE_ES_STATUS_CODES.includes(error.statusCode ?? 0));
 
 export interface DetectionAlertsApiService {
   deleteAll: () => Promise<void>;
@@ -55,28 +64,46 @@ export const getDetectionAlertsApiService = ({
       return measurePerformanceAsync(log, 'security.detectionAlerts.waitForAlerts', async () => {
         const deadline = Date.now() + timeout;
         const index = `${DEFAULT_ALERTS_INDEX_PATTERN}${space}`;
+        let lastRetryableError: errors.ElasticsearchClientError | undefined;
 
         while (Date.now() < deadline) {
           try {
-            await esClient.indices.refresh({ index });
+            // The alerts index is created lazily by the detection engine: `ignore_unavailable` makes
+            // a missing index count as zero alerts.
+            await esClient.indices.refresh({ index, ignore_unavailable: true });
             const result = await esClient.count({
               index,
+              ignore_unavailable: true,
               query: {
                 term: { 'kibana.alert.rule.name': ruleName },
               },
             });
+            lastRetryableError = undefined;
             if (result.count >= minCount) {
               return result.count;
             }
-          } catch {
-            // index not yet created — keep polling
+          } catch (error) {
+            // Transient errors (e.g. a 429 from a circuit breaker) keep polling until the deadline;
+            // anything else is a real failure and surfaces immediately.
+            if (!isTransientEsError(error)) {
+              throw error;
+            }
+            lastRetryableError = error;
+            log.debug(
+              `waitForAlerts: retrying after transient Elasticsearch error: ${error.message}`
+            );
           }
           await new Promise((resolve) => setTimeout(resolve, WAIT_FOR_ALERTS_POLL_INTERVAL_MS));
         }
 
-        throw new Error(
-          `waitForAlerts timed out after ${timeout}ms: expected >=${minCount} alert(s) for rule "${ruleName}" in space "${space}"`
-        );
+        const timeoutMessage = `waitForAlerts timed out after ${timeout}ms: expected >=${minCount} alert(s) for rule "${ruleName}" in space "${space}"`;
+        if (lastRetryableError) {
+          throw new Error(
+            `${timeoutMessage}; the last poll failed with: ${lastRetryableError.message}`,
+            { cause: lastRetryableError }
+          );
+        }
+        throw new Error(timeoutMessage);
       });
     },
   };
