@@ -1,5 +1,5 @@
 {
-  "sha1": "a130c2014eea409a4fce18c4450d7bb04060eaac",
+  "sha1": "0e2f601b8f085c6ab5d8420ddbc5e61a26a8822a",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -211,8 +211,8 @@
       }
     },
     {
-      "id": "1c8c85aed319853-59e30e1c3b44243",
-      "title": "Homepage - Admin body links should navigate to correct URLs when clicked",
+      "id": "1c8c85aed319853-8a071e8cddceb65",
+      "title": "Homepage - Admin body links should point to correct URLs",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-search",
@@ -429,8 +429,8 @@
       }
     },
     {
-      "id": "03e83e549838106-5e1de212dd5bdf1",
-      "title": "Homepage - Viewer body links should navigate to correct URLs when clicked",
+      "id": "03e83e549838106-68fcec50aa6332d",
+      "title": "Homepage - Viewer body links should point to correct URLs",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-search",
