@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { componentTemplateNameSchema, componentTemplateSchema } from './schema_validation';
+import {
+  componentTemplateNameSchema,
+  componentTemplateSchema,
+  createComponentTemplateSchema,
+} from './schema_validation';
 
 describe('componentTemplateSchema', () => {
   it('SHOULD accept minimal valid payload', () => {
@@ -38,14 +42,13 @@ describe('componentTemplateSchema', () => {
     ).toThrow();
   });
 
-  it('SHOULD reject a name containing a forward slash', () => {
-    expect(() =>
-      componentTemplateSchema.validate({
-        name: 'a/b',
-        template: {},
-        _kbnMeta: { usedBy: [], isManaged: false },
-      })
-    ).toThrowError(/must not contain the character "\/"/);
+  it('SHOULD accept a pre-existing slash-named template on update', () => {
+    const value = componentTemplateSchema.validate({
+      name: 'a/b',
+      template: {},
+      _kbnMeta: { usedBy: [], isManaged: false },
+    });
+    expect(value).toBeTruthy();
   });
 
   it('SHOULD require _kbnMeta fields', () => {
@@ -128,6 +131,18 @@ describe('componentTemplateSchema', () => {
       _kbnMeta: { usedBy: [], isManaged: false },
     });
     expect(value).toBeTruthy();
+  });
+});
+
+describe('createComponentTemplateSchema', () => {
+  it('SHOULD reject a name containing a forward slash on create', () => {
+    expect(() =>
+      createComponentTemplateSchema.validate({
+        name: 'a/b',
+        template: {},
+        _kbnMeta: { usedBy: [], isManaged: false },
+      })
+    ).toThrowError(/must not contain the character "\/"/);
   });
 });
 

@@ -40,7 +40,11 @@ import type { DataRetention } from '../../../../../../../common';
 import { useApi, useComponentTemplatesContext } from '../../../component_templates_context';
 import { useAppContext } from '../../../../../app_context';
 import { useLicense } from '../../../../../../hooks/use_license';
-import { logisticsFormSchema } from './step_logistics_schema';
+import {
+  getLogisticsFormSchema,
+  nameConfig,
+  nameConfigWithoutValidations,
+} from './step_logistics_schema';
 
 const UseField = getUseField({ component: Field });
 const FormRow = getFormRow({ titleTag: 'h3' });
@@ -146,9 +150,11 @@ const ServerlessDlmPhasesSelector = ({ defaultValue, onChange }: DlmPhasesSelect
 };
 
 export const StepLogistics: React.FunctionComponent<Props> = React.memo(
-  ({ defaultValue, isEditing, onChange }) => {
+  ({ defaultValue, isEditing = false, onChange }) => {
+    const formSchema = useMemo(() => getLogisticsFormSchema(isEditing), [isEditing]);
+
     const { form } = useForm({
-      schema: logisticsFormSchema,
+      schema: formSchema,
       defaultValue,
       options: { stripEmptyFields: false },
     });
@@ -271,6 +277,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
         >
           <UseField
             path="name"
+            config={isEditing ? nameConfigWithoutValidations : nameConfig}
             componentProps={{
               ['data-test-subj']: 'nameField',
               euiFieldProps: { disabled: isEditing },

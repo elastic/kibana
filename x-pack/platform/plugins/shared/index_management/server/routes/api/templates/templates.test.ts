@@ -46,6 +46,44 @@ describe('Component templates API', () => {
         },
       },
     };
+
+    it('SHOULD encode the transport path when pre-reading slash or query characters in the name', async () => {
+      const specialName = 'foo/bar?x';
+      const specialRequest: RequestMock = {
+        ...mockRequest,
+        params: { name: specialName },
+        body: {
+          ...mockRequest.body,
+          name: specialName,
+          indexPatterns: ['logs-*'],
+        },
+      };
+
+      transportRequest.mockResolvedValue({
+        index_templates: [
+          {
+            name: specialName,
+            index_template: { template: {} },
+          },
+        ],
+      });
+
+      indexTemplateExists.mockResolvedValue(true);
+      updateIndexTemplate.mockResolvedValue(true);
+
+      await router.runRequest(specialRequest);
+
+      expect(
+        router.contextMock.core.elasticsearch.client.asCurrentUser.transport.request
+      ).toHaveBeenCalledWith({
+        method: 'GET',
+        path: '/_index_template/foo%2Fbar%3Fx',
+      });
+      expect(updateIndexTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({ name: specialName })
+      );
+    });
+
     it('updates a component template with data_stream_options successfully', async () => {
       transportRequest.mockResolvedValue({
         index_templates: [

@@ -20,22 +20,23 @@ export const componentTemplateNameSchema = schema.string({
   validate: rejectForwardSlash,
 });
 
-export const componentTemplateSchema = schema.object({
-  name: componentTemplateNameSchema,
-  template: schema.object({
-    settings: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-    aliases: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-    mappings: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-    lifecycle: schema.maybe(
-      schema.object({
-        enabled: schema.boolean(),
-        data_retention: schema.maybe(schema.string({ maxLength: 1000 })),
-        frozen_after: schema.maybe(schema.string({ maxLength: 1000 })),
-      })
-    ),
-    // Allowing unknowns here to support data stream options that are not yet defined in the schema
-    data_stream_options: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-  }),
+const componentTemplateTemplateSchema = schema.object({
+  settings: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+  aliases: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+  mappings: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+  lifecycle: schema.maybe(
+    schema.object({
+      enabled: schema.boolean(),
+      data_retention: schema.maybe(schema.string({ maxLength: 1000 })),
+      frozen_after: schema.maybe(schema.string({ maxLength: 1000 })),
+    })
+  ),
+  // Allowing unknowns here to support data stream options that are not yet defined in the schema
+  data_stream_options: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+});
+
+const componentTemplateSharedFields = {
+  template: componentTemplateTemplateSchema,
   version: schema.maybe(schema.number()),
   _meta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
   _kbnMeta: schema.object({
@@ -43,4 +44,14 @@ export const componentTemplateSchema = schema.object({
     isManaged: schema.boolean(),
   }),
   deprecated: schema.maybe(schema.boolean()),
+};
+
+export const componentTemplateSchema = schema.object({
+  name: schema.string({ maxLength: 1000 }),
+  ...componentTemplateSharedFields,
+});
+
+export const createComponentTemplateSchema = schema.object({
+  name: componentTemplateNameSchema,
+  ...componentTemplateSharedFields,
 });

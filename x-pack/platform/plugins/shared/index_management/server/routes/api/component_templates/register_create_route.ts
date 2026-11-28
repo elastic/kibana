@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { serializeComponentTemplate } from '../../../../common/lib';
 import type { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
-import { componentTemplateSchema } from './schema_validation';
+import { createComponentTemplateSchema } from './schema_validation';
 
 export const registerCreateRoute = ({
   router,
@@ -26,7 +26,7 @@ export const registerCreateRoute = ({
         },
       },
       validate: {
-        body: componentTemplateSchema,
+        body: createComponentTemplateSchema,
       },
     },
     async (context, request, response) => {

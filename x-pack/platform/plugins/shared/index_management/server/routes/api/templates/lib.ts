@@ -77,7 +77,7 @@ export const getTemplateDataStreamOptions = async ({
     }>;
   }>({
     method: 'GET',
-    path: `/_index_template/${name}`,
+    path: `/_index_template/${encodeURIComponent(name)}`,
   });
   // TODO: Replace with the following when the client includes data_stream_options in IndicesIndexTemplateSummary
   // https://github.com/elastic/kibana/issues/220614

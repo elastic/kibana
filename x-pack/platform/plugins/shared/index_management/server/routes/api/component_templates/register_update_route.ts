@@ -12,10 +12,10 @@ import type { DataStreamOptions } from '../../../../common/types/data_streams';
 import { serializeComponentTemplate } from '../../../../common/lib';
 import type { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
-import { componentTemplateNameSchema, componentTemplateSchema } from './schema_validation';
+import { componentTemplateSchema } from './schema_validation';
 
 const paramsSchema = schema.object({
-  name: componentTemplateNameSchema,
+  name: schema.string({ maxLength: 1000 }),
 });
 
 export const registerUpdateRoute = ({
@@ -48,7 +48,7 @@ export const registerUpdateRoute = ({
           }>;
         }>({
           method: 'GET',
-          path: `/_component_template/${name}`,
+          path: `/_component_template/${encodeURIComponent(name)}`,
         });
         // TODO: Replace with the following when the client includes data_stream_options in ClusterComponentTemplateSummary
         // https://github.com/elastic/kibana/issues/220614

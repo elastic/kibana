@@ -10,10 +10,10 @@ import { i18n } from '@kbn/i18n';
 import type { TemplateDeserialized } from '../../../../common';
 import type { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
-import { templateSchema } from './validate_schemas';
+import { createTemplateSchema } from './validate_schemas';
 import { saveTemplate, doesTemplateExist } from './lib';
 
-const bodySchema = templateSchema;
+const bodySchema = createTemplateSchema;
 
 export function registerCreateRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.post(
