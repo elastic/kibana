@@ -19,7 +19,7 @@ import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { UnifiedDataTableProps } from './data_table';
 import React, { useCallback, useState } from 'react';
 import userEvent, { PointerEventsCheckLevel } from '@testing-library/user-event';
-import { buildDataTableRecord, getDocId } from '@kbn/discover-utils';
+import { buildDataTableRecord, getDocId, type RowControlColumn } from '@kbn/discover-utils';
 import { EsqlSource } from '@kbn/data-source';
 import {
   buildDataViewMock,
@@ -1065,6 +1065,116 @@ describe('UnifiedDataTable', () => {
       },
       EXTENDED_JEST_TIMEOUT
     );
+
+    describe('stateful leading controls', () => {
+      const StatefulRowControl = ({ label }: { label: string }) => {
+        const [isOpen, setIsOpen] = useState(false);
+        return (
+          <EuiButton data-test-subj="statefulRowControl" onClick={() => setIsOpen(true)}>
+            {isOpen ? `${label} open` : label}
+          </EuiButton>
+        );
+      };
+      const getControls = (label: string, id = 'stateful'): RowControlColumn[] => [
+        {
+          id,
+          render: (_Control, { rowIndex }) => <StatefulRowControl label={`${label} ${rowIndex}`} />,
+        },
+      ];
+      const openFirstRowControl = async (props: UnifiedDataTableProps) => {
+        const result = await renderComponent({
+          ...props,
+          rowAdditionalLeadingControls: getControls('first'),
+        });
+
+        await userEvent.click(screen.getAllByTestId('statefulRowControl')[0]);
+        expect(screen.getAllByTestId('statefulRowControl')[0]).toHaveTextContent('first 0 open');
+
+        return result;
+      };
+
+      it(
+        'should keep the state of leading controls when rows and controls are replaced',
+        async () => {
+          const props = getProps();
+          const { rerender } = await openFirstRowControl(props);
+
+          rerender(
+            <DataTableWithI18n
+              {...props}
+              rows={esHitsMock.map((hit) => buildDataTableRecord(hit, dataViewMock))}
+              rowAdditionalLeadingControls={getControls('second')}
+            />
+          );
+
+          expect(screen.getAllByTestId('statefulRowControl')[0]).toHaveTextContent('second 0 open');
+        },
+        EXTENDED_JEST_TIMEOUT
+      );
+
+      it(
+        'should reset the state of leading controls when a different document takes the row',
+        async () => {
+          const props = getProps();
+          const { rerender } = await openFirstRowControl(props);
+
+          rerender(
+            <DataTableWithI18n
+              {...props}
+              rows={[...esHitsMock].reverse().map((hit) => buildDataTableRecord(hit, dataViewMock))}
+              rowAdditionalLeadingControls={getControls('second')}
+            />
+          );
+
+          expect(screen.getAllByTestId('statefulRowControl')[0]).toHaveTextContent('second 0');
+          expect(screen.getAllByTestId('statefulRowControl')[0]).not.toHaveTextContent('open');
+        },
+        EXTENDED_JEST_TIMEOUT
+      );
+
+      it(
+        'should reset the state of leading controls when a document with the same id from another index takes the row',
+        async () => {
+          const buildRecordWithBareId = (index: string) => {
+            const hit = { ...esHitsMock[0], _index: index };
+            return { ...buildDataTableRecord(hit, dataViewMock), id: hit._id };
+          };
+          const props = { ...getProps(), rows: [buildRecordWithBareId('first_index')] };
+          const { rerender } = await openFirstRowControl(props);
+
+          rerender(
+            <DataTableWithI18n
+              {...props}
+              rows={[buildRecordWithBareId('second_index')]}
+              rowAdditionalLeadingControls={getControls('second')}
+            />
+          );
+
+          expect(screen.getAllByTestId('statefulRowControl')[0]).toHaveTextContent('second 0');
+          expect(screen.getAllByTestId('statefulRowControl')[0]).not.toHaveTextContent('open');
+        },
+        EXTENDED_JEST_TIMEOUT
+      );
+
+      it(
+        'should reset the state of a leading control when another control takes its slot',
+        async () => {
+          const props = getProps();
+          const { rerender } = await openFirstRowControl(props);
+
+          rerender(
+            <DataTableWithI18n
+              {...props}
+              rowAdditionalLeadingControls={getControls('second', 'other')}
+            />
+          );
+
+          expect(screen.getAllByTestId('statefulRowControl')[0]).toHaveTextContent('second 0');
+          expect(screen.getAllByTestId('statefulRowControl')[0]).not.toHaveTextContent('open');
+        },
+        EXTENDED_JEST_TIMEOUT
+      );
+    });
 
     it(
       'should be able to customise the trailing controls',

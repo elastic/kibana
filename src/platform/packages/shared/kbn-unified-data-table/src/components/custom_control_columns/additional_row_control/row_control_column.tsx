@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React, { useContext, useMemo } from 'react';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import type {
@@ -17,6 +17,7 @@ import type {
   RowControlRowProps,
 } from '@kbn/discover-utils';
 import { useControlColumn } from '../../../hooks/use_control_column';
+import { RowControlsContext } from './row_controls_context';
 
 export const RowControlCell = ({
   rowControlColumn,
@@ -84,38 +85,41 @@ export const getRowControlColumn = (rowControlColumn: RowControlColumn) => {
 
 /**
  * Returns a per-row getter backed by a WeakMap so `isAvailable` is evaluated at most once
- * per record across all consumers (inline slots and the overflow menu).
+ * per record and row index across all consumers (inline slots and the overflow menu).
  */
 export const createAvailableControlsGetter = (
   rowControlColumns: RowControlColumn[]
 ): ((rowProps: RowControlRowProps) => RowControlColumn[]) => {
-  const cache = new WeakMap<DataTableRecord, RowControlColumn[]>();
+  const cache = new WeakMap<DataTableRecord, { rowIndex: number; available: RowControlColumn[] }>();
   return ({ record, rowIndex }) => {
-    let available = cache.get(record);
-    if (!available) {
-      available = rowControlColumns.filter(
-        (col) => col.isAvailable?.({ record, rowIndex }) ?? true
-      );
-      cache.set(record, available);
+    const cached = cache.get(record);
+    if (cached?.rowIndex === rowIndex) {
+      return cached.available;
     }
+    const available = rowControlColumns.filter(
+      (col) => col.isAvailable?.({ record, rowIndex }) ?? true
+    );
+    cache.set(record, { rowIndex, available });
     return available;
   };
 };
 
 /**
  * Creates all inline slot `RenderCellValue`s at once. Each slot picks the Kth action
- * from the per-row available list returned by `getAvailableControls`.
+ * from the per-row available list provided by `RowControlsContext`.
  */
 export const getCompatibleSlotRenderers = (
-  numSlots: number,
-  getAvailableControls: (rowProps: RowControlRowProps) => RowControlColumn[]
+  numSlots: number
 ): Array<(props: EuiDataGridCellValueElementProps) => React.ReactElement | null> => {
   return Array.from({ length: numSlots }, (_, slotIndex) => {
     const CompatibleSlotCell = (props: EuiDataGridCellValueElementProps) => {
+      const getAvailableControls = useContext(RowControlsContext);
       const { record, rowIndex } = useControlColumn(props);
       if (!record) return null;
       const column = getAvailableControls({ record, rowIndex })[slotIndex];
-      return column ? <RowControlCell {...props} rowControlColumn={column} /> : null;
+      return column ? (
+        <RowControlCell key={column.id} {...props} rowControlColumn={column} />
+      ) : null;
     };
     return CompatibleSlotCell;
   });

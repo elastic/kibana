@@ -7,4 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getAdditionalRowControlColumns } from './get_additional_row_control_columns';
+export {
+  getAdditionalRowControlColumns,
+  getAdditionalRowControlsLayout,
+  type AdditionalRowControlsLayout,
+} from './get_additional_row_control_columns';
+export { createAvailableControlsGetter } from './row_control_column';
+export { RowControlsContext } from './row_controls_context';

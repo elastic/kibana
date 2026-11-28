@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getAdditionalRowControlColumns } from './get_additional_row_control_columns';
+import {
+  getAdditionalRowControlColumns,
+  getAdditionalRowControlsLayout,
+} from './get_additional_row_control_columns';
+import { createAvailableControlsGetter } from './row_control_column';
+import { RowControlsContext } from './row_controls_context';
 import { mockRowAdditionalLeadingControls } from '../../../../__mocks__/external_control_columns';
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
@@ -17,32 +22,37 @@ import { userEvent } from '@testing-library/user-event';
 import type { RowControlColumn, RowControlComponent } from '@kbn/discover-utils';
 
 const setup = (rowControlColumns: RowControlColumn[], visibleRowLeadingControls?: number) => {
-  const { columns } = getAdditionalRowControlColumns(rowControlColumns, visibleRowLeadingControls);
+  const columns = getAdditionalRowControlColumns(
+    getAdditionalRowControlsLayout(rowControlColumns, visibleRowLeadingControls)
+  );
 
   render(
     <UnifiedDataTableContext.Provider value={dataTableContextComplexMock}>
-      {columns.map((Column, idx) => (
-        <Column
-          key={idx}
-          setCellProps={jest.fn()}
-          rowIndex={0}
-          colIndex={0}
-          columnId="actions"
-          isExpandable
-          isExpanded
-          isDetails
-        />
-      ))}
+      <RowControlsContext.Provider value={createAvailableControlsGetter(rowControlColumns)}>
+        {columns.map((Column, idx) => (
+          <Column
+            key={idx}
+            setCellProps={jest.fn()}
+            rowIndex={0}
+            colIndex={0}
+            columnId="actions"
+            isExpandable
+            isExpanded
+            isDetails
+          />
+        ))}
+      </RowControlsContext.Provider>
     </UnifiedDataTableContext.Provider>
   );
 };
 
 describe('getAdditionalRowControlColumns', () => {
   it('should work correctly for 0 controls', () => {
-    const { columns, totalWidth } = getAdditionalRowControlColumns([]);
+    const layout = getAdditionalRowControlsLayout([]);
+    const columns = getAdditionalRowControlColumns(layout);
 
     expect(columns).toHaveLength(0);
-    expect(totalWidth).toBe(0);
+    expect(layout.totalWidth).toBe(0);
   });
 
   it('should work correctly for 1 control', () => {
@@ -98,7 +108,7 @@ describe('getAdditionalRowControlColumns', () => {
       { ...mockRowAdditionalLeadingControls[1], width: 70 },
     ];
 
-    const { totalWidth } = getAdditionalRowControlColumns(mocks);
+    const { totalWidth } = getAdditionalRowControlsLayout(mocks);
 
     expect(totalWidth).toBe(120);
   });
@@ -110,7 +120,7 @@ describe('getAdditionalRowControlColumns', () => {
       { ...mockRowAdditionalLeadingControls[2] },
     ];
 
-    const { totalWidth } = getAdditionalRowControlColumns(mocks);
+    const { totalWidth } = getAdditionalRowControlsLayout(mocks);
 
     expect(totalWidth).toBe(74); // 50 (first control) + 24 (menu button default width)
   });
@@ -178,7 +188,7 @@ describe('getAdditionalRowControlColumns', () => {
         },
       ];
 
-      const { totalWidth } = getAdditionalRowControlColumns(mocks, 3);
+      const { totalWidth } = getAdditionalRowControlsLayout(mocks, 3);
 
       // 50 + 30 (first two visible) + 24 (menu)
       expect(totalWidth).toBe(104);
@@ -276,7 +286,7 @@ describe('getAdditionalRowControlColumns', () => {
       mockRowAdditionalLeadingControls[2],
     ];
 
-    const { columns } = getAdditionalRowControlColumns(mocks, 0);
+    const columns = getAdditionalRowControlColumns(getAdditionalRowControlsLayout(mocks, 0));
 
     // With totalVisible clamped to 2 and n=3 (n > 2), expect 1 inline + 1 menu = 2 columns
     expect(columns).toHaveLength(2);

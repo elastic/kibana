@@ -10,8 +10,12 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { getRowControlColumn } from './row_control_column';
-import { dataTableContextMock } from '../../../../__mocks__/table_context';
+import type { RowControlColumn } from '@kbn/discover-utils';
+import { createAvailableControlsGetter, getRowControlColumn } from './row_control_column';
+import {
+  dataTableContextMock,
+  dataTableContextRowsMock,
+} from '../../../../__mocks__/table_context';
 import { UnifiedDataTableContext } from '../../../table_context';
 
 describe('getRowControlColumn', () => {
@@ -82,5 +86,34 @@ describe('getRowControlColumn', () => {
     await waitFor(() => {
       expect(screen.getByText('Control tooltip text!')).toBeInTheDocument();
     });
+  });
+});
+
+describe('createAvailableControlsGetter', () => {
+  const evenRowControl: RowControlColumn = {
+    id: 'even_row_control',
+    render: jest.fn(),
+    isAvailable: ({ rowIndex }) => rowIndex % 2 === 0,
+  };
+
+  it('should evaluate isAvailable once per record and row index', () => {
+    const isAvailable = jest.fn(() => true);
+    const getAvailableControls = createAvailableControlsGetter([
+      { ...evenRowControl, isAvailable },
+    ]);
+    const [record] = dataTableContextRowsMock;
+
+    getAvailableControls({ record, rowIndex: 0 });
+    getAvailableControls({ record, rowIndex: 0 });
+
+    expect(isAvailable).toHaveBeenCalledTimes(1);
+  });
+
+  it('should re-evaluate isAvailable when a record moves to another row', () => {
+    const getAvailableControls = createAvailableControlsGetter([evenRowControl]);
+    const [record] = dataTableContextRowsMock;
+
+    expect(getAvailableControls({ record, rowIndex: 0 })).toEqual([evenRowControl]);
+    expect(getAvailableControls({ record, rowIndex: 1 })).toEqual([]);
   });
 });
