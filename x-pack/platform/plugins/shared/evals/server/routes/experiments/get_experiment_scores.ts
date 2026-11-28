@@ -66,6 +66,11 @@ export const registerGetExperimentScoresRoute = ({
             query,
             sort: SCORES_SORT_ORDER,
             size: 10000,
+            // The compare CLI gates regression verdicts on these scores: an exact total
+            // lets it detect a truncated read, and a failed shard must be an error
+            // rather than a silently smaller result set.
+            track_total_hits: true,
+            allow_partial_search_results: false,
             _source_excludes: UNBOUNDED_SCORE_FIELDS,
           });
 
@@ -74,8 +79,12 @@ export const registerGetExperimentScoresRoute = ({
             .map((hit) => hit._source)
             .filter((source): source is Record<string, unknown> => source !== undefined);
 
+          const rawTotal = searchResponse.hits?.total;
+          const total =
+            (typeof rawTotal === 'number' ? rawTotal : rawTotal?.value) ?? scores.length;
+
           return response.ok({
-            body: { scores, total: scores.length },
+            body: { scores, total },
           });
         } catch (error) {
           const tooLarge = handleMaximumResponseSizeExceededError({

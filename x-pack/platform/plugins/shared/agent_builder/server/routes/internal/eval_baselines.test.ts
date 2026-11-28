@@ -16,6 +16,7 @@ import {
 } from '@kbn/evals-common';
 import type { RouteDependencies } from '../types';
 import type { InternalStartServices } from '../../services';
+import { PinnedBaselineScoreCountMismatchError } from '../../services/eval_baselines/errors';
 import { registerEvalBaselineRoutes } from './eval_baselines';
 
 const createScoreSource = (judgeModelId = 'glm-5.2') => ({
@@ -228,6 +229,62 @@ describe('eval baselines routes', () => {
       // Rollback must not depend on live scores it will not use: no search, no limits.
       expect(search).not.toHaveBeenCalled();
       expect(pin).not.toHaveBeenCalled();
+    });
+
+    it('forwards the expected score count to both pin paths and maps a mismatch to 400', async () => {
+      const requestWithExpectation = () =>
+        httpServerMock.createKibanaRequest({
+          method: 'post',
+          path: EVAL_BASELINES_PIN_URL,
+          body: {
+            suite_id: 'agent-builder-regression',
+            execution_id: 'run-1::suite::model',
+            expected_score_count: 2,
+          },
+        });
+
+      // The promotion path validates against the stored snapshot before publishing.
+      repin.mockRejectedValueOnce(
+        new PinnedBaselineScoreCountMismatchError({
+          baselineId: 'baseline-1',
+          actualCount: 7,
+          expectedCount: 2,
+          stored: true,
+        })
+      );
+      const repinMismatch = await handlers[EVAL_BASELINES_PIN_URL](
+        createContext(),
+        requestWithExpectation(),
+        kibanaResponseFactory
+      );
+      expect(repinMismatch.status).toBe(400);
+      expect(repinMismatch.payload).toMatchObject({
+        message: expect.stringContaining('stored snapshot is immutable'),
+      });
+      expect(repin).toHaveBeenCalledWith(expect.objectContaining({ expectedScoreCount: 2 }));
+      expect(pin).not.toHaveBeenCalled();
+
+      // The fresh-pin path validates against the deduped live scores before publishing.
+      repin.mockResolvedValueOnce(undefined);
+      search.mockResolvedValue(createSearchResponse([createScoreSource()]));
+      pin.mockRejectedValueOnce(
+        new PinnedBaselineScoreCountMismatchError({
+          baselineId: 'baseline-1',
+          actualCount: 1,
+          expectedCount: 2,
+          stored: false,
+        })
+      );
+      const pinMismatch = await handlers[EVAL_BASELINES_PIN_URL](
+        createContext(),
+        requestWithExpectation(),
+        kibanaResponseFactory
+      );
+      expect(pinMismatch.status).toBe(400);
+      expect(pinMismatch.payload).toMatchObject({
+        message: expect.stringContaining('but 2 were expected'),
+      });
+      expect(pin).toHaveBeenCalledWith(expect.objectContaining({ expectedScoreCount: 2 }));
     });
 
     it('derives a different baseline id when the same execution is pinned in another space', async () => {

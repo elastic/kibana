@@ -72,6 +72,17 @@ export const PinEvaluationBaselineRequestBody = lazySchema(() =>
       .max(256)
       .optional()
       .describe('Who or what pinned this baseline (user or pipeline identifier)'),
+    /**
+     * Number of scores the caller expects the baseline to hold. Validated before any pointer is published, so a pin issued before the run finished exporting scores fails instead of blessing a partial snapshot.
+     */
+    expected_score_count: z
+      .number()
+      .int()
+      .min(1)
+      .optional()
+      .describe(
+        'Number of scores the caller expects the baseline to hold. Validated before any pointer is published, so a pin issued before the run finished exporting scores fails instead of blessing a partial snapshot.'
+      ),
   })
 );
 export type PinEvaluationBaselineRequestBody = z.infer<typeof PinEvaluationBaselineRequestBody>;

@@ -15,6 +15,9 @@ import {
   EVALS_DATASET_RESOLVE_URL,
   EVALS_DATASET_UPSERT_URL,
   EVALS_DATASET_URL,
+  EVAL_BASELINES_PIN_URL,
+  EVAL_BASELINES_LATEST_URL,
+  EVAL_BASELINE_SCORES_URL,
   EVALS_EXPERIMENT_SCORES_URL,
   EVALS_EXPERIMENT_DATASET_EXAMPLES_URL,
   EVALS_EXPERIMENT_EXAMPLE_DETAILS_URL,
@@ -27,6 +30,9 @@ import {
   GetEvaluationExperimentExampleDetailsResponse,
   GetEvaluationExperimentScoresResponse,
   GetEvaluationExperimentsResponse,
+  GetLatestPinnedBaselineResponse,
+  GetPinnedBaselineScoresResponse,
+  PinEvaluationBaselineResponse,
   IngestScoresRequestBody,
   IngestScoresResponse,
   MAX_SCORES_PER_QUERY,
@@ -37,6 +43,7 @@ import {
   type DatasetMaturity,
   type EvaluationScoreDocument,
   type IngestScoresRequestBodyInput,
+  type PinnedBaseline,
   type Model as EvalsModel,
 } from '@kbn/evals-common';
 import { getStatusCode } from './retry_utils';
@@ -276,7 +283,12 @@ export class EvalsClient {
 
   async getExperimentScores(
     experimentId: string,
-    options?: GetExperimentFilters
+    options?: GetExperimentFilters,
+    // Strictness is opt-in: pinned-baseline comparisons gate verdicts on these scores,
+    // so there a truncated or failed read must be an error. Everything else (polling
+    // specs, advisory reads, branch-mode comparisons) keeps the lenient contract of
+    // "best effort, [] on failure" it was written against.
+    { requireComplete = false }: { requireComplete?: boolean } = {}
   ): Promise<EvaluationScoreDocument[]> {
     try {
       const response = await this.kbnClient.request({
@@ -289,10 +301,16 @@ export class EvalsClient {
       });
       const parsed = GetEvaluationExperimentScoresResponse.parse(getResponseData(response));
 
-      if (parsed.total > MAX_SCORES_PER_QUERY) {
-        throw new Error(
-          `Experiment ${experimentId} returned ${parsed.total} scores, which exceeds MAX_SCORES_PER_QUERY (${MAX_SCORES_PER_QUERY})`
-        );
+      // A subset must never pass as gated evidence: a regression verdict computed over
+      // a truncated read looks complete and can pass wrongly.
+      if (parsed.total > parsed.scores.length) {
+        const message =
+          `Experiment ${experimentId} has ${parsed.total} scores but the scores API returned ` +
+          `${parsed.scores.length} (over the ${MAX_SCORES_PER_QUERY} per-query cap)`;
+        if (requireComplete) {
+          throw new Error(`${message}; refusing to compare a subset.`);
+        }
+        this.log.warning(`${message}; continuing with the returned subset.`);
       }
 
       return parsed.scores;
@@ -302,8 +320,81 @@ export class EvalsClient {
           error instanceof Error ? error.message : String(error)
         }`
       );
+      // An empty result reads as "the run exported nothing", which sends a gating
+      // caller down the wrong path when the read itself failed.
+      if (requireComplete) {
+        throw error;
+      }
       return [];
     }
+  }
+
+  /**
+   * Pins an execution's scores as the regression baseline for its (suite, task model):
+   * the registry snapshots them into the pinned-baselines stream, outside the scores
+   * retention. Pinning an already-pinned execution re-promotes its stored snapshot.
+   * Throws on failure so a scheduled baseline run goes red instead of silently not pinning.
+   */
+  async pinBaseline({
+    suiteId,
+    executionId,
+    reason,
+    pinnedBy,
+    expectedScoreCount,
+  }: {
+    suiteId: string;
+    executionId: string;
+    reason?: string;
+    pinnedBy?: string;
+    /** Validated by the pin route before any pointer is published. */
+    expectedScoreCount?: number;
+  }): Promise<PinnedBaseline> {
+    const response = await this.kbnClient.request({
+      path: this.path(EVAL_BASELINES_PIN_URL),
+      method: 'POST',
+      body: {
+        suite_id: suiteId,
+        execution_id: executionId,
+        ...(reason != null && { reason }),
+        ...(pinnedBy != null && { pinned_by: pinnedBy }),
+        ...(expectedScoreCount != null && { expected_score_count: expectedScoreCount }),
+      },
+      headers: VERSIONED_HEADERS,
+    });
+    return PinEvaluationBaselineResponse.parse(getResponseData(response)).baseline;
+  }
+
+  async findLatestPinnedBaseline({
+    suiteId,
+    taskModelId,
+  }: {
+    suiteId: string;
+    taskModelId?: string;
+  }): Promise<PinnedBaseline | undefined> {
+    // Errors (routes not deployed, auth, 5xx) must propagate: swallowing them would make
+    // a broken lookup indistinguishable from the genuine "nothing pinned yet" null.
+    const response = await this.kbnClient.request({
+      path: this.path(EVAL_BASELINES_LATEST_URL),
+      method: 'GET',
+      query: {
+        suite_id: suiteId,
+        ...(taskModelId && { model_id: taskModelId }),
+      },
+      headers: VERSIONED_HEADERS,
+    });
+    const { baseline } = GetLatestPinnedBaselineResponse.parse(getResponseData(response));
+    return baseline ?? undefined;
+  }
+
+  async getPinnedBaselineScores(baselineId: string): Promise<EvaluationScoreDocument[]> {
+    const response = await this.kbnClient.request({
+      path: this.path(
+        EVAL_BASELINE_SCORES_URL.replace('{baselineId}', encodeURIComponent(baselineId))
+      ),
+      method: 'GET',
+      headers: VERSIONED_HEADERS,
+    });
+    return GetPinnedBaselineScoresResponse.parse(getResponseData(response)).scores;
   }
 
   /** Reads complete per-example score evidence from the run's home Space. */
@@ -489,9 +580,13 @@ export class EvalsClient {
       });
 
       const parsed = GetEvaluationExperimentsResponse.parse(getResponseData(response));
-      const match = parsed.experiments.find(
-        (exp) => exp.execution_id != null && exp.execution_id.startsWith(`${baseExecutionId}::`)
-      );
+      // Pin-enabled CI steps salt the base with their Buildkite job ID (see
+      // run_suite.sh), so a build's executions may carry either base form.
+      const match = parsed.experiments.find((exp) => {
+        if (exp.execution_id == null) return false;
+        const base = exp.execution_id.split('::')[0];
+        return base === baseExecutionId || base.startsWith(`${baseExecutionId}-job-`);
+      });
 
       if (!match || !match.execution_id) {
         return undefined;

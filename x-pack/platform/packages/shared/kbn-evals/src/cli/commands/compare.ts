@@ -6,10 +6,17 @@
  */
 
 import Fs from 'fs';
-import { createFlagError } from '@kbn/dev-cli-errors';
+import { createFailError, createFlagError } from '@kbn/dev-cli-errors';
 import type { Command, FlagsReader } from '@kbn/dev-cli-runner';
 import { KbnClient } from '@kbn/kbn-client';
-import { compareScores, pairScores, RepetitionPolicy } from '@kbn/evals-common';
+import {
+  compareScores,
+  pairScores,
+  buildRegressionReport,
+  DEFAULT_REGRESSION_REPORT_CONFIG,
+  RepetitionPolicy,
+  type RegressionReportConfig,
+} from '@kbn/evals-common';
 import type { BaselineExperiment } from '../../utils/evals_client';
 import { EvalsClient } from '../../utils/evals_client';
 import { getEvaluationsKbnClient } from '../../utils/evaluations_kbn_client';
@@ -18,6 +25,12 @@ import { buildExecutionCompareUrl } from '../../utils/evals_ui_url';
 import { readSpaceIdsFlag } from '../run_helpers';
 import { formatCompareReport } from '../../utils/reporting/compare_report';
 import { formatMarkdownCompareReport } from '../../utils/reporting/compare_markdown_report';
+import {
+  parseRegressionReportConfig,
+  findJudgeMismatch,
+  formatRegressionReportMarkdown,
+  logRegressionReport,
+} from './regression_verdict';
 import type {
   RegressionGateConfig,
   RegressionGateVerdict,
@@ -81,8 +94,13 @@ export const compareCmd: Command<void> = {
     2. Auto-resolve baseline from a branch (for CI):
        node scripts/evals compare <experiment-id> --baseline-branch main --suite <suite-id>
 
+    3. Compare against the pinned baseline with a regression verdict (regression suites):
+       node scripts/evals compare <experiment-id> --baseline-pinned --suite <suite-id>
+
   Options:
     --baseline-branch  Branch to find the latest baseline experiment on (e.g. "main")
+    --baseline-pinned  Compare against the suite's pinned baseline (see "evals ext pin-baseline")
+    --report-gates     Path to a JSON file overriding the default regression report thresholds
     --suite            Suite ID filter for baseline lookup and score filtering
     --format           Output format: "terminal" (default) or "markdown"
     --kibana-url       Kibana URL for generating compare page links in markdown
@@ -105,6 +123,7 @@ export const compareCmd: Command<void> = {
   flags: {
     string: [
       'baseline-branch',
+      'report-gates',
       'suite',
       'format',
       'kibana-url',
@@ -119,8 +138,11 @@ export const compareCmd: Command<void> = {
       'gate-max-baseline-age-days',
       'verdict-output',
     ],
+    boolean: ['baseline-pinned'],
     help: `
       --baseline-branch  Branch to find the latest baseline experiment on
+      --baseline-pinned  Compare against the suite's pinned baseline instead of a branch run
+      --report-gates     Path to a JSON file overriding the default regression report thresholds
       --suite            Suite ID filter for baseline lookup and score filtering
       --format           Output format: "terminal" (default) or "markdown"
       --kibana-url       Kibana URL for generating compare page links in markdown
@@ -139,6 +161,8 @@ export const compareCmd: Command<void> = {
   run: async ({ log, flagsReader }) => {
     const positionals = flagsReader.getPositionals();
     const baselineBranch = flagsReader.string('baseline-branch');
+    const baselinePinned = flagsReader.boolean('baseline-pinned');
+    const reportGatesPath = flagsReader.string('report-gates');
     const suiteId = flagsReader.string('suite');
     const format = flagsReader.string('format') ?? 'terminal';
     const kibanaUrl = flagsReader.string('kibana-url');
@@ -159,6 +183,54 @@ export const compareCmd: Command<void> = {
       throw createFlagError('--repetition-policy must be "mean" or "median".');
     }
     const repetitionPolicy = parsedPolicy.data;
+
+    if (baselinePinned && baselineBranch) {
+      throw createFlagError('--baseline-pinned and --baseline-branch are mutually exclusive.');
+    }
+    if (reportGatesPath && !baselinePinned) {
+      throw createFlagError('--report-gates only applies with --baseline-pinned.');
+    }
+
+    let reportConfig: RegressionReportConfig = DEFAULT_REGRESSION_REPORT_CONFIG;
+    if (reportGatesPath) {
+      try {
+        reportConfig = parseRegressionReportConfig(Fs.readFileSync(reportGatesPath, 'utf-8'));
+      } catch (error) {
+        throw createFlagError(
+          `Could not read report thresholds from "${reportGatesPath}": ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      }
+    }
+
+    // Skipped or invalid pinned comparisons still produce a PR-visible markdown note
+    // through the same stdout-or-file path as a completed one: the shell that builds the
+    // PR comment treats "no output" as "nothing to post", which would hide the skip.
+    const emitMarkdownNote = (heading: string, message: string): void => {
+      if (format !== 'markdown') {
+        return;
+      }
+      const content = `### ${heading}\n\n${message}\n\n`;
+      if (outputPath) {
+        Fs.appendFileSync(outputPath, content);
+        log.info(`Markdown report appended to ${outputPath}`);
+      } else {
+        process.stdout.write(content);
+      }
+    };
+
+    // An aborted comparison must stay distinguishable from a completed report-only
+    // verdict: in markdown mode the note is the PR-visible outcome and the command exits
+    // cleanly, but in terminal mode there is no comment to carry it, so the command
+    // fails for callers to see that no verdict was computed.
+    const abortComparison = (heading: string, message: string): void => {
+      log.error(message);
+      if (format !== 'markdown') {
+        throw createFailError(message);
+      }
+      emitMarkdownNote(heading, message);
+    };
 
     const regressionGate = readRegressionGateFlags(flagsReader);
     const verdictOutputPath = flagsReader.string('verdict-output');
@@ -211,8 +283,86 @@ export const compareCmd: Command<void> = {
     let targetExperimentId: string;
     let baselineExperimentId: string;
     let baselineMetadata: BaselineExperiment | undefined;
+    let pinnedBaselineId: string | undefined;
+    let pinnedJudgeModelId: string | null | undefined;
+    let pinnedScoreCount: number | undefined;
 
-    if (baselineBranch) {
+    if (baselinePinned) {
+      if (!suiteId) {
+        throw createFlagError('--suite is required when using --baseline-pinned.');
+      }
+
+      targetExperimentId = positionals[0];
+      if (!targetExperimentId) {
+        throw createFlagError(
+          'One experiment ID is required with --baseline-pinned. Example: node scripts/evals compare <experiment-id> --baseline-pinned --suite <suite-id>'
+        );
+      }
+
+      // Same base-build-ID resolution as the branch mode (see below).
+      if (!targetExperimentId.includes('::')) {
+        const resolved = await evalsClient.findLatestExperimentForBuild({
+          suiteId,
+          baseExecutionId: targetExperimentId,
+        });
+        if (resolved) {
+          log.info(`Resolved PR experiment: ${targetExperimentId} → ${resolved.executionId}`);
+          targetExperimentId = resolved.executionId;
+        } else {
+          log.warning(`Could not resolve base ID "${targetExperimentId}"; using raw ID.`);
+        }
+      }
+
+      // The registry pins one baseline per (suite, task model): without the model segment
+      // the lookup would return the newest pin for ANY model in the suite, and the verdict
+      // could compare different task models. Refuse instead.
+      if (!targetExperimentId.includes('::')) {
+        const message =
+          `Cannot determine the task model from execution ID \`${targetExperimentId}\`: a pinned ` +
+          `baseline is resolved per task model. Pass the full composite execution ID ` +
+          `(\`bk-BUILD::suite::model\`).`;
+        abortComparison('⚠️ Pinned-baseline comparison skipped', message);
+        return;
+      }
+      const taskModelId = targetExperimentId.split('::').pop();
+
+      log.info(`Looking up pinned baseline for suite "${suiteId}" (model: ${taskModelId})...`);
+
+      let pinned;
+      try {
+        pinned = await evalsClient.findLatestPinnedBaseline({ suiteId, taskModelId });
+      } catch (error) {
+        // A broken registry must still leave a PR-visible trace: the comment step treats a
+        // clean exit with no markdown as "nothing to post", hiding that no verdict exists.
+        const message = `The pinned-baseline registry could not be reached: ${
+          error instanceof Error ? error.message : String(error)
+        }`;
+        abortComparison('⚠️ Pinned-baseline comparison unavailable', message);
+        return;
+      }
+      if (!pinned) {
+        const message =
+          `No pinned baseline found for suite \`${suiteId}\` and model \`${taskModelId}\`. ` +
+          `Seed one from a green run on main: \`node scripts/evals ext pin-baseline --suite ${suiteId} --execution-id <id>\``;
+        log.warning(message);
+        emitMarkdownNote('ℹ️ No pinned baseline', message);
+        return;
+      }
+
+      pinnedBaselineId = pinned.baseline_id;
+      pinnedJudgeModelId = pinned.judge_model_id;
+      pinnedScoreCount = pinned.score_count;
+      baselineExperimentId = pinned.execution_id;
+      baselineMetadata = {
+        executionId: pinned.execution_id,
+        timestamp: pinned.pinned_at,
+        gitCommitSha: pinned.git_commit_sha ?? null,
+        gitBranch: pinned.git_branch ?? null,
+      };
+      log.info(
+        `Found pinned baseline ${pinned.baseline_id} (execution ${pinned.execution_id}, pinned at ${pinned.pinned_at})`
+      );
+    } else if (baselineBranch) {
       if (!suiteId) {
         throw createFlagError('--suite is required when using --baseline-branch.');
       }
@@ -323,18 +473,91 @@ export const compareCmd: Command<void> = {
     const targetFilter = suiteId ? { suiteId, executionId: targetExperimentId } : undefined;
     const baselineFilter = suiteId ? { suiteId, executionId: baselineExperimentId } : undefined;
 
-    const [targetExperimentScores, baselineExperimentScores] = await Promise.all([
-      evalsClient.getExperimentScores(targetExperimentId, targetFilter),
-      evalsClient.getExperimentScores(baselineExperimentId, baselineFilter),
-    ]);
+    // Anywhere a verdict is computed from these scores (the pinned report, or the merge
+    // gate), the reads must be complete or fail: a truncated read looks like a complete
+    // run and can produce a confidently wrong verdict. Ungated branch comparisons keep
+    // the lenient contract they always had.
+    const scoresGateVerdicts = Boolean(pinnedBaselineId) || Boolean(regressionGate);
+    let targetExperimentScores;
+    let baselineExperimentScores;
+    try {
+      [targetExperimentScores, baselineExperimentScores] = await Promise.all([
+        evalsClient.getExperimentScores(targetExperimentId, targetFilter, {
+          requireComplete: scoresGateVerdicts,
+        }),
+        // A pinned baseline's scores live in the pinned-baselines snapshot, which
+        // outlives the retention on the scores data stream.
+        pinnedBaselineId
+          ? evalsClient.getPinnedBaselineScores(pinnedBaselineId)
+          : evalsClient.getExperimentScores(baselineExperimentId, baselineFilter, {
+              requireComplete: scoresGateVerdicts,
+            }),
+      ]);
+    } catch (error) {
+      // The merge gate never blocks on infra problems: record the inconclusive verdict
+      // before surfacing the failure, so the gate reads "not enforced", not "no verdict".
+      if (regressionGate) {
+        writeVerdict(inconclusiveVerdict('the experiment scores could not be read completely'));
+      }
+      if (!pinnedBaselineId) {
+        throw error;
+      }
+      // Covers both sides of the read: the underlying error names the experiment or
+      // baseline that failed, so don't blame the snapshot for a failed target read.
+      const message = `The scores needed for the pinned comparison could not be read: ${
+        error instanceof Error ? error.message : String(error)
+      }`;
+      abortComparison('⚠️ Pinned-baseline comparison unavailable', message);
+      return;
+    }
 
-    // Inconclusive rather than a regression: a run without scores can't be told apart from an infra
-    // failure. A broken agent that still runs gets low scores, which the gate does catch.
+    // The snapshot read must hand back exactly what was pinned: a partial read would
+    // gate the verdict on a subset of the baseline and look complete while doing it.
+    if (
+      pinnedBaselineId &&
+      pinnedScoreCount != null &&
+      baselineExperimentScores.length !== pinnedScoreCount
+    ) {
+      abortComparison(
+        '⚠️ Pinned-baseline comparison unavailable',
+        `The pinned baseline holds ${pinnedScoreCount} score(s) but the registry returned ` +
+          `${baselineExperimentScores.length}; refusing to compare against a partial snapshot.`
+      );
+      return;
+    }
+
+    // An empty target is a missing-run problem, not a judge problem: handle it before
+    // the judge match, or a run that exported nothing would be reported as a judge
+    // mismatch and point reviewers at the baseline instead of at the missing scores. For
+    // the merge gate it is inconclusive rather than a regression: a run without scores
+    // can't be told apart from an infra failure.
     if (targetExperimentScores.length === 0) {
       if (regressionGate) {
         writeVerdict(inconclusiveVerdict('the PR run produced no scores'));
       }
+      if (pinnedBaselineId) {
+        abortComparison(
+          '⚠️ Pinned-baseline comparison unavailable',
+          `No scores found for this run (execution \`${targetExperimentId}\`). The run may ` +
+            `have failed before exporting scores, or the execution ID resolved incorrectly.`
+        );
+        return;
+      }
       throw new Error(`No scores found for experiment ID: ${targetExperimentId}`);
+    }
+
+    // Scores from different judges are not comparable: refuse the comparison instead of
+    // gating on garbage. The pin route rejects mixed-judge executions, so the baseline
+    // side is a single judge (or judge-less); the target side must match it exactly.
+    if (pinnedBaselineId) {
+      const mismatch = findJudgeMismatch({
+        baselineJudgeModelId: pinnedJudgeModelId,
+        targetScores: targetExperimentScores,
+      });
+      if (mismatch) {
+        abortComparison('⚠️ Comparison invalid: judge mismatch', mismatch);
+        return;
+      }
     }
 
     if (baselineExperimentScores.length === 0) {
@@ -405,6 +628,39 @@ export const compareCmd: Command<void> = {
       return;
     }
 
+    // Coverage is checked per (dataset, evaluator) slice against what was actually
+    // gated, not per dataset: a dataset that lost one evaluator (nulled-out scores, a
+    // rejected slice, a removed metric) would otherwise still read as covered and
+    // produce an unqualified pass. Slices whose baseline scores are all null never had
+    // anything to gate (no ground truth, metric not reported), so they are not coverage.
+    let missingBaselineSlices: string[] = [];
+    if (pinnedBaselineId) {
+      const gatedSlices = new Set(
+        results.map(({ datasetId, evaluatorName }) => `${datasetId}|${evaluatorName}`)
+      );
+      const missing = new Map<string, string>();
+      for (const score of baselineExperimentScores) {
+        if (!Number.isFinite(score.evaluator.score ?? null)) {
+          continue;
+        }
+        const key = `${score.example.dataset.id}|${score.evaluator.name}`;
+        if (!gatedSlices.has(key) && !missing.has(key)) {
+          missing.set(key, `${score.example.dataset.name} / ${score.evaluator.name}`);
+        }
+      }
+      missingBaselineSlices = [...missing.values()].sort();
+    }
+
+    // The regression report, only against a pinned baseline: a branch-mode baseline is
+    // whatever happened to run last, not a reference anyone promoted. Report-only —
+    // verdicts never change the exit code until the suite's noise floor is known.
+    const regressionReport = pinnedBaselineId
+      ? buildRegressionReport(results, reportConfig)
+      : undefined;
+    if (regressionReport) {
+      logRegressionReport(log, regressionReport, { missingBaselineSlices });
+    }
+
     const regressionGateVerdict = regressionGate
       ? evaluateRegressionGate({
           results,
@@ -418,19 +674,28 @@ export const compareCmd: Command<void> = {
 
     if (format === 'markdown') {
       const effectiveKibanaUrl = kibanaUrl ?? evaluationsKbnUrl;
-      const comparePageUrl = effectiveKibanaUrl
-        ? buildExecutionCompareUrl({
-            kibanaUrl: effectiveKibanaUrl,
-            spaceId: spaceIds?.[0],
-            baselineExecutionId: baselineExperimentId,
-            targetExecutionId: targetExperimentId,
-            repetitionPolicy,
-          })
-        : undefined;
-      if (effectiveKibanaUrl && !comparePageUrl) {
+      // The UI comparison page reads live scores only: a pinned baseline's execution may
+      // have aged out of the scores retention, so the link would 404. Omit it.
+      const comparePageUrl =
+        effectiveKibanaUrl && !pinnedBaselineId
+          ? buildExecutionCompareUrl({
+              kibanaUrl: effectiveKibanaUrl,
+              spaceId: spaceIds?.[0],
+              baselineExecutionId: baselineExperimentId,
+              targetExecutionId: targetExperimentId,
+              repetitionPolicy,
+            })
+          : undefined;
+      if (effectiveKibanaUrl && !pinnedBaselineId && !comparePageUrl) {
         log.warning('Invalid Kibana URL for compare page link.');
       }
 
+      const verdictMarkdown = regressionReport
+        ? formatRegressionReportMarkdown(regressionReport, {
+            missingBaselineSlices,
+            config: reportConfig,
+          }) + '\n\n'
+        : '';
       const markdown = formatMarkdownCompareReport({
         targetExperimentId,
         baselineExperimentId,
@@ -444,14 +709,15 @@ export const compareCmd: Command<void> = {
         baselineBranch: baselineBranch ?? undefined,
         repetitionPolicy,
         rejectedSlices: rejectedNames,
+        pinnedBaseline: Boolean(pinnedBaselineId),
         regressionGateVerdict,
       });
 
       if (outputPath) {
-        Fs.appendFileSync(outputPath, markdown + '\n\n');
+        Fs.appendFileSync(outputPath, verdictMarkdown + markdown + '\n\n');
         log.info(`Markdown report appended to ${outputPath}`);
       } else {
-        process.stdout.write(markdown + '\n');
+        process.stdout.write(verdictMarkdown + markdown + '\n');
       }
     } else {
       const report = formatCompareReport({

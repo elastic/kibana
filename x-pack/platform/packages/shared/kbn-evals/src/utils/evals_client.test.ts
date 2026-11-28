@@ -329,7 +329,7 @@ describe('EvalsClient', () => {
     );
   });
 
-  it('getExperimentScores returns [] and logs when response exceeds MAX_SCORES_PER_QUERY', async () => {
+  it('getExperimentScores keeps the lenient contract by default: subset on truncation, [] on failure', async () => {
     const kbnClient = createMockKbnClient();
     const log = createLog();
     kbnClient.request.mockResolvedValue(
@@ -340,9 +340,35 @@ describe('EvalsClient', () => {
     );
     const client = new EvalsClient(kbnClient, log);
 
-    await expect(client.getExperimentScores('experiment-123')).resolves.toEqual([]);
+    // Polling specs and advisory reads were written against this contract.
+    await expect(client.getExperimentScores('experiment-123')).resolves.toHaveLength(1);
+    expect(log.warning).toHaveBeenCalledWith(expect.stringContaining('per-query cap'));
 
-    expect(log.error).toHaveBeenCalledWith(expect.stringContaining('exceeds MAX_SCORES_PER_QUERY'));
+    kbnClient.request.mockRejectedValue(new Error('socket hang up'));
+    await expect(client.getExperimentScores('experiment-123')).resolves.toEqual([]);
+  });
+
+  it('getExperimentScores with requireComplete throws on truncation and read failures', async () => {
+    const kbnClient = createMockKbnClient();
+    const log = createLog();
+    kbnClient.request.mockResolvedValue(
+      asKbnResponse({
+        scores: [createScoreDocument('example-1')],
+        total: MAX_SCORES_PER_QUERY + 1,
+      })
+    );
+    const client = new EvalsClient(kbnClient, log);
+
+    // Gated evidence: a truncated read must not degrade to a subset, and a failed read
+    // must not degrade to [], which reads as "the run exported nothing".
+    await expect(
+      client.getExperimentScores('experiment-123', undefined, { requireComplete: true })
+    ).rejects.toThrow(/refusing to compare a subset/);
+
+    kbnClient.request.mockRejectedValue(new Error('socket hang up'));
+    await expect(
+      client.getExperimentScores('experiment-123', undefined, { requireComplete: true })
+    ).rejects.toThrow('socket hang up');
   });
 
   it('upsertDataset posts to the upsert route', async () => {
@@ -827,6 +853,90 @@ describe('EvalsClient', () => {
 
       expect(result).toBeUndefined();
       expect(log.error).toHaveBeenCalledWith(expect.stringContaining('timeout'));
+    });
+  });
+
+  describe('pinned baselines', () => {
+    const pinnedBaseline = {
+      baseline_id: 'baseline-1',
+      suite_id: 'suite-1',
+      execution_id: 'bk-1::suite-1::gpt-5',
+      judge_model_id: 'glm-5.2',
+      pinned_at: '2026-11-01T00:00:00.000Z',
+      score_count: 2,
+    };
+
+    it('pinBaseline posts the pin request and returns the created baseline', async () => {
+      const kbnClient = createMockKbnClient();
+      const log = createLog();
+      kbnClient.request.mockResolvedValue(asKbnResponse({ baseline: pinnedBaseline }));
+      const client = new EvalsClient(kbnClient, log);
+
+      const result = await client.pinBaseline({
+        suiteId: 'suite-1',
+        executionId: 'bk-1::suite-1::gpt-5',
+        reason: 'monthly baseline',
+        pinnedBy: 'rakesh',
+        expectedScoreCount: 42,
+      });
+
+      expect(kbnClient.request).toHaveBeenCalledWith(
+        expect.objectContaining({
+          method: 'POST',
+          body: {
+            suite_id: 'suite-1',
+            execution_id: 'bk-1::suite-1::gpt-5',
+            reason: 'monthly baseline',
+            pinned_by: 'rakesh',
+            expected_score_count: 42,
+          },
+        })
+      );
+      expect(result).toMatchObject({ baseline_id: 'baseline-1', judge_model_id: 'glm-5.2' });
+    });
+
+    it('findLatestPinnedBaseline returns undefined only on a genuine null baseline', async () => {
+      const kbnClient = createMockKbnClient();
+      const log = createLog();
+      kbnClient.request.mockResolvedValue(asKbnResponse({ baseline: null }));
+      const client = new EvalsClient(kbnClient, log);
+
+      await expect(
+        client.findLatestPinnedBaseline({ suiteId: 'suite-1', taskModelId: 'gpt-5' })
+      ).resolves.toBeUndefined();
+
+      expect(kbnClient.request).toHaveBeenCalledWith(
+        expect.objectContaining({
+          method: 'GET',
+          query: { suite_id: 'suite-1', model_id: 'gpt-5' },
+        })
+      );
+    });
+
+    it('findLatestPinnedBaseline propagates lookup failures instead of masking them as "no pin"', async () => {
+      const kbnClient = createMockKbnClient();
+      const log = createLog();
+      kbnClient.request.mockRejectedValue(new Error('404 Not Found'));
+      const client = new EvalsClient(kbnClient, log);
+
+      await expect(client.findLatestPinnedBaseline({ suiteId: 'suite-1' })).rejects.toThrow(
+        '404 Not Found'
+      );
+    });
+
+    it('getPinnedBaselineScores returns the snapshot scores and propagates failures', async () => {
+      const kbnClient = createMockKbnClient();
+      const log = createLog();
+      const score = createScoreDocument('example-1');
+      kbnClient.request.mockResolvedValueOnce(asKbnResponse({ scores: [score], total: 1 }));
+      const client = new EvalsClient(kbnClient, log);
+
+      await expect(client.getPinnedBaselineScores('baseline-1')).resolves.toHaveLength(1);
+
+      kbnClient.request.mockRejectedValueOnce(new Error('401 Unauthorized'));
+      await expect(client.getPinnedBaselineScores('baseline-1')).rejects.toThrow(
+        '401 Unauthorized'
+      );
     });
   });
 

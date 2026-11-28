@@ -96,6 +96,33 @@ for suite_id in "${SUITE_ARRAY[@]}"; do
     BASE_COMPARE_ARGS+=(--kibana-url "$KIBANA_URL")
   fi
 
+  # Suites that opted in (pinnedBaseline in evals.suites.json) compare against their
+  # pinned baseline instead of the latest run on main.
+  SUITE_INFO_JSON="$(
+    node x-pack/platform/packages/shared/kbn-evals/scripts/ci/get_suite_info.js "$suite_id" 2>/dev/null || echo '{}'
+  )"
+  SUITE_PINNED_BASELINE="$(printf '%s' "$SUITE_INFO_JSON" | jq -r '.pinnedBaseline // false' 2>/dev/null || echo false)"
+
+  # The report thresholds come from the suite entry (regressionReportGates), not from
+  # framework defaults: the suite owns its gates. Absent config falls back to the CLI's
+  # built-in placeholders.
+  REPORT_GATES_ARGS=()
+  if [[ "$SUITE_PINNED_BASELINE" == "true" ]]; then
+    SUITE_REPORT_GATES="$(printf '%s' "$SUITE_INFO_JSON" | jq -c '.regressionReportGates // empty' 2>/dev/null || true)"
+    if [[ -n "$SUITE_REPORT_GATES" ]]; then
+      REPORT_GATES_FILE="$(mktemp -t report_gates_XXXXXX.json)"
+      printf '%s' "$SUITE_REPORT_GATES" >"$REPORT_GATES_FILE"
+      REPORT_GATES_ARGS=(--report-gates "$REPORT_GATES_FILE")
+    fi
+  fi
+
+  # A fresh-baseline run for a pinned suite would post an ungated branch comparison over
+  # the pinned verdict in the same PR comment slot; the pin is the reference, so skip it.
+  if [[ "$SUITE_PINNED_BASELINE" == "true" && -n "$FRESH_BASELINE_PR_EXPERIMENT_ID" ]]; then
+    echo "Suite ${suite_id} compares against a pinned baseline; skipping the fresh-baseline comparison."
+    continue
+  fi
+
   # Read the connector list written by run_suite.sh at fanout time.
   # Each entry is a connector ID (EVAL_PROJECT value, e.g. "eis-anthropic-claude-4-5-haiku").
   SUITE_CONNECTORS=""
@@ -118,6 +145,13 @@ for suite_id in "${SUITE_ARRAY[@]}"; do
       fi
       if [[ -z "$CONNECTOR_COMPOSITE" ]]; then
         echo "No execution ID for connector ${connector_id} in suite ${suite_id}; skipping."
+        # A pinned suite's comment must say this model has no verdict rather than omit
+        # it: the eval job may have died before worker teardown wrote the execution ID.
+        if [[ "$SUITE_PINNED_BASELINE" == "true" && -z "$FRESH_BASELINE_PR_EXPERIMENT_ID" ]]; then
+          printf '### ⚠️ Pinned-baseline comparison unavailable\n\nNo execution ID was recorded for suite `%s` / connector `%s`: the eval run may have failed before exporting scores. See this build'"'"'s eval step logs.\n\n' \
+            "$suite_id" "$connector_id" >>"$MARKDOWN_FILE"
+          HAS_RESULTS="true"
+        fi
         continue
       fi
 
@@ -135,9 +169,16 @@ for suite_id in "${SUITE_ARRAY[@]}"; do
           echo "Compare failed for suite ${suite_id} / connector ${connector_id}; continuing."
         fi
       else
-        COMPARE_ARGS+=(--baseline-branch main)
-        if [[ -n "${BUILDKITE_BUILD_URL:-}" ]]; then
-          COMPARE_ARGS+=(--refresh-url "${BUILDKITE_BUILD_URL}#kbn-evals-${_suite_key_safe}-refresh-block")
+        if [[ "$SUITE_PINNED_BASELINE" == "true" ]]; then
+          COMPARE_ARGS+=(--baseline-pinned)
+          if [[ ${#REPORT_GATES_ARGS[@]} -gt 0 ]]; then
+            COMPARE_ARGS+=("${REPORT_GATES_ARGS[@]}")
+          fi
+        else
+          COMPARE_ARGS+=(--baseline-branch main)
+          if [[ -n "${BUILDKITE_BUILD_URL:-}" ]]; then
+            COMPARE_ARGS+=(--refresh-url "${BUILDKITE_BUILD_URL}#kbn-evals-${_suite_key_safe}-refresh-block")
+          fi
         fi
         # Empty unless this suite has a regressionGate and this is its gate model's connector.
         GATE_ARGS=()
@@ -151,6 +192,14 @@ for suite_id in "${SUITE_ARRAY[@]}"; do
           HAS_RESULTS="true"
         else
           echo "Compare failed for suite ${suite_id} / connector ${connector_id}; continuing."
+          # A pinned suite's PR comment must say the verdict is missing rather than not
+          # exist: the CLI reports its own failures, so this only covers a crash before it
+          # could (reviewers otherwise read "no comment" as "no regression").
+          if [[ "$SUITE_PINNED_BASELINE" == "true" ]]; then
+            printf '### ⚠️ Pinned-baseline comparison unavailable\n\nThe comparison for suite `%s` / connector `%s` failed before a verdict could be computed. See the "post comparison" step logs in this build.\n\n' \
+              "$suite_id" "$connector_id" >>"$MARKDOWN_FILE"
+            HAS_RESULTS="true"
+          fi
         fi
       fi
     done
@@ -173,14 +222,26 @@ for suite_id in "${SUITE_ARRAY[@]}"; do
         echo "Compare failed for suite ${suite_id}; continuing."
       fi
     else
-      COMPARE_ARGS+=(--baseline-branch main)
-      if [[ -n "${BUILDKITE_BUILD_URL:-}" ]]; then
-        COMPARE_ARGS+=(--refresh-url "${BUILDKITE_BUILD_URL}#kbn-evals-${_suite_key_safe}-refresh-block")
+      if [[ "$SUITE_PINNED_BASELINE" == "true" ]]; then
+        COMPARE_ARGS+=(--baseline-pinned)
+        if [[ ${#REPORT_GATES_ARGS[@]} -gt 0 ]]; then
+          COMPARE_ARGS+=("${REPORT_GATES_ARGS[@]}")
+        fi
+      else
+        COMPARE_ARGS+=(--baseline-branch main)
+        if [[ -n "${BUILDKITE_BUILD_URL:-}" ]]; then
+          COMPARE_ARGS+=(--refresh-url "${BUILDKITE_BUILD_URL}#kbn-evals-${_suite_key_safe}-refresh-block")
+        fi
       fi
       if node scripts/evals compare "$SUITE_EXECUTION_ID" "${COMPARE_ARGS[@]}"; then
         HAS_RESULTS="true"
       else
         echo "Compare failed for suite ${suite_id}; continuing."
+        if [[ "$SUITE_PINNED_BASELINE" == "true" ]]; then
+          printf '### ⚠️ Pinned-baseline comparison unavailable\n\nThe comparison for suite `%s` failed before a verdict could be computed. See the "post comparison" step logs in this build.\n\n' \
+            "$suite_id" >>"$MARKDOWN_FILE"
+          HAS_RESULTS="true"
+        fi
       fi
     fi
   fi

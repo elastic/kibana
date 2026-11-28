@@ -66,6 +66,10 @@ describe('GET /internal/evals/experiments/{experimentId}/scores', () => {
       expect.objectContaining({
         sort: SCORES_SORT_ORDER,
         size: 10000,
+        // The compare CLI gates verdicts on these scores: exact totals expose truncated
+        // reads, and a failed shard must error rather than shrink the result silently.
+        track_total_hits: true,
+        allow_partial_search_results: false,
       })
     );
   });
@@ -98,6 +102,28 @@ describe('GET /internal/evals/experiments/{experimentId}/scores', () => {
     expect(response.status).toBe(200);
     expect(response.payload.scores).toHaveLength(2);
     expect(response.payload.total).toBe(2);
+  });
+
+  it('preserves the exact total when Elasticsearch reports more hits than it returned', async () => {
+    const { handler, context, evaluationScoreService } = setup();
+    const scoreDoc = {
+      experiment_id: 'experiment-abc',
+      evaluator: { name: 'correctness', score: 0.9 },
+    };
+    evaluationScoreService.search.mockResolvedValueOnce({
+      hits: {
+        total: { value: 10001, relation: 'eq' },
+        hits: [{ _source: scoreDoc }],
+      },
+    } as any);
+
+    const response = await handler(context, makeRequest(), kibanaResponseFactory);
+
+    // total > scores.length is how the client detects a capped read; reporting
+    // scores.length here would make truncation invisible again.
+    expect(response.status).toBe(200);
+    expect(response.payload.scores).toHaveLength(1);
+    expect(response.payload.total).toBe(10001);
   });
 
   it('filters out hits with no _source', async () => {

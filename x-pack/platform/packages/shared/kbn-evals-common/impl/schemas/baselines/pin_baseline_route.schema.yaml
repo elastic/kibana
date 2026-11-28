@@ -40,6 +40,13 @@ paths:
                   type: string
                   maxLength: 256
                   description: Who or what pinned this baseline (user or pipeline identifier)
+                expected_score_count:
+                  type: integer
+                  minimum: 1
+                  description: >-
+                    Number of scores the caller expects the baseline to hold. Validated
+                    before any pointer is published, so a pin issued before the run
+                    finished exporting scores fails instead of blessing a partial snapshot.
       responses:
         '200':
           description: Successful response

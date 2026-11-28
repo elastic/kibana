@@ -69,6 +69,13 @@ export interface EvalSuiteMetadata {
    * `--evaluation-connector-id` or `EVAL_CONNECTOR_ID` is given, ahead of the Vault default.
    */
   defaultJudge?: string;
+  /**
+   * When true, CI compares the suite's runs against the pinned baseline
+   * (`evals compare --baseline-pinned`) instead of the latest run on main.
+   * Not supported together with `shards`: shards run as independent steps, so a
+   * per-shard pin could publish a partial execution as the baseline.
+   */
+  pinnedBaseline?: boolean;
   shards?: EvalSuiteShard[];
   stepTimeoutInMinutes?: number;
 }
@@ -90,6 +97,7 @@ export interface EvalSuiteDefinition {
   scoutHook?: string;
   vaultSecret?: string;
   defaultJudge?: string;
+  pinnedBaseline?: boolean;
   shards?: EvalSuiteShard[];
   stepTimeoutInMinutes?: number;
 }
@@ -202,6 +210,7 @@ const normalizeSuite = (
     scoutHook: metadata?.scoutHook,
     vaultSecret: metadata?.vaultSecret,
     defaultJudge: metadata?.defaultJudge,
+    pinnedBaseline: metadata?.pinnedBaseline,
     shards: metadata?.shards,
     stepTimeoutInMinutes: metadata?.stepTimeoutInMinutes,
   };

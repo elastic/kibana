@@ -11,6 +11,7 @@ import type { DataStreamsStart } from '@kbn/core-data-streams-server';
 import type { AnyIDataStreamClient } from '@kbn/data-streams';
 import type { EvaluationScoreDocument, PinnedBaseline } from '@kbn/evals-common';
 import { EvaluationIndices, MAX_PINNABLE_SCORES, buildSpaceFilter } from '@kbn/evals-common';
+import { assertExpectedScoreCount } from './errors';
 
 /** A snapshotted score document: the original score plus its baseline attribution. */
 export type PinnedBaselineScoreDocument = EvaluationScoreDocument & {
@@ -97,10 +98,12 @@ export class PinnedBaselineService {
     pointer,
     scores,
     spaceIds,
+    expectedScoreCount,
   }: {
     pointer: Omit<PinnedBaseline, 'pinned_at' | 'score_count' | 'dataset_ids'>;
     scores: Array<{ id: string; document: EvaluationScoreDocument }>;
     spaceIds: string[];
+    expectedScoreCount?: number | null;
   }): Promise<PinnedBaseline> {
     const client = await this.getClient();
 
@@ -110,6 +113,12 @@ export class PinnedBaselineService {
     // recorded count and judge metadata) ever changing.
     const existingPointer = await this.findPointerById(client, pointer.baseline_id);
     if (existingPointer) {
+      assertExpectedScoreCount({
+        baselineId: pointer.baseline_id,
+        actualCount: existingPointer.baseline.score_count,
+        expectedCount: expectedScoreCount,
+        stored: true,
+      });
       this.logger.info(
         `Baseline ${pointer.baseline_id} is already pinned; promoting its existing snapshot.`
       );
@@ -123,6 +132,13 @@ export class PinnedBaselineService {
     // across backing indices after a rollover). Both copies map to one snapshot ID, so
     // counting them separately would publish a score_count no read could ever satisfy.
     const uniqueScores = [...new Map(scores.map((score) => [score.id, score])).values()];
+
+    assertExpectedScoreCount({
+      baselineId: pointer.baseline_id,
+      actualCount: uniqueScores.length,
+      expectedCount: expectedScoreCount,
+      stored: false,
+    });
 
     const pinnedAt = new Date().toISOString();
     const datasetIds = [
@@ -166,11 +182,12 @@ export class PinnedBaselineService {
 
     // Bulk writes are not atomic, and `findLatest` selects whatever pointer exists: write
     // the snapshot first and publish the pointer only once every score landed, so a
-    // partially-written pin never becomes the active baseline. Only the pointer write
-    // waits for a refresh; the scores become searchable with it, and waiting per chunk
-    // would serialize a full pin over many refresh intervals.
+    // partially-written pin never becomes the active baseline. The batch waits for one
+    // refresh (on its last chunk): a losing concurrent pin's read-back below must be able
+    // to see these documents, and a pointer-write conflict has nothing of its own to wait
+    // on when every item conflicts.
     if (scoreDocuments.length > 0) {
-      await this.createDocuments(client, scoreDocuments, pointer.baseline_id, false);
+      await this.createDocuments(client, scoreDocuments, pointer.baseline_id, 'wait_for');
     }
     const conflicts = await this.createDocuments(
       client,
@@ -180,9 +197,23 @@ export class PinnedBaselineService {
     );
     if (conflicts > 0) {
       // A concurrent first pin won the write-once pointer: its view of the snapshot is
-      // the published one, so answer with what is stored rather than this request's.
+      // the published one, so answer with what is stored rather than this request's —
+      // and hold the caller's expected count against the winner, which may have
+      // snapshotted a different set of scores than the ones this request validated.
       const storedPointer = await this.findPointerById(client, pointer.baseline_id);
       if (storedPointer) {
+        assertExpectedScoreCount({
+          baselineId: pointer.baseline_id,
+          actualCount: storedPointer.baseline.score_count,
+          expectedCount: expectedScoreCount,
+          stored: true,
+        });
+        // This losing attempt may have written score documents the winner never counted
+        // (the attempts read the live scores at different moments). getScores throws on
+        // a snapshot whose document count disagrees with its pointer, so reading the
+        // winner's snapshot back fails this pin loudly instead of answering success
+        // with a baseline no comparison will be able to read.
+        await this.getScores({ baselineId: pointer.baseline_id, spaceId: spaceIds[0] });
         return pointerToResponse(storedPointer);
       }
     }
@@ -199,16 +230,24 @@ export class PinnedBaselineService {
     baselineId,
     pinnedBy,
     reason,
+    expectedScoreCount,
   }: {
     baselineId: string;
     pinnedBy: string | null;
     reason: string | null;
+    expectedScoreCount?: number | null;
   }): Promise<PinnedBaseline | undefined> {
     const client = await this.getClient();
     const existingPointer = await this.findPointerById(client, baselineId);
     if (!existingPointer) {
       return undefined;
     }
+    assertExpectedScoreCount({
+      baselineId,
+      actualCount: existingPointer.baseline.score_count,
+      expectedCount: expectedScoreCount,
+      stored: true,
+    });
     return this.publishPointer(client, existingPointer, { pinnedBy, reason });
   }
 
@@ -262,9 +301,13 @@ export class PinnedBaselineService {
   ): Promise<number> {
     let totalConflicted = 0;
     for (let offset = 0; offset < documents.length; offset += BULK_WRITE_CHUNK_SIZE) {
+      // A refresh makes everything indexed before it searchable, so honoring the
+      // requested refresh on the last chunk alone gives the whole batch visibility
+      // without serializing every chunk over a refresh interval.
+      const isLastChunk = offset + BULK_WRITE_CHUNK_SIZE >= documents.length;
       const response = await client.create({
         documents: documents.slice(offset, offset + BULK_WRITE_CHUNK_SIZE),
-        refresh,
+        refresh: isLastChunk ? refresh : false,
       });
 
       const conflicted = response.items.filter((item) => item.create?.status === 409).length;

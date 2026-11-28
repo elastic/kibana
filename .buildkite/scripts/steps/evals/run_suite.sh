@@ -29,6 +29,17 @@ if [[ -z "${TEST_RUN_ID:-}" ]] && [[ -n "${BUILDKITE_BUILD_ID:-}" ]]; then
   export TEST_RUN_ID="bk-${BUILDKITE_BUILD_ID}"
 fi
 
+# A Buildkite retry reuses the build-scoped TEST_RUN_ID (set above or inherited from the
+# fanout), so a retried pin-enabled step would export its scores under the same execution
+# ID as the failed attempt's partial export and pin the union of both attempts. Salting
+# the seed per job gives every attempt its own execution: the pin and the comparisons
+# read the full execution ID back from this job's metadata, so nothing needs the unsalted
+# form. Only the executing per-connector step salts (EVAL_PROJECT), and only once.
+if [[ "${EVAL_PIN_BASELINE:-}" == "1" && -n "${EVAL_PROJECT:-}" && -n "${TEST_RUN_ID:-}" &&
+  -n "${BUILDKITE_JOB_ID:-}" && "${TEST_RUN_ID}" != *"-job-"* ]]; then
+  export TEST_RUN_ID="${TEST_RUN_ID}-job-${BUILDKITE_JOB_ID}"
+fi
+
 # Bootstrap workspace deps + download build artifacts (same setup as FTR/Scout CI steps)
 source .buildkite/scripts/steps/functional/common.sh
 
@@ -36,6 +47,9 @@ EVAL_SUITE_INFO="$(
   node x-pack/platform/packages/shared/kbn-evals/scripts/ci/get_suite_info.js "$EVAL_SUITE_ID" || true
 )"
 EVAL_SUITE_NAME="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.name // empty' 2>/dev/null || true)"
+# Suites comparing against a pinned baseline don't get the fresh-baseline refresh flow:
+# unblocking it would post an ungated branch comparison over the pinned verdict.
+EVAL_SUITE_PINNED_BASELINE="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.pinnedBaseline // false' 2>/dev/null || echo false)"
 EVAL_SUITE_SLACK_CHANNEL="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.slackChannel // empty' 2>/dev/null || true)"
 # Per-suite step timeout for suites that legitimately need longer than the 120m default.
 EVAL_SUITE_STEP_TIMEOUT="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.stepTimeoutInMinutes // empty' 2>/dev/null || true)"
@@ -248,6 +262,11 @@ EOF
       # most suite/model combinations through without per-suite special-casing.
       timeout_in_minutes="${EVAL_STEP_TIMEOUT_IN_MINUTES:-${EVAL_SUITE_STEP_TIMEOUT:-120}}"
 
+      # The reason is free-form prose going into a double-quoted YAML scalar that
+      # buildkite-agent interpolates on upload: escape backslashes, quotes and `$`
+      # (as `$$`), and flatten newlines, or the upload fails or substitutes env vars.
+      eval_pin_baseline_reason_yaml="$(printf '%s' "${EVAL_PIN_BASELINE_REASON:-}" | tr '\r\n' '  ' | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g' -e 's/\$/$$/g')"
+
       fanout_step_keys=()
       fanout_connector_ids=()
       # Each matrix row is one step, a JSON object { connectorId, shardId, specFiles }. shardId is ""
@@ -320,6 +339,8 @@ EOF
           EVAL_SPEC_FILES: "${shard_spec_file_args}"
           EVAL_REPETITIONS: "${EVAL_REPETITIONS:-}"
           EVAL_CONCURRENCY: "${EVAL_CONCURRENCY:-}"
+          EVAL_PIN_BASELINE: "${EVAL_PIN_BASELINE:-}"
+          EVAL_PIN_BASELINE_REASON: "${eval_pin_baseline_reason_yaml}"
         timeout_in_minutes: ${step_timeout_in_minutes}
         concurrency_group: "${step_concurrency_group}"
         concurrency: ${step_concurrency}
@@ -452,7 +473,10 @@ EOF
 EOF
         # Refresh baseline block + trigger (top-level — 2-space indent).
         # The trigger fires a fresh main eval run so the PR comment is updated
-        # with a same-day baseline when the auto-discovered one is stale.
+        # with a same-day baseline when the auto-discovered one is stale. Pinned-baseline
+        # suites skip it: their reference is the pin, and the fresh-baseline run would
+        # post an ungated branch comparison over the pinned verdict.
+        if [[ "${EVAL_SUITE_PINNED_BASELINE}" != "true" ]]; then
         cat >>"$FANOUT_PIPELINE_FILE" <<EOF
   - block: "LLM Evals: Refresh ${suite_display_name}"
     key: "kbn-evals-${group_key_safe}-refresh-block"
@@ -481,6 +505,7 @@ EOF
         EVAL_SCOUT_ARCH: "${EVAL_SCOUT_ARCH:-}"
         EVAL_SCOUT_DOMAIN: "${EVAL_SCOUT_DOMAIN:-}"
 EOF
+        fi
       elif [[ -n "${FRESH_BASELINE_PR_EXPERIMENT_ID:-}" ]]; then
         # Fresh-baseline mode: emit the post-comparison step inside the fanout so
         # it starts only after all model steps have written their execution IDs to
@@ -743,5 +768,111 @@ run_eval_suite() {
   node scripts/evals run --suite "$EVAL_SUITE_ID" "${EVAL_RUN_ARGS[@]}" </dev/null
 }
 
+# Static pin preconditions, knowable before the suite runs: an off-main or filtered run
+# that can never pin must fail up front, not after an hour of evaluating every model.
+validate_pin_preconditions() {
+  if [[ "${EVAL_PIN_BASELINE:-}" != "1" ]]; then
+    return 0
+  fi
+  # A baseline must represent main: `on_demand.sh` passes EVAL_PIN_BASELINE through, so
+  # without this check an on-demand run of a feature branch could become the reference
+  # every PR is compared against. The override is two deliberate variables, not one
+  # accident, for the rare legitimate pin from another ref.
+  if [[ "${BUILDKITE_BRANCH:-}" != "main" && "${EVAL_PIN_BASELINE_ALLOW_BRANCH:-}" != "1" ]]; then
+    echo "EVAL_PIN_BASELINE=1 on branch '${BUILDKITE_BRANCH:-unknown}': baselines are pinned from main only. Set EVAL_PIN_BASELINE_ALLOW_BRANCH=1 to pin from another ref deliberately."
+    return 1
+  fi
+  # The branch is a build label, not proof of the checked-out code: an on-demand build
+  # selects branch and commit separately. Require the evaluated commit to sit on main's
+  # history too, whenever the ref is available to check against. The local origin/main
+  # can be stale on agents that check out by SHA, so refresh it first: a commit newer
+  # than a stale ref would otherwise be rejected as off-main.
+  if [[ "${EVAL_PIN_BASELINE_ALLOW_BRANCH:-}" != "1" ]]; then
+    git fetch --quiet origin main 2>/dev/null || true
+    if git rev-parse --verify -q origin/main >/dev/null 2>&1; then
+      if ! git merge-base --is-ancestor HEAD origin/main 2>/dev/null; then
+        echo "EVAL_PIN_BASELINE=1 but the checked-out commit is not on main's history; refusing to pin it as the baseline."
+        return 1
+      fi
+    fi
+  fi
+  # An explicitly requested pin that cannot be published must fail the step: a scheduled
+  # baseline run finishing green with the active baseline unchanged would go unnoticed.
+  if [[ -n "${EVAL_GREP:-}" || -n "${EVAL_GREP_INVERT:-}" ]]; then
+    echo "EVAL_PIN_BASELINE=1 with EVAL_GREP/EVAL_GREP_INVERT would pin a filtered run as the suite baseline; refusing."
+    return 1
+  fi
+  # Spec-file filtering restricts the run the same way grep does; sharded suites set it
+  # too, but they are refused on EVAL_SHARD_ID below, so this covers unsharded use.
+  if [[ -n "${EVAL_SPEC_FILES:-}" ]]; then
+    echo "EVAL_PIN_BASELINE=1 with EVAL_SPEC_FILES would pin a subset of the suite as the baseline; refusing."
+    return 1
+  fi
+  # Shards of one suite/model share a composite execution ID but run as independent
+  # steps, so a per-shard pin could publish a partial execution as the baseline (and a
+  # successful shard would pin even when a sibling shard failed).
+  if [[ -n "${EVAL_SHARD_ID:-}" ]]; then
+    echo "Baseline pinning is not supported for sharded suites; cannot pin shard ${EVAL_SHARD_ID}."
+    return 1
+  fi
+}
+
+validate_pin_preconditions
 run_eval_suite
 
+# Scheduled baseline runs (EVAL_PIN_BASELINE=1, e.g. the monthly regression baseline
+# pipeline) pin this run's scores as the new baseline for the suite/model after the run
+# succeeds. PR runs never set this: they only compare against the pinned baseline.
+pin_baseline() {
+  if [[ "${EVAL_PIN_BASELINE:-}" != "1" ]]; then
+    return 0
+  fi
+  # Re-checked after the run: the env cannot change mid-step, but a refactor moving the
+  # pre-run call must not silently drop these guards.
+  validate_pin_preconditions || return 1
+  if [[ -z "${EVAL_PROJECT:-}" ]]; then
+    echo "EVAL_PIN_BASELINE=1 requires a per-connector step (EVAL_PROJECT); cannot pin."
+    return 1
+  fi
+
+  local composite=""
+  local ingest_failures=""
+  if command -v buildkite-agent >/dev/null 2>&1; then
+    composite="$(buildkite-agent meta-data get "kbn-evals:execution-id:${EVAL_SUITE_ID}:${EVAL_PROJECT}" 2>/dev/null || true)"
+    # evaluate.ts records score-export failures under this key, scoped by job ID so a
+    # clean retry of the step is not poisoned by a previous attempt's marker. With
+    # `--default ''` an unset key reads as empty with exit 0, so a non-zero exit is a
+    # metadata API error: pinning without knowing whether the export completed fails closed.
+    if ! ingest_failures="$(buildkite-agent meta-data get "kbn-evals:score-ingest-failures:${EVAL_SUITE_ID}:${EVAL_PROJECT}:${BUILDKITE_JOB_ID:-}" --default '' 2>/dev/null)"; then
+      echo "Could not read the score-ingest-failure marker for ${EVAL_SUITE_ID}/${EVAL_PROJECT}; refusing to pin without confirmation that the score export completed."
+      return 1
+    fi
+  fi
+  if [[ -z "$composite" ]]; then
+    echo "No execution ID recorded for ${EVAL_SUITE_ID}/${EVAL_PROJECT}; cannot pin baseline."
+    return 1
+  fi
+  # The execution-id key is build-scoped while pin executions are attempt-scoped (the
+  # job-salted TEST_RUN_ID): if this attempt's key write was lost, the key may still hold
+  # a previous attempt's execution, whose export this attempt's ingest marker says
+  # nothing about. Only pin what this attempt exported.
+  if [[ -n "${TEST_RUN_ID:-}" && "$composite" != "${TEST_RUN_ID}::"* ]]; then
+    echo "Execution ${composite} does not belong to this attempt (expected base ${TEST_RUN_ID}); refusing to pin another attempt's scores."
+    return 1
+  fi
+  # A green run can still have holes in its exported scores, and a baseline must be a
+  # complete snapshot. evaluate.ts also fails the eval step itself when a pin-enabled run
+  # loses scores; this marker is the backstop in case that signal is lost.
+  if [[ -n "$ingest_failures" ]]; then
+    echo "Score export reported ${ingest_failures} ingest failure(s) for ${EVAL_SUITE_ID}/${EVAL_PROJECT}; refusing to pin an incomplete baseline."
+    return 1
+  fi
+
+  echo "--- Pinning baseline for ${EVAL_SUITE_ID}/${EVAL_PROJECT}: ${composite}"
+  node scripts/evals ext pin-baseline \
+    --suite "$EVAL_SUITE_ID" \
+    --execution-id "$composite" \
+    --reason "${EVAL_PIN_BASELINE_REASON:-scheduled baseline run}"
+}
+
+pin_baseline

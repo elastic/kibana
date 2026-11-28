@@ -40,6 +40,9 @@ process.stdout.write(
     concurrencyGroups: suite.concurrencyGroups,
     scoutHook: suite.scoutHook,
     vaultSecret: suite.vaultSecret,
+    pinnedBaseline: suite.pinnedBaseline === true,
+    // Threshold overrides for the pinned-baseline regression report (compare --report-gates).
+    regressionReportGates: suite.regressionReportGates,
     scoutArch: suite.scoutArch,
     scoutDomain: suite.scoutDomain,
     // The Scout server config set (plugin flags the suite's stack needs). run_suite.sh

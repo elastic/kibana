@@ -65,6 +65,21 @@ export interface EvalsSuiteMetadataEntry {
   requireDecisionOnPaths?: EvalsDecisionPaths;
   /** Blocks the `evals gate` on a regression of one pre-registered metric. */
   regressionGate?: EvalsRegressionGate;
+  /** Compares PR runs against the suite's pinned baseline instead of the branch tip. */
+  pinnedBaseline?: boolean;
+  /** Thresholds for the pinned-baseline regression report (`evals compare --report-gates`). */
+  regressionReportGates?: EvalsRegressionReportGates;
+}
+
+interface EvalsRegressionReportThresholds {
+  failRelativeChange?: number;
+  warnRelativeChange?: number;
+  alpha?: number;
+}
+
+export interface EvalsRegressionReportGates {
+  defaults?: EvalsRegressionReportThresholds;
+  evaluators?: Record<string, EvalsRegressionReportThresholds>;
 }
 
 function pathExistsInGitTree(repoRelativePath: string): boolean {
