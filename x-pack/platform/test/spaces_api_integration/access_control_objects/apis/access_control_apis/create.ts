@@ -266,9 +266,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should allow overwriting an object owned by another user if in default mode', async () => {
-      const { cookie: adminCookie, profileUid: adminUid } = await loginAsKibanaAdmin(
-        supertestWithoutAuth
-      );
+      const { cookie: adminCookie, profileUid: adminUid } =
+        await loginAsKibanaAdmin(supertestWithoutAuth);
       const createResponse = await supertestWithoutAuth
         .post('/access_control_objects/create')
         .set('kbn-xsrf', 'true')
@@ -308,9 +307,8 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('should reject', function () {
       it('when attempting to overwrite an object owned by another user if not admin', async () => {
-        const { cookie: objectOwnerCookie, profileUid: adminUid } = await loginAsKibanaAdmin(
-          supertestWithoutAuth
-        );
+        const { cookie: objectOwnerCookie, profileUid: adminUid } =
+          await loginAsKibanaAdmin(supertestWithoutAuth);
         const createResponse = await supertestWithoutAuth
           .post('/access_control_objects/create')
           .set('kbn-xsrf', 'true')

@@ -104,8 +104,11 @@ function toGroupings(instanceId: string, groupBy: string[]): Record<string, stri
     return {};
   }
 
-  return groupBy.reduce((acc, groupKey, index) => {
-    acc[groupKey] = groupingValues[index];
-    return acc;
-  }, {} as Record<string, string>);
+  return groupBy.reduce(
+    (acc, groupKey, index) => {
+      acc[groupKey] = groupingValues[index];
+      return acc;
+    },
+    {} as Record<string, string>
+  );
 }

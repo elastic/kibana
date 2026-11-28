@@ -17,8 +17,8 @@ const setup = () => {
   const install = jest.fn();
   const logger = loggerMock.create();
   const ensure = createEnsureFailureSweep({
-    getWorkflowsManagement: () => ({ management } as never),
-    getManagedWorkflowsClient: async () => ({ install } as never),
+    getWorkflowsManagement: () => ({ management }) as never,
+    getManagedWorkflowsClient: async () => ({ install }) as never,
     logger,
   });
   return { request, getWorkflow, management, install, logger, ensure };

@@ -101,7 +101,7 @@ export function initializeESQLControlManager(
   const isEsqlQueryControl = !isStaticControl;
 
   const availableOptions$ = new BehaviorSubject<string[]>(
-    isStaticControl ? initialState.available_options ?? [] : []
+    isStaticControl ? (initialState.available_options ?? []) : []
   );
   const selectedOptions$ = new BehaviorSubject<string[]>(initialState.selected_options);
   const hasSelections$ = new BehaviorSubject<boolean>(false); // hardcoded to false to prevent clear action from appearing.
@@ -306,7 +306,7 @@ export function initializeESQLControlManager(
     });
 
   const query$ = new BehaviorSubject<AggregateQuery>({
-    esql: isEsqlQueryControl ? initialState.esql_query ?? '' : '',
+    esql: isEsqlQueryControl ? (initialState.esql_query ?? '') : '',
   });
   const publishQuerySubscription = esqlQuery$.subscribe((esql) => {
     query$.next({ esql });

@@ -108,9 +108,10 @@ export function runLintWithTypes() {
       log.success(`All projects validated successfully!`);
       if (flags.fix) {
         log.info(`
-❗️ After staging your changes, don't forget to run eslint/prettier on them with:
+❗️ After staging your changes, don't forget to lint and format them with:
 
     node scripts/precommit_hook --fix
+    node scripts/oxfmt <changed files>
 `);
       }
     },

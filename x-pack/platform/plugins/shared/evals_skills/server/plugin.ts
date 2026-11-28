@@ -24,15 +24,12 @@ import type { EvalExperimentsToolDeps } from './skills/eval_experiments/tools/de
  * It has no enabled flag of its own. Its skills call the evals routes, so it registers them only
  * when `xpack.evals.enabled` is set and `xpack.evals.mode` is `full`.
  */
-export class EvalsSkillsPlugin
-  implements
-    Plugin<
-      EvalsSkillsPluginSetup,
-      EvalsSkillsPluginStart,
-      EvalsSkillsSetupDependencies,
-      EvalsSkillsStartDependencies
-    >
-{
+export class EvalsSkillsPlugin implements Plugin<
+  EvalsSkillsPluginSetup,
+  EvalsSkillsPluginStart,
+  EvalsSkillsSetupDependencies,
+  EvalsSkillsStartDependencies
+> {
   private readonly logger: Logger;
 
   constructor(context: PluginInitializerContext) {

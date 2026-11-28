@@ -8,6 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
+import { REALTIME_BACKING_INDEX_WINDOW } from './constants';
 import type { DataStreamMetadataManager } from './data_stream_metadata_manager';
 import type { DocumentVersionManager } from './document_version_manager';
 
@@ -45,9 +46,9 @@ export interface DataStreamDataClientDeps<TExecution extends { id: string }> {
   logger: Logger;
 }
 
-export class DataStreamDataClient<TExecution extends { id: string }>
-  implements DataClient<TExecution>
-{
+export class DataStreamDataClient<
+  TExecution extends { id: string },
+> implements DataClient<TExecution> {
   private indexesToQuery: string[] = [];
   private readonly additionalIndexesToQuery: string[] = [];
 
@@ -101,7 +102,7 @@ export class DataStreamDataClient<TExecution extends { id: string }>
     let backingIndexesForFallback: string[] = [];
     if (uncachedIds.length > 0) {
       const { backingIndexes } = await this.deps.metadataManager.getMetaOrLoad();
-      backingIndexesForFallback = backingIndexes.slice(-2);
+      backingIndexesForFallback = backingIndexes.slice(-REALTIME_BACKING_INDEX_WINDOW);
     }
 
     // For uncached ids, add one mget entry per backing index (last two) and
@@ -326,7 +327,9 @@ export class DataStreamDataClient<TExecution extends { id: string }>
     }
 
     const { backingIndexes } = await this.deps.metadataManager.getMetaOrLoad();
-    const fallbackIndexes = backingIndexes.slice(-2).concat(this.additionalIndexesToQuery);
+    const fallbackIndexes = backingIndexes
+      .slice(-REALTIME_BACKING_INDEX_WINDOW)
+      .concat(this.additionalIndexesToQuery);
 
     const result = new Array<BulkItemResponse>(request.items.length);
     let hasErrors = false;
@@ -486,8 +489,8 @@ export class DataStreamDataClient<TExecution extends { id: string }>
     const preFailed: Array<{ id: string; originalIndex: number; error: estypes.ErrorCause }> = [];
     const pendingIndexes: number[] = [];
 
-    // DataStream requires @timestamp to be set on create and update.
-    // We inject the @timestamp into the document from the date field.
+    // DataStream requires @timestamp on create. Copy it from the date field when that
+    // field is present. A plain create without the date field is rejected above.
     const withTimestamp = (item: BulkPlainItem<TExecution>): BulkPlainItem<TExecution> => {
       if (!this.deps.dateField) return item;
       const ts = item.document[this.deps.dateField];
@@ -525,7 +528,8 @@ export class DataStreamDataClient<TExecution extends { id: string }>
     if (pendingIndexes.length > 0) {
       // Several items may target the same id; each keeps its own slot in the response.
       const uniqueIds = Array.from(new Set(pendingIndexes.map((i) => items[i].document.id)));
-      const versions = await this.deps.versionManager.bulkGetVersions(uniqueIds);
+      const { versions, confirmedMissing } =
+        await this.deps.versionManager.bulkGetVersions(uniqueIds);
 
       for (const i of pendingIndexes) {
         const item = items[i];
@@ -540,17 +544,28 @@ export class DataStreamDataClient<TExecution extends { id: string }>
             originalIndex: i,
           });
         } else {
-          // No version found — document does not exist in the data stream.
-          // upsert without a version becomes a create; plain update has nothing to update.
+          // No version. An upsert becomes a create. A write without the date field gets the
+          // current time when the lookup confirmed the document is absent, and fails otherwise.
           if (item.operation === 'upsert') {
-            sendable.push({
-              item: {
-                ...withTimestamp(item),
-                operation: 'create',
-                index: this.deps.dataStreamName,
-              },
-              originalIndex: i,
-            });
+            const hasDate = typeof item.document[this.deps.dateField] === 'string';
+            if (!hasDate && !confirmedMissing.has(id)) {
+              preFailed.push({
+                id,
+                originalIndex: i,
+                error: {
+                  type: 'illegal_state_exception',
+                  reason: `[_doc][${id}]: could not confirm the document is missing`,
+                },
+              });
+            } else {
+              const document = hasDate
+                ? withTimestamp(item).document
+                : { ...item.document, '@timestamp': new Date().toISOString() };
+              sendable.push({
+                item: { ...item, document, operation: 'create', index: this.deps.dataStreamName },
+                originalIndex: i,
+              });
+            }
           } else {
             preFailed.push({
               id,

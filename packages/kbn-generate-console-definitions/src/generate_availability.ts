@@ -48,7 +48,7 @@ export const isAvailabilityPublic = (
 ): boolean =>
   Boolean(
     availability &&
-      (!availability.visibility || availability.visibility === SpecificationTypes.Visibility.public)
+    (!availability.visibility || availability.visibility === SpecificationTypes.Visibility.public)
   );
 
 export const generateAvailability = (

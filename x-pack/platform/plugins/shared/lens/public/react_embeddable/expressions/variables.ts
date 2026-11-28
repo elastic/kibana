@@ -6,6 +6,8 @@
  */
 
 import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
+import type { Observable } from 'rxjs';
+import { XY_OVERLAYS_VARIABLE, type XYOverlay } from '@kbn/expression-xy-plugin/common';
 
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { TextBasedPersistedState, LensRuntimeState } from '@kbn/lens-common';
@@ -28,11 +30,16 @@ function getInternalTables(states: Record<string, unknown>) {
  * Collect all the data that need to be forwarded at the end of the
  * expression pipeline as overrides, palette, etc... and merged them all here
  */
-export function getVariables(api: LensApi, state: LensRuntimeState) {
+export function getVariables(
+  api: LensApi,
+  state: LensRuntimeState,
+  overlays$?: Observable<readonly XYOverlay[]>
+) {
   return {
     embeddableTitle: api.defaultTitle$?.getValue(),
     ...(state.palette ? { theme: { palette: state.palette } } : {}),
     ...('overrides' in state ? { overrides: state.overrides } : {}),
+    ...(overlays$ ? { [XY_OVERLAYS_VARIABLE]: overlays$ } : {}),
     ...getInternalTables(state.attributes.state.datasourceStates),
   };
 }

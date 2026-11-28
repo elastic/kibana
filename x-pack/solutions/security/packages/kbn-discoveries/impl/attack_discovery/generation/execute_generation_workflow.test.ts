@@ -95,7 +95,7 @@ const createAuthorizedAuthzMock = () =>
     checkPrivilegesWithRequest: () => ({
       atSpace: async () => ({ hasAllRequested: true, privileges: { kibana: [] } }),
     }),
-  } as unknown as Parameters<typeof executeGenerationWorkflow>[0]['authz']);
+  }) as unknown as Parameters<typeof executeGenerationWorkflow>[0]['authz'];
 
 /**
  * Unauthorized authz mock: `hasAllRequested` is false so the guard at the top of
@@ -108,7 +108,7 @@ const createUnauthorizedAuthzMock = () =>
     checkPrivilegesWithRequest: () => ({
       atSpace: async () => ({ hasAllRequested: false, privileges: { kibana: [] } }),
     }),
-  } as unknown as Parameters<typeof executeGenerationWorkflow>[0]['authz']);
+  }) as unknown as Parameters<typeof executeGenerationWorkflow>[0]['authz'];
 
 describe('executeGenerationWorkflow', () => {
   beforeEach(() => {
@@ -1089,7 +1089,7 @@ describe('executeGenerationWorkflow', () => {
         authz: createAuthorizedAuthzMock(),
         executionUuid: 'test-execution-uuid',
         getEventLogIndex: async () => '.kibana-event-log-test',
-        getEventLogger: async () => ({ logEvent: jest.fn() } as unknown as IEventLogger),
+        getEventLogger: async () => ({ logEvent: jest.fn() }) as unknown as IEventLogger,
         getStartServices: async () => ({
           coreStart: coreStartMock,
           pluginsStart: pluginsStart ?? { elasticAssistant: { ensureSpaceResources } },
@@ -2039,7 +2039,7 @@ describe('executeGenerationWorkflow', () => {
         executionUuid: 'test-execution-uuid',
         getEventLogIndex: async () => '.kibana-event-log-test',
         getEventLogger: async () =>
-          ({ logEvent: jest.fn() } as unknown as jest.Mocked<IEventLogger>),
+          ({ logEvent: jest.fn() }) as unknown as jest.Mocked<IEventLogger>,
         getStartServices: (async () => ({
           coreStart: coreStartMock,
           pluginsStart: {},

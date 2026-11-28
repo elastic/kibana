@@ -26,20 +26,19 @@ import {
 
 export type { CascadeTable, CascadeTableCell, CascadeTableCellContext, CascadeTableRow };
 
-export interface TableProps<G extends GroupNode, L>
-  extends Omit<
-    TableOptions<CascadeTableFeatures, G>,
-    | 'features'
-    | 'columns'
-    | 'data'
-    | 'state'
-    | 'getRowId'
-    | 'getSubRows'
-    | 'onExpandedChange'
-    | 'onRowSelectionChange'
-    | 'getRowCanExpand'
-    | 'enableRowRangeSelection'
-  > {
+export interface TableProps<G extends GroupNode, L> extends Omit<
+  TableOptions<CascadeTableFeatures, G>,
+  | 'features'
+  | 'columns'
+  | 'data'
+  | 'state'
+  | 'getRowId'
+  | 'getSubRows'
+  | 'onExpandedChange'
+  | 'onRowSelectionChange'
+  | 'getRowCanExpand'
+  | 'enableRowRangeSelection'
+> {
   allowMultipleRowToggle: boolean;
   header: FC<{ table: CascadeTable<G> }>;
   rowCell: FC<CascadeTableCellContext<G, unknown>>;

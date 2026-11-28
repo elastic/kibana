@@ -115,9 +115,9 @@ export const getAgentsRoute = (router: IRouter, osqueryContext: OsqueryAppContex
         const policyName: string | undefined = policyNameClause?.[1];
 
         const foundPolicyByName = policyName
-          ? agentPolicies?.filter((policy) =>
+          ? (agentPolicies?.filter((policy) =>
               policy.name.toLowerCase().includes(policyName.toLowerCase())
-            ) ?? []
+            ) ?? [])
           : [];
 
         // `policy_name` is not an agent field, and Fleet rejects unmapped kuery fields, so the

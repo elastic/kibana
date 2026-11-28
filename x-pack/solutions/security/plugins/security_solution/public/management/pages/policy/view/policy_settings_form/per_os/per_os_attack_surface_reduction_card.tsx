@@ -141,8 +141,8 @@ export const PerOsAttackSurfaceReductionCard = memo<PerOsAttackSurfaceReductionC
                     content={
                       isRegistryCredentialHardeningAvailable
                         ? REGISTRY_CREDENTIAL_HARDENING_HINT
-                        : registryCredentialHardeningUpsellMessage ??
-                          REGISTRY_CREDENTIAL_HARDENING_LICENSE_UPSELL
+                        : (registryCredentialHardeningUpsellMessage ??
+                          REGISTRY_CREDENTIAL_HARDENING_LICENSE_UPSELL)
                     }
                     anchorProps={{
                       'data-test-subj': getTestId('windows-registryCredentialHardeningTooltipIcon'),

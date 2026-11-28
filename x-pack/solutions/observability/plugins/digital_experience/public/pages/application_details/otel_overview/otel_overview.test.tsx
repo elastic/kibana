@@ -33,6 +33,7 @@ import {
 } from '../../../hooks/use_overview_search';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { createUiSettingsMock } from '../../../test_utils/ui_settings_mock';
+import { VitalsTrendPanel } from './components/vitals_trend_panel';
 import { OtelOverview } from './otel_overview';
 
 const mockBrushEndListeners: BrushEndListener[] = [];
@@ -70,6 +71,10 @@ jest.mock('../../../hooks/use_environment');
 jest.mock('../../../hooks/use_overview_filters');
 jest.mock('../../../hooks/use_overview_search');
 jest.mock('../../../hooks/use_query_param');
+// Its own test covers the chart; here the Overview only has to reload it on Refresh.
+jest.mock('./components/vitals_trend_panel', () => ({
+  VitalsTrendPanel: jest.fn(() => null),
+}));
 // Stand in for the Unified Search bars, which the Overview's own test does not render: the date
 // picker's Refresh button loads the Overview again.
 jest.mock('./components/overview_search_bar', () => ({
@@ -493,7 +498,7 @@ describe('OtelOverview', () => {
     expect(setFilter).toHaveBeenLastCalledWith('browser', []);
   });
 
-  it('shows what the filters select as pills, with "not" before an exclusion', async () => {
+  it('shows what the filters select as a pill for each, with "NOT" before an exclusion', async () => {
     mockFilters({
       browser: [...include('Chrome', 'Firefox'), ...exclude('Safari')],
       os: exclude('Linux'),
@@ -502,10 +507,9 @@ describe('OtelOverview', () => {
     await findPageLoads('1,533');
 
     const pills = screen.getByTestId('digitalExperienceOverviewPills');
-    expect(within(pills).getByText('Browser: Chrome')).toBeInTheDocument();
-    expect(within(pills).getByText('Browser: Firefox')).toBeInTheDocument();
-    expect(within(pills).getByText('Browser: not Safari')).toBeInTheDocument();
-    expect(within(pills).getByText('OS: not Linux')).toBeInTheDocument();
+    expect(within(pills).getByText('Browser: Chrome, Firefox')).toBeInTheDocument();
+    expect(within(pills).getByText('NOT Browser: Safari')).toBeInTheDocument();
+    expect(within(pills).getByText('NOT OS: Linux')).toBeInTheDocument();
   });
 
   it('shows the filters on their buttons by how many values they select', async () => {
@@ -519,14 +523,27 @@ describe('OtelOverview', () => {
     );
   });
 
-  it('removes a value with its pill, and keeps the others of the filter', async () => {
-    mockFilters({ browser: [...include('Chrome'), ...exclude('Safari')] });
+  it('removes the values of a pill, and keeps the other values of the filter', async () => {
+    mockFilters({ browser: [...include('Chrome', 'Firefox'), ...exclude('Safari')] });
     renderOverview();
     await findPageLoads('1,533');
 
-    fireEvent.click(screen.getByRole('button', { name: 'Remove Browser: Chrome' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Remove Browser: Chrome, Firefox' }));
+    expect(setFilter).toHaveBeenLastCalledWith('browser', exclude('Safari'));
 
-    expect(setFilter).toHaveBeenCalledWith('browser', exclude('Safari'));
+    fireEvent.click(screen.getByRole('button', { name: 'Remove NOT Browser: Safari' }));
+    expect(setFilter).toHaveBeenLastCalledWith('browser', include('Chrome', 'Firefox'));
+  });
+
+  it('lists the first values on a pill and the others in its title', async () => {
+    mockFilters({ browser: include('Chrome', 'Edge', 'Safari', 'Firefox', 'Opera') });
+    renderOverview();
+    await findPageLoads('1,533');
+
+    const pill = screen.getByTestId('digitalExperienceOverviewPill-browser');
+    expect(pill).toHaveTextContent('Browser: Chrome, Edge, Safari');
+    expect(within(pill).getByTestId('digitalExperienceOverviewPillMore')).toHaveTextContent('+2');
+    expect(pill).toHaveAttribute('title', 'Browser: Chrome, Edge, Safari, Firefox, Opera');
   });
 
   it('shows no pills while no filter has a value', async () => {
@@ -564,7 +581,7 @@ describe('OtelOverview', () => {
     await findPageLoads('1,533');
 
     expect(screen.getByTestId('digitalExperienceOverviewFilter-country')).toBeInTheDocument();
-    expect(screen.getByTestId('digitalExperienceOverviewPill-country-DE')).toHaveTextContent(
+    expect(screen.getByTestId('digitalExperienceOverviewPill-country')).toHaveTextContent(
       'Country: DE'
     );
   });
@@ -591,21 +608,20 @@ describe('OtelOverview', () => {
     expect(clearFilters).toHaveBeenCalledTimes(1);
   });
 
-  it('says which panels the page filters narrow, for a page and for text its URL contains', async () => {
+  it('says what the Page filter leaves out in its popover, and not on the page', async () => {
     mockFilters({ pageUrl: include('https://shop.example.com/cart') });
-    const { unmount } = renderOverview();
-    await findPageLoads('1,533');
-
-    expect(screen.getByTestId('digitalExperienceOverviewPageFilterNote')).toHaveTextContent(
-      'Page applies to every browser event but HTTP requests'
-    );
-    unmount();
-
-    mockFilters({ pageContains: include('/cart') });
     renderOverview();
     await findPageLoads('1,533');
+    expect(screen.queryByTestId('digitalExperienceOverviewPageFilterNote')).not.toBeInTheDocument();
 
-    expect(screen.getByTestId('digitalExperienceOverviewPageFilterNote')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('digitalExperienceOverviewFilter-pageUrl'));
+
+    expect(
+      await screen.findByTestId('digitalExperienceOverviewFilter-pageUrlNote')
+    ).toHaveTextContent('Applies to every browser event but HTTP requests');
+    expect(
+      screen.queryByTestId('digitalExperienceOverviewFilter-browserNote')
+    ).not.toBeInTheDocument();
   });
 
   describe('All filters', () => {
@@ -615,6 +631,38 @@ describe('OtelOverview', () => {
       fireEvent.click(screen.getByTestId('digitalExperienceOverviewAllFilters'));
       return screen.findByTestId('digitalExperienceOverviewFiltersFlyout');
     };
+
+    it('covers the page by default, and keeps the mode the user picks for the next visit', async () => {
+      window.localStorage.clear();
+      await openFlyout();
+
+      expect(screen.getByRole('button', { name: 'Overlay' })).toHaveAttribute(
+        'aria-pressed',
+        'true'
+      );
+
+      fireEvent.click(screen.getByTestId('digitalExperienceOverviewFiltersFlyoutPush'));
+
+      expect(screen.getByRole('button', { name: 'Push' })).toHaveAttribute('aria-pressed', 'true');
+      expect(
+        window.localStorage.getItem('xpack.digitalExperience.overview.filtersFlyoutType')
+      ).toBe('"push"');
+      window.localStorage.clear();
+    });
+
+    it('says what the Page and URL contains filters leave out, beside their values', async () => {
+      await openFlyout();
+
+      expect(
+        screen.getByTestId('digitalExperienceOverviewFiltersFlyout-pageUrlNote')
+      ).toHaveTextContent('Applies to every browser event but HTTP requests');
+      expect(
+        screen.getByTestId('digitalExperienceOverviewFiltersFlyout-pageContainsNote')
+      ).toHaveTextContent('Applies to page loads and frustration signals only');
+      expect(
+        screen.queryByTestId('digitalExperienceOverviewFiltersFlyout-browserNote')
+      ).not.toBeInTheDocument();
+    });
 
     const flyoutOption = (name: string, value: string) =>
       screen.getByTestId(`digitalExperienceOverviewFiltersFlyout-${name}Option-${value}`);
@@ -823,6 +871,17 @@ describe('OtelOverview', () => {
     await waitFor(() => {
       return expect(fetch).toHaveBeenCalledTimes(8);
     });
+  });
+
+  it('reloads the vitals chart on Refresh, as a relative range stays the same', async () => {
+    renderOverview();
+    const reloadTime = () =>
+      jest.mocked(VitalsTrendPanel).mock.calls.at(-1)?.[0].lastReloadRequestTime;
+    expect(reloadTime()).toBeUndefined();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Refresh' }));
+
+    await waitFor(() => expect(reloadTime()).toEqual(expect.any(Number)));
   });
 
   it('shows the usage panels below the trends', async () => {

@@ -18,9 +18,9 @@ const infoMock = playwrightTest.info as unknown as jest.Mock;
 const setProjectTimeouts = (use: { navigationTimeout?: number; actionTimeout?: number }) =>
   infoMock.mockReturnValue({ project: { use } });
 
-const createPage = () => ({ goto: jest.fn().mockResolvedValue(null) } as unknown as Page);
+const createPage = () => ({ goto: jest.fn().mockResolvedValue(null) }) as unknown as Page;
 const createLocator = () =>
-  ({ waitFor: jest.fn().mockResolvedValue(undefined) } as unknown as Locator);
+  ({ waitFor: jest.fn().mockResolvedValue(undefined) }) as unknown as Locator;
 
 describe('navigateToApp', () => {
   beforeEach(() => jest.clearAllMocks());

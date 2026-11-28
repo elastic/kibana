@@ -32,7 +32,7 @@ const setup = () => {
 
 const getOpenAction = (toasts: ReturnType<typeof setup>['toasts'], call = 0) => {
   const [toast] = toasts.addInfo.mock.calls[call] as [
-    { actionProps: { primary: { onClick: () => void } } }
+    { actionProps: { primary: { onClick: () => void } } },
   ];
   return toast.actionProps.primary.onClick;
 };

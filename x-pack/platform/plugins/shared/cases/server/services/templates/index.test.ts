@@ -57,7 +57,7 @@ const createMockSearchResponse = (
       max_score: null,
       hits: savedObjects.map((so) => ({ _id: so.id, _index: '.kibana_cases' })),
     },
-  } as unknown as SavedObjectsSearchResponse<SavedObjectsRawDocSource, unknown>);
+  }) as unknown as SavedObjectsSearchResponse<SavedObjectsRawDocSource, unknown>;
 
 /**
  * Creates a mock Template saved object.
@@ -76,7 +76,7 @@ const createTemplateSO = (
       author: 'unknown',
       ...attrs,
     } as Template,
-  } as SavedObject<Template>);
+  }) as SavedObject<Template>;
 
 const createMockFindResponse = (
   savedObjects: Array<SavedObject<Template>>,
@@ -87,7 +87,7 @@ const createMockFindResponse = (
     per_page: savedObjects.length,
     total: totalOverride ?? savedObjects.length,
     saved_objects: savedObjects,
-  } as SavedObjectsFindResponse<Template>);
+  }) as SavedObjectsFindResponse<Template>;
 
 describe('TemplatesService', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();

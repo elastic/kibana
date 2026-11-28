@@ -22,9 +22,12 @@ import { registerCases } from './cases/register_cases';
 import { canUseAiops } from './capabilities';
 import { AiopsUsage } from './track_usage';
 
-export class AiopsPlugin
-  implements Plugin<AiopsPluginSetup, AiopsPluginStart, AiopsPluginSetupDeps, AiopsPluginStartDeps>
-{
+export class AiopsPlugin implements Plugin<
+  AiopsPluginSetup,
+  AiopsPluginStart,
+  AiopsPluginSetupDeps,
+  AiopsPluginStartDeps
+> {
   public setup(core: AiopsCoreSetup, { embeddable, cases, uiActions }: AiopsPluginSetupDeps) {
     if (embeddable) {
       registerEmbeddables(embeddable, core.getStartServices);
@@ -47,9 +50,8 @@ export class AiopsPlugin
     return {
       ChangePointDetectionComponent: getChangePointDetectionComponent(core, plugins),
       getPatternAnalysisAvailable: async () => {
-        const { getPatternAnalysisAvailable } = await import(
-          './components/log_categorization/log_categorization_enabled'
-        );
+        const { getPatternAnalysisAvailable } =
+          await import('./components/log_categorization/log_categorization_enabled');
         return getPatternAnalysisAvailable(core.application);
       },
       PatternAnalysisComponent,

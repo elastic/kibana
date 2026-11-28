@@ -12,7 +12,7 @@ import {
   resolveMaintenanceWindowsOrThrow,
 } from './resolve_maintenance_windows';
 
-const mw = (id: string, title: string): MaintenanceWindow => ({ id, title } as MaintenanceWindow);
+const mw = (id: string, title: string): MaintenanceWindow => ({ id, title }) as MaintenanceWindow;
 
 const maintenanceWindows = [
   mw('id-1', 'Weekend window'),

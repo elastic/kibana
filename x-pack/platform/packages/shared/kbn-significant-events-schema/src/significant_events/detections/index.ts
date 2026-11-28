@@ -30,7 +30,10 @@ export const CHANGE_POINT_TYPES = [
 
 export type ChangePointType = (typeof CHANGE_POINT_TYPES)[number];
 
-/** The outcome of re-running a rule's stored query when the classifier looked at a detection. */
+/**
+ * The outcome of re-running a rule's stored query when the classifier looked at a detection. The
+ * classifier no longer re-runs it: the status is read only from markers stored before.
+ */
 export const PROBE_STATUSES = ['ok', 'error', 'timeout', 'no_query', 'aborted'] as const;
 export type ProbeStatus = (typeof PROBE_STATUSES)[number];
 
@@ -45,8 +48,9 @@ export type BaselineDecision = (typeof BASELINE_DECISIONS)[number];
 export const SKIP_REASONS = ['still_breaching', 'still_healthy', 'already_reviewed'] as const;
 
 /**
- * Why a detection reaches the agent. `state_changed`: the probe contradicts a stored verdict.
- * `probe_unavailable`: the probe could not run; `probe_status` says why.
+ * Why a detection reaches the agent. `state_changed`: whether the rule recorded a breach contradicts
+ * a stored verdict. `probe_unavailable`: the stored query could not be re-run; only markers stored
+ * before the classifier stopped re-running it carry it.
  */
 export const NEEDS_AGENT_REASONS = [
   'state_changed',
@@ -77,8 +81,8 @@ export const baselineObservationSchema = lazySchema(() =>
 export type BaselineObservation = z.infer<typeof baselineObservationSchema>;
 
 /**
- * Why the classifier closed a detection without the discovery agent: its decision for the rule, the
- * probe that backed it and the baseline it observed. Stored on the detection's processed marker, so
+ * Why the classifier closed a detection without the discovery agent: its decision for the rule and
+ * whether the rule had recorded a breach. Stored on the detection's processed marker, so
  * `checked_at` is the marker's timestamp and is only present on reads. `reason` is read as a plain
  * string so a marker written with a reason that has since been renamed still shows; the write side
  * validates it.
@@ -86,8 +90,14 @@ export type BaselineObservation = z.infer<typeof baselineObservationSchema>;
 export const detectionSkipSchema = lazySchema(() =>
   z.object({
     reason: z.string().max(64),
+    /** Whether the rule recorded a breach, and how many minutes back it looked for one. */
+    rule_breached: z.boolean().optional(),
+    breach_window_minutes: z.number().int().min(0).optional(),
+    /**
+     * Stored before the classifier read the rule's own breaches: whether a re-run of the stored query
+     * returned rows, over how many minutes, and the status of the re-run. Read, never written.
+     */
     probe_status: z.enum(PROBE_STATUSES).optional(),
-    /** Whether the re-run stored query returned rows, and over how many minutes it looked back. */
     probe_has_rows: z.boolean().optional(),
     probe_window_minutes: z.number().int().min(0).optional(),
     baseline: baselineObservationSchema.optional(),
@@ -191,15 +201,44 @@ const REASON_STATES: Readonly<Record<string, string>> = {
   still_healthy: VERDICT_STATES.refutes,
 };
 
-const probeSentence = ({
-  hasRows,
+/** What the rule's own breach record says: a quiet rule recorded no breach, which is not "matches nothing". */
+const breachSentence = ({
+  breached,
   minutes,
 }: {
-  hasRows: boolean;
+  breached: boolean;
   minutes: number | undefined;
 }): string => {
   if (minutes === undefined) {
-    return hasRows
+    return breached
+      ? i18n.translate('xpack.significantEvents.detectionSkip.breach.recorded', {
+          defaultMessage: 'The rule recorded a breach.',
+        })
+      : i18n.translate('xpack.significantEvents.detectionSkip.breach.none', {
+          defaultMessage: 'The rule recorded no breach.',
+        });
+  }
+  return breached
+    ? i18n.translate('xpack.significantEvents.detectionSkip.breach.recordedInWindow', {
+        defaultMessage: 'The rule recorded a breach (last {minutes} min).',
+        values: { minutes },
+      })
+    : i18n.translate('xpack.significantEvents.detectionSkip.breach.noneInWindow', {
+        defaultMessage: 'The rule recorded no breach (last {minutes} min).',
+        values: { minutes },
+      });
+};
+
+/** A marker written before the breach record was read stores the probe result under the old names. */
+const matchSentence = ({
+  matches,
+  minutes,
+}: {
+  matches: boolean;
+  minutes: number | undefined;
+}): string => {
+  if (minutes === undefined) {
+    return matches
       ? i18n.translate('xpack.significantEvents.detectionSkip.probe.rows', {
           defaultMessage: 'The rule still matches.',
         })
@@ -207,7 +246,7 @@ const probeSentence = ({
           defaultMessage: 'The rule matches nothing.',
         });
   }
-  return hasRows
+  return matches
     ? i18n.translate('xpack.significantEvents.detectionSkip.probe.rowsInWindow', {
         defaultMessage: 'The rule still matches (last {minutes} min).',
         values: { minutes },
@@ -232,7 +271,7 @@ export const describeSkip = (
   const state =
     reasonState === undefined
       ? undefined
-      : (skip.stored_verdict ? VERDICT_STATES[skip.stored_verdict] : undefined) ?? reasonState;
+      : ((skip.stored_verdict ? VERDICT_STATES[skip.stored_verdict] : undefined) ?? reasonState);
   const lines: string[] = [];
   if (skip.reason === 'already_reviewed') {
     lines.push(
@@ -250,9 +289,20 @@ export const describeSkip = (
   } else if (state === undefined) {
     lines.push(skip.reason);
   } else {
-    if (skip.probe_has_rows !== undefined) {
+    // A marker stored before the rule's own breaches were read says the same under the old names.
+    if (skip.rule_breached !== undefined) {
       lines.push(
-        probeSentence({ hasRows: skip.probe_has_rows, minutes: skip.probe_window_minutes })
+        breachSentence({
+          breached: skip.rule_breached,
+          minutes: skip.breach_window_minutes ?? skip.probe_window_minutes,
+        })
+      );
+    } else if (skip.probe_has_rows !== undefined) {
+      lines.push(
+        matchSentence({
+          matches: skip.probe_has_rows,
+          minutes: skip.probe_window_minutes,
+        })
       );
     }
     lines.push(

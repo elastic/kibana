@@ -188,7 +188,7 @@ export const toOpenApi = ({
     const schema =
       fields && fields.length > 0
         ? toProperties(fields)
-        : (object && toObjectRef(object)) ?? (example === undefined ? undefined : {});
+        : ((object && toObjectRef(object)) ?? (example === undefined ? undefined : {}));
     return {
       description: description ?? 'Response',
       ...(schema

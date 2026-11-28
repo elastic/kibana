@@ -29,6 +29,8 @@ import {
   EVENT_EXCEPTION,
   EVENT_NAVIGATION_TIMING,
   EVENT_RAGE_CLICK,
+  EVENT_REPLAY_EVENT,
+  EVENT_REPLAY_START,
   EVENT_WEB_VITAL,
   FRUSTRATION_EVENTS,
   OTEL_SPAN_NAME,
@@ -47,6 +49,7 @@ import {
   type SessionAttribute,
 } from '../../../common/session_attribute_fields';
 import {
+  NULLIFY_UNMAPPED_FIELDS,
   SOURCE_CSS_SELECTOR_FIELD,
   SOURCE_LOAD_EVENT_END_FIELD,
   SOURCE_SERVICE_NAME_FIELD,
@@ -55,7 +58,7 @@ import {
   SOURCE_WEB_VITAL_NAME_FIELD,
   SOURCE_WEB_VITAL_VALUE_FIELD,
 } from '../../../common/otel_source_fields';
-import { cleanedValue } from '../../lib/esql';
+import { cleanedValue } from '../../../common/esql_values';
 import { ESQL_DEFAULT_MAX_ROWS } from './esql_max_rows';
 import { HASH_SPACE, hashPrefix, type HashRange } from './hash_ranges';
 
@@ -77,8 +80,6 @@ export interface SummaryQuery {
   params: estypes.EsqlNamedValue[];
 }
 
-// OTel attributes that some index doesn't map read as null instead of failing the query.
-export const NULLIFY_UNMAPPED_FIELDS = 'SET unmapped_fields = "NULLIFY";';
 const SOURCES = SESSIONS_SOURCE_INDICES.join(', ');
 
 export const texts = (values: readonly string[]): string =>
@@ -111,9 +112,18 @@ export const sessionEventsOf =
   AND ${SOURCE_SESSION_ID_FIELD} IS NOT NULL AND ${SOURCE_SESSION_ID_FIELD} != ""
   AND ${SOURCE_SERVICE_NAME_FIELD} IS NOT NULL AND ${SOURCE_SERVICE_NAME_FIELD} != ""`;
 
-/** The browser SDK events with a session and an application. */
+/**
+ * The browser SDK events with a session and an application, but the replay events: a recording
+ * has far more of them than its session has telemetry, and a recording is not activity. The replay
+ * start records stay, which are one per segment and say that a session has a replay.
+ * The condition spells out null so that Elasticsearch applies it to the index: a `!=` alone would
+ * leave out the spans, which have no event name, and a `COALESCE` would be read for every event.
+ */
 export const browserSessionEvents = sessionEventsOf(
-  `${TELEMETRY_SDK_LANGUAGE} == ${escapeStringValue(BROWSER_SDK_LANGUAGE)}`
+  `${TELEMETRY_SDK_LANGUAGE} == ${escapeStringValue(BROWSER_SDK_LANGUAGE)}
+  AND (${OTEL_EVENT_NAME} IS NULL OR ${OTEL_EVENT_NAME} != ${escapeStringValue(
+    EVENT_REPLAY_EVENT
+  )})`
 );
 
 const windowParams = ({ changedFrom, changedTo }: ChangedWindow): estypes.EsqlNamedValue[] => [
@@ -226,9 +236,10 @@ export const attributeQueryParts = <TFields extends AttributeFields>(
     // The fields are cleaned into attributes only once per session, after the last stage:
     // cleaning every event's fields took about 40% of the query.
     stats: Object.entries(groups).flatMap(([group, attributes]) =>
-      groupFields(attributes).map(
-        (field): Stat => [rawColumn(field), `LAST(TO_STRING(${field}), ${seenColumn(group)})`]
-      )
+      groupFields(attributes).map((field): Stat => [
+        rawColumn(field),
+        `LAST(TO_STRING(${field}), ${seenColumn(group)})`,
+      ])
     ),
     evals: Object.entries(fields).map(
       ([attribute, candidates]) =>
@@ -286,10 +297,13 @@ export const HTTP_REQUEST_STATS: Stat[] = Object.entries(HTTP_REQUEST_CONDITIONS
   ([column, condition]): Stat => [column, `COUNT(*) WHERE ${condition}`]
 );
 
+// The replay start records tell that a session has a replay; they are not its activity, so they
+// are left out of its counts and times.
 const SESSION_STATS: Stat[] = [
-  ['start_time', 'MIN(@timestamp)'],
-  ['end_time', 'MAX(@timestamp)'],
-  ['event_count', 'COUNT(@timestamp)'],
+  ['start_time', 'MIN(@timestamp) WHERE NOT is_replay_start'],
+  ['end_time', 'MAX(@timestamp) WHERE NOT is_replay_start'],
+  ['event_count', 'COUNT(*) WHERE NOT is_replay_start'],
+  ['replay_start_count', 'COUNT(*) WHERE is_replay_start'],
   ['page_view_count', 'COUNT(*) WHERE is_page_view'],
   ['page_load_count', `COUNT(*) WHERE event == ${escapeStringValue(EVENT_NAVIGATION_TIMING)}`],
   ['click_count', 'COUNT(*) WHERE is_click'],
@@ -368,7 +382,8 @@ export const sessionSummaryQuery: SummaryQueryOf = (
 ${browserSessionEvents('rebuild_from', 'changed_to')}
   AND ${SOURCE_SESSION_ID_FIELD} IN (${texts(sessionIds)})
 | EVAL event = COALESCE(${OTEL_EVENT_NAME}, ""), span = COALESCE(${OTEL_SPAN_NAME}, "")
-| EVAL is_page_view = event IN (${texts(PAGE_VIEW_EVENTS)}) OR span IN (${texts(PAGE_VIEW_EVENTS)}),
+| EVAL is_replay_start = event == ${escapeStringValue(EVENT_REPLAY_START)},
+       is_page_view = event IN (${texts(PAGE_VIEW_EVENTS)}) OR span IN (${texts(PAGE_VIEW_EVENTS)}),
        is_click = event IN (${texts(CLICK_EVENTS)}) OR span IN (${texts(CLICK_EVENTS)}),
        is_frustration = event IN (${texts(FRUSTRATION_EVENTS)}),
        ${HTTP_REQUEST_EVALS},

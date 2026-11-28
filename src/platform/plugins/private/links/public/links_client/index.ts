@@ -70,7 +70,7 @@ export const linksClient = {
 };
 
 export function getLinksClient<
-  Attr extends StoredLinksState = StoredLinksState
+  Attr extends StoredLinksState = StoredLinksState,
 >(): VisualizationClient<typeof LINKS_LIBRARY_TYPE, Attr> {
   return {
     get: async (id: string) => {
@@ -97,10 +97,10 @@ export function getLinksClient<
       const { title = original.data.title } = data;
       const transformedData = transformOut({ ...data, title }, options?.references ?? []);
       const tags = savedObjectsTaggingService
-        ? savedObjectsTaggingService
+        ? (savedObjectsTaggingService
             .getTaggingApi()
-            ?.ui.getTagIdsFromReferences(options?.references ?? []) ?? []
-        : original.data.tags ?? [];
+            ?.ui.getTagIdsFromReferences(options?.references ?? []) ?? [])
+        : (original.data.tags ?? []);
       const result = await linksClient.update(id, { ...original.data, ...transformedData, tags });
       const { state: attributes, references } = transformIn(result.data);
 

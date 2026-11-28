@@ -32,15 +32,12 @@ export interface RouteDependencies {
   router: IRouter;
 }
 
-export class ServerlessSearchPlugin
-  implements
-    Plugin<
-      ServerlessSearchPluginSetup,
-      ServerlessSearchPluginStart,
-      SetupDependencies,
-      StartDependencies
-    >
-{
+export class ServerlessSearchPlugin implements Plugin<
+  ServerlessSearchPluginSetup,
+  ServerlessSearchPluginStart,
+  SetupDependencies,
+  StartDependencies
+> {
   // @ts-ignore config is not used for now
   private readonly config: ServerlessSearchConfig;
   private readonly logger: Logger;

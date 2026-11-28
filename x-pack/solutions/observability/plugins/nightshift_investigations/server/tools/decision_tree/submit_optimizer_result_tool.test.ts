@@ -56,7 +56,7 @@ const createStore = (existing?: DecisionTreeDetail): jest.Mocked<DecisionTreeSto
     getVersion: jest.fn().mockResolvedValue(undefined),
     archive: jest.fn(),
     writePendingVersion: jest.fn().mockResolvedValue(undefined),
-  } as jest.Mocked<DecisionTreeStore>);
+  }) as jest.Mocked<DecisionTreeStore>;
 
 /** The error a commit throws when its head was saved but its version document was not. */
 const versionWriteError = (
@@ -816,7 +816,7 @@ describe('nightshift_submit_optimizer_result counts', () => {
         traversals?: Traversal[];
         submission?: { merged_nodes: Array<{ from: string[]; into: string }> };
       },
-      RegExp
+      RegExp,
     ]
   >([
     [

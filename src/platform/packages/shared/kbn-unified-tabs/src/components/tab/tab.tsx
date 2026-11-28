@@ -394,13 +394,15 @@ function getTabContainerCss(
       color: ${euiTheme.colors.text};
     }
 
-    ${!isSelected
-      ? `
+    ${
+      !isSelected
+        ? `
       &:hover .unifiedTabs__tabLabelText {
         color: ${euiTheme.colors.primary};
       }
     `
-      : ''}
+        : ''
+    }
 
     &:hover,
     &:focus-within {

@@ -46,7 +46,7 @@ describe('resumeSyncParentIfNeeded', () => {
         parentWorkflowExecutionId: parentExecId,
       },
       ...overrides,
-    } as EsWorkflowExecution);
+    }) as EsWorkflowExecution;
 
   const createDeps = () => {
     const internalResumeWorkflowExecution = jest.fn().mockResolvedValue(undefined);

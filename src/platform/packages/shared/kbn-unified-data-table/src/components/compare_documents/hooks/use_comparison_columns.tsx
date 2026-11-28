@@ -129,14 +129,14 @@ export const useComparisonColumns = ({
                 values: { documentId: displayId },
               })
           : isEsql
-          ? i18n.translate('unifiedDataTable.comparisonColumnResultTooltip', {
-              defaultMessage: 'Comparison result: {resultNumber}',
-              values: { resultNumber: displayId },
-            })
-          : i18n.translate('unifiedDataTable.comparisonColumnTooltip', {
-              defaultMessage: 'Comparison document: {documentId}',
-              values: { documentId: displayId },
-            });
+            ? i18n.translate('unifiedDataTable.comparisonColumnResultTooltip', {
+                defaultMessage: 'Comparison result: {resultNumber}',
+                values: { resultNumber: displayId },
+              })
+            : i18n.translate('unifiedDataTable.comparisonColumnTooltip', {
+                defaultMessage: 'Comparison document: {documentId}',
+                values: { documentId: displayId },
+              });
 
       currentColumns.push({
         id: docId,

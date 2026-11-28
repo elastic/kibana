@@ -76,14 +76,14 @@ const setup = (
   const definition = sendNotificationsStepDefinition({
     investigationLocator,
     getInvestigationsClient,
-    getActions: () => ({ getActionsClientWithRequestInSpace } as never),
+    getActions: () => ({ getActionsClientWithRequestInSpace }) as never,
     getIsomerRuntime: getTestIsomerRuntime,
     getRoutingClient,
   });
   const failureDefinition = handleInvestigationFailureStepDefinition({
     investigationLocator,
     getInvestigationsClient,
-    getActions: () => ({ getActionsClientWithRequestInSpace } as never),
+    getActions: () => ({ getActionsClientWithRequestInSpace }) as never,
     getIsomerRuntime: getTestIsomerRuntime,
     getRoutingClient,
     getTriggerEmitter: () => emitter,
@@ -103,7 +103,7 @@ const setup = (
       },
       logger: loggerMock.create(),
       abortSignal: controller.signal,
-    } as never);
+    }) as never;
   return {
     definition,
     failureDefinition,

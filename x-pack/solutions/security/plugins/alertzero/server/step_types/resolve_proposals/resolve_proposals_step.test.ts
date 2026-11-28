@@ -137,7 +137,7 @@ describe(`${RESOLVE_PROPOSALS_STEP_ID} step wiring`, () => {
     getResolveProposalsStepDefinition({
       getProposalsService: () => proposalsService as never,
       getProposalPrivileges: () => privileges as never,
-      getConversations: () => ({ getScopedClient: async () => conversationClient } as never),
+      getConversations: () => ({ getScopedClient: async () => conversationClient }) as never,
       logger,
     }).handler({
       input,

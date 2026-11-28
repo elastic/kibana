@@ -47,10 +47,10 @@ export const useRuleAuthorDisplayNames = ({
 
     return {
       createdBy: createdByProfileUid
-        ? displayNameByUid.get(createdByProfileUid) ?? createdBy
+        ? (displayNameByUid.get(createdByProfileUid) ?? createdBy)
         : createdBy,
       updatedBy: updatedByProfileUid
-        ? displayNameByUid.get(updatedByProfileUid) ?? updatedBy
+        ? (displayNameByUid.get(updatedByProfileUid) ?? updatedBy)
         : updatedBy,
     };
   }, [userProfiles, createdBy, createdByProfileUid, updatedBy, updatedByProfileUid]);

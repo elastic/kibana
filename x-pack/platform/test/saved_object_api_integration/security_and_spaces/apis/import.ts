@@ -243,8 +243,8 @@ export default function (context: FtrProviderContext) {
         overwrite
           ? ' with overwrite enabled'
           : createNewCopies
-          ? ' with createNewCopies enabled'
-          : ''
+            ? ' with createNewCopies enabled'
+            : ''
       }`;
       const { unauthorizedRead, unauthorizedWrite, authorized } = createTests(
         overwrite,

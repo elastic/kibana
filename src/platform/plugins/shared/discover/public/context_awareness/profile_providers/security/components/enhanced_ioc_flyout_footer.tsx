@@ -30,5 +30,5 @@ export const EnhancedIOCFlyoutFooter = ({
 
   return renderFooter
     ? renderFooter({ hit, ...docViewProps })
-    : fallbackRenderFooter?.({ hit, ...docViewProps }) ?? null;
+    : (fallbackRenderFooter?.({ hit, ...docViewProps }) ?? null);
 };

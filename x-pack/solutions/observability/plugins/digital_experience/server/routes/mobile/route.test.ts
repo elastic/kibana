@@ -13,12 +13,19 @@ import {
   APPLICATION_TAB_ROUTE_SECURITY,
 } from '../application_tab_route';
 import { hasPartialReadAccess } from '../applications/get_partial_access';
+import { getMobileAppStarts } from './get_mobile_app_starts';
 import { getMobileKpis } from './get_mobile_kpis';
 import { getMobileReleases } from './get_mobile_releases';
-import { MOBILE_KPIS_ENDPOINT, MOBILE_RELEASES_ENDPOINT, mobileRouteRepository } from './route';
+import {
+  MOBILE_APP_STARTS_ENDPOINT,
+  MOBILE_KPIS_ENDPOINT,
+  MOBILE_RELEASES_ENDPOINT,
+  mobileRouteRepository,
+} from './route';
 
 jest.mock('./get_mobile_kpis');
 jest.mock('./get_mobile_releases');
+jest.mock('./get_mobile_app_starts');
 jest.mock('../applications/get_partial_access');
 
 const START = '2021-01-18T12:00:00.000Z';
@@ -29,6 +36,8 @@ const KPIS: Omit<MobileKpisResponse, 'isPartial'> = {
   sessions: { value: 7, previous: 5, delta: 2 },
   users: { value: 3, previous: 3, delta: 0 },
   errorRate: { value: 0.5, previous: null, delta: null },
+  coldStart: { value: 1200, previous: 1000, delta: 200, count: 4, previousCount: 3 },
+  warmStart: { value: null, previous: null, delta: null, count: 0, previousCount: 0 },
   releases: [{ key: '1.2.3', count: 7 }],
   osNames: [{ key: 'iOS', count: 7 }],
   platforms: ['ios'],
@@ -188,6 +197,70 @@ describe('mobile releases route', () => {
 
     expect(response).toBe(releases);
     expect(jest.mocked(getMobileReleases)).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filters: { serviceName: 'shop-mobile', osName: 'iOS', release: '1.2.3' },
+        start: Date.parse(START),
+        end: Date.parse(END),
+        environment: 'production',
+        timeZone: 'Europe/Madrid',
+      })
+    );
+  });
+});
+
+describe('mobile app starts route', () => {
+  const { params, handler } = mobileRouteRepository[MOBILE_APP_STARTS_ENDPOINT];
+  const schema = params as unknown as {
+    shape: { query: { safeParse: (query: unknown) => { success: boolean } } };
+  };
+  const isValid = (query: Record<string, string>) =>
+    schema.shape.query.safeParse({ start: START, end: END, ...query }).success;
+
+  it('takes the params, options and security of the releases route', () => {
+    expect(isValid({ osName: 'iPadOS', release: '1.2.3', timeZone: 'Europe/Madrid' })).toBe(true);
+    expect(isValid({ start: END, end: START })).toBe(false);
+    expect(isValid({ osName: '' })).toBe(false);
+    expect(isValid({ release: 'x'.repeat(1025) })).toBe(false);
+    expect(isValid({ timeZone: 'Mars/Olympus' })).toBe(false);
+    expect(mobileRouteRepository[MOBILE_APP_STARTS_ENDPOINT]).toEqual(
+      expect.objectContaining({
+        options: APPLICATION_TAB_ROUTE_OPTIONS,
+        security: APPLICATION_TAB_ROUTE_SECURITY,
+      })
+    );
+  });
+
+  it('queries the app starts with the filters and the time range', async () => {
+    const appStarts = { histogram: { interval: { value: 1, unit: 's' }, start: 0, end: 1 } };
+    jest.mocked(getMobileAppStarts).mockResolvedValue(appStarts as never);
+
+    const response = await (handler as unknown as (resources: unknown) => Promise<unknown>)({
+      params: {
+        path: { serviceName: 'shop-mobile' },
+        query: {
+          start: START,
+          end: END,
+          environment: 'production',
+          osName: 'iOS',
+          release: '1.2.3',
+          timeZone: 'Europe/Madrid',
+        },
+      },
+      context: {
+        core: Promise.resolve({
+          elasticsearch: { client: { asCurrentUser: esClient, asInternalUser: internalEsClient } },
+          featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) },
+        }),
+      },
+      request: { events: { aborted$: NEVER } },
+      plugins: {},
+      isServerless: false,
+      isUxEnabled: true,
+      logger: loggingSystemMock.createLogger(),
+    });
+
+    expect(response).toBe(appStarts);
+    expect(jest.mocked(getMobileAppStarts)).toHaveBeenCalledWith(
       expect.objectContaining({
         filters: { serviceName: 'shop-mobile', osName: 'iOS', release: '1.2.3' },
         start: Date.parse(START),

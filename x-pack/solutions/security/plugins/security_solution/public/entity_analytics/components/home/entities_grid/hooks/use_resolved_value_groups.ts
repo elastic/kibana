@@ -164,7 +164,7 @@ export const useResolvedValueGroups = ({
   const isIndexUnavailable = isEnabled && context.entitiesIndexError != null;
   useErrorToast(
     RESOLVED_VALUE_GROUPS_ERROR_TITLE,
-    isEnabled ? context.entitiesIndexError ?? overrides.error ?? groups.error : undefined
+    isEnabled ? (context.entitiesIndexError ?? overrides.error ?? groups.error) : undefined
   );
 
   const isTruncated = isEnabled && groups.data?.isTruncated === true;

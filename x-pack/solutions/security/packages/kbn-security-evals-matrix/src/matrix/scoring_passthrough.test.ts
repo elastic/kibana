@@ -54,7 +54,7 @@ describe('queryMatrixScores — scoring policy passthrough', () => {
       listExperiments: jest.fn().mockResolvedValue([experiment]),
       getExperimentStats: jest.fn().mockResolvedValue({ stats: [] }),
       getExperimentScores: jest.fn().mockResolvedValue(docs),
-    } as unknown as MatrixEvalsClient);
+    }) as unknown as MatrixEvalsClient;
 
   const prefixMean = async (scoring?: Parameters<typeof queryMatrixScores>[2]['scoring']) => {
     const [model] = await queryMatrixScores(clientFor(), log, {

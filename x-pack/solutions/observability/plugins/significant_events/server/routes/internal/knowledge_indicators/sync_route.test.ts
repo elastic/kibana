@@ -43,7 +43,7 @@ const makeHandlerParams = ({ sourceIds }: { sourceIds: string[] }): HandlerParam
     workflowClients: {},
     maintenanceService: { getState: jest.fn().mockResolvedValue('enabled') },
     server: {} as HandlerParams['server'],
-  } as unknown as HandlerParams);
+  }) as unknown as HandlerParams;
 
 describe('streamsWithIndicatorsRoute', () => {
   beforeEach(() => {

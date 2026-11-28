@@ -487,9 +487,7 @@ describe('ConversationAppHeader', () => {
     await user.click(screen.getByRole('button', { name: 'Close chat details' }));
 
     expect(screen.queryByTestId('stubChatDetailsFlyout')).not.toBeInTheDocument();
-    // The menu decides where focus lands (the item, or the "…" button once its popover is gone);
-    // without returning focus it would drop to the page body.
-    expect(document.activeElement).not.toBe(document.body);
+    expect(document.activeElement).toBe(screen.getByTestId('app-menu-overflow-button'));
   });
 
   it('downloads the chat from the overflow menu', async () => {

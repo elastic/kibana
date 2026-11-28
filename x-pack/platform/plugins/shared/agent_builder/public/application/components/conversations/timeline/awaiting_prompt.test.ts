@@ -43,7 +43,7 @@ const resumeStarted = (): TimelineDisplayEvent =>
     execution_id: RESUME_EXECUTION_ID,
     trigger_event_id: PROMPT_RESPONSE_ID,
     data: { trigger_type: 'prompt_response' },
-  } as TimelineDisplayEvent);
+  }) as TimelineDisplayEvent;
 
 const resumeTerminated = (): TimelineDisplayEvent =>
   createExecutionTerminatedEvent({

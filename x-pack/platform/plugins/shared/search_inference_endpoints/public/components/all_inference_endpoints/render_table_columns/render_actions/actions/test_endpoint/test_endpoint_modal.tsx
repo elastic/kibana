@@ -41,7 +41,7 @@ export const TestEndpointModal: React.FC<TestEndpointModalProps> = ({ inferenceI
   const modalTitleId = useGeneratedHtmlId();
   const { mutate: testEndpoint, data, error, isLoading } = useTestEndpoint();
 
-  const requestFailureReason = error ? error.body?.message ?? error.message : undefined;
+  const requestFailureReason = error ? (error.body?.message ?? error.message) : undefined;
 
   return (
     <EuiModal

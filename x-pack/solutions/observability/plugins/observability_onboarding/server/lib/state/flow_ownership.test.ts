@@ -26,7 +26,7 @@ const createContext = (
         },
       },
     }),
-  } as unknown as ObservabilityOnboardingRequestHandlerContext);
+  }) as unknown as ObservabilityOnboardingRequestHandlerContext;
 
 const createFlow = (createdBy?: string): SavedObservabilityOnboardingFlow => ({
   id: 'flow-id',

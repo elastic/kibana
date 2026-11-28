@@ -256,7 +256,7 @@ export const buildNightshiftAgentConfiguration = ({
       ...(contextWorkflows && learningEnabled
         ? { post_execution_workflow_ids: [optimizeWorkflowId] }
         : {}),
-    } satisfies AgentBaseConfiguration);
+    }) satisfies AgentBaseConfiguration;
 
   // The hooks are per space, so the configuration always resolves per request.
   return async (ctx) => {

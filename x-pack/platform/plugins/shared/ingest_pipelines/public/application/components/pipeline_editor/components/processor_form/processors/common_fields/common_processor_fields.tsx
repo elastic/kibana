@@ -6,14 +6,21 @@
  */
 
 import type { FunctionComponent } from 'react';
-import React from 'react';
+import React, { useMemo } from 'react';
+import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { PainlessLang } from '@kbn/monaco';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode } from '@elastic/eui';
 import type { FieldConfig } from '../../../../../../../shared_imports';
-import { UseField, FIELD_TYPES, Field, ToggleField } from '../../../../../../../shared_imports';
+import {
+  UseField,
+  FIELD_TYPES,
+  Field,
+  ToggleField,
+  useFormContext,
+} from '../../../../../../../shared_imports';
 
 import { TextEditor } from '../../field_components';
 import { to, from, EDITOR_PX_HEIGHT } from '../shared';
@@ -31,8 +38,33 @@ const ignoreFailureConfig: FieldConfig<any> = {
   type: FIELD_TYPES.TOGGLE,
 };
 
-const ifConfig: FieldConfig = {
-  serializer: from.emptyStringToUndefined,
+type ScriptObject = Record<string, unknown>;
+
+const isScriptObject = (value: unknown): value is ScriptObject =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+/**
+ * Elasticsearch accepts `if` as a Painless string or a script object (`{ source, lang, params }`).
+ * The editor only handles the source string, so script object properties are restored on save.
+ */
+const getIfConfig = (initialIf: unknown): FieldConfig => ({
+  deserializer: (value: unknown) => {
+    if (isScriptObject(value)) {
+      return typeof value.source === 'string' ? value.source : '';
+    }
+    return value;
+  },
+  serializer: (value: unknown) => {
+    if (!isScriptObject(initialIf)) {
+      return from.emptyStringToUndefined(value);
+    }
+    if (value === '') {
+      // Stored script references (e.g. `{ id }`) have no source to edit, so an empty editor keeps them.
+      return typeof initialIf.source === 'string' ? undefined : initialIf;
+    }
+    // An inline source replaces a stored script `id`; other script options such as `params` are kept.
+    return { ...omit(initialIf, 'id'), source: value };
+  },
   label: i18n.translate('xpack.ingestPipelines.pipelineEditor.commonFields.ifFieldLabel', {
     defaultMessage: 'Condition (optional)',
   }),
@@ -47,7 +79,7 @@ const ifConfig: FieldConfig = {
     />
   ),
   type: FIELD_TYPES.TEXT,
-};
+});
 
 const tagConfig: FieldConfig = {
   serializer: from.emptyStringToUndefined,
@@ -62,6 +94,11 @@ const tagConfig: FieldConfig = {
 
 export const CommonProcessorFields: FunctionComponent = () => {
   const suggestionProvider = PainlessLang.getSuggestionProvider('processor_conditional');
+  const { getFieldDefaultValue } = useFormContext();
+  const ifConfig = useMemo(
+    () => getIfConfig(getFieldDefaultValue('fields.if')),
+    [getFieldDefaultValue]
+  );
 
   return (
     <section>

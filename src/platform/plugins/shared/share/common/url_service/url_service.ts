@@ -17,7 +17,7 @@ import type {
 
 export interface UrlServiceDependencies<
   D = unknown,
-  ShortUrlClient extends IShortUrlClient = IShortUrlClient
+  ShortUrlClient extends IShortUrlClient = IShortUrlClient,
 > extends LocatorClientDependencies {
   shortUrls: IShortUrlClientFactoryProvider<D, ShortUrlClient>;
 }

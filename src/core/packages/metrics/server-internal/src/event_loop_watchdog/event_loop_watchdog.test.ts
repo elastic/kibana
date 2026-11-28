@@ -41,9 +41,8 @@ describe('EventLoopWatchdog', () => {
   const options = () => createWorker.mock.calls[0][0] as ManagedWorkerOptions<WatchdogWorkerData>;
   const slots = (call = 0) =>
     new BigInt64Array(
-      (
-        createWorker.mock.calls[call][0] as ManagedWorkerOptions<WatchdogWorkerData>
-      ).workerData!.shared
+      (createWorker.mock.calls[call][0] as ManagedWorkerOptions<WatchdogWorkerData>).workerData!
+        .shared
     );
   const create = ({ diagnosticDir }: { diagnosticDir?: string } = profiling) =>
     new EventLoopWatchdog({

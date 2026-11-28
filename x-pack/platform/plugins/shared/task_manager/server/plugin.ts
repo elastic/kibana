@@ -141,15 +141,12 @@ export interface TaskManagerPluginsSetup {
 
 const LogHealthForBackgroundTasksOnlyMinutes = 60;
 
-export class TaskManagerPlugin
-  implements
-    Plugin<
-      TaskManagerSetupContract,
-      TaskManagerStartContract,
-      TaskManagerPluginsSetup,
-      TaskManagerPluginsStart
-    >
-{
+export class TaskManagerPlugin implements Plugin<
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+  TaskManagerPluginsSetup,
+  TaskManagerPluginsStart
+> {
   private taskPollingLifecycle?: TaskPollingLifecycle;
   private taskManagerId?: string;
   private usageCounter?: UsageCounter;
@@ -162,7 +159,6 @@ export class TaskManagerPlugin
   private metrics$ = new Subject<Metrics>();
   private resetMetrics$ = new Subject<boolean>();
   private shouldRunBackgroundTasks: boolean;
-  private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   private adHocTaskCounter: AdHocTaskCounter;
   private taskManagerMetricsCollector?: TaskManagerMetricsCollector;
   private nodeRoles: PluginInitializerContext['node']['roles'];
@@ -185,7 +181,6 @@ export class TaskManagerPlugin
     this.logger = initContext.logger.get();
     this.config = initContext.config.get<TaskManagerConfig>();
     this.definitions = new TaskTypeDictionary(this.logger);
-    this.kibanaVersion = initContext.env.packageInfo.version;
     this.nodeRoles = initContext.node.roles;
     this.shouldRunBackgroundTasks = this.nodeRoles.backgroundTasks;
     this.adHocTaskCounter = new AdHocTaskCounter();
@@ -246,6 +241,8 @@ export class TaskManagerPlugin
 
     // Routes
     const router = core.http.createRouter();
+    // Until start() creates the license subscriber, don't assume security is disabled so the privilege check still runs.
+    const getIsSecurityDisabled = () => this.licenseSubscriber?.getIsSecurityDisabled() ?? false;
     const { serviceStatus$, monitoredHealth$ } = healthRoute({
       router,
       monitoringStats$: this.monitoringStats$,
@@ -253,9 +250,9 @@ export class TaskManagerPlugin
       taskManagerId: this.taskManagerId,
       config: this.config!,
       usageCounter: this.usageCounter!,
-      kibanaVersion: this.kibanaVersion,
       kibanaIndexName: core.savedObjects.getDefaultIndex(),
       getClusterClient: () => clusterClientPromise,
+      getIsSecurityDisabled,
       shouldRunTasks: this.shouldRunBackgroundTasks,
       docLinks: core.docLinks,
       numOfKibanaInstances$: this.numOfKibanaInstances$,
@@ -267,7 +264,6 @@ export class TaskManagerPlugin
       taskManagerId: this.taskManagerId,
       config: this.config!,
       usageCounter: this.usageCounter!,
-      kibanaVersion: this.kibanaVersion,
       kibanaIndexName: core.savedObjects.getDefaultIndex(),
       getClusterClient: () => clusterClientPromise,
     });
@@ -277,6 +273,9 @@ export class TaskManagerPlugin
       metrics$: this.metrics$,
       resetMetrics$: this.resetMetrics$,
       taskManagerId: this.taskManagerId,
+      kibanaIndexName: core.savedObjects.getDefaultIndex(),
+      getClusterClient: () => clusterClientPromise,
+      getIsSecurityDisabled,
     });
     executionControlRoutes({
       router,

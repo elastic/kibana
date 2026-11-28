@@ -22,17 +22,28 @@ export const DEFAULT_VAGRANTFILE = path.join(__dirname, 'vagrant', 'Vagrantfile'
 
 const MAX_BUFFER = 1024 * 1024 * 5; // 5MB
 
-const destroyVagrantMachine = async (vagrantCwd: string, log: ToolingLog): Promise<void> => {
-  // The install exec timeout should already have released `vagrant ssh`. Stay under the
-  // 10 minute enrolledEndpoint fixture: 3 × 30s plus two 2s pauses.
-  const maxAttempts = 3;
+// Two attempts of `vagrant destroy` (up to ~95s) plus `vagrant up` fit inside the 30 minute Cypress
+// `createEndpointHost` task. It also matches the Vagrantfile's `config.vm.boot_timeout`.
+export const VAGRANT_UP_TIMEOUT_MS = 600_000;
+const MIN_VAGRANT_UP_TIMEOUT_MS = 30_000;
+/** A retry needs a `vagrant destroy` (up to ~95s) and a real `vagrant up` attempt. */
+const MIN_RETRY_BUDGET_MS = 180_000;
 
+// Defaults suit the creation path, where this clears a stale or absent VM before `vagrant up` --
+// a fast no-op kept under the 10 minute enrolledEndpoint fixture. Destroying a live VM is much
+// slower, so that caller raises the budget. Creation cleanup is best effort; teardown sets `rethrow`
+// so a VM that could not be destroyed is reported to its caller.
+const destroyVagrantMachine = async (
+  vagrantCwd: string,
+  log: ToolingLog,
+  { attemptTimeoutMs = 30_000, maxAttempts = 3, rethrow = false } = {}
+): Promise<void> => {
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
       await execa.command('vagrant destroy -f', {
         env: { VAGRANT_CWD: vagrantCwd },
         stdio: ['inherit', 'pipe', 'pipe'],
-        timeout: 30_000,
+        timeout: attemptTimeoutMs,
       });
       return;
     } catch (error) {
@@ -44,6 +55,9 @@ const destroyVagrantMachine = async (vagrantCwd: string, log: ToolingLog): Promi
       );
 
       if (attempt === maxAttempts) {
+        if (rethrow) {
+          throw error;
+        }
         return;
       }
 
@@ -367,6 +381,11 @@ interface CreateVagrantVmOptions extends BaseVmCreateOptions {
    */
   vagrantFile?: string;
   log?: ToolingLog;
+  /**
+   * Total time in ms for `vagrant destroy`, `vagrant up` and its retry. Set it when the caller has a
+   * setup timeout shorter than two full attempts. Unset, each attempt gets `VAGRANT_UP_TIMEOUT_MS`.
+   */
+  createBudgetMs?: number;
 }
 
 /**
@@ -380,6 +399,7 @@ const createVagrantVm = async ({
   memory,
   cpus,
   disk,
+  createBudgetMs,
 }: CreateVagrantVmOptions): Promise<HostVm> => {
   log.debug(`Using Vagrantfile: ${vagrantFile}`);
 
@@ -426,15 +446,25 @@ const createVagrantVm = async ({
   }
 
   const MAX_ATTEMPTS = 2;
+  const deadline = createBudgetMs === undefined ? undefined : Date.now() + createBudgetMs;
 
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     try {
       await destroyVagrantMachine(VAGRANT_CWD, log);
 
+      // Kill a hung `vagrant up` rather than let it hold the job-wide Vagrant machine lock. With a
+      // creation budget, the timeout never runs past it, so a hang is cleaned up inside the caller's setup time.
       const vagrantUpResponse = (
         await execa.command('vagrant up', {
           env: vagrantEnv,
           stdio: ['inherit', 'pipe', 'pipe'],
+          timeout:
+            deadline === undefined
+              ? VAGRANT_UP_TIMEOUT_MS
+              : Math.max(
+                  MIN_VAGRANT_UP_TIMEOUT_MS,
+                  Math.min(VAGRANT_UP_TIMEOUT_MS, deadline - Date.now())
+                ),
         })
       ).stdout;
 
@@ -447,6 +477,12 @@ const createVagrantVm = async ({
       );
 
       if (attempt === MAX_ATTEMPTS) {
+        throw e;
+      }
+
+      // A second attempt that cannot finish in the remaining budget would only outlast the caller's timeout.
+      if (deadline !== undefined && deadline - Date.now() < MIN_RETRY_BUDGET_MS) {
+        log.warning('Not retrying vagrant up: the remaining creation budget is too short');
         throw e;
       }
 
@@ -526,14 +562,15 @@ export const createVagrantHostVmClient = (
   };
 
   const destroy = async (): Promise<void> => {
-    // Bounded so a slow halt rejects for the caller to handle instead of hanging past the
-    // 60s `taskTimeout` of the Cypress teardown tasks that destroy endpoint hosts.
-    const destroyResponse = await execa.command(`vagrant destroy -f`, {
-      ...execaOptions,
-      timeout: 30_000,
+    // A live VM teardown has been observed to outlast 60s, so give each attempt double that. When every
+    // attempt fails the rejection is kept: callers use it to know the VM may still exist.
+    await destroyVagrantMachine(VAGRANT_CWD, log, {
+      attemptTimeoutMs: 120_000,
+      maxAttempts: 2,
+      rethrow: true,
     });
 
-    log.debug(`VM [${name}] was destroyed successfully`, destroyResponse);
+    log.debug(`VM [${name}] was destroyed`);
   };
 
   const info = () => {

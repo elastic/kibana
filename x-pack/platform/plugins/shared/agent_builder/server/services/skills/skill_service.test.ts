@@ -61,7 +61,7 @@ const createMockSkillDefinition = (overrides: Partial<SkillDefinition> = {}): Sk
 const createMockToolRegistry = (toolIds: string[] = []): ToolRegistry =>
   ({
     has: jest.fn(async (id: string) => toolIds.includes(id)),
-  } as unknown as ToolRegistry);
+  }) as unknown as ToolRegistry;
 
 describe('createSkillService', () => {
   beforeEach(() => {
@@ -174,6 +174,7 @@ describe('createSkillService', () => {
         getToolRegistry: jest.fn().mockResolvedValue(mockToolRegistry),
         uiSettings: mockUiSettings,
         savedObjects: mockSavedObjects,
+        getPrincipalKey: () => undefined,
       });
 
       const registry = await getRegistry({ request: {} as any });
@@ -204,6 +205,7 @@ describe('createSkillService', () => {
         getToolRegistry: jest.fn().mockResolvedValue(createMockToolRegistry()),
         uiSettings: mockUiSettings,
         savedObjects: { getScopedClient: jest.fn().mockReturnValue({}) } as any,
+        getPrincipalKey: () => undefined,
       });
     };
 

@@ -11,7 +11,7 @@ import { getEsqlDocumentId, parseEsqlSourceDocuments } from './parse_esql_source
 const response = (
   columns: Array<{ name: string; type: string }>,
   values: unknown[][]
-): ESQLSearchResponse => ({ columns, values } as unknown as ESQLSearchResponse);
+): ESQLSearchResponse => ({ columns, values }) as unknown as ESQLSearchResponse;
 
 describe('parseEsqlSourceDocuments', () => {
   describe('concrete index (METADATA _id, _source present)', () => {

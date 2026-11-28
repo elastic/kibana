@@ -29,12 +29,12 @@ describe('getDreamingStatusStepDefinition', () => {
     source?: 'memories' | 'transcripts' | 'relationships' | 'maintenance';
   } = {}) =>
     getDreamingStatusStepDefinition({
-      getAiIndexService: () => ({ get } as unknown as AiIndexService),
+      getAiIndexService: () => ({ get }) as unknown as AiIndexService,
       isContextEngineEnabled: async () => contextEngineEnabled,
       isMemoryEnabled: async () => memoryEnabled,
       checkReadPrivilege: async () => canRead,
-      getSessionMemoryService: async () => ({} as SessionMemoryService),
-      getSessionEventsService: async () => ({} as SessionEventsService),
+      getSessionMemoryService: async () => ({}) as SessionMemoryService,
+      getSessionEventsService: async () => ({}) as SessionEventsService,
     }).handler(
       createMockStepContext({
         input: { ai_index_id: 'support', ...(source && { source }) },

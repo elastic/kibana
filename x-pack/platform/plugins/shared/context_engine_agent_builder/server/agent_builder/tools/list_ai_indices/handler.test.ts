@@ -21,7 +21,7 @@ const aiIndex = (id: string, managed = false): AiIndexHttpItem =>
     dest: { type: 'index', value: `ai-index-${id}` },
     date_created: '2026-01-01T00:00:00.000Z',
     date_modified: '2026-01-01T00:00:00.000Z',
-  } as AiIndexHttpItem);
+  }) as AiIndexHttpItem;
 
 describe('listAiIndicesHandler', () => {
   const baseContext = {

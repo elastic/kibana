@@ -36,7 +36,7 @@ export function useKibanaUiSetting(
   defaultValue?: TimePickerQuickRange[]
 ): [
   TimePickerQuickRange[],
-  (key: 'timepicker:quickRanges', value: TimePickerQuickRange[]) => Promise<boolean>
+  (key: 'timepicker:quickRanges', value: TimePickerQuickRange[]) => Promise<boolean>,
 ];
 
 export function useKibanaUiSetting(

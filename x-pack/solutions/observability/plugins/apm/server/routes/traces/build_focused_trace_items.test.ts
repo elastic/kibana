@@ -8,7 +8,7 @@
 import type { TraceItem } from '../../../common/waterfall/unified_trace_item';
 import { buildChildrenTree, buildFocusedTraceItems } from './build_focused_trace_items';
 
-const mockTraceDoc = (id: string, parentId?: string) => ({ id, parentId } as TraceItem);
+const mockTraceDoc = (id: string, parentId?: string) => ({ id, parentId }) as TraceItem;
 
 describe('buildChildrenTree', () => {
   it('returns an empty array when no children are found', () => {

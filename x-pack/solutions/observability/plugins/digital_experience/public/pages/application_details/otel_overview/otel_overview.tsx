@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { APPLICATION_SOURCE } from '../../../../common/application_source';
 import { NO_WEB_VITALS } from '../../../../common/core_web_vitals';
@@ -18,7 +18,6 @@ import type {
   OverviewPercentileParam,
   OverviewSearchParams,
 } from '../../../../common/overview_filters';
-import { PAGE_FILTER_NOTE_NAMES } from '../../../../common/overview_filters';
 import type {
   ApplicationOverview,
   ApplicationOverviewKpisResponse,
@@ -52,13 +51,9 @@ import { OverviewToolbar } from './components/overview_toolbar';
 import { OverviewTrends } from './components/overview_trends';
 import { TopClicksPanel } from './components/top_clicks_panel';
 import { TopPagesPanel } from './components/top_pages_panel';
+import { VitalsTrendPanel } from './components/vitals_trend_panel';
 import { usePickerOptions } from './hooks/use_picker_options';
 import { EMPTY_USAGE, usageRequestOf } from './utils/usage_request';
-
-const PAGE_FILTER_NOTE = i18n.translate('xpack.digitalExperience.overview.filters.pageNote', {
-  defaultMessage:
-    'Page applies to every browser event but HTTP requests, which carry the URL they request. URL contains applies to page loads and frustration signals only: web vitals, JS errors and other clicks carry no URL.',
-});
 
 const FETCH_ERROR_TITLE = i18n.translate('xpack.digitalExperience.overview.fetchErrorTitle', {
   defaultMessage: 'Could not load the Overview',
@@ -73,6 +68,13 @@ const USAGE_FETCH_ERROR_TITLE = i18n.translate(
   'xpack.digitalExperience.overview.usageFetchErrorTitle',
   { defaultMessage: 'Could not load the pages, browsers and clicks' }
 );
+
+/**
+ * The least width of the panels that share a row, which then stack: measured in the page, not in
+ * the window, so a flyout beside the page does not leave them overflowing.
+ */
+const SIDE_PANEL_CSS = { minInlineSize: 320 };
+const WIDE_PANEL_CSS = { minInlineSize: 400 };
 
 /** The most frequent error groups on the Overview; the Errors tab lists the rest. */
 const TOP_ERRORS_ROWS = 5;
@@ -137,11 +139,12 @@ function OverviewPanels({
 }) {
   return (
     <>
-      <EuiFlexGroup gutterSize="m" alignItems="stretch">
-        <EuiFlexItem grow={2}>
+      {/* Side by side while the page is wide enough, whatever the window: a flyout beside it narrows it. */}
+      <EuiFlexGroup gutterSize="m" alignItems="stretch" wrap>
+        <EuiFlexItem grow={2} css={SIDE_PANEL_CSS}>
           <CoreWebVitalsPanel webVitals={overview.webVitals} isLoading={isLoading} />
         </EuiFlexItem>
-        <EuiFlexItem grow={5}>
+        <EuiFlexItem grow={5} css={WIDE_PANEL_CSS}>
           <OverviewTrends
             points={overview.trend}
             histogram={trendHistogram}
@@ -174,7 +177,10 @@ function UsageAndErrorsPanels({
   /** Includes the value in a filter, or takes it off when it is included already. */
   onSelectFilter: (name: OverviewFilterName, value: string) => void;
 }) {
-  const { errorsHref, sessionsHref } = useApplicationLinks(serviceName, APPLICATION_SOURCE.otel);
+  const { errorsHref, frustrationHref, sessionsHref } = useApplicationLinks(
+    serviceName,
+    APPLICATION_SOURCE.otel
+  );
   const {
     topPages,
     breakdowns,
@@ -218,8 +224,8 @@ function UsageAndErrorsPanels({
         </>
       )}
       <EuiSpacer size="m" />
-      <EuiFlexGroup gutterSize="m" alignItems="stretch">
-        <EuiFlexItem grow={3}>
+      <EuiFlexGroup gutterSize="m" alignItems="stretch" wrap>
+        <EuiFlexItem grow={3} css={WIDE_PANEL_CSS}>
           {topErrors.error ? (
             <LoadErrorPrompt
               data-test-subj="digitalExperienceOverviewTopErrorsError"
@@ -239,7 +245,7 @@ function UsageAndErrorsPanels({
           )}
         </EuiFlexItem>
         {!error && (
-          <EuiFlexItem grow={2}>
+          <EuiFlexItem grow={2} css={SIDE_PANEL_CSS}>
             <TopClicksPanel clicks={topClicks} totalClicks={totalClicks} isLoading={isLoading} />
           </EuiFlexItem>
         )}
@@ -248,13 +254,14 @@ function UsageAndErrorsPanels({
         <>
           <EuiSpacer size="m" />
           <EuiFlexGroup gutterSize="m" alignItems="stretch">
-            <EuiFlexItem>
+            <EuiFlexItem css={{ minInlineSize: 0 }}>
               <FrustrationPanel
                 frustration={frustration}
                 frustratedElements={frustratedElements}
                 frustratedPages={frustratedPages}
                 isLoading={isLoading}
                 sessionsHref={sessionsHref}
+                dashboardHref={frustrationHref}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -276,6 +283,8 @@ export function OtelOverview({ serviceName }: { serviceName: string }) {
   const searchParams = useOverviewSearchParams();
   const formatters = useFormatters();
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+  // Refresh reloads the Lens chart through this, as its range doesn't change for a relative one.
+  const [lastReloadRequestTime, setLastReloadRequestTime] = useState<number>();
   // In the URL, so a reload or Share keeps it; the application page's header toggles it.
   const { value: compare } = useQueryParam('compare');
   // Separate requests, so the KPIs never wait on the panels below and a failure replaces only its own.
@@ -299,6 +308,7 @@ export function OtelOverview({ serviceName }: { serviceName: string }) {
     setFilter(name, toggleFilterValue(filters[name] ?? [], value, false));
 
   const refreshAll = () => {
+    setLastReloadRequestTime(Date.now());
     overview.refresh();
     kpis.refresh();
     usage.refresh();
@@ -319,8 +329,8 @@ export function OtelOverview({ serviceName }: { serviceName: string }) {
         onRefresh={refreshAll}
         formatters={formatters}
       />
-      {/* As tall as a row of pills even with none, so picking the first value moves nothing below. */}
-      <div css={{ marginBlockStart: euiTheme.size.s, minBlockSize: euiTheme.size.l }}>
+      {/* With no pills it leaves as much room below the toolbar as there is above it. */}
+      <div css={{ marginBlockStart: euiTheme.size.s, minBlockSize: euiTheme.size.s }}>
         <OverviewFilterPills filters={filters} setFilter={setFilter} onClear={clearFilters} />
       </div>
       {isFlyoutOpen && (
@@ -331,18 +341,6 @@ export function OtelOverview({ serviceName }: { serviceName: string }) {
           onApply={setFilters}
           onClose={() => setIsFlyoutOpen(false)}
         />
-      )}
-      {PAGE_FILTER_NOTE_NAMES.some((name) => (filters[name] ?? []).length > 0) && (
-        <>
-          <EuiSpacer size="s" />
-          <EuiText
-            size="xs"
-            color="subdued"
-            data-test-subj="digitalExperienceOverviewPageFilterNote"
-          >
-            {PAGE_FILTER_NOTE}
-          </EuiText>
-        </>
       )}
       <EuiSpacer size="m" />
       {/* Its own request, so a failure replaces only the row and the panels below keep loading. */}
@@ -383,6 +381,8 @@ export function OtelOverview({ serviceName }: { serviceName: string }) {
           onTimeRangeSelect={setTimeRange}
         />
       )}
+      {/* Its own Lens query, so it loads, fails and refreshes apart from the Overview's request. */}
+      <VitalsTrendPanel serviceName={serviceName} lastReloadRequestTime={lastReloadRequestTime} />
       <EuiSpacer size="m" />
       <UsageAndErrorsPanels
         serviceName={serviceName}

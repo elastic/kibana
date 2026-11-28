@@ -114,9 +114,8 @@ export const putFleetProxyHandler: RequestHandler<
     };
 
     // Bump all the agent policy that use that proxy
-    const { fleetServerHosts, outputs, downloadSources } = await getFleetProxyRelatedSavedObjects(
-      proxyId
-    );
+    const { fleetServerHosts, outputs, downloadSources } =
+      await getFleetProxyRelatedSavedObjects(proxyId);
     await bumpRelatedPolicies(soClient, esClient, fleetServerHosts, outputs, downloadSources);
 
     return response.ok({ body });
@@ -154,9 +153,8 @@ export const deleteFleetProxyHandler: RequestHandler<
     const soClient = coreContext.savedObjects.client;
     const esClient = coreContext.elasticsearch.client.asInternalUser;
 
-    const { fleetServerHosts, outputs, downloadSources } = await getFleetProxyRelatedSavedObjects(
-      proxyId
-    );
+    const { fleetServerHosts, outputs, downloadSources } =
+      await getFleetProxyRelatedSavedObjects(proxyId);
 
     await deleteFleetProxy(soClient, esClient, request.params.itemId);
 

@@ -21,22 +21,25 @@ export { isPackageFipsIncompatible };
 export function filterOutNonFipsPolicyTemplates<T extends RegistrySearchResult>(
   packageList: Array<Installable<T>>
 ): Array<Installable<T>> {
-  return packageList.reduce((acc, pkg) => {
-    const { policy_templates: policyTemplates } = pkg;
+  return packageList.reduce(
+    (acc, pkg) => {
+      const { policy_templates: policyTemplates } = pkg;
 
-    if (isPackageFipsIncompatible(policyTemplates, pkg.name)) {
+      if (isPackageFipsIncompatible(policyTemplates, pkg.name)) {
+        return acc;
+      }
+
+      if (!policyTemplates || policyTemplates.length === 0) {
+        acc.push(pkg);
+        return acc;
+      }
+
+      acc.push({
+        ...pkg,
+        policy_templates: policyTemplates.filter((template) => template.fips_compatible !== false),
+      });
       return acc;
-    }
-
-    if (!policyTemplates || policyTemplates.length === 0) {
-      acc.push(pkg);
-      return acc;
-    }
-
-    acc.push({
-      ...pkg,
-      policy_templates: policyTemplates.filter((template) => template.fips_compatible !== false),
-    });
-    return acc;
-  }, [] as Array<Installable<T>>);
+    },
+    [] as Array<Installable<T>>
+  );
 }

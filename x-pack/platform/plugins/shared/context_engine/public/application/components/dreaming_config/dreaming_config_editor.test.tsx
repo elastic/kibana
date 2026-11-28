@@ -12,6 +12,7 @@ import React, { useState } from 'react';
 import {
   DreamingConfigEditor,
   draftOf,
+  isDreamingSetUp,
   typesOfDraft,
   type DreamingConfigDraft,
 } from './dreaming_config_editor';
@@ -41,6 +42,22 @@ const fillName = (value: string) =>
   fireEvent.change(screen.getByTestId('contextDreamingTypeModalName'), { target: { value } });
 
 const save = () => fireEvent.click(screen.getByTestId('contextDreamingTypeModalSave'));
+
+describe('isDreamingSetUp', () => {
+  it('is false when dreaming is off and builds nothing', () => {
+    expect(isDreamingSetUp({ enabled: false, facts: [] })).toBe(false);
+  });
+
+  it('is true when dreaming is on', () => {
+    expect(isDreamingSetUp({ enabled: true })).toBe(true);
+  });
+
+  it('is true when dreaming has a fact type', () => {
+    expect(
+      isDreamingSetUp({ enabled: false, facts: [{ type: 'preference', description: 'A taste' }] })
+    ).toBe(true);
+  });
+});
 
 describe('DreamingConfigEditor', () => {
   it('keeps entities and relationships on a draft while entities are off, and leaves them out of the config', () => {

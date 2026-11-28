@@ -31,7 +31,7 @@ export interface AttachmentVersion<DataType = unknown> {
  */
 export interface VersionedAttachment<
   Type extends string = string,
-  DataType = Type extends AttachmentType ? AttachmentDataOf<Type> : unknown
+  DataType = Type extends AttachmentType ? AttachmentDataOf<Type> : unknown,
 > {
   /** Unique identifier for the attachment */
   id: string;
@@ -71,7 +71,7 @@ export interface VersionedAttachment<
  */
 export type VersionedAttachmentWithOrigin<
   Type extends string = string,
-  DataType = Type extends AttachmentType ? AttachmentDataOf<Type> : unknown
+  DataType = Type extends AttachmentType ? AttachmentDataOf<Type> : unknown,
 > = VersionedAttachment<Type, DataType> & { origin: string };
 
 /**
@@ -79,7 +79,7 @@ export type VersionedAttachmentWithOrigin<
  */
 export function isVersionedAttachmentWithOrigin<
   Type extends string = string,
-  DataType = Type extends AttachmentType ? AttachmentDataOf<Type> : unknown
+  DataType = Type extends AttachmentType ? AttachmentDataOf<Type> : unknown,
 >(
   attachment: VersionedAttachment<Type, DataType>
 ): attachment is VersionedAttachmentWithOrigin<Type, DataType> {
@@ -151,7 +151,7 @@ export interface AttachmentDiff {
  */
 export interface AttachmentInput<
   Type extends string = string,
-  DataType = Type extends AttachmentType ? AttachmentDataOf<Type> : unknown
+  DataType = Type extends AttachmentType ? AttachmentDataOf<Type> : unknown,
 > {
   /** Optional ID (will be generated if not provided) */
   id?: string;

@@ -13,6 +13,7 @@ import {
   EuiIcon,
   EuiTitle,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiSpacer,
   EuiLink,
   EuiCode,
@@ -348,6 +349,7 @@ interface Props {
   onChange: (content: Forms.Content) => void;
   isEditing?: boolean;
   isLegacy?: boolean;
+  hasDataStreamOptions?: boolean;
 }
 
 function formDeserializer(formData: LogisticsForm): LogisticsFormInternal {
@@ -368,14 +370,20 @@ function getformSerializer(initialTemplateData: LogisticsForm = {}) {
       indexMode: indexModeValue,
       ...rest
     } = formData;
-    const dataStream = doCreateDataStream ? initialTemplateData.dataStream ?? {} : undefined;
+    const dataStream = doCreateDataStream ? (initialTemplateData.dataStream ?? {}) : undefined;
     const indexMode = setIndexMode ? indexModeValue : undefined;
     return { ...rest, dataStream, indexMode };
   };
 }
 
 export const StepLogistics: React.FunctionComponent<Props> = React.memo(
-  ({ defaultValue, isEditing = false, onChange, isLegacy = false }) => {
+  ({
+    defaultValue,
+    isEditing = false,
+    onChange,
+    isLegacy = false,
+    hasDataStreamOptions = false,
+  }) => {
     const {
       config: { enableIndexMode },
     } = useAppContext();
@@ -574,10 +582,34 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
           {/* Create data stream */}
           {isLegacy !== true && (
             <FormRow title={createDataStream.title} description={createDataStream.description}>
-              <UseField
-                path="doCreateDataStream"
-                componentProps={{ 'data-test-subj': createDataStream.testSubject }}
-              />
+              <>
+                <UseField
+                  path="doCreateDataStream"
+                  componentProps={{ 'data-test-subj': createDataStream.testSubject }}
+                />
+                {/* Data stream options are only valid for data stream templates */}
+                {hasDataStreamOptions && !doCreateDataStream && (
+                  <>
+                    <EuiSpacer size="m" />
+                    <EuiCallOut
+                      announceOnMount
+                      color="warning"
+                      iconType="warning"
+                      size="s"
+                      title={i18n.translate(
+                        'xpack.idxMgmt.templateForm.stepLogistics.dataStreamOptionsLostTitle',
+                        { defaultMessage: 'Data stream options will be lost' }
+                      )}
+                      data-test-subj="dataStreamOptionsLostCallout"
+                    >
+                      <FormattedMessage
+                        id="xpack.idxMgmt.templateForm.stepLogistics.dataStreamOptionsLostDescription"
+                        defaultMessage="Create data stream is turned off, so any data stream options in this template will be removed when you save."
+                      />
+                    </EuiCallOut>
+                  </>
+                )}
+              </>
             </FormRow>
           )}
 

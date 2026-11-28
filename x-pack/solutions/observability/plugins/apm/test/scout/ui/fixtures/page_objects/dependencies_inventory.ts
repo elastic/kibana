@@ -12,7 +12,10 @@ export class DependenciesInventoryPage {
   public readonly header;
   public readonly dependenciesTable;
 
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {
     this.header = this.page.getByRole('heading', { name: 'Dependencies' });
     this.dependenciesTable = this.page.getByTestId('dependenciesTable');
   }

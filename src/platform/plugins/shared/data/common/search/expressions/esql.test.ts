@@ -37,7 +37,7 @@ const createExecutionContext = (): ExecutionContext =>
     getKibanaRequest: jest.fn(),
     getSearchSessionId: jest.fn(),
     getExecutionContext: jest.fn(),
-  } as unknown as ExecutionContext);
+  }) as unknown as ExecutionContext;
 
 const getMockSearchService = (): MockTypedSearchService => ({
   esql: jest.fn().mockResolvedValue({
@@ -49,7 +49,7 @@ const getMockSearchService = (): MockTypedSearchService => ({
 const createUiSettings = (dateFormatTZ?: string): UiSettingsCommon =>
   ({
     get: async (key: string) => (key === 'dateFormat:tz' ? dateFormatTZ : undefined),
-  } as unknown as UiSettingsCommon);
+  }) as unknown as UiSettingsCommon;
 
 const createEsqlFn = (mockSearchService: MockTypedSearchService, dateFormatTZ?: string) =>
   getEsqlFn({

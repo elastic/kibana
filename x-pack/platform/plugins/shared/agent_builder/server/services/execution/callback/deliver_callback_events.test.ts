@@ -62,7 +62,7 @@ const createConversationExecution = (url: string | null = callbackUrl): AgentExe
       nextInput: { message: 'hello' },
       ...(url ? { callback: { url } } : {}),
     },
-  } as unknown as AgentExecution);
+  }) as unknown as AgentExecution;
 const createSlackExecution = (): AgentExecution => {
   const execution = createConversationExecution();
 
@@ -84,19 +84,19 @@ const createStandaloneExecution = (): AgentExecution =>
     agentParams: {
       nextInput: { message: 'hello' },
     },
-  } as unknown as AgentExecution);
+  }) as unknown as AgentExecution;
 
 const createReasoningEvent = (reasoning: string): ChatEvent =>
   ({
     type: ChatEventType.reasoning,
     data: { reasoning },
-  } as unknown as ChatEvent);
+  }) as unknown as ChatEvent;
 
 const createMessageChunkEvent = (text: string): ChatEvent =>
   ({
     type: ChatEventType.messageChunk,
     data: { text_chunk: text, message_id: 'message-1' },
-  } as ChatEvent);
+  }) as ChatEvent;
 
 const createRoundCompleteEvent = (
   message = 'Hello',
@@ -109,7 +109,7 @@ const createRoundCompleteEvent = (
       round: { id: 'round-1', input: { message: 'hello' }, response: { message }, steps },
       attachments,
     },
-  } as unknown as ChatEvent);
+  }) as unknown as ChatEvent;
 
 const createExecutionStartedEvent = (): ChatEvent =>
   ({
@@ -120,7 +120,7 @@ const createExecutionStartedEvent = (): ChatEvent =>
     execution_id: 'round-1::execution',
     trigger_event_id: 'round-1::user_message',
     data: { trigger_type: 'user_message' },
-  } as unknown as ChatEvent);
+  }) as unknown as ChatEvent;
 
 const createExecutionTerminatedEvent = (
   outcome: unknown = { type: 'responded', response: { message: 'Hello' } }
@@ -133,16 +133,16 @@ const createExecutionTerminatedEvent = (
     execution_id: 'round-1::execution',
     trigger_event_id: 'round-1::user_message',
     data: { outcome },
-  } as unknown as ChatEvent);
+  }) as unknown as ChatEvent;
 
 const createToolCallEvent = (data: Record<string, unknown>): ChatEvent =>
-  ({ type: ChatEventType.toolCall, data } as unknown as ChatEvent);
+  ({ type: ChatEventType.toolCall, data }) as unknown as ChatEvent;
 
 const createToolResultEvent = (toolCallId: string): ChatEvent =>
   ({
     type: ChatEventType.toolResult,
     data: { tool_call_id: toolCallId, tool_id: 'search', results: [] },
-  } as unknown as ChatEvent);
+  }) as unknown as ChatEvent;
 
 /** Stores the attachments of the conversation the callback reads once the stream completes. */
 const storeAttachments = (attachments: unknown[]) =>
@@ -162,7 +162,7 @@ const createExecutionFailedEvent = (): ChatEvent =>
     execution_id: 'round-1::execution',
     trigger_event_id: 'round-1::user_message',
     data: { time_to_last_token: 1, error: { code: 'internalError', message: 'boom' } },
-  } as unknown as ChatEvent);
+  }) as unknown as ChatEvent;
 
 const createExecutionAbortedEvent = (): ChatEvent =>
   ({
@@ -173,7 +173,7 @@ const createExecutionAbortedEvent = (): ChatEvent =>
     execution_id: 'round-1::execution',
     trigger_event_id: 'round-1::user_message',
     data: { time_to_last_token: 1 },
-  } as unknown as ChatEvent);
+  }) as unknown as ChatEvent;
 
 const createCallbackDeliveryServiceMock = () => {
   const service = {

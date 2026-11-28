@@ -66,7 +66,7 @@ const createLogger = (): jest.Mocked<
 
 type UpdateCall = [
   attachmentId: string,
-  input: { data: { metadata?: { routing_tags?: string[] }; matcher?: { tags?: string[] } } }
+  input: { data: { metadata?: { routing_tags?: string[] }; matcher?: { tags?: string[] } } },
 ];
 
 const input = { ruleAttachmentId: 'rule-att', policyAttachmentId: 'policy-att' };

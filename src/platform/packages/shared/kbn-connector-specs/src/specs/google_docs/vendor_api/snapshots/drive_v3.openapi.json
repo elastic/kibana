@@ -864,7 +864,29 @@
           },
           {
             "in": "query",
-            "name": "uploadType",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
             "schema": {
               "type": "string"
             }
@@ -878,39 +900,7 @@
           },
           {
             "in": "query",
-            "name": "$.xgafv",
-            "schema": {
-              "enum": [
-                "1",
-                "2"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "oauth_token",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "quotaUser",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "fields",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "callback",
+            "name": "uploadType",
             "schema": {
               "type": "string"
             }
@@ -930,24 +920,42 @@
           },
           {
             "in": "query",
-            "name": "prettyPrint",
+            "name": "callback",
             "schema": {
-              "default": "true",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "supportsAllDrives",
+            "schema": {
+              "default": "false",
               "type": "boolean"
-            }
-          },
-          {
-            "in": "query",
-            "name": "access_token",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "key",
-            "schema": {
-              "type": "string"
             }
           },
           {
@@ -962,21 +970,6 @@
           },
           {
             "in": "query",
-            "name": "includeLabels",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "supportsAllDrives",
-            "schema": {
-              "default": "false",
-              "type": "boolean"
-            }
-          },
-          {
-            "in": "query",
             "name": "acknowledgeAbuse",
             "schema": {
               "default": "false",
@@ -986,6 +979,13 @@
           {
             "in": "query",
             "name": "includePermissionsForView",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "includeLabels",
             "schema": {
               "type": "string"
             }
@@ -1005,13 +1005,41 @@
         "security": [
           {
             "Oauth2": [
-              "https://www.googleapis.com/auth/drive",
-              "https://www.googleapis.com/auth/drive.appdata",
-              "https://www.googleapis.com/auth/drive.file",
-              "https://www.googleapis.com/auth/drive.meet.readonly",
-              "https://www.googleapis.com/auth/drive.metadata",
-              "https://www.googleapis.com/auth/drive.metadata.readonly",
-              "https://www.googleapis.com/auth/drive.photos.readonly",
+              "https://www.googleapis.com/auth/drive"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/drive.appdata"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/drive.file"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/drive.meet.readonly"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/drive.metadata"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/drive.metadata.readonly"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/drive.photos.readonly"
+            ]
+          },
+          {
+            "Oauth2": [
               "https://www.googleapis.com/auth/drive.readonly"
             ]
           }

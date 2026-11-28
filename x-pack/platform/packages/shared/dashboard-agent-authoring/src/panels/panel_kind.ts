@@ -92,7 +92,7 @@ interface TypeDiscriminator<Type extends string> {
  */
 export const defineConfigPanelKind = <
   const Type extends string,
-  Shape extends TypeDiscriminator<Type> & z.ZodRawShape
+  Shape extends TypeDiscriminator<Type> & z.ZodRawShape,
 >({
   execute,
   ...kind
@@ -104,7 +104,7 @@ export const defineConfigPanelKind = <
   ({
     ...kind,
     execute: execute ?? ((config) => ({ panelContent: { type: kind.embeddableType, config } })),
-  } as const satisfies ConfigPanelKind);
+  }) as const satisfies ConfigPanelKind;
 
 /**
  * Declares a by-value kind whose config is validated against `configSchema` when it is executed,
@@ -136,12 +136,12 @@ export const defineReferencedConfigPanelKind = <const Type extends string>({
         panelContent: { type: kind.embeddableType, config: toEmbeddableConfig(result.data) },
       };
     },
-  } as const satisfies ReferencedConfigPanelKind);
+  }) as const satisfies ReferencedConfigPanelKind;
 
 /** Declares a server-side generated kind. The content schema must carry the kind's `type` literal. */
 export const defineRequestPanelKind = <
   const Type extends string,
-  Shape extends TypeDiscriminator<Type> & z.ZodRawShape
+  Shape extends TypeDiscriminator<Type> & z.ZodRawShape,
 >(
   kind: PanelKindBase & {
     type: Type;

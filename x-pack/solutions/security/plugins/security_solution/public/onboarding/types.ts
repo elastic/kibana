@@ -116,8 +116,9 @@ export interface OnboardingConfigAvailabilityProps {
   disabledExperimentalFlagRequired?: keyof ExperimentalFeatures;
 }
 
-export interface OnboardingCardConfig<TMetadata extends {} = {}>
-  extends OnboardingConfigAvailabilityProps {
+export interface OnboardingCardConfig<
+  TMetadata extends {} = {},
+> extends OnboardingConfigAvailabilityProps {
   id: OnboardingCardId;
   title: string;
   icon: IconType;

@@ -181,7 +181,7 @@ describe('createOrUpdateIndexTemplate', () => {
           },
         },
       ],
-    } as unknown as Awaited<ReturnType<typeof clusterClient.indices.getIndexTemplate>>);
+    }) as unknown as Awaited<ReturnType<typeof clusterClient.indices.getIndexTemplate>>;
 
   // Installs once against an empty cluster to capture the hash this template stamps.
   const captureInstalledHash = async (): Promise<string> => {

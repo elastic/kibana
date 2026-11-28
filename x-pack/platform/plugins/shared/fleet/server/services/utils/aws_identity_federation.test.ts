@@ -14,7 +14,7 @@ describe('isAwsIdentityFederationEnabled', () => {
   const contextWith = (getBooleanValue: jest.Mock) =>
     ({
       core: Promise.resolve({ featureFlags: { getBooleanValue } }),
-    } as unknown as FleetRequestHandlerContext);
+    }) as unknown as FleetRequestHandlerContext;
 
   it.each([true, false])('reads the flag from the request context when it is %s', async (flag) => {
     const getBooleanValue = jest.fn().mockResolvedValue(flag);

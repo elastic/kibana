@@ -34,7 +34,7 @@ describe('handleTransformReauthorizeAndStart - install source gate', () => {
     ({
       install_source: installSource,
       installed_es: ids.map((id) => ({ id, type: ElasticsearchAssetType.transform })),
-    } as any);
+    }) as any;
 
   const reauthorize = (ids: string[] = [transformId]) =>
     handleTransformReauthorizeAndStart({

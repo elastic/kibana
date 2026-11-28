@@ -94,7 +94,7 @@ const buildTemplateInstalledEvent = (
 ): TemplateInstalledEvent => {
   // Only a catalog template's form is described: the field names and connector
   // types in an uploaded file are free text.
-  const describeForm = origin === 'install';
+  const describeForm = origin === 'catalog';
   const { templateSlug, templateVersion }: TemplateOriginFields = storedOrigin ?? {};
   const catalogTemplate = findCatalogTemplate(library.getCachedTemplates(), templateSlug);
 
@@ -137,15 +137,12 @@ export class LibraryTelemetry {
    * by field, so nothing else added to the failure later can reach telemetry.
    */
   readonly reportCatalogFailed = (failure: LibraryFailure): void => {
-    this.report(
-      LIBRARY_CATALOG_FAILED_EVENT_TYPE,
-      (): LibraryCatalogFailedEvent => ({
-        operation: failure.operation,
-        fetchErrorReason: failure.reason,
-        sourceMode: this.deps.library.getHealth().sourceMode,
-        ...(failure.operation === 'template' ? { templateSlug: failure.templateSlug } : {}),
-      })
-    );
+    this.report(LIBRARY_CATALOG_FAILED_EVENT_TYPE, (): LibraryCatalogFailedEvent => ({
+      operation: failure.operation,
+      fetchErrorReason: failure.reason,
+      sourceMode: this.deps.library.getHealth().sourceMode,
+      ...(failure.operation === 'template' ? { templateSlug: failure.templateSlug } : {}),
+    }));
   };
 
   private report<T extends object>(eventType: string, buildEvent: () => T): void {

@@ -233,10 +233,10 @@ export class LensConfigBuilder {
     return 'visualizationType' in config
       ? config.visualizationType
       : isLensLegacyFormat(config)
-      ? config.chartType
-      : 'type' in config
-      ? config.type
-      : null;
+        ? config.chartType
+        : 'type' in config
+          ? config.type
+          : null;
   }
 
   /**

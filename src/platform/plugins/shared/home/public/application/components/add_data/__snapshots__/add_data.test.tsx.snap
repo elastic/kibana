@@ -49,7 +49,7 @@ exports[`AddData render 1`] = `
         </EuiButton>
         <EuiButtonEmpty
           data-test-subj="addSampleData"
-          href="#/tutorial_directory/sampleData"
+          href="#/tutorial_directory/sampleData?returnAppId=home&returnPath=%23%2F"
           iconType="documents"
         >
           <MemoizedFormattedMessage
@@ -59,7 +59,7 @@ exports[`AddData render 1`] = `
         </EuiButtonEmpty>
         <EuiButtonEmpty
           data-test-subj="uploadFile"
-          href="#/tutorial_directory/fileDataViz"
+          href="#/tutorial_directory/fileDataViz?returnAppId=home&returnPath=%23%2F"
           iconType="download"
         >
           <MemoizedFormattedMessage
@@ -78,10 +78,10 @@ exports[`AddData render 1`] = `
                 "/app/integrations/browse",
               ],
               Array [
-                "#/tutorial_directory/sampleData",
+                "#/tutorial_directory/sampleData?returnAppId=home&returnPath=%23%2F",
               ],
               Array [
-                "#/tutorial_directory/fileDataViz",
+                "#/tutorial_directory/fileDataViz?returnAppId=home&returnPath=%23%2F",
               ],
             ],
             "results": Array [
@@ -91,11 +91,11 @@ exports[`AddData render 1`] = `
               },
               Object {
                 "type": "return",
-                "value": "#/tutorial_directory/sampleData",
+                "value": "#/tutorial_directory/sampleData?returnAppId=home&returnPath=%23%2F",
               },
               Object {
                 "type": "return",
-                "value": "#/tutorial_directory/fileDataViz",
+                "value": "#/tutorial_directory/fileDataViz?returnAppId=home&returnPath=%23%2F",
               },
             ],
           }

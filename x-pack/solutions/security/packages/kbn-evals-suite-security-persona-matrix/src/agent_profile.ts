@@ -50,7 +50,7 @@ export const resolveExpectedToolId = (toolId: string, profile: AgentProfile): st
 
 /** Copy of `examples` whose `metadata.expectedTools` name the tools `profile`'s agent has. */
 export const withProfileExpectedTools = <
-  T extends { metadata?: { expectedTools?: string[] } & Record<string, unknown> }
+  T extends { metadata?: { expectedTools?: string[] } & Record<string, unknown> },
 >(
   examples: readonly T[],
   profile: AgentProfile

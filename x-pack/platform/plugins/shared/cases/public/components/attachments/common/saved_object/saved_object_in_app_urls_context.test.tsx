@@ -43,9 +43,9 @@ const soAttachment = (
     type,
     attachmentId,
     metadata: { title: `t-${attachmentId}`, soType },
-  } as unknown as AttachmentUIV2);
+  }) as unknown as AttachmentUIV2;
 
-const caseWith = (comments: AttachmentUIV2[]): CaseUI => ({ ...basicCase, comments } as CaseUI);
+const caseWith = (comments: AttachmentUIV2[]): CaseUI => ({ ...basicCase, comments }) as CaseUI;
 
 describe('SavedObjectInAppUrlsProvider', () => {
   beforeEach(() => {

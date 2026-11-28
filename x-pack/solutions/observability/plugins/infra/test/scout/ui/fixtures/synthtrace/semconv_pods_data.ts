@@ -40,12 +40,12 @@ export function generateSemconvPodsData({
         const docs = pod.omitMemory
           ? [...pod.entity.cpu(), ...pod.entity.network({ interfaces: pod.interfaces })]
           : pod.withoutLimits
-          ? [
-              ...pod.entity.cpuWithoutLimit(),
-              ...pod.entity.memoryWithoutLimit(),
-              ...pod.entity.network({ interfaces: pod.interfaces }),
-            ]
-          : pod.entity.metrics({ interfaces: pod.interfaces });
+            ? [
+                ...pod.entity.cpuWithoutLimit(),
+                ...pod.entity.memoryWithoutLimit(),
+                ...pod.entity.network({ interfaces: pod.interfaces }),
+              ]
+            : pod.entity.metrics({ interfaces: pod.interfaces });
         return docs.map((doc, i) => doc.timestamp(timestamp + i));
       })
     );

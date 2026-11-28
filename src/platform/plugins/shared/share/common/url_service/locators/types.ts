@@ -40,8 +40,9 @@ export interface ILocatorClient extends PersistableStateService<LocatorData> {
 /**
  * A convenience interface used to define and register a locator.
  */
-export interface LocatorDefinition<P extends SerializableRecord>
-  extends Partial<PersistableState<P>> {
+export interface LocatorDefinition<P extends SerializableRecord> extends Partial<
+  PersistableState<P>
+> {
   /**
    * Unique ID of the locator. Should be constant and unique across Kibana.
    */
@@ -180,8 +181,7 @@ export interface KibanaLocation<S = object> {
  * and its params.
  */
 export interface LocatorData<LocatorParams extends SerializableRecord = SerializableRecord>
-  extends VersionedState<LocatorParams>,
-    SerializableRecord {
+  extends VersionedState<LocatorParams>, SerializableRecord {
   /**
    * Locator ID.
    */

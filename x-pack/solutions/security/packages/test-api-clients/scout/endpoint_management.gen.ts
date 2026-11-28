@@ -107,11 +107,11 @@ export type ScoutResponseType = NonNullable<ApiClientOptions['responseType']>;
  */
 export type ScoutResponseBody<
   TResponseType extends ScoutResponseType,
-  TJsonBody = ApiClientResponse['body']
+  TJsonBody = ApiClientResponse['body'],
 > = TResponseType extends 'text' ? string : TResponseType extends 'buffer' ? Buffer : TJsonBody;
 
 export interface ScoutApiRequestOptions<
-  TResponseType extends ScoutResponseType = ScoutResponseType
+  TResponseType extends ScoutResponseType = ScoutResponseType,
 > {
   /** Extra headers merged on top of the defaults, e.g. an API key or a SAML cookie for auth */
   headers?: Record<string, string>;
@@ -164,10 +164,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
-    const path = `${basePath}${replaceParams(
-      '/api/endpoint/protection_updates_note/{package_policy_id}',
-      encodePathParams(props.params)
-    )}`;
+    const path = `${basePath}${replaceParams('/api/endpoint/protection_updates_note/{package_policy_id}', encodePathParams(props.params))}`;
 
     return apiClient.post<
       ScoutResponseBody<TResponseType, CreateUpdateProtectionUpdatesNoteResponse>
@@ -216,10 +213,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
-    const path = `${basePath}${replaceParams(
-      '/api/endpoint/action/{action_id}/file/{file_id}/download',
-      encodePathParams(props.params)
-    )}`;
+    const path = `${basePath}${replaceParams('/api/endpoint/action/{action_id}/file/{file_id}/download', encodePathParams(props.params))}`;
 
     return apiClient.get<ScoutResponseBody<TResponseType>>(path, {
       headers: {
@@ -242,10 +236,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, EndpointFileInfoResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
-    const path = `${basePath}${replaceParams(
-      '/api/endpoint/action/{action_id}/file/{file_id}',
-      encodePathParams(props.params)
-    )}`;
+    const path = `${basePath}${replaceParams('/api/endpoint/action/{action_id}/file/{file_id}', encodePathParams(props.params))}`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, EndpointFileInfoResponse>>(path, {
       headers: {
@@ -574,10 +565,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, GetEndpointSuggestionsResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
-    const path = `${basePath}${replaceParams(
-      '/internal/api/endpoint/suggestions/{suggestion_type}',
-      encodePathParams(props.params)
-    )}`;
+    const path = `${basePath}${replaceParams('/internal/api/endpoint/suggestions/{suggestion_type}', encodePathParams(props.params))}`;
 
     return apiClient.post<ScoutResponseBody<TResponseType, GetEndpointSuggestionsResponse>>(path, {
       headers: {
@@ -626,10 +614,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
-    const path = `${basePath}${replaceParams(
-      '/api/endpoint/protection_updates_note/{package_policy_id}',
-      encodePathParams(props.params)
-    )}`;
+    const path = `${basePath}${replaceParams('/api/endpoint/protection_updates_note/{package_policy_id}', encodePathParams(props.params))}`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, GetProtectionUpdatesNoteResponse>>(path, {
       headers: {

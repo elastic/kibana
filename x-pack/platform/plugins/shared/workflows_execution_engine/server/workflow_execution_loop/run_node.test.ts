@@ -92,8 +92,8 @@ describe('runNode', () => {
       scopeStack,
       abortController: new AbortController(),
       contextManager: {
-        ensureContextReady: jest.fn().mockResolvedValue(undefined),
-        releaseReadPins: jest.fn(),
+        prepareContext: jest.fn().mockResolvedValue(undefined),
+        releaseContext: jest.fn(),
       },
     } as unknown as jest.Mocked<StepExecutionRuntime>;
 
@@ -132,7 +132,7 @@ describe('runNode', () => {
         getWorkflowExecutionById: jest.fn().mockResolvedValue(null),
       },
       stepIoService: {
-        releaseTransientlyRehydratedOutputs: jest.fn(),
+        getOutputSizeStats: jest.fn().mockReturnValue({ totalBytes: 0, stepCount: 0 }),
       },
       signal: taskAbortController.signal,
     } as unknown as RunNodeTestParams;
@@ -518,32 +518,31 @@ describe('runNode', () => {
     });
   });
 
-  describe('releaseReadPins lifecycle hook (pin cleanup on node exit)', () => {
-    it('calls releaseReadPins on every successful run', async () => {
+  describe('node context snapshot', () => {
+    it('prepares the context once on every successful run and drops it afterwards', async () => {
       await runNode(mockParams);
 
-      expect(mockStepExecutionRuntime.contextManager.releaseReadPins).toHaveBeenCalledTimes(1);
+      expect(mockStepExecutionRuntime.contextManager.prepareContext).toHaveBeenCalledTimes(1);
+      expect(mockStepExecutionRuntime.contextManager.releaseContext).toHaveBeenCalledTimes(1);
     });
 
-    it('calls releaseReadPins even when run() throws', async () => {
-      mockNodeImplementation.run.mockRejectedValue(new Error('node exploded'));
+    it('drops the snapshot when the node throws', async () => {
+      mockNodeImplementation.run = jest.fn().mockRejectedValue(new Error('step failed'));
 
       await runNode(mockParams);
 
-      // Error is caught → captureError on the cursor, but the finally block still fires.
-      expect(mockParams.workflowExecutionCursor.captureError).toHaveBeenCalled();
-      expect(mockStepExecutionRuntime.contextManager.releaseReadPins).toHaveBeenCalledTimes(1);
+      expect(mockStepExecutionRuntime.contextManager.prepareContext).toHaveBeenCalledTimes(1);
+      expect(mockStepExecutionRuntime.contextManager.releaseContext).toHaveBeenCalledTimes(1);
     });
 
-    it('calls releaseReadPins on the status !== RUNNING short-circuit even though ensureContextReady never ran', async () => {
-      // Verifies idempotency: the pin release fires in finally regardless of whether
-      // ensureContextReady set any pins (eviction-disabled fast path, or early return).
+    it('does not prepare the context when the execution is no longer RUNNING', async () => {
       workflowExecution.status = ExecutionStatus.CANCELLED;
 
       await runNode(mockParams);
 
       expect(mockNodeImplementation.run).not.toHaveBeenCalled();
-      expect(mockStepExecutionRuntime.contextManager.releaseReadPins).toHaveBeenCalledTimes(1);
+      expect(mockStepExecutionRuntime.contextManager.prepareContext).not.toHaveBeenCalled();
+      expect(mockStepExecutionRuntime.contextManager.releaseContext).not.toHaveBeenCalled();
     });
   });
 });

@@ -71,7 +71,7 @@ describe('decisionTreePrepareStepDefinition', () => {
       abortSignal,
       stepId: 'decision_tree_prepare',
       stepType: 'nightshift.decisionTreePrepare',
-    } as never);
+    }) as never;
 
   const run = (input: Record<string, unknown>, executionId?: string, abortSignal?: AbortSignal) =>
     decisionTreePrepareStepDefinition({

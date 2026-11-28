@@ -12,6 +12,7 @@ import type {
   MitreSubtechnique,
   MitreTechnique,
 } from '@kbn/security-mitre-attack-common';
+import { MitreDataUnavailableError } from '@kbn/security-mitre-attack-common';
 
 /**
  * The slice of a MITRE ATT&CK Enterprise technique or sub-technique that Tier 2
@@ -30,6 +31,9 @@ export interface MitreCatalogEntry {
 export interface MitreCatalog {
   techniqueById: ReadonlyMap<string, MitreCatalogEntry>;
   subtechniqueById: ReadonlyMap<string, MitreCatalogEntry>;
+  unavailableReason?: 'disabled' | 'population_failed' | 'no_client';
+  /** True when the data service is degraded — positive matches are reliable but absent IDs may be missing due to incomplete population, not because they are invalid. */
+  degraded?: boolean;
 }
 
 type TechniqueLike = MitreTechnique | MitreSubtechnique;
@@ -82,9 +86,22 @@ export const buildMitreCatalog = (entities: MitreEntity[]): MitreCatalog => {
   return { techniqueById, subtechniqueById };
 };
 
-const EMPTY_CATALOG: MitreCatalog = {
+const EMPTY_CATALOG_NO_CLIENT: MitreCatalog = {
   techniqueById: new Map(),
   subtechniqueById: new Map(),
+  unavailableReason: 'no_client',
+};
+
+const EMPTY_CATALOG_FAILED: MitreCatalog = {
+  techniqueById: new Map(),
+  subtechniqueById: new Map(),
+  unavailableReason: 'population_failed',
+};
+
+const EMPTY_CATALOG_DISABLED: MitreCatalog = {
+  techniqueById: new Map(),
+  subtechniqueById: new Map(),
+  unavailableReason: 'disabled',
 };
 
 // Global ATT&CK Enterprise reference data, identical for every space; the client is created once at mitreAttack start.
@@ -109,35 +126,57 @@ export const getMitreCatalog = async ({
   logger?: Logger;
 } = {}): Promise<MitreCatalog> => {
   if (!mitreDataClient) {
-    logger?.debug('MITRE data client is unavailable');
-    return EMPTY_CATALOG;
+    logger?.debug('MITRE data client is unavailable (plugin disabled or managed source off)');
+    return EMPTY_CATALOG_NO_CLIENT;
   }
 
   if (cachedCatalog) return cachedCatalog;
 
+  // Both reads are needed: the snapshot before guards a repair finishing mid-read, and the read
+  // after catches a population that list() itself started and that ended degraded (partial data).
+  const statusBefore = mitreDataClient.getStatus().status;
+
   let techniques: MitreTechnique[];
   let subtechniques: MitreSubtechnique[];
+  let statusAfter: string;
   try {
     ({ techniques, subtechniques } = await mitreDataClient.list({
       framework: 'enterprise',
       status: 'all',
     }));
+    statusAfter = mitreDataClient.getStatus().status;
   } catch (error) {
-    // A transient read failure must not fail the hunt, retry on the next call.
+    if (error instanceof MitreDataUnavailableError) {
+      if (error.reason === 'disabled') {
+        logger?.debug('MITRE data client reports disabled; catalog permanently unavailable');
+        return EMPTY_CATALOG_DISABLED;
+      }
+      logger?.warn(
+        `MITRE data unavailable (${error.reason}); the hunt run is skipped, retryable on next call`
+      );
+      return EMPTY_CATALOG_FAILED;
+    }
     logger?.warn(
       `Failed to load the MITRE catalog; the hunt run is skipped: ${
         error instanceof Error ? error.message : String(error)
       }`
     );
-    return EMPTY_CATALOG;
+    return EMPTY_CATALOG_FAILED;
   }
   if (techniques.length === 0 && subtechniques.length === 0) {
     logger?.debug(
       'MITRE collection is empty (managed MITRE data unavailable: population failed or data missing); not caching catalog'
     );
-    return EMPTY_CATALOG;
+    return EMPTY_CATALOG_FAILED;
   }
 
-  cachedCatalog = buildMitreCatalog([...techniques, ...subtechniques]);
-  return cachedCatalog;
+  const isDegraded = statusBefore === 'degraded' || statusAfter === 'degraded';
+  const catalog: MitreCatalog = {
+    ...buildMitreCatalog([...techniques, ...subtechniques]),
+    ...(isDegraded && { degraded: true }),
+  };
+  if (statusBefore === 'ready' && statusAfter === 'ready') {
+    cachedCatalog = catalog;
+  }
+  return catalog;
 };

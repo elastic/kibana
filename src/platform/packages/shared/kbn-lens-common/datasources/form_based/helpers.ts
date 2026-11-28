@@ -39,8 +39,8 @@ export function isColumnFormatted(
 ): column is FormattedIndexPatternColumn | TextBasedLayerColumn {
   return Boolean(
     'params' in column &&
-      (column as FormattedIndexPatternColumn).params &&
-      'format' in (column as FormattedIndexPatternColumn).params!
+    (column as FormattedIndexPatternColumn).params &&
+    'format' in (column as FormattedIndexPatternColumn).params!
   );
 }
 

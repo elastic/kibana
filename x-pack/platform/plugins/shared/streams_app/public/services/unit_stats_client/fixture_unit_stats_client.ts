@@ -497,4 +497,4 @@ export const createFixtureStreamsRepositoryClient = (
     fetch: async (_endpoint: string, { params }: { params: { body: StreamsUnit.StatsRequest } }) =>
       withRequestedSeries(STATS_FIXTURE_RESPONSES[scenario], params.body.components ?? []),
     // The type of the client is that of every route, and a story answers only this one.
-  } as unknown as StreamsRepositoryClient);
+  }) as unknown as StreamsRepositoryClient;

@@ -395,11 +395,11 @@ describe('digital experience apps', () => {
       const eventNameOf = (doc: EdotBrowserDocument) =>
         'event_name' in doc ? doc.event_name : undefined;
       const isFrustration = (doc: EdotBrowserDocument) =>
-        String(eventNameOf(doc)).startsWith('browser.frustration.');
+        String(eventNameOf(doc)).startsWith('elastic.frustration.');
       const docs = generate();
       const signals = docs.filter(isFrustration);
       const ofKind = (kind: string) =>
-        signals.filter((doc) => eventNameOf(doc) === `browser.frustration.${kind}`);
+        signals.filter((doc) => eventNameOf(doc) === `elastic.frustration.${kind}`);
 
       it('reports rage, dead and error clicks on the clicked element', () => {
         ['rage_click', 'dead_click', 'error_click'].forEach((kind) =>
@@ -429,7 +429,7 @@ describe('digital experience apps', () => {
 
       it('repeats the click of a rage click, and counts the clicks', () => {
         ofKind('rage_click').forEach(({ attributes = {}, ...doc }) => {
-          const count = attributes['browser.frustration.click_count'] as number;
+          const count = attributes['elastic.frustration.click_count'] as number;
           const burst = docs.filter(
             (other) =>
               eventNameOf(other) === 'browser.user_action.click' &&
@@ -1345,7 +1345,7 @@ describe('digital experience apps', () => {
 
     describe('frustration signals', () => {
       const signals = docs.filter((doc) =>
-        String('event_name' in doc ? doc.event_name : '').startsWith('browser.frustration.')
+        String('event_name' in doc ? doc.event_name : '').startsWith('elastic.frustration.')
       );
       const sessionIdOf = (doc: EdotBrowserDocument) => attribute(doc, 'session.id');
       const signalsPerSession = (all: EdotBrowserDocument[], ofSignals = signals) => {
@@ -1360,7 +1360,7 @@ describe('digital experience apps', () => {
       const ofVersion = (all: EdotBrowserDocument[], version: string) =>
         all.filter((doc) => doc.resource?.attributes?.['service.version'] === version);
       const errorClicksOn = (all: EdotBrowserDocument[], selector: string) =>
-        eventsOf(all, 'browser.frustration.error_click').filter(
+        eventsOf(all, 'elastic.frustration.error_click').filter(
           (doc) => attribute(doc, 'browser.css_selector') === selector
         );
 
@@ -1615,24 +1615,23 @@ describe('digital experience ongoing sessions', () => {
     const store: OngoingSessionStore<EdotBrowserDocument> = new Map();
     const generate =
       (key: string, created: number[] = []) =>
-      (timeRange: Timerange) =>
-        [
-          generateOngoingPerMinute(timeRange, 2, {
-            store,
-            key,
-            maxDuration: MAX_DURATION,
-            create: ({ time, index }) => {
-              created.push(index);
-              return OFFSETS.map(
-                (offset) =>
-                  new Serializable<EdotBrowserDocument>({
-                    '@timestamp': time + offset,
-                    event_name: String(index),
-                  })
-              );
-            },
-          }),
-        ];
+      (timeRange: Timerange) => [
+        generateOngoingPerMinute(timeRange, 2, {
+          store,
+          key,
+          maxDuration: MAX_DURATION,
+          create: ({ time, index }) => {
+            created.push(index);
+            return OFFSETS.map(
+              (offset) =>
+                new Serializable<EdotBrowserDocument>({
+                  '@timestamp': time + offset,
+                  event_name: String(index),
+                })
+            );
+          },
+        }),
+      ];
     const describeDocs = (docs: EdotBrowserDocument[]) =>
       docs.map((doc) => `${'event_name' in doc ? doc.event_name : ''}@${timeOf(doc)}`).sort();
 

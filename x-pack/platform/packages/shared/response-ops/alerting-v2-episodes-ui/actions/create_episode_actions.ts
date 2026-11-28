@@ -15,7 +15,11 @@ import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { QueryClient } from '@kbn/react-query';
-import type { EpisodeActionExtension, EpisodeDataSource } from '../types/episode_data_source';
+import type {
+  EpisodeActionExtension,
+  EpisodeDataSource,
+  EpisodeSnoozePayload,
+} from '../types/episode_data_source';
 import type { AlertEpisode } from '../queries/episodes_query';
 import { isSourceEpisode } from '../queries/episodes_query';
 import { withEpisodeWritePrivilege, type CanWriteEpisode } from '../utils/episode_write_privilege';
@@ -75,16 +79,14 @@ export const createEpisodeActions = (deps: EpisodeActionsDeps): EpisodeAction[] 
     additionalDataSource?.actionExtensions?.find((e) => e.actionId === id);
   const actionDeps = { http: deps.http, notifications: deps.notifications };
   const canWriteEpisode = (episode: AlertEpisode): boolean =>
-    isSourceEpisode(episode) ? canWriteSourceEpisode?.(episode) ?? false : canWriteNativeEpisodes;
+    isSourceEpisode(episode) ? (canWriteSourceEpisode?.(episode) ?? false) : canWriteNativeEpisodes;
 
   return [
     createAckAction(actionDeps, ext('ALERTING_V2_ACK_EPISODE')),
     createUnackAction(actionDeps, ext('ALERTING_V2_UNACK_EPISODE')),
     createSnoozeAction(
       deps,
-      ext('ALERTING_V2_SNOOZE_EPISODE') as
-        | EpisodeActionExtension<{ snoozedUntil: string | null }>
-        | undefined
+      ext('ALERTING_V2_SNOOZE_EPISODE') as EpisodeActionExtension<EpisodeSnoozePayload> | undefined
     ),
     createUnsnoozeAction(actionDeps, ext('ALERTING_V2_UNSNOOZE_EPISODE')),
     createResolveAction(actionDeps, ext('ALERTING_V2_RESOLVE_EPISODE')),

@@ -49,7 +49,7 @@ export class AutomaticImportResponseFactory {
     };
 
     const message =
-      body instanceof Error ? body.message : body ?? STATUS_CODE_TO_ERROR_MESSAGE[statusCode];
+      body instanceof Error ? body.message : (body ?? STATUS_CODE_TO_ERROR_MESSAGE[statusCode]);
 
     return this.response.custom({
       headers: defaultedHeaders,

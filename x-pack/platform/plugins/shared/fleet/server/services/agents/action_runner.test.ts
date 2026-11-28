@@ -112,7 +112,7 @@ class TestActionRunner extends ActionRunner {
   }
 }
 
-const createAgent = (id: string): Agent => ({ id, sort: [id] } as unknown as Agent);
+const createAgent = (id: string): Agent => ({ id, sort: [id] }) as unknown as Agent;
 
 const badRequest = (type: string) =>
   new EsErrors.ResponseError({
@@ -560,7 +560,7 @@ describe('ActionRunner', () => {
             page: 1,
             perPage: 2,
             pit: 'rotated-pit',
-          } as Awaited<ReturnType<typeof getAgentsByKuery>>)
+          }) as Awaited<ReturnType<typeof getAgentsByKuery>>
       );
 
       await createRunner({ total: 2 }).runActionAsyncWithRetry();

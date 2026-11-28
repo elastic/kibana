@@ -64,8 +64,8 @@ const TRIGGER_ICONS: Record<string, IconType> = {
 // hardcoded fallback tables available.
 const renderStepIcon: RenderStepIcon = ({ stepType, isTrigger }) => {
   const iconType = isTrigger
-    ? TRIGGER_ICONS[stepType] ?? HardcodedIcons.trigger
-    : getConnectorSpecIcon(stepType) ?? getStepIconType(stepType);
+    ? (TRIGGER_ICONS[stepType] ?? HardcodedIcons.trigger)
+    : (getConnectorSpecIcon(stepType) ?? getStepIconType(stepType));
 
   return (
     <Suspense fallback={<EuiLoadingSpinner size="s" />}>
