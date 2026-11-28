@@ -103,7 +103,8 @@ const toMeasure = ({
   };
 };
 
-const errorsPer100 = (jsErrors: number | null, pageLoads: number | null): number | null =>
+/** JS errors per 100 page loads; `null` without page loads. */
+export const errorsPer100 = (jsErrors: number | null, pageLoads: number | null): number | null =>
   jsErrors === null || !pageLoads ? null : (jsErrors / pageLoads) * 100;
 
 const vitalValue = (webVitals: WebVitals, vital: CoreWebVital): number | null => {
@@ -164,6 +165,8 @@ export interface BaselineKpis {
   loadTime: number | null;
   errorFreeSessions: number | null;
   jsErrors: number | null;
+  /** The mean of each period's rate, not the rate of the mean counts, which busy periods would outweigh. */
+  jsErrorsPer100: number | null;
   failedHttpRequests: number | null;
   requestLatency: number | null;
 }
@@ -174,6 +177,7 @@ export const NO_BASELINE_KPIS: BaselineKpis = {
   loadTime: null,
   errorFreeSessions: null,
   jsErrors: null,
+  jsErrorsPer100: null,
   failedHttpRequests: null,
   requestLatency: null,
 };
@@ -288,7 +292,7 @@ export const buildScorecard = ({
       betterWhen: 'lower',
       value: errorsPer100(jsErrors.value, pageLoads.value),
       previous: errorsPer100(jsErrors.previous, pageLoads.previous),
-      baseline: errorsPer100(baselineKpis.jsErrors, baselineKpis.pageLoads),
+      baseline: baselineKpis.jsErrorsPer100,
       sampleCount: pageLoads.value,
     }),
     toMeasure({

@@ -14,7 +14,13 @@ import {
 } from '../../routes/overview/otel/get_otel_overview_kpis';
 import type { ApplicationSearch } from '../../routes/application_tab_route';
 import { sortEnvironments } from '../helpers/environment';
-import { BASELINE_PERIODS, buildScorecard, NO_BASELINE_KPIS, type BaselineKpis } from './scorecard';
+import {
+  BASELINE_PERIODS,
+  buildScorecard,
+  errorsPer100,
+  NO_BASELINE_KPIS,
+  type BaselineKpis,
+} from './scorecard';
 import {
   toWebVitalsResult,
   webVitalsSearch,
@@ -58,6 +64,8 @@ export const averageBaselineKpis = (periods: PeriodKpis[]): BaselineKpis => {
     loadTime: mean(({ loadTime }) => loadTime),
     errorFreeSessions: mean(({ errorFreeSessions }) => errorFreeSessions),
     jsErrors: mean(({ jsErrors }) => jsErrors),
+    // Like the shares, a rate is the mean of the periods' rates.
+    jsErrorsPer100: mean(({ jsErrors, pageLoads }) => errorsPer100(jsErrors, pageLoads)),
     failedHttpRequests: mean(({ failedHttpRatio }) => failedHttpRatio),
     requestLatency: mean(({ requestLatency }) => requestLatency),
   };

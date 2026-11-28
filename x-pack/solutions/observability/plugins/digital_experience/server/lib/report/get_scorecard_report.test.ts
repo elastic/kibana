@@ -194,6 +194,16 @@ describe('averageBaselineKpis', () => {
     ).toMatchObject({ sessions: 0, jsErrors: 1.5, failedHttpRequests: 0.25, requestLatency: 100 });
   });
 
+  it("averages the periods' error rates, not the rate of their mean counts", () => {
+    // 10 and 1 errors per 100 page loads: 5.5 on average, though 10 errors in 910 loads are 1.1.
+    expect(
+      averageBaselineKpis([
+        { ...PERIOD_KPIS, jsErrors: 1, pageLoads: 10 },
+        { ...PERIOD_KPIS, jsErrors: 9, pageLoads: 900 },
+      ]).jsErrorsPer100
+    ).toBeCloseTo(5.5);
+  });
+
   it('has no baseline without any telemetry', () => {
     expect(averageBaselineKpis([NO_KPIS, NO_KPIS]).sessions).toBeNull();
   });

@@ -202,8 +202,7 @@ describe('buildScorecard', () => {
         ...NO_BASELINE_KPIS,
         loadTime: 1200,
         errorFreeSessions: 0.97,
-        jsErrors: 5,
-        pageLoads: 500,
+        jsErrorsPer100: 1,
       }
     );
 
