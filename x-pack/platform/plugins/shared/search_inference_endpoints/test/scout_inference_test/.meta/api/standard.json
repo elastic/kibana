@@ -1,5 +1,5 @@
 {
-  "sha1": "0298d08dab75b9f8348bb25951f7049a5f10bf6b",
+  "sha1": "a0919756153ebe782b845552e33011b58a213233",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -15,8 +15,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_features_authorization.spec.ts",
-        "line": 20,
-        "column": 10
+        "line": 19,
+        "column": 96
       }
     },
     {
@@ -30,8 +30,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_features_authorization.spec.ts",
-        "line": 30,
-        "column": 10
+        "line": 23,
+        "column": 40
       }
     },
     {
@@ -45,8 +45,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_features_authorization.spec.ts",
-        "line": 40,
-        "column": 10
+        "line": 31,
+        "column": 13
       }
     },
     {
@@ -60,8 +60,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_authorization.spec.ts",
-        "line": 36,
-        "column": 10
+        "line": 30,
+        "column": 16
       }
     },
     {
@@ -75,8 +75,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_authorization.spec.ts",
-        "line": 45,
-        "column": 10
+        "line": 35,
+        "column": 64
       }
     },
     {
@@ -90,8 +90,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_authorization.spec.ts",
-        "line": 57,
-        "column": 10
+        "line": 45,
+        "column": 75
       }
     },
     {
@@ -105,8 +105,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_authorization.spec.ts",
-        "line": 65,
-        "column": 10
+        "line": 53,
+        "column": 12
       }
     },
     {
@@ -120,8 +120,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_crud.spec.ts",
-        "line": 32,
-        "column": 10
+        "line": 27,
+        "column": 40
       }
     },
     {
@@ -135,8 +135,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_crud.spec.ts",
-        "line": 42,
-        "column": 10
+        "line": 34,
+        "column": 40
       }
     },
     {
@@ -150,8 +150,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_crud.spec.ts",
-        "line": 56,
-        "column": 10
+        "line": 47,
+        "column": 27
       }
     },
     {
@@ -165,8 +165,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_crud.spec.ts",
-        "line": 75,
-        "column": 10
+        "line": 67,
+        "column": 54
       }
     },
     {
@@ -180,8 +180,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_spaces.spec.ts",
-        "line": 41,
-        "column": 10
+        "line": 34,
+        "column": 5
       }
     },
     {
@@ -195,8 +195,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_spaces.spec.ts",
-        "line": 57,
-        "column": 10
+        "line": 50,
+        "column": 21
       }
     },
     {
@@ -210,8 +210,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_spaces.spec.ts",
-        "line": 76,
-        "column": 10
+        "line": 68,
+        "column": 23
       }
     },
     {
@@ -225,8 +225,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_validation.spec.ts",
-        "line": 20,
-        "column": 10
+        "line": 16,
+        "column": 45
       }
     },
     {
@@ -241,7 +241,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_validation.spec.ts",
         "line": 36,
-        "column": 10
+        "column": 11
       }
     },
     {
@@ -255,8 +255,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_validation.spec.ts",
-        "line": 54,
-        "column": 10
+        "line": 55,
+        "column": 22
       }
     },
     {
@@ -270,8 +270,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/inference_settings_validation.spec.ts",
-        "line": 66,
-        "column": 10
+        "line": 68,
+        "column": 21
       }
     },
     {
@@ -285,8 +285,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/region_policy_authorization.spec.ts",
-        "line": 34,
-        "column": 10
+        "line": 27,
+        "column": 56
       }
     },
     {
@@ -300,8 +300,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/region_policy_authorization.spec.ts",
-        "line": 47,
-        "column": 10
+        "line": 35,
+        "column": 5
       }
     },
     {
@@ -315,8 +315,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/region_policy_authorization.spec.ts",
-        "line": 65,
-        "column": 10
+        "line": 50,
+        "column": 47
       }
     },
     {
@@ -330,8 +330,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/region_policy_authorization.spec.ts",
-        "line": 76,
-        "column": 10
+        "line": 60,
+        "column": 14
       }
     },
     {
@@ -345,8 +345,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/region_policy_authorization.spec.ts",
-        "line": 94,
-        "column": 10
+        "line": 77,
+        "column": 5
       }
     },
     {
@@ -360,8 +360,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/region_policy_authorization.spec.ts",
-        "line": 107,
-        "column": 10
+        "line": 81,
+        "column": 56
       }
     },
     {
@@ -375,8 +375,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/region_policy_authorization.spec.ts",
-        "line": 128,
-        "column": 10
+        "line": 99,
+        "column": 23
       }
     },
     {
@@ -390,8 +390,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/region_policy_authorization.spec.ts",
-        "line": 139,
-        "column": 10
+        "line": 113,
+        "column": 23
       }
     },
     {
@@ -405,8 +405,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/region_policy_authorization.spec.ts",
-        "line": 149,
-        "column": 10
+        "line": 119,
+        "column": 18
       }
     },
     {
@@ -420,8 +420,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/region_policy_authorization.spec.ts",
-        "line": 159,
-        "column": 10
+        "line": 127,
+        "column": 83
       }
     },
     {
@@ -435,8 +435,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/region_policy_authorization.spec.ts",
-        "line": 170,
-        "column": 10
+        "line": 138,
+        "column": 11
       }
     },
     {
@@ -450,8 +450,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/region_policy_crud.spec.ts",
-        "line": 30,
-        "column": 10
+        "line": 24,
+        "column": 46
       }
     },
     {
@@ -465,8 +465,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/region_policy_crud.spec.ts",
-        "line": 39,
-        "column": 10
+        "line": 30,
+        "column": 77
       }
     },
     {
@@ -480,8 +480,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/region_policy_crud.spec.ts",
-        "line": 67,
-        "column": 10
+        "line": 63,
+        "column": 12
       }
     },
     {
@@ -495,8 +495,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/region_policy_crud.spec.ts",
-        "line": 94,
-        "column": 10
+        "line": 97,
+        "column": 31
       }
     },
     {
@@ -510,8 +510,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/region_policy_crud.spec.ts",
-        "line": 131,
-        "column": 10
+        "line": 138,
+        "column": 16
       }
     },
     {
@@ -525,8 +525,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/region_policy_crud.spec.ts",
-        "line": 145,
-        "column": 10
+        "line": 154,
+        "column": 82
       }
     },
     {
@@ -540,8 +540,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/region_policy_crud.spec.ts",
-        "line": 154,
-        "column": 10
+        "line": 159,
+        "column": 39
       }
     },
     {
@@ -555,8 +555,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/region_policy_crud.spec.ts",
-        "line": 167,
-        "column": 10
+        "line": 179,
+        "column": 3
       }
     }
   ]

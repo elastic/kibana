@@ -1,5 +1,5 @@
 {
-  "sha1": "11e8604fd7376f5fdcca87c53238176653b4f958",
+  "sha1": "ff585f81ab8bff2b1fb1fa2ab9c19f9aaf1afc53",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -681,7 +681,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/private_location_apis.spec.ts",
-        "line": 179,
+        "line": 177,
         "column": 53
       }
     },
@@ -694,7 +694,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/private_location_apis.spec.ts",
-        "line": 188,
+        "line": 186,
         "column": 23
       }
     },
@@ -707,7 +707,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/private_location_apis.spec.ts",
-        "line": 200,
+        "line": 198,
         "column": 9
       }
     },
@@ -720,7 +720,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/private_location_apis.spec.ts",
-        "line": 207,
+        "line": 205,
         "column": 25
       }
     },
@@ -733,7 +733,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/private_location_apis.spec.ts",
-        "line": 211,
+        "line": 209,
         "column": 25
       }
     },
@@ -746,7 +746,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/private_location_apis.spec.ts",
-        "line": 235,
+        "line": 233,
         "column": 11
       }
     },
@@ -759,7 +759,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/private_location_apis.spec.ts",
-        "line": 242,
+        "line": 240,
         "column": 17
       }
     },
@@ -772,7 +772,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/private_location_apis.spec.ts",
-        "line": 259,
+        "line": 257,
         "column": 19
       }
     },
@@ -785,7 +785,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/private_location_apis.spec.ts",
-        "line": 273,
+        "line": 271,
         "column": 19
       }
     },
@@ -798,7 +798,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/private_location_apis.spec.ts",
-        "line": 298,
+        "line": 296,
         "column": 29
       }
     },
@@ -811,7 +811,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/private_location_apis.spec.ts",
-        "line": 310,
+        "line": 308,
         "column": 9
       }
     }

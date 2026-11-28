@@ -1,5 +1,5 @@
 {
-  "sha1": "a130c2014eea409a4fce18c4450d7bb04060eaac",
+  "sha1": "0e2f601b8f085c6ab5d8420ddbc5e61a26a8822a",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin_serverless.spec.ts",
-        "line": 21,
-        "column": 7
+        "line": 15,
+        "column": 16
       }
     },
     {
@@ -30,8 +30,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
-        "line": 24,
-        "column": 9
+        "line": 19,
+        "column": 16
       }
     },
     {
@@ -46,8 +46,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
-        "line": 29,
-        "column": 9
+        "line": 24,
+        "column": 10
       }
     },
     {
@@ -62,8 +62,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
-        "line": 39,
-        "column": 9
+        "line": 29,
+        "column": 60
       }
     },
     {
@@ -78,8 +78,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
-        "line": 56,
-        "column": 9
+        "line": 42,
+        "column": 22
       }
     },
     {
@@ -94,8 +94,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
-        "line": 81,
-        "column": 9
+        "line": 61,
+        "column": 13
       }
     },
     {
@@ -110,8 +110,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
-        "line": 89,
-        "column": 9
+        "line": 67,
+        "column": 13
       }
     },
     {
@@ -126,8 +126,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
-        "line": 105,
-        "column": 9
+        "line": 81,
+        "column": 10
       }
     },
     {
@@ -142,8 +142,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
-        "line": 144,
-        "column": 9
+        "line": 116,
+        "column": 24
       }
     },
     {
@@ -158,8 +158,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
-        "line": 150,
-        "column": 9
+        "line": 123,
+        "column": 23
       }
     },
     {
@@ -174,7 +174,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
-        "line": 156,
+        "line": 130,
         "column": 9
       }
     },
@@ -190,8 +190,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
-        "line": 165,
-        "column": 9
+        "line": 136,
+        "column": 30
       }
     },
     {
@@ -206,13 +206,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
-        "line": 182,
-        "column": 9
+        "line": 144,
+        "column": 58
       }
     },
     {
-      "id": "1c8c85aed319853-59e30e1c3b44243",
-      "title": "Homepage - Admin body links should navigate to correct URLs when clicked",
+      "id": "1c8c85aed319853-8a071e8cddceb65",
+      "title": "Homepage - Admin body links should point to correct URLs",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-search",
@@ -222,8 +222,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
-        "line": 192,
-        "column": 9
+        "line": 150,
+        "column": 82
       }
     },
     {
@@ -236,8 +236,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_data_management_user.spec.ts",
-        "line": 31,
-        "column": 14
+        "line": 21,
+        "column": 84
       }
     },
     {
@@ -250,8 +250,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_data_management_user.spec.ts",
-        "line": 51,
-        "column": 14
+        "line": 34,
+        "column": 33
       }
     },
     {
@@ -264,8 +264,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer_serverless.spec.ts",
-        "line": 21,
-        "column": 7
+        "line": 15,
+        "column": 16
       }
     },
     {
@@ -280,8 +280,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
-        "line": 24,
-        "column": 9
+        "line": 19,
+        "column": 16
       }
     },
     {
@@ -296,8 +296,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
-        "line": 32,
-        "column": 9
+        "line": 24,
+        "column": 75
       }
     },
     {
@@ -312,8 +312,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
-        "line": 66,
-        "column": 9
+        "line": 59,
+        "column": 32
       }
     },
     {
@@ -328,8 +328,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
-        "line": 75,
-        "column": 9
+        "line": 62,
+        "column": 26
       }
     },
     {
@@ -344,8 +344,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
-        "line": 81,
-        "column": 9
+        "line": 68,
+        "column": 7
       }
     },
     {
@@ -360,8 +360,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
-        "line": 87,
-        "column": 9
+        "line": 75,
+        "column": 10
       }
     },
     {
@@ -376,8 +376,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
-        "line": 112,
-        "column": 9
+        "line": 87,
+        "column": 93
       }
     },
     {
@@ -392,8 +392,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
-        "line": 120,
-        "column": 9
+        "line": 98,
+        "column": 24
       }
     },
     {
@@ -408,8 +408,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
-        "line": 136,
-        "column": 9
+        "line": 107,
+        "column": 13
       }
     },
     {
@@ -424,13 +424,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
-        "line": 153,
-        "column": 9
+        "line": 117,
+        "column": 13
       }
     },
     {
-      "id": "03e83e549838106-5e1de212dd5bdf1",
-      "title": "Homepage - Viewer body links should navigate to correct URLs when clicked",
+      "id": "03e83e549838106-68fcec50aa6332d",
+      "title": "Homepage - Viewer body links should point to correct URLs",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-search",
@@ -440,8 +440,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
-        "line": 163,
-        "column": 9
+        "line": 129,
+        "column": 24
       }
     }
   ]

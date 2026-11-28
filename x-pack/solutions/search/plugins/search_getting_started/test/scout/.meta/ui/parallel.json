@@ -1,5 +1,5 @@
 {
-  "sha1": "6dca8c58a841e6465d505c153c4bc16c33532826",
+  "sha1": "c56b53bacc0fa7483ad7798dd0e1004c507d3242",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -16,8 +16,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_admin.serverless.spec.ts",
-        "line": 21,
-        "column": 9
+        "line": 16,
+        "column": 61
       }
     },
     {
@@ -32,8 +32,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_admin.spec.ts",
-        "line": 21,
-        "column": 9
+        "line": 17,
+        "column": 25
       }
     },
     {
@@ -48,8 +48,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_admin.spec.ts",
-        "line": 80,
-        "column": 9
+        "line": 73,
+        "column": 13
       }
     },
     {
@@ -64,8 +64,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_admin.spec.ts",
-        "line": 93,
-        "column": 9
+        "line": 82,
+        "column": 15
       }
     },
     {
@@ -80,8 +80,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_admin.spec.ts",
-        "line": 102,
-        "column": 9
+        "line": 90,
+        "column": 7
       }
     },
     {
@@ -96,8 +96,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_admin.spec.ts",
-        "line": 118,
-        "column": 9
+        "line": 102,
+        "column": 13
       }
     },
     {
@@ -114,8 +114,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_admin.spec.ts",
-        "line": 125,
-        "column": 9
+        "line": 108,
+        "column": 13
       }
     },
     {
@@ -130,8 +130,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_admin.spec.ts",
-        "line": 140,
-        "column": 9
+        "line": 120,
+        "column": 23
       }
     },
     {
@@ -146,8 +146,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_viewer.serverless.spec.ts",
-        "line": 21,
-        "column": 9
+        "line": 16,
+        "column": 61
       }
     },
     {
@@ -160,8 +160,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_viewer.serverless.spec.ts",
-        "line": 30,
-        "column": 9
+        "line": 24,
+        "column": 34
       }
     },
     {
@@ -176,8 +176,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_viewer.spec.ts",
-        "line": 21,
-        "column": 9
+        "line": 17,
+        "column": 25
       }
     },
     {
@@ -192,8 +192,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_viewer.spec.ts",
-        "line": 26,
-        "column": 9
+        "line": 21,
+        "column": 58
       }
     }
   ]
