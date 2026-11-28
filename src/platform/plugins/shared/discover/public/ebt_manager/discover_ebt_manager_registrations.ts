@@ -33,6 +33,8 @@ export const CONTEXTUAL_PROFILE_RESOLVED_EVENT_TYPE = 'discover_profile_resolved
 export const CONTEXTUAL_PROFILE_LEVEL = 'contextLevel';
 export const CONTEXTUAL_PROFILE_ID = 'profileId';
 
+export const FIND_PATTERNS_CLICK = 'discover_find_patterns_click';
+
 export const TABS_EVENT_TYPE = 'discover_tabs';
 
 /**
@@ -208,6 +210,7 @@ export const registerDiscoverEBTManagerAnalytics = (
     },
   });
 
+  core.analytics.registerEventType({ eventType: FIND_PATTERNS_CLICK, schema: {} });
   core.analytics.registerEventType(cascadeEventType);
 
   core.analytics.registerEventType(discoverInDashboardEventType);

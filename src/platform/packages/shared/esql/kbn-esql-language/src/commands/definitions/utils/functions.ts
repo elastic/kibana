@@ -161,6 +161,21 @@ export const filterFunctionDefinitions = (
   );
 };
 
+/** Checks whether the editor would offer a named function at the specified location. */
+export const isFunctionAvailableAtLocation = (
+  name: string,
+  location: FunctionFilterPredicates['location'],
+  hasMinimumLicenseRequired: (minimumLicenseRequired: LicenseType) => boolean,
+  activeProduct?: PricingProduct
+): boolean => {
+  const definition = getFunctionDefinition(name);
+  return (
+    !!definition &&
+    filterFunctionDefinitions([definition], { location }, hasMinimumLicenseRequired, activeProduct)
+      .length > 0
+  );
+};
+
 export function getAllFunctions(options?: {
   type?: Array<FunctionDefinition['type']> | FunctionDefinition['type'];
   includeOperators?: boolean;

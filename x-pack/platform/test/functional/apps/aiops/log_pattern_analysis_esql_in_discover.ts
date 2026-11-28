@@ -53,6 +53,37 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await discover.waitUntilSearchingHasFinished();
     });
 
+    it('finds patterns and drills back into the filtered results', async () => {
+      const source = [
+        'FROM logstash-* | WHERE @message IS NOT NULL | LIMIT 1',
+        'EVAL line = ["payment failed on host 1", "payment failed on host 2", "host on failed payment"]',
+        'MV_EXPAND line | EVAL @message = TO_TEXT(line) | KEEP @message',
+      ].join(' | ');
+      await monacoEditor.setCodeEditorValue(source);
+      await testSubjects.click('querySubmitButton');
+      await discover.waitUntilTabIsLoaded();
+      expect(await testSubjects.getVisibleText('dscFindPatternsButton')).to.contain(
+        'Find patterns in @message'
+      );
+      await testSubjects.click('dscFindPatternsButton');
+      await discover.waitUntilTabIsLoaded();
+      await unifiedFieldList.waitUntilFieldlistHasCountOfFields(2);
+      expect(await dataGrid.getHeaderFields()).to.eql(['count', 'pattern']);
+      await dataGrid.clickCellExpandButton(0, { columnName: 'pattern' });
+      await dataGrid.clickCellExpandPopoverAction('patterns-action-view-docs-in-discover');
+      await discover.waitUntilTabIsLoaded();
+      expect(await monacoEditor.getCodeEditorValue()).to.contain(
+        source + '\n  | WHERE @message RLIKE '
+      );
+      expect(await discover.getHitCountInt()).to.be(2);
+      const messages = await Promise.all(
+        [0, 1].map(async (row) =>
+          (await dataGrid.getCellElementByColumnName(row, '@message')).getVisibleText()
+        )
+      );
+      expect(messages.sort()).to.eql(['payment failed on host 1', 'payment failed on host 2']);
+    });
+
     it('should render categorize fields correctly', async () => {
       // set query to be categorize command
       // ensure the columns are correct

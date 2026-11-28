@@ -20,6 +20,7 @@ import type {
   DataGridCellValueElementProps,
 } from '@kbn/unified-data-table';
 import { createElement } from 'react';
+import { getMatchingMessagesQuery } from '../../../../application/main/components/find_patterns/find_patterns_query';
 import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
 import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory } from '../../../profiles';
@@ -125,25 +126,38 @@ export const createPatternsDataSourceProfileProvider = (
               return patternColumns.includes(field.name);
             },
             execute: async (executeContext) => {
-              const index = executeContext.dataView?.getIndexPattern();
-              if (
-                !isOfAggregateQueryType(executeContext.query) ||
-                !executeContext.value ||
-                !index
-              ) {
+              if (!isOfAggregateQueryType(executeContext.query) || !executeContext.value) {
                 return;
               }
 
-              const pattern = extractCategorizeTokens(executeContext.value as string).join(' ');
+              const pattern = executeContext.value as string;
               const categoryField = getCategorizeField(executeContext.query.esql)[0];
 
-              if (!categoryField || !pattern) {
+              if (!categoryField) {
+                return;
+              }
+
+              if (toolkit.actions.updateESQLQuery) {
+                const matchingMessages = getMatchingMessagesQuery(
+                  executeContext.query.esql,
+                  categoryField,
+                  pattern
+                );
+                if (matchingMessages) {
+                  toolkit.actions.updateESQLQuery(matchingMessages);
+                  return;
+                }
+              }
+
+              const index = executeContext.dataView?.getIndexPattern();
+              const tokens = extractCategorizeTokens(pattern).join(' ');
+              if (!index || !tokens) {
                 return;
               }
 
               const query = {
                 ...executeContext.query,
-                esql: `FROM ${index}\n  | WHERE MATCH(${categoryField}, "${pattern}", {"auto_generate_synonyms_phrase_query": false, "fuzziness": 0, "operator": "AND"})\n  | LIMIT ${DOC_LIMIT}`,
+                esql: `FROM ${index}\n  | WHERE MATCH(${categoryField}, "${tokens}", {"auto_generate_synonyms_phrase_query": false, "fuzziness": 0, "operator": "AND"})\n  | LIMIT ${DOC_LIMIT}`,
               };
 
               if (toolkit.actions.openInNewTab) {

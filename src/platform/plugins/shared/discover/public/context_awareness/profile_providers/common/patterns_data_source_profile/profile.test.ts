@@ -14,6 +14,7 @@ import type {
 import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import { EsqlSource } from '@kbn/data-source';
 import { mapEsqlResponseToDatatable } from '@kbn/data-plugin/common';
+import { findPatterns } from '../../../../application/main/components/find_patterns/find_patterns_query';
 import { createProfileProviderSharedServicesMock } from '../../../__mocks__';
 import { DataSourceCategory, SolutionType } from '../../../profiles';
 import { createEsqlDataSource } from '../../../../../common/data_sources';
@@ -47,6 +48,42 @@ const getConfiguration = (
     toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
   })({ columns, settings, dataSource });
 };
+
+it('drills into a generated pattern in the current tab without an index', async () => {
+  const provider = createPatternsDataSourceProfileProvider(
+    createProfileProviderSharedServicesMock()
+  );
+  const updateESQLQuery = jest.fn();
+  const actions = provider.profile.getAdditionalCellActions?.(() => [], {
+    context: {
+      category: DataSourceCategory.Default,
+      patternColumns: ['pattern'],
+      sparklineColumns: [],
+    },
+    toolkit: {
+      ...EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+      actions: { updateESQLQuery },
+    },
+  })();
+  const action = actions?.find(({ id }) => id === 'patterns-action-view-docs-in-discover');
+  if (!action) {
+    throw new Error('Expected the View matching results action');
+  }
+  const source = 'ROW message = TO_TEXT("connection failed")';
+  await action.execute({
+    field: {
+      name: 'pattern',
+      type: 'string',
+      searchable: false,
+      aggregatable: false,
+    },
+    query: { esql: findPatterns(source, 'message') },
+    value: '.*?connection.+?failed.*?',
+  });
+  expect(updateESQLQuery).toHaveBeenCalledWith(
+    source + '\n  | WHERE message RLIKE ".*connection.+failed.*"'
+  );
+});
 
 describe('Patterns numeric column widths', () => {
   it('compacts an aliased SPARKLINE column after mapping the fetched response', async () => {

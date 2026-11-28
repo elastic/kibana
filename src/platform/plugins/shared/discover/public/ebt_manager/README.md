@@ -159,3 +159,7 @@ These counters are reported with `usageCollection.reportUiCounter('discover', ..
 | `loaded`    | `field_statistics_loaded`      | The field statistics table loaded.                         |
 | `loaded`    | `pattern_analysis_loaded`      | The pattern analysis table loaded.                         |
 | `count`     | `ad_hoc_data_view`             | Discover rendered with an ad hoc data view (classic mode). |
+
+### Find patterns
+
+Discover emits `discover_find_patterns_click` each time a user clicks **Find patterns in {field}** in ES|QL results. The event has no payload fields.
