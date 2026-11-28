@@ -1,0 +1,22 @@
+overlay: 1.0.0
+info:
+  title: Microsoft Graph v1.0 corrections for Microsoft Entra ID
+  version: 1.0.0
+actions:
+  - target: $.components.schemas['microsoft.graph.entity','microsoft.graph.passwordProfile'].required[?@ == '@odata.type']
+    description: >-
+      The OpenAPI converter marks @odata.type required on every type because it is the
+      discriminator (https://github.com/microsoft/OpenAPI.NET.OData/issues/243), but Graph only
+      needs it for a derived type sent where a base type is expected. The request examples omit it,
+      including on passwordProfile, in
+      https://learn.microsoft.com/en-us/graph/api/user-update?view=graph-rest-1.0 and
+      https://learn.microsoft.com/en-us/graph/api/user-post-users?view=graph-rest-1.0.
+    remove: true
+  - target: $.components.schemas['microsoft.graph.directoryObject','microsoft.graph.user'].allOf[*].required[?@ == '@odata.type']
+    description: >-
+      As above: the user objects sent in
+      https://learn.microsoft.com/en-us/graph/api/user-update?view=graph-rest-1.0 (accountEnabled,
+      passwordProfile and other properties) and
+      https://learn.microsoft.com/en-us/graph/api/user-post-users?view=graph-rest-1.0 carry no
+      @odata.type.
+    remove: true

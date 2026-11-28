@@ -1,0 +1,76 @@
+{
+  "getUser": {
+    "input": [
+      { "userId": "6e7b768e-07e2-4810-8459-485f84f8f204" },
+      { "userId": "jane@contoso.com" }
+    ],
+    "responses": [
+      {
+        "method": "GET",
+        "path": "/users/{user-id}",
+        "status": 404,
+        "body": {
+          "error": {
+            "code": "Request_ResourceNotFound",
+            "message": "Resource 'jane@contoso.com' does not exist or one of its queried reference-property objects are not present."
+          }
+        }
+      }
+    ]
+  },
+  "getUserGroups": {
+    "input": [{}, { "transitive": false }]
+  },
+  "updateUser": {
+    "input": { "properties": { "department": "Finance" } }
+  },
+  "request": {
+    "input": { "method": "GET", "path": "/users" }
+  },
+  "resetUserMfa": {
+    "responses": [
+      {
+        "method": "GET",
+        "path": "/users/{user-id}/authentication/methods",
+        "status": 200,
+        "body": {
+          "value": [
+            { "@odata.type": "#microsoft.graph.passwordAuthenticationMethod", "id": "28c10230-6103-485e-b985-444c60001490" },
+            { "@odata.type": "#microsoft.graph.fido2AuthenticationMethod", "id": "-2_GRUg2-HYz6_1YG4YRAQ2" },
+            { "@odata.type": "#microsoft.graph.emailAuthenticationMethod", "id": "3ddfcfc8-9383-446f-83cc-3ab9be4be18f" },
+            { "@odata.type": "#microsoft.graph.microsoftAuthenticatorAuthenticationMethod", "id": "6a3a1e9c-2f1e-4f3b-9d5a-2b8f1c3e4d5f" },
+            { "@odata.type": "#microsoft.graph.softwareOathAuthenticationMethod", "id": "b172893e-893e-b172-3e89-72b13e8972b1" },
+            { "@odata.type": "#microsoft.graph.windowsHelloForBusinessAuthenticationMethod", "id": "_jpuR-TGZtk6aQCLF3BQjA2" },
+            { "@odata.type": "#microsoft.graph.temporaryAccessPassAuthenticationMethod", "id": "8d4b8e0f-1f0e-4b7c-9a3e-0c2f5e7a9b1d" },
+            { "@odata.type": "#microsoft.graph.phoneAuthenticationMethod", "id": "3179e48a-750b-4051-897c-87b9720928f7" }
+          ]
+        }
+      }
+    ]
+  },
+  "revokeUserAppAssignment": {
+    "input": [
+      { "appRoleAssignmentId": "41W1zT6z1U-kJxf62svfp1HFE8pMZhxDun-ThPczmJE" },
+      { "resourceId": "0bdbc3c6-8bc2-4c2c-8a42-0e0d9e6a4c2f" }
+    ],
+    "responses": [
+      {
+        "method": "GET",
+        "path": "/users/{user-id}/appRoleAssignments",
+        "status": 200,
+        "body": {
+          "value": [
+            {
+              "@odata.type": "#microsoft.graph.appRoleAssignment",
+              "id": "41W1zT6z1U-kJxf62svfp1HFE8pMZhxDun-ThPczmJE",
+              "appRoleId": "00000000-0000-0000-0000-000000000000",
+              "principalId": "cde4b48d-24b5-4495-8f7b-1fd51da5bb4f",
+              "resourceId": "0bdbc3c6-8bc2-4c2c-8a42-0e0d9e6a4c2f",
+              "resourceDisplayName": "Contoso HR"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
