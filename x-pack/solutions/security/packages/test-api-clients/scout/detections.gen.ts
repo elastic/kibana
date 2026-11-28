@@ -615,10 +615,7 @@ finalize it.
   ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, GetRuleExecutionEventsResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
-    const path = `${basePath}${replaceParams(
-      '/internal/detection_engine/rules/{ruleId}/execution/events',
-      encodePathParams(props.params)
-    )}`;
+    const path = `${basePath}${replaceParams('/internal/detection_engine/rules/{ruleId}/execution/events', encodePathParams(props.params))}`;
 
     return apiClient.put<ScoutResponseBody<TResponseType, GetRuleExecutionEventsResponse>>(
       `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
@@ -640,10 +637,7 @@ finalize it.
   ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, GetRuleExecutionResultsResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
-    const path = `${basePath}${replaceParams(
-      '/internal/detection_engine/rules/{ruleId}/execution/results',
-      encodePathParams(props.params)
-    )}`;
+    const path = `${basePath}${replaceParams('/internal/detection_engine/rules/{ruleId}/execution/results', encodePathParams(props.params))}`;
 
     return apiClient.put<ScoutResponseBody<TResponseType, GetRuleExecutionResultsResponse>>(
       `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,

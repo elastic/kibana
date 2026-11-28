@@ -328,10 +328,7 @@ If a record already exists for the specified entity, that record is overwritten 
   ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, DeleteEntityEngineResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
-    const path = `${basePath}${replaceParams(
-      '/api/entity_store/engines/{entityType}',
-      encodePathParams(props.params)
-    )}`;
+    const path = `${basePath}${replaceParams('/api/entity_store/engines/{entityType}', encodePathParams(props.params))}`;
 
     return apiClient.delete<ScoutResponseBody<TResponseType, DeleteEntityEngineResponse>>(
       `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
@@ -520,10 +517,7 @@ If a record already exists for the specified entity, that record is overwritten 
   ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, GetEntityEngineResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
-    const path = `${basePath}${replaceParams(
-      '/api/entity_store/engines/{entityType}',
-      encodePathParams(props.params)
-    )}`;
+    const path = `${basePath}${replaceParams('/api/entity_store/engines/{entityType}', encodePathParams(props.params))}`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, GetEntityEngineResponse>>(path, {
       headers: {
@@ -591,10 +585,7 @@ If a record already exists for the specified entity, that record is overwritten 
   ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, InitEntityEngineResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
-    const path = `${basePath}${replaceParams(
-      '/api/entity_store/engines/{entityType}/init',
-      encodePathParams(props.params)
-    )}`;
+    const path = `${basePath}${replaceParams('/api/entity_store/engines/{entityType}/init', encodePathParams(props.params))}`;
 
     return apiClient.post<ScoutResponseBody<TResponseType, InitEntityEngineResponse>>(path, {
       headers: {
@@ -831,10 +822,7 @@ If a record already exists for the specified entity, that record is overwritten 
   ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, StartEntityEngineResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
-    const path = `${basePath}${replaceParams(
-      '/api/entity_store/engines/{entityType}/start',
-      encodePathParams(props.params)
-    )}`;
+    const path = `${basePath}${replaceParams('/api/entity_store/engines/{entityType}/start', encodePathParams(props.params))}`;
 
     return apiClient.post<ScoutResponseBody<TResponseType, StartEntityEngineResponse>>(path, {
       headers: {
@@ -856,10 +844,7 @@ If a record already exists for the specified entity, that record is overwritten 
   ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, StopEntityEngineResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
-    const path = `${basePath}${replaceParams(
-      '/api/entity_store/engines/{entityType}/stop',
-      encodePathParams(props.params)
-    )}`;
+    const path = `${basePath}${replaceParams('/api/entity_store/engines/{entityType}/stop', encodePathParams(props.params))}`;
 
     return apiClient.post<ScoutResponseBody<TResponseType, StopEntityEngineResponse>>(path, {
       headers: {

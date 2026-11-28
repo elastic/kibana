@@ -160,10 +160,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
-    const path = `${basePath}${replaceParams(
-      '/api/endpoint/protection_updates_note/{package_policy_id}',
-      encodePathParams(props.params)
-    )}`;
+    const path = `${basePath}${replaceParams('/api/endpoint/protection_updates_note/{package_policy_id}', encodePathParams(props.params))}`;
 
     return apiClient.post<
       ScoutResponseBody<TResponseType, CreateUpdateProtectionUpdatesNoteResponse>
@@ -213,10 +210,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, EndpointFileDownloadResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
-    const path = `${basePath}${replaceParams(
-      '/api/endpoint/action/{action_id}/file/{file_id}/download',
-      encodePathParams(props.params)
-    )}`;
+    const path = `${basePath}${replaceParams('/api/endpoint/action/{action_id}/file/{file_id}/download', encodePathParams(props.params))}`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, EndpointFileDownloadResponse>>(path, {
       headers: {
@@ -242,10 +236,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, EndpointFileInfoResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
-    const path = `${basePath}${replaceParams(
-      '/api/endpoint/action/{action_id}/file/{file_id}',
-      encodePathParams(props.params)
-    )}`;
+    const path = `${basePath}${replaceParams('/api/endpoint/action/{action_id}/file/{file_id}', encodePathParams(props.params))}`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, EndpointFileInfoResponse>>(path, {
       headers: {
@@ -269,10 +260,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
-    const path = `${basePath}${replaceParams(
-      '/api/endpoint/action/{action_id}',
-      encodePathParams(props.params)
-    )}`;
+    const path = `${basePath}${replaceParams('/api/endpoint/action/{action_id}', encodePathParams(props.params))}`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, EndpointGetActionsDetailsResponse>>(
       path,
@@ -656,10 +644,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, GetEndpointSuggestionsResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
-    const path = `${basePath}${replaceParams(
-      '/api/endpoint/suggestions/{suggestion_type}',
-      encodePathParams(props.params)
-    )}`;
+    const path = `${basePath}${replaceParams('/api/endpoint/suggestions/{suggestion_type}', encodePathParams(props.params))}`;
 
     return apiClient.post<ScoutResponseBody<TResponseType, GetEndpointSuggestionsResponse>>(path, {
       headers: {
@@ -702,10 +687,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
-    const path = `${basePath}${replaceParams(
-      '/api/endpoint/protection_updates_note/{package_policy_id}',
-      encodePathParams(props.params)
-    )}`;
+    const path = `${basePath}${replaceParams('/api/endpoint/protection_updates_note/{package_policy_id}', encodePathParams(props.params))}`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, GetProtectionUpdatesNoteResponse>>(path, {
       headers: {
@@ -768,10 +750,7 @@ const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => 
   ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, UpdateWorkflowInsightResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
-    const path = `${basePath}${replaceParams(
-      '/internal/api/endpoint/workflow_insights/{insightId}',
-      encodePathParams(props.params)
-    )}`;
+    const path = `${basePath}${replaceParams('/internal/api/endpoint/workflow_insights/{insightId}', encodePathParams(props.params))}`;
 
     return apiClient.put<ScoutResponseBody<TResponseType, UpdateWorkflowInsightResponse>>(path, {
       headers: {
