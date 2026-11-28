@@ -10,6 +10,7 @@
 import { test, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { ES_ARCHIVE, KBN_ARCHIVE } from '../constants';
+import { gotoOverviewApp } from '../helpers';
 
 test.describe('Kibana Overview - Footer', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ esArchiver, kbnClient, uiSettings }) => {
@@ -25,7 +26,7 @@ test.describe('Kibana Overview - Footer', { tag: tags.stateful.classic }, () => 
 
   test('clicking footer updates landing page', async ({ browserAuth, page }) => {
     await browserAuth.loginAs('editor');
-    await page.gotoApp('kibana_overview');
+    await gotoOverviewApp(page);
 
     const footerButton = page.testSubj.locator('kbnOverviewPageFooterButton');
     await expect(footerButton).toBeVisible();

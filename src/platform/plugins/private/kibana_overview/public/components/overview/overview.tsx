@@ -229,6 +229,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
 
   return (
     <KibanaPageTemplate
+      data-test-subj="kbnOverviewPage"
       css={styles(euiTheme, minBreakpointM)}
       pageHeader={{
         iconType: 'logoKibana',
