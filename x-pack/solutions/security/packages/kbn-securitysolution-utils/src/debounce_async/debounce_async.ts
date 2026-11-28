@@ -20,8 +20,10 @@ export function debounceAsync<Args extends unknown[], Result>(
 ): (...args: Args) => Promise<Awaited<Result>> {
   let timeoutId: ReturnType<typeof setTimeout> | undefined;
   let resolve: (value: Awaited<Result>) => void;
-  let promise = new Promise<Awaited<Result>>((_resolve) => {
+  let reject: (reason: unknown) => void;
+  let promise = new Promise<Awaited<Result>>((_resolve, _reject) => {
     resolve = _resolve;
+    reject = _reject;
   });
 
   return (...args) => {
@@ -30,10 +32,17 @@ export function debounceAsync<Args extends unknown[], Result>(
     }
 
     timeoutId = setTimeout(async () => {
-      resolve(await fn(...args));
-      promise = new Promise((_resolve) => {
+      const resolveInvocation = resolve;
+      const rejectInvocation = reject;
+      promise = new Promise((_resolve, _reject) => {
         resolve = _resolve;
+        reject = _reject;
       });
+      try {
+        resolveInvocation(await fn(...args));
+      } catch (error) {
+        rejectInvocation(error);
+      }
     }, intervalMs);
 
     return promise;
