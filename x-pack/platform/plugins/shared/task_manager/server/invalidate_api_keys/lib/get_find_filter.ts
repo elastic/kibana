@@ -10,10 +10,11 @@ import { timePeriodBeforeDate } from '../../lib/intervals';
 interface GetFindFilterOpts {
   removalDelay: string;
   excludedSOIds?: string[];
+  excludedApiKeyIds?: string[];
   savedObjectType: string;
 }
 export function getFindFilter(opts: GetFindFilterOpts): string {
-  const { removalDelay, excludedSOIds = [], savedObjectType } = opts;
+  const { removalDelay, excludedSOIds = [], excludedApiKeyIds = [], savedObjectType } = opts;
   const delay: string = timePeriodBeforeDate(new Date(), removalDelay).toISOString();
   let filter = `${savedObjectType}.attributes.createdAt <= "${delay}"`;
 
@@ -23,6 +24,13 @@ export function getFindFilter(opts: GetFindFilterOpts): string {
       (id: string) => `NOT ${savedObjectType}.id: "${savedObjectType}:${id}"`
     );
     filter += ` AND ${excludedSOIdFilter.join(' AND ')}`;
+  }
+
+  if (excludedApiKeyIds.length > 0) {
+    const excludedApiKeyIdFilter = [...new Set(excludedApiKeyIds)].map(
+      (apiKeyId) => `NOT ${savedObjectType}.attributes.apiKeyId: "${apiKeyId}"`
+    );
+    filter += ` AND ${excludedApiKeyIdFilter.join(' AND ')}`;
   }
   return filter;
 }

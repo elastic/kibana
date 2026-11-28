@@ -53,6 +53,31 @@ describe('getFindFilter', () => {
     );
   });
 
+  test('should exclude api key ids that a running task still holds', () => {
+    expect(
+      getFindFilter({
+        removalDelay: '1h',
+        excludedApiKeyIds: ['key-1', 'key-1', 'key-2'],
+        savedObjectType: 'api_key_to_invalidate',
+      })
+    ).toEqual(
+      `api_key_to_invalidate.attributes.createdAt <= "2021-01-01T11:00:00.000Z" AND NOT api_key_to_invalidate.attributes.apiKeyId: "key-1" AND NOT api_key_to_invalidate.attributes.apiKeyId: "key-2"`
+    );
+  });
+
+  test('should combine excluded saved object ids and api key ids', () => {
+    expect(
+      getFindFilter({
+        removalDelay: '1h',
+        excludedSOIds: ['abc'],
+        excludedApiKeyIds: ['key-1'],
+        savedObjectType: 'api_key_to_invalidate',
+      })
+    ).toEqual(
+      `api_key_to_invalidate.attributes.createdAt <= "2021-01-01T11:00:00.000Z" AND NOT api_key_to_invalidate.id: "api_key_to_invalidate:abc" AND NOT api_key_to_invalidate.attributes.apiKeyId: "key-1"`
+    );
+  });
+
   test('should handle duplicate excluded SO ids', () => {
     expect(
       getFindFilter({

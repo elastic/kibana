@@ -507,6 +507,13 @@ describe('runInvalidate', () => {
           per_page: 100,
           page: 1,
         });
+        // Page 2 of the running-task scan. These objects have no task marker.
+        internalSavedObjectsRepository.find.mockResolvedValueOnce({
+          saved_objects: [],
+          total: 105,
+          per_page: 100,
+          page: 2,
+        });
 
         if (encrypted) {
           encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
@@ -584,7 +591,7 @@ describe('runInvalidate', () => {
         expect(result.missingApiKeyRetries).toEqual({});
 
         expect(internalSavedObjectsRepository.find).toHaveBeenCalledTimes(
-          2 * (1 + savedObjectTypes.length)
+          2 * (1 + savedObjectTypes.length) + 1
         );
         if (encrypted) {
           expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledTimes(2);
@@ -612,7 +619,7 @@ describe('runInvalidate', () => {
           expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
         }
 
-        let N = 2;
+        let N = 3;
         savedObjectTypes.forEach((t) => {
           expect(internalSavedObjectsRepository.find).toHaveBeenNthCalledWith(N, {
             type: t.type,
@@ -704,6 +711,13 @@ describe('runInvalidate', () => {
           per_page: 100,
           page: 1,
         });
+        // Page 2 of the running-task scan. These objects have no task marker.
+        internalSavedObjectsRepository.find.mockResolvedValueOnce({
+          saved_objects: [],
+          total: 105,
+          per_page: 100,
+          page: 2,
+        });
 
         if (encrypted) {
           encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
@@ -768,7 +782,7 @@ describe('runInvalidate', () => {
         expect(result.missingApiKeyRetries).toEqual({});
 
         expect(internalSavedObjectsRepository.find).toHaveBeenCalledTimes(
-          2 + savedObjectTypes.length
+          3 + savedObjectTypes.length
         );
         if (encrypted) {
           expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledTimes(2);
@@ -803,7 +817,7 @@ describe('runInvalidate', () => {
           expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
         }
 
-        let N = 2;
+        let N = 3;
         savedObjectTypes.forEach((t) => {
           expect(internalSavedObjectsRepository.find).toHaveBeenNthCalledWith(N, {
             type: t.type,
@@ -842,4 +856,212 @@ describe('runInvalidate', () => {
       });
     }
   );
+
+  describe('keys replaced during a task run across pages', () => {
+    const type = 'api_key_to_invalidate';
+    const startedAt = '2021-01-01T11:00:00.000Z';
+    const futureRetryAt = '2021-01-01T13:00:00.000Z';
+    const createdAtFilter = `${type}.attributes.createdAt <= "2021-01-01T11:00:00.000Z"`;
+
+    const pendingSo = (
+      id: string,
+      apiKeyId: string,
+      task?: { taskId: string; taskStartedAt: string }
+    ) => ({
+      id,
+      type,
+      score: 0,
+      attributes: {
+        apiKeyId,
+        createdAt: '2020-01-01T00:00:00.000Z',
+        ...(task ?? {}),
+      },
+      references: [],
+    });
+
+    const findPage = (
+      savedObjects: Array<ReturnType<typeof pendingSo>>,
+      total: number,
+      page: number
+    ) => ({
+      saved_objects: savedObjects,
+      total,
+      per_page: 100,
+      page,
+    });
+
+    const runningTask = (id: string, taskStartedAt: string) => ({
+      id,
+      type: 'task',
+      attributes: { status: 'running', startedAt: taskStartedAt, retryAt: futureRetryAt },
+      references: [],
+    });
+
+    const run = () =>
+      runInvalidate({
+        removalDelay: '1h',
+        invalidateApiKeyFn,
+        logger,
+        savedObjectsClient: internalSavedObjectsRepository,
+        savedObjectType: type,
+        savedObjectTypesToQuery: [],
+      });
+
+    beforeEach(() => {
+      invalidateApiKeyFn.mockResolvedValue({
+        invalidated_api_keys: ['other-key'],
+        previously_invalidated_api_keys: [],
+        error_count: 0,
+      });
+    });
+
+    test('leaves a shared key in place when its running-task marker is on a later page', async () => {
+      internalSavedObjectsRepository.find
+        .mockResolvedValueOnce(findPage([pendingSo('1', 'other-key')], 201, 1))
+        .mockResolvedValueOnce(findPage([pendingSo('2', 'another-key')], 201, 2))
+        .mockResolvedValueOnce(
+          findPage(
+            [pendingSo('3', 'shared-key', { taskId: 'task-1', taskStartedAt: startedAt })],
+            201,
+            3
+          )
+        )
+        .mockResolvedValueOnce(
+          findPage([pendingSo('1', 'other-key'), pendingSo('2', 'another-key')], 2, 1)
+        );
+      internalSavedObjectsRepository.bulkGet.mockResolvedValueOnce({
+        saved_objects: [runningTask('task-1', startedAt)],
+      });
+
+      const result = await run();
+
+      expect(result.totalInvalidated).toEqual(2);
+      expect(invalidateApiKeyFn).toHaveBeenCalledTimes(1);
+      expect(invalidateApiKeyFn).toHaveBeenCalledWith({ ids: ['other-key', 'another-key'] });
+      expect(internalSavedObjectsRepository.find).toHaveBeenNthCalledWith(2, {
+        type,
+        filter: createdAtFilter,
+        page: 2,
+        sortField: 'createdAt',
+        sortOrder: 'asc',
+        perPage: 100,
+      });
+      expect(internalSavedObjectsRepository.find).toHaveBeenNthCalledWith(3, {
+        type,
+        filter: createdAtFilter,
+        page: 3,
+        sortField: 'createdAt',
+        sortOrder: 'asc',
+        perPage: 100,
+      });
+      expect(internalSavedObjectsRepository.find).toHaveBeenNthCalledWith(4, {
+        type,
+        filter: `${createdAtFilter} AND NOT ${type}.attributes.apiKeyId: "shared-key"`,
+        page: 1,
+        sortField: 'createdAt',
+        sortOrder: 'asc',
+        perPage: 100,
+      });
+    });
+
+    test('leaves a shared key in place when its running-task marker is on the first page', async () => {
+      internalSavedObjectsRepository.find
+        .mockResolvedValueOnce(
+          findPage(
+            [pendingSo('1', 'shared-key', { taskId: 'task-1', taskStartedAt: startedAt })],
+            150,
+            1
+          )
+        )
+        .mockResolvedValueOnce(findPage([pendingSo('2', 'shared-key')], 150, 2))
+        .mockResolvedValueOnce(findPage([], 0, 1));
+      internalSavedObjectsRepository.bulkGet.mockResolvedValueOnce({
+        saved_objects: [runningTask('task-1', startedAt)],
+      });
+
+      const result = await run();
+
+      expect(result.totalInvalidated).toEqual(0);
+      expect(invalidateApiKeyFn).not.toHaveBeenCalled();
+      expect(internalSavedObjectsRepository.find).toHaveBeenNthCalledWith(
+        3,
+        expect.objectContaining({
+          page: 1,
+          filter: `${createdAtFilter} AND NOT ${type}.attributes.apiKeyId: "shared-key"`,
+        })
+      );
+    });
+
+    test('invalidates a shared key once the recorded run has finished', async () => {
+      internalSavedObjectsRepository.find
+        .mockResolvedValueOnce(findPage([pendingSo('1', 'shared-key')], 150, 1))
+        .mockResolvedValueOnce(
+          findPage(
+            [pendingSo('2', 'shared-key', { taskId: 'task-1', taskStartedAt: startedAt })],
+            150,
+            2
+          )
+        )
+        .mockResolvedValueOnce(
+          findPage(
+            [pendingSo('2', 'shared-key', { taskId: 'task-1', taskStartedAt: startedAt })],
+            1,
+            1
+          )
+        );
+      internalSavedObjectsRepository.bulkGet
+        .mockResolvedValueOnce({
+          saved_objects: [
+            {
+              id: 'task-1',
+              type: 'task',
+              attributes: { status: 'idle', startedAt: null, retryAt: futureRetryAt },
+              references: [],
+            },
+          ],
+        })
+        .mockResolvedValueOnce({
+          saved_objects: [
+            {
+              id: 'task-1',
+              type: 'task',
+              attributes: { status: 'idle', startedAt: null, retryAt: futureRetryAt },
+              references: [],
+            },
+          ],
+        });
+
+      const result = await run();
+
+      expect(result.totalInvalidated).toEqual(2);
+      expect(invalidateApiKeyFn).toHaveBeenNthCalledWith(1, { ids: ['shared-key'] });
+      expect(invalidateApiKeyFn).toHaveBeenNthCalledWith(2, { ids: ['shared-key'] });
+      expect(internalSavedObjectsRepository.find).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({ page: 2, filter: createdAtFilter })
+      );
+    });
+
+    test('does not scan further pages when every pending object fits on one page', async () => {
+      internalSavedObjectsRepository.find.mockResolvedValueOnce(
+        findPage(
+          [
+            pendingSo('1', 'shared-key', { taskId: 'task-1', taskStartedAt: startedAt }),
+            pendingSo('2', 'shared-key'),
+          ],
+          2,
+          1
+        )
+      );
+      internalSavedObjectsRepository.bulkGet.mockResolvedValueOnce({
+        saved_objects: [runningTask('task-1', startedAt)],
+      });
+
+      const result = await run();
+
+      expect(result.totalInvalidated).toEqual(0);
+      expect(internalSavedObjectsRepository.find).toHaveBeenCalledTimes(1);
+      expect(invalidateApiKeyFn).not.toHaveBeenCalled();
+    });
+  });
 });

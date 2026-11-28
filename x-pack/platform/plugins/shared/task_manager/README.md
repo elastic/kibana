@@ -1054,7 +1054,7 @@ re-used between tasks (as in the case of one task queuing up another task), we d
 
 We schedule a recurring background task that queries for the existence of any `api_key_to_invalidate` saved objects and then queries to see whether those API key IDs are used by any other tasks. If no other tasks are referencing the API key, we invalidate it. We use a removal delay in the query to avoid race conditions that may happen if a task is scheduled with a re-used API key while the invalidation task is running.
 
-When `regenerateApiKey` replaces the API key of a task that is currently running, that run keeps using the old key. The old key's `api_key_to_invalidate` object records the task id and the run's `startedAt`, and the key is not invalidated while that same run is still in progress (the task is `running` with the same `startedAt` and its `retryAt` hasn't passed).
+When `regenerateApiKey` replaces the API key of a task that is currently running, that run keeps using the old key. The old key's `api_key_to_invalidate` object records the task id and the run's `startedAt`, and the key is not invalidated while that same run is still in progress (the task is `running` with the same `startedAt` and its `retryAt` hasn't passed). Pending objects are invalidated a page at a time, so when more than one page is waiting the task reads every page first and leaves every object with that `apiKeyId` in place.
 
 The default schedule for this task is every `5m`. To change this schedule, use the `kibana.yml` configuration option `xpack.task_manager.invalidate_api_key_task.interval`.
 
