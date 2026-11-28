@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { SIEM_DASHBOARD_MIGRATION_STATS_PATH } from '@kbn/security-solution-plugin/common/siem_migrations/dashboards/constants';
+import type { GetDashboardMigrationStatsResponse } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
+import { API_HEADERS } from './common';
 import { deleteAllDocuments } from './elasticsearch';
 
 const MIGRATION_INDEX_PREFIX = '.kibana-siem-rule-migrations';
@@ -30,4 +33,28 @@ export const cleanDashboardsMigrationData = () => {
 
     deleteAllDocuments(migrationIndices.join(','));
   });
+};
+
+/**
+ * Fetches the dashboard migration stats with the session of the logged-in user, so polling creates no API keys.
+ */
+export const getDashboardMigrationStats = (migrationId: string) =>
+  cy.request<GetDashboardMigrationStatsResponse>({
+    method: 'GET',
+    url: SIEM_DASHBOARD_MIGRATION_STATS_PATH.replace('{migration_id}', migrationId),
+    headers: {
+      ...API_HEADERS,
+      'elastic-api-version': '1',
+    },
+  });
+
+/**
+ * Waits until the dashboard migration's current execution has finished, as recorded by `last_execution.finished_at`.
+ */
+export const waitForDashboardMigrationExecutionToFinish = (migrationId: string) => {
+  cy.waitUntil(() =>
+    getDashboardMigrationStats(migrationId).then(({ body }) =>
+      Boolean(body.last_execution?.finished_at)
+    )
+  );
 };
