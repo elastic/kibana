@@ -27,6 +27,10 @@ export const i18nTexts = {
       defaultMessage: 'Received a {statusCode} response from Elasticsearch: {message}',
       values: { statusCode, message },
     }),
+  responseTooLargeError: i18n.translate('generateCsv.responseTooLargeErrorMessage', {
+    defaultMessage:
+      'The data returned by Elasticsearch is too large to export. Try narrowing your search with filters or use a smaller time range.',
+  }),
   unknownError: (message: string = 'unknown') =>
     i18n.translate('generateCsv.unknownErrorMessage', {
       defaultMessage: 'Encountered an unknown error: {message}',
