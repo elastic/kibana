@@ -117,7 +117,7 @@ const createAttachments = async (
     const caseWithObservables = await extractAndAddObservables(
       caseId,
       decodedAttachments,
-      { settings },
+      { settings, owner },
       clientArgs
     );
 
