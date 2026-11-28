@@ -6,6 +6,9 @@ set -euo pipefail
 # that needs one and closes those of connectors healthy again (`--surface`), and refreshes the
 # artifacts of connectors with only non-breaking changes in a single bot PR.
 #
+# It also uploads a coverage report (`--coverage`) describing every connector in the repo, so
+# what the drift check covers can be read against what exists.
+#
 # CONNECTOR_VENDOR_API_CONNECTOR checks one connector (a metadata.id) instead of all of them.
 # CONNECTOR_VENDOR_API_GITHUB_REPO selects the mode:
 #   - empty: dry run against elastic/kibana, the issues are read and the would-be writes logged,
@@ -24,6 +27,7 @@ TARGET_REPO="${CONNECTOR_VENDOR_API_GITHUB_REPO:-}"
 REPORT_DIR="target/connector_vendor_api"
 REPORT_PATH="$REPORT_DIR/drift.json"
 SUMMARY_PATH="$REPORT_DIR/drift_summary.json"
+COVERAGE_PATH="$REPORT_DIR/coverage.json"
 SPECS_DIR="src/platform/packages/shared/kbn-connector-specs/src/specs"
 REFRESH_BRANCH="connector-vendor-api-refresh"
 REFRESH_TITLE="[Connector validation] Refresh vendor API artifacts"
@@ -78,6 +82,15 @@ export KBN_BOOTSTRAP_NO_PREBUILT=true
 # at about 5.5 GB, above the 4 GB CI sets for every job. The agent has 16 GB. The last
 # --max-old-space-size wins, so this overrides the CI default without dropping other options.
 export NODE_OPTIONS="${NODE_OPTIONS:-} --max-old-space-size=8192"
+
+# Coverage reads the committed artifacts only: no vendor is fetched and no spec is loaded, so
+# it costs seconds and cannot fail on a vendor being down. It runs before the drift check so
+# the report is uploaded even when that fails, as it did in the runs that ran out of heap and
+# left the build with no artifacts at all. It describes every connector in the repo, including
+# the ones the drift check never looks at, which is what makes it a coverage denominator.
+echo "--- Report connector coverage"
+node scripts/connector_vendor_api --coverage --json --report "$COVERAGE_PATH"
+buildkite-agent artifact upload "$COVERAGE_PATH"
 
 echo "+++ Detect vendor API drift"
 drift_args=(--drift --report "$REPORT_PATH")
