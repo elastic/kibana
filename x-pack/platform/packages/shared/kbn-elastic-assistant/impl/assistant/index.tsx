@@ -147,6 +147,7 @@ const AssistantComponent: React.FC<Props> = ({
     handleOnConversationSelected,
     isConversationOwner,
     refetchCurrentConversation,
+    setCurrentConnector,
     setCurrentConversation,
     setCurrentSystemPromptId,
   } = useCurrentConversation({
@@ -495,6 +496,7 @@ const AssistantComponent: React.FC<Props> = ({
                     refetchPrompts={refetchPrompts}
                     selectedConversation={currentConversation}
                     setChatHistoryVisible={setChatHistoryVisible}
+                    setCurrentConnector={setCurrentConnector}
                     setCurrentConversation={setCurrentConversation}
                     setIsSettingsModalVisible={setIsSettingsModalVisible}
                     setPaginationObserver={setPaginationObserver}

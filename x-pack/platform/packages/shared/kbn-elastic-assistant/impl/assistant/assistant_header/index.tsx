@@ -23,6 +23,7 @@ import { ConversationSettingsMenu } from '../settings/settings_context_menu/conv
 import { ShareSelectModal } from '../share_conversation/share_select_modal';
 import { NEW_CHAT } from '../conversations/conversation_sidepanel/translations';
 import type { DataStreamApis } from '../use_data_stream_apis';
+import type { ConnectorApiConfig } from '../use_current_conversation';
 import type { Conversation } from '../../..';
 import { AssistantTitle } from '../assistant_title';
 import { ConnectorSelectorInline } from '../../connectorland/connector_selector_inline/connector_selector_inline';
@@ -66,6 +67,7 @@ interface OwnProps {
     options?: RefetchOptions & RefetchQueryFilters<unknown>
   ) => Promise<QueryObserverResult<unknown, unknown>>;
   setCurrentConversation: React.Dispatch<React.SetStateAction<Conversation | undefined>>;
+  setCurrentConnector?: (connectorApiConfig: ConnectorApiConfig) => Promise<void>;
   setPaginationObserver: (ref: HTMLDivElement) => void;
 }
 
@@ -100,6 +102,7 @@ export const AssistantHeader: React.FC<Props> = ({
   refetchPrompts,
   selectedConversation,
   setChatHistoryVisible,
+  setCurrentConnector,
   setCurrentConversation,
   setIsSettingsModalVisible,
   setPaginationObserver,
@@ -243,6 +246,7 @@ export const AssistantHeader: React.FC<Props> = ({
                   selectedConnectorId={selectedConnectorId}
                   selectedConversation={selectedConversation}
                   onConnectorSelected={onConversationChange}
+                  onConversationConnectorChange={setCurrentConnector}
                 />
               </EuiFlexItem>
               {!isNewConversation && (
