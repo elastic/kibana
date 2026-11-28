@@ -248,6 +248,11 @@ function transformToExternalModel(
     : (configuration.attributes
         .observableTypes as ConfigurationTransformedAttributes['observableTypes']);
 
+  const observableTypeSettings = !configuration.attributes.observableTypeSettings
+    ? []
+    : (configuration.attributes
+        .observableTypeSettings as ConfigurationTransformedAttributes['observableTypeSettings']);
+
   const ownerAutoExtractDefault =
     OWNER_INFO[configuration.attributes.owner as Owner]?.features.observables.autoExtractDefault ??
     false;
@@ -264,6 +269,7 @@ function transformToExternalModel(
       customFields,
       templates,
       observableTypes,
+      observableTypeSettings,
       extractObservables,
       workflowTags,
     },

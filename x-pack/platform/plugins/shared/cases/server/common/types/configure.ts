@@ -33,6 +33,7 @@ export interface ConfigurationPersistedAttributes {
   customFields?: PersistedCustomFieldsConfiguration;
   templates?: PersistedTemplatesConfiguration;
   observableTypes?: PersistedObservableTypesConfiguration;
+  observableTypeSettings?: PersistedObservableTypeSettingsConfiguration;
   extractObservables?: boolean;
   workflowTags?: string[];
   legacyTemplatesMigrated?: boolean;
@@ -49,6 +50,12 @@ export interface ConfigurationPersistedAttributes {
 type PersistedObservableTypesConfiguration = Array<{
   key: string;
   label: string;
+}>;
+
+type PersistedObservableTypeSettingsConfiguration = Array<{
+  key: string;
+  paths?: Array<{ path: string; enabled: boolean; excludedValues?: string[] }>;
+  valuePattern?: string;
 }>;
 
 type PersistedCustomFieldsConfiguration = Array<{

@@ -11,6 +11,8 @@ import { CustomFieldTypes } from '../custom_field/v1';
 import {
   ConfigurationAttributesSchema,
   ConfigurationSchema,
+  ObservableTypesConfigurationSchema,
+  ObservableTypeSettingsConfigurationSchema,
   CustomFieldConfigurationWithoutTypeSchema,
   TemplateConfigurationSchema,
   TextCustomFieldConfigurationSchema,
@@ -388,6 +390,46 @@ describe('configure', () => {
       });
       expect(result.success).toBe(true);
       expect(result.data).toStrictEqual({ ...defaultRequest, caseFields: {} });
+    });
+  });
+
+  describe('ObservableTypeSettingsConfigurationSchema', () => {
+    it('accepts the settings of a built-in type and of a custom type', () => {
+      const observableTypeSettings = [
+        { key: 'observable-type-agent-id', paths: [{ path: 'agent.id', enabled: false }] },
+        {
+          key: 'employee-id',
+          valuePattern: '^E\\d{6}$',
+          paths: [{ path: 'user.employee_id', enabled: true, excludedValues: ['E000000'] }],
+        },
+      ];
+
+      const result = ObservableTypeSettingsConfigurationSchema.safeParse(observableTypeSettings);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(observableTypeSettings);
+    });
+
+    it('accepts a type without fields', () => {
+      expect(
+        ObservableTypeSettingsConfigurationSchema.safeParse([{ key: 'ticket-ref' }]).success
+      ).toBe(true);
+    });
+
+    it('rejects a field without the enabled flag', () => {
+      expect(
+        ObservableTypeSettingsConfigurationSchema.safeParse([
+          { key: 'employee-id', paths: [{ path: 'user.employee_id' }] },
+        ]).success
+      ).toBe(false);
+    });
+  });
+
+  describe('ObservableTypesConfigurationSchema', () => {
+    it('strips the settings fields from an observable type', () => {
+      const result = ObservableTypesConfigurationSchema.safeParse([
+        { key: 'employee-id', label: 'Employee ID', paths: [] },
+      ]);
+      expect(result.data).toStrictEqual([{ key: 'employee-id', label: 'Employee ID' }]);
     });
   });
 });
