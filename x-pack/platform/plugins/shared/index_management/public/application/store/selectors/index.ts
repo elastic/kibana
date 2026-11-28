@@ -10,6 +10,7 @@ import { Pager, EuiSearchBar } from '@elastic/eui';
 import { createSelector } from 'reselect-v4';
 import type { Index } from '../../../../common';
 import { indexStatusLabels } from '../../lib/index_status_labels';
+import { resolveIndexMode } from '../../lib/index_mode_labels';
 import { sortTable } from '../../services';
 import { extensionsService } from './extension_service';
 import type { IndexManagementState, RowStatusState, TableState } from '../types';
@@ -78,7 +79,11 @@ export const getFilteredIndices = createSelector(
     let indexArray = allIds.map((indexName) => indices[indexName]);
     indexArray = filterByToggles(indexArray, tableState.toggleNameToVisibleMap);
     const filter = tableState.filter || EuiSearchBar.Query.MATCH_ALL;
-    return EuiSearchBar.Query.execute(filter, indexArray, {
+    const indicesForFilter = indexArray.map((index) => ({
+      ...index,
+      mode: resolveIndexMode(index.mode),
+    }));
+    return EuiSearchBar.Query.execute(filter, indicesForFilter, {
       defaultFields: defaultFilterFields,
     });
   }

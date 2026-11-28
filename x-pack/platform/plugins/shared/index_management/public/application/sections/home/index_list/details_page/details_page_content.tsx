@@ -31,6 +31,7 @@ import { DetailsPageStats } from './details_page_stats';
 import { DetailsPageTab } from './details_page_tab';
 import { IndexErrorCallout } from './index_error_callout';
 import { DetailsPageOverview } from './details_page_overview/details_page_overview';
+import { indexModeLabels, resolveIndexMode } from '../../../../lib/index_mode_labels';
 
 const defaultTabs: IndexDetailsTab[] = [
   // Overview tab is injected in component to pass live docs sample data.
@@ -83,7 +84,7 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
     core: {
       application: { capabilities },
     },
-    config: { enableIndexStats },
+    config: { enableIndexStats, enableIndexMode },
     plugins: { console: consolePlugin, ml },
     services: { extensionsService, notificationService },
     url,
@@ -192,6 +193,19 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
 
   const badges = useMemo<AppHeaderBadge[]>(() => {
     const result: AppHeaderBadge[] = [];
+
+    if (enableIndexMode) {
+      const resolvedMode = resolveIndexMode(index.mode);
+      const label =
+        indexModeLabels[resolvedMode as keyof typeof indexModeLabels] ?? resolvedMode;
+
+      result.push({
+        label,
+        color: 'hollow',
+        'data-test-subj': 'indexDetailsIndexModeBadge',
+      });
+    }
+
     extensionsService.badges.forEach((indexBadge) => {
       if (indexBadge.matchIndex(index)) {
         const badge: AppHeaderBadge = {
@@ -211,7 +225,7 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
       }
     });
     return result;
-  }, [extensionsService.badges, index]);
+  }, [enableIndexMode, extensionsService.badges, index]);
 
   const appMenu = useMemo<AppMenuConfig>(
     () => ({

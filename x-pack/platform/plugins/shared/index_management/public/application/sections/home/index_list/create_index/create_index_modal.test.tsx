@@ -126,6 +126,47 @@ describe('CreateIndexModal', () => {
     expect(screen.getByText('Show API')).toBeInTheDocument();
   });
 
+  it('uses a lookup- index name prefix when lookup index mode is selected', async () => {
+    renderModal();
+    const input = screen.getByTestId('createIndexNameFieldText');
+    expect(input).toHaveValue('search-abcd');
+
+    fireEvent.click(screen.getByTestId('indexModeField'));
+    fireEvent.click(await screen.findByTestId('indexModeLookupOption'));
+
+    expect(input).toHaveValue('lookup-');
+  });
+
+  it('restores the standard index name when switching back from lookup mode', async () => {
+    renderModal();
+    const input = screen.getByTestId('createIndexNameFieldText');
+
+    fireEvent.click(screen.getByTestId('indexModeField'));
+    fireEvent.click(await screen.findByTestId('indexModeLookupOption'));
+    expect(input).toHaveValue('lookup-');
+
+    fireEvent.click(screen.getByTestId('indexModeField'));
+    fireEvent.click(await screen.findByTestId('indexModeStandardOption'));
+    expect(input).toHaveValue('search-abcd');
+  });
+
+  it('keeps separate index names when switching between standard and vectordb modes', async () => {
+    renderModal();
+    const input = screen.getByTestId('createIndexNameFieldText');
+    expect(input).toHaveValue('search-abcd');
+
+    await userEvent.clear(input);
+    await userEvent.type(input, 'search-custom');
+
+    fireEvent.click(screen.getByTestId('indexModeField'));
+    fireEvent.click(await screen.findByTestId('indexModeVectordbDocumentOption'));
+    expect(input).toHaveValue('search-abcd');
+
+    fireEvent.click(screen.getByTestId('indexModeField'));
+    fireEvent.click(await screen.findByTestId('indexModeStandardOption'));
+    expect(input).toHaveValue('search-custom');
+  });
+
   it('reflects the selected index mode in the API code block', async () => {
     renderModal();
     fireEvent.click(screen.getByTestId('createIndexShowApiButton'));

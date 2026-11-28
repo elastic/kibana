@@ -23,6 +23,7 @@ import {
   KbnWarningCallout,
 } from '@kbn/ui-callout';
 import {
+  EuiBadge,
   EuiButton,
   EuiLink,
   EuiCheckbox,
@@ -69,10 +70,18 @@ import { docCountApi } from './get_doc_count';
 import type { DocCountApi } from './get_doc_count';
 import type { Index } from '../../../../../../common';
 import type { ExtensionsService } from '../../../../../services';
+import { indexModeLabels, resolveIndexMode } from '../../../../lib/index_mode_labels';
+import { indexModeSearchFilter } from '../../../../lib/index_mode_search_filter';
+
+const getIndexModeLabel = (mode?: string) => {
+  const resolvedMode = resolveIndexMode(mode);
+  return indexModeLabels[resolvedMode as keyof typeof indexModeLabels] ?? resolvedMode;
+};
 
 interface GetColumnConfigsParams {
   showIndexStats: boolean;
   showSizeAndDocCount: boolean;
+  enableIndexMode: boolean;
   history: History;
   filterChanged: (filter: string | Query) => void;
   extensionsService: ExtensionsService;
@@ -94,6 +103,7 @@ interface IndexTableColumnConfig extends IndicesListColumn {
 const getColumnConfigs = ({
   showIndexStats,
   showSizeAndDocCount,
+  enableIndexMode,
   history,
   filterChanged,
   extensionsService,
@@ -237,6 +247,25 @@ const getColumnConfigs = ({
         align: RIGHT_ALIGNMENT,
       }
     );
+  }
+
+  if (enableIndexMode) {
+    columns.push({
+      fieldName: 'mode',
+      label: i18n.translate('xpack.idxMgmt.indexTable.headers.indexModeHeader', {
+        defaultMessage: 'Index mode',
+      }),
+      order: 35,
+      width: '7.5em',
+      minWidth: '7.5em',
+      className: 'eui-textNoWrap',
+      render: (index: Index) => (
+        <EuiBadge color="hollow" data-test-subj="indexTableIndexModeBadge">
+          {getIndexModeLabel(index.mode)}
+        </EuiBadge>
+      ),
+      sort: (index: Index) => getIndexModeLabel(index.mode),
+    });
   }
 
   columns.push(...extensionsService.columns);
@@ -477,12 +506,24 @@ export class IndexTable extends Component<IndexTableProps, IndexTableState> {
     }
   };
 
-  getFilters = (extensionsService: ExtensionsService): SearchFilterConfig[] => {
+  getFilters = (
+    extensionsService: ExtensionsService,
+    enableIndexMode: boolean
+  ): SearchFilterConfig[] => {
     const { allIndices } = this.props;
-    return extensionsService.filters.reduce<SearchFilterConfig[]>((accum, filterExtension) => {
-      const filtersToAdd = filterExtension(allIndices);
-      return [...accum, ...filtersToAdd];
-    }, []);
+    const extensionFilters = extensionsService.filters.reduce<SearchFilterConfig[]>(
+      (accum, filterExtension) => {
+        const filtersToAdd = filterExtension(allIndices);
+        return [...accum, ...filtersToAdd];
+      },
+      []
+    );
+
+    if (!enableIndexMode) {
+      return extensionFilters;
+    }
+
+    return [...extensionFilters, indexModeSearchFilter];
   };
 
   toggleAll = () => {
@@ -763,6 +804,7 @@ export class IndexTable extends Component<IndexTableProps, IndexTableState> {
           const columnConfigs = getColumnConfigs({
             showIndexStats: config.enableIndexStats,
             showSizeAndDocCount: config.enableSizeAndDocCount,
+            enableIndexMode: config.enableIndexMode,
             extensionsService,
             filterChanged,
             history,
@@ -771,7 +813,7 @@ export class IndexTable extends Component<IndexTableProps, IndexTableState> {
             http,
             docCountApi: this.docCountApi,
           });
-          const searchFilters = this.getFilters(extensionsService);
+          const searchFilters = this.getFilters(extensionsService, config.enableIndexMode);
           const columnsCount = columnConfigs.length + 1;
           return (
             <EuiPageSection paddingSize="none">
