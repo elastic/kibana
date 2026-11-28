@@ -205,6 +205,31 @@ describe('AlertEpisodeMetadataSection', () => {
     expect(passedDataView?.getFieldByName('data.host.name')?.type).toBe('string');
   });
 
+  it('guesses the data view from the data when the rule is not available', async () => {
+    mockEsqlResponses(JSON.stringify({ host: { name: 'web' }, count: 3 }));
+    mockHttp.get.mockRejectedValueOnce(new Error('Rule not available'));
+    useAlertingEpisodeSourceDataViewMock.mockReturnValue({
+      value: undefined,
+      loading: false,
+    } as never);
+
+    render(
+      <I18nProvider>
+        <AlertEpisodeMetadataSection episodeId="ep-1" services={mockServices} />
+      </I18nProvider>,
+      { wrapper }
+    );
+
+    await waitFor(() => expect(screen.getByTestId('mock-doc-viewer-table')).toBeInTheDocument());
+
+    expect(useAlertingEpisodeSourceDataViewMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ query: undefined })
+    );
+    const passedDataView = mockTableRender.mock.calls.at(-1)?.[0]?.dataView;
+    expect(passedDataView?.getFieldByName('data.host.name')?.type).toBe('string');
+    expect(passedDataView?.getFieldByName('data.count')?.type).toBe('number');
+  });
+
   it('strips _id/_index/_score/_ignored metadata fields from the rendered hit', async () => {
     // Mirrors what flattenHit actually does for a synthetic (non-search) hit: it merges the data
     // view's metaFields into `flattened` even though this hit never had real values for them.

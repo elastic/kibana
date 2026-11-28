@@ -79,7 +79,11 @@ describe('createDataContainerDataView', () => {
       metaFields: ['_id', '_index'],
     });
 
-    const prefixed = createDataContainerDataView(source, fieldFormatsMock);
+    const prefixed = createDataContainerDataView({
+      sourceDataView: source,
+      data: { C: 3, host: { name: 'web' } },
+      fieldFormats: fieldFormatsMock,
+    });
 
     expect(prefixed.getFieldByName('data')).toBeUndefined();
     expect(prefixed.getFieldByName('data.C')?.type).toBe('number');
@@ -94,5 +98,48 @@ describe('createDataContainerDataView', () => {
 
     expect(record.flattened['data.C']).toBe(3);
     expect(record.flattened['data.host.name']).toBe('web');
+  });
+
+  it('guesses the types of fields the source data view does not know', () => {
+    const source = new DataView({
+      spec: {
+        id: 'logs-view',
+        title: 'logs-*',
+        fields: { C: field({ name: 'C', type: 'string', esTypes: ['keyword'] }) },
+      },
+      fieldFormats: fieldFormatsMock,
+    });
+
+    const dataView = createDataContainerDataView({
+      sourceDataView: source,
+      data: { C: 3, count: 12 },
+      fieldFormats: fieldFormatsMock,
+    });
+
+    // The source wins over the guess.
+    expect(dataView.getFieldByName('data.C')?.type).toBe('string');
+    expect(dataView.getFieldByName('data.count')?.type).toBe('number');
+  });
+
+  it('builds a data view from the data alone when there is no source data view', () => {
+    const data = {
+      '@timestamp': '2026-04-29T10:00:00.000Z',
+      host: { name: 'web', cpu: 0.75 },
+      healthy: false,
+    };
+
+    const dataView = createDataContainerDataView({ data, fieldFormats: fieldFormatsMock });
+
+    expect(dataView.id).toBe('alerting-v2-episode-data-container');
+    expect(dataView.metaFields).toEqual([]);
+    expect(dataView.getFieldByName('data.@timestamp')?.type).toBe('date');
+    expect(dataView.getFieldByName('data.host.name')?.type).toBe('string');
+    expect(dataView.getFieldByName('data.host.cpu')?.type).toBe('number');
+    expect(dataView.getFieldByName('data.healthy')?.type).toBe('boolean');
+
+    const record = buildDataTableRecord({ _id: '1', _source: { data } }, dataView);
+
+    expect(record.flattened['data.host.name']).toBe('web');
+    expect(record.flattened['data.healthy']).toBe(false);
   });
 });
