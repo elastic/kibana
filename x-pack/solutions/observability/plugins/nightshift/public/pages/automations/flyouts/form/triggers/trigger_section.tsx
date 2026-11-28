@@ -6,7 +6,12 @@
  */
 
 import React, { useState } from 'react';
+import { getEbtProps } from '@kbn/ebt-click';
 import { EuiButton, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  NIGHTSHIFT_EBT_ACTIONS,
+  NIGHTSHIFT_EBT_ELEMENTS,
+} from '../../../../../common/ebt_constants';
 import {
   createTriggerFormValues,
   getScheduledRunsPerDay,
@@ -82,6 +87,10 @@ export const AutomationTriggerSection = ({
                     color="text"
                     onClick={toggle}
                     data-test-subj="automationAddTrigger"
+                    {...getEbtProps({
+                      action: NIGHTSHIFT_EBT_ACTIONS.ADD_AUTOMATION_TRIGGER,
+                      element: NIGHTSHIFT_EBT_ELEMENTS.AUTOMATIONS_FORM,
+                    })}
                   >
                     {triggerLabels.addTrigger}
                   </EuiButton>

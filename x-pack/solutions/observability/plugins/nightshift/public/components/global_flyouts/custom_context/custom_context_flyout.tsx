@@ -29,6 +29,7 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { KbnDangerCallout } from '@kbn/ui-callout';
@@ -37,6 +38,7 @@ import {
   MAX_CUSTOM_CONTEXT_SNIPPET_LENGTH,
   type CustomContextSnippet,
 } from '@kbn/nightshift-investigations-plugin/common';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import { useFormatTimestamp } from '../../../hooks/use_format_timestamp';
 import { useFetchCustomContext } from './use_fetch_custom_context';
 import { useSaveCustomContext } from './use_save_custom_context';
@@ -148,6 +150,10 @@ function SnippetEditor({
             isDisabled={!canSave}
             onClick={save}
             data-test-subj="nightshiftCustomContextSave"
+            {...getEbtProps({
+              action: NIGHTSHIFT_EBT_ACTIONS.SAVE_CUSTOM_CONTEXT_SNIPPET,
+              element: NIGHTSHIFT_EBT_ELEMENTS.CUSTOM_CONTEXT_FLYOUT,
+            })}
           >
             {i18n.translate('xpack.nightshift.customContext.saveButton', {
               defaultMessage: 'Save',
@@ -246,6 +252,10 @@ function SnippetItem({
                   disabled={isSaving}
                   onClick={onEdit}
                   data-test-subj="nightshiftCustomContextEdit"
+                  {...getEbtProps({
+                    action: NIGHTSHIFT_EBT_ACTIONS.EDIT_CUSTOM_CONTEXT_SNIPPET,
+                    element: NIGHTSHIFT_EBT_ELEMENTS.CUSTOM_CONTEXT_FLYOUT,
+                  })}
                 />
               </EuiToolTip>
               <EuiToolTip content={labels.delete} disableScreenReaderOutput>
@@ -256,6 +266,10 @@ function SnippetItem({
                   disabled={isSaving}
                   onClick={onDelete}
                   data-test-subj="nightshiftCustomContextDelete"
+                  {...getEbtProps({
+                    action: NIGHTSHIFT_EBT_ACTIONS.DELETE_CUSTOM_CONTEXT_SNIPPET,
+                    element: NIGHTSHIFT_EBT_ELEMENTS.CUSTOM_CONTEXT_FLYOUT,
+                  })}
                 />
               </EuiToolTip>
             </EuiFlexGroup>
@@ -329,6 +343,10 @@ export function CustomContextSnippets({
               iconType="plus"
               onClick={() => setEditing(NEW_SNIPPET)}
               data-test-subj="nightshiftCustomContextAdd"
+              {...getEbtProps({
+                action: NIGHTSHIFT_EBT_ACTIONS.ADD_CUSTOM_CONTEXT_SNIPPET,
+                element: NIGHTSHIFT_EBT_ELEMENTS.CUSTOM_CONTEXT_FLYOUT,
+              })}
             >
               {labels.add}
             </EuiButton>
@@ -377,6 +395,10 @@ export function CustomContextSnippets({
               disabled={isSaving}
               onClick={() => setEditing(NEW_SNIPPET)}
               data-test-subj="nightshiftCustomContextAdd"
+              {...getEbtProps({
+                action: NIGHTSHIFT_EBT_ACTIONS.ADD_CUSTOM_CONTEXT_SNIPPET,
+                element: NIGHTSHIFT_EBT_ELEMENTS.CUSTOM_CONTEXT_FLYOUT,
+              })}
             >
               {labels.add}
             </EuiButtonEmpty>

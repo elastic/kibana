@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { getEbtProps } from '@kbn/ebt-click';
 import React from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import { useCleanupStaleEvents } from '../hooks/use_cleanup_stale_events';
 import { SettingsSectionRow } from './settings_section';
 
@@ -35,6 +37,10 @@ export function StaleEventCleanupSection({ canManage }: { canManage: boolean }) 
         <EuiFlexItem grow={false}>
           <EuiButton
             data-test-subj="streams-settings-stale-event-cleanup-button"
+            {...getEbtProps({
+              action: NIGHTSHIFT_EBT_ACTIONS.CLEAN_UP_STALE_EVENTS,
+              element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+            })}
             size="s"
             iconType="broom"
             isLoading={isCleaningUp}
