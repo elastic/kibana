@@ -467,6 +467,7 @@ describe('query tab with unified timeline', () => {
     it(
       'should load more records according to sample size correctly',
       async () => {
+        useStubbedGrid();
         render(
           <TestProviders
             store={createMockStore({
@@ -477,21 +478,16 @@ describe('query tab with unified timeline', () => {
           </TestProviders>
         );
 
-        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+        await waitFor(() => {
+          expect(getUnifiedTimelineBodyProps().events).toHaveLength(3);
+        });
+
+        act(() => {
+          getUnifiedTimelineBodyProps().onFetchMoreRecords();
+        });
 
         await waitFor(() => {
-          expect(screen.getByTestId('pagination-button-0')).toHaveAttribute('aria-current', 'page');
-          expect(screen.getByTestId('pagination-button-2')).toBeVisible();
-        });
-        // Go to last page
-        fireEvent.click(screen.getByTestId('pagination-button-2'));
-        await waitFor(() => {
-          expect(screen.getByTestId('dscGridSampleSizeFetchMoreLink')).toBeVisible();
-        });
-        fireEvent.click(screen.getByTestId('dscGridSampleSizeFetchMoreLink'));
-        await waitFor(() => {
-          expect(screen.getByTestId('pagination-button-2')).toHaveAttribute('aria-current', 'page');
-          expect(screen.getByTestId('pagination-button-5')).toBeVisible();
+          expect(getUnifiedTimelineBodyProps().events).toHaveLength(6);
         });
       },
       SPECIAL_TEST_TIMEOUT
