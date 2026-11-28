@@ -26,7 +26,7 @@ spaceTest.describe(
       await apiServices.detectionRule.createCustomQueryRule({
         ...CUSTOM_QUERY_RULE,
         name: ruleName,
-        index: ['auditbeat-*'],
+        index: ['auditbeat-2022'],
       });
       await browserAuth.loginAsPlatformEngineer();
     });
