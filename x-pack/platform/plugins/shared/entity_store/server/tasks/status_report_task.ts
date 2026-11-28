@@ -28,11 +28,13 @@ import type { GetStatusResult } from '../domain/types';
 import {
   ENTITY_STORE_HEALTH_REPORT_EVENT,
   ENTITY_STORE_METADATA_USAGE_EVENT,
+  ENTITY_STORE_RESOLUTION_RULES_STATE_EVENT,
   ENTITY_STORE_RESOLUTION_STATE_EVENT,
   ENTITY_STORE_USAGE_EVENT,
   createReportEvent,
   type TelemetryReporter,
 } from '../telemetry/events';
+import { ResolutionRulesClient, getResolutionRuleConfig } from '../domain/resolution/rules';
 import { executeEsqlQuery } from '../infra/elasticsearch/esql';
 import { wrapTaskRun } from '../telemetry/traces';
 import { shouldDeleteOrphanedEntityStoreTask } from './should_delete_orphaned_task';
@@ -283,6 +285,18 @@ export const getResolutionState = async (
   return { resolvedEntities, targetEntities, maxGroupSize, avgGroupSize };
 };
 
+/** Returns the effective enabled state of every resolution rule next to its default. */
+export const getResolutionRulesState = async (
+  rulesClient: ResolutionRulesClient
+): Promise<Array<{ id: string; enabled: boolean; defaultEnabled: boolean }>> => {
+  const rules = await rulesClient.getEffectiveRules();
+  return rules.map(({ id, enabled }) => ({
+    id,
+    enabled,
+    defaultEnabled: getResolutionRuleConfig(id)?.defaultEnabled ?? false,
+  }));
+};
+
 const toHealthReportPayload = (statusResult: GetStatusResult) => {
   if (statusResult.status === ENTITY_STORE_STATUS.NOT_INSTALLED) {
     return { engines: [] };
@@ -411,6 +425,19 @@ async function runTask({
       }
     })
   );
+
+  // Report resolution rules enabled state
+  try {
+    const rulesClient = new ResolutionRulesClient(
+      coreStart.savedObjects.getScopedClient(fakeRequest),
+      namespace,
+      logger
+    );
+    const rules = await getResolutionRulesState(rulesClient);
+    telemetryReporter.reportEvent(ENTITY_STORE_RESOLUTION_RULES_STATE_EVENT, { namespace, rules });
+  } catch (e) {
+    logger.warn(`Failed to report resolution rules state: ${getErrorMessage(e)}`);
+  }
 
   // Report metadata datastream doc count (only present when entity store v2 is enabled)
   try {
