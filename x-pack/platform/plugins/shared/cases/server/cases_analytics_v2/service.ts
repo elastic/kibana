@@ -39,6 +39,11 @@ import {
   V2_NOOP_ATTACHMENTS_WRITER,
   type CasesAttachmentsV2WriterContract,
 } from './writer/attachments';
+import {
+  createCasesAnalyticsV2Reader,
+  V2_NOOP_READER,
+  type CasesAnalyticsV2ReaderContract,
+} from './reader';
 
 interface CasesAnalyticsV2ServiceDeps {
   logger: Logger;
@@ -204,6 +209,11 @@ export class CasesAnalyticsV2Service {
     bulkDeleteAttachmentsByCaseIds: (ids) =>
       this.attachmentsWriter.bulkDeleteAttachmentsByCaseIds(ids),
     bulkUpsertAttachmentsAwait: (sos) => this.attachmentsWriter.bulkUpsertAttachmentsAwait(sos),
+  };
+  /** Same lifecycle as `writer`. Read-only searches on the analytics indices. */
+  private reader: CasesAnalyticsV2ReaderContract = V2_NOOP_READER;
+  private readonly readerProxy: CasesAnalyticsV2ReaderContract = {
+    msearch: (requests) => this.reader.msearch(requests),
   };
   /**
    * Stable refresher returned to consumers. Captured by the cases
@@ -450,6 +460,7 @@ export class CasesAnalyticsV2Service {
     // hook.
     this.internalSavedObjectsClient = deps.internalSavedObjectsClient;
     this.esClient = deps.esClient;
+    this.reader = createCasesAnalyticsV2Reader(deps.esClient);
     this.spacesEnabled = deps.spacesEnabled;
     this.taskManager = deps.taskManager;
 
@@ -576,6 +587,14 @@ export class CasesAnalyticsV2Service {
    */
   public getAttachmentsWriter(): CasesAttachmentsV2WriterContract {
     return this.attachmentsWriterProxy;
+  }
+
+  /**
+   * Stable read-only reference for the cases client factory. Fails every search until `start()`
+   * runs, and forever when the feature flag is off.
+   */
+  public getReader(): CasesAnalyticsV2ReaderContract {
+    return this.readerProxy;
   }
 
   /**

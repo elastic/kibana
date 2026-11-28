@@ -45,6 +45,8 @@ import type {
   CasePostRequest,
   CasePatchRequest,
   AttachmentRequest,
+  KpiMetricsResponse,
+  KpiMetricPreviewResponse,
 } from '../../../common/types/api';
 import { CaseStatuses } from '../../../common/types/domain';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
@@ -181,6 +183,12 @@ export const deleteFileAttachments = async ({
 
 export const getCategories = async (signal: AbortSignal): Promise<string[]> =>
   Promise.resolve(categories);
+
+export const getKpiMetrics = async (): Promise<KpiMetricsResponse> =>
+  Promise.resolve({ enabled: true, metrics: [] });
+
+export const previewKpiMetric = async (): Promise<KpiMetricPreviewResponse> =>
+  Promise.resolve({ id: 'preview', type: 'value', format: 'number', value: 0 });
 
 export const replaceCustomField = async ({
   caseId,

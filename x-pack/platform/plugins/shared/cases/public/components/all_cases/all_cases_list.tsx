@@ -30,6 +30,7 @@ import { CasesMetrics } from './components/cases_metrics';
 import { CasesListOnboarding } from './onboarding/cases_list_onboarding';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 import { initialData, useGetCases } from '../../containers/use_get_cases';
+import { useCasesListKpiMetrics } from './use_cases_list_kpi_metrics';
 import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
 import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
 import { useCasesConfig } from '../../common/lib/kibana';
@@ -91,6 +92,13 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     });
 
     const { templatesEnabled } = useCasesConfig();
+
+    const { kpiMetrics, kpiResults, isLoadingKpiResults, isAnalyticsEnabled } =
+      useCasesListKpiMetrics({
+        from: filterOptions.from,
+        to: filterOptions.to,
+        enabled: !isSelectorView,
+      });
     const { globalInlineFields } = useGlobalInlineFields({ enabled: templatesEnabled });
     const userPickerFields = useMemo(
       () => globalInlineFields.filter((field) => field.control === FieldType.USER_PICKER),
@@ -369,6 +377,10 @@ export const AllCasesList = React.memo<AllCasesListProps>(
               countClosedCases={data.countClosedCases}
               mttr={data.mttr}
               isLoading={isLoadingCases}
+              kpiMetrics={kpiMetrics}
+              kpiResults={kpiResults}
+              isLoadingKpiResults={isLoadingKpiResults}
+              isAnalyticsEnabled={isAnalyticsEnabled}
             />
           </div>
         ) : null}

@@ -29,6 +29,10 @@ import type {
   UpdateSummary,
   CasesPatchResponse,
   BulkDeleteAttachmentsRequest,
+  KpiMetricsRequest,
+  KpiMetricsResponse,
+  KpiMetricPreviewRequest,
+  KpiMetricPreviewResponse,
 } from '../../common/types/api';
 import type {
   CaseConnectors,
@@ -72,6 +76,8 @@ import {
   COMMENT_ATTACHMENT_TYPE,
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
   INTERNAL_GET_CASE_CATEGORIES_URL,
+  INTERNAL_KPI_METRICS_URL,
+  INTERNAL_KPI_METRICS_PREVIEW_URL,
   CASES_INTERNAL_URL,
   INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL,
 } from '../../common/constants';
@@ -183,6 +189,26 @@ export const getCategories = async ({
   );
   return response ?? [];
 };
+
+export const getKpiMetrics = async ({
+  owner,
+  from,
+  to,
+  signal,
+}: KpiMetricsRequest & { signal?: AbortSignal }): Promise<KpiMetricsResponse> =>
+  KibanaServices.get().http.fetch<KpiMetricsResponse>(INTERNAL_KPI_METRICS_URL, {
+    method: 'GET',
+    signal,
+    query: { owner, ...(from != null && { from }), ...(to != null && { to }) },
+  });
+
+export const previewKpiMetric = async (
+  request: KpiMetricPreviewRequest
+): Promise<KpiMetricPreviewResponse> =>
+  KibanaServices.get().http.fetch<KpiMetricPreviewResponse>(INTERNAL_KPI_METRICS_PREVIEW_URL, {
+    method: 'POST',
+    body: JSON.stringify(request),
+  });
 
 export const getReporters = async (signal: AbortSignal, owner: string[]): Promise<User[]> => {
   const response = await KibanaServices.get().http.fetch<User[]>(CASE_REPORTERS_URL, {

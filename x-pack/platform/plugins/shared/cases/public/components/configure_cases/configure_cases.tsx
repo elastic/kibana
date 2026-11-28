@@ -37,6 +37,8 @@ import { OldCustomFieldsAndTemplatesSection } from './old_custom_fields_and_temp
 import { WorkflowTags } from './workflow_tags';
 import { useAreWorkflowsAvailableForCases } from '../workflows/use_run_case_workflow';
 import * as observableTypesI18n from '../observable_types/translations';
+import { KpiMetricsSettings } from '../kpi_metrics';
+import * as kpiMetricsI18n from '../kpi_metrics/translations';
 
 const contentWrapperCss = css`
   box-sizing: content-box;
@@ -102,6 +104,8 @@ export const ConfigureCases: React.FC = React.memo(() => {
     onEditObservableType,
     onDeleteObservableType,
     AddOrEditObservableTypeFlyout,
+    kpiMetrics,
+    onSaveKpiMetrics,
   } = useConfigureCasesController<LegacyFlyoutType>();
 
   const showObservableTypesSection =
@@ -232,6 +236,20 @@ export const ConfigureCases: React.FC = React.memo(() => {
                     />
                   </SettingsSection>
                 )}
+
+                <EuiHorizontalRule margin="l" />
+
+                <SettingsSection
+                  data-test-subj="cases-kpi-metrics-section"
+                  title={kpiMetricsI18n.TITLE}
+                  description={kpiMetricsI18n.DESCRIPTION}
+                >
+                  <KpiMetricsSettings
+                    kpiMetrics={kpiMetrics}
+                    isLoading={isLoadingCaseConfiguration}
+                    onSave={onSaveKpiMetrics}
+                  />
+                </SettingsSection>
 
                 {workflowsAvailableForCases && <EuiHorizontalRule margin="l" />}
 

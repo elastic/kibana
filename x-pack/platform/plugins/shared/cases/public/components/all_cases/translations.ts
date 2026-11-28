@@ -171,6 +171,23 @@ export const ATTC_DESCRIPTION = i18n.translate('xpack.cases.casesStats.mttrDescr
   defaultMessage: 'The average duration (from creation to closure) for your current cases',
 });
 
+export const KPI_METRIC_ERROR_ARIA_LABEL = i18n.translate(
+  'xpack.cases.casesStats.kpiMetricErrorAriaLabel',
+  {
+    defaultMessage: 'The metric could not be calculated',
+  }
+);
+
+export const KPI_METRIC_ANALYTICS_DISABLED = i18n.translate(
+  'xpack.cases.casesStats.kpiMetricAnalyticsDisabled',
+  {
+    defaultMessage: 'Case analytics is turned off. Custom metrics need case analytics.',
+  }
+);
+
+export const KPI_METRIC_UNKNOWN = i18n.translate('xpack.cases.casesStats.kpiMetricUnknown', {
+  defaultMessage: 'This metric is not available.',
+});
 export const FILTER_ASSIGNEES_ARIA_LABEL = i18n.translate(
   'xpack.cases.allCasesView.filterAssigneesAriaLabel',
   {

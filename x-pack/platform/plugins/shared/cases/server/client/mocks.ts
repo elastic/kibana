@@ -62,6 +62,7 @@ import {
   V2_NOOP_ACTIVITY_WRITER,
   V2_NOOP_ATTACHMENTS_WRITER,
   V2_NOOP_DATA_VIEW_REFRESHER,
+  V2_NOOP_READER,
   V2_NOOP_WRITER,
 } from '../cases_analytics_v2';
 import { CasesEventBus } from '../events/event_bus';
@@ -120,6 +121,8 @@ const createMetricsSubClientMock = (): MetricsSubClientMock => {
     getCaseMetrics: jest.fn(),
     getCasesMetrics: jest.fn(),
     getStatusTotalsByType: jest.fn(),
+    getKpiMetrics: jest.fn(),
+    previewKpiMetric: jest.fn(),
   });
 };
 
@@ -311,6 +314,7 @@ export const createCasesClientMockArgs = () => {
     casesEventBus: createCasesEventBusMock(),
     request: httpServerMock.createKibanaRequest(),
     clientSource: 'rest_api' as CasesClientSource,
+    analyticsV2Reader: { msearch: jest.fn().mockResolvedValue([]) },
   };
 };
 
@@ -345,6 +349,7 @@ export const createCasesClientFactoryMockArgs = () => {
     analyticsV2ActivityWriter: V2_NOOP_ACTIVITY_WRITER,
     analyticsV2AttachmentsWriter: V2_NOOP_ATTACHMENTS_WRITER,
     analyticsV2DataViewRefresher: V2_NOOP_DATA_VIEW_REFRESHER,
+    analyticsV2Reader: V2_NOOP_READER,
   };
 };
 

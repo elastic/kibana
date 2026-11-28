@@ -1803,7 +1803,7 @@ describe('client', () => {
       },
       closure_type: 'close-by-user',
       owner: 'securitySolutionFixture',
-    } as ConfigurationRequest;
+    } as Omit<ConfigurationRequest, 'metrics'>;
 
     it(`throws when trying to create more than ${MAX_CUSTOM_FIELDS_PER_CASE} custom fields`, async () => {
       await expect(

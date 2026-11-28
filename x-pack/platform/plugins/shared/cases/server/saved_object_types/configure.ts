@@ -47,6 +47,30 @@ const observableTypeSettingsAttributesSchema = schema.object(
   { unknowns: 'allow' }
 );
 
+const kpiMetricListSchema = schema.maybe(
+  schema.arrayOf(
+    schema.object(
+      {
+        id: schema.string(),
+        kind: schema.oneOf([schema.literal('predefined'), schema.literal('custom')]),
+      },
+      { unknowns: 'allow' }
+    )
+  )
+);
+
+const kpiMetricsAttributesSchema = observableTypeSettingsAttributesSchema.extends(
+  {
+    metrics: schema.maybe(
+      schema.object(
+        { casesList: kpiMetricListSchema, caseDetails: kpiMetricListSchema },
+        { unknowns: 'allow' }
+      )
+    ),
+  },
+  { unknowns: 'allow' }
+);
+
 export const caseConfigureSavedObjectType: SavedObjectsType = {
   name: CASE_CONFIGURE_SAVED_OBJECT,
   indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
@@ -197,6 +221,14 @@ export const caseConfigureSavedObjectType: SavedObjectsType = {
       schemas: {
         forwardCompatibility: observableTypeSettingsAttributesSchema,
         create: observableTypeSettingsAttributesSchema,
+      },
+    },
+    '5': {
+      // metrics holds the KPI metrics of the case list and the case details page. Not indexed, so no mapping change.
+      changes: [],
+      schemas: {
+        forwardCompatibility: kpiMetricsAttributesSchema,
+        create: kpiMetricsAttributesSchema,
       },
     },
   },

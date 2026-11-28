@@ -32,6 +32,7 @@ import type { LicensingService } from '../services/licensing';
 import type { NotificationService } from '../services/notifications/types';
 import type { User } from '../common/types/user';
 import type { ConfigType } from '../config';
+import type { CasesAnalyticsV2ReaderContract } from '../cases_analytics_v2';
 import type { CasesEventBus } from '../events/event_bus';
 import type { ActionSource } from '../../common/types/domain';
 import type { CasesClient } from './client';
@@ -72,6 +73,7 @@ export interface CasesClientArgs {
   readonly request: KibanaRequest;
   readonly closeReasonValidator?: (closeReason: string, owner: string) => Promise<boolean>;
   readonly clientSource: CasesClientSource;
+  readonly analyticsV2Reader: CasesAnalyticsV2ReaderContract;
 }
 
 export type CasesSearchParams = Partial<
