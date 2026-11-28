@@ -88,8 +88,8 @@ describe('EMS is enabled', () => {
       minZoom: 0,
       sourceDescriptor: {
         id: undefined,
-        isAutoSelect: true,
-        lightModeDefault: DEFAULT_EMS_ROADMAP_DESATURATED_ID,
+        is_auto_select: true,
+        light_mode_default: DEFAULT_EMS_ROADMAP_DESATURATED_ID,
         type: 'EMS_TMS',
       },
       style: { type: 'EMS_VECTOR_TILE', color: '' },

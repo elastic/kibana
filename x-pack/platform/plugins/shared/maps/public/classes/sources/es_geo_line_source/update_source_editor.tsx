@@ -72,19 +72,19 @@ export class UpdateSourceEditor extends Component<Props, State> {
   };
 
   _onGroupByTimeseriesChange = (value: boolean) => {
-    this.props.onChange({ propName: 'groupByTimeseries', value });
+    this.props.onChange({ propName: 'group_by_timeseries', value });
   };
 
   _onLineSimplificationSizeChange = (value: number) => {
-    this.props.onChange({ propName: 'lineSimplificationSize', value });
+    this.props.onChange({ propName: 'line_simplification_size', value });
   };
 
   _onSplitFieldChange = (value: string) => {
-    this.props.onChange({ propName: 'splitField', value });
+    this.props.onChange({ propName: 'split_field', value });
   };
 
   _onSortFieldChange = (value: string) => {
-    this.props.onChange({ propName: 'sortField', value });
+    this.props.onChange({ propName: 'sort_field', value });
   };
 
   render() {

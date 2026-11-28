@@ -75,7 +75,7 @@ export function getHttpRequestsLayerList(
     sourceDescriptor: {
       type: SOURCE_TYPES.EMS_FILE,
       id: 'world_countries',
-      tooltipProperties: [COUNTRY_NAME],
+      tooltip_properties: [COUNTRY_NAME],
     },
     style: getLayerStyle(HTTP_REQUEST_PER_COUNTRY, PalleteColors.BluetoRed, styleColors),
     id: uuidv4(),
@@ -114,7 +114,7 @@ export function getHttpRequestsLayerList(
     sourceDescriptor: {
       type: SOURCE_TYPES.EMS_FILE,
       id: 'administrative_regions_lvl2',
-      tooltipProperties: ['region_iso_code'],
+      tooltip_properties: ['region_iso_code'],
     },
     style: getLayerStyle(HTTP_REQUESTS_PER_REGION, PalleteColors.YellowtoRed, styleColors),
     id: uuidv4(),

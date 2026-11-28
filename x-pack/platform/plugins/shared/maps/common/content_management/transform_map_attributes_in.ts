@@ -11,10 +11,39 @@ import type { StoredRefreshInterval } from '../../server/saved_objects/types';
 import type { MapAttributes, StoredMapAttributes } from '../../server';
 import { extractReferences } from '../migrations/references';
 import { convertSnakeCasedKeysToCamelCase } from './convert_snake_cased_keys_to_camel_case';
+import { isMapsOwnedSource } from './is_maps_owned_source';
 import { mapStateKeys, uiStateKeys } from './stored_map_attributes';
 
 // Query state contains Elasticsearch DSL. Keys must be persisted as provided.
 const SKIP_CAMEL_CASE_KEYS = ['query', 'whereQuery'];
+
+function convertLayerToCamelCase(layer: unknown) {
+  const { sourceDescriptor, joins, ...rest } = layer as Record<string, any>;
+  const converted: Record<string, unknown> = convertSnakeCasedKeysToCamelCase(
+    rest,
+    SKIP_CAMEL_CASE_KEYS
+  );
+  // Sources not owned by maps are stored as provided.
+  if (sourceDescriptor !== undefined) {
+    converted.sourceDescriptor = isMapsOwnedSource(sourceDescriptor)
+      ? convertSnakeCasedKeysToCamelCase(sourceDescriptor, SKIP_CAMEL_CASE_KEYS)
+      : sourceDescriptor;
+  }
+  if (Array.isArray(joins)) {
+    converted.joins = joins.map((join) =>
+      join && typeof join === 'object' && join.right !== undefined && !isMapsOwnedSource(join.right)
+        ? {
+            ...convertSnakeCasedKeysToCamelCase(
+              { ...join, right: undefined },
+              SKIP_CAMEL_CASE_KEYS
+            ),
+            right: join.right,
+          }
+        : convertSnakeCasedKeysToCamelCase(join, SKIP_CAMEL_CASE_KEYS)
+    );
+  }
+  return converted;
+}
 
 export function transformMapAttributesIn(mapState: MapAttributes): {
   attributes: StoredMapAttributes;
@@ -27,7 +56,7 @@ export function transformMapAttributesIn(mapState: MapAttributes): {
   if (mapState.description) storedMapAttributes.description = mapState.description;
   if (mapState.layers)
     storedMapAttributes.layerListJSON = JSON.stringify(
-      convertSnakeCasedKeysToCamelCase(mapState.layers, SKIP_CAMEL_CASE_KEYS)
+      mapState.layers.map(convertLayerToCamelCase)
     );
 
   const mapStateJSON = getJSONString(

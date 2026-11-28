@@ -23,7 +23,11 @@ import type { ESSearchSourceDescriptor } from '../../../../../common/descriptor_
 type TopHitsSourceChangeArgs = OnSourceChangeArgs<
   Pick<
     ESSearchSourceDescriptor,
-    'topHitsGroupByTimeseries' | 'topHitsSplitField' | 'topHitsSize' | 'sortField' | 'sortOrder'
+    | 'top_hits_group_by_timeseries'
+    | 'top_hits_split_field'
+    | 'top_hits_size'
+    | 'sort_field'
+    | 'sort_order'
   >
 >;
 
@@ -61,26 +65,29 @@ export class TopHitsForm extends Component<Props, State> {
   }
 
   _onGroupByTimeseriesChange = (topHitsGroupByTimeseries: boolean) => {
-    this.props.onChange({ propName: 'topHitsGroupByTimeseries', value: topHitsGroupByTimeseries });
+    this.props.onChange({
+      propName: 'top_hits_group_by_timeseries',
+      value: topHitsGroupByTimeseries,
+    });
   };
 
   _onTopHitsSplitFieldChange = (topHitsSplitField?: string) => {
     if (!topHitsSplitField) {
       return;
     }
-    this.props.onChange({ propName: 'topHitsSplitField', value: topHitsSplitField });
+    this.props.onChange({ propName: 'top_hits_split_field', value: topHitsSplitField });
   };
 
   _onTopHitsSizeChange = (size: number) => {
-    this.props.onChange({ propName: 'topHitsSize', value: size });
+    this.props.onChange({ propName: 'top_hits_size', value: size });
   };
 
   _onSortFieldChange = (sortField?: string) => {
-    this.props.onChange({ propName: 'sortField', value: sortField });
+    this.props.onChange({ propName: 'sort_field', value: sortField });
   };
 
   _onSortOrderChange = (event: ChangeEvent<HTMLSelectElement>) => {
-    this.props.onChange({ propName: 'sortOrder', value: event.target.value });
+    this.props.onChange({ propName: 'sort_order', value: event.target.value });
   };
 
   async loadIndexSettings() {

@@ -85,12 +85,12 @@ export function createRegionMapLayerDescriptor({
   const termSourceDescriptor: Writable<ESTermSourceDescriptor> = {
     type: SOURCE_TYPES.ES_TERM_SOURCE,
     id: joinId,
-    indexPatternId,
+    index_pattern_id: indexPatternId,
     term: termsFieldName,
     metrics: [metricsDescriptor],
-    applyGlobalQuery: true,
-    applyGlobalTime: true,
-    applyForceRefresh: true,
+    apply_global_query: true,
+    apply_global_time: true,
+    apply_force_refresh: true,
   };
   if (termsSize !== undefined) {
     termSourceDescriptor.size = termsSize;
@@ -105,7 +105,7 @@ export function createRegionMapLayerDescriptor({
     ],
     sourceDescriptor: EMSFileSource.createDescriptor({
       id: emsLayerId,
-      tooltipProperties: ['name', leftFieldName],
+      tooltip_properties: ['name', leftFieldName],
     }),
     style: VectorStyle.createDescriptor({
       [VECTOR_STYLES.FILL_COLOR]: {

@@ -50,7 +50,7 @@ describe('transformMapOut', () => {
         "layers": Array [
           Object {
             "sourceDescriptor": Object {
-              "indexPatternId": "c698b940-e149-11e8-a35a-370a8516603a",
+              "index_pattern_id": "c698b940-e149-11e8-a35a-370a8516603a",
               "type": "ES_GEO_GRID",
             },
           },

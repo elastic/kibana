@@ -11,13 +11,13 @@ export const mockLayerList = [
       {
         leftField: 'iso2',
         right: {
-          applyForceRefresh: true,
-          applyGlobalQuery: true,
-          applyGlobalTime: true,
+          apply_force_refresh: true,
+          apply_global_query: true,
+          apply_global_time: true,
           type: 'ES_TERM_SOURCE',
           id: '3657625d-17b0-41ef-99ba-3a2b2938655c',
           term: 'client.geo.country_iso_code',
-          whereQuery: {
+          where_query: {
             language: 'kuery',
             query: 'transaction.type : "page-load" and service.name : "undefined"',
           },
@@ -28,7 +28,7 @@ export const mockLayerList = [
               label: 'Page load duration',
             },
           ],
-          indexPatternId: 'apm_static_data_view_id_default',
+          index_pattern_id: 'apm_static_data_view_id_default',
         },
       },
     ],
@@ -87,18 +87,18 @@ export const mockLayerList = [
       {
         leftField: 'region_iso_code',
         right: {
-          applyForceRefresh: true,
-          applyGlobalQuery: true,
-          applyGlobalTime: true,
+          apply_force_refresh: true,
+          apply_global_query: true,
+          apply_global_time: true,
           type: 'ES_TERM_SOURCE',
           id: 'e62a1b9c-d7ff-4fd4-a0f6-0fdc44bb9e41',
           term: 'client.geo.region_iso_code',
-          whereQuery: {
+          where_query: {
             language: 'kuery',
             query: 'transaction.type : "page-load" and service.name : "undefined"',
           },
           metrics: [{ type: 'avg', field: 'transaction.duration.us' }],
-          indexPatternId: 'apm_static_data_view_id_default',
+          index_pattern_id: 'apm_static_data_view_id_default',
         },
       },
     ],

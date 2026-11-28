@@ -155,11 +155,11 @@ export function getInitialSourceIndexFieldLayers(
           sourceDescriptor: {
             id: htmlIdGenerator()(),
             type: SOURCE_TYPES.ES_SEARCH,
-            tooltipProperties: [geoField],
+            tooltip_properties: [geoField],
             label: index,
-            indexPatternId: dataViewId,
-            geoField,
-            scalingType: SCALING_TYPES.MVT,
+            index_pattern_id: dataViewId,
+            geo_field: geoField,
+            scaling_type: SCALING_TYPES.MVT,
           } as unknown as ESSearchSourceDescriptor,
         });
       });

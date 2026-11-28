@@ -79,10 +79,10 @@ export const BaseESAggSourceSchema = lazySchema(() =>
 
 export const ESGeoGridSourceSchema = lazySchema(() =>
   BaseESAggSourceSchema.extend({
-    geoField: z.string().meta({
+    geo_field: z.string().meta({
       description: 'Field containing indexed geo-point or geo-shape values.',
     }),
-    requestType: z.union([
+    request_type: z.union([
       z.literal(RENDER_AS.HEATMAP),
       z.literal(RENDER_AS.POINT),
       z.literal(RENDER_AS.GRID),
@@ -98,20 +98,20 @@ export const ESGeoGridSourceSchema = lazySchema(() =>
 
 export const ESGeoLineSourceSchema = lazySchema(() =>
   BaseESAggSourceSchema.extend({
-    geoField: z.string().meta({
+    geo_field: z.string().meta({
       description: 'Field containing indexed geo-point values.',
     }),
-    groupByTimeseries: z.boolean().default(false).optional().meta({
+    group_by_timeseries: z.boolean().default(false).optional().meta({
       description: `When true, results are grouped by time_series aggregation, creating a line feature for each time_series group.`,
     }),
-    lineSimplificationSize: z.number().min(1).max(10000).default(500).optional().meta({
+    line_simplification_size: z.number().min(1).max(10000).default(500).optional().meta({
       description: `The maximum number of points for each line. Line is simplifed when threshold is exceeded. Use smaller values for better performance.`,
     }),
-    splitField: z.string().optional().meta({
-      description: `Field used to group results by term aggregation, creating a line feature for each term. Required when groupByTimeseries is false. Ignored when groupByTimeseries is true.`,
+    split_field: z.string().optional().meta({
+      description: `Field used to group results by term aggregation, creating a line feature for each term. Required when group_by_timeseries is false. Ignored when group_by_timeseries is true.`,
     }),
-    sortField: z.string().optional().meta({
-      description: `Numeric field used as the sort key for ordering the points. Required when groupByTimeseries is false. Ignored when groupByTimeseries is true.`,
+    sort_field: z.string().optional().meta({
+      description: `Numeric field used as the sort key for ordering the points. Required when group_by_timeseries is false. Ignored when group_by_timeseries is true.`,
     }),
     type: z.literal(SOURCE_TYPES.ES_GEO_LINE),
   }).meta({
@@ -122,10 +122,10 @@ export const ESGeoLineSourceSchema = lazySchema(() =>
 
 export const ESPewPewSourceSchema = lazySchema(() =>
   BaseESAggSourceSchema.extend({
-    destGeoField: z.string().meta({
+    dest_geo_field: z.string().meta({
       description: `Field containing indexed geo-point values.`,
     }),
-    sourceGeoField: z.string().meta({
+    source_geo_field: z.string().meta({
       description: `Field containing indexed geo-point values.`,
     }),
     type: z.literal(SOURCE_TYPES.ES_PEW_PEW),

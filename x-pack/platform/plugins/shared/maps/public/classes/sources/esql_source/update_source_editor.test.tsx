@@ -27,7 +27,7 @@ describe('UpdateSourceEditor', () => {
       const onChange = jest.fn();
       const sourceDescriptor = ESQLSource.createDescriptor({
         esql: 'from logs | keep location | limit 10000',
-        narrowByMapBounds: false,
+        narrow_by_map_bounds: false,
       });
       render(
         <UpdateSourceEditor
@@ -40,8 +40,8 @@ describe('UpdateSourceEditor', () => {
       await userEvent.click(getNarrowByMapBoundsSwitch());
       await waitFor(() =>
         expect(onChange).toHaveBeenCalledWith(
-          { propName: 'narrowByMapBounds', value: true },
-          { propName: 'geoField', value: 'location' }
+          { propName: 'narrow_by_map_bounds', value: true },
+          { propName: 'geo_field', value: 'location' }
         )
       );
     });
@@ -50,8 +50,8 @@ describe('UpdateSourceEditor', () => {
       const onChange = jest.fn();
       const sourceDescriptor = ESQLSource.createDescriptor({
         esql: 'from logs | keep location | limit 10000',
-        geoField: 'dest_location',
-        narrowByMapBounds: false,
+        geo_field: 'dest_location',
+        narrow_by_map_bounds: false,
       });
       render(
         <UpdateSourceEditor
@@ -63,7 +63,7 @@ describe('UpdateSourceEditor', () => {
       await waitFor(() => getNarrowByMapBoundsSwitch());
       await userEvent.click(getNarrowByMapBoundsSwitch());
       await waitFor(() =>
-        expect(onChange).toHaveBeenCalledWith({ propName: 'narrowByMapBounds', value: true })
+        expect(onChange).toHaveBeenCalledWith({ propName: 'narrow_by_map_bounds', value: true })
       );
     });
   });
@@ -77,7 +77,7 @@ describe('UpdateSourceEditor', () => {
       const onChange = jest.fn();
       const sourceDescriptor = ESQLSource.createDescriptor({
         esql: 'from logs | keep location | limit 10000',
-        narrowByGlobalTime: false,
+        narrow_by_global_time: false,
       });
       render(
         <UpdateSourceEditor
@@ -90,8 +90,8 @@ describe('UpdateSourceEditor', () => {
       await userEvent.click(getNarrowByTimeSwitch());
       await waitFor(() =>
         expect(onChange).toHaveBeenCalledWith(
-          { propName: 'narrowByGlobalTime', value: true },
-          { propName: 'dateField', value: 'timestamp' }
+          { propName: 'narrow_by_global_time', value: true },
+          { propName: 'date_field', value: 'timestamp' }
         )
       );
     });
@@ -100,8 +100,8 @@ describe('UpdateSourceEditor', () => {
       const onChange = jest.fn();
       const sourceDescriptor = ESQLSource.createDescriptor({
         esql: 'from logs | keep location | limit 10000',
-        dateField: 'utc_timestamp',
-        narrowByGlobalTime: false,
+        date_field: 'utc_timestamp',
+        narrow_by_global_time: false,
       });
       render(
         <UpdateSourceEditor
@@ -113,7 +113,7 @@ describe('UpdateSourceEditor', () => {
       await waitFor(() => getNarrowByTimeSwitch());
       await userEvent.click(getNarrowByTimeSwitch());
       await waitFor(() =>
-        expect(onChange).toHaveBeenCalledWith({ propName: 'narrowByGlobalTime', value: true })
+        expect(onChange).toHaveBeenCalledWith({ propName: 'narrow_by_global_time', value: true })
       );
     });
   });

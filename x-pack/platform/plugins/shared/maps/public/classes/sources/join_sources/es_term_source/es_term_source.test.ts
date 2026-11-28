@@ -36,7 +36,7 @@ describe('getMetricFields', () => {
     const source = new ESTermSource({
       id: '1234',
       term: termFieldName,
-      indexPatternId: 'foobar',
+      index_pattern_id: 'foobar',
     });
     const metrics = source.getMetricFields();
     expect(metrics[0].getName()).toEqual('__kbnjoin__count__1234');
@@ -48,7 +48,7 @@ describe('getMetricFields', () => {
       id: '1234',
       term: termFieldName,
       metrics: metricExamples,
-      indexPatternId: 'foobar',
+      index_pattern_id: 'foobar',
     });
     const metrics = source.getMetricFields();
     expect(metrics[0].getName()).toEqual('__kbnjoin__sum_of_myFieldGettingSummed__1234');
@@ -115,11 +115,11 @@ describe('getSyncMeta', () => {
     const source = new ESTermSource({
       id: '1234',
       term: termFieldName,
-      indexPatternId: 'foobar',
+      index_pattern_id: 'foobar',
       size: 10,
     });
     expect(source.getSyncMeta({} as unknown as DataFilters)).toEqual({
-      indexPatternId: 'foobar',
+      index_pattern_id: 'foobar',
       metrics: ['__kbnjoin__count__1234'],
       size: 10,
       term: 'myTermField',

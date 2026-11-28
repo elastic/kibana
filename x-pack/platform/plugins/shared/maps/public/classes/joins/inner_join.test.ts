@@ -18,7 +18,7 @@ jest.mock('../layers/vector_layer', () => {});
 const rightSource = {
   type: SOURCE_TYPES.ES_TERM_SOURCE,
   id: 'd3625663-5b34-4d50-a784-0d743f676a0c',
-  indexPatternId: '90943e30-9a47-11e8-b64d-95841ca0b247',
+  index_pattern_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
   term: 'geo.dest',
   metrics: [{ type: AGG_TYPE.COUNT }],
 } as ESTermSourceDescriptor;
@@ -64,7 +64,7 @@ describe('createJoinSource', () => {
       expect(
         createJoinSource({
           ...rightSource,
-          indexPatternId: undefined,
+          index_pattern_id: undefined,
         })
       ).toBe(undefined);
     });

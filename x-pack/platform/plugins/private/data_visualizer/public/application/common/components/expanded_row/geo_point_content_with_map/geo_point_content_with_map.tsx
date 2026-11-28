@@ -10,10 +10,11 @@ import React, { useEffect, useState } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type {
   ES_GEO_FIELD_TYPE,
+  ESQLSourceDescriptor,
   LayerDescriptor,
   VectorLayerDescriptor,
 } from '@kbn/maps-plugin/common';
-import { INITIAL_LOCATION } from '@kbn/maps-plugin/common';
+import { INITIAL_LOCATION, SOURCE_TYPES } from '@kbn/maps-plugin/common';
 import type { CombinedQuery } from '../../../../index_data_visualizer/types/combined_query';
 import { ExpandedRowContent } from '../../stats_table/components/field_data_expanded_row/expanded_row_content';
 import { DocumentStatsTable } from '../../stats_table/components/field_data_expanded_row/document_stats';
@@ -76,23 +77,16 @@ export const GeoPointContentWithMap: FC<{
         if (esql !== undefined) {
           // Currently, createESSearchSourceLayerDescriptor doesn't support ES|QL yet
           // but we can manually override the source descriptor with the ES|QL ESQLSourceDescriptor
-          const esqlSourceDescriptor = {
-            columns: [
-              {
-                name: config.fieldName,
-                type: config.type,
-              },
-            ],
-            dataViewId: dataView.id,
-            dateField: dataView.timeFieldName ?? timeFieldName,
-            geoField: config.fieldName,
+          const esqlSourceDescriptor: ESQLSourceDescriptor = {
+            date_field: dataView.timeFieldName ?? timeFieldName,
+            geo_field: config.fieldName,
             esql,
-            narrowByGlobalSearch: true,
-            narrowByGlobalTime: true,
-            narrowByMapBounds: true,
+            narrow_by_global_search: true,
+            narrow_by_global_time: true,
+            narrow_by_map_bounds: true,
             id: (searchLayerDescriptor.sourceDescriptor as { id: string }).id,
-            type: 'ESQL',
-            applyForceRefresh: true,
+            type: SOURCE_TYPES.ESQL,
+            apply_force_refresh: true,
           };
 
           setLayerList([
