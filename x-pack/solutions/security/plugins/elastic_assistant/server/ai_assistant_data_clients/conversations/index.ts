@@ -15,6 +15,7 @@ import type {
 import type { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import { createConversation } from './create_conversation';
 import { updateConversation } from './update_conversation';
+import { updateConversationTitleIfUnset } from './update_conversation_title_if_unset';
 import { getConversation } from './get_conversation';
 import { conversationExists } from './conversation_exists';
 import { deleteConversation } from './delete_conversation';
@@ -156,6 +157,37 @@ export class AIAssistantConversationsDataClient extends AIAssistantDataClient {
       conversationUpdateProps,
       dataWriter,
       logger: this.options.logger,
+      user: authenticatedUser ?? this.options.currentUser ?? undefined,
+    });
+  };
+
+  /**
+   * Sets a conversation's title only if it is still empty or equal to `placeholderTitle`.
+   * @param options
+   * @param options.id The id of the conversation to update.
+   * @param options.title The new title.
+   * @param options.placeholderTitle The default title that may be replaced, e.g. "New chat".
+   * @returns true if the title was written, false if the conversation is missing or was already titled
+   */
+  public updateConversationTitleIfUnset = async ({
+    id,
+    title,
+    placeholderTitle,
+    authenticatedUser,
+  }: {
+    id: string;
+    title: string;
+    placeholderTitle: string;
+    authenticatedUser?: AuthenticatedUser;
+  }): Promise<boolean> => {
+    const esClient = await this.options.elasticsearchClientPromise;
+    return updateConversationTitleIfUnset({
+      esClient,
+      logger: this.options.logger,
+      conversationIndex: this.indexTemplateAndPattern.alias,
+      id,
+      title,
+      placeholderTitle,
       user: authenticatedUser ?? this.options.currentUser ?? undefined,
     });
   };
