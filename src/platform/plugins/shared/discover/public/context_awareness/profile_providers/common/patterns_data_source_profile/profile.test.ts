@@ -81,7 +81,7 @@ it('drills into a generated pattern in the current tab without an index', async 
     value: '.*?connection.+?failed.*?',
   });
   expect(updateESQLQuery).toHaveBeenCalledWith(
-    expect.stringContaining(source + '\n  | WHERE MATCH(')
+    source + '\n  | WHERE message RLIKE ".*connection.+failed.*"'
   );
 });
 

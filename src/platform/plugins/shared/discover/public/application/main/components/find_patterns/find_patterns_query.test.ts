@@ -10,12 +10,20 @@
 import { getMatchingMessagesQuery, findPatterns } from './find_patterns_query';
 
 describe('findPatterns', () => {
-  it('retains the source pipeline and escapes tokens in the matching query', () => {
-    const source = 'FROM logs-* | WHERE service.name == "checkout" // selected service';
+  it('filters the original pipeline by the ordered category regex', () => {
+    const source = 'FROM logs-* | LIMIT 10 // selected sample';
     const grouped = findPatterns(source, 'log text');
-    expect(getMatchingMessagesQuery(grouped, 'log text', 'say "hello"')).toEqual(
-      source +
-        '\n  | WHERE MATCH(TO_TEXT(TO_STRING(`log text`)), "say \\"hello\\"", {"auto_generate_synonyms_phrase_query": false, "fuzziness": 0, "operator": "AND"})'
+    expect(getMatchingMessagesQuery(grouped, 'log text', '.*?payment.+?failed.*?')).toBe(
+      source + '\n  | WHERE `log text` RLIKE ".*payment.+failed.*"'
+    );
+  });
+
+  it('preserves literal regex characters and escapes Lucene and ES|QL special characters', () => {
+    const source = 'FROM logs';
+    const grouped = findPatterns(source, 'message');
+    const pattern = String.raw`.*?service\.name.+?@"host".*?`;
+    expect(getMatchingMessagesQuery(grouped, 'message', pattern)).toBe(
+      source + '\n' + String.raw`  | WHERE message RLIKE ".*service\\.name.+\\@\\\"host\\\".*"`
     );
   });
 

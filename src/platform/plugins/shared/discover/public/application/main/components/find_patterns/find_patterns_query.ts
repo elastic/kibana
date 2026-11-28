@@ -17,14 +17,15 @@ export const findPatterns = (esql: string, field: string) => esql + groupingComm
 export const getMatchingMessagesQuery = (
   esql: string,
   field: string,
-  tokens: string
+  pattern: string
 ): string | undefined => {
   const suffix = groupingCommands(field);
   if (!esql.endsWith(suffix)) {
     return undefined;
   }
 
-  // Match the selected field at the end of the original pipeline, including after a LIMIT.
+  // RLIKE uses Lucene regexes. Drop lazy modifiers and escape Lucene-only operators in tokens.
+  const regex = pattern.replace(/(\.[*+])\?/g, '$1').replace(/[@#&~<>"]/g, '\\$&');
   const source = esql.slice(0, -suffix.length);
-  return `${source}\n  | WHERE MATCH(TO_TEXT(TO_STRING(${escapeEsqlColumnName(field)})), ${escapeStringValue(tokens)}, {"auto_generate_synonyms_phrase_query": false, "fuzziness": 0, "operator": "AND"})`;
+  return `${source}\n  | WHERE ${escapeEsqlColumnName(field)} RLIKE ${escapeStringValue(regex)}`;
 };

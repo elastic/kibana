@@ -130,10 +130,10 @@ export const createPatternsDataSourceProfileProvider = (
                 return;
               }
 
-              const pattern = extractCategorizeTokens(executeContext.value as string).join(' ');
+              const pattern = executeContext.value as string;
               const categoryField = getCategorizeField(executeContext.query.esql)[0];
 
-              if (!categoryField || !pattern) {
+              if (!categoryField) {
                 return;
               }
 
@@ -150,13 +150,14 @@ export const createPatternsDataSourceProfileProvider = (
               }
 
               const index = executeContext.dataView?.getIndexPattern();
-              if (!index) {
+              const tokens = extractCategorizeTokens(pattern).join(' ');
+              if (!index || !tokens) {
                 return;
               }
 
               const query = {
                 ...executeContext.query,
-                esql: `FROM ${index}\n  | WHERE MATCH(${categoryField}, "${pattern}", {"auto_generate_synonyms_phrase_query": false, "fuzziness": 0, "operator": "AND"})\n  | LIMIT ${DOC_LIMIT}`,
+                esql: `FROM ${index}\n  | WHERE MATCH(${categoryField}, "${tokens}", {"auto_generate_synonyms_phrase_query": false, "fuzziness": 0, "operator": "AND"})\n  | LIMIT ${DOC_LIMIT}`,
               };
 
               if (toolkit.actions.openInNewTab) {
