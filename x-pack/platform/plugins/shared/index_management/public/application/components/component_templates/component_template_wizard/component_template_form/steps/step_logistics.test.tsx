@@ -13,7 +13,7 @@ import { StepLogistics } from './step_logistics';
 
 let mockIsServerless = false;
 
-jest.mock('../../../../app_context', () => ({
+jest.mock('../../../../../app_context', () => ({
   useAppContext: () => ({
     config: { isServerless: mockIsServerless },
     plugins: { cloud: undefined },
@@ -23,7 +23,7 @@ jest.mock('../../../../app_context', () => ({
   }),
 }));
 
-jest.mock('../../component_templates_context', () => ({
+jest.mock('../../../component_templates_context', () => ({
   useComponentTemplatesContext: () => ({
     documentation: { componentTemplates: 'https://example.test', componentTemplatesMetadata: '' },
     getUrlForApp: () => 'http://localhost/app/management',
