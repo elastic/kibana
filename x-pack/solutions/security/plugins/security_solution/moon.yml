@@ -326,6 +326,7 @@ dependsOn:
   - '@kbn/custom-content-common'
   - '@kbn/custom-content-renderer'
   - '@kbn/securitysolution-timeline-search-strategy'
+  - '@kbn/core-user-storage-browser'
 tags:
   - plugin
   - prod

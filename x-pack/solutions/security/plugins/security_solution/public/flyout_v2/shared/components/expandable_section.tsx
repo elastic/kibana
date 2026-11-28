@@ -50,6 +50,11 @@ export interface ExpandableSectionProps {
    */
   sectionId?: string;
   /**
+   * POC: when provided, called with the new expanded state on toggle and the localStorage write is
+   * skipped (the caller persists the state, e.g. per user via User Storage).
+   */
+  onExpandedChange?: (expanded: boolean) => void;
+  /**
    * Title value to render in the header of the accordion
    */
   title: ReactElement | string;
@@ -78,6 +83,7 @@ export const ExpandableSection = memo(
     gutterSize = 'none',
     localStorageKey,
     sectionId,
+    onExpandedChange,
     title,
     extraAction,
     headingLevel = 'h4',
@@ -96,8 +102,13 @@ export const ExpandableSection = memo(
     );
 
     const onToggle = useCallback(() => {
+      if (onExpandedChange) {
+        onExpandedChange(state === 'closed');
+        toggle({ title: sectionId });
+        return;
+      }
       toggle({ localStorageKey, title: sectionId });
-    }, [toggle, localStorageKey, sectionId]);
+    }, [toggle, localStorageKey, sectionId, onExpandedChange, state]);
 
     return (
       <EuiAccordion

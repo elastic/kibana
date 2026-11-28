@@ -25,8 +25,9 @@ import type { ListPluginSetup } from '@kbn/lists-plugin/server';
 import type { ILicense } from '@kbn/licensing-types';
 import type { NewPackagePolicy, UpdatePackagePolicyWithId } from '@kbn/fleet-plugin/common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
-
 import { ATTACK_FINGERPRINT_AI_INDEX_ID } from '@kbn/alertzero-plugin/common/ai_indices';
+import { registerUserSettings } from './user_settings/register_user_settings';
+
 import { registerScriptsLibraryRoutes } from './endpoint/routes/scripts_library';
 import { registerCustomYaraSignaturesRoutes } from './endpoint/routes/custom_yara_signatures';
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
@@ -393,6 +394,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
 
     initUiSettings(core.uiSettings, experimentalFeatures, config.enableUiSettingsValidations);
+    registerUserSettings(core.userStorage);
 
     productFeaturesService.setup(core, plugins);
 

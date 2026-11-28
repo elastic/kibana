@@ -29,6 +29,16 @@ export interface UseTabsParams<T extends string> {
    * `FlyoutTabClicked` event tagged with this flyout type. Omit to skip tab-click telemetry.
    */
   flyoutType?: FlyoutType;
+  /**
+   * POC: tab id persisted by the caller (for example in User Storage). Read instead of localStorage
+   * when `onPersistTabId` is provided. An empty string means "nothing stored".
+   */
+  persistedTabId?: string;
+  /**
+   * POC: called instead of writing to localStorage when the user explicitly selects a tab. Providing
+   * it moves persistence to the caller, including importing any legacy localStorage value.
+   */
+  onPersistTabId?: (tabId: string) => void;
 }
 
 export interface UseTabsResult<T extends string> {
@@ -58,7 +68,8 @@ const resolveTabId = <T extends string>(
  *
  * Resolves the active tab from (in priority order):
  *   1. `initialTabId` (e.g. expandable-flyout URL path or an explicit initial value)
- *   2. The value persisted in localStorage under `storageKey`
+ *   2. The value persisted by the caller (`persistedTabId`) when `onPersistTabId` is provided,
+ *      otherwise the value persisted in localStorage under `storageKey`
  *   3. `validTabIds[0]` as the final fallback
  */
 export const useTabs = <T extends string>({
@@ -66,6 +77,8 @@ export const useTabs = <T extends string>({
   storageKey,
   initialTabId,
   flyoutType,
+  persistedTabId,
+  onPersistTabId,
 }: UseTabsParams<T>): UseTabsResult<T> => {
   const { storage } = useKibana().services;
   const { reportTabClicked } = useFlyoutTelemetry();
@@ -73,7 +86,7 @@ export const useTabs = <T extends string>({
   const [selectedTabId, setSelectedTabIdState] = useState<T>(
     () =>
       resolveTabId(validTabIds, initialTabId) ??
-      resolveTabId(validTabIds, storage.get(storageKey)) ??
+      resolveTabId(validTabIds, onPersistTabId ? persistedTabId : storage.get(storageKey)) ??
       validTabIds[0]
   );
 
@@ -93,12 +106,16 @@ export const useTabs = <T extends string>({
   const setSelectedTabId = useCallback(
     (tabId: T) => {
       setSelectedTabIdState(tabId);
-      storage.set(storageKey, tabId);
+      if (onPersistTabId) {
+        onPersistTabId(tabId);
+      } else {
+        storage.set(storageKey, tabId);
+      }
       if (flyoutType) {
         reportTabClicked({ flyoutType, tabId });
       }
     },
-    [storage, storageKey, flyoutType, reportTabClicked]
+    [storage, storageKey, flyoutType, reportTabClicked, onPersistTabId]
   );
 
   return { selectedTabId, setSelectedTabId };
