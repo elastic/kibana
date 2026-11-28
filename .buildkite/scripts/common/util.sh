@@ -63,6 +63,20 @@ push_as_github_token() {
   )
 }
 
+# Lists uncommitted changes, ignoring config files that CI rewrites locally.
+get_git_changes() {
+  git status --porcelain -- . ':!:config/node.options' ':!config/kibana.yml'
+}
+
+# Commits all uncommitted changes as kibanamachine on top of the PR branch.
+commit_changes_to_pr() {
+  git config --global user.name kibanamachine
+  git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
+  gh pr checkout "${BUILDKITE_PULL_REQUEST}"
+  git add -A -- . ':!config/node.options' ':!config/kibana.yml'
+  git commit -m "$1"
+}
+
 check_for_changed_files() {
   RED='\033[0;31m'
   YELLOW='\033[0;33m'
@@ -71,7 +85,7 @@ check_for_changed_files() {
   SHOULD_AUTO_COMMIT_CHANGES="${2:-}"
   CUSTOM_FIX_MESSAGE="${3:-Changes from $1}"
   FORCE_GITHUB_TOKEN_PUSH_ARG="${4:-}"
-  GIT_CHANGES="$(git status --porcelain -- . ':!:config/node.options' ':!config/kibana.yml')"
+  GIT_CHANGES="$(get_git_changes)"
 
   if [ "$GIT_CHANGES" ]; then
     if ! is_auto_commit_disabled && [[ "$SHOULD_AUTO_COMMIT_CHANGES" == "true" && "${BUILDKITE_PULL_REQUEST:-false}" != "false" ]]; then
@@ -79,11 +93,7 @@ check_for_changed_files() {
       echo "$GIT_CHANGES"
       echo ""
 
-      git config --global user.name kibanamachine
-      git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
-      gh pr checkout "${BUILDKITE_PULL_REQUEST}"
-      git add -A -- . ':!config/node.options' ':!config/kibana.yml'
-      git commit -m "$CUSTOM_FIX_MESSAGE"
+      commit_changes_to_pr "$CUSTOM_FIX_MESSAGE"
 
       # If COLLECT_COMMITS_MARKER_FILE is set, we're in batch mode (e.g., called from quick checks runner)
       # Just record the commit for later batch push
