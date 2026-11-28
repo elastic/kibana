@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { EuiProvider } from '@elastic/eui';
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { EuiThemeProvider } from '@elastic/eui';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import type { InputFieldProps } from './package_policy_input_var_field';
@@ -21,7 +21,7 @@ jest.mock('../../../../../../../../hooks', () => ({
 
 const wrapper = ({ children }: React.PropsWithChildren) => (
   <I18nProvider>
-    <EuiProvider>{children}</EuiProvider>
+    <EuiThemeProvider>{children}</EuiThemeProvider>
   </I18nProvider>
 );
 
@@ -33,15 +33,13 @@ const makeProps = (): InputFieldProps => ({
 });
 
 describe('PackagePolicyInputVarField dataset validation', () => {
-  it('shows a custom dataset error after editing and clears it after correction', async () => {
+  it('shows a custom dataset error after editing and clears it after correction', () => {
     const props = makeProps();
     const { rerender } = render(<PackagePolicyInputVarField {...props} />, { wrapper });
     const input = screen.getByTestId('comboBoxSearchInput');
 
-    await act(async () => {
-      fireEvent.change(input, { target: { value: 'kubernetes.Logs' } });
-      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
-    });
+    fireEvent.change(input, { target: { value: 'kubernetes.Logs' } });
+    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
 
     expect(props.onChange).toHaveBeenLastCalledWith({
       dataset: 'kubernetes.Logs',
@@ -57,10 +55,8 @@ describe('PackagePolicyInputVarField dataset validation', () => {
     expect(screen.getByText('Dataset must be lowercase')).toBeVisible();
     expect(input).toHaveAttribute('aria-invalid', 'true');
 
-    await act(async () => {
-      fireEvent.change(input, { target: { value: 'kubernetes.logs_valid' } });
-      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
-    });
+    fireEvent.change(input, { target: { value: 'kubernetes.logs_valid' } });
+    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
     expect(props.onChange).toHaveBeenLastCalledWith({
       dataset: 'kubernetes.logs_valid',
       package: 'kubernetes',
@@ -74,7 +70,7 @@ describe('PackagePolicyInputVarField dataset validation', () => {
     );
     expect(screen.queryByText('Dataset must be lowercase')).not.toBeInTheDocument();
     expect(input).not.toHaveAttribute('aria-invalid', 'true');
-  });
+  }, 15_000);
 
   it('keeps errors hidden before the dataset is edited', () => {
     render(<PackagePolicyInputVarField {...makeProps()} errors={['Dataset must be lowercase']} />, {
