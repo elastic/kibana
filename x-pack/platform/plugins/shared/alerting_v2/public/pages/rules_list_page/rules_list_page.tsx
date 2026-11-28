@@ -77,14 +77,19 @@ export const RulesListPage = () => {
     closeCreateOptionsFlyout();
     navigateToAgentBuilder();
   };
-  const ruleCreateSearch = useRuleCreateSearch({ onClose: closeCreateOptionsFlyout });
-  const onBuildSequenceFromOptionsFlyout = () => {
+  const onBuildSequenceFromOptionsFlyout = useCallback(() => {
     closeCreateOptionsFlyout();
     navigateToSequenceBuilder();
-  };
-  const onCreateThresholdRuleFromOptionsFlyout = () => {
+  }, [closeCreateOptionsFlyout, navigateToSequenceBuilder]);
+  const onCreateThresholdRuleFromOptionsFlyout = useCallback(() => {
     openCreateBuilderFlyout('threshold');
-  };
+  }, [openCreateBuilderFlyout]);
+  const ruleCreateSearch = useRuleCreateSearch({
+    onClose: closeCreateOptionsFlyout,
+    onCreateEsqlRule: openCreateFlyout,
+    onCreateThresholdRule: onCreateThresholdRuleFromOptionsFlyout,
+    onBuildSequence: showBuildSequence ? onBuildSequenceFromOptionsFlyout : undefined,
+  });
 
   const emptyState = canWrite ? (
     <RuleCreateOptionsPanel
