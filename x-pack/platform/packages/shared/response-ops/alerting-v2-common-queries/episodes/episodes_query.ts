@@ -56,6 +56,7 @@ export const ALERT_EPISODE_FIELDS = [
   'last_tags',
   'episode_data',
   'severity',
+  'reason',
   'source',
 ] as const;
 
@@ -126,7 +127,7 @@ const resolveSortField = (sortField: string): string => {
 
 /**
  * Reduces the episode events to one row per episode: its latest event, with the
- * episode-level stats.
+ * episode-level stats. Expects the `event_reason` column added by `addEventReason`.
  */
 export const addEpisodeAggregation = (query: ComposerQuery) => {
   /* This will be simplified when the `$.alerting-episodes` ES|QL view works.
@@ -139,10 +140,18 @@ export const addEpisodeAggregation = (query: ComposerQuery) => {
   // prettier-ignore
   query
     .pipe`EVAL extracted_data = JSON_EXTRACT(_source, "data")`
-    .pipe`INLINE STATS first_timestamp = MIN(@timestamp), last_timestamp = MAX(@timestamp), triggered_at = MIN(@timestamp) WHERE \`episode.status\` == "active", start_event_timestamp = MIN(@timestamp) WHERE \`episode.status\` == "pending" AND \`episode.status_count\` == 1, episode_data = LAST(extracted_data, @timestamp) WHERE extracted_data != "{}", severity = LAST(severity, @timestamp) WHERE status == "breached" AND severity IS NOT NULL BY episode.id`
+    .pipe`INLINE STATS first_timestamp = MIN(@timestamp), last_timestamp = MAX(@timestamp), triggered_at = MIN(@timestamp) WHERE \`episode.status\` == "active", start_event_timestamp = MIN(@timestamp) WHERE \`episode.status\` == "pending" AND \`episode.status_count\` == 1, episode_data = LAST(extracted_data, @timestamp) WHERE extracted_data != "{}", severity = LAST(severity, @timestamp) WHERE status == "breached" AND severity IS NOT NULL, reason = LAST(event_reason, @timestamp) WHERE event_reason IS NOT NULL BY episode.id`
     .pipe`EVAL duration = DATE_DIFF("ms", first_timestamp, last_timestamp)`
     .pipe`WHERE @timestamp == last_timestamp`
     .pipe`LIMIT 1 BY episode.id`;
+};
+
+/**
+ * The reason is a keyword in the events and a text in the actions, and ES|QL rejects a field mapped
+ * to both once an `INLINE STATS` has run, so it is converted right after the sources are read.
+ */
+const addEventReason = (query: ComposerQuery) => {
+  query.pipe`EVAL event_reason = TO_STRING(reason)`;
 };
 
 const addSeriesActionStats = (query: ComposerQuery) => {
@@ -315,6 +324,7 @@ export const buildEpisodesBaseQuery = (
 
   query.where`type == "alert" OR action_type IN ("snooze", "unsnooze", "tag", "ack", "unack", "assign")`;
 
+  addEventReason(query);
   addSeriesActionStats(query);
   addEpisodeIdActionStats(query);
   query.where`type == "alert"`;

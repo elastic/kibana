@@ -35,6 +35,7 @@ import { AlertEpisodeStatusHealth } from '../status/status_badge';
 import { AlertEpisodeAssigneeCell } from '../assignee_cell';
 import { UserProfileDisplay } from '../user_profile_display';
 import { CopyableShortId } from '../copyable_short_id';
+import { AlertEpisodeReasonSection } from './reason_section';
 import { AlertEpisodeGroupingSection } from './grouping_section';
 import { AlertEpisodeTrendChartSection } from './trend_chart_section';
 import { AlertEpisodeTimelineHeatmapsSection } from './timeline_heatmaps_section';
@@ -482,6 +483,7 @@ export const AlertEpisodeDetailsFlyout = ({
                 data-test-subj="alertingV2EpisodeFlyoutAccordionAbout"
               >
                 <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
+                  <AlertEpisodeReasonSection episodeId={episodeId} services={services} compressed />
                   <AlertEpisodeGroupingSection
                     episodeId={episodeId}
                     services={services}

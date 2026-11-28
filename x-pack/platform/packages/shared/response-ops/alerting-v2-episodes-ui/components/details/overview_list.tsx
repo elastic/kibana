@@ -26,6 +26,7 @@ import { UserProfileDisplay } from '../user_profile_display';
 import { EMPTY_VALUE } from '../../constants';
 import { formatDateTime } from '../../utils/format_date_time';
 import { isEpisodeSnoozed } from '../../utils/is_episode_snoozed';
+import { EpisodeReasonText } from './reason_text';
 import * as i18n from './translations';
 
 /**
@@ -39,6 +40,8 @@ export interface AlertEpisodeOverviewListProps {
   /** Source data view used to format grouping values with their field's `fieldFormats` formatter. */
   groupingDataView?: DataView;
   groupingStatus?: GroupingRowStatus;
+  /** Rendered rule reason of the episode. The row is hidden when there is none. */
+  reason?: string;
   triggeredAt: string | undefined;
   durationMs: number | undefined;
   assigneeUid: string | undefined;
@@ -53,6 +56,7 @@ export const AlertEpisodeOverviewList = ({
   groupingData,
   groupingDataView,
   groupingStatus = 'visible',
+  reason,
   triggeredAt,
   durationMs,
   assigneeUid,
@@ -118,6 +122,19 @@ export const AlertEpisodeOverviewList = ({
                   ),
               },
             ]),
+        ...(reason
+          ? [
+              {
+                title: i18n.METADATA_LIST_REASON_LABEL,
+                description: (
+                  <EpisodeReasonText
+                    reason={reason}
+                    data-test-subj="alertingV2EpisodeDetailsOverviewListReason"
+                  />
+                ),
+              },
+            ]
+          : []),
         ...(alertUrl
           ? [
               {

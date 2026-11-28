@@ -108,6 +108,44 @@ describe('AlertEpisodeOverviewList', () => {
     expect(tagsRow).toHaveTextContent('tag-b');
   });
 
+  it('renders the reason row', () => {
+    render(
+      <I18nProvider>
+        <AlertEpisodeOverviewList {...baseProps} reason="Carrier ES-Air averaged 41.6 min" />
+      </I18nProvider>
+    );
+
+    expect(screen.getByText('Reason')).toBeInTheDocument();
+    expect(screen.getByTestId('alertingV2EpisodeDetailsOverviewListReason')).toHaveTextContent(
+      'Carrier ES-Air averaged 41.6 min'
+    );
+  });
+
+  it('renders the reason as text, never as HTML', () => {
+    render(
+      <I18nProvider>
+        <AlertEpisodeOverviewList {...baseProps} reason="<img src=x onerror=alert(1)>" />
+      </I18nProvider>
+    );
+
+    const reasonRow = screen.getByTestId('alertingV2EpisodeDetailsOverviewListReason');
+    expect(reasonRow).toHaveTextContent('<img src=x onerror=alert(1)>');
+    expect(reasonRow.querySelector('img')).toBeNull();
+  });
+
+  it('hides the reason row when there is no reason', () => {
+    render(
+      <I18nProvider>
+        <AlertEpisodeOverviewList {...baseProps} />
+      </I18nProvider>
+    );
+
+    expect(screen.queryByText('Reason')).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('alertingV2EpisodeDetailsOverviewListReason')
+    ).not.toBeInTheDocument();
+  });
+
   it('hides the grouping row and keeps other rows when grouping is forbidden', () => {
     render(
       <I18nProvider>

@@ -106,6 +106,7 @@ export const AlertEpisodeOverviewListSection = ({
       groupingData={groupingData}
       groupingDataView={sourceDataView}
       groupingStatus={groupingStatus}
+      reason={episode?.reason || undefined}
       triggeredAt={triggeredAt}
       durationMs={durationMs}
       assigneeUid={assigneeUid}
