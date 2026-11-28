@@ -14,7 +14,7 @@ import {
   getPackagePolicyWithAgentConfigurations,
   getPackagePolicyWithSourceMap,
 } from './get_package_policy_decorators';
-import { listSourceMapArtifacts } from './source_maps';
+import { listSourceMapArtifactsMetadata } from './source_maps';
 
 export async function decoratePackagePolicyWithAgentConfigAndSourceMap({
   packagePolicy,
@@ -27,9 +27,9 @@ export async function decoratePackagePolicyWithAgentConfigAndSourceMap({
   fleetPluginStart: NonNullable<APMPluginStartDependencies['fleet']>;
   apmIndices: APMIndices;
 }) {
-  const [agentConfigurations, { artifacts }] = await Promise.all([
+  const [agentConfigurations, artifacts] = await Promise.all([
     listConfigurations({ internalESClient, apmIndices }),
-    listSourceMapArtifacts({ fleetPluginStart }),
+    listSourceMapArtifactsMetadata({ fleetPluginStart }),
   ]);
 
   const policyWithSourceMaps = getPackagePolicyWithSourceMap({
