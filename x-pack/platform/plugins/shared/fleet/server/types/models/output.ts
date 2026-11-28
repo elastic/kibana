@@ -375,6 +375,9 @@ const KafkaKerberosSchema = schema.object({
   username: schema.string({
     minLength: 1,
     maxLength: KAFKA_KERBEROS_USERNAME_MAX_LENGTH,
+    // `minLength` accepts spaces: a blank principal is rejected here, as the preconfigured outputs
+    // only log the validation errors of the service
+    validate: (value) => (value.trim() === '' ? 'must not be blank' : undefined),
     meta: {
       description:
         'Kerberos username (the principal). Required. When `auth_type` is `keytab`, it is the principal to look up in the keytab file; when it is `password`, the password is set in `secrets.kerberos.password`.',
