@@ -579,6 +579,13 @@ export const CASES_TEMPLATE_CLEARED_EVENT_TYPE = 'cases_template_cleared' as con
 export const CASES_OBSERVABLES_DELETED_EVENT_TYPE = 'cases_observables_deleted' as const;
 
 /**
+ * One event per completed "Extract observables" click in the UI, whatever the outcome. The
+ * server-side usage counter `extract_observables` counts every client method call from the UI, the
+ * API and workflows. It cannot tell the UI apart, so this event gives the UI-triggered count.
+ */
+export const CASES_OBSERVABLES_EXTRACTED_EVENT_TYPE = 'cases_observables_extracted' as const;
+
+/**
  * Field Library management events. One confirmed UI write each, never a total — see
  * `register_management_events`.
  */

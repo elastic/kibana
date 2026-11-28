@@ -23,3 +23,4 @@ export const registerObservablesAnalytics = ({
 
 export { useObservablesDeletedEBT } from './use_observables_deleted_ebt';
 export type { ObservableDeleteScope } from './use_observables_deleted_ebt';
+export { useObservablesExtractedEBT } from './use_observables_extracted_ebt';
