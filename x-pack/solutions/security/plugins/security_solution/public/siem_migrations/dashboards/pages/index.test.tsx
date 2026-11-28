@@ -8,6 +8,7 @@
 import React from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
 import { render, screen } from '@testing-library/react';
+import { MemoryRouter } from '@kbn/shared-ux-router';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
@@ -80,11 +81,17 @@ const renderComponent = (migrationId?: string) => {
   };
 
   return render(
-    <MockAppHeaderProvider>
-      <TestProviders>
-        <MigrationDashboardsPage match={mockMatch} location={mockLocation} history={mockHistory} />
-      </TestProviders>
-    </MockAppHeaderProvider>
+    <MemoryRouter>
+      <MockAppHeaderProvider>
+        <TestProviders>
+          <MigrationDashboardsPage
+            match={mockMatch}
+            location={mockLocation}
+            history={mockHistory}
+          />
+        </TestProviders>
+      </MockAppHeaderProvider>
+    </MemoryRouter>
   );
 };
 
