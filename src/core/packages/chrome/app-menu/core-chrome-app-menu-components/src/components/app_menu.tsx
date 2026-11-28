@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { EuiHeaderLinks, useIsWithinBreakpoints } from '@elastic/eui';
 import { getAppMenuItems } from '../utils';
 import { AppMenuActionButton } from './app_menu_action_button';
@@ -37,6 +37,32 @@ export const AppMenuComponent = ({
   const isBetweenMandXlBreakpoint = useIsWithinBreakpoints(['m', 'l']);
   const isAboveXlBreakpoint = useIsWithinBreakpoints(['xl']);
 
+  const handlePopoverToggle = useCallback((id: string) => {
+    setOpenPopoverId((prev) => (prev === id ? null : id));
+  }, []);
+
+  const handleOnPopoverClose = useCallback(() => {
+    setOpenPopoverId(null);
+  }, []);
+
+  // Memoize getAppMenuItems so displayedItems/overflowItems only get new references
+  // when config actually changes, not on every render. Without this, the inline spread
+  // `[...displayedItems, ...overflowItems]` below would create a new array on every render,
+  // causing AppMenuPopover.panels to recompute and triggering the EuiContextMenu
+  // componentDidUpdate → getDerivedStateFromProps → findMenuItems → setState cascade.
+  const { displayedItems, overflowItems, shouldOverflow } = useMemo(
+    () =>
+      config
+        ? getAppMenuItems({ config })
+        : { displayedItems: [], overflowItems: [], shouldOverflow: false },
+    [config]
+  );
+
+  const combinedItems = useMemo(
+    () => [...displayedItems, ...overflowItems],
+    [displayedItems, overflowItems]
+  );
+
   if (!config || hasNoItems(config) || !visible) {
     return null;
   }
@@ -49,18 +75,6 @@ export const AppMenuComponent = ({
     gutterSize: 'xs' as const,
     popoverBreakpoints: 'none' as const,
     className: 'kbnTopNavMenu__wrapper',
-  };
-
-  const { displayedItems, overflowItems, shouldOverflow } = getAppMenuItems({
-    config,
-  });
-
-  const handlePopoverToggle = (id: string) => {
-    setOpenPopoverId(openPopoverId === id ? null : id);
-  };
-
-  const handleOnPopoverClose = () => {
-    setOpenPopoverId(null);
   };
 
   const primaryActionComponent = primaryActionItem ? (
@@ -76,7 +90,7 @@ export const AppMenuComponent = ({
 
   const collapsedComponent = (
     <AppMenuOverflowButton
-      items={[...displayedItems, ...overflowItems]}
+      items={combinedItems}
       isPopoverOpen={openPopoverId === showMoreButtonId}
       primaryActionItem={primaryActionItem}
       onPopoverToggle={() => handlePopoverToggle(showMoreButtonId)}
@@ -92,7 +106,7 @@ export const AppMenuComponent = ({
     return (
       <EuiHeaderLinks {...headerLinksProps}>
         <AppMenuOverflowButton
-          items={[...displayedItems, ...overflowItems]}
+          items={combinedItems}
           isPopoverOpen={openPopoverId === showMoreButtonId}
           onPopoverToggle={() => handlePopoverToggle(showMoreButtonId)}
           onPopoverClose={handleOnPopoverClose}
