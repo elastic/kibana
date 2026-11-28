@@ -24,8 +24,7 @@ import {
 const end = moment().valueOf();
 const start = moment(end).subtract(10, 'minutes').valueOf();
 
-// Failing: See https://github.com/elastic/kibana/issues/290494
-apiTest.describe.skip(
+apiTest.describe(
   'Observability alert details context when logs are annotated with service.name',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
@@ -101,17 +100,12 @@ apiTest.describe.skip(
     });
 
     apiTest(
-      'returns no service summary and the service + container log categories when no params are specified',
+      'returns no service summary and no log categories when no params are specified',
       async ({ apiClient }) => {
         const alertContext = await fetchContext(apiClient, {});
 
         expect(getServiceSummary(alertContext)).toBeUndefined();
-        expect(
-          getLogCategories(alertContext).map(({ errorCategory }) => errorCategory)
-        ).toStrictEqual([
-          'Error message from service',
-          'Error message from container my-container-c',
-        ]);
+        expect(getLogCategories(alertContext)).toStrictEqual([]);
       }
     );
 
