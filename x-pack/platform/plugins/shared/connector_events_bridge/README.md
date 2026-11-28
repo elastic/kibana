@@ -1,10 +1,10 @@
 # Connector events bridge
 
-Phase 1 disposable bridge that registers on the Actions inbound events hub and forwards connector events to Workflows via `workflowsExtensions.getClient(request).emitEvent(...)`.
+Registers on the Actions inbound events hub and forwards connector events to Workflows via `workflowsExtensions.getClient(request).emitEvent(...)`. This plugin disappears once Workflows can attach an identity to a workflow.
 
 ## Why this plugin exists
 
-Keeps Actions free of a hard Workflows dependency. The hub (`actions/server/inbound`) stays consumer-agnostic; this plugin is the single Phase 1 emitter. Actions rejects a second `registerConnectorEventEmitter` call (exactly one emitter).
+Keeps Actions free of a hard Workflows dependency. The hub (`actions/server/inbound`) stays consumer-agnostic; this plugin is the Workflows emitter. Actions rejects a second `registerConnectorEventEmitter` call (exactly one emitter).
 
 Registration is gated by `xpack.actions.inboundEvents.enabled`.
 
@@ -14,6 +14,6 @@ External ingress has no useful caller principal (public route; ingest token ≠ 
 
 Emitter failures **rethrow** so the hub records `emit_threw` / `emit_partial` while the public POST still returns **202** (not 5xx).
 
-## Phase 2 replacement
+## Event bus
 
-Replace this bridge with the shared event bus **without changing** the SaaS-facing hub URL (`POST /api/actions/events/{connector_type_id}/{connector_id}`). Internal bus producers may pass a real `KibanaRequest`.
+The hub also publishes each accepted event on Kibana's event bus, one topic per event id, beside this bridge. `slack2.hitl_action` stays off the bus: Actions does not register `connectors.slack2.hitl_action`, and a subscriber to that name receives nothing. This plugin resumes that event. A workflow definition has no identity attached to it, and a bus event does not carry one, so Workflows cannot start from the bus yet. This plugin fills that gap: it still calls `emitEvent`. It disappears once Workflows can attach an identity to a workflow. The public ingest URL is unchanged (`POST /api/actions/events/{connector_type_id}/{connector_id}`).

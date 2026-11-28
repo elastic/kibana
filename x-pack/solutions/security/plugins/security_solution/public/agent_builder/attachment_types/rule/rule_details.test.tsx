@@ -53,12 +53,12 @@ const makeApplication = () =>
       [RULES_FEATURE_LATEST]: { edit_rules: true },
     },
     navigateToApp: jest.fn(),
-  } as unknown as ApplicationStart);
+  }) as unknown as ApplicationStart;
 
 const makeUiSettings = () =>
   ({
     get: jest.fn(),
-  } as unknown as IUiSettingsClient);
+  }) as unknown as IUiSettingsClient;
 
 const renderInlineContent = (rule: Record<string, unknown>) => {
   const aiRuleCreation = new AiRuleCreationService();
@@ -1212,6 +1212,7 @@ describe('RuleInlineContent integration', () => {
       savedRule,
       origin = 'saved-rule-id',
       versionData,
+      id = 'test',
       application = makeApplication(),
       uiSettings = makeUiSettings(),
       registerActionButtons = jest.fn(),
@@ -1221,6 +1222,7 @@ describe('RuleInlineContent integration', () => {
       savedRule?: Record<string, unknown>;
       origin?: string;
       versionData?: { version: number; versionCount: number; createdAt: string };
+      id?: string;
       application?: ApplicationStart;
       uiSettings?: IUiSettingsClient;
       registerActionButtons?: jest.Mock;
@@ -1236,7 +1238,7 @@ describe('RuleInlineContent integration', () => {
         definition.renderInlineContent!(
           {
             attachment: {
-              id: 'test',
+              id,
               type: 'security.rule',
               origin,
               ...(versionData ? { versionData } : {}),
@@ -1280,6 +1282,15 @@ describe('RuleInlineContent integration', () => {
 
       expect(lastRegisteredLabels(registerActionButtons)).toEqual([]);
     });
+
+    it.each(['tuned-rule', 'coverage-rule'])(
+      'registers no buttons for the Detection Watch rule card "%s", even when it differs from the saved rule',
+      (id) => {
+        const { registerActionButtons } = renderCard({ savedRule: changedSavedRule, id });
+
+        expect(lastRegisteredLabels(registerActionButtons)).toEqual([]);
+      }
+    );
 
     it('registers no buttons when the card matches the saved rule', () => {
       const { registerActionButtons } = renderCard({ savedRule: cardRule });

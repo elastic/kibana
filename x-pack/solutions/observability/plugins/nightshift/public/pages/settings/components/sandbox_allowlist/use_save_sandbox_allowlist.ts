@@ -14,6 +14,9 @@ import type {
 import { useKibana } from '../../../../hooks/use_kibana';
 import { NIGHTSHIFT_SANDBOX_ALLOWLIST_QUERY_KEY } from './use_fetch_sandbox_allowlist';
 
+// Short-lived so it does not sit over the Save button.
+const SAVE_SUCCESS_TOAST_LIFETIME_MS = 3000;
+
 const SAVE_SUCCESS_TOAST_TITLE = i18n.translate(
   'xpack.nightshift.sandboxAllowlist.saveSuccessToastTitle',
   { defaultMessage: 'Sandbox egress allowlist saved' }
@@ -47,7 +50,10 @@ export const useSaveSandboxAllowlist = (): UseMutationResult<
       });
     },
     onSuccess: async () => {
-      notifications.toasts.addSuccess({ title: SAVE_SUCCESS_TOAST_TITLE });
+      notifications.toasts.addSuccess({
+        title: SAVE_SUCCESS_TOAST_TITLE,
+        toastLifeTimeMs: SAVE_SUCCESS_TOAST_LIFETIME_MS,
+      });
       await queryClient.invalidateQueries({ queryKey: NIGHTSHIFT_SANDBOX_ALLOWLIST_QUERY_KEY });
     },
     onError: (error) => {

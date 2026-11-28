@@ -37,8 +37,7 @@ import {
 type ActionPolicyCanvasData = ActionPolicyAttachment['data'] & { id: string; name: string };
 
 export interface ActionPolicyCanvasContentProps
-  extends AttachmentRenderProps<ActionPolicyAttachment>,
-    CanvasRenderCallbacks {}
+  extends AttachmentRenderProps<ActionPolicyAttachment>, CanvasRenderCallbacks {}
 
 export const ActionPolicyCanvasContent = ({
   attachment,

@@ -110,7 +110,7 @@ export interface SavedObjectsModelMappingsDeprecationChange {
  */
 export interface SavedObjectsModelDataBackfillChange<
   PreviousAttributes = any,
-  NewAttributes = any
+  NewAttributes = any,
 > {
   type: 'data_backfill';
   /**

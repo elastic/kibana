@@ -122,7 +122,8 @@ function InvestigationCompleteCheckIcon({
             iconGradientCss,
             css`
               align-items: center;
-              background: linear-gradient(
+              background:
+                linear-gradient(
                     ${euiTheme.colors.backgroundBasePlain},
                     ${euiTheme.colors.backgroundBasePlain}
                   )
@@ -325,7 +326,8 @@ export function AiGradientBadge({
   const plateCss =
     variant === 'outlined'
       ? css`
-          background: linear-gradient(
+          background:
+            linear-gradient(
                 ${euiTheme.colors.backgroundBasePlain},
                 ${euiTheme.colors.backgroundBasePlain}
               )

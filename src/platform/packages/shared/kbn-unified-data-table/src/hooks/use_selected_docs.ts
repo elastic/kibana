@@ -186,10 +186,13 @@ export const useSelectedDocs = (docMap: DocMap): UseSelectedDocsState => {
 function createSelectedDocsMapFromIds(
   docIds: string[]
 ): UnifiedDataTableRestorableState['selectedDocsMap'] {
-  return docIds.reduce((acc, docId) => {
-    acc[docId] = true;
-    return acc;
-  }, {} as UnifiedDataTableRestorableState['selectedDocsMap']);
+  return docIds.reduce(
+    (acc, docId) => {
+      acc[docId] = true;
+      return acc;
+    },
+    {} as UnifiedDataTableRestorableState['selectedDocsMap']
+  );
 }
 
 function getIdsFromSelectedDocsMap(

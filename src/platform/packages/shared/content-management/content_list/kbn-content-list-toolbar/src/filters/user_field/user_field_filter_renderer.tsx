@@ -125,7 +125,7 @@ export const UserFieldFilterRenderer = ({
       // matches the one the legacy `UserProfilesSelectable` popover exposes.
       const optionSubj = getContentListUserOptionSubj(
         fieldName,
-        isSentinel ? option.key : option.data?.user?.username ?? option.key
+        isSentinel ? option.key : (option.data?.user?.username ?? option.key)
       );
 
       return (

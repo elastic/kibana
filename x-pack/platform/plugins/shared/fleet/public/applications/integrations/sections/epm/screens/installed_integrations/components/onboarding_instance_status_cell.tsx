@@ -27,7 +27,7 @@ const STATUS_ORDER: Partial<Record<Agent['status'] & string, number>> = {
 };
 const PENDING_RANK = 2;
 const statusRank = (agent?: Agent) =>
-  agent ? (agent.status && STATUS_ORDER[agent.status]) ?? 4 : PENDING_RANK;
+  agent ? ((agent.status && STATUS_ORDER[agent.status]) ?? 4) : PENDING_RANK;
 
 /**
  * The status badge of one agent, the one that most needs attention, followed by a count of the

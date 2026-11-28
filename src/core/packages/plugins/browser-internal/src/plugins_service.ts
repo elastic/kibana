@@ -41,9 +41,10 @@ export interface InternalPluginsServiceStart {
  *
  * @internal
  */
-export class PluginsService
-  implements CoreService<InternalPluginsServiceSetup, InternalPluginsServiceStart>
-{
+export class PluginsService implements CoreService<
+  InternalPluginsServiceSetup,
+  InternalPluginsServiceStart
+> {
   private readonly runtimeResolver = new RuntimePluginContractResolver();
   /** Plugin wrappers in topological order. */
   private readonly plugins = new Map<PluginName, PluginWrapper<unknown, unknown>>();
@@ -51,7 +52,10 @@ export class PluginsService
 
   private readonly satupPlugins: PluginName[] = [];
 
-  constructor(private readonly coreContext: CoreContext, plugins: InjectedMetadataPlugin[]) {
+  constructor(
+    private readonly coreContext: CoreContext,
+    plugins: InjectedMetadataPlugin[]
+  ) {
     // Generate opaque ids
     const opaqueIds = new Map<PluginName, PluginOpaqueId>(plugins.map((p) => [p.id, Symbol(p.id)]));
 

@@ -64,8 +64,8 @@ const getUnitedMetadataSortMethod = (
     sortField === EndpointSortableField.HOST_STATUS
       ? 'status'
       : sortField === EndpointSortableField.ENROLLED_AT
-      ? 'united.agent.enrolled_at'
-      : sortField.replace('metadata.', 'united.endpoint.');
+        ? 'united.agent.enrolled_at'
+        : sortField.replace('metadata.', 'united.endpoint.');
 
   const primarySort: estypes.SortCombinations = DATE_FIELDS.includes(sortField)
     ? { [mappedUnitedMetadataSortField]: { order: sortDirection, unmapped_type: 'date' } }

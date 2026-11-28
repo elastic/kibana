@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiAccordion,
@@ -32,6 +32,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
 import { checkActionTypeEnabled } from '@kbn/alerts-ui-shared/src/check_action_type_enabled';
+import type { ActionType } from '@kbn/actions-types';
 import type { SandboxConnector } from '@kbn/nightshift-investigations-plugin/common';
 import {
   NIGHTSHIFT_EBT_ACTIONS,
@@ -64,7 +65,26 @@ export function AddConnectorFlyout({ onClose }: { onClose: () => void }): React.
   const { application, triggersActionsUi } = useKibana().services;
   const { groups, isLoading, error, typesError, refetch } = useConnectorsByType();
   const { assignedIds, assign, unassign, canEditAgent, updatingId } = useAgentConnectors();
-  const { openAdd, addFlyout } = useAddConnectorFlyout();
+  // Rows are expanded by type id. A connector created here is assigned without a toast, so its row
+  // opens to show it as Enabled.
+  const [openTypeIds, setOpenTypeIds] = useState<ReadonlySet<string>>(new Set());
+  const [creatingTypeId, setCreatingTypeId] = useState<string | undefined>();
+  const setTypeOpen = useCallback((typeId: string, isOpen: boolean) => {
+    setOpenTypeIds((current) => {
+      const next = new Set(current);
+      if (isOpen) next.add(typeId);
+      else next.delete(typeId);
+      return next;
+    });
+  }, []);
+  const onCreated = useCallback(() => {
+    if (creatingTypeId) setTypeOpen(creatingTypeId, true);
+  }, [creatingTypeId, setTypeOpen]);
+  const { openAdd, addFlyout } = useAddConnectorFlyout({ onCreated });
+  const startCreate = (actionType: ActionType) => {
+    setCreatingTypeId(actionType.id);
+    openAdd(actionType);
+  };
   const [search, setSearch] = useState('');
   const titleId = useGeneratedHtmlId({ prefix: 'nightshiftAddConnectorFlyout' });
 
@@ -153,10 +173,12 @@ export function AddConnectorFlyout({ onClose }: { onClose: () => void }): React.
                         !canCreate
                           ? noPermissionReason
                           : enabledCheck.isEnabled
-                          ? undefined
-                          : enabledCheck.message
+                            ? undefined
+                            : enabledCheck.message
                       }
-                      onCreate={() => openAdd(group.actionType)}
+                      onCreate={() => startCreate(group.actionType)}
+                      isOpen={openTypeIds.has(group.actionType.id)}
+                      onToggleOpen={(isOpen) => setTypeOpen(group.actionType.id, isOpen)}
                       assignedIds={assignedIds}
                       isSearching={query.length > 0}
                       canToggle={canEditAgent}
@@ -182,6 +204,8 @@ function ConnectorTypeRow({
   item,
   createDisabledReason,
   onCreate,
+  isOpen,
+  onToggleOpen,
   assignedIds,
   canToggle,
   updatingId,
@@ -192,6 +216,8 @@ function ConnectorTypeRow({
   item: ReturnType<typeof getSourceCardItem>;
   createDisabledReason?: string;
   onCreate: () => void;
+  isOpen: boolean;
+  onToggleOpen: (isOpen: boolean) => void;
   assignedIds: string[];
   canToggle: boolean;
   updatingId: string | undefined;
@@ -255,7 +281,8 @@ function ConnectorTypeRow({
         id={accordionId}
         arrowDisplay="left"
         isDisabled={!hasConnectors}
-        forceState={isSearching && hasConnectors ? 'open' : undefined}
+        forceState={hasConnectors && (isSearching || isOpen) ? 'open' : 'closed'}
+        onToggle={onToggleOpen}
         buttonContent={
           <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>

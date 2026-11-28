@@ -82,8 +82,8 @@ const newSnapshotSchema = schema.object({
       !BASE64.test(value)
         ? 'must be base64'
         : !value.startsWith(JPEG_BASE64_START)
-        ? 'must be a JPEG image'
-        : undefined,
+          ? 'must be a JPEG image'
+          : undefined,
   }),
 });
 

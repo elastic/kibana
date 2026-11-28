@@ -49,6 +49,7 @@ import type { CoreSetup } from '@kbn/core/public';
 import type { HeatmapRenderProps, FilterEvent, BrushEvent } from '../../common';
 import {
   applyPaletteParams,
+  fillMissingHeatmapYBuckets,
   findMinMaxByColumnId,
   getFormattedTable,
   getSortPredicate,
@@ -472,6 +473,15 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       }
     }
 
+    // DSL histograms already include or drop empty rows via the agg toggle. Only ES|QL
+    // numeric buckets need the client to insert the missing steps.
+    if (isEsqlMode) {
+      const yInterval = yAxisColumn
+        ? datatableUtilities.getNumberHistogramInterval(yAxisColumn)
+        : undefined;
+      chartData = fillMissingHeatmapYBuckets(chartData, yAccessor, valueAccessor, yInterval);
+    }
+
     chartData = sortRowsByRangeLowerBound(chartData, xAxisColumn, args.gridConfig.xSortPredicate);
     chartData = sortRowsByRangeLowerBound(chartData, yAxisColumn, args.gridConfig.ySortPredicate);
 
@@ -802,7 +812,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     const themeOverrides: PartialTheme = {
       legend: {
         labelOptions: {
-          maxLines: args.legend.shouldTruncate ? args.legend?.maxLines ?? 1 : 0,
+          maxLines: args.legend.shouldTruncate ? (args.legend?.maxLines ?? 1) : 0,
         },
       },
       heatmap: {
@@ -1050,7 +1060,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
                       `${
                         yAccessor && formattedTable.formattedColumns[yAccessor]
                           ? v
-                          : yValuesFormatter.convertToText(v) ?? ''
+                          : (yValuesFormatter.convertToText(v) ?? '')
                       }`
                   : undefined
               }

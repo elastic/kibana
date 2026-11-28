@@ -152,8 +152,8 @@ export const createRecorderWorkspace = ({
         end < readable.length
           ? `\n[bytes ${start}-${end} of ${readable.length}; read on with offset ${end}]`
           : cutAtLimit
-          ? `\n[bytes ${start}-${end}; the file is longer than can be read]`
-          : '';
+            ? `\n[bytes ${start}-${end}; the file is longer than can be read]`
+            : '';
       return `${slice.toString('utf8')}${more}`;
     },
   };

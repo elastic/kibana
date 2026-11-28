@@ -238,8 +238,8 @@ const fitTexts = (
       length <= allowance
         ? text
         : allowance > floor
-        ? truncate(text, allowance)
-        : TRUNCATION_MARKER;
+          ? truncate(text, allowance)
+          : TRUNCATION_MARKER;
     remaining -= (fitted[index]?.length ?? 0) - floor;
   });
   return fitted;

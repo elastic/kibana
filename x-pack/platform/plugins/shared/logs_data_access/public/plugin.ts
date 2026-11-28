@@ -12,15 +12,12 @@ import type { LogsDataAccessPluginSetupDeps, LogsDataAccessPluginStartDeps } fro
 export type LogsDataAccessPluginSetup = ReturnType<LogsDataAccessPlugin['setup']>;
 export type LogsDataAccessPluginStart = ReturnType<LogsDataAccessPlugin['start']>;
 
-export class LogsDataAccessPlugin
-  implements
-    Plugin<
-      LogsDataAccessPluginSetup,
-      LogsDataAccessPluginStart,
-      LogsDataAccessPluginSetupDeps,
-      LogsDataAccessPluginStartDeps
-    >
-{
+export class LogsDataAccessPlugin implements Plugin<
+  LogsDataAccessPluginSetup,
+  LogsDataAccessPluginStart,
+  LogsDataAccessPluginSetupDeps,
+  LogsDataAccessPluginStartDeps
+> {
   public setup() {}
 
   public start(core: CoreStart, plugins: LogsDataAccessPluginStartDeps) {

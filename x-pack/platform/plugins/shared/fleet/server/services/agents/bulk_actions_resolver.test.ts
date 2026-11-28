@@ -246,7 +246,7 @@ describe('createRetryTask', () => {
       },
       state: {},
       ...overrides,
-    } as ConcreteTaskInstance);
+    }) as ConcreteTaskInstance;
 
   /** The liveness probe returns one hit when a batch landed within the interval. */
   const mockRecentBatch = (hasRecentBatch: boolean) => {

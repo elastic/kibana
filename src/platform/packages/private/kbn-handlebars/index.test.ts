@@ -688,16 +688,13 @@ describe('blocks', () => {
       it('root decorator', () => {
         expectTemplate('{{*decorator}}world')
           .withInput({ me: 'my' })
-          .withDecorator(
-            'decorator',
-            (fn): TemplateDelegate =>
-              (context, options) => {
-                expect(context).toMatchInlineSnapshot(`
+          .withDecorator('decorator', (fn): TemplateDelegate => (context, options) => {
+            expect(context).toMatchInlineSnapshot(`
               Object {
                 "me": "my",
               }
             `);
-                expect(options).toMatchInlineSnapshot(`
+            expect(options).toMatchInlineSnapshot(`
               Object {
                 "decorators": Object {
                   "decorator": [Function],
@@ -706,21 +703,17 @@ describe('blocks', () => {
                 "partials": Object {},
               }
             `);
-                return `hello ${context.me} ${fn()}!`;
-              }
-          )
+            return `hello ${context.me} ${fn()}!`;
+          })
           .toCompileTo('hello my world!');
       });
 
       it('decorator nested inside of array-helper', () => {
         expectTemplate('{{#arr}}{{*decorator}}world{{/arr}}')
           .withInput({ arr: ['my'] })
-          .withDecorator(
-            'decorator',
-            (fn): TemplateDelegate =>
-              (context, options) => {
-                expect(context).toMatchInlineSnapshot(`"my"`);
-                expect(options).toMatchInlineSnapshot(`
+          .withDecorator('decorator', (fn): TemplateDelegate => (context, options) => {
+            expect(context).toMatchInlineSnapshot(`"my"`);
+            expect(options).toMatchInlineSnapshot(`
               Object {
                 "blockParams": Array [
                   "my",
@@ -746,9 +739,8 @@ describe('blocks', () => {
                 },
               }
             `);
-                return `hello ${context} ${fn()}!`;
-              }
-          )
+            return `hello ${context} ${fn()}!`;
+          })
           .toCompileTo('hello my world!');
       });
 
@@ -757,19 +749,15 @@ describe('blocks', () => {
           .withHelper('helper', function (options: HelperOptions) {
             return options.fn('my', { foo: 'bar' } as any);
           })
-          .withDecorator(
-            'decorator',
-            (fn): TemplateDelegate =>
-              (context, options) => {
-                expect(context).toMatchInlineSnapshot(`"my"`);
-                expect(options).toMatchInlineSnapshot(`
+          .withDecorator('decorator', (fn): TemplateDelegate => (context, options) => {
+            expect(context).toMatchInlineSnapshot(`"my"`);
+            expect(options).toMatchInlineSnapshot(`
               Object {
                 "foo": "bar",
               }
             `);
-                return `hello ${context} ${fn()}!`;
-              }
-          )
+            return `hello ${context} ${fn()}!`;
+          })
           .toCompileTo('hello my world!');
       });
     });

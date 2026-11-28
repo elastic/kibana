@@ -116,9 +116,11 @@ function EvidenceList({ evidence }: { evidence: string[] }) {
           size="s"
           data-test-subj="nightshiftEntityFlyoutEvidenceItem"
           css={css`
-            background: ${index % 2 === 0
-              ? euiTheme.colors.backgroundBasePlain
-              : euiTheme.colors.backgroundBaseSubdued};
+            background: ${
+              index % 2 === 0
+                ? euiTheme.colors.backgroundBasePlain
+                : euiTheme.colors.backgroundBaseSubdued
+            };
             font-family: ${euiTheme.font.familyCode};
             margin: 0;
             padding: ${euiTheme.size.s} ${euiTheme.size.m};

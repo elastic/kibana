@@ -19,7 +19,10 @@ export class FeatureControlsPage {
   public readonly logsApp: Locator;
   public readonly readOnlyBadge: Locator;
 
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {
     this.infraNoDataPage = this.page.getByTestId('kbnNoDataPage');
     this.logsApp = this.page.getByTestId('infraLogsPage');
     this.readOnlyBadge = this.page.getByTestId('headerBadge');

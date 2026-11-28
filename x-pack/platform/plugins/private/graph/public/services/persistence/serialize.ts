@@ -32,7 +32,7 @@ const serializeNode = (
   color,
   field: data.field,
   term: data.term,
-  parent: parentId ? nodeIndexes.get(parentId) ?? null : null,
+  parent: parentId ? (nodeIndexes.get(parentId) ?? null) : null,
   size: scaledSize,
 });
 

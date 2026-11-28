@@ -23,19 +23,19 @@ const createDetection = (overrides: StoredDetection): Omit<Detection, 'processed
     rule_name: overrides.rule_name ?? 'Rule 1',
     change_point_type: overrides.change_point_type ?? 'spike',
     ...overrides,
-  } as Omit<Detection, 'processed'>);
+  }) as Omit<Detection, 'processed'>;
 
 const sourceResponse = (docs: Array<Record<string, unknown>>): ESQLSearchResponse =>
   ({
     columns: [{ name: '_source', type: 'object' }],
     values: docs.map((d) => [d]),
-  } as unknown as ESQLSearchResponse);
+  }) as unknown as ESQLSearchResponse;
 
 const countResponse = (total: number): ESQLSearchResponse =>
   ({
     columns: [{ name: 'total', type: 'long' }],
     values: [[total]],
-  } as unknown as ESQLSearchResponse);
+  }) as unknown as ESQLSearchResponse;
 
 interface MarkerRow {
   id: string;
@@ -56,7 +56,7 @@ const markerResponse = (markers: MarkerRow[]): ESQLSearchResponse =>
       at,
       skip ? { processed_by: 'exec-1', skip } : { processed_by: 'exec-1' },
     ]),
-  } as unknown as ESQLSearchResponse);
+  }) as unknown as ESQLSearchResponse;
 
 interface MockResponses {
   // Detections returned by the latest/find data query (already collapsed by groupBy).
@@ -335,9 +335,11 @@ describe('DetectionClient', () => {
 
 describe('DetectionClient.bulkCreate', () => {
   const createWriteClient = (items: BulkResponse['items']) => {
-    const create = jest.fn(
-      async (): Promise<BulkResponse> => ({ errors: items.length > 0, items, took: 1 })
-    );
+    const create = jest.fn(async (): Promise<BulkResponse> => ({
+      errors: items.length > 0,
+      items,
+      took: 1,
+    }));
     const client = new DetectionClient({
       dataStreamClient: { create },
       esClient: elasticsearchServiceMock.createElasticsearchClient(),
@@ -407,9 +409,11 @@ describe('DetectionClient.markSourceDetectionsProcessed', () => {
       }
       return sourceResponse(detections);
     });
-    const create = jest.fn(
-      async (): Promise<BulkResponse> => ({ errors: false, items: [], took: 1 })
-    );
+    const create = jest.fn(async (): Promise<BulkResponse> => ({
+      errors: false,
+      items: [],
+      took: 1,
+    }));
     const client = new DetectionClient({
       dataStreamClient: { create },
       esClient: { esql: { query } } as never,

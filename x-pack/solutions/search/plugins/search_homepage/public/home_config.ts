@@ -8,6 +8,7 @@
 import type { ApplicationStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { ElasticsearchHomePageProps } from '@kbn/elasticsearch-home/public';
+import { getAddDataPath } from './add_data_path';
 
 const TELEMETRY_PREFIX = 'searchHomepage';
 const STORAGE_KEY_PREFIX = 'searchHomepage';
@@ -71,8 +72,7 @@ export const getSearchHomeConfig = ({
       label: i18n.translate('xpack.searchHomepage.home.addData.uploadFile', {
         defaultMessage: 'Upload a file',
       }),
-      onClick: () =>
-        application.navigateToApp('home', { path: '#/tutorial_directory/fileDataViz' }),
+      onClick: () => application.navigateToApp('home', { path: getAddDataPath('fileDataViz') }),
       testSubj: 'addDataUploadFileLink',
       telemetryId: `${TELEMETRY_PREFIX}-addData-uploadFile`,
     },

@@ -141,8 +141,8 @@ const historyColumns = (
       if (list === null) {
         return EMPTY_VALUE;
       }
-      const { length } = list.errors;
-      return length > 0 ? <EuiBadge color="danger">{length}</EuiBadge> : length;
+      const count = [...list.probes, ...list.queries].filter(({ error }) => error !== null).length;
+      return count > 0 ? <EuiBadge color="danger">{count}</EuiBadge> : count;
     },
   },
 ];

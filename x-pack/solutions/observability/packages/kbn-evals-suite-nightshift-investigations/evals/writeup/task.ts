@@ -228,7 +228,7 @@ export const replayReply = async (
   const extraTurns: ExtraTurn[] = [];
   const attachments: ReplyAttachment[] = [];
   let lastError = '';
-  for (let calls = 0, failures = 0; calls < MAX_EXTRA_CALLS && failures < MAX_FAILURES; ) {
+  for (let calls = 0, failures = 0; calls < MAX_EXTRA_CALLS && failures < MAX_FAILURES;) {
     try {
       const response = await inferenceClient.chatComplete({
         system: replay.system,
@@ -259,7 +259,7 @@ export const replayReply = async (
         const args = (
           typeof call.function.arguments === 'string'
             ? JSON.parse(call.function.arguments || '{}')
-            : call.function.arguments ?? {}
+            : (call.function.arguments ?? {})
         ) as Record<string, unknown>;
         const result = replayToolResult(call.function.name, args, attachments);
         extraTurns.push({ name: call.function.name, args, result });

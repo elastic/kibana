@@ -37,15 +37,15 @@ export const toDetectionRule = (
     enabled === undefined
       ? undefined
       : engineState === 'paused'
-      ? { state: 'inactive', reason: 'engine_paused' }
-      : sourceEnabled === false
-      ? { state: 'inactive', reason: 'source_disabled' }
-      : enabled
-      ? { state: 'active' }
-      : {
-          state: 'inactive',
-          reason: 'rule_disabled',
-        };
+        ? { state: 'inactive', reason: 'engine_paused' }
+        : sourceEnabled === false
+          ? { state: 'inactive', reason: 'source_disabled' }
+          : enabled
+            ? { state: 'active' }
+            : {
+                state: 'inactive',
+                reason: 'rule_disabled',
+              };
   return { query, sourceId, occurrences, matches, lastActivity, status };
 };
 

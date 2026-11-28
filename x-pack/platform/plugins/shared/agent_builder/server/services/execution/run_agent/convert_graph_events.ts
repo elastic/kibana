@@ -360,7 +360,7 @@ export const convertGraphEvents = ({
         ) {
           const output = event.data.output as { steps?: RunStepUpdate[] };
           const notifications = (output.steps ?? []).flatMap((update) =>
-            update.type === 'append' ? notificationEvent(update.step) ?? [] : []
+            update.type === 'append' ? (notificationEvent(update.step) ?? []) : []
           );
           return notifications.length > 0 ? of(...notifications) : EMPTY;
         }

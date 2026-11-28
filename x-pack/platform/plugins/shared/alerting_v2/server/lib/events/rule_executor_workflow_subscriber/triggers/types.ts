@@ -20,7 +20,7 @@ import type { RuleExecutorEvent } from '../../rule_executor_event_publisher/even
  */
 export interface RuleExecutorWorkflowTriggerBinding<
   TEvent extends RuleExecutorEvent = RuleExecutorEvent,
-  TSchema extends z.ZodObject = z.ZodObject
+  TSchema extends z.ZodObject = z.ZodObject,
 > {
   readonly eventType: TEvent['type'];
   readonly triggerId: string;

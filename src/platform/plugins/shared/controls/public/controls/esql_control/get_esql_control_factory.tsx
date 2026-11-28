@@ -49,7 +49,7 @@ import { getTooltipTitle } from './utils/get_tooltip_title';
 import { getPlacementHints, LAYOUT_CONSTRAINTS } from '../constants';
 
 export const getESQLControlFactory = <
-  State extends OptionsListESQLControlState = OptionsListESQLControlState
+  State extends OptionsListESQLControlState = OptionsListESQLControlState,
 >(): EmbeddablePublicDefinition<
   State extends { control_type: 'STATIC_VALUES' } ? StaticESQLControl : QueryESQLControl,
   ESQLControlApi<State>
@@ -61,8 +61,8 @@ export const getESQLControlFactory = <
     isDuplicate: (incomingState, existingState) =>
       Boolean(
         incomingState.variable_name &&
-          incomingState.variable_name === existingState.variable_name &&
-          incomingState.control_type === existingState.control_type
+        incomingState.variable_name === existingState.variable_name &&
+        incomingState.control_type === existingState.control_type
       ),
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = initialState;
@@ -98,7 +98,7 @@ export const getESQLControlFactory = <
           ({
             ...selections.getLatestState(),
             ...labelManager.getLatestState(),
-          } as typeof initialState),
+          }) as typeof initialState,
         anyStateChange$: merge(labelManager.anyStateChange$, selections.anyStateChange$),
         getComparators: () => {
           return {

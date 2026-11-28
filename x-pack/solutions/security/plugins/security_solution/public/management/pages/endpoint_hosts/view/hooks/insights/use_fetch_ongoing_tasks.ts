@@ -52,13 +52,16 @@ export const useFetchLatestScan = ({
         const timestamp = timestampStr ? moment(timestampStr) : null;
 
         // we only want latest for each type
-        const insightsMap = response.data.reduce((acc, curr) => {
-          if (!acc[curr.insightType]) {
-            acc[curr.insightType] = curr;
-          }
+        const insightsMap = response.data.reduce(
+          (acc, curr) => {
+            if (!acc[curr.insightType]) {
+              acc[curr.insightType] = curr;
+            }
 
-          return acc;
-        }, {} as Record<WorkflowInsightType, DefendInsightsResponse>);
+            return acc;
+          },
+          {} as Record<WorkflowInsightType, DefendInsightsResponse>
+        );
         const insights = Object.values(insightsMap);
 
         const processQueryResults = (insightResults: DefendInsightsResponse[]) => {

@@ -358,8 +358,8 @@ export const generateExecutorFunction = ({
         ...(errorSource === TaskErrorSource.USER
           ? { retry: false, errorSource: TaskErrorSource.USER }
           : retryDate
-          ? { retry: retryDate }
-          : {}),
+            ? { retry: retryDate }
+            : {}),
       };
     } finally {
       releaseAcquiredClients();

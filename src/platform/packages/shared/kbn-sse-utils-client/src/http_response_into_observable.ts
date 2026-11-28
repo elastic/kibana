@@ -14,7 +14,7 @@ import type { StreamedHttpResponse } from './create_observable_from_http_respons
 import { createObservableFromHttpResponse } from './create_observable_from_http_response';
 
 export function httpResponseIntoObservable<
-  T extends ServerSentEvent = ServerSentEvent
+  T extends ServerSentEvent = ServerSentEvent,
 >(): OperatorFunction<StreamedHttpResponse, T> {
   return switchMap((response) => createObservableFromHttpResponse<T>(response));
 }

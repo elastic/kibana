@@ -27,7 +27,7 @@ const item = (tags: string[]): ArtifactItem =>
     updated_at: '2024-02-01T00:00:00.000Z',
     updated_by: 'tester',
     _version: 'WzEsMV0=',
-  } as ArtifactItem);
+  }) as ArtifactItem;
 
 describe('toArtifactRef', () => {
   it.each([

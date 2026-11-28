@@ -140,9 +140,8 @@ export function processMathProcessor(
 
   // Add optional description
   if (scriptProcessor.script) {
-    (
-      scriptProcessor.script as Record<string, unknown>
-    ).description = `Math processor: ${processor.expression}`;
+    (scriptProcessor.script as Record<string, unknown>).description =
+      `Math processor: ${processor.expression}`;
   }
 
   // Add tag if customIdentifier was provided

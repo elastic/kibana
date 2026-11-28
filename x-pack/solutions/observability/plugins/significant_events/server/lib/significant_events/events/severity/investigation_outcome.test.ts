@@ -38,7 +38,7 @@ const investigation = ({
       created_at: '2026-11-09T10:00:00.000Z',
     })),
     ...overrides,
-  } as InvestigationSummary);
+  }) as InvestigationSummary;
 
 const withSeverity = (severity: string) =>
   investigation({ metadata: { status: 'open', severity, verdict: 'v' } as never });
@@ -202,8 +202,8 @@ describe('loadInvestigationOutcomes', () => {
           logger,
           eventIds,
           agenticInvestigations: {
-            getSubjectsClient: () => ({ findConversationIdsBySubjects } as never),
-            getInvestigationsClient: () => ({ list: listInvestigations } as never),
+            getSubjectsClient: () => ({ findConversationIdsBySubjects }) as never,
+            getInvestigationsClient: () => ({ list: listInvestigations }) as never,
           },
           eventClient: { findCurrentEpisodeIdsByEventIds, findEventIdsByEpisodeIds },
         }),

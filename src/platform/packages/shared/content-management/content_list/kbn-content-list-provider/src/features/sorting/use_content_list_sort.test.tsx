@@ -15,12 +15,10 @@ import { useContentListSort } from './use_content_list_sort';
 import type { SortingConfig, SortState } from './types';
 
 describe('useContentListSort', () => {
-  const mockFindItems = jest.fn(
-    async (_params: FindItemsParams): Promise<FindItemsResult> => ({
-      items: [],
-      total: 0,
-    })
-  );
+  const mockFindItems = jest.fn(async (_params: FindItemsParams): Promise<FindItemsResult> => ({
+    items: [],
+    total: 0,
+  }));
 
   const STORAGE_KEY = 'contentList:sort:test-list-listing';
 

@@ -31,7 +31,7 @@ export const SOLARWINDS_NODE_STATUSES = {
 type SolarWindsNodeStatus = keyof typeof SOLARWINDS_NODE_STATUSES;
 const NODE_STATUS_NAMES = Object.keys(SOLARWINDS_NODE_STATUSES) as [
   SolarWindsNodeStatus,
-  ...SolarWindsNodeStatus[]
+  ...SolarWindsNodeStatus[],
 ];
 
 const MAX_PAGE_SIZE = 500;

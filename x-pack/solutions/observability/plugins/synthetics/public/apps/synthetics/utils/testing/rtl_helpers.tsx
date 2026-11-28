@@ -150,6 +150,7 @@ export const mockCore: () => Partial<CoreStart> = () => {
         get$: setSetting$,
       },
       globalClient: defaultCore.settings.globalClient,
+      metadata: { getAll: jest.fn().mockResolvedValue({}) },
     },
     usageCollection: {
       reportUiCounter: () => {},
@@ -287,7 +288,7 @@ export function WrappedHelper<ExtraCore>({
   const testState = React.useMemo(() => mergeTestState(state), [state]);
 
   const routerHistory = React.useMemo(
-    () => (url ? getHistoryFromUrl(url) : history ?? createMemoryHistory()),
+    () => (url ? getHistoryFromUrl(url) : (history ?? createMemoryHistory())),
     [url, history]
   );
 
@@ -315,7 +316,7 @@ export function render<ExtraCore>(
   }: RenderRouterOptions<ExtraCore> & { useRealStore?: boolean } = {}
 ): any {
   // Resolve the history once so the returned instance is the one the router actually uses.
-  const routerHistory = url ? getHistoryFromUrl(url) : history ?? createMemoryHistory();
+  const routerHistory = url ? getHistoryFromUrl(url) : (history ?? createMemoryHistory());
 
   return {
     ...reactTestLibRender(

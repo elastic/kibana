@@ -22,9 +22,10 @@ import {
   VIEW_CONTROLLER_SCOPE,
   resourceAttributeField,
 } from '../../../common/otel_data';
-import { SESSIONS_MAX_SESSION_HOURS } from '../../../common/sessions';
+import { MOBILE_MAX_CRASH_DELAY_HOURS, SESSIONS_MAX_SESSION_HOURS } from '../../../common/sessions';
 import { SESSION_ATTRIBUTE_FIELDS } from '../../../common/session_attribute_fields';
 import {
+  NULLIFY_UNMAPPED_FIELDS,
   SOURCE_SERVICE_NAME_FIELD,
   SOURCE_SESSION_ID_FIELD,
 } from '../../../common/otel_source_fields';
@@ -32,7 +33,6 @@ import {
   ESQL_MAX_ROWS,
   HTTP_REQUEST_CONDITIONS,
   HTTP_REQUEST_EVALS,
-  NULLIFY_UNMAPPED_FIELDS,
   RAW_PREFIX,
   attributeQueryParts,
   renderStats,
@@ -92,22 +92,19 @@ const {
   'attribute_rank'
 );
 
-/** How late a crash may be sent after it happened, as the next launch sends it. */
-const MAX_CRASH_DELAY_HOURS = 24;
-
 /**
  * How far before its window a changed mobile session is rebuilt from: a crash sent up to
- * `MAX_CRASH_DELAY_HOURS` late still sees every other event of its session.
+ * `MOBILE_MAX_CRASH_DELAY_HOURS` late still sees every other event of its session.
  */
-export const MOBILE_REBUILD_HOURS = SESSIONS_MAX_SESSION_HOURS + MAX_CRASH_DELAY_HOURS;
+export const MOBILE_REBUILD_HOURS = SESSIONS_MAX_SESSION_HOURS + MOBILE_MAX_CRASH_DELAY_HOURS;
 
 /**
- * A crash sent later than `MAX_CRASH_DELAY_HOURS`: its session's rebuild could start after its
+ * A crash sent later than `MOBILE_MAX_CRASH_DELAY_HOURS`: its session's rebuild could start after its
  * other events, and the partial summary would replace the full one.
  */
 const LATE_CRASH = `COALESCE(${OTEL_EVENT_NAME} IN (${texts(
   CRASH_EVENTS
-)}) AND TO_DATETIME(${OTEL_OBSERVED_TIMESTAMP}) < @timestamp - ${MAX_CRASH_DELAY_HOURS} hours, false)`;
+)}) AND TO_DATETIME(${OTEL_OBSERVED_TIMESTAMP}) < @timestamp - ${MOBILE_MAX_CRASH_DELAY_HOURS} hours, false)`;
 
 const SDK_LANGUAGE = resourceAttributeField(TELEMETRY_SDK_LANGUAGE);
 
@@ -116,8 +113,8 @@ const MOBILE_SDK = `(${resourceAttributeField(TELEMETRY_SDK_NAME)} IN (${texts(M
     OR (${resourceAttributeField(TELEMETRY_DISTRO_NAME)} == ${escapeStringValue(ELASTIC_DISTRO)}
       AND ${resourceAttributeField(OS_NAME)} IN (${texts(Object.values(MOBILE_OS_NAMES).flat())})
       AND (${SDK_LANGUAGE} IS NULL OR ${SDK_LANGUAGE} != ${escapeStringValue(
-  BROWSER_SDK_LANGUAGE
-)})))`;
+        BROWSER_SDK_LANGUAGE
+      )})))`;
 
 /** The EDOT Android and EDOT iOS events with a session and an application, but late crashes. */
 export const mobileSessionEvents = sessionEventsOf(`${MOBILE_SDK}
@@ -132,16 +129,18 @@ const MOBILE_SESSION_STATS: Stat[] = [
   ['tap_count', `COUNT(*) WHERE event == ${escapeStringValue(EVENT_WIDGET_CLICK)}`],
   // EDOT Android and EDOT iOS export from a disk buffer at least once, so a retried export can
   // store the same span twice.
-  ...Object.entries(HTTP_REQUEST_CONDITIONS).map(
-    ([column, condition]): Stat => [column, `COUNT_DISTINCT(${OTEL_SPAN_ID}) WHERE ${condition}`]
-  ),
+  ...Object.entries(HTTP_REQUEST_CONDITIONS).map(([column, condition]): Stat => [
+    column,
+    `COUNT_DISTINCT(${OTEL_SPAN_ID}) WHERE ${condition}`,
+  ]),
   ...ATTRIBUTE_STATS,
 ];
 
 /**
  * One row per session of `sessionIds`, rebuilt from its events since `?rebuild_from`: its counts,
  * times and latest attributes. A crash counts at the time it happened, the earlier of its two
- * times: EDOT iOS sends it on the next launch with only its observed time set to the crash.
+ * times: EDOT iOS sends it on the next launch with only its observed time set to the crash. An
+ * observed time from before a crash can be sent late, e.g. an exporter's zero, is ignored.
  */
 export const mobileSessionSummaryQuery: SummaryQueryOf = (
   { changedTo, rebuildFrom },
@@ -154,12 +153,13 @@ ${mobileSessionEvents('rebuild_from', 'changed_to')}
 | EVAL event = COALESCE(${OTEL_EVENT_NAME}, "")
 | EVAL is_crash = event IN (${texts(CRASH_EVENTS)}),
        is_screen_view = COALESCE(${OTEL_SCOPE_NAME} == ${escapeStringValue(
-    VIEW_CONTROLLER_SCOPE
-  )}, false),
+         VIEW_CONTROLLER_SCOPE
+       )}, false),
        ${HTTP_REQUEST_EVALS},
        ${ATTRIBUTE_RANK},
        ${SEEN_EVALS.join(',\n       ')}
-| EVAL event_time = CASE(is_crash, LEAST(@timestamp, COALESCE(TO_DATETIME(${OTEL_OBSERVED_TIMESTAMP}), @timestamp)), @timestamp)
+| EVAL observed_time = TO_DATETIME(${OTEL_OBSERVED_TIMESTAMP})
+| EVAL event_time = CASE(is_crash AND observed_time + ${MOBILE_MAX_CRASH_DELAY_HOURS} hours >= @timestamp, LEAST(@timestamp, observed_time), @timestamp)
 | STATS ${renderStats(MOBILE_SESSION_STATS, '        ')}
   BY service = ${SOURCE_SERVICE_NAME_FIELD}, session = ${SOURCE_SESSION_ID_FIELD}
 | EVAL ${ATTRIBUTE_EVALS.join(',\n       ')}

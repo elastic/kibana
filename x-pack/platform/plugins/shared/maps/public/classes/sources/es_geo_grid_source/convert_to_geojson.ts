@@ -66,7 +66,7 @@ export function convertRegularRespToGeoJson(
 }
 
 function convertToGeoJson<
-  TBucket extends AggregationsCompositeBucket | AggregationsGeoTileGridBucket
+  TBucket extends AggregationsCompositeBucket | AggregationsGeoTileGridBucket,
 >(
   esResponse: EsResponse,
   renderAs: RENDER_AS,

@@ -175,7 +175,7 @@ describe('reconcileSourceAutomations', () => {
       previous,
       current,
       changed: new Set(['sources']),
-    } as unknown as AiIndexChangeEvent);
+    }) as unknown as AiIndexChangeEvent;
 
   const attached = { automations: [{ type: 'workflow' as const, value: 'wf-old' }] };
 

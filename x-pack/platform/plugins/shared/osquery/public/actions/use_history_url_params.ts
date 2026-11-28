@@ -80,7 +80,7 @@ const parseSortDirection = (
 const parseString = (value: string | Array<string | null> | null | undefined): string => {
   if (!value) return '';
 
-  return Array.isArray(value) ? value[0] ?? '' : value;
+  return Array.isArray(value) ? (value[0] ?? '') : value;
 };
 
 export const parseHistoryUrlParams = (search: string): HistoryUrlFilters => {

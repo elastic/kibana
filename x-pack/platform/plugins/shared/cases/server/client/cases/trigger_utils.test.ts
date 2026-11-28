@@ -11,7 +11,7 @@ import { emitObservablesAddedEvent } from './trigger_utils';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 
 const makeCase = (id = 'case-1', owner = 'securitySolution') =>
-  ({ id, attributes: { owner } } as unknown as CaseSavedObjectTransformed);
+  ({ id, attributes: { owner } }) as unknown as CaseSavedObjectTransformed;
 
 const makeObservable = (overrides: Partial<Observable> = {}): Observable => ({
   id: 'obs-1',

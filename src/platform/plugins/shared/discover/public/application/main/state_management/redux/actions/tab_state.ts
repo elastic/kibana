@@ -54,6 +54,7 @@ import {
   type ProfileStateDefaultsHandling,
 } from '../../../../../../common/context_awareness';
 import type { ProfileStateMutationOptions } from '../../../../../context_awareness';
+import { recordHasContext } from '../../../../../context_awareness/profiles_manager/record_has_context';
 import { selectTab } from '../selectors';
 import {
   selectDataSourceProfileId,
@@ -163,8 +164,8 @@ export const setExpandedDoc: InternalStateThunkActionCreator<[ExpandedDocPayload
     // Compare identities rather than references, since a shared link may omit the routing.
     const isSameDocument = Boolean(
       expandedDoc &&
-        appState.expandedDoc &&
-        matchesExpandedDocRef(expandedDoc, appState.expandedDoc)
+      appState.expandedDoc &&
+      matchesExpandedDocRef(expandedDoc, appState.expandedDoc)
     );
 
     dispatch(
@@ -177,6 +178,30 @@ export const setExpandedDoc: InternalStateThunkActionCreator<[ExpandedDocPayload
         },
       })
     );
+  };
+
+type ExpandedDocExtPointPayload = TabActionPayload<{
+  expandedDoc: DataTableRecord | undefined;
+  initialDocViewerTabId?: string;
+}>;
+
+/** Sets the expanded document for a profile, which may hand in a record Discover did not fetch. */
+export const setExpandedDocExtPointAction: InternalStateThunkActionCreator<
+  [ExpandedDocExtPointPayload]
+> = ({ tabId, expandedDoc, initialDocViewerTabId }) =>
+  function setExpandedDocExtPointActionThunkFn(dispatch, _getState, { runtimeStateManager }) {
+    // A record from outside the fetch paths (a chart section's, for example) is not the
+    // proxy `resolveDocumentProfile` creates: without its lazy `context`, the flyout would
+    // fall back to the default document profile and show the generic viewer for a document
+    // a profile knows better. A record that carries its context passes through untouched.
+    const resolvedDoc =
+      expandedDoc && !recordHasContext(expandedDoc)
+        ? selectTabRuntimeState(runtimeStateManager, tabId)
+            .scopedProfilesManager$.getValue()
+            .resolveDocumentProfile({ record: expandedDoc })
+        : expandedDoc;
+
+    dispatch(setExpandedDoc({ tabId, expandedDoc: resolvedDoc, initialDocViewerTabId }));
   };
 
 type DocViewerShareableStatePayload = TabActionPayload<{
@@ -672,7 +697,7 @@ export const onQuerySubmit: InternalStateThunkActionCreator<
     TabActionPayload<{
       payload: { dateRange: TimeRange; query?: Query | AggregateQuery };
       isUpdate?: boolean;
-    }>
+    }>,
   ]
 > = ({ tabId, payload, isUpdate }) =>
   function onQuerySubmitThunkFn(

@@ -95,7 +95,7 @@ export function OnboardingFirstInvestigationStep({
 
   // A failed run and a run with nothing to suggest look the same: an empty state with a retry.
   const suggestions = useMemo(
-    () => (execution.status === 'failed' ? [] : execution.suggestions ?? []),
+    () => (execution.status === 'failed' ? [] : (execution.suggestions ?? [])),
     [execution.status, execution.suggestions]
   );
   const hasSuggestions = suggestions.length > 0;

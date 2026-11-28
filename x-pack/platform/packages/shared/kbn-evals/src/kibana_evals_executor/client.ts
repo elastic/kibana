@@ -104,7 +104,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
 
   async runExperiment<
     TEvaluationDataset extends EvaluationDataset,
-    TTaskOutput extends TaskOutput = TaskOutput
+    TTaskOutput extends TaskOutput = TaskOutput,
   >(
     {
       name,
@@ -113,6 +113,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
       metadata: experimentMetadata,
       concurrency,
       trustUpstreamDataset = false,
+      selectExample,
     }: {
       name?: string;
       datasets: TEvaluationDataset[];
@@ -120,6 +121,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
       task: ExperimentTask<TEvaluationDataset['examples'][number], TTaskOutput>;
       concurrency?: number;
       trustUpstreamDataset?: boolean;
+      selectExample?: (example: TEvaluationDataset['examples'][number], index: number) => boolean;
     },
     evaluators: Array<Evaluator<TEvaluationDataset['examples'][number], TTaskOutput>>
   ): Promise<DatasetRunResult[]> {
@@ -137,6 +139,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
             metadata: experimentMetadata,
             concurrency: runConcurrency,
             trustUpstreamDataset,
+            selectExample,
           },
           evaluators
         )
@@ -165,7 +168,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
 
   private async runSingleDatasetExperiment<
     TEvaluationDataset extends EvaluationDataset,
-    TTaskOutput extends TaskOutput = TaskOutput
+    TTaskOutput extends TaskOutput = TaskOutput,
   >(
     {
       experimentName,
@@ -174,6 +177,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
       metadata: experimentMetadata,
       concurrency,
       trustUpstreamDataset = false,
+      selectExample = () => true,
     }: {
       experimentName: string;
       dataset: TEvaluationDataset;
@@ -181,6 +185,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
       task: ExperimentTask<TEvaluationDataset['examples'][number], TTaskOutput>;
       concurrency: number;
       trustUpstreamDataset?: boolean;
+      selectExample?: (example: TEvaluationDataset['examples'][number], index: number) => boolean;
     },
     evaluators: Array<Evaluator<TEvaluationDataset['examples'][number], TTaskOutput>>
   ): Promise<DatasetRunResult> {
@@ -215,8 +220,13 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
         `🧪 Starting experiment "${experimentName} - Dataset: ${resolvedDataset.name}" with ${evaluators.length} evaluators and ${runConcurrency} concurrent runs`
       );
 
+      // Selected up front, so a selector that throws fails the experiment before any task starts.
+      const selectedExamples = resolvedDataset.examples.flatMap((example, exampleIndex) =>
+        selectExample(example, exampleIndex) ? [{ example, exampleIndex }] : []
+      );
+
       for (let rep = 0; rep < repetitions; rep++) {
-        resolvedDataset.examples.forEach((example, exampleIndex) => {
+        selectedExamples.forEach(({ example, exampleIndex }) => {
           runJobs.push(
             limiter(async () => {
               const runKey = `${exampleIndex}-${rep}-${randomUUID()}`;

@@ -32,7 +32,7 @@ export function transformINPResponse<T>(
     hasINP: (response.hits?.total?.value ?? 0) > 0,
     inp: inp?.values?.[pkey],
     inpRanks: inp?.values?.[pkey]
-      ? getRanksPercentages(inpRanks?.values) ?? DEFAULT_RANKS
+      ? (getRanksPercentages(inpRanks?.values) ?? DEFAULT_RANKS)
       : DEFAULT_RANKS,
   };
 }

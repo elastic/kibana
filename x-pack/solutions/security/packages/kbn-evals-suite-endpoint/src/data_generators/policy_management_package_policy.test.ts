@@ -59,7 +59,7 @@ const createLog = (): jest.Mocked<ToolingLog> =>
     warning: jest.fn(),
     info: jest.fn(),
     debug: jest.fn(),
-  } as unknown as jest.Mocked<ToolingLog>);
+  }) as unknown as jest.Mocked<ToolingLog>;
 
 const createIndexed = ({
   integrationPolicies,
@@ -71,7 +71,7 @@ const createIndexed = ({
   ({
     integrationPolicies,
     agentPolicies: [{ id: `${agentPolicyName}-id`, name: agentPolicyName }],
-  } as IndexedFleetEndpointPolicyResponse);
+  }) as IndexedFleetEndpointPolicyResponse;
 
 const createMalwareOffPolicy = (): PolicyConfig => {
   const policy = policyFactory();

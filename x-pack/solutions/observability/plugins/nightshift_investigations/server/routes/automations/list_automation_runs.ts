@@ -113,12 +113,12 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
     const runs = executions.results.map((exec) => {
       const startedStep =
         (exec.triggeredBy === 'alerting.v1.alertStatusChanged'
-          ? alertSteps.get(exec.id) ?? legacyAlertSteps.get(exec.id)
+          ? (alertSteps.get(exec.id) ?? legacyAlertSteps.get(exec.id))
           : exec.triggeredBy === 'alerting.alertStatusChanged'
-          ? alertV2Steps.get(exec.id)
-          : exec.triggeredBy === SLACK_MESSAGE_EVENT_ID
-          ? slackSteps.get(exec.id)
-          : undefined) ?? defaultSteps.get(exec.id);
+            ? alertV2Steps.get(exec.id)
+            : exec.triggeredBy === SLACK_MESSAGE_EVENT_ID
+              ? slackSteps.get(exec.id)
+              : undefined) ?? defaultSteps.get(exec.id);
       const recoveredStep = recoveredAlertSteps.get(exec.id) ?? recoveredAlertV2Steps.get(exec.id);
       const isRecoveryFollowUp = startedStep === undefined && recoveredStep !== undefined;
       const step = startedStep ?? recoveredStep;
@@ -182,10 +182,10 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
         ...run,
         executedByDisplayName:
           run.triggeredBy === 'manual' && run.executedBy
-            ? displayNames.get(run.executedBy) ??
+            ? (displayNames.get(run.executedBy) ??
               (run.executedBy.startsWith('u_') || run.executedBy === 'unknown'
                 ? undefined
-                : run.executedBy)
+                : run.executedBy))
             : undefined,
       })),
       total: executions.total,

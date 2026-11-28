@@ -63,7 +63,7 @@ const createAttachments = async (
 
     const [attachmentsWithIds, entities]: [
       Array<{ id: string } & UnifiedAttachmentPayload>,
-      OwnerEntity[]
+      OwnerEntity[],
     ] = decodedAttachments.reduce<
       [Array<{ id: string } & UnifiedAttachmentPayload>, OwnerEntity[]]
     >(

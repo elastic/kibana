@@ -55,7 +55,7 @@ const createMockRuleTypeRegistry = (
   ({
     get: jest.fn().mockReturnValue({ queryInspector }),
     has: jest.fn().mockReturnValue(true),
-  } as unknown as jest.Mocked<RuleTypeRegistry>);
+  }) as unknown as jest.Mocked<RuleTypeRegistry>;
 
 const mockGetAlertIndicesAlias = jest
   .fn()

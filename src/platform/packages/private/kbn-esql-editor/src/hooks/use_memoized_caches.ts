@@ -89,7 +89,7 @@ export const useMemoizedCaches = ({
           CoreStart,
           (() => Promise<ILicense | undefined>) | undefined,
           ((sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>) | undefined,
-          AbortSignal | undefined
+          AbortSignal | undefined,
         ]
       ) => ({
         timestamp: Date.now(),

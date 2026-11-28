@@ -14,7 +14,7 @@ const messageChunkEvent = (chunk: string): ChatEvent =>
   ({
     type: ChatEventType.messageChunk,
     data: { message_id: 'm1', text_chunk: chunk },
-  } as ChatEvent);
+  }) as ChatEvent;
 
 const setup = () => {
   const eventsService = new EventsService();

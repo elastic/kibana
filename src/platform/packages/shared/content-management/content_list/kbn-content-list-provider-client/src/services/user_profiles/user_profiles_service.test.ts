@@ -12,7 +12,7 @@ import { createUserProfilesService } from './user_profiles_service';
 
 describe('createUserProfilesService', () => {
   const buildUserProfile = (userProfile: jest.Mock) =>
-    ({ bulkGet: userProfile } as unknown as UserProfileServiceStart);
+    ({ bulkGet: userProfile }) as unknown as UserProfileServiceStart;
 
   it('short-circuits with an empty array when no uids are supplied', async () => {
     const bulkGet = jest.fn();

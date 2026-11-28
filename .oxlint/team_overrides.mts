@@ -95,7 +95,6 @@ export const teamOverrides: OxlintOverride[] = [
    */
   {
     files: [
-      '**/.eslintrc.js',
       'packages/kbn-eslint-plugin-eslint/**/*',
       'x-pack/gulpfile.js',
       'x-pack/scripts/*.js',
@@ -1039,6 +1038,27 @@ export const teamOverrides: OxlintOverride[] = [
    * Code inside .buildkite runs separately from everything else in CI, before bootstrap, with Node. It needs a few tweaks because of this.
    */
   { files: ['.buildkite/**/*.{cjs,js,mjs,ts}'], rules: { 'no-console': 'off' } },
+  /**
+   * Pipeline scripts print the generated pipeline to stdout, which is uploaded to Buildkite as yaml.
+   */
+  {
+    files: [
+      '.buildkite/scripts/pipelines/evals_pr/pipeline.ts',
+      '.buildkite/scripts/pipelines/pull_request/pipeline.ts',
+      '.buildkite/scripts/pipelines/static_checks/pipeline.ts',
+    ],
+    rules: {
+      '@kbn/compat/eslint-no-restricted-syntax': [
+        'error',
+        {
+          selector:
+            "CallExpression[callee.object.name='console'][callee.property.name!=/^(warn|error)$/]",
+          message:
+            'Debug logging to stdout in this file will attempt to upload the log message as yaml to buildkite, which might result in pipeline syntax error. Use emitPipeline() to upload steps, or log to stderr.',
+        },
+      ],
+    },
+  },
   /**
    * Repository tooling packages run outside the standard application bundles and need a few targeted lint overrides.
    */

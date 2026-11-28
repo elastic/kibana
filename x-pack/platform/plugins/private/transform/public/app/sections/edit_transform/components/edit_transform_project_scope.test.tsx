@@ -18,7 +18,7 @@ import { EditTransformFlyoutProvider } from '../state_management/edit_transform_
 import { EditTransformProjectScope } from './edit_transform_project_scope';
 
 const mockUseGetTransformCpsEnabled = jest.fn(
-  (_args?: { enabled: boolean }) => ({ data: true } as { data: boolean | undefined })
+  (_args?: { enabled: boolean }) => ({ data: true }) as { data: boolean | undefined }
 );
 
 jest.mock('../../../app_dependencies');

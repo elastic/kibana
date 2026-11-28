@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { BaseStepDefinition } from '@kbn/workflows';
 import { StepCategory } from '@kbn/workflows';
+import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { z } from '@kbn/zod/v4';
 import { optionalStepInput } from './optional_step_input';
 
@@ -45,7 +45,7 @@ export const checkDecidePrivilegesStepOutputSchema = z.object({
   canDecide: z.boolean(),
 });
 
-export const checkDecidePrivilegesStepCommonDefinition: BaseStepDefinition<
+export const checkDecidePrivilegesStepCommonDefinition: CommonStepDefinition<
   typeof checkDecidePrivilegesStepInputSchema,
   typeof checkDecidePrivilegesStepOutputSchema
 > = {
@@ -59,6 +59,7 @@ export const checkDecidePrivilegesStepCommonDefinition: BaseStepDefinition<
   }),
   category: StepCategory.Kibana,
   stability: 'beta',
+  exposure: 'internal',
   inputSchema: checkDecidePrivilegesStepInputSchema,
   outputSchema: checkDecidePrivilegesStepOutputSchema,
   documentation: {

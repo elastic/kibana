@@ -73,9 +73,12 @@ interface DecryptedTaskAttributes {
   apiKey?: string;
 }
 
-export class TaskManagerServiceAccountsTestPlugin
-  implements Plugin<void, void, SetupDependencies, StartDependencies>
-{
+export class TaskManagerServiceAccountsTestPlugin implements Plugin<
+  void,
+  void,
+  SetupDependencies,
+  StartDependencies
+> {
   // Usernames of the runs waiting to authenticate again, by task id.
   private readonly runsInFlight = new Map<string, string>();
 

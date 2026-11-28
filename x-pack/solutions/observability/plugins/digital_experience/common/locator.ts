@@ -16,8 +16,8 @@ export const DIGITAL_EXPERIENCE_LOCATOR_ID = 'DIGITAL_EXPERIENCE_LOCATOR';
 
 /**
  * The params of the app's pages that a link keeps, as the URL holds them: the time range,
- * environment and source, the Overview's filters, KQL query and percentile, and the Sessions
- * list's own state. Any other param is left out of the location, so a stored link can only set
+ * environment and source, the Overview's filters, KQL query and percentile, the mobile page's
+ * filters and open crash group, and the Sessions list's own state. Any other param is left out of the location, so a stored link can only set
  * these. The routes check their values, and replace an invalid one by its default.
  *
  * The params of a locator end up in short URLs and in whatever else stores a link, so they live as
@@ -35,6 +35,7 @@ export const DIGITAL_EXPERIENCE_LOCATOR_QUERY_KEYS = [
   'osName',
   'release',
   'compare',
+  'crashGroup',
   'filters',
   'kuery',
   'percentile',
@@ -65,8 +66,7 @@ type QueryValue = string | number | boolean;
  * `serviceName`, with the state of the page as its URL holds it.
  */
 export interface DigitalExperienceLocatorParams
-  extends SerializableRecord,
-    Partial<Record<DigitalExperienceLocatorQueryKey, QueryValue>> {
+  extends SerializableRecord, Partial<Record<DigitalExperienceLocatorQueryKey, QueryValue>> {
   serviceName?: string;
   /** The tab of the application; the Overview when unset or unknown. */
   tab?: ApplicationTabId;
@@ -101,9 +101,7 @@ const pathOf = ({ serviceName, tab }: DigitalExperienceLocatorParams): string =>
   return isTab(tab) && tab !== 'overview' ? `${application}/${tab}` : application;
 };
 
-export class DigitalExperienceLocatorDefinition
-  implements LocatorDefinition<DigitalExperienceLocatorParams>
-{
+export class DigitalExperienceLocatorDefinition implements LocatorDefinition<DigitalExperienceLocatorParams> {
   public readonly id = DIGITAL_EXPERIENCE_LOCATOR_ID;
 
   public readonly getLocation = async (params: DigitalExperienceLocatorParams) => {
