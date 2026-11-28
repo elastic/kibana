@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const replaceNewLinesWithSpace = (str: string) => str.replace(/\n/g, ' ');
@@ -17,7 +18,6 @@ export function CasesSingleViewServiceProvider({ getService, getPageObject }: Ft
   const testSubjects = getService('testSubjects');
   const header = getPageObject('header');
   const find = getService('find');
-  const lensPage = getPageObject('lens');
   const appMenu = getPageObject('appMenu');
   const retry = getService('retry');
 
@@ -79,15 +79,27 @@ export function CasesSingleViewServiceProvider({ getService, getPageObject }: Ft
       );
       await addVisualizationButton.click();
 
-      await this.findAndSaveVisualization(visName);
+      await this.findAndSaveVisualization(visName, addCommentElement);
 
       await testSubjects.existOrFail('cases-app', { timeout: 10 * 1000 });
 
       await this.submitComment();
     },
 
-    async findAndSaveVisualization(visName: string) {
+    async findAndSaveVisualization(visName: string, editorContainer?: WebElementWrapper) {
+      const countLensBlocks = async () => {
+        const editors = editorContainer
+          ? await editorContainer.findAllByCssSelector('textarea.euiMarkdownEditorTextArea')
+          : await find.allByCssSelector('textarea.euiMarkdownEditorTextArea');
+        let count = 0;
+        for (const editor of editors) {
+          count += ((await editor.getAttribute('value')) ?? '').split('!{lens').length - 1;
+        }
+        return count;
+      };
+
       await testSubjects.existOrFail('savedObjectsFinderTable', { timeout: 10 * 1000 });
+      const lensBlocksBefore = await countLensBlocks();
 
       // select visualization
       await testSubjects.setValue('savedObjectFinderSearchInput', visName, {
@@ -95,11 +107,13 @@ export function CasesSingleViewServiceProvider({ getService, getPageObject }: Ft
       });
       const sourceSubj = `savedObjectTitle${visName.replaceAll(' ', '-')}`;
       await testSubjects.click(sourceSubj);
-      await header.waitUntilLoadingHasFinished();
-      await lensPage.isLensPageOrFail();
 
-      // save and return to cases app, add comment
-      await lensPage.saveAndReturn();
+      // choosing a saved object inserts the lens block into the editor and closes the modal
+      await testSubjects.missingOrFail('savedObjectsFinderTable');
+      await retry.waitFor(
+        'lens block to be inserted into the markdown editor',
+        async () => (await countLensBlocks()) > lensBlocksBefore
+      );
     },
 
     async openVisualizationButtonTooltip() {
