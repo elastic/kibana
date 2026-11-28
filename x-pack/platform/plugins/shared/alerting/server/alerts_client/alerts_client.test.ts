@@ -2103,6 +2103,88 @@ describe('Alerts Client', () => {
           );
         });
 
+        test('should delete delayed tracked AAD docs that are not in the working set', async () => {
+          // An active and a delayed document for the same alert instance. Only the active one
+          // is restored into the task state, so the delayed one is left without an owner.
+          const restoredAlert = {
+            ...fetchedAlert1,
+            [ALERT_INSTANCE_ID]: 'duplicated',
+            [ALERT_UUID]: 'active-uuid',
+            [ALERT_TRACKED]: true,
+          };
+          const leftoverAlert = {
+            ...restoredAlert,
+            [ALERT_UUID]: 'delayed-uuid',
+            [ALERT_STATUS]: 'delayed',
+            [ALERT_CONSECUTIVE_MATCHES]: 1,
+          };
+
+          clusterClient.search.mockResolvedValue({
+            took: 10,
+            timed_out: false,
+            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+            hits: {
+              total: { relation: 'eq', value: 2 },
+              hits: [
+                {
+                  _id: 'delayed-uuid',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  _seq_no: 41,
+                  _primary_term: 665,
+                  _source: leftoverAlert,
+                },
+                {
+                  _id: 'active-uuid',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  _seq_no: 42,
+                  _primary_term: 665,
+                  _source: restoredAlert,
+                },
+              ],
+            },
+          });
+
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
+
+          await alertsClient.persistAlerts();
+
+          const bulkBody = clusterClient.bulk.mock.calls[0][0].body as Array<
+            Record<string, unknown>
+          >;
+          // the delete only applies to the version of the document this run loaded
+          expect(bulkBody).toContainEqual({
+            delete: {
+              _id: 'delayed-uuid',
+              _index: '.internal.alerts-test.alerts-default-000001',
+              if_seq_no: 41,
+              if_primary_term: 665,
+            },
+          });
+          // the delayed document is not written again, not even as a recovered alert
+          expect(bulkBody.find((item) => item[ALERT_UUID] === 'delayed-uuid')).toBeUndefined();
+          // the restored document is not reported by the rule, so it recovers as usual
+          expect(bulkBody.find((item) => item[ALERT_UUID] === 'active-uuid')).toEqual(
+            expect.objectContaining({ [ALERT_STATUS]: 'recovered' })
+          );
+          expect(logger.warn).toHaveBeenCalledWith(
+            `Deleting 1 delayed alert document(s) that this run does not track ${ruleInfo}: duplicated`,
+            logTags
+          );
+          expect(logger.warn).not.toHaveBeenCalledWith(
+            expect.stringContaining('Untracking'),
+            logTags
+          );
+        });
+
         test('should recover still-active tracked AAD docs that are missing from task state', async () => {
           const orphanAlert = {
             ...fetchedAlert1,

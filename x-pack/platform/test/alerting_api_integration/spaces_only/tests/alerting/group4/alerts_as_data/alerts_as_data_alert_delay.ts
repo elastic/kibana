@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { get } from 'lodash';
+import { v4 as uuidv4 } from 'uuid';
 import type { QueryDslQueryContainer, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import type { Alert } from '@kbn/alerts-as-data-utils';
@@ -26,6 +27,7 @@ import {
   ALERT_START,
   ALERT_STATUS,
   ALERT_TIME_RANGE,
+  ALERT_TRACKED,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
   EVENT_ACTION,
@@ -993,6 +995,109 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
 
       const source: PatternFiringAlert = alertDocsRun3[0]._source!;
       expect(source[ALERT_STATUS]).to.equal('active');
+    });
+
+    it('should delete a delayed alert doc that the rule does not track', async () => {
+      const response = await supertestWithoutAuth
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestRuleData({
+            rule_type_id: 'test.patternFiringAad',
+            schedule: { interval: '1d' },
+            throttle: null,
+            notify_when: null,
+            params: {
+              pattern: { instance: [true, true, true] },
+            },
+            alert_delay: {
+              active: 3,
+            },
+          })
+        );
+
+      expect(response.status).to.eql(200);
+      const ruleId = response.body.id;
+      objectRemover.add(Spaces.space1.id, ruleId, 'rule', 'alerting');
+
+      const getRuleAlertDocs = async (): Promise<Array<SearchHit<PatternFiringAlert>>> => {
+        const { hits } = await es.search<PatternFiringAlert>({
+          index: alertsAsDataIndex,
+          query: { term: { [ALERT_RULE_UUID]: ruleId } },
+        });
+        return hits.hits;
+      };
+
+      // --------------------------
+      // RUN 1 - 1 delayed alert
+      // --------------------------
+      await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 1 }]]));
+      await waitForTaskState(ruleId, (s) => {
+        expect(s.alertInstances?.instance.meta?.activeCount).to.equal(1);
+      });
+
+      const alertDocsRun1 = await getRuleAlertDocs();
+      expect(alertDocsRun1.length).to.equal(1);
+      const trackedDoc = alertDocsRun1[0];
+      expect(trackedDoc._source![ALERT_STATUS]).to.equal('delayed');
+
+      // An older delayed doc for the same alert, which the task state does not know. The rule
+      // keeps the doc from its task state, so no run tracks this one.
+      const leftoverUuid = uuidv4();
+      const leftoverStart = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+      await es.index({
+        index: trackedDoc._index,
+        id: leftoverUuid,
+        refresh: 'wait_for',
+        document: {
+          ...trackedDoc._source,
+          [ALERT_UUID]: leftoverUuid,
+          [ALERT_START]: leftoverStart,
+          [ALERT_TIME_RANGE]: { gte: leftoverStart },
+          [ALERT_TRACKED]: true,
+        },
+      });
+
+      // --------------------------
+      // RUN 2 - the alert is still delayed, the leftover doc is deleted
+      // --------------------------
+      await alertUtils.runSoonWhenIdle(ruleId, retry, taskManagerUtils);
+
+      let events: IValidatedEvent[] = await waitForEventLogDocs(
+        ruleId,
+        new Map([['execute', { equal: 2 }]])
+      );
+      expect(get(events[1], 'event.outcome')).to.be('success');
+      expect(get(events[1], RECOVERED_PATH)).to.be(0);
+      expect(get(events[1], DELAYED_PATH)).to.be(1);
+      await waitForTaskState(ruleId, (s) => {
+        expect(s.alertInstances?.instance.meta?.activeCount).to.equal(2);
+        expect(s.alertInstances?.instance.meta?.uuid).to.equal(trackedDoc._id);
+      });
+
+      const alertDocsRun2 = await getRuleAlertDocs();
+      expect(alertDocsRun2.length).to.equal(1);
+      expect(alertDocsRun2[0]._id).to.equal(trackedDoc._id);
+      expect(alertDocsRun2[0]._source![ALERT_STATUS]).to.equal('delayed');
+      expect(alertDocsRun2[0]._source![ALERT_CONSECUTIVE_MATCHES]).to.equal(2);
+
+      // --------------------------
+      // RUN 3 - the alert becomes active in the doc the rule tracks
+      // --------------------------
+      await alertUtils.runSoonWhenIdle(ruleId, retry, taskManagerUtils);
+
+      events = await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 3 }]]));
+      expect(get(events[2], 'event.outcome')).to.be('success');
+      expect(get(events[2], NEW_PATH)).to.be(1);
+      expect(get(events[2], RECOVERED_PATH)).to.be(0);
+      await waitForTaskState(ruleId, (s) => {
+        expect(s.alertInstances?.instance.meta?.activeCount).to.equal(3);
+      });
+
+      const alertDocsRun3 = await getRuleAlertDocs();
+      expect(alertDocsRun3.length).to.equal(1);
+      expect(alertDocsRun3[0]._id).to.equal(trackedDoc._id);
+      expect(alertDocsRun3[0]._source![ALERT_STATUS]).to.equal('active');
     });
   });
 
