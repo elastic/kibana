@@ -21,12 +21,20 @@ export const CUSTOMER0_CUSTOM_CONTEXT: readonly string[] = [
 ];
 
 /**
+ * Source code as it was at a past moment: the last main commit before it, with every ref and reflog
+ * entry dropped so `git log --all` can't reach later commits. Objects stay fetchable on demand.
+ */
+const historicalCheckout = (moment: string): string =>
+  `Read source code as it was at the ${moment}, not today's: instead of a shallow clone, clone the week before it, check out main's last commit before it and drop the newer refs, e.g. \`git clone --filter=blob:none --no-checkout --shallow-since=<${moment} date minus 7 days> https://github.com/elastic/kibana && c=$(git -C kibana rev-list -1 --first-parent --before=<${moment} timestamp> HEAD) && [ -n "$c" ] && git -C kibana checkout --detach "$c" && git -C kibana for-each-ref --format='%(refname)' | xargs -n1 git -C kibana update-ref --no-deref -d && git -C kibana reflog expire --expire=now --all && rm -f kibana/.git/FETCH_HEAD\`. If no commit comes back, deepen the same clone with \`git -C kibana fetch --deepen=<n>\` and run the lookup, checkout and cleanup again rather than reading today's code.`;
+
+/**
  * Customer0 cases are past, resolved incidents, so unlike production the investigation could read
  * the humans' diagnosis or the fix. This eval-only snippet keeps it to evidence that existed when
  * the alert fired; `rca_anti_leakage` still scores what it actually accessed.
  */
 export const RETROSPECTIVE_GUARDRAIL_CONTEXT =
-  "Evaluation guardrail: this alert fired in the past and has since been resolved. Investigate it as if it is the alert's timestamp now, using only evidence that existed then. Bound every telemetry query to end no later than one hour after the alert's timestamp. Do not read human discussion of this incident (Slack or chat threads, including replies under the alert, incident or ticket records, status-page post-mortems, post-incident reviews), and do not use GitHub issues, pull requests, commits or comments created after the alert's timestamp. Code, commits, deploys and config changes from before the alert are fair game.";
+  "Evaluation guardrail: this alert fired in the past and has since been resolved. Investigate it as if it is the alert's timestamp now, using only evidence that existed then. Bound every telemetry query to end no later than one hour after the alert's timestamp. Do not read human discussion of this incident (Slack or chat threads, including replies under the alert, incident or ticket records, status-page post-mortems, post-incident reviews), and do not use GitHub issues, pull requests, commits or comments created after the alert's timestamp. Code, commits, deploys and config changes from before the alert are fair game. " +
+  historicalCheckout('alert');
 
 /**
  * Recovery cases replay the round that follows an alert's recovery. The recovery is in the past, so
@@ -34,7 +42,8 @@ export const RETROSPECTIVE_GUARDRAIL_CONTEXT =
  * re-fire or fix out of the verdict while leaving the alert's whole lifetime in reach.
  */
 export const RECOVERY_GUARDRAIL_CONTEXT =
-  "Evaluation guardrail: this alert recovered in the past. Treat the recovery's timestamp as the present, using only evidence that existed then. Bound every telemetry query to end no later than one hour after the recovery; the alert's whole earlier lifetime stays readable. Do not read human discussion of this incident (Slack or chat threads, incident or ticket records, status-page post-mortems, post-incident reviews), and do not use GitHub issues, pull requests, commits or comments created after the recovery. Code, commits, deploys and config changes from before the recovery are fair game.";
+  "Evaluation guardrail: this alert recovered in the past. Treat the recovery's timestamp as the present, using only evidence that existed then. Bound every telemetry query to end no later than one hour after the recovery; the alert's whole earlier lifetime stays readable. Do not read human discussion of this incident (Slack or chat threads, incident or ticket records, status-page post-mortems, post-incident reviews), and do not use GitHub issues, pull requests, commits or comments created after the recovery. Code, commits, deploys and config changes from before the recovery are fair game. " +
+  historicalCheckout('recovery');
 
 /** ORCA's environment is built on the upstream demo at this commit (paper, Appendix I). */
 export const ORCA_DEMO_COMMIT = 'fc77a6cbc0bf36ff52f21e4d59fa7b8a0f5d6733';
@@ -48,24 +57,37 @@ export const ORCA_CUSTOM_CONTEXT: readonly string[] = [
   `Source code: the system is the OpenTelemetry Astronomy Shop demo, and its source is public: github.com/open-telemetry/opentelemetry-demo at commit ${ORCA_DEMO_COMMIT} (blobless clone in the sandbox with \`git clone --filter=blob:none\`, then \`git checkout ${ORCA_DEMO_COMMIT}\`; find files with \`git ls-tree\`/\`git grep\`, don't guess paths).`,
 ];
 
-/**
- * The custom context snippets an investigation dataset runs with. Stored datasets are not named
- * `nightshift/customer0…`, so they are recognized by their `customer0` tag.
- */
-export const getDatasetCustomContext = ({
-  name,
-  tags = [],
-}: {
+export interface DatasetIdentity {
   name: string;
   tags?: readonly string[];
-}): readonly string[] => {
-  if (tags.includes('customer0-recovery')) {
-    return [...CUSTOMER0_CUSTOM_CONTEXT, RECOVERY_GUARDRAIL_CONTEXT];
+}
+
+/**
+ * Which deployment's space an investigation dataset reproduces, if any. Stored datasets are not
+ * named `nightshift/customer0…`, so they are recognized by their `customer0` or `customer0-recovery`
+ * tag.
+ */
+export const getDatasetEnvironment = ({
+  name,
+  tags = [],
+}: DatasetIdentity): 'customer0-recovery' | 'customer0' | 'orca' | undefined => {
+  if (tags.includes('customer0-recovery')) return 'customer0-recovery';
+  if (name.startsWith('nightshift/customer0') || tags.includes('customer0')) return 'customer0';
+  return name.startsWith('nightshift/orca-') ? 'orca' : undefined;
+};
+
+/** The custom context snippets an investigation dataset runs with. */
+export const getDatasetCustomContext = (dataset: DatasetIdentity): readonly string[] => {
+  switch (getDatasetEnvironment(dataset)) {
+    case 'customer0-recovery':
+      return [...CUSTOMER0_CUSTOM_CONTEXT, RECOVERY_GUARDRAIL_CONTEXT];
+    case 'customer0':
+      return [...CUSTOMER0_CUSTOM_CONTEXT, RETROSPECTIVE_GUARDRAIL_CONTEXT];
+    case 'orca':
+      return ORCA_CUSTOM_CONTEXT;
+    default:
+      return [];
   }
-  if (name.startsWith('nightshift/customer0') || tags.includes('customer0')) {
-    return [...CUSTOMER0_CUSTOM_CONTEXT, RETROSPECTIVE_GUARDRAIL_CONTEXT];
-  }
-  return name.startsWith('nightshift/orca-') ? ORCA_CUSTOM_CONTEXT : [];
 };
 
 /** The space's current custom context snippets, in stored order. */

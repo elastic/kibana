@@ -13,11 +13,14 @@ import {
 } from '@kbn/workflows/managed';
 import { evaluate } from '../../src/evaluate';
 import { saveConnectorSetOnInvestigator } from '../investigation/connector_sets';
+import { getDatasetCustomContext, replaceCustomContext } from '../investigation/custom_context';
 import {
-  getDatasetCustomContext,
-  readCustomContext,
-  replaceCustomContext,
-} from '../investigation/custom_context';
+  getDatasetSandboxAllowlist,
+  replaceSandboxAllowlist,
+  restoreSpaceSettings,
+  snapshotSpaceSettings,
+  type SpaceSetting,
+} from '../investigation/sandbox_allowlist';
 import { enableNightshiftSpace } from '../investigation/space_setup';
 import {
   TRACES_FILE_DATASET_NAME,
@@ -218,11 +221,17 @@ evaluate.describe('Nightshift decision-tree reinforcement', { tag: suiteTags }, 
         dataset.examples.length * repetitions * (CUSTOMER0_REINFORCEMENT_TIMEOUT_MS + 5 * 60_000) +
           SETUP_TIMEOUT_MS
       );
-      await setup([NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID, NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID]);
-      await saveConnectorSetOnInvestigator(fetch, { withoutConnectors: false });
-      const previousCustomContext = await readCustomContext(fetch);
+      // Snapshot the custom context and egress rules before setup, which adds rules of its own.
+      const previousSettings = await snapshotSpaceSettings(fetch);
+      const touched = new Set<SpaceSetting>();
       try {
+        // Setup adds repository rules.
+        touched.add('sandboxAllowlist');
+        await setup([NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID, NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID]);
+        await saveConnectorSetOnInvestigator(fetch, { withoutConnectors: false });
+        touched.add('customContext');
         await replaceCustomContext(fetch, getDatasetCustomContext(dataset));
+        await replaceSandboxAllowlist(fetch, getDatasetSandboxAllowlist(dataset));
         const [experiment] = await executorClient.runExperiment(
           {
             name: 'Nightshift reinforcement micro-eval',
@@ -247,7 +256,7 @@ evaluate.describe('Nightshift decision-tree reinforcement', { tag: suiteTags }, 
           repetitions,
         });
       } finally {
-        await replaceCustomContext(fetch, previousCustomContext);
+        await restoreSpaceSettings(fetch, previousSettings, touched);
       }
     }
   );

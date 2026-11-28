@@ -1,0 +1,118 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { HttpHandler } from '@kbn/core/public';
+import {
+  SANDBOX_ALLOWLIST_API_PATH,
+  type GetSandboxAllowlistResponse,
+  type PutSandboxAllowlistRequest,
+} from '@kbn/nightshift-investigations-plugin/common';
+import {
+  getDatasetEnvironment,
+  readCustomContext,
+  replaceCustomContext,
+  type DatasetIdentity,
+} from './custom_context';
+
+/**
+ * Egress rules that let `git` clone and fetch one public GitHub repository over smart HTTP, with or
+ * without the `.git` suffix. The rest of github.com (issues, pull requests, the web UI) stays
+ * blocked.
+ */
+export const gitCloneRules = (repository: string): string[] =>
+  [repository, `${repository}.git`].flatMap((path) => [
+    `allow https github.com GET /${path}/info/refs`,
+    `allow https github.com POST /${path}/git-upload-pack`,
+  ]);
+
+/** The repository `ORCA_CUSTOM_CONTEXT` tells the agent to clone. */
+export const ORCA_SANDBOX_ALLOWLIST: readonly string[] = gitCloneRules(
+  'open-telemetry/opentelemetry-demo'
+);
+
+/**
+ * The repositories `CUSTOMER0_CUSTOM_CONTEXT` tells the agent to clone. Only git traffic is allowed,
+ * so the agent cannot read the issues or pull requests the retrospective guardrail rules out.
+ */
+export const CUSTOMER0_SANDBOX_ALLOWLIST: readonly string[] = [
+  'elastic/kibana',
+  'elastic/elasticsearch',
+].flatMap(gitCloneRules);
+
+/**
+ * The sandbox egress rules an investigation dataset runs with. The sandbox reaches only these and
+ * its connectors' hosts, so without them the repositories its custom context points at are refused.
+ */
+export const getDatasetSandboxAllowlist = (dataset: DatasetIdentity): readonly string[] => {
+  switch (getDatasetEnvironment(dataset)) {
+    // Recovery runs share the Customer-0 context, so they clone the same repositories.
+    case 'customer0':
+    case 'customer0-recovery':
+      return CUSTOMER0_SANDBOX_ALLOWLIST;
+    case 'orca':
+      return ORCA_SANDBOX_ALLOWLIST;
+    default:
+      return [];
+  }
+};
+
+/** The space's current sandbox egress rules, in stored order. */
+export const readSandboxAllowlist = async (fetch: HttpHandler): Promise<string[]> =>
+  (await fetch<GetSandboxAllowlistResponse>(SANDBOX_ALLOWLIST_API_PATH)).hosts;
+
+/** Replaces the space's sandbox egress rules with exactly these. */
+export const replaceSandboxAllowlist = async (
+  fetch: HttpHandler,
+  hosts: readonly string[]
+): Promise<void> => {
+  if (hosts.length === 0 && (await readSandboxAllowlist(fetch)).length === 0) return;
+  const body: PutSandboxAllowlistRequest = { hosts: [...hosts] };
+  await fetch(SANDBOX_ALLOWLIST_API_PATH, { method: 'PUT', body: JSON.stringify(body) });
+};
+
+/** The default space's custom context and egress rules, which an eval run changes. */
+export interface SpaceSettingsSnapshot {
+  customContext: string[];
+  sandboxAllowlist: string[];
+}
+
+/** A setting an eval run changes; a run records each one before it starts changing it. */
+export type SpaceSetting = keyof SpaceSettingsSnapshot;
+
+/** Reads the settings an eval run changes, to put back with `restoreSpaceSettings`. */
+export const snapshotSpaceSettings = async (fetch: HttpHandler): Promise<SpaceSettingsSnapshot> => {
+  const [customContext, sandboxAllowlist] = await Promise.all([
+    readCustomContext(fetch),
+    readSandboxAllowlist(fetch),
+  ]);
+  return { customContext, sandboxAllowlist };
+};
+
+/**
+ * Puts back the settings the run touched, independently so one failure can't skip the other, then
+ * fails if either did. Untouched settings are left alone: restoring rewrites snippet metadata.
+ */
+export const restoreSpaceSettings = async (
+  fetch: HttpHandler,
+  { customContext, sandboxAllowlist }: SpaceSettingsSnapshot,
+  touched: ReadonlySet<SpaceSetting>
+): Promise<void> => {
+  const failures = (
+    await Promise.allSettled([
+      touched.has('customContext') ? replaceCustomContext(fetch, customContext) : undefined,
+      touched.has('sandboxAllowlist')
+        ? replaceSandboxAllowlist(fetch, sandboxAllowlist)
+        : undefined,
+    ])
+  ).filter((result): result is PromiseRejectedResult => result.status === 'rejected');
+  if (failures.length > 0) {
+    throw new AggregateError(
+      failures.map(({ reason }) => reason),
+      "Restoring the space's custom context or sandbox egress rules failed"
+    );
+  }
+};

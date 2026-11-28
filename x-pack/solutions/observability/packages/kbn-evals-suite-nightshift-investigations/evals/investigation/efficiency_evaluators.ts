@@ -12,6 +12,7 @@ export const UNCACHED_INPUT_TOKENS_EVALUATOR = 'uncached_input_tokens';
 export const OUTPUT_TOKENS_EVALUATOR = 'output_tokens';
 export const LATENCY_SECONDS_EVALUATOR = 'latency_seconds';
 export const TOOL_CALLS_TOTAL_EVALUATOR = 'tool_calls_total';
+export const SANDBOX_EGRESS_DENIED_EVALUATOR = 'sandbox_egress_denied';
 export const DECISION_TREES_ACCESSED_EVALUATOR = 'decision_trees_accessed';
 
 type InvestigationEvaluator = Evaluator<InvestigationExample, InvestigationTaskOutput>;
@@ -84,6 +85,22 @@ export const toolCallsTotalEvaluator: InvestigationEvaluator = {
     ),
 };
 
+/**
+ * Sandbox commands the egress firewall refused. Above zero means the space's sandbox allowlist is
+ * missing a host the agent needed, such as a repository its custom context points at.
+ */
+export const sandboxEgressDeniedEvaluator: InvestigationEvaluator = {
+  name: SANDBOX_EGRESS_DENIED_EVALUATOR,
+  kind: 'CODE',
+  direction: 'minimize',
+  evaluate: async ({ output }) =>
+    measure(
+      output?.sandbox_egress_denied_count,
+      'commands',
+      `The sandbox egress firewall refused ${output?.sandbox_egress_denied_count} sandbox command(s).`
+    ),
+};
+
 /** How many decision trees (symptom playbooks) were successfully read; failed reads don't count. */
 export const decisionTreesAccessedEvaluator: InvestigationEvaluator = {
   name: DECISION_TREES_ACCESSED_EVALUATOR,
@@ -108,5 +125,6 @@ export const efficiencyEvaluators: InvestigationEvaluator[] = [
   outputTokensEvaluator,
   latencySecondsEvaluator,
   toolCallsTotalEvaluator,
+  sandboxEgressDeniedEvaluator,
   decisionTreesAccessedEvaluator,
 ];

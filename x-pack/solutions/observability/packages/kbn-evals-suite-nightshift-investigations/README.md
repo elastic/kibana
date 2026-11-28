@@ -290,7 +290,8 @@ evaluations cluster changes nothing until the entry is updated. Scores are attri
 dataset name, so each cut is its own series in the dashboards.
 
 Golden cuts must carry the `customer0` tag (`requiredTags`), which applies the Customer-0 custom
-context and the retrospective guardrail. A dataset without it fails the run before any
+context, the retrospective guardrail and the [sandbox egress rules](#sandbox-egress) for cloning
+Elastic's repositories. A dataset without it fails the run before any
 investigation starts.
 
 ### Running a new golden cut in CI
@@ -460,6 +461,34 @@ completed investigation or placeholder score alone does not prove connectivity.
 Leave the Elasticsearch settings unset for the bundled synthetic examples; they need no connector. The
 former `remote` selection and `NIGHTSHIFT_REMOTE_EXAMPLES_FILE` are replaced by this shared file
 workflow.
+
+### Sandbox egress
+
+The sandbox reaches only its connectors' hosts and the space's sandbox egress rules (Nightshift
+settings, `PUT /internal/nightshift/sandbox_allowlist`). Space setup adds `GET,POST` prefix rules
+for the three repositories below (#304625). They also open those repositories' issue and pull
+request pages, and connector probes and the other evals run with them. Investigation datasets
+replace them, next to their custom context, with the rules the dataset needs
+([`sandbox_allowlist.ts`](evals/investigation/sandbox_allowlist.ts)): git smart HTTP to the
+repositories that context points at, `elastic/kibana` and `elastic/elasticsearch` for Customer-0
+and recovery cases and `open-telemetry/opentelemetry-demo` for ORCA. Only `git clone` and
+`git fetch` get through, so the rest of github.com, including issues and pull requests, stays
+blocked. Other investigation datasets run with no rules. Investigation runs and live reinforcement
+runs snapshot the space's custom context and rules before setup and restore both when they end, so
+a run on an existing stack leaves them as it found them; a failed restore fails the run. The
+reinforcement replay and trace-file modes don't restore, so they leave setup's prefix rules in
+place.
+
+ORCA checks out the demo's pinned commit. The Customer-0 and recovery guardrails have the agent
+check out main's last commit before the alert or the recovery and drop every newer ref and reflog
+entry, so `git log --all` can't reach code fixed after the incident. An agent that fetches again
+can still see later commits; the guardrail rules out using them.
+
+Every investigation records `sandbox_egress_denied`, the number of sandbox commands the firewall
+refused: `CONNECT tunnel failed, response 403`, a `sandbox_egress_denied` response, or a 403 from
+github.com, whose rules are checked per request (git's `The requested URL returned error: 403` for
+a github.com URL, or curl's from a command that requests one). Above zero, the agent needed a host
+or path the rules leave out.
 
 ## Reinforcement micro-eval
 
@@ -994,7 +1023,9 @@ one custom context snippet (`ORCA_CUSTOM_CONTEXT` in
 `github.com/open-telemetry/opentelemetry-demo` at commit `fc77a6cbc0bf36ff52f21e4d59fa7b8a0f5d6733`,
 the commit the paper's environment is built on. The paper's agents find that checkout at
 `/app/opentelemetry-demo`; ours clone it in the sandbox, as the customer0 space points at Elastic's
-repositories. The Golden release `nightshift/orca-ech-full-20261019` is an alert-triggered eval
+repositories. The space's [sandbox egress rules](#sandbox-egress) allow that clone. ORCA runs before
+12 November 2026 had no source code: every clone was refused until #304625 allowed the repository.
+The Golden release `nightshift/orca-ech-full-20261019` is an alert-triggered eval
 of 42 questions and is not this ORCA benchmark; CI does not run it. Quote that 42-question set
 as a benchmark result again only after its windows end at detection time.
 
