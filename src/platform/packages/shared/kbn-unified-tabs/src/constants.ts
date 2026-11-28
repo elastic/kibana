@@ -10,7 +10,7 @@
 export const MAX_TAB_LABEL_LENGTH = 120;
 
 export const MAX_TAB_WIDTH = 280;
-export const MIN_TAB_WIDTH = 112;
+export const MIN_TAB_WIDTH = 124;
 
 /**
  * Total rendered height of the tabs bar row.
