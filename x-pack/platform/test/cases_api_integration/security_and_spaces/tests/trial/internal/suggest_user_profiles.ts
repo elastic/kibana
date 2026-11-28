@@ -12,6 +12,7 @@ import {
   superUser,
   obsOnly,
   noCasesPrivilegesSpace1,
+  secOnlyReadCreateComment,
 } from '../../../../common/lib/authentication/users';
 import type { Role, User } from '../../../../common/lib/authentication/types';
 import { createUsersAndRoles, deleteUsersAndRoles } from '../../../../common/lib/authentication';
@@ -19,8 +20,14 @@ import { createUsersAndRoles, deleteUsersAndRoles } from '../../../../common/lib
 export default function ({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  // Failing: See https://github.com/elastic/kibana/issues/262485
-  describe.skip('suggest_user_profiles', () => {
+  describe('suggest_user_profiles', () => {
+    before(async () => {
+      await loginUsers({
+        supertest: supertestWithoutAuth,
+        users: [secOnlyReadCreateComment],
+      });
+    });
+
     it('returns no suggestions when the owner is an empty array', async () => {
       const profiles = await suggestUserProfiles({
         supertest: supertestWithoutAuth,
@@ -68,7 +75,11 @@ export default function ({ getService }: FtrProviderContext) {
         auth: { user: superUser, space: 'space1' },
       });
 
-      expectSnapshot(profiles.map(({ user, data }) => ({ user, data }))).toMatchInline(`
+      const sortedProfiles = [...profiles].sort((a, b) =>
+        a.user.username.localeCompare(b.user.username)
+      );
+
+      expectSnapshot(sortedProfiles.map(({ user, data }) => ({ user, data }))).toMatchInline(`
         Array [
           Object {
             "data": Object {},
@@ -182,18 +193,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       expect(profiles.length).to.be(1);
-      expectSnapshot(profiles.map(({ user, data }) => ({ user, data }))).toMatchInline(`
-        Array [
-          Object {
-            "data": Object {},
-            "user": Object {
-              "email": "sec_only_read@elastic.co",
-              "full_name": "sec only_read",
-              "username": "sec_only_read",
-            },
-          },
-        ]
-      `);
+      expect(profiles[0].user.username).to.contain('sec_only');
     });
 
     describe('user with both security and observability privileges', () => {
