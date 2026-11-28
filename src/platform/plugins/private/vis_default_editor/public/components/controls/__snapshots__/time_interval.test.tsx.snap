@@ -45,6 +45,7 @@ exports[`TimeIntervalParamEditor should match snapshot 1`] = `
     }
     placeholder="Select an interval"
     selectedOptions={Array []}
+    selectionDisplay="wrap"
     singleSelection={
       Object {
         "asPlainText": true,

@@ -160,6 +160,7 @@ describe('RoleComboBox', () => {
         placeholder="Select roles"
         renderOption={[Function]}
         selectedOptions={Array []}
+        selectionDisplay="wrap"
         singleSelection={false}
         sortMatchesBy="none"
       />

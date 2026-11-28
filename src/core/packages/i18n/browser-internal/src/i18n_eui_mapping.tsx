@@ -181,6 +181,14 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       defaultMessage: 'Select a color',
       description: 'ARIA label for the color picker button',
     }),
+    'euiColorPicker.openButtonLabel': i18n.translate('core.euiColorPicker.openButtonLabel', {
+      defaultMessage: 'Open color selection dialog',
+      description: 'ARIA label for the button that opens the color selection dialog',
+    }),
+    'euiColorPicker.closeButtonLabel': i18n.translate('core.euiColorPicker.closeButtonLabel', {
+      defaultMessage: 'Close color selection dialog',
+      description: 'ARIA label for the button that closes the color selection dialog',
+    }),
     'euiColorPicker.colorLabel': i18n.translate('core.euiColorPicker.colorLabel', {
       defaultMessage: 'Color value',
     }),
@@ -1916,5 +1924,17 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       defaultMessage: 'Invalid expression',
       description: 'Screen reader label for the warning icon shown on an invalid EuiExpression',
     }),
+    'euiComboBoxInput.collapsedSelections': ({ count }: EuiValues) =>
+      i18n.translate('core.euiComboBoxInput.collapsedSelections', {
+        defaultMessage: 'Show {count} hidden selections',
+        values: { count },
+      }),
+    'euiComboBoxInput.collapsedSelectionsDialog': i18n.translate(
+      'core.euiComboBoxInput.collapsedSelectionsDialog',
+      {
+        defaultMessage: 'Hidden selections',
+        description: 'Screen reader label for the dialog that shows hidden selections',
+      }
+    ),
   };
 };

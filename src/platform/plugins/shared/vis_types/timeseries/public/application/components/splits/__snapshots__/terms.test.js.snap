@@ -198,6 +198,7 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
               },
             ]
           }
+          selectionDisplay="wrap"
           singleSelection={
             Object {
               "asPlainText": true,

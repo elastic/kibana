@@ -148,6 +148,7 @@ exports[`it renders without crashing 1`] = `
     ]
   }
   selectedOptions={Array []}
+  selectionDisplay="wrap"
   singleSelection={false}
   sortMatchesBy="none"
 />

@@ -254,6 +254,7 @@ exports[`it renders without crashing 1`] = `
       options={Array []}
       placeholder="Add a user…"
       selectedOptions={Array []}
+      selectionDisplay="wrap"
       singleSelection={false}
       sortMatchesBy="none"
     />

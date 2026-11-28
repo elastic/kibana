@@ -44,6 +44,7 @@ exports[`it renders without crashing 1`] = `
                 options={Array []}
                 placeholder="Add an index pattern…"
                 selectedOptions={Array []}
+                selectionDisplay="wrap"
                 singleSelection={false}
                 sortMatchesBy="none"
               />
@@ -88,6 +89,7 @@ exports[`it renders without crashing 1`] = `
                 }
                 placeholder="Add a privilege…"
                 selectedOptions={Array []}
+                selectionDisplay="wrap"
                 singleSelection={false}
                 sortMatchesBy="none"
               />

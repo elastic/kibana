@@ -78,6 +78,7 @@ exports[`src/legacy/core_plugins/metrics/public/components/icon_select/icon_sele
       },
     ]
   }
+  selectionDisplay="wrap"
   singleSelection={
     Object {
       "asPlainText": true,
