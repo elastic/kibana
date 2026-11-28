@@ -36,7 +36,7 @@ const createPluginConfigAccessor = (maxAlertsPerRun = DEFAULT_MAX_ALERTS_PER_RUN
     rules: {
       minimumScheduleInterval: '1m',
       maxScheduledPerMinute: 400,
-      run: { alerts: { max: maxAlertsPerRun } },
+      run: { alerts: { max: maxAlertsPerRun }, query: { maxResponseSize: 50 * 1024 * 1024 } },
     },
   };
 
@@ -188,6 +188,26 @@ describe('ExecuteRuleQueryStep', () => {
     mockHelpersEsqlToArrowReader(
       mockEsClient,
       jest.fn().mockRejectedValue(new errors.ResponseError({ statusCode: 400 } as DiagnosticResult))
+    );
+
+    const state = createRulePipelineState({ rule: createRuleResponse() });
+
+    const error = await getStepError(step, state);
+
+    expect(error).toBeInstanceOf(Error);
+    expect(getErrorSource(error!)).toBe(TaskErrorSource.USER);
+  });
+
+  it('marks content-length-exceeded errors as TaskErrorSource.USER', async () => {
+    mockHelpersEsqlToArrowReader(
+      mockEsClient,
+      jest
+        .fn()
+        .mockRejectedValue(
+          new errors.RequestAbortedError(
+            'Response size exceeded the limit (content length: 52428800)'
+          )
+        )
     );
 
     const state = createRulePipelineState({ rule: createRuleResponse() });

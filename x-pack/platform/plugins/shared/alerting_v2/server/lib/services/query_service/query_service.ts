@@ -19,6 +19,8 @@ export interface ExecuteQueryParams {
   filter?: EsqlQueryRequest['filter'];
   params?: EsqlQueryRequest['params'];
   abortSignal?: AbortSignal;
+  /** Maximum allowed response body size in bytes. Passed to the ES transport. */
+  maxResponseSize?: number;
 }
 
 export interface QueryServiceContract {
@@ -41,6 +43,7 @@ export class QueryService implements QueryServiceContract {
     filter,
     params,
     abortSignal,
+    maxResponseSize,
   }: ExecuteQueryParams): Promise<EsqlQueryResponse> {
     this.logger.debug({
       message: () => `QueryService: Executing query - ${JSON.stringify({ query, filter, params })}`,
@@ -54,7 +57,7 @@ export class QueryService implements QueryServiceContract {
           filter,
           params,
         },
-        { signal: abortSignal }
+        { signal: abortSignal, ...(maxResponseSize !== undefined ? { maxResponseSize } : {}) }
       );
 
       this.logger.debug({
@@ -83,6 +86,7 @@ export class QueryService implements QueryServiceContract {
     filter,
     params,
     abortSignal,
+    maxResponseSize,
   }: ExecuteQueryParams): AsyncIterable<T[]> {
     const context = createExecutionContext(abortSignal ?? new AbortController().signal);
 
@@ -95,6 +99,9 @@ export class QueryService implements QueryServiceContract {
     try {
       context.throwIfAborted();
 
+      // Note: Arrow streaming uses chunked transfer encoding so the transport's
+      // maxResponseSize guard (which checks Content-Length) will not fire.
+      // The per-run alerts.max row limit acts as the primary guardrail here.
       reader = await this.esClient.helpers
         .esql(
           {
@@ -103,7 +110,7 @@ export class QueryService implements QueryServiceContract {
             filter,
             params,
           },
-          { signal: context.signal }
+          { signal: context.signal, ...(maxResponseSize !== undefined ? { maxResponseSize } : {}) }
         )
         .toArrowReader();
 
