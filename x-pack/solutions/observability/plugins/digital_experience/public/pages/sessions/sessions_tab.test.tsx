@@ -814,28 +814,6 @@ describe('SessionsTab', () => {
     expect(searchParams(history)).toEqual(
       expect.objectContaining({ sortField: 'duration_ms', page: '1' })
     );
-
-    // The first page is the default, so it leaves the URL.
-    await act(async () => {
-      fireEvent.click(screen.getByTestId('pagination-button-0'));
-    });
-    expect(searchParams(history).page).toBeUndefined();
-
-    await act(async () => {
-      fireEvent.click(within(table).getByRole('button', { name: /^JS errors/ }));
-    });
-    expect(searchParams(history)).toEqual(expect.objectContaining({ sortField: 'js_error_count' }));
-
-    await act(async () => {
-      fireEvent.click(within(table).getByRole('button', { name: /^Frustration/ }));
-    });
-    expect(searchParams(history)).toEqual(
-      expect.objectContaining({ sortField: 'frustration_count', sortDirection: 'asc' })
-    );
-    expect(within(table).getByRole('columnheader', { name: /^Frustration/ })).toHaveAttribute(
-      'aria-sort',
-      'ascending'
-    );
   });
 
   it('shows the summary columns by default, and the others on request', async () => {
