@@ -1,12 +1,12 @@
 {
-  "sha1": "78a6a22b27ffdc8a72cb297b2c92721b54ee2f87",
+  "sha1": "f8150a7b5365bb9f0d934605ff257488d2ea8cf7",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
     {
-      "id": "09db0f9b251af6a-62e78b299821a45",
-      "title": "Global setup",
+      "id": "09db0f9b251af6a-f9b99f9ae44f969",
+      "title": "Prepare Fleet for EDR response-action seeds",
       "expectedStatus": "passed",
       "tags": [],
       "location": {

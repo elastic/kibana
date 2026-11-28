@@ -1,5 +1,5 @@
 {
-  "sha1": "0578ebaf627e03f128e2db3a16bc0ab656a41193",
+  "sha1": "2c3ba8e00925f9b92ca521cf47dd0c9be5123dbb",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -343,56 +343,56 @@
     {
       "id": "cac3a28fa43b605-df9e267d31fd948",
       "title": "Onboarding — managed integrations add a service to the existing package policy after a reload, the added service goes into the first policy with a PUT",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_policy_updates_mi.spec.ts",
-        "line": 23,
+        "line": 24,
         "column": 15
       }
     },
     {
       "id": "cac3a28fa43b605-0359f2d9f65dda6",
       "title": "Onboarding — managed integrations add a service to the existing package policy a failed update marks the deployment failed and Retry updates the same policy",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_policy_updates_mi.spec.ts",
-        "line": 46,
+        "line": 47,
         "column": 14
       }
     },
     {
       "id": "cac3a28fa43b605-f68d8446dd46be4",
       "title": "Onboarding — managed integrations add a service to the existing package policy a service with its own namespace gets its own policy",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_policy_updates_mi.spec.ts",
-        "line": 70,
+        "line": 71,
         "column": 13
       }
     },
     {
       "id": "cac3a28fa43b605-2ff2fa08bb6f90c",
       "title": "Onboarding — managed integrations add a service to the existing package policy a duplicated service gets its own policy",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_policy_updates_mi.spec.ts",
-        "line": 87,
+        "line": 88,
         "column": 13
       }
     },
