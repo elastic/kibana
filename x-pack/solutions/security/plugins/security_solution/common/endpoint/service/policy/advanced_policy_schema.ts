@@ -1251,6 +1251,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'mac.advanced.kernel.network_extension.enable_dns_loopback_monitoring',
+    first_supported_version: '8.19.27',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.kernel.network_extension.enable_dns_loopback_monitoring',
+      {
+        defaultMessage:
+          'Report DNS lookups sent to a local resolver on a loopback address (127.0.0.0/8), such as the one used by Cloudflare WARP and some VPN clients. Applies only while DNS events are enabled. On macOS 12 and 13, lookups to 127.0.0.1 are not reported. Turn off to avoid a second DNS event for each lookup that a local forwarding resolver sends upstream. Supported on 8.19.27+, 9.5.8+ and 9.6.1+. Default: true.',
+      }
+    ),
+  },
+  {
     key: 'windows.advanced.memory_protection.shellcode_trampoline_detection',
     first_supported_version: '8.1',
     documentation: i18n.translate(
