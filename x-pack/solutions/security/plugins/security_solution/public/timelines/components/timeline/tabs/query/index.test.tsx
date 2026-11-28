@@ -581,47 +581,28 @@ describe('query tab with unified timeline', () => {
     );
   });
 
-  const openDisplaySettings = async () => {
-    expect(screen.getByTestId('dataGridDisplaySelectorButton')).toBeVisible();
-
-    fireEvent.click(screen.getByTestId('dataGridDisplaySelectorButton'));
-
-    await waitFor(() => {
-      expect(
-        screen
-          .getAllByTestId('unifiedDataTableSampleSizeInput')
-          .find((el) => el.getAttribute('type') === 'number')
-      ).toBeVisible();
-    });
-  };
-
-  const updateSampleSize = async (sampleSize: number) => {
-    const sampleSizeInput = screen
-      .getAllByTestId('unifiedDataTableSampleSizeInput')
-      .find((el) => el.getAttribute('type') === 'number');
-
-    expect(sampleSizeInput).toBeVisible();
-
-    fireEvent.change(sampleSizeInput as HTMLElement, {
-      target: { value: sampleSize },
-    });
-  };
-
   describe('controls', () => {
     it(
       'should reftech on sample size change',
       async () => {
-        renderTestComponents();
+        useStubbedGrid();
+        const store = createMockStore(structuredClone(mockState));
+        render(
+          <TestProviders store={store}>
+            <TestComponent />
+          </TestProviders>
+        );
 
         await waitFor(() => {
-          expect(screen.getByTestId('discoverDocTable')).toBeVisible();
+          expect(getUnifiedTimelineBodyProps().events).toHaveLength(1);
         });
-        expect(screen.queryByTestId('pagination-button-1')).not.toBeInTheDocument();
 
-        await openDisplaySettings();
-        await updateSampleSize(2);
+        act(() => {
+          store.dispatch(timelineActions.updateSampleSize({ id: TimelineId.test, sampleSize: 2 }));
+        });
+
         await waitFor(() => {
-          expect(screen.getByTestId('pagination-button-1')).toBeVisible();
+          expect(getUnifiedTimelineBodyProps().events).toHaveLength(2);
         });
       },
       SPECIAL_TEST_TIMEOUT
