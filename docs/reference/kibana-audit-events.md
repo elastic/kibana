@@ -1,5 +1,8 @@
 ---
 navigation_title: Kibana audit events
+applies_to:
+  stack: ga
+  serverless: ga
 ---
 
 # Kibana audit events
@@ -12,7 +15,7 @@ Refer to [enabling](docs-content://deploy-manage/security/logging-configuration/
 
 This section describes {{kib}} events that can be logged for auditing purposes.
 
-Each event is broken down into `category`, `type`, `action`, and `outcome` fields to make it easy to filter, query and aggregate the resulting logs. The `trace.id` field can be used to correlate multiple events that originate from the same request or, for a workload that runs as a service account, from the same run.
+Each event is broken down into `category`, `type`, `action`, and `outcome` fields to make it easy to filter, query and aggregate the resulting logs. The `trace.id` field (`http.request.id` in {{serverless-full}}) can be used to correlate multiple events that originate from the same request or, for a workload that runs as a service account, from the same run.
 
 Refer to [audit schema](#xpack-security-ecs-audit-schema) for a table of fields logged with audit events.
 
@@ -29,28 +32,29 @@ To ensure that a record of every operation is persisted even in case of an unexp
 | `user_logout` | `unknown` | User is logging out. |
 | `session_cleanup` | `unknown` | Removing invalid or expired session. |
 | `access_agreement_acknowledged` | n/a | User has acknowledged the access agreement. |
-| `service_account_assume` {applies_to}`stack: preview 9.6+` | `success` | Workload [plugin/type/id] is executing as service account [id=x]. Logged when a run starts as a service account. Refer to [Trace what a workload did as a service account](#service-account-assume-details). |
+| `service_account_assume` {applies_to}`{stack: ga 9.6+, serverless: ga}` | `success` | Workload [plugin/type/id] is executing as service account [id=x]. Logged when a run starts as a service account. Refer to [Trace what a workload did as a service account](#service-account-assume-details). |
 | | `failure` | Workload [plugin/type/id] failed to execute as service account [id=x]. Refer to [Why a run fails](#service-account-assume-failures). |
 
 #### Trace what a workload did as a service account [service-account-assume-details]
 ```{applies_to}
-stack: preview 9.6+
+stack: ga 9.6+
+serverless: ga
 ```
 
 A `service_account_assume` event marks the start of a workload run that executes as a service account. Use it to find everything that run did.
 
 * **Who acted:** The service account is the actor. `user.id` and `user.name` are the account ID, and `user.roles` is omitted.
-* **What the run did:** Every event the run causes shares this event's `trace.id`. Search on that value to list them. When the plugin supplies a run ID, it appears in `kibana.workload.execution_id` and in the message as `[executionId=…]`.
-* **How to reduce volume:** A workload that runs often writes one `success` event for each run. To drop them, add this filter to [`xpack.security.audit.ignore_filters`](/reference/configuration-reference/security-settings.md#audit-logging-ignore-filters):
+* **What the run did:** Every event the run causes shares this event's `trace.id` (`http.request.id` in {{serverless-full}}). Search on that value to list them. When the plugin supplies a run ID, it appears in `kibana.workload.execution_id` and in the message as `[executionId=…]`.
+* {applies_to}`serverless: unavailable` **How to reduce volume:** A workload that runs often writes one `success` event for each run. To drop them, add this filter to [`xpack.security.audit.ignore_filters`](/reference/configuration-reference/security-settings.md#audit-logging-ignore-filters):
 
-  ```yaml
-  xpack.security.audit.ignore_filters:
-    - actions: [service_account_assume]
-      outcomes: [success]
-  ```
+    ```yaml
+    xpack.security.audit.ignore_filters:
+      - actions: [service_account_assume]
+        outcomes: [success]
+    ```
 
 $$$service-account-assume-failures$$$
-A `failure` event means {{kib}} couldn't run the workload as its service account, or couldn't keep running it. {{kib}} doesn't log a temporary failure, such as an unavailable {{es}} cluster. It logs a permanent failure once for each run. A failure at the start is logged without a request, so its `trace.id` comes from the active tracing span instead of the run.
+A `failure` event means {{kib}} couldn't run the workload as its service account, or couldn't keep running it. {{kib}} doesn't log a temporary failure, such as an unavailable {{es}} cluster. It logs a permanent failure once for each run. A failure at the start is logged without a request. On {{stack}}, its `trace.id` comes from the active tracing span instead of the run. On {{serverless-full}}, it has no `http.request.id`, but can carry the active span's trace ID in the OpenTelemetry trace context.
 
 When the run starts, a failure means one of these:
 
@@ -387,7 +391,7 @@ Workflow events (`workflow_*`) are logged after the operation finishes, with `ev
 
 | **Action** | **Outcome** | **Description** |
 | --- | --- | --- |
-| `service_account_create` {applies_to}`stack: preview 9.6+` | `success` | User has created service account [id=x, name=y]. Logged after the account exists, so the event carries the id the backend assigned. |
+| `service_account_create` {applies_to}`{stack: ga 9.6+, serverless: ga}` | `success` | User has created service account [id=x, name=y]. Logged after the account exists, so the event carries the id the backend assigned. |
 | | `failure` | Failed attempt to create service account [name=y]: the user is not authorized. The name is omitted when it did not pass validation. |
 | | `unknown` | Failed attempt to create service account [id=x, name=y], which might have been left behind. The create failed after writing to {{es}} and {{kib}} could not confirm that it removed the partially created account. Refer to the {{kib}} server logs. |
 
@@ -395,16 +399,16 @@ Workflow events (`workflow_*`) are logged after the operation finishes, with `ev
 
 | **Action** | **Outcome** | **Description** |
 | --- | --- | --- |
-| `service_account_workload_bind` {applies_to}`stack: preview 9.6+` | `unknown` | User is binding service account [id=x] to workload [plugin/type/id]. Binding a workload that is already bound to a different account also writes a `service_account_workload_unbind` event for that account first. |
+| `service_account_workload_bind` {applies_to}`{stack: ga 9.6+, serverless: ga}` | `unknown` | User is binding service account [id=x] to workload [plugin/type/id]. Binding a workload that is already bound to a different account also writes a `service_account_workload_unbind` event for that account first. |
 | | `failure` | Failed attempt to bind service account [id=x] to workload [plugin/type/id]: the user is not authorized. |
-| `service_account_workload_unbind` {applies_to}`stack: preview 9.6+` | `unknown` | User is unbinding service account [id=x] from workload [plugin/type/id]. When the workload has no binding, or the stored binding failed integrity verification, the message drops `[id=x]` and `user.target` is omitted. |
+| `service_account_workload_unbind` {applies_to}`{stack: ga 9.6+, serverless: ga}` | `unknown` | User is unbinding service account [id=x] from workload [plugin/type/id]. When the workload has no binding, or the stored binding failed integrity verification, the message drops `[id=x]` and `user.target` is omitted. |
 | | `failure` | Failed attempt to unbind service account from workload [plugin/type/id]: the user is not authorized. |
 
 #### Type: deletion
 
 | **Action** | **Outcome** | **Description** |
 | --- | --- | --- |
-| `service_account_delete` {applies_to}`stack: preview 9.6+` | `unknown` | User is deleting service account [id=x]. A forced delete, which skips the check for bound workloads and leaves their bindings behind, appends `[force=true]` to the message. |
+| `service_account_delete` {applies_to}`{stack: ga 9.6+, serverless: ga}` | `unknown` | User is deleting service account [id=x]. A forced delete, which skips the check for bound workloads and leaves their bindings behind, appends `[force=true]` to the message. |
 | | `failure` | Failed attempt to delete service account [id=x]: the user is not authorized. A forced delete appends `[force=true]` to this message too. |
 
 ::::{note}
@@ -541,7 +545,7 @@ serverless: preview
 
 | **Field** | **Description** |
 | --- | --- |
-| `trace.id` | Unique identifier allowing events of the same transaction from {{kib}} and {{es}} to be correlated. For a workload that runs as a service account, the events of one run share it. Refer to [Trace what a workload did as a service account](#service-account-assume-details). |
+| `trace.id` | Unique identifier allowing events of the same transaction from {{kib}} and {{es}} to be correlated. For a workload that runs as a service account, the events of one run share it. In {{serverless-full}}, this field is delivered as `http.request.id`. Refer to [Trace what a workload did as a service account](#service-account-assume-details). |
 
 ### Serverless OpenTelemetry field names [serverless-otel-field-names]
 
