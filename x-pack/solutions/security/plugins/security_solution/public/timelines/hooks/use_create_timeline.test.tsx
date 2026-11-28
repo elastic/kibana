@@ -137,7 +137,7 @@ describe('useCreateTimeline', () => {
     await hookResult.result.current();
 
     expect(onClick).toHaveBeenCalled();
-    expect(resetDiscoverAppState).toHaveBeenCalled();
+    expect(resetDiscoverAppState).toHaveBeenCalledWith(undefined, { isCreatingTimeline: true });
   });
 
   it('should dispatch removeLinkTo action if absolute timeRange is passed to callback', async () => {

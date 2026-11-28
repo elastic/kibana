@@ -22,11 +22,13 @@ jest.mock('../use_selector', () => ({
 }));
 
 const mockUseLocation = jest.fn().mockReturnValue({ pathname: '/test', search: '?' });
+const mockUseHistory = jest.fn().mockReturnValue({ action: 'PUSH' });
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
   return {
     ...original,
     useLocation: () => mockUseLocation(),
+    useHistory: () => mockUseHistory(),
   };
 });
 
@@ -69,6 +71,32 @@ describe('queryTimelineByIdOnUrlChange', () => {
           timelineId: newTestTimelineId,
           openTimeline: true,
         })
+      );
+    });
+
+    it('should restore the timeline from the URL when Back or Forward selected it', () => {
+      mockUseLocation.mockReturnValue({ search: oldTimelineRisonSearchString });
+
+      const { rerender } = renderHook(() => useQueryTimelineByIdOnUrlChange());
+      mockUseLocation.mockReturnValue({ search: newTimelineRisonSearchString });
+      mockUseHistory.mockReturnValueOnce({ action: 'POP' });
+      rerender();
+
+      expect(mockQueryTimelineById).toHaveBeenCalledWith(
+        expect.objectContaining({ timelineId: newTestTimelineId, isRestoringFromUrl: true })
+      );
+    });
+
+    it('should not restore the timeline from the URL when a link selected it', () => {
+      // The legacy URL conflict link carries the current timeline's Discover state along.
+      mockUseLocation.mockReturnValue({ search: oldTimelineRisonSearchString });
+
+      const { rerender } = renderHook(() => useQueryTimelineByIdOnUrlChange());
+      mockUseLocation.mockReturnValue({ search: newTimelineRisonSearchString });
+      rerender();
+
+      expect(mockQueryTimelineById).toHaveBeenCalledWith(
+        expect.objectContaining({ timelineId: newTestTimelineId, isRestoringFromUrl: false })
       );
     });
   });

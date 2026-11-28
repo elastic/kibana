@@ -16,11 +16,14 @@ import { useQuery } from '@kbn/react-query';
 import { isEqualWith } from 'lodash';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import { useDispatch } from 'react-redux';
-import { APP_STATE_URL_KEY } from '@kbn/discover-plugin/common';
+import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
+import { APP_STATE_URL_KEY, GLOBAL_STATE_URL_KEY } from '@kbn/discover-plugin/common';
 import { PageScope } from '../../../../../data_view_manager/constants';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { updateSavedSearchId } from '../../../../store/actions';
+import { defaultDiscoverTimeRange } from '../../../../../common/components/discover_in_timeline/use_discover_in_timeline_actions';
 import { useDiscoverInTimelineContext } from '../../../../../common/components/discover_in_timeline/use_discover_in_timeline_context';
+import { applyTimelineStateToDiscover } from './apply_timeline_state_to_discover';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useDiscoverState } from './use_discover_state';
 import { useSetDiscoverCustomizationCallbacks } from './customizations/use_set_discover_customizations';
@@ -68,6 +71,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
     updateSavedSearch,
     initializeLocalSavedSearch,
     defaultDiscoverAppState,
+    timelineRestorePending,
   } = useDiscoverInTimelineContext();
 
   const { discoverAppState, setDiscoverInternalState, setDiscoverAppState } = useDiscoverState();
@@ -162,6 +166,12 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
     return unSubscribeAll;
   }, [discoverStateContainer]);
 
+  // The timeline tabs are conditionally rendered, so this component unmounts whenever the user
+  // leaves the ES|QL tab, taking the Discover state container it published with it. Releasing the
+  // reference keeps callers from dispatching into a disposed container, where writes are accepted
+  // and silently dropped.
+  useEffect(() => () => setDiscoverStateContainer(undefined), [setDiscoverStateContainer]);
+
   const initialDiscoverCustomizationCallback: CustomizationCallback = useCallback(
     async ({ stateContainer }) => {
       setDiscoverStateContainer(stateContainer);
@@ -184,31 +194,36 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
           discoverAppState) ??
         defaultDiscoverAppState;
 
-      const hasESQLUrlState = (stateContainer.getCurrentTab().appState.query as { esql: string })
-        ?.esql;
+      // The timeline was restored while this tab could not apply it. When a different timeline
+      // was opened, the Discover URL state belongs to the previously opened one and would
+      // otherwise be restored in its place — silently, since the two often share a query — so the
+      // timeline's saved session, or the default, wins over it. When the timeline the URL points
+      // at was restored, the URL state is this timeline's own and is kept.
+      const pendingRestore = timelineRestorePending.current;
+      timelineRestorePending.current = null;
 
-      if (!stateContainer.stateStorage.get(APP_STATE_URL_KEY) || !hasESQLUrlState) {
-        if (savedSearchAppState?.savedSearch.timeRange) {
-          stateContainer.internalState.dispatch(
-            stateContainer.injectCurrentTab(stateContainer.internalActions.updateGlobalState)({
-              globalState: {
-                timeRange: savedSearchAppState.savedSearch.timeRange,
-              },
-            })
-          );
-        }
-        stateContainer.internalState.dispatch(
-          stateContainer.injectCurrentTab(stateContainer.internalActions.setAppState)({
-            appState: finalAppState,
-          })
-        );
-        await stateContainer.internalState.dispatch(
-          stateContainer.injectCurrentTab(
-            stateContainer.internalActions.updateAppStateAndReplaceUrl
-          )({
-            appState: finalAppState,
-          })
-        );
+      // Nothing of this timeline's own session is at stake: the URL carries no app state, or the
+      // tab holds no ES|QL query yet. Seeding it from the timeline cannot lose in-session work.
+      const hasNoEsqlStateToPreserve =
+        !stateContainer.stateStorage.get(APP_STATE_URL_KEY) ||
+        !(stateContainer.getCurrentTab().appState.query as { esql?: string })?.esql;
+
+      // Only a restore takes the saved session's range, and a restore from the URL only when the
+      // URL carries none of its own. Otherwise Discover keeps the range in the URL or, failing
+      // that, the one the ES|QL search already runs against: on a remount, the user's latest.
+      const takesSavedTimeRange =
+        pendingRestore === 'opened' ||
+        (pendingRestore === 'fromUrl' &&
+          !stateContainer.stateStorage.get<GlobalQueryStateFromUrl>(GLOBAL_STATE_URL_KEY)?.time);
+
+      if (pendingRestore === 'opened' || hasNoEsqlStateToPreserve) {
+        await applyTimelineStateToDiscover({
+          stateContainer,
+          appState: finalAppState,
+          timeRange: takesSavedTimeRange
+            ? savedSearchAppState?.savedSearch.timeRange ?? defaultDiscoverTimeRange
+            : undefined,
+        });
       }
 
       const unsubscribeState = stateContainer.createAppStateObservable().subscribe({
@@ -240,6 +255,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
       defaultDiscoverAppState,
       timelineId,
       initializeLocalSavedSearch,
+      timelineRestorePending,
     ]
   );
 

@@ -73,7 +73,7 @@ const StartAppComponent: FC<StartAppComponent> = ({ children, history, store, th
                             getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
                           >
                             <UpsellingProvider upsellingService={upselling}>
-                              <DiscoverInTimelineContextProvider>
+                              <DiscoverInTimelineContextProvider history={history}>
                                 <PageRouter history={history}>
                                   <AssistantProvider>{children}</AssistantProvider>
                                   <TrialCompanion />

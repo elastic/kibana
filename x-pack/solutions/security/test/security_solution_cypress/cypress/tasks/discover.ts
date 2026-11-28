@@ -78,14 +78,13 @@ export const verifyDiscoverEsqlQuery = (esqlQueryToVerify: string) => {
   // We select the query first as multi-line queries do not render fully unless all the text is selected
   selectCurrentDiscoverEsqlQuery();
   /**
-   * When selected all visual spaces actually render the middot character, so we replace the spaces with the middot
-   * If testing without selecting first you can replace with a Non-breaking space character
+   * Monaco renders spaces as middots inside a selection and as non-breaking spaces outside it,
+   * so both are normalised back to plain spaces before comparing.
    * https://github.com/cypress-io/cypress/issues/15863#issuecomment-816746693
    */
-  const unicodeReplacedQuery = esqlQueryToVerify.replaceAll(' ', '\u00b7');
-  cy.get(DISCOVER_ESQL_INPUT_TEXT_CONTAINER).should(
-    ($input) => $input.text() === unicodeReplacedQuery
-  );
+  cy.get(DISCOVER_ESQL_INPUT_TEXT_CONTAINER).should(($input) => {
+    expect($input.text().replace(/[\u00a0\u00b7]/g, ' ')).to.eq(esqlQueryToVerify);
+  });
 };
 
 export const submitDiscoverSearchBar = () => {

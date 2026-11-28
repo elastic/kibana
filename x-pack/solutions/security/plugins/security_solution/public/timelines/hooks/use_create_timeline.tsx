@@ -144,7 +144,7 @@ export const useCreateTimeline = ({
 
   return useCallback(
     async (options?: { timeRange?: TimeRange }) => {
-      await resetDiscoverAppState();
+      await resetDiscoverAppState(undefined, { isCreatingTimeline: true });
       createTimeline({ id: timelineId, show: true, timeRange: options?.timeRange });
       if (typeof onClick === 'function') {
         onClick();

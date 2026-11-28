@@ -7,7 +7,7 @@
 
 import { useEffect, useMemo } from 'react';
 
-import { useLocation } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import usePrevious from 'react-use/lib/usePrevious';
 import { safeDecode } from '@kbn/rison';
 import type { TimelineUrl } from '../../../timelines/store/model';
@@ -38,6 +38,7 @@ export const useQueryTimelineByIdOnUrlChange = () => {
   const flyoutTimeline = useShallowEqualSelector((state) => getTimeline(state, TimelineId.active));
 
   const { search } = useLocation();
+  const action = useHistory()?.action;
   const oldSearch = usePrevious(search);
   const timelineIdFromReduxStore = flyoutTimeline?.savedObjectId ?? '';
 
@@ -66,11 +67,15 @@ export const useQueryTimelineByIdOnUrlChange = () => {
       queryTimelineById({
         activeTimelineTab: activeTab ?? TimelineTabs.query,
         duplicate: false,
+        // Back and Forward return to an entry whose Discover state is this timeline's own: opening
+        // a timeline drops the previous one's from the entry it takes over. The legacy URL
+        // conflict link copies the current timeline's Discover state along.
+        isRestoringFromUrl: action === 'POP',
         timelineId: newId,
         openTimeline: true,
       });
     }
-  }, [timelineIdFromReduxStore, oldId, newId, activeTab, queryTimelineById]);
+  }, [timelineIdFromReduxStore, oldId, newId, activeTab, queryTimelineById, action]);
 };
 
 export const getQueryStringKeyValue = ({ search, urlKey }: { search: string; urlKey: string }) =>
