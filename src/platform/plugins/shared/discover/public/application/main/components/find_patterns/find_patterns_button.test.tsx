@@ -114,6 +114,13 @@ describe('FindPatternsButton', () => {
     });
   });
 
+  it('uses error.message when message is empty in the current results', async () => {
+    await setup({
+      resultColumns: [{ ...MESSAGE_COLUMN, isNull: true }, createColumn('error.message', 'text')],
+    });
+    expect(screen.getByRole('button', { name: 'Find patterns in error.message' })).toBeVisible();
+  });
+
   it('hides the action on Observability Logs Essentials even with a platinum license', async () => {
     await setup({ activeProduct: { type: 'observability', tier: 'logs_essentials' } });
     expect(screen.queryByTestId('dscFindPatternsButton')).not.toBeInTheDocument();
@@ -137,6 +144,7 @@ describe('FindPatternsButton', () => {
   it.each([
     { resultColumns: [createColumn('message', 'keyword'), createColumn('_id', 'text')] },
     { resultColumns: [createColumn('message', 'long')] },
+    { resultColumns: [{ ...MESSAGE_COLUMN, isNull: true }] },
     { sourceEsql: 'FROM other-logs' },
     { fetchStatus: FetchStatus.LOADING },
   ])('hides the action without current message results (%j)', async (options) => {

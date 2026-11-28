@@ -52,7 +52,10 @@ export const FindPatternsButton = () => {
 
   const field = getCategorizationField(
     dataSource.resultColumns
-      .filter(({ meta }) => meta.esType === 'text' || meta.esType === 'match_only_text')
+      .filter(
+        ({ isNull, meta }) =>
+          !isNull && (meta.esType === 'text' || meta.esType === 'match_only_text')
+      )
       .map(({ name }) => name)
   );
   if (
