@@ -38,6 +38,12 @@ Each task manager instance runs tasks in a pool which ensures that at most N tas
 
 For example, we may have a system with a total `capacity` of 20, but a super expensive task such as an indicator match alerting rule which specifies a `capacity` of 10. In this case, `alerting:siem.indicatorRule` task can only run two at a time.
 
+## Adaptive capacity
+
+With `xpack.task_manager.capacity: auto` each Kibana node sizes its own capacity from the memory it has instead of a fixed number. Once a second the controller computes how much of the heap (and of the container memory limit, when Node reports one) is left after the runs in flight, prices every task from what its earlier runs cost, and turns the remainder into a capacity between `adaptive_capacity.min_capacity` and `adaptive_capacity.max_capacity`. At claim time each candidate is admitted only if its own estimate still fits the remaining budget; runs estimated as light bypass the budget so a herd of heavy tasks does not starve cheap ones. Estimates are written to the task document, so a restarted node and its peers start warm. Any numeric `capacity` switches the controller off.
+
+The rest of the tuning (heap target ratio, default price of an unseen task, ramp-up step, decision interval, light-run threshold and reserved slots, container memory target) is fixed in `server/lib/adaptive_capacity/constants.ts`. Every decision, including the effective settings, is visible under `stats.configuration.value.adaptive_capacity` in the [health API](#monitoring) and as `kibana.task_manager.adaptive_capacity.*` OpenTelemetry gauges.
+
 ## Config options
 
 The task_manager can be configured via `taskManager` config options (e.g. `xpack.taskManager.max_attempts`):
@@ -46,7 +52,9 @@ The task_manager can be configured via `taskManager` config options (e.g. `xpack
 - `poll_interval` - How often the background worker should check the task_manager index for more work
 - `index` - **deprecated** The name of the index that the task_manager will use. This is deprecated, and will be removed starting in 8.0
 - `max_workers` - **deprecated** The maximum number of tasks a Kibana will run concurrently (defaults to 10)
-- `capacity` - The maximum capacity Kibana can handle concurrently (defaults to 20)
+- `capacity` - The maximum capacity Kibana can handle concurrently (defaults to 20), or `auto` to let each node size it from its heap and container memory, between `adaptive_capacity.min_capacity` and `adaptive_capacity.max_capacity`. See [Adaptive capacity](#adaptive-capacity).
+- `adaptive_capacity.min_capacity` - Lowest capacity a node reports with `capacity: auto`, even under memory pressure (defaults to 5).
+- `adaptive_capacity.max_capacity` - Highest capacity a node reports with `capacity: auto`, regardless of headroom (defaults to 50).
 - `version_conflict_threshold` - The threshold percentage for workers experiencing version conflicts for shifting the polling interval
 - `monitored_aggregated_stats_refresh_rate` - Dictates how often we refresh the "Cold" metrics. Learn More: [./MONITORING](./MONITORING.MD)
 - `monitored_stats_running_average_window`- Dictates the size of the window used to calculate the running average of various "Hot" stats. Learn More: [./MONITORING](./MONITORING.MD)

@@ -101,7 +101,8 @@ export async function claimAvailableTasksMget(
 }
 
 async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershipResult> {
-  const { getCapacity, claimOwnershipUntil, batches, events$, taskStore, taskPartitioner } = opts;
+  const { getCapacity, getMemoryGate, claimOwnershipUntil, batches, events$, taskStore } = opts;
+  const { taskPartitioner } = opts;
   const { definitions, excludedTaskTypes, taskMaxAttempts } = opts;
   const logger = createWrappedLogger({ logger: opts.logger, tags: [claimAvailableTasksMget.name] });
   const initialCapacity = getCapacity();
@@ -162,19 +163,55 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   // apply limited concurrency limits (TODO: can currently starve other tasks)
   const candidateTasks = selectTasksByCapacity({ definitions, tasks: currentTasks, batches });
 
-  // apply capacity constraint to candidate tasks
+  // apply capacity and, with adaptive capacity, heap budget constraints to candidate tasks
   const tasksToRun: TaskClaimCandidate[] = [];
   const leftOverTasks: TaskClaimCandidate[] = [];
   const tasksWithMalformedData: TaskClaimCandidate[] = [];
+  const memoryGate = getMemoryGate?.();
 
   let capacityAccumulator = 0;
+  let memoryAccumulator = 0;
+  let memoryLimited = 0;
+  let seeded = 0;
   for (const task of candidateTasks) {
     const taskCost = getTaskCost(task, definitions);
-    if (capacityAccumulator + taskCost <= initialCapacity) {
+    // A document written by any node that ran this task before carries its estimate,
+    // so a fresh node budgets it from history instead of the cold-start default.
+    if (memoryGate && task.memoryEstimate) {
+      if (memoryGate.seed(task.id, task.taskType, taskCost, task.memoryEstimate)) seeded++;
+    }
+    const taskBytes = memoryGate ? memoryGate.estimateBytes(task.id, task.taskType, taskCost) : 0;
+    const fitsCapacity = capacityAccumulator + taskCost <= initialCapacity;
+    // Light runs are bounded by capacity alone, so cheap work keeps flowing while
+    // a heavy herd holds the heap budget. A heavy candidate is admitted only when
+    // its estimate fits the budget left by the running tasks; one that does not
+    // fit waits, and gets its turn as soon as the pool drains enough. A run that
+    // would not fit an idle node at all is never admitted: on a small heap that
+    // is the difference between a visible backlog and a process that dies.
+    // Light means cheap as a whole: a run that streams 40 MB through buffers
+    // outside the heap is not light however small its heap share.
+    const isLight =
+      memoryGate !== undefined &&
+      (memoryGate.isLight
+        ? memoryGate.isLight(task.id, task.taskType, taskCost)
+        : taskBytes <= memoryGate.lightTaskBytes);
+    const fitsMemory =
+      !memoryGate || isLight || memoryAccumulator + taskBytes <= memoryGate.budgetBytes;
+    if (fitsCapacity && fitsMemory) {
       tasksToRun.push(task);
       capacityAccumulator += taskCost;
+      if (!isLight) {
+        memoryAccumulator += taskBytes;
+      }
+    } else if (fitsCapacity) {
+      // Over the heap budget: skip this task but keep looking, lighter candidates
+      // may still fit.
+      leftOverTasks.push(task);
+      memoryLimited++;
     } else {
       leftOverTasks.push(task);
+      // Don't claim further tasks even if smaller tasks are next: leave room for
+      // this one in the next cycle instead of starving it.
       capacityAccumulator = initialCapacity;
     }
   }
@@ -256,7 +293,14 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   await markUnreadableTasksAsFailed({ taskStore, tasks: unreadableTasks, logger });
 
   // TODO: need a better way to generate stats
-  const message = `task claimer claimed: ${fullTasksToRun.length}; stale: ${staleTasks.length}; conflicts: ${conflicts}; missing: ${missingTasks.length}; capacity reached: ${leftOverTasks.length}; updateErrors: ${bulkUpdateErrors}; getErrors: ${bulkGetErrors}; malformed data errors: ${tasksWithMalformedData.length}`;
+  const memoryMessage = memoryGate
+    ? `; heap budget: ${Math.round(
+        memoryGate.budgetBytes / (1024 * 1024)
+      )} MB, planned: ${Math.round(memoryAccumulator / (1024 * 1024))} MB, reserved: ${Math.round(
+        memoryGate.reservedBytes / (1024 * 1024)
+      )} MB, heap limited: ${memoryLimited}, seeded: ${seeded}`
+    : '';
+  const message = `task claimer claimed: ${fullTasksToRun.length}; stale: ${staleTasks.length}; conflicts: ${conflicts}; missing: ${missingTasks.length}; capacity reached: ${leftOverTasks.length}; updateErrors: ${bulkUpdateErrors}; getErrors: ${bulkGetErrors}; malformed data errors: ${tasksWithMalformedData.length}${memoryMessage}`;
   logger.debug(message);
 
   // build results

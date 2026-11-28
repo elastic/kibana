@@ -68,6 +68,10 @@ const config = {
   auto_calculate_default_ech_capacity: false,
   api_key_type: ApiKeyType.ES,
   grant_uiam_api_keys: false,
+  adaptive_capacity: {
+    min_capacity: 5,
+    max_capacity: 50,
+  },
   claim_nudge: {
     enabled: true,
   },
@@ -89,6 +93,7 @@ const getStatsWithTimestamp = ({
         timestamp,
         value: {
           capacity: { config: 10, as_cost: 20, as_workers: 10 },
+          adaptive_capacity: null,
           claim_strategy: 'mget',
           request_capacity: 1000,
           monitored_aggregated_stats_refresh_rate: 5000,

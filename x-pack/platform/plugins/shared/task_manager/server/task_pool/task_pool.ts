@@ -49,6 +49,18 @@ interface TaskPoolOpts {
   definitions: TaskTypeDictionary;
   logger: Logger;
   strategy: string;
+  /** Called when a run leaves the pool, however it ended. */
+  onTaskEnded?: (task: RunningTaskSnapshot) => void;
+}
+
+/** A run currently held by the pool. */
+export interface RunningTaskSnapshot {
+  readonly executionId: string;
+  readonly taskId: string;
+  readonly taskType: string;
+  readonly cost: number;
+  /** Bytes the run reserved through its memory reporter; absent or 0 when none. */
+  readonly reservedBytes?: number;
 }
 
 export enum TaskPoolRunResult {
@@ -73,6 +85,7 @@ export class TaskPool {
   private load$ = new Subject<TaskManagerStat>();
   private definitions: TaskTypeDictionary;
   private capacityCalculator: ICapacity;
+  private readonly onTaskEnded?: (task: RunningTaskSnapshot) => void;
 
   /**
    * Creates an instance of TaskPool.
@@ -85,6 +98,7 @@ export class TaskPool {
   constructor(opts: TaskPoolOpts) {
     this.logger = opts.logger;
     this.definitions = opts.definitions;
+    this.onTaskEnded = opts.onTaskEnded;
 
     switch (opts.strategy) {
       case CLAIM_STRATEGY_MGET:
@@ -111,6 +125,19 @@ export class TaskPool {
    */
   public getCurrentTasksInPool(): string[] {
     return Array.from(this.tasksInPool.keys());
+  }
+
+  /**
+   * Gets the runs currently in the pool with their type and cost.
+   */
+  public getRunningTasks(): RunningTaskSnapshot[] {
+    return Array.from(this.tasksInPool, ([executionId, runner]) => ({
+      executionId,
+      taskId: runner.id,
+      taskType: runner.taskType,
+      cost: runner.cost,
+      reservedBytes: runner.memoryReservationBytes,
+    }));
   }
 
   /**
@@ -249,12 +276,24 @@ export class TaskPool {
         }
       })
       .then(() => {
-        this.tasksInPool.delete(taskRunner.taskExecutionId);
+        this.removeFromPool(taskRunner);
       })
       .catch(() => {});
   }
 
+  private removeFromPool(task: TaskRunner) {
+    if (this.tasksInPool.delete(task.taskExecutionId)) {
+      this.onTaskEnded?.({
+        executionId: task.taskExecutionId,
+        taskId: task.id,
+        taskType: task.taskType,
+        cost: task.cost,
+      });
+    }
+  }
+
   private handleFailureOfMarkAsRunning(task: TaskRunner, err: unknown) {
+    // The run never executed, so it is not an observation for the memory estimator.
     this.tasksInPool.delete(task.taskExecutionId);
     this.logger.error(`Failed to mark Task ${task.toString()} as running: ${getErrorMessage(err)}`);
   }
@@ -285,7 +324,7 @@ export class TaskPool {
     (async () => {
       try {
         this.logger.debug(`Cancelling task ${task.toString()}.`);
-        this.tasksInPool.delete(task.taskExecutionId);
+        this.removeFromPool(task);
         await task.cancel();
       } catch (err) {
         this.logger.error(`Failed to cancel task ${task.toString()}: ${err}`);

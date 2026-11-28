@@ -12,6 +12,7 @@ import {
   ADJUST_THROUGHPUT_INTERVAL,
   INTERVAL_AFTER_BLOCK_EXCEPTION,
   calculateStartingCapacity,
+  isAdaptiveCapacity,
   countErrors,
   createCapacityScan,
   createPollIntervalScan,
@@ -90,6 +91,17 @@ describe('createManagedConfiguration()', () => {
     expect(logger.warn).toHaveBeenCalledWith(
       `Both \"xpack.task_manager.capacity\" and \"xpack.task_manager.max_workers\" configs are set, max_workers will be ignored in favor of capacity and the setting should be removed.`
     );
+  });
+
+  test('uses the adaptive ceiling as starting capacity when capacity is auto', async () => {
+    const config = {
+      capacity: 'auto',
+      adaptive_capacity: { min_capacity: 5, max_capacity: 40 },
+      poll_interval: 2,
+    } as TaskManagerConfig;
+    expect(isAdaptiveCapacity(config)).toBe(true);
+    expect(calculateStartingCapacity(config, logger, DEFAULT_CAPACITY)).toBe(40);
+    expect(isAdaptiveCapacity({ capacity: 10 } as TaskManagerConfig)).toBe(false);
   });
 
   test(`skips errors that aren't about too many requests`, async () => {

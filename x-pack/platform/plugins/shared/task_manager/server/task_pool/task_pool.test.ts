@@ -54,6 +54,28 @@ describe('TaskPool', () => {
     jest.useRealTimers();
   });
 
+  test('getRunningTasks carries the memory reservation of each run', async () => {
+    const pool = new TaskPool({
+      capacity$: of(10),
+      definitions,
+      logger,
+      strategy: CLAIM_STRATEGY_MGET,
+    });
+    const reserved = mockTask({ memoryReservationBytes: 128 });
+    await pool.run([reserved, mockTask()]);
+    expect(pool.getRunningTasks()).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          executionId: reserved.taskExecutionId,
+          taskId: reserved.id,
+          cost: TaskCost.Normal,
+          reservedBytes: 128,
+        }),
+        expect.objectContaining({ reservedBytes: 0 }),
+      ])
+    );
+  });
+
   describe('uses the correct capacity calculator based on the strategy', () => {
     let costCapacitySpy: jest.SpyInstance;
     beforeEach(() => {

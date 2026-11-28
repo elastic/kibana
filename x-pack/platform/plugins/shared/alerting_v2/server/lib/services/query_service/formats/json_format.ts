@@ -15,6 +15,7 @@ import type {
   EsqlResponseFormat,
   EsqlRowBatchSource,
 } from './types';
+import { toTransportOptions } from './types';
 
 export const NON_STREAMING_MAX_ROWS = 1000;
 
@@ -37,7 +38,7 @@ export const jsonFormat = {
     request: EsqlFormatRequest,
     options: EsqlFormatRequestOptions
   ): Promise<EsqlRowBatchSource> {
-    const response = await esClient.esql.query(request, options);
+    const response = await esClient.esql.query(request, toTransportOptions(options));
     return { batches: yieldRowSlices(response) };
   },
 } satisfies EsqlResponseFormat;

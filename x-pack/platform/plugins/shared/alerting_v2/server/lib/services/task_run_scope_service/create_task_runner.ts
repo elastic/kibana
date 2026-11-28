@@ -28,6 +28,7 @@ export interface AlertingTaskRunner {
     signal: RunContext['signal'];
     executionUuid: RunContext['executionUuid'];
     setCustomTaskRunEventFields: RunContext['setCustomTaskRunEventFields'];
+    memory?: RunContext['memory'];
   }): Promise<RunResult>;
 }
 
@@ -141,6 +142,7 @@ export function createTaskRunnerFactory({
       fakeRequest,
       executionUuid,
       setCustomTaskRunEventFields,
+      memory,
     }: RunContext) => ({
       run: async () => {
         if (requiresFakeRequest && !fakeRequest) {
@@ -172,6 +174,7 @@ export function createTaskRunnerFactory({
             signal,
             executionUuid,
             setCustomTaskRunEventFields,
+            ...(memory ? { memory } : {}),
           });
         } finally {
           await scope.unbindAllAsync();

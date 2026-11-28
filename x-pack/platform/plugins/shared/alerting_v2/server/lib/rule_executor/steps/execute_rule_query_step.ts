@@ -75,6 +75,12 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
       });
 
       try {
+        // Streamed batches live outside the V8 heap, where Task Manager cannot see
+        // them: report what has been received so far, and once the first batch has
+        // shown the row size, reserve what the row limit could still bring.
+        const { memory } = input;
+        let bytesReceived = 0;
+        let reserved = false;
         const esqlRowBatchStream = step.queryService.executeQueryStream({
           query: boundedQuery,
           filter: queryPayload.filter,
@@ -82,6 +88,14 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
           abortSignal: input.executionContext.signal,
           maxResponseSize: step.maxQueryResponseSize,
           format,
+          ...(memory
+            ? {
+                onBytes: (bytes: number) => {
+                  bytesReceived += bytes;
+                  memory.report(bytesReceived);
+                },
+              }
+            : {}),
         });
 
         let hasRealBatch = false;
@@ -94,6 +108,15 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
 
         for await (const batch of withAtLeastOne<EsqlRowBatch>(trackedStream, [])) {
           totalRows += batch.length;
+          if (memory && !reserved && bytesReceived > 0 && totalRows > 0) {
+            reserved = true;
+            memory.reserve(
+              Math.min(
+                step.maxQueryResponseSize,
+                Math.ceil((bytesReceived / totalRows) * queryRowLimit)
+              )
+            );
+          }
 
           const counters: Partial<Record<RuleExecutionCounter, number>> = {
             [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: batch.length,

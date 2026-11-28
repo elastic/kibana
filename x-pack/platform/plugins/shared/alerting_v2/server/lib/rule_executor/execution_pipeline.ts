@@ -44,6 +44,8 @@ export interface RuleExecutionPipelineInput {
   readonly abortSignal: AbortSignal;
   /** Bound per-execution logger from the task runner. */
   readonly logger: LoggerServiceContract;
+  /** Task Manager's memory reporter for this run, when it was started by Task Manager. */
+  readonly memory?: RuleExecutionInput['memory'];
 }
 
 export interface RuleExecutionPipelineResult {
@@ -80,6 +82,7 @@ export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
       executionId: rawInput.executionUuid,
       scheduledAt: rawInput.scheduledAt,
       executionContext,
+      ...(rawInput.memory ? { memory: rawInput.memory } : {}),
     };
 
     let pipelineState: RulePipelineState = { input, logger };
