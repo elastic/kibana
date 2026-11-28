@@ -143,6 +143,7 @@
     "x-pack/platform/test/fleet_api_integration/apis/fixtures/package_verification/packages/zips/wrong_key-1.0.0.zip": "'wrong_key-1.0.0.zip' should be snake_case",
     "x-pack/platform/test/fleet_api_integration/apis/fixtures/package_verification/packages/zips/wrong_key-1.0.0.zip.sig": "'wrong_key-1.0.0.zip.sig' should be snake_case",
     "x-pack/platform/test/fleet_api_integration/apis/fixtures/test_packages/abnormal_security/1.12.0/data_stream/audit/fields/base-fields.yml": "'base-fields.yml' should be snake_case",
+    "x-pack/platform/test/fleet_api_integration/apis/fixtures/test_packages/abnormal_security/1.12.1/data_stream/audit/fields/base-fields.yml": "'base-fields.yml' should be snake_case",
     "x-pack/platform/test/fleet_api_integration/apis/fixtures/test_packages/all_assets/0.1.0/kibana/slo_template/nginx-availability.json": "'nginx-availability.json' should be snake_case",
     "x-pack/platform/test/fleet_api_integration/apis/fixtures/test_packages/all_assets/0.2.0/kibana/slo_template/nginx-availability.json": "'nginx-availability.json' should be snake_case",
     "x-pack/platform/test/fleet_api_integration/apis/fixtures/test_packages/apm/apm-8.7.0.zip": "'apm-8.7.0.zip' should be snake_case",
