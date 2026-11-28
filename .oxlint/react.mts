@@ -49,7 +49,9 @@ export const reactRules: DummyRuleMap = {
   'react/jsx-pascal-case': 'error',
   // 'react/jsx-uses-react': 'error',
   // 'react/jsx-uses-vars': 'error',
-  'react/no-danger': 'error',
+  // oxlint flags `dangerouslySetInnerHTML` on any JSX element, while ESLint only flags DOM
+  // elements; keep it in ESLint.
+  // 'react/no-danger': 'error',
   'react/no-is-mounted': 'error',
   'react/no-unescaped-entities': 'error',
   'react/no-will-update-set-state': 'error',

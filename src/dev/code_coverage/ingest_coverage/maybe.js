@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint new-cap: 0 */
-/* eslint no-unused-vars: 0 */
+/* eslint-disable new-cap */
+/* eslint-disable no-unused-vars */
 
 /**
  * Just monad used for valid values

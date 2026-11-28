@@ -185,6 +185,7 @@ export const teamOverrides: OxlintOverride[] = [
       'x-pack/platform/plugins/shared/cases/**/*.{ts,tsx}',
       'src/platform/packages/shared/kbn-cell-actions/**/*.{ts,tsx}',
     ],
+    excludeFiles: ['x-pack/solutions/security/packages/kbn-test-suites-xpack-security-endpoint/**'],
     rules: {
       '@typescript-eslint/no-this-alias': 'error',
       '@typescript-eslint/no-explicit-any': 'error',
@@ -208,6 +209,7 @@ export const teamOverrides: OxlintOverride[] = [
       'x-pack/solutions/security/packages/data-stream-adapter/**/*.{js,mjs,ts,tsx}',
       'src/platform/packages/shared/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
     ],
+    excludeFiles: ['x-pack/solutions/security/packages/kbn-test-suites-xpack-security-endpoint/**'],
     rules: {
       'accessor-pairs': 'error',
       'array-callback-return': 'error',

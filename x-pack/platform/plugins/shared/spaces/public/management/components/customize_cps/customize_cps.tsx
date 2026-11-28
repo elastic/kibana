@@ -6,8 +6,7 @@
  */
 
 import { EuiDescribedFormGroup, EuiFormRow, EuiPanel, EuiTitle } from '@elastic/eui';
-import { type FC, useCallback } from 'react';
-import React from 'react';
+import React, { type FC, useCallback } from 'react';
 
 import type { CPSPluginStart } from '@kbn/cps/public';
 import { ProjectPickerContent, useFetchProjects } from '@kbn/cps-utils';

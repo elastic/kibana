@@ -42,6 +42,9 @@ module.exports = {
 
   rules: {
     'react/jsx-no-duplicate-props': ['error', { ignoreCase: true }],
+    // oxlint flags `dangerouslySetInnerHTML` on any JSX element, while ESLint only flags DOM
+    // elements; keep it in ESLint so the scope stays the same.
+    'react/no-danger': 'error',
     'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
     'react-hooks/exhaustive-deps': 'error', // Checks effect dependencies
     'jsx-a11y/accessible-emoji': 'error',
