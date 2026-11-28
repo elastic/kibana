@@ -106,6 +106,8 @@ export {
   extractIocsResponseSchema,
   enrichReportCoreBodySchema,
   ENRICH_REPORT_CORE_MAX_BODY_BYTES,
+  ENRICH_REPORT_CORE_MAX_BEHAVIORS,
+  ENRICH_REPORT_CORE_MAX_ARTIFACTS,
   enrichReportCoreResponseSchema,
   extractDiamondBodySchema,
   EXTRACT_DIAMOND_MAX_BODY_BYTES,

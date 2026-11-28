@@ -11,6 +11,8 @@ import type { ScopedModel } from '@kbn/agent-builder-server';
 import { isContextLengthExceededError } from '@kbn/inference-common';
 import { z, lazySchema } from '@kbn/zod/v4';
 import {
+  ENRICH_REPORT_CORE_MAX_ARTIFACTS,
+  ENRICH_REPORT_CORE_MAX_BEHAVIORS,
   THREAT_CATEGORIES,
   THREAT_REGIONS,
   type SeverityLevel,
@@ -42,6 +44,11 @@ const closedSet = <T extends string>(allowed: readonly T[], max: number) =>
     .array(z.string())
     .transform((values) => values.filter((value): value is T => allowed.includes(value as T)))
     .transform((values) => [...new Set(values)].slice(0, max));
+
+// No `.max()` on model-output arrays: as `maxItems` it makes Gemini on Vertex AI answer 400 to
+// this schema (as in #297860). `enrichReportCore` caps behaviors/artifacts at the response
+// schema's limits, and its `approvedIds` sets keep only ids from the batch that call reviewed,
+// so repeats and out-of-batch ids are dropped.
 
 const ATTACK_TECHNIQUE_ID_PATTERN = /^T\d{4}(?:\.\d{3})?$/;
 
@@ -109,17 +116,25 @@ export const reportCoreModelOutputSchema = lazySchema(() =>
         .transform((value) => value.slice(0, 2_000))
         .optional(),
     }),
-    approved_ioc_candidate_ids: z.array(z.number().int().min(0).max(4_999)).max(300),
-    behaviors: z.array(behaviorSchema).max(100),
-    artifacts: z.array(artifactSchema).max(200),
+    approved_ioc_candidate_ids: z.array(z.number().int().min(0).max(4_999)),
+    behaviors: z.array(behaviorSchema),
+    artifacts: z.array(artifactSchema),
   })
 );
 
-const iocAdjudicationOnlySchema = lazySchema(() =>
+export const iocAdjudicationOnlySchema = lazySchema(() =>
   z.object({
-    approved_ioc_candidate_ids: z.array(z.number().int().min(0).max(4_999)).max(300),
+    approved_ioc_candidate_ids: z.array(z.number().int().min(0).max(4_999)),
   })
 );
+
+const capWithWarning = <T>(values: T[], max: number, field: string, logger: Logger): T[] => {
+  if (values.length <= max) {
+    return values;
+  }
+  logger.warn(`enrich_report_core returned ${values.length} ${field}; keeping the first ${max}`);
+  return values.slice(0, max);
+};
 
 export type ReportCoreModelOutput = z.infer<typeof reportCoreModelOutputSchema>;
 
@@ -474,12 +489,22 @@ export const enrichReportCore = async (
       score: severityScore(parsed.severity.level),
       ...(parsed.severity.rationale ? { rationale: parsed.severity.rationale } : {}),
     },
-    behaviors: parsed.behaviors.map((behavior) => ({
+    behaviors: capWithWarning(
+      parsed.behaviors,
+      ENRICH_REPORT_CORE_MAX_BEHAVIORS,
+      'behaviors',
+      logger
+    ).map((behavior) => ({
       ...behavior,
       id: behaviorId(behavior),
       llm_confidence: behavior.confidence,
     })),
-    artifacts: parsed.artifacts,
+    artifacts: capWithWarning(
+      parsed.artifacts,
+      ENRICH_REPORT_CORE_MAX_ARTIFACTS,
+      'artifacts',
+      logger
+    ),
     ...adjudicated,
     context: contextMetadata,
     model_id: model.connector.connectorId,
