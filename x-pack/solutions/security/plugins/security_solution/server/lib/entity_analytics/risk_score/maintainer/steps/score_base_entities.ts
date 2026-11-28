@@ -81,6 +81,12 @@ export interface Phase1BaseScoringSummary extends StepResult {
   entityCreationsFailed: number;
 }
 
+/** A scored page plus the run's stamped-or-derived decision, which later steps must follow. */
+export interface BaseScoredEntityPage extends ScoredEntityPage {
+  /** Whether base scoring read this run's EUIDs from the stamped field; the same for every page of a run. */
+  stamped: boolean;
+}
+
 interface EuidPageBounds {
   lower: string | undefined;
   upper: string;
@@ -120,7 +126,7 @@ export const calculateBaseEntityScores = async function* ({
   abortSignal,
   createMissingEntities,
   pageTimings,
-}: ScoreBaseEntitiesParams): AsyncGenerator<ScoredEntityPage> {
+}: ScoreBaseEntitiesParams): AsyncGenerator<BaseScoredEntityPage> {
   let afterKey: Record<string, string> | undefined;
   let previousPageUpperBound: string | undefined;
 
@@ -186,7 +192,7 @@ export const calculateBaseEntityScores = async function* ({
         })
       );
 
-      yield pageTimings.timeSync(['modifiers'], () =>
+      const scoredPage = pageTimings.timeSync(['modifiers'], () =>
         applyBaseScoreModifiers({
           scores,
           entities,
@@ -196,6 +202,7 @@ export const calculateBaseEntityScores = async function* ({
           watchlistConfigs,
         })
       );
+      yield { ...scoredPage, stamped };
     }
   } while (afterKey !== undefined);
 };
@@ -251,6 +258,7 @@ export const scoreBaseEntities = async ({
             alertFilters: params.alertFilters,
             logger: params.logger,
             missingScores,
+            stamped: page.stamped,
             abortSignal: params.abortSignal,
           })
         );

@@ -67,6 +67,7 @@ describe('createMissingEntities', () => {
     entityType: EntityType.user,
     alertsIndex: '.alerts-security.alerts-default',
     alertFilters: [],
+    stamped: false,
   };
 
   beforeEach(() => {
@@ -257,5 +258,80 @@ describe('createMissingEntities', () => {
       { euid: 'user:idp@okta', reason: 'user_not_local_namespace' },
     ]);
     expect(result.failed).toEqual([{ euid: 'user:mismatch@host1@local', reason: 'euid_mismatch' }]);
+  });
+
+  describe('alert lookup mode', () => {
+    const missingScores = [buildScore('user:alice@host-1@local')];
+
+    beforeEach(() => {
+      esClient.search = jest
+        .fn()
+        .mockResolvedValue({ aggregations: { by_entity_id: { buckets: [] } } });
+    });
+
+    it('looks representative alerts up by the stored entity ID when base scoring used it', async () => {
+      await createMissingEntities({
+        esClient,
+        crudClient,
+        logger,
+        ...baseParams,
+        stamped: true,
+        missingScores,
+      });
+
+      expect(esClient.search).toHaveBeenCalledTimes(1);
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.not.objectContaining({ runtime_mappings: expect.anything() }),
+        expect.anything()
+      );
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: expect.objectContaining({
+            bool: expect.objectContaining({
+              filter: [{ terms: { 'kibana.alert.entity.id': ['user:alice@host-1@local'] } }],
+            }),
+          }),
+          aggs: {
+            by_entity_id: expect.objectContaining({
+              terms: {
+                field: 'kibana.alert.entity.id',
+                size: 1,
+                include: ['user:alice@host-1@local'],
+              },
+            }),
+          },
+        }),
+        expect.anything()
+      );
+    });
+
+    it('looks representative alerts up by the derived entity ID when base scoring derived it', async () => {
+      await createMissingEntities({
+        esClient,
+        crudClient,
+        logger,
+        ...baseParams,
+        stamped: false,
+        missingScores,
+      });
+
+      expect(esClient.search).toHaveBeenCalledTimes(1);
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          runtime_mappings: { entity_id: expect.objectContaining({ type: 'keyword' }) },
+          query: expect.objectContaining({
+            bool: expect.objectContaining({
+              filter: [{ terms: { entity_id: ['user:alice@host-1@local'] } }],
+            }),
+          }),
+          aggs: {
+            by_entity_id: expect.objectContaining({
+              terms: { field: 'entity_id', size: 1 },
+            }),
+          },
+        }),
+        expect.anything()
+      );
+    });
   });
 });
