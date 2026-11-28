@@ -37,7 +37,7 @@ const mockUseBindChannel = useBindChannel as jest.MockedFunction<typeof useBindC
 const mockUseUnbindChannel = useUnbindChannel as jest.MockedFunction<typeof useUnbindChannel>;
 
 // AppsSection pulls the whole card + bindings together.
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @kbn/compat/typescript-no-var-requires
 const { AppsSection } = require('.');
 
 const bindChannel = jest.fn().mockResolvedValue(undefined);
