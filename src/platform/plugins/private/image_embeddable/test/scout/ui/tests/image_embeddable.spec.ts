@@ -41,7 +41,7 @@ test.describe('Image embeddable', { tag: '@local-stateful-classic' }, () => {
       await pageObjects.dashboard.openAddPanelFlyout();
       await page.testSubj.click('create-action-Image');
       await expect(page.testSubj.locator('createImageEmbeddableFlyout')).toBeVisible();
-      await page.locator('.euiFilePicker__input').setInputFiles(ELASTIC_LOGO_PATH);
+      await page.locator('input[type="file"]').setInputFiles(ELASTIC_LOGO_PATH);
       await expect(page.testSubj.locator('imageEmbeddableEditorSave')).toBeEnabled({
         timeout: 15_000,
       });
@@ -73,9 +73,7 @@ test.describe('Image embeddable', { tag: '@local-stateful-classic' }, () => {
     await test.step('verify drilldown count and navigate via image click', async () => {
       await pageObjects.dashboard.openPanelContextMenu();
       await expect(
-        page.testSubj
-          .locator('embeddablePanelAction-OPEN_FLYOUT_EDIT_DRILLDOWN')
-          .locator('.euiNotificationBadge')
+        page.testSubj.locator('embeddablePanelAction-OPEN_FLYOUT_EDIT_DRILLDOWN').getByText(/^\d+$/)
       ).toHaveText('1');
       await page.keyboard.press('Escape');
 
