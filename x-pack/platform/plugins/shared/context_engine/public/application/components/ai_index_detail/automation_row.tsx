@@ -16,7 +16,9 @@ import {
   EuiPopover,
   EuiText,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
@@ -76,6 +78,14 @@ export const AutomationRow = ({
   const {
     services: { application },
   } = useKibana();
+  const { euiTheme } = useEuiTheme();
+  // The size of the run button, so the spinner takes its place without moving.
+  const runSlotCss = css({
+    alignItems: 'center',
+    justifyContent: 'center',
+    blockSize: euiTheme.size.l,
+    inlineSize: euiTheme.size.l,
+  });
   const displayName = workflowSummary?.name ?? automation.value;
   const enabled = workflowSummary?.enabled;
   const definition = workflowSummary?.definition;
@@ -144,7 +154,7 @@ export const AutomationRow = ({
         actions={
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
             {isRunning ? (
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem grow={false} css={runSlotCss}>
                 <EuiToolTip content={runningLabel} disableScreenReaderOutput>
                   {runningHref ? (
                     <EuiLink
