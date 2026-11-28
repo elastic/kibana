@@ -604,6 +604,26 @@ describe('discover session API transforms', () => {
       const { sessionState: transformed } = transformDiscoverSessionOut(attributes);
       expect(transformed.tabs[0].sort).toEqual([{ name: '@timestamp', direction: 'desc' }]);
     });
+
+    it.each([
+      { name: 'public', transform: transformDiscoverSessionOut },
+      { name: 'internal', transform: transformInternalDiscoverSessionOut },
+    ])(
+      'defaults a missing tab sort to an empty array in the $name session response',
+      ({ transform }) => {
+        // The raw Saved Objects API persists attributes without schema defaults, so `sort` can be absent.
+        const attributes = {
+          ...discoverSessionAttributes,
+          tabs: discoverSessionAttributes.tabs.map((tab) => {
+            const { sort, ...tabAttributes } = tab.attributes;
+            return { ...tab, attributes: tabAttributes as typeof tab.attributes };
+          }),
+        };
+
+        const { sessionState: transformed } = transform(attributes);
+        expect(transformed.tabs[0].sort).toEqual([]);
+      }
+    );
   });
 
   describe('transform in', () => {
