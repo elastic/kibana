@@ -14,6 +14,7 @@ const mockCloseFlyout = jest.fn();
 const mockCreateWorkflowMigration = jest.fn();
 const mockAddError = jest.fn();
 const mockAddSuccess = jest.fn();
+const mockStartWorkflowMigration = jest.fn();
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
@@ -24,11 +25,31 @@ jest.mock('../../../../common/lib/kibana/kibana_react', () => ({
   useKibana: () => ({
     services: {
       siemMigrations: {
-        workflows: { createWorkflowMigration: mockCreateWorkflowMigration },
+        workflows: {
+          createWorkflowMigration: mockCreateWorkflowMigration,
+          startWorkflowMigration: mockStartWorkflowMigration,
+        },
       },
       notifications: { toasts: { addError: mockAddError, addSuccess: mockAddSuccess } },
     },
   }),
+}));
+
+// The modal loads the AI connectors over http, it is covered by its own tests
+jest.mock('../../../common/components/start_migration_modal', () => ({
+  StartMigrationModal: ({
+    onStartMigrationWithSettings,
+  }: {
+    onStartMigrationWithSettings: (settings: { connectorId: string }) => void;
+  }) => (
+    <div data-test-subj="startMigrationModal">
+      <button
+        type="button"
+        data-test-subj="startMigrationModal-Translate"
+        onClick={() => onStartMigrationWithSettings({ connectorId: 'connector-1' })}
+      />
+    </div>
+  ),
 }));
 
 jest.mock('../../../../common/components/user_profiles/use_get_current_user_profile', () => ({
@@ -69,6 +90,7 @@ describe('WorkflowMigrationDataInputFlyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockCreateWorkflowMigration.mockResolvedValue('migration-1');
+    mockStartWorkflowMigration.mockResolvedValue({ started: true });
   });
 
   it('should show the flyout title', () => {
@@ -180,5 +202,53 @@ describe('WorkflowMigrationDataInputFlyout', () => {
     fireEvent.click(screen.getByTestId('workflowDataFlyoutCloseButton'));
 
     expect(onClose).toHaveBeenCalled();
+  });
+
+  describe('translating the created migration', () => {
+    const openStartModal = async () => {
+      renderFlyout();
+      await uploadStory();
+      await waitFor(() =>
+        expect(screen.getByTestId('workflowDataFlyoutTranslateButton')).toBeEnabled()
+      );
+      fireEvent.click(screen.getByTestId('workflowDataFlyoutTranslateButton'));
+    };
+
+    it('should open the connector modal when the translate button is clicked', async () => {
+      await openStartModal();
+
+      expect(screen.getByTestId('startMigrationModal')).toBeInTheDocument();
+    });
+
+    it('should start the created migration with the chosen connector', async () => {
+      await openStartModal();
+
+      fireEvent.click(screen.getByTestId('startMigrationModal-Translate'));
+
+      await waitFor(() =>
+        expect(mockStartWorkflowMigration).toHaveBeenCalledWith({
+          migrationId: 'migration-1',
+          settings: { connectorId: 'connector-1' },
+        })
+      );
+    });
+
+    it('should close the flyout once the translation started', async () => {
+      await openStartModal();
+
+      fireEvent.click(screen.getByTestId('startMigrationModal-Translate'));
+
+      await waitFor(() => expect(mockCloseFlyout).toHaveBeenCalled());
+    });
+
+    it('should keep the flyout open when the translation could not be started', async () => {
+      mockStartWorkflowMigration.mockRejectedValue(new Error('boom'));
+      await openStartModal();
+
+      fireEvent.click(screen.getByTestId('startMigrationModal-Translate'));
+
+      await waitFor(() => expect(mockAddError).toHaveBeenCalled());
+      expect(mockCloseFlyout).not.toHaveBeenCalled();
+    });
   });
 });

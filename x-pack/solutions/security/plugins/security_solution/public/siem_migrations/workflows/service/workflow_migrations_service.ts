@@ -25,6 +25,7 @@ import { SiemMigrationsServiceBase } from '../../common/service';
 import type { GetMigrationsStatsAllParams, GetMigrationStatsParams } from '../../common/types';
 import { START_STOP_POLLING_SLEEP_SECONDS } from '../../common/constants';
 import type { WorkflowMigrationStats } from '../types';
+import { raiseSuccessToast } from './notification/success_notification';
 
 export const CREATE_MIGRATION_BODY_BATCH_SIZE = 50;
 
@@ -158,7 +159,8 @@ export class SiemWorkflowMigrationsService extends SiemMigrationsServiceBase<Wor
 
     await this.migrationTaskPollingUntil(
       migrationId,
-      ({ status }) => status === SiemMigrationTaskStatus.RUNNING,
+      // the stats are empty (204) while the migration has no workflows
+      (stats) => stats?.status === SiemMigrationTaskStatus.RUNNING,
       { sleepSecs: START_STOP_POLLING_SLEEP_SECONDS, timeoutSecs: 90 }
     );
 
@@ -188,7 +190,7 @@ export class SiemWorkflowMigrationsService extends SiemMigrationsServiceBase<Wor
 
     await this.migrationTaskPollingUntil(
       migrationId,
-      ({ status }) => status !== SiemMigrationTaskStatus.RUNNING,
+      (stats) => stats?.status !== SiemMigrationTaskStatus.RUNNING,
       { sleepSecs: START_STOP_POLLING_SLEEP_SECONDS, timeoutSecs: 90 }
     );
 
@@ -220,8 +222,8 @@ export class SiemWorkflowMigrationsService extends SiemMigrationsServiceBase<Wor
     return api.getWorkflowMigrationAllStats(params);
   }
 
-  protected sendFinishedMigrationNotification(_taskStats: WorkflowMigrationStats) {
-    // The completion toast is added together with the Translated workflows page.
+  protected sendFinishedMigrationNotification(taskStats: WorkflowMigrationStats) {
+    raiseSuccessToast(taskStats, this.core);
   }
 
   /** Deletes a workflow migration by its ID, refreshing the stats to remove it from the list */

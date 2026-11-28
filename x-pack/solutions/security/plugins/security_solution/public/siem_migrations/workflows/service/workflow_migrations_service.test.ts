@@ -225,6 +225,15 @@ describe('SiemWorkflowMigrationsService', () => {
 
       expect(result).toEqual({ stopped: true });
     });
+
+    it('should stop the migration when the stats are empty (204) because the migration has no workflows', async () => {
+      mockApi.stopWorkflowMigration.mockResolvedValue({ stopped: true });
+      mockApi.getWorkflowMigrationStats.mockResolvedValue(undefined as never);
+
+      await expect(service.stopWorkflowMigration({ migrationId: 'migration-1' })).resolves.toEqual({
+        stopped: true,
+      });
+    });
   });
 
   describe('addWorkflowsToMigration', () => {

@@ -137,6 +137,13 @@ export const startMigrationFromFlyout = () => {
   cy.get(SELECTORS.UPLOAD_RULES_FLYOUT).should('not.exist');
 };
 
+export const startWorkflowMigrationFromFlyout = () => {
+  cy.get(SELECTORS.WORKFLOWS_FLYOUT_TRANSLATE_BTN).should('not.be.disabled').click();
+  cy.get(SELECTORS.START_MIGRATION_MODAL.START_MIGRATION_BTN).should('not.be.disabled');
+  cy.get(SELECTORS.START_MIGRATION_MODAL.START_MIGRATION_BTN).click();
+  cy.get(SELECTORS.UPLOAD_WORKFLOWS_FLYOUT).should('not.exist');
+};
+
 export const startDashboardMigrationFromFlyout = () => {
   cy.get(SELECTORS.START_MIGRATION_FROM_FLYOUT_BTN).should('not.be.disabled');
   cy.get(SELECTORS.START_MIGRATION_FROM_FLYOUT_BTN).click();

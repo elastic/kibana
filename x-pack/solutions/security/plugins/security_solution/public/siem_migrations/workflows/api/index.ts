@@ -11,12 +11,15 @@ export {
   deleteWorkflowMigration,
   getWorkflowMigrationAllStats,
   getWorkflowMigrationStats,
+  getWorkflowMigrationTranslationStats,
+  getWorkflowMigrationWorkflows,
   startWorkflowMigration,
   stopWorkflowMigration,
   updateWorkflowMigration,
 } from './migrations';
 export type {
   GetWorkflowMigrationAllStatsParams,
+  GetWorkflowMigrationWorkflowsParams,
   StartWorkflowsMigrationParams,
   StopWorkflowMigrationParams,
 } from './migrations';

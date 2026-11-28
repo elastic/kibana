@@ -6,11 +6,29 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { WorkflowMigrationResultPanel } from './migration_result_panel';
 import type { WorkflowMigrationStats } from '../../types';
 import { SiemMigrationTaskStatus } from '../../../../../common/siem_migrations/constants';
 import { TestProviders } from '../../../../common/mock';
+import * as api from '../../api';
+
+jest.mock('../../api');
+
+const mockedApi = api as jest.Mocked<typeof api>;
+
+const mockTranslationStats = (
+  stats: Awaited<ReturnType<typeof api.getWorkflowMigrationTranslationStats>>
+) => mockedApi.getWorkflowMigrationTranslationStats.mockResolvedValue(stats);
+
+const translationStats = {
+  id: 'migration-1',
+  items: {
+    total: 10,
+    success: { total: 6, result: { full: 1, partial: 2, untranslatable: 3 }, installable: 3 },
+    failed: 4,
+  },
+} as Awaited<ReturnType<typeof api.getWorkflowMigrationTranslationStats>>;
 
 const getStats = (overrides: Partial<WorkflowMigrationStats> = {}): WorkflowMigrationStats => ({
   id: 'migration-1',
@@ -32,6 +50,11 @@ const renderPanel = (
   });
 
 describe('WorkflowMigrationResultPanel', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+    mockTranslationStats(translationStats);
+  });
+
   it('should show the migration name and the complete badge', () => {
     renderPanel();
 
@@ -65,8 +88,49 @@ describe('WorkflowMigrationResultPanel', () => {
     const onToggleCollapsed = jest.fn();
     renderPanel(getStats(), { isCollapsed: true, onToggleCollapsed });
 
-    fireEvent.click(screen.getByText('Translation complete'));
+    fireEvent.click(screen.getByText('My Tines migration'));
 
-    expect(onToggleCollapsed).toHaveBeenCalled();
+    expect(onToggleCollapsed).toHaveBeenCalledWith(false);
+  });
+
+  describe('translation summary', () => {
+    it.each([
+      ['Translated', '1'],
+      ['Partially translated', '2'],
+      ['Not translated', '3'],
+      ['Failed', '4'],
+    ])('should count the workflows that are "%s"', async (status, count) => {
+      renderPanel();
+
+      expect(await screen.findByTestId(`translationStatusCount-${status}`)).toHaveTextContent(
+        count
+      );
+    });
+
+    it('should not show the summary when the migration has no translation stats yet', async () => {
+      mockTranslationStats(undefined);
+      renderPanel();
+
+      await waitFor(() =>
+        expect(mockedApi.getWorkflowMigrationTranslationStats).toHaveBeenCalled()
+      );
+      expect(screen.queryByTestId('translationResultsChart')).not.toBeInTheDocument();
+    });
+
+    it('should keep the link to the translated workflows when there are no translation stats', async () => {
+      mockTranslationStats(undefined);
+      renderPanel();
+
+      expect(await screen.findByTestId('viewTranslatedWorkflowsButton')).toBeInTheDocument();
+    });
+  });
+
+  it('should collapse and expand with the chevron button', () => {
+    const onToggleCollapsed = jest.fn();
+    renderPanel(getStats(), { isCollapsed: false, onToggleCollapsed });
+
+    fireEvent.click(screen.getByTestId('collapseButton'));
+
+    expect(onToggleCollapsed).toHaveBeenCalledWith(true);
   });
 });

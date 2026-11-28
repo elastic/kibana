@@ -16,6 +16,8 @@ import { SecurityPageName } from '../../../app/types';
 import { UnknownMigration } from '../../common/components';
 import { MigrationSelectorRow } from '../../common/components/migration_selector';
 import { useMigrationAppHeaderProps } from '../../common/hooks/use_migration_app_header_props';
+import { MigrationProgressPanel } from '../../common/components/migration_panels/migration_progress_panel';
+import { MigrationWorkflowsTable } from '../components/workflows_table';
 import { MigrationReadyPanel } from '../components/migration_status_panels/migration_ready_panel';
 import { useLatestStats } from '../service/hooks/use_latest_stats';
 import { EmptyMigrationWorkflowsPage } from './empty';
@@ -70,6 +72,18 @@ export const MigrationWorkflowsPage: React.FC<MigrationWorkflowsPageProps> = Rea
 
       return (
         <>
+          {migrationStats.status === SiemMigrationTaskStatus.RUNNING && (
+            <>
+              <EuiSpacer size="m" />
+              <MigrationProgressPanel migrationStats={migrationStats} migrationType="workflow" />
+            </>
+          )}
+          {migrationStats.status === SiemMigrationTaskStatus.FINISHED && (
+            <>
+              <EuiSpacer size="m" />
+              <MigrationWorkflowsTable migrationStats={migrationStats} />
+            </>
+          )}
           {[
             SiemMigrationTaskStatus.READY,
             SiemMigrationTaskStatus.INTERRUPTED,

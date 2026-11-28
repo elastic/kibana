@@ -6,18 +6,11 @@
  */
 
 import React from 'react';
-
 import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/css';
-import type { DashboardMigrationDashboard } from '../../../../../common/siem_migrations/model/dashboard_migration.gen';
-import {
-  MigrationTranslationResult,
-  SiemMigrationStatus,
-} from '../../../../../common/siem_migrations/constants';
-import {
-  convertTranslationResultIntoText,
-  useResultVisColors,
-} from '../../../common/utils/translation_results';
+import { MigrationTranslationResult } from '../../../../../common/siem_migrations/constants';
+import type { MigrationTranslationResult as MigrationTranslationResultType } from '../../../../../common/siem_migrations/model/common.gen';
+import { convertTranslationResultIntoText, useResultVisColors } from '../../utils';
 import * as i18n from './translations';
 
 const statusTextWrapperClassName = css`
@@ -25,21 +18,34 @@ const statusTextWrapperClassName = css`
   display: inline-grid;
 `;
 
-interface StatusBadgeProps {
-  dashboard: DashboardMigrationDashboard;
+export interface StatusBadgeProps {
+  /** The item was installed, it has an Elastic counterpart */
+  isInstalled: boolean;
+  /** The translation of the item failed */
+  isFailed: boolean;
+  translationResult?: MigrationTranslationResultType;
+  /** Why the translation failed, shown on hover, e.g. the first comment of the item */
+  failedMessage?: string;
   'data-test-subj'?: string;
 }
 
+/**
+ * The translation status of a migrated item (rule, dashboard, workflow...): installed, failed,
+ * or the result of the translation. It only knows the facts about the item, not its type.
+ */
 export const StatusBadge: React.FC<StatusBadgeProps> = React.memo(
-  ({ dashboard, 'data-test-subj': dataTestSubj = 'translation-result' }) => {
+  ({
+    isInstalled,
+    isFailed,
+    translationResult = MigrationTranslationResult.UNTRANSLATABLE,
+    failedMessage,
+    'data-test-subj': dataTestSubj = 'translation-result',
+  }) => {
     const colors = useResultVisColors();
-    // Installed
-    if (dashboard.elastic_dashboard?.id) {
+
+    if (isInstalled) {
       return (
-        <EuiToolTip
-          data-test-subj="installedStatusTooltip"
-          content={i18n.DASHBOARD_STATUS_INSTALLED}
-        >
+        <EuiToolTip data-test-subj="installedStatusTooltip" content={i18n.STATUS_INSTALLED}>
           <EuiFlexGroup gutterSize="xs" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiIcon
@@ -49,39 +55,36 @@ export const StatusBadge: React.FC<StatusBadgeProps> = React.memo(
               />
             </EuiFlexItem>
             <EuiFlexItem data-test-subj={dataTestSubj} grow={false}>
-              {i18n.DASHBOARD_STATUS_INSTALLED}
+              {i18n.STATUS_INSTALLED}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiToolTip>
       );
     }
 
-    // Failed
-    if (dashboard.status === SiemMigrationStatus.FAILED) {
-      const tooltipMessage = dashboard.comments?.length
-        ? dashboard.comments[0].message
-        : i18n.DASHBOARD_STATUS_FAILED;
+    if (isFailed) {
       return (
-        <EuiToolTip data-test-subj="failedStatusTooltip" content={tooltipMessage}>
+        <EuiToolTip
+          data-test-subj="failedStatusTooltip"
+          content={failedMessage ?? i18n.STATUS_FAILED}
+        >
           <EuiFlexGroup gutterSize="xs" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiIcon type="warningFill" color="danger" aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem data-test-subj={dataTestSubj} grow={false}>
-              {i18n.DASHBOARD_STATUS_FAILED}
+              {i18n.STATUS_FAILED}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiToolTip>
       );
     }
 
-    const translationResult = dashboard.translation_result ?? 'untranslatable';
     const displayValue = convertTranslationResultIntoText(translationResult);
-    const color = colors[translationResult];
 
     return (
       <EuiToolTip data-test-subj="translationStatusTooltip" content={displayValue}>
-        <EuiHealth color={color} data-test-subj={dataTestSubj}>
+        <EuiHealth color={colors[translationResult]} data-test-subj={dataTestSubj}>
           <div className={statusTextWrapperClassName}>
             <span className="eui-textTruncate">{displayValue}</span>
           </div>

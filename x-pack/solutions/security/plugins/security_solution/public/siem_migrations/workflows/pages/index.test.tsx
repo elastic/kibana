@@ -25,6 +25,16 @@ jest.mock('../components/migration_status_panels/migration_ready_panel', () => (
   MigrationReadyPanel: () => <div data-test-subj="workflowMigrationReadyPanel" />,
 }));
 
+jest.mock('../../common/components/migration_panels/migration_progress_panel', () => ({
+  MigrationProgressPanel: ({ migrationType }: { migrationType: string }) => (
+    <div data-test-subj={`${migrationType}MigrationProgressPanel`} />
+  ),
+}));
+
+jest.mock('../components/workflows_table', () => ({
+  MigrationWorkflowsTable: () => <div data-test-subj="siemMigrationsWorkflowsTable" />,
+}));
+
 jest.mock('../service/hooks/use_latest_stats');
 jest.mock('../../../common/lib/kibana');
 
@@ -187,6 +197,39 @@ describe('MigrationWorkflowsPage', () => {
       renderComponent('1');
 
       expect(screen.getByTestId('workflowMigrationReadyPanel')).toBeInTheDocument();
+    });
+  });
+
+  describe('when the migration is running', () => {
+    beforeEach(() => mockLatestStats([getMigration('1', SiemMigrationTaskStatus.RUNNING)]));
+
+    it('should render the progress panel', () => {
+      renderComponent('1');
+
+      expect(screen.getByTestId('workflowMigrationProgressPanel')).toBeInTheDocument();
+    });
+
+    it('should not render the results table', () => {
+      renderComponent('1');
+
+      expect(screen.queryByTestId('siemMigrationsWorkflowsTable')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('when the migration is finished', () => {
+    beforeEach(() => mockLatestStats([getMigration('1', SiemMigrationTaskStatus.FINISHED)]));
+
+    it('should render the results table', () => {
+      renderComponent('1');
+
+      expect(screen.getByTestId('siemMigrationsWorkflowsTable')).toBeInTheDocument();
+    });
+
+    it('should not render the ready or the progress panel', () => {
+      renderComponent('1');
+
+      expect(screen.queryByTestId('workflowMigrationReadyPanel')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('workflowMigrationProgressPanel')).not.toBeInTheDocument();
     });
   });
 

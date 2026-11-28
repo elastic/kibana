@@ -20,6 +20,9 @@ import {
 import React, { useCallback, useState } from 'react';
 import { useMigrationDataInputContext } from '../../../common/components/migration_data_input_flyout_context';
 import { PanelText } from '../../../../common/components/panel_text';
+import type { MigrationSettingsBase } from '../../../common/types';
+import { useStartMigration } from '../../service/hooks/use_start_migration';
+import { useStartWorkflowsMigrationModal } from '../../service/hooks/use_start_workflows_migration_modal';
 import { WorkflowsDataInputStep } from './constants';
 import { WorkflowsUploadStep } from './steps/upload_stories';
 import * as i18n from './translations';
@@ -48,6 +51,18 @@ export const WorkflowMigrationDataInputFlyout = React.memo(
       setDataInputStep(WorkflowsDataInputStep.End);
     }, []);
 
+    const { startMigration, isLoading: isStarting } = useStartMigration(closeFlyout);
+    const onStartMigrationWithSettings = useCallback(
+      (settings: MigrationSettingsBase) => {
+        if (createdMigrationId) {
+          startMigration({ id: createdMigrationId }, settings);
+        }
+      },
+      [createdMigrationId, startMigration]
+    );
+    const { modal: startMigrationModal, showModal: showStartMigrationModal } =
+      useStartWorkflowsMigrationModal({ onStartMigrationWithSettings });
+
     return (
       <EuiFlyoutResizable
         onClose={closeFlyout}
@@ -58,6 +73,7 @@ export const WorkflowMigrationDataInputFlyout = React.memo(
         data-test-subj="workflowMigrationDataInputFlyout"
         aria-labelledby={titleId}
       >
+        {startMigrationModal}
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2 id={titleId}>{i18n.DATA_INPUT_FLYOUT_TITLE}</h2>
@@ -86,10 +102,11 @@ export const WorkflowMigrationDataInputFlyout = React.memo(
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              {/* Starting a translation is not available yet, it is wired together with the start modal. */}
               <EuiButton
                 fill
                 disabled={createdMigrationId == null}
+                isLoading={isStarting}
+                onClick={showStartMigrationModal}
                 data-test-subj="workflowDataFlyoutTranslateButton"
               >
                 {i18n.DATA_INPUT_FLYOUT_TRANSLATE}
