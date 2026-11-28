@@ -351,7 +351,9 @@ describe('HoverActionsPopover', () => {
         return hoverPopoverProps[hoverPopoverProps.length - 1].focusTrapProps!.onClickOutside!;
       };
 
-      act(() => getOnClickOutside()({ target: getByTestId('test-component') } as unknown as MouseEvent));
+      act(() =>
+        getOnClickOutside()({ target: getByTestId('test-component') } as unknown as MouseEvent)
+      );
       expect(queryByTestId('actionItem-test-action')).toBeInTheDocument();
 
       act(() => getOnClickOutside()({ target: document.body } as unknown as MouseEvent));
