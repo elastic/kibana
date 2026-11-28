@@ -70,3 +70,4 @@ graphql
 oxlint-tsgolint
 bump-cli
 @oxlint/plugins
+eslint-plugin-n
