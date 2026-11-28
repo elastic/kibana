@@ -134,7 +134,7 @@ Restore a message from Trash. Rolls back a `trashMessage` call. Only effective w
 
 #### Send message
 
-Send an email from the authenticated user's Gmail account. Irreversible once accepted by the receiving mail server. Supports plain-text and HTML bodies, bare addr-spec recipients only, and no attachments in v1. Available in Workflows only. Requires OAuth 2.0 authorization code auth.
+Send an email from the authenticated user's Gmail account. Irreversible once accepted by the receiving mail server. Supports plain-text and HTML bodies, bare addr-spec recipients only, and no attachments in v1. Agents and workflows can both call this action unless this connector limits its actions. The **Actions** setting applies to agents, workflows, and the Run a connector API on this connector. Refer to [Limit a connector's actions](docs-content://explore-analyze/ai-features/agent-builder/connectors.md#limit-a-connectors-actions). Requires OAuth 2.0 authorization code auth.
 
 `to`
 :   (Required) Recipient email addresses (bare addr-spec, for example `["user@example.com"]`).
@@ -156,7 +156,7 @@ Send an email from the authenticated user's Gmail account. Irreversible once acc
 
 #### Reply message
 
-Send a reply to an existing message, preserving the thread. The connector fetches the original message to set threading headers and determine the default recipient from `Reply-To` or `From`. Available in Workflows only. Requires OAuth 2.0 authorization code auth.
+Send a reply to an existing message, preserving the thread. The connector fetches the original message to set threading headers and determine the default recipient from `Reply-To` or `From`. Agents and workflows can both call this action unless this connector limits its actions. The **Actions** setting applies to agents, workflows, and the Run a connector API on this connector. Refer to [Limit a connector's actions](docs-content://explore-analyze/ai-features/agent-builder/connectors.md#limit-a-connectors-actions). Requires OAuth 2.0 authorization code auth.
 
 `messageId`
 :   (Required) Gmail message ID to reply to.

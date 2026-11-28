@@ -9,7 +9,7 @@ applies_to:
 
 # BigQuery connector [bigquery-action-type]
 
-The BigQuery connector wraps the [BigQuery REST API](https://cloud.google.com/bigquery/docs/reference/rest) to run GoogleSQL queries, retrieve query results, and list datasets. Use it to query data in BigQuery from workflows and AI agents. Workflow authors can also run write or DDL statements through a separate action that is not exposed to AI agents.
+The BigQuery connector wraps the [BigQuery REST API](https://cloud.google.com/bigquery/docs/reference/rest) to run GoogleSQL queries, retrieve query results, and list datasets. Use it to query data in BigQuery from workflows and AI agents. A separate action can run write or DDL statements.
 
 You can use this connector in **Agent Builder** and **Workflows**.
 
@@ -37,7 +37,7 @@ You can test connectors when you create or edit the connector in {{kib}}. The te
 The BigQuery connector has the following actions:
 
 Run query
-:   Run a read-only GoogleSQL query. Accepts `SELECT`, `WITH` (CTE), and `EXPLAIN` statements only. Write operations, DDL, scripts, stored procedures, and semicolon-delimited multi-statement submissions are rejected before the request is sent. Returns normalized rows as objects plus the BigQuery job reference and pagination token when more rows are available.
+:   Run a GoogleSQL query that starts with `SELECT`, `WITH`, or `EXPLAIN`, after leading comments and whitespace. Semicolon-delimited multi-statement input is rejected before the request is sent. A trailing semicolon is allowed. Returns normalized rows as objects plus the BigQuery job reference and pagination token when more rows are available.
     - `query` (required): Read-only GoogleSQL query. Use fully-qualified table names such as `project.dataset.table`.
     - `location` (optional): BigQuery processing location. If omitted, uses the connector default location.
     - `maxResults` (optional): Maximum number of rows to return in the first response (1-10000). Defaults to 1000.
@@ -45,7 +45,7 @@ Run query
     - `useQueryCache` (optional): Whether BigQuery can use cached query results.
 
 Execute query
-:   Run any GoogleSQL query. This action is available to workflow authors and direct API callers only. It is not exposed to AI agents. Use it for deliberate write, DDL, script, stored procedure, dry run, or multi-statement requests.
+:   Run any GoogleSQL query with no statement-type restrictions. Use it for deliberate write, DDL, script, stored procedure, dry run, or multi-statement requests. Because this action can change data and schema, review the statements before they run. Agents and workflows can both call it unless this connector limits its actions. The **Actions** setting applies to agents, workflows, and the Run a connector API on this connector. Refer to [Limit a connector's actions](docs-content://explore-analyze/ai-features/agent-builder/connectors.md#limit-a-connectors-actions).
     - `query` (required): GoogleSQL query to run.
     - `location`, `maxResults`, `timeoutMs`, `useQueryCache` (optional): Same semantics as *Run query*.
     - `dryRun` (optional): If `true`, BigQuery validates the query and returns estimated bytes processed without running it.
@@ -71,12 +71,12 @@ Use *Run query* to submit read-only SQL, then poll with *Get query results* usin
 
 ## Security model [bigquery-action-security-model]
 
-The connector splits SQL execution across two actions with different exposure:
+The connector splits SQL execution across two actions with different capabilities:
 
-- *Run query* is available to AI agents and is restricted to read-only statements (`SELECT`, `WITH`, and `EXPLAIN`). The restriction is enforced before the request is sent, so write, DDL, script, stored procedure, and multi-statement submissions never reach BigQuery.
-- *Execute query* is available only to workflow authors and direct API callers. AI agents cannot invoke it. Use it when you deliberately want a workflow to write data, modify schema, dry run a statement, or run a script.
+- *Run query* accepts a statement only when it starts with `SELECT`, `WITH`, or `EXPLAIN`, after leading comments and whitespace. Semicolon-delimited multi-statement input is rejected before the request is sent. A trailing semicolon is allowed. The check does not parse the rest of the statement, so a write that starts with `WITH` or `EXPLAIN` can still be sent to BigQuery.
+- *Execute query* accepts any GoogleSQL statement. Agents and workflows can both call it unless this connector limits its actions. Use it when you deliberately want to write data, modify schema, dry run a statement, or run a script. Refer to [Limit a connector's actions](docs-content://explore-analyze/ai-features/agent-builder/connectors.md#limit-a-connectors-actions).
 
-For defense in depth, grant the connector service account only the BigQuery permissions the intended use case requires. A read-only service account paired with *Run query* keeps agents within query-only access even if workflow authors can use *Execute query* for separate automation.
+For defense in depth, grant the connector service account only the BigQuery permissions the intended use case requires. A read-only service account keeps both agents and workflows within query-only access, even if *Execute query* is allowed.
 
 ## Connector networking configuration [bigquery-connector-networking-configuration]
 
