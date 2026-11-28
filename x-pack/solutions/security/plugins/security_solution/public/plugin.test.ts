@@ -1,0 +1,225 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { Subject } from 'rxjs';
+import type { App, AppDeepLink, AppUpdater } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import type { ILicense } from '@kbn/licensing-types';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import {
+  ALERTS_FEATURE_ID,
+  ALERTS_UI_DETECTIONS,
+  ALERTS_UI_READ,
+} from '@kbn/security-solution-features/constants';
+
+import { APP_UI_ID, SECURITY_FEATURE_ID } from '../common/constants';
+import { SecurityPageName } from './app/types';
+import { appLinks, getFilteredLinks } from './app/links';
+import { manageOldSiemRoutes } from './helpers';
+import { Plugin } from './plugin';
+import type { SetupPlugins, StartPlugins } from './types';
+
+jest.mock('./plugin_services', () => ({
+  PluginServices: jest.fn().mockImplementation(() => ({
+    setup: jest.fn(),
+    start: jest.fn(),
+    stop: jest.fn(),
+    generateServices: jest.fn(),
+  })),
+}));
+
+jest.mock('./helpers', () => ({
+  ...jest.requireActual('./helpers'),
+  manageOldSiemRoutes: jest.fn(),
+}));
+
+jest.mock('./app/links', () => ({
+  ...jest.requireActual('./app/links'),
+  getFilteredLinks: jest.fn(),
+}));
+
+const LEGACY_SIEM_APP_ID = 'siem';
+
+const startPlugin = ({ accessible = true }: { accessible?: boolean } = {}) => {
+  const coreSetup = coreMock.createSetup();
+  const coreStart = coreMock.createStart();
+
+  coreStart.application.capabilities = {
+    ...coreStart.application.capabilities,
+    ...(accessible
+      ? {
+          [SECURITY_FEATURE_ID]: { show: true },
+          [ALERTS_FEATURE_ID]: { [ALERTS_UI_READ]: true, [ALERTS_UI_DETECTIONS]: true },
+        }
+      : {}),
+  };
+  coreSetup.getStartServices.mockResolvedValue([coreStart, {} as never, {} as never]);
+
+  const license$ = new Subject<ILicense>();
+
+  const setupPlugins = {
+    licensing: { license$ },
+    management: { sections: { section: { ai: { registerApp: jest.fn(), getApp: jest.fn() } } } },
+    cases: { attachmentFramework: { registerAttachment: jest.fn() } },
+    discoverShared: { features: { registry: { register: jest.fn() } } },
+  } as unknown as SetupPlugins;
+
+  const plugin = new Plugin(
+    coreMock.createPluginInitializerContext(
+      { enableExperimental: [] },
+      { buildFlavor: 'traditional' }
+    )
+  );
+
+  plugin.setup(coreSetup, setupPlugins);
+
+  const registeredApps = coreSetup.application.register.mock.calls.map(([app]) => app as App);
+  const legacySiemApp = registeredApps.find(({ id }) => id === LEGACY_SIEM_APP_ID)!;
+  const securityApp = registeredApps.find(({ id }) => id === APP_UI_ID)!;
+
+  const registeredDeepLinks: AppDeepLink[][] = [];
+  (securityApp.updater$ as Subject<AppUpdater>).subscribe((updater) => {
+    const deepLinks = updater(securityApp)?.deepLinks;
+    if (deepLinks != null) {
+      registeredDeepLinks.push(deepLinks);
+    }
+  });
+
+  plugin.start(coreStart, { licensing: { license$ } } as unknown as StartPlugins);
+
+  return { legacySiemApp, license$, registeredDeepLinks };
+};
+
+const createMountParams = () => {
+  const params = coreMock.createAppMountParameters();
+  document.body.appendChild(params.element);
+  return params;
+};
+
+const mountLegacySiemApp = (legacySiemApp: App, params = createMountParams()) =>
+  legacySiemApp.mount(params);
+
+const getLoader = (element: HTMLElement) => element.querySelector('[role="progressbar"]');
+
+describe('Security Solution plugin', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.useFakeTimers();
+    (getFilteredLinks as jest.Mock).mockResolvedValue(appLinks);
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+    document.body.replaceChildren();
+  });
+
+  describe('legacy `siem` app', () => {
+    it('redirects only once the deepLinks it resolves the legacy route with are registered', async () => {
+      const { legacySiemApp, license$, registeredDeepLinks } = startPlugin();
+      const deepLinkIdsAtRedirect: string[][] = [];
+      (manageOldSiemRoutes as jest.Mock).mockImplementationOnce(() => {
+        deepLinkIdsAtRedirect.push(registeredDeepLinks.flat().map(({ id }) => id));
+      });
+      await mountLegacySiemApp(legacySiemApp);
+
+      // The links are only processed once the license resolves, which can outlast the debounce
+      // of the deepLinks updater. Nothing must be registered, nor redirected, until then.
+      await jest.advanceTimersByTimeAsync(1000);
+
+      expect(registeredDeepLinks).toHaveLength(0);
+      expect(manageOldSiemRoutes).not.toHaveBeenCalled();
+
+      license$.next(licensingMock.createLicense({ license: { type: 'platinum' } }));
+      await jest.advanceTimersByTimeAsync(1000);
+
+      expect(deepLinkIdsAtRedirect).toHaveLength(1);
+      expect(deepLinkIdsAtRedirect[0]).toContain(SecurityPageName.alerts);
+    });
+
+    it('redirects when the Security Solution app is not accessible and no deepLink is registered', async () => {
+      const { legacySiemApp, license$, registeredDeepLinks } = startPlugin({ accessible: false });
+      await mountLegacySiemApp(legacySiemApp);
+
+      license$.next(licensingMock.createLicense({ license: { type: 'platinum' } }));
+      await jest.advanceTimersByTimeAsync(1000);
+
+      expect(registeredDeepLinks).toHaveLength(0);
+      expect(manageOldSiemRoutes).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not redirect before the legacy app mount has resolved', async () => {
+      const { legacySiemApp } = startPlugin({ accessible: false });
+      await jest.advanceTimersByTimeAsync(1000);
+
+      await mountLegacySiemApp(legacySiemApp);
+
+      expect(manageOldSiemRoutes).not.toHaveBeenCalled();
+
+      await jest.advanceTimersByTimeAsync(0);
+
+      expect(manageOldSiemRoutes).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not redirect once the legacy app has been unmounted', async () => {
+      const { legacySiemApp, license$ } = startPlugin();
+      const unmount = await mountLegacySiemApp(legacySiemApp);
+
+      unmount();
+      license$.next(licensingMock.createLicense({ license: { type: 'platinum' } }));
+      await jest.advanceTimersByTimeAsync(1000);
+
+      expect(manageOldSiemRoutes).not.toHaveBeenCalled();
+    });
+
+    it('shows a loader once the legacy app mount has resolved, until it is unmounted', async () => {
+      const { legacySiemApp } = startPlugin();
+      const params = createMountParams();
+      const { element } = params;
+      const unmount = await mountLegacySiemApp(legacySiemApp, params);
+
+      expect(manageOldSiemRoutes).not.toHaveBeenCalled();
+      expect(getLoader(element)).not.toBeNull();
+
+      unmount();
+
+      expect(getLoader(element)).toBeNull();
+    });
+
+    it('neither renders nor redirects when the user leaves while the legacy app mount is loading', async () => {
+      const { legacySiemApp, license$ } = startPlugin();
+      const params = createMountParams();
+      const { element } = params;
+      const helpers = await import('./helpers');
+      let resolveHelpers: (loadedHelpers: typeof helpers) => void = () => {};
+      const lazyHelpersForRoutes = jest
+        .spyOn(
+          Plugin.prototype as unknown as { lazyHelpersForRoutes: () => Promise<typeof helpers> },
+          'lazyHelpersForRoutes'
+        )
+        .mockImplementationOnce(
+          () =>
+            new Promise((resolve) => {
+              resolveHelpers = resolve;
+            })
+        );
+      const mounting = mountLegacySiemApp(legacySiemApp, params);
+      await jest.advanceTimersByTimeAsync(0);
+
+      expect(lazyHelpersForRoutes).toHaveBeenCalledTimes(1);
+
+      element.remove();
+      resolveHelpers(helpers);
+      await mounting;
+      lazyHelpersForRoutes.mockRestore();
+      license$.next(licensingMock.createLicense({ license: { type: 'platinum' } }));
+      await jest.advanceTimersByTimeAsync(1000);
+
+      expect(getLoader(element)).toBeNull();
+      expect(manageOldSiemRoutes).not.toHaveBeenCalled();
+    });
+  });
+});

@@ -7,7 +7,15 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { BehaviorSubject, combineLatestWith, Subject } from 'rxjs';
+import {
+  asyncScheduler,
+  BehaviorSubject,
+  combineLatestWith,
+  first,
+  observeOn,
+  ReplaySubject,
+  Subject,
+} from 'rxjs';
 import type * as H from 'history';
 import type {
   AppMountParameters,
@@ -100,6 +108,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private isServerless: boolean;
 
   private appUpdater$ = new Subject<AppUpdater>();
+  /**
+   * Emits once the application deepLinks have been registered, or once it is known they never
+   * will be. `appUpdater$` does not replay, this is what late consumers can await instead.
+   */
+  private deepLinksRegistered$ = new ReplaySubject<void>(1);
   private storage = new Storage(localStorage);
 
   // Lazily instantiated dependencies
@@ -201,17 +214,29 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       appRoute: 'app/siem',
       title: 'SIEM',
       visibleIn: [],
-      mount: async (_params: AppMountParameters) => {
+      mount: async ({ element }: AppMountParameters) => {
         const [coreStart] = await core.getStartServices();
 
-        const { manageOldSiemRoutes } = await this.lazyHelpersForRoutes();
-        const subscription = this.appUpdater$.subscribe(() => {
-          // wait for app initialization to set the links
-          manageOldSiemRoutes(coreStart);
-          subscription.unsubscribe();
-        });
+        const { manageOldSiemRoutes, renderLegacySiemRoutesLoader } =
+          await this.lazyHelpersForRoutes();
+        // Core does not call the unmount of a mount that resolves after the user has left the app.
+        if (!element.isConnected) {
+          return () => {};
+        }
+        // Core removes its own loading placeholder once this mount resolves, before the redirect.
+        const unmountLoader = renderLegacySiemRoutesLoader(coreStart, element);
+        // The legacy routes are resolved through the Security Solution app deepLinks, so the
+        // redirect can only happen once those deepLinks have been registered. It must not start
+        // before Core has settled this mount, which would end the destination app's loading
+        // state early, and is cancelled if the user leaves before it happens.
+        const redirectSubscription = this.deepLinksRegistered$
+          .pipe(first(), observeOn(asyncScheduler))
+          .subscribe(() => manageOldSiemRoutes(coreStart));
 
-        return () => true;
+        return () => {
+          redirectSubscription.unsubscribe();
+          unmountLoader();
+        };
       },
     });
 
@@ -849,6 +874,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     // This is necessary to hide security solution from the selectable solutions in the spaces UI
     if (!isSecuritySolutionAccessible(capabilities)) {
       this.appUpdater$.next(() => ({ status: AppStatus.inaccessible, visibleIn: [] }));
+      // no deepLinks will ever be registered, release the consumers waiting for them
+      this.deepLinksRegistered$.next();
       // no need to register the links updater when the plugin is inaccessible. return early
       return;
     }
@@ -861,6 +888,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     } = await this.lazyApplicationLinks();
 
     registerDeepLinksUpdater(this.appUpdater$, solutionNavigationTree$);
+
+    // `appUpdater$` does not replay, this subscription is registered along with the updater so
+    // the first deepLinks registration cannot be missed by consumers that await it later.
+    const deepLinksSubscription = this.appUpdater$.subscribe(() => {
+      this.deepLinksRegistered$.next();
+      deepLinksSubscription.unsubscribe();
+    });
 
     const appLinksToUpdate$ = new BehaviorSubject<AppLinkItems>(initialAppLinks);
 
