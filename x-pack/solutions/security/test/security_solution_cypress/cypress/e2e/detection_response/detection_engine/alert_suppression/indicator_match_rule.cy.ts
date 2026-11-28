@@ -33,7 +33,7 @@ import { getDetails } from '../../../../tasks/rule_details';
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 
-const SUPPRESS_BY_FIELDS = ['myhash.mysha256', 'source.ip.keyword'];
+const SUPPRESS_BY_FIELDS = ['myhash.mysha256', 'source.ip'];
 
 describe(
   'Indicator Match - Alert suppression',
