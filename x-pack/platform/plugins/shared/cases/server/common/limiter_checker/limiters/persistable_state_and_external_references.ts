@@ -10,11 +10,23 @@ import { AttachmentType } from '../../../../common/types/domain';
 import type { AttachmentService } from '../../../services';
 import { MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES } from '../../../../common/constants';
 import { isLegacyAttachmentRequest } from '../../../../common/utils/attachments';
-import { isFileAttachmentRequest, isPersistableStateOrExternalReference } from '../../utils';
+import {
+  isCommentRequestTypeActions,
+  isFileAttachmentRequest,
+  isPersistableStateOrExternalReference,
+  isUnifiedPersistableStateOrExternalReference,
+} from '../../utils';
 import { BaseLimiter } from '../base_limiter';
 
 export class PersistableStateAndExternalReferencesLimiter extends BaseLimiter {
-  constructor(private readonly attachmentService: AttachmentService) {
+  /**
+   * @param isUnifiedAttachmentsEnabled `xpack.cases.attachments.enabled`: legacy `actions`
+   * requests are only stored as counted `security.endpoint` rows when it is on.
+   */
+  constructor(
+    private readonly attachmentService: AttachmentService,
+    private readonly isUnifiedAttachmentsEnabled: boolean
+  ) {
     super({
       limit: MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES,
       attachmentType: [AttachmentType.persistableState, AttachmentType.externalReference],
@@ -29,11 +41,11 @@ export class PersistableStateAndExternalReferencesLimiter extends BaseLimiter {
   }
 
   public countOfItemsInRequest(requests: AttachmentRequestV2[]): number {
-    const legacyRequests = requests.filter(isLegacyAttachmentRequest);
-    const totalReferences = legacyRequests
-      .filter(isPersistableStateOrExternalReference)
-      .filter((request) => !isFileAttachmentRequest(request));
-
-    return totalReferences.length;
+    return requests.filter((request) =>
+      isLegacyAttachmentRequest(request)
+        ? (isPersistableStateOrExternalReference(request) && !isFileAttachmentRequest(request)) ||
+          (this.isUnifiedAttachmentsEnabled && isCommentRequestTypeActions(request))
+        : isUnifiedPersistableStateOrExternalReference(request)
+    ).length;
   }
 }

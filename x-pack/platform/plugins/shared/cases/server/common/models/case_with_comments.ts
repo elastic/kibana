@@ -511,7 +511,8 @@ export class CaseCommentModel {
     const limitChecker = new AttachmentLimitChecker(
       this.params.services.attachmentService,
       this.params.fileService,
-      this.caseInfo.id
+      this.caseInfo.id,
+      this.params.config.attachments?.enabled === true
     );
 
     await limitChecker.validate(req);

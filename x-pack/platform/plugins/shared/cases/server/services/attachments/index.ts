@@ -37,8 +37,9 @@ import {
   LEGACY_FILE_ATTACHMENT_TYPE,
 } from '../../../common/constants';
 import {
+  FILE_ATTACHMENT_TYPE,
   PERSISTABLE_ATTACHMENT_TYPES,
-  SECURITY_ENDPOINT_ATTACHMENT_TYPE,
+  UNIFIED_TO_EXTERNAL_REFERENCE_TYPE_MAP,
 } from '../../../common/constants/attachments';
 import {
   getAttachmentSavedObjectType,
@@ -314,9 +315,9 @@ export class AttachmentService {
    * - Legacy: `persistableState` and `externalReference` rows in
    *   `cases-comments`, EXCLUDING `.files` (file attachments are limited
    *   separately).
-   * - Unified (when the flag is on): persistable-state subtypes plus
-   *   `security.endpoint`, EXCLUDING `file` (matched via the `type` field on
-   *   `cases-attachments`).
+   * - Unified (when the flag is on): persistable-state subtypes plus every
+   *   {@link UNIFIED_TO_EXTERNAL_REFERENCE_TYPE_MAP} type, EXCLUDING `file`
+   *   (matched via the `type` field on `cases-attachments`).
    *
    * Files are intentionally excluded on both sides; the request-side
    * `PersistableStateAndExternalReferencesLimiter.countOfItemsInRequest`
@@ -358,7 +359,9 @@ export class AttachmentService {
 
       const unifiedTypesToCount = [
         ...PERSISTABLE_ATTACHMENT_TYPES_ARRAY,
-        SECURITY_ENDPOINT_ATTACHMENT_TYPE,
+        ...Object.keys(UNIFIED_TO_EXTERNAL_REFERENCE_TYPE_MAP).filter(
+          (type) => type !== FILE_ATTACHMENT_TYPE
+        ),
         // Custom externalReference/persistableState subtypes with no unified
         // mapping (e.g. FTR `.test` types) are still written to
         // `cases-attachments` but keep their legacy `type`, so count those too.

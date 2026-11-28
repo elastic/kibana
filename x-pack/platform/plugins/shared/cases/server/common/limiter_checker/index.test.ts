@@ -13,7 +13,7 @@ import { createAlertRequests, createFileRequests, createUserRequests } from './t
 describe('AttachmentLimitChecker', () => {
   const mockAttachmentService = createAttachmentServiceMock();
   const mockFileService = createFileServiceMock();
-  const checker = new AttachmentLimitChecker(mockAttachmentService, mockFileService, 'id');
+  const checker = new AttachmentLimitChecker(mockAttachmentService, mockFileService, 'id', true);
 
   beforeEach(() => {
     jest.clearAllMocks();

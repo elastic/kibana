@@ -21,12 +21,16 @@ export class AttachmentLimitChecker {
   constructor(
     attachmentService: AttachmentService,
     fileService: FileServiceStart,
-    private readonly caseId: string
+    private readonly caseId: string,
+    isUnifiedAttachmentsEnabled: boolean
   ) {
     this.limiters = [
       new AlertLimiter(attachmentService),
       new FileLimiter(fileService),
-      new PersistableStateAndExternalReferencesLimiter(attachmentService),
+      new PersistableStateAndExternalReferencesLimiter(
+        attachmentService,
+        isUnifiedAttachmentsEnabled
+      ),
     ];
   }
 
