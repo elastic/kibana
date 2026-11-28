@@ -547,6 +547,7 @@ export class TaskRunner<
       taskRunnerContext: this.context,
       taskInstance: this.taskInstance,
       ruleRunMetricsStore,
+      ruleResultService: this.ruleResult,
       apiKey: effectiveApiKey,
       // Carry the UIAM key id so the connector tasks are visible to the API key invalidation
       // task's in-use guard, which cannot see the encrypted key material itself.
