@@ -1437,6 +1437,24 @@ describe('ConversationClient', () => {
   });
 
   describe('getByOrigin', () => {
+    it('does not return an owned conversation whose agent the caller can no longer use', async () => {
+      const document = createConversationDocument();
+      mockEsClient.search.mockResolvedValueOnce({
+        hits: {
+          hits: [document],
+        },
+      });
+      mockGetDocumentResponseOnce(document);
+      agentRegistry.get.mockRejectedValue(createAgentNotFoundError({ agentId: 'agent-1' }));
+
+      const result = await client.getByOrigin({
+        external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+      });
+
+      expect(result).toBeUndefined();
+      expect(agentRegistry.get).toHaveBeenCalledWith('agent-1', { access: 'use' });
+    });
+
     it('finds a conversation by first-class origin in the current space', async () => {
       const document = createConversationDocument();
       mockEsClient.search.mockResolvedValueOnce({
@@ -1464,6 +1482,20 @@ describe('ConversationClient', () => {
                   term: {
                     'origin.external_conversation_id':
                       'team:T123/channel:C123/thread:1712345678.000100',
+                  },
+                },
+                {
+                  bool: {
+                    should: [
+                      { term: { user_id: 'user-1' } },
+                      {
+                        bool: {
+                          must_not: { exists: { field: 'user_id' } },
+                          filter: { term: { user_name: 'test-user' } },
+                        },
+                      },
+                    ],
+                    minimum_should_match: 1,
                   },
                 },
               ],

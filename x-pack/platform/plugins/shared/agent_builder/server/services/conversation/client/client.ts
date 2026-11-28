@@ -64,6 +64,7 @@ import type {
 } from '../../../../common/http_api/conversations';
 import type { AgentRegistry } from '../../agents/agent_registry';
 import {
+  buildOwnedConversationFilter,
   buildPinnedFilter,
   buildReadAccessFilter,
   hasConversationConverseAccess,
@@ -795,6 +796,7 @@ class ConversationClientImpl implements ConversationClient {
           filter: [
             createSpaceDslFilter(this.space),
             { term: { 'origin.external_conversation_id': origin.external_conversation_id } },
+            buildOwnedConversationFilter({ user: this.getUser() }),
           ],
         },
       },
