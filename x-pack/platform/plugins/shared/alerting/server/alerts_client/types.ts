@@ -173,6 +173,9 @@ export interface InitializeExecutionOpts {
   flappingSettings: RulesSettingsFlappingProperties;
   activeAlertsFromState: Record<string, RawAlertInstance>;
   recoveredAlertsFromState: Record<string, RawAlertInstance>;
+  // Only a regular rule run may set this. It untracks active alert documents that are missing
+  // from the task state, so the state passed in must be the rule's own.
+  shouldUntrackOrphanedAlerts?: boolean;
 }
 
 export interface TrackedAlerts<
@@ -239,6 +242,7 @@ export interface SearchResult<AlertData, Aggregation = unknown> {
   hits: SearchResponseBody<Alert & AlertData>['hits']['hits'];
   total: SearchResponseBody<Alert & AlertData>['hits']['total'];
   aggregations: SearchResponseBody<Alert & AlertData, Aggregation>['aggregations'];
+  _shards: SearchResponseBody<Alert & AlertData>['_shards'];
 }
 
 export type GetSummarizedAlertsParams = {

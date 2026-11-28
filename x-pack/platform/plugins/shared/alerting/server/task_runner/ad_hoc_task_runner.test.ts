@@ -718,6 +718,13 @@ describe('Ad Hoc Task Runner', () => {
     expect(runnerResult).toEqual({ state: {}, runAt: new Date('1970-01-01T00:00:00.000Z') });
     await taskRunner.cleanup();
 
+    // A backfill does not have the rule's task state, so every active alert document of the
+    // rule would look orphaned to it.
+    expect(alertsClient.initializeExecution).toHaveBeenCalledTimes(1);
+    expect(alertsClient.initializeExecution).toHaveBeenCalledWith(
+      expect.not.objectContaining({ shouldUntrackOrphanedAlerts: true })
+    );
+
     // Verify all the expected calls were made before calling the rule executor
     expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
       AD_HOC_RUN_SAVED_OBJECT_TYPE,

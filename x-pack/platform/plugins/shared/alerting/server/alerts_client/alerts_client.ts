@@ -14,7 +14,7 @@ import {
   ALERT_SCHEDULED_ACTION_DATE,
   ALERT_SCHEDULED_ACTION_THROTTLING,
 } from '@kbn/rule-data-utils';
-import { get, isEmpty } from 'lodash';
+import { get, isEmpty, uniq } from 'lodash';
 import type {
   MsearchRequestItem,
   MsearchResponseItem,
@@ -64,8 +64,9 @@ import {
   AlertBuilder,
 } from './lib';
 import { resolveAlertConflicts } from './lib/alert_conflict_resolver';
-import { createEmptyTrackedAlerts } from './lib/get_tracked_alerts';
+import { createEmptyTrackedAlerts, getAlertUuidsFromState } from './lib/get_tracked_alerts';
 import { reconcileTrackedAlertsWithState } from './lib/reconcile_tracked_alerts';
+import { untrackOrphanedAlerts } from './lib/untrack_orphaned_alerts';
 import { getMaxAlertLimit } from '../../common';
 import {
   filterMaintenanceWindows,
@@ -80,6 +81,9 @@ export interface AlertsClientParams extends CreateAlertsClientParams {
   kibanaVersion: string;
   dataStreamAdapter: DataStreamAdapter;
   isServerless: boolean;
+  // Rules whose orphaned alert documents were already untracked. Shared across runs by the
+  // alerts service, so a rule is only searched once per Kibana process.
+  rulesWithoutOrphanedAlerts?: Set<string>;
 }
 
 export class AlertsClient<
@@ -115,6 +119,7 @@ export class AlertsClient<
   private _isUsingDataStreams: boolean;
   private ruleInfoMessage: string;
   private logTags: { tags: string[] };
+  private readonly rulesWithoutOrphanedAlerts: Set<string>;
 
   constructor(private readonly options: AlertsClientParams) {
     this.legacyAlertsClient = new LegacyAlertsClient<
@@ -143,6 +148,7 @@ export class AlertsClient<
     this.ruleInfoMessage = `for ${this.ruleType.id}:${this.options.rule.id} '${this.options.rule.name}'`;
     this.logTags = { tags: [this.ruleType.id, this.options.rule.id, 'alerts-client'] };
     this.isServerless = options.isServerless;
+    this.rulesWithoutOrphanedAlerts = options.rulesWithoutOrphanedAlerts ?? new Set();
   }
 
   public async initializeExecution(opts: InitializeExecutionOpts) {
@@ -163,6 +169,9 @@ export class AlertsClient<
     const { trackedAlerts, activeAlertsFromState, recoveredAlertsFromState } =
       await this.reconcileTrackedAlerts(opts);
     this.trackedAlerts = trackedAlerts;
+    if (opts.shouldUntrackOrphanedAlerts) {
+      await this.untrackOrphanedAlerts(opts);
+    }
     await this.legacyAlertsClient.initializeExecution({
       ...opts,
       activeAlertsFromState,
@@ -194,6 +203,42 @@ export class AlertsClient<
     }
   }
 
+  // Temporary cleanup of active alert documents that no run loads anymore: the ones written
+  // before `kibana.alert.tracked` existed and the ones an earlier version left active with
+  // tracked set to false. They are written here and kept out of the tracked alerts, so the rule
+  // executor never sees them and a failure cannot fail the run.
+  // Removal is tracked in https://github.com/elastic/response-ops-team/issues/896
+  private async untrackOrphanedAlerts({
+    activeAlertsFromState,
+    recoveredAlertsFromState,
+  }: InitializeExecutionOpts) {
+    const ruleKey = `${this.options.rule.spaceId}:${this.options.rule.id}`;
+    if (!this.ruleType.alerts?.shouldWrite || this.rulesWithoutOrphanedAlerts.has(ruleKey)) {
+      return;
+    }
+
+    const { isComplete } = await untrackOrphanedAlerts<AlertData>({
+      ruleId: this.options.rule.id,
+      knownAlertUuids: uniq([
+        ...Object.keys(this.trackedAlerts.all),
+        ...getAlertUuidsFromState(activeAlertsFromState, recoveredAlertsFromState),
+      ]),
+      timestamp: this.startedAtString ?? new Date().toISOString(),
+      search: (queryBody) => this.search(queryBody),
+      bulk: async (operations) => {
+        const esClient = await this.options.elasticsearchClientPromise;
+        return esClient.bulk({ operations });
+      },
+      logger: this.options.logger,
+      ruleInfoMessage: this.ruleInfoMessage,
+      logTags: this.logTags,
+    });
+
+    if (isComplete) {
+      this.rulesWithoutOrphanedAlerts.add(ruleKey);
+    }
+  }
+
   public async search<Aggregation = unknown>(
     queryBody: SearchRequest
   ): Promise<SearchResult<AlertData, Aggregation>> {
@@ -204,13 +249,14 @@ export class AlertsClient<
     const {
       hits: { hits, total },
       aggregations,
+      _shards,
     } = await esClient.search<Alert & AlertData, Aggregation>({
       index,
       ...queryBody,
       ignore_unavailable: true,
     });
 
-    return { hits, total, aggregations };
+    return { hits, total, aggregations, _shards };
   }
 
   public async msearch<Aggregation = unknown>(
