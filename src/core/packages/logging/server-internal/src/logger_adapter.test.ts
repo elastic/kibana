@@ -7,8 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Logger } from '@kbn/logging';
+import type { Appender, Logger, LogRecord } from '@kbn/logging';
+import { LogLevel } from '@kbn/logging';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
+import * as globalContextModule from './global_context';
+import { BaseLogger } from './logger';
 import { LoggerAdapter } from './logger_adapter';
 
 describe('LoggerAdapter', () => {
@@ -16,6 +19,10 @@ describe('LoggerAdapter', () => {
 
   beforeEach(() => {
     internalLogger = loggerMock.create();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   test('proxies all method calls to the internal logger.', () => {
@@ -49,6 +56,7 @@ describe('LoggerAdapter', () => {
     expect(internalLogger.get).toHaveBeenCalledTimes(1);
     expect(internalLogger.get).toHaveBeenCalledWith('context');
 
+    internalLogger.isLevelEnabled.mockClear();
     internalLogger.isLevelEnabled.mockReturnValue(false);
     expect(adapter.isLevelEnabled('info')).toEqual(false);
     expect(internalLogger.isLevelEnabled).toHaveBeenCalledTimes(1);
@@ -179,6 +187,132 @@ describe('LoggerAdapter', () => {
       adapter.info('message');
       expect(internalLogger.info).toHaveBeenCalledTimes(1);
       expect(internalLogger.info).toHaveBeenCalledWith('message', undefined);
+    });
+  });
+
+  describe('disabled level short-circuit', () => {
+    const methods = ['trace', 'debug', 'info', 'warn', 'error', 'fatal'] as const;
+
+    test.each(methods)(
+      'skips mergeGlobalContext and underlying %s call when isLevelEnabled returns false',
+      (method) => {
+        const mergeSpy = jest.spyOn(globalContextModule, 'mergeGlobalContext');
+        internalLogger.isLevelEnabled.mockReturnValue(false);
+        const adapter = new LoggerAdapter(internalLogger, { 'service.node.roles': ['ui'] });
+
+        // @ts-expect-error Custom ECS field
+        adapter[method](`${method} message`, { hello: 'world' });
+
+        expect(mergeSpy).not.toHaveBeenCalled();
+        expect(internalLogger[method]).not.toHaveBeenCalled();
+      }
+    );
+
+    test('skips mergeGlobalContext and underlying log() call when record level is disabled', () => {
+      const mergeSpy = jest.spyOn(globalContextModule, 'mergeGlobalContext');
+      internalLogger.isLevelEnabled.mockReturnValue(false);
+      const adapter = new LoggerAdapter(internalLogger, { 'service.node.roles': ['ui'] });
+
+      adapter.log({
+        context: 'ctx',
+        level: LogLevel.Debug,
+        message: 'debug message',
+        timestamp: new Date(),
+        pid: 1,
+      });
+
+      expect(mergeSpy).not.toHaveBeenCalled();
+      expect(internalLogger.log).not.toHaveBeenCalled();
+    });
+
+    test('forwards calls when isLevelEnabled returns undefined on an unstubbed mock', () => {
+      internalLogger.isLevelEnabled.mockImplementation(() => undefined as unknown as boolean);
+      const adapter = new LoggerAdapter(internalLogger, { 'a.b': 'c' });
+
+      // @ts-expect-error Custom ECS field
+      adapter.debug('debug message', { hello: 'world' });
+
+      expect(internalLogger.debug).toHaveBeenCalledTimes(1);
+      expect(internalLogger.debug).toHaveBeenCalledWith('debug message', {
+        hello: 'world',
+        a: { b: 'c' },
+      });
+    });
+
+    test('skips mergeGlobalContext for disabled levels on BaseLogger', () => {
+      const mergeSpy = jest.spyOn(globalContextModule, 'mergeGlobalContext');
+      const appender: Appender = { append: jest.fn() };
+      const baseLogger = new BaseLogger('ctx', LogLevel.Info, [appender], {
+        get: () => baseLogger,
+      });
+      const adapter = new LoggerAdapter(baseLogger, { 'service.node.roles': ['ui'] });
+
+      adapter.debug('dropped debug');
+      adapter.trace('dropped trace');
+      adapter.log({
+        context: 'ctx',
+        level: LogLevel.Debug,
+        message: 'dropped record',
+        timestamp: new Date(),
+        pid: 1,
+      });
+
+      expect(mergeSpy).not.toHaveBeenCalled();
+      expect(appender.append).not.toHaveBeenCalled();
+
+      adapter.info('allowed info');
+
+      expect(mergeSpy).toHaveBeenCalledTimes(1);
+      expect(appender.append).toHaveBeenCalledTimes(1);
+      expect(appender.append).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: 'allowed info',
+          meta: { service: { node: { roles: ['ui'] } } },
+        })
+      );
+    });
+
+    test('preserves meta filters on BaseLogger while still short-circuiting above gate level', () => {
+      const mergeSpy = jest.spyOn(globalContextModule, 'mergeGlobalContext');
+      const appender: Appender = { append: jest.fn() };
+      const baseLogger = new BaseLogger(
+        'ctx',
+        LogLevel.Warn,
+        [appender],
+        { get: () => baseLogger },
+        [{ type: 'meta', match: { 'labels.ruleType': 'esql' }, level: 'debug' }]
+      );
+      const adapter = new LoggerAdapter(baseLogger, { 'service.node.roles': ['ui'] });
+
+      adapter.trace('dropped trace', { labels: { ruleType: 'esql' } });
+      expect(mergeSpy).not.toHaveBeenCalled();
+      expect(appender.append).not.toHaveBeenCalled();
+
+      adapter.debug('filtered debug', { labels: { ruleType: 'esql' } });
+      expect(mergeSpy).toHaveBeenCalledTimes(1);
+      expect(appender.append).toHaveBeenCalledTimes(1);
+      expect(appender.append).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: 'filtered debug',
+          meta: {
+            labels: { ruleType: 'esql' },
+            service: { node: { roles: ['ui'] } },
+          },
+        })
+      );
+    });
+
+    test('forwards log() records when record.level is omitted', () => {
+      internalLogger.isLevelEnabled.mockReturnValue(false);
+      const adapter = new LoggerAdapter(internalLogger, { 'a.b': 'c' });
+
+      adapter.log({ message: 'no level' } as unknown as LogRecord);
+
+      expect(internalLogger.log).toHaveBeenCalledTimes(1);
+      expect(internalLogger.log).toHaveBeenCalledWith({
+        message: 'no level',
+        meta: { a: { b: 'c' } },
+      });
     });
   });
 });

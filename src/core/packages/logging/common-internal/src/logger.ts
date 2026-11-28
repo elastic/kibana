@@ -240,6 +240,11 @@ export abstract class AbstractLogger implements Logger {
     return this.level.supports(LogLevel.fromId(levelId));
   }
 
+  /** @internal */
+  public isGateLevelEnabled(level: LogLevel): boolean {
+    return this.gateLevel.supports(level);
+  }
+
   public log(record: LogRecord) {
     if (!this.shouldLogRecord(record.level, record.meta)) return;
     this.appendRecord(record);

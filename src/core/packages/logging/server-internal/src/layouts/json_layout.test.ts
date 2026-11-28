@@ -12,10 +12,12 @@ import { test as fcTest, fc } from '@fast-check/jest';
 import type { LogRecord } from '@kbn/logging';
 import { LogLevel } from '@kbn/logging';
 import { JsonLayout } from './json_layout';
+import { createFixedOffsetDate } from '../test_helpers/fixed_offset_date';
 
 jest.spyOn(process, 'uptime').mockReturnValue(10);
 
-const timestamp = new Date(Date.UTC(2012, 1, 1, 14, 30, 22, 11));
+const EST_OFFSET_MINUTES = 300;
+const timestamp = createFixedOffsetDate(Date.UTC(2012, 1, 1, 14, 30, 22, 11), EST_OFFSET_MINUTES);
 const records: LogRecord[] = [
   {
     context: 'context-1',

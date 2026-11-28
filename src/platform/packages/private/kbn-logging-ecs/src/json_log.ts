@@ -7,11 +7,38 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import moment from 'moment-timezone';
 import { merge } from '@kbn/std';
 import type { Ecs } from '@elastic/ecs';
 import { EcsVersion } from '@elastic/ecs';
 import type { LogRecord } from '@kbn/logging';
+
+const pad2 = (value: number): string => (value < 10 ? `0${value}` : `${value}`);
+
+const pad3 = (value: number): string => {
+  if (value < 10) return `00${value}`;
+  if (value < 100) return `0${value}`;
+  return `${value}`;
+};
+
+const padYear = (year: number): string => {
+  if (year >= 1000) return `${year}`;
+  if (year < 0) return `-${String(-year).padStart(4, '0')}`;
+  return String(year).padStart(4, '0');
+};
+
+const formatTimestamp = (date: Date): string => {
+  if (Number.isNaN(date.getTime())) {
+    return 'Invalid date';
+  }
+
+  const offsetMinutes = -date.getTimezoneOffset();
+  const sign = offsetMinutes >= 0 ? '+' : '-';
+  const absOffset = Math.abs(offsetMinutes);
+  const offsetHours = Math.trunc(absOffset / 60);
+  const offsetRemainderMinutes = absOffset % 60;
+
+  return `${padYear(date.getFullYear())}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}T${pad2(date.getHours())}:${pad2(date.getMinutes())}:${pad2(date.getSeconds())}.${pad3(date.getMilliseconds())}${sign}${pad2(offsetHours)}:${pad2(offsetRemainderMinutes)}`;
+};
 
 /**
  * Converts a `LogRecord` into its ECS representation, using `uptime` as `process.uptime`.
@@ -24,7 +51,7 @@ export const toEcsLog = (record: LogRecord, uptime: number): Ecs => {
 
   const log: Ecs = {
     ecs: { version: EcsVersion },
-    '@timestamp': moment(record.timestamp).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+    '@timestamp': formatTimestamp(record.timestamp),
     message: record.message,
     error: errorToSerializableObject(record.error),
     log: {

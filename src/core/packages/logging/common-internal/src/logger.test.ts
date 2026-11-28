@@ -473,6 +473,25 @@ describe('AbstractLogger', () => {
       });
     });
 
+    describe('isGateLevelEnabled', () => {
+      it('reflects the most permissive filter level when filters are configured', () => {
+        logger = new TestLogger(context, LogLevel.Warn, appenderMocks, factory, [filter]);
+
+        expect(logger.isGateLevelEnabled(LogLevel.Warn)).toBe(true);
+        expect(logger.isGateLevelEnabled(LogLevel.Info)).toBe(true);
+        expect(logger.isGateLevelEnabled(LogLevel.Debug)).toBe(true);
+        expect(logger.isGateLevelEnabled(LogLevel.Trace)).toBe(false);
+      });
+
+      it('reflects the nominal level when no filters are configured', () => {
+        logger = new TestLogger(context, LogLevel.Info, appenderMocks, factory);
+
+        expect(logger.isGateLevelEnabled(LogLevel.Info)).toBe(true);
+        expect(logger.isGateLevelEnabled(LogLevel.Debug)).toBe(false);
+        expect(logger.isGateLevelEnabled(LogLevel.Trace)).toBe(false);
+      });
+    });
+
     it('forwards records passed via log() through filter evaluation', () => {
       logger = new TestLogger(context, LogLevel.Warn, appenderMocks, factory, [filter]);
 

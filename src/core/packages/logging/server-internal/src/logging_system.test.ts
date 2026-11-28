@@ -8,10 +8,12 @@
  */
 
 import { mockStreamWrite, mockGetFlattenedObject } from './logging_system.test.mocks';
+import { createFixedOffsetDate } from './test_helpers/fixed_offset_date';
 
 const dynamicProps = { process: { pid: expect.any(Number) }, ecs: { version: EcsVersion } };
 
-const timestamp = new Date(Date.UTC(2012, 1, 1, 14, 33, 22, 11));
+const EST_OFFSET_MINUTES = 300;
+const timestamp = createFixedOffsetDate(Date.UTC(2012, 1, 1, 14, 33, 22, 11), EST_OFFSET_MINUTES);
 let mockConsoleLog: jest.SpyInstance;
 
 import { createWriteStream } from 'fs';
