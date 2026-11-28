@@ -7,6 +7,7 @@
 
 import type { MitreEntity } from '@kbn/security-mitre-attack-common';
 import { MITRE_FRAMEWORKS } from '@kbn/security-mitre-attack-common';
+import { MITRE_FRAMEWORK_DEFINITIONS } from '../build_artifact/build_artifact';
 import { loadMitreArtifact } from './load_artifact';
 
 describe('loadMitreArtifact', () => {
@@ -33,6 +34,14 @@ describe('loadMitreArtifact', () => {
   it.each(MITRE_FRAMEWORKS)('contains entities for the %s framework', (framework) => {
     const frameworkEntities = entities.filter((entity) => entity.framework === framework);
     expect(frameworkEntities.length).toBeGreaterThan(0);
+  });
+
+  it.each(
+    MITRE_FRAMEWORK_DEFINITIONS.flatMap(({ framework, versions, toFrameworkVersion }) =>
+      versions.map((tag) => `${framework}:${toFrameworkVersion(tag)}`)
+    )
+  )('contains the pinned version %s', (groupKey) => {
+    expect(groups.has(groupKey)).toBe(true);
   });
 
   it('every framework/version group contains at least one tactic, technique, and subtechnique', () => {

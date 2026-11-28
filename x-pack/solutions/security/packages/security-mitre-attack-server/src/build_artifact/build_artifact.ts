@@ -33,7 +33,7 @@ export interface FrameworkDefinition {
 // Each tag must correspond to the version used for prebuilt rules in
 // https://github.com/elastic/detection-rules.
 // Tags are published at https://github.com/mitre/cti/tags.
-export const MITRE_CONTENT_VERSIONS: readonly string[] = ['ATT&CK-v19.2'];
+export const MITRE_CONTENT_VERSIONS: readonly string[] = ['ATT&CK-v19.2', 'ATT&CK-v20.1'];
 
 // Append a tag here to include an additional MITRE ATLAS version in the artifact.
 // Tags are published at https://github.com/mitre-atlas/atlas-data/releases and must
