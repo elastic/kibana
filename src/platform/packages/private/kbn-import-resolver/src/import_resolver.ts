@@ -38,7 +38,7 @@ export class ImportResolver {
     }
   });
 
-  private baseResolveOpts = {
+  private baseResolveOpts: Resolve.SyncOpts = {
     extensions: ['.js', '.json', '.ts', '.tsx', '.d.ts'],
     isFile: (path: string) => !!this.safeStat(path)?.isFile(),
     isDirectory: (path: string) => !!this.safeStat(path)?.isDirectory(),
