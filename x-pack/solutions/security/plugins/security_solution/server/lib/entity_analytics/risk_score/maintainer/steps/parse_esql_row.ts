@@ -15,7 +15,23 @@ export interface ParsedRiskScore {
   score: number;
   normalized_score: number;
   risk_inputs: SearchHitRiskInput[];
+  /** Alert count per `entity.source` of the entity's alerts; absent when the row carries none. */
+  source_alert_counts?: SourceAlertCount[];
 }
+
+export interface SourceAlertCount {
+  source: string;
+  alerts: number;
+}
+
+/** Reads a `<alert count>:<source>` value written by the base score query. */
+const parseSourceAlertCount = (value: unknown): SourceAlertCount[] => {
+  if (typeof value !== 'string') return [];
+  const separator = value.indexOf(':');
+  const alerts = Number(value.slice(0, separator));
+  if (separator < 1 || !Number.isFinite(alerts)) return [];
+  return [{ source: value.slice(separator + 1), alerts }];
+};
 
 export interface ParsedResolutionScore {
   resolution_target_id: string;
@@ -34,7 +50,13 @@ export interface ParsedResolutionScore {
 export const parseEsqlBaseScoreRow =
   (index: string, sampleSize: number) =>
   (row: unknown[]): ParsedRiskScore => {
-    const [count, score, _inputs, entityId] = row as [number, number, string | string[], string];
+    const [count, score, _inputs, _sources, entityId] = row as [
+      number,
+      number,
+      string | string[],
+      string | string[] | null | undefined,
+      string
+    ];
     const zetaValue = getRiemannZetaValue(sampleSize);
 
     const inputs = [_inputs]
@@ -87,6 +109,7 @@ export const parseEsqlBaseScoreRow =
       score,
       normalized_score: score / zetaValue,
       risk_inputs: inputs,
+      source_alert_counts: [_sources].flat().flatMap(parseSourceAlertCount),
     };
   };
 
@@ -101,10 +124,12 @@ export const parseEsqlResolutionScoreRow =
       string,
     ];
 
+    // No source counts here: base scoring already counted these alerts, so counting them again
+    // would double them in telemetry.
     const baseParsed = parseEsqlBaseScoreRow(
       index,
       sampleSize
-    )([count, score, _inputs, resolutionTargetId]);
+    )([count, score, _inputs, undefined, resolutionTargetId]);
 
     const parsedRelatedEntities = [contributingEntitiesRaw]
       .flat()

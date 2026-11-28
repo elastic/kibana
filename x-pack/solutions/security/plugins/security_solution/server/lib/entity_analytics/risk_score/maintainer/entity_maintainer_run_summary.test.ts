@@ -7,6 +7,7 @@
 
 import type { RunMetrics } from './instrumentation/run_metrics_tracker';
 import {
+  buildAlertSources,
   buildRiskScoreEntityMaintainerRunSummary,
   buildRiskScorePhase0EntityMaintainerRunSummary,
   buildRiskScoreSkipEntityMaintainerRunSummary,
@@ -270,5 +271,101 @@ describe('buildRiskScoreEntityMaintainerRunSummary', () => {
       skipped: 4,
       failed: 0,
     });
+  });
+});
+
+describe('buildAlertSources', () => {
+  it('reports every alert as scanned and the scored ones as qualified', () => {
+    expect(
+      buildAlertSources({
+        okta: { scored: 10, unmatched: 0 },
+        azure: { scored: 3, unmatched: 4 },
+      })
+    ).toEqual([
+      { id: 'okta', scanned: 10, qualified: 10, outcome: 'producing' },
+      { id: 'azure', scanned: 7, qualified: 3, outcome: 'producing' },
+    ]);
+  });
+
+  it('reports a source whose alerts were all unmatched as empty', () => {
+    expect(buildAlertSources({ gcp: { scored: 0, unmatched: 5 } })).toEqual([
+      { id: 'gcp', scanned: 5, qualified: 0, outcome: 'empty' },
+    ]);
+  });
+
+  it('keeps the top 30 sources by alert count and adds up the rest as other', () => {
+    const alertSources = Object.fromEntries(
+      Array.from({ length: 33 }, (_, i) => [`source_${i}`, { scored: 100 - i, unmatched: 1 }])
+    );
+
+    const sources = buildAlertSources(alertSources);
+
+    expect(sources).toHaveLength(31);
+    expect(sources[0]).toEqual({
+      id: 'source_0',
+      scanned: 101,
+      qualified: 100,
+      outcome: 'producing',
+    });
+    expect(sources[29]).toEqual({
+      id: 'source_29',
+      scanned: 72,
+      qualified: 71,
+      outcome: 'producing',
+    });
+    // source_30..source_32 scored 70 + 69 + 68, unmatched 3
+    expect(sources[30]).toEqual({
+      id: 'other',
+      scanned: 210,
+      qualified: 207,
+      outcome: 'producing',
+    });
+  });
+
+  it('shortens very long source names', () => {
+    const [entry] = buildAlertSources({
+      [`x${'y'.repeat(300)}`]: { scored: 1, unmatched: 0 },
+    });
+
+    expect(entry.id).toBe(`x${'y'.repeat(99)}`);
+  });
+
+  it('returns nothing when there are no alerts', () => {
+    expect(buildAlertSources({})).toEqual([]);
+  });
+});
+
+describe('buildRiskScoreEntityMaintainerRunSummary alert sources', () => {
+  const stages = [{ name: 'base' as const, status: 'success' as const, durationMs: 1 }];
+
+  it('adds the sources when there are alert sources', () => {
+    const summary = buildRiskScoreEntityMaintainerRunSummary({
+      entityType: 'user',
+      metrics: emptyMetrics(),
+      stages,
+      alertSources: { okta: { scored: 2, unmatched: 1 } },
+    });
+
+    expect(summary.sources).toEqual([
+      { id: 'okta', scanned: 3, qualified: 2, outcome: 'producing' },
+    ]);
+    expect(summary).not.toHaveProperty('breakdown');
+  });
+
+  it('leaves the sources out when there are none', () => {
+    const withEmpty = buildRiskScoreEntityMaintainerRunSummary({
+      entityType: 'user',
+      metrics: emptyMetrics(),
+      stages,
+      alertSources: {},
+    });
+    const without = buildRiskScoreEntityMaintainerRunSummary({
+      entityType: 'user',
+      metrics: emptyMetrics(),
+      stages,
+    });
+
+    expect(withEmpty).not.toHaveProperty('sources');
+    expect(without).not.toHaveProperty('sources');
   });
 });
