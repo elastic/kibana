@@ -19,6 +19,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
   const aiops = getService('aiops');
   const retry = getService('retry');
+  const testSubjects = getService('testSubjects');
 
   // AIOps / Log Rate Analysis lives in the ML UI so we need some related services.
   const ml = getService('ml');
@@ -74,6 +75,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await aiops.logRateAnalysisPage.assertNoWindowParametersEmptyPromptExists();
       } else if (testData.expected.prompt === 'change-point') {
         await aiops.logRateAnalysisPage.assertChangePointDetectedPromptExists();
+      } else if (testData.expected.prompt === 'change-point-or-empty') {
+        await retry.waitFor('analysis prompt', async () => {
+          return (
+            (await testSubjects.exists('aiopsChangePointDetectedPrompt')) ||
+            (await testSubjects.exists('aiopsNoWindowParametersEmptyPrompt'))
+          );
+        });
       } else {
         throw new Error('Invalid prompt');
       }
