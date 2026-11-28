@@ -17,7 +17,6 @@ import type {
   ToolResult,
   UserIdAndName,
   SerializedMetadataValue,
-  ConversationParentRelation,
 } from '@kbn/agent-builder-common';
 import type {
   AttachmentVersionRef,
@@ -37,6 +36,7 @@ import {
   normalizeConversationAccessControl,
 } from '@kbn/agent-builder-common';
 import { TimelineEventType } from '@kbn/agent-builder-common/chat/timeline_events';
+import { ConversationParentRelation } from '@kbn/agent-builder-common';
 import { isInternalTool } from '@kbn/agent-builder-common/tools';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { ExecutionPeek } from '../../execution/persistence';
@@ -430,6 +430,14 @@ export const toResponseConversationWithoutRounds = ({
   return withPermissions({ conversation, user });
 };
 
+/** Threads store no access control: their parent's decides. */
+const accessControlToEs = (
+  conversation: Pick<Conversation, 'access_control' | 'parent_conversation'>
+): Pick<ConversationProperties, 'access_control'> =>
+  conversation.parent_conversation?.relation === ConversationParentRelation.thread
+    ? {}
+    : { access_control: normalizeConversationAccessControl(conversation.access_control) };
+
 export const toEs = (
   conversation: NormalizedConversation,
   space: string
@@ -458,7 +466,7 @@ export const toEs = (
     pinned: undefined,
     pinned_by: conversation.pinned_by ?? [],
     read_only: conversation.read_only,
-    access_control: normalizeConversationAccessControl(conversation.access_control),
+    ...accessControlToEs(conversation),
     ...(conversation.origin ? { origin: conversation.origin } : {}),
     ...(conversation.workspace_id ? { workspace_id: conversation.workspace_id } : {}),
     ...(conversation.parent_conversation
@@ -594,7 +602,7 @@ export const createRequestToEs = ({
     read_by: [],
     pinned_by: [],
     read_only: conversation.read_only ?? false,
-    access_control: normalizeConversationAccessControl(conversation.access_control),
+    ...accessControlToEs(conversation),
     ...(conversation.origin ? { origin: conversation.origin } : {}),
     ...(conversation.workspace_id ? { workspace_id: conversation.workspace_id } : {}),
     // Cast metadata to storage type — see note in toEs.

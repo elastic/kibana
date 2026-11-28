@@ -87,6 +87,34 @@ describe('CommandMenuList', () => {
     expect(screen.getByTestId('richLabel')).toHaveTextContent('Rich label with highlight');
   });
 
+  it('renders an icon before the label of options that have one', () => {
+    const { container } = renderWithProvider(
+      <CommandMenuList
+        options={[
+          { key: '1', label: 'With icon', iconType: 'comment' },
+          {
+            key: '2',
+            label: 'Rich with icon',
+            iconType: 'document',
+            renderLabel: <span data-test-subj="richIconLabel">Rich with icon</span>,
+          },
+          { key: '3', label: 'Without icon' },
+        ]}
+        isLoading={false}
+        onSelect={jest.fn()}
+      />
+    );
+
+    const rows = screen.getAllByRole('option');
+    expect(rows[0].querySelector('[data-euiicon-type="comment"]')).toBeInTheDocument();
+    expect(rows[1].querySelector('[data-euiicon-type="document"]')).toBeInTheDocument();
+    expect(screen.getByTestId('richIconLabel')).toBeInTheDocument();
+    expect(
+      rows[2].querySelectorAll('[data-euiicon-type]:not([data-euiicon-type="return"])')
+    ).toHaveLength(0);
+    expect(container.querySelectorAll('[data-euiicon-type="return"]')).toHaveLength(1);
+  });
+
   it('renders a composite renderLabel (e.g. primary text plus trailing description)', () => {
     renderWithProvider(
       <CommandMenuList

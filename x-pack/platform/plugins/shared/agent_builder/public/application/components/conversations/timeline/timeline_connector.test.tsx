@@ -13,7 +13,7 @@ import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments'
 import useObservable from 'react-use/lib/useObservable';
 import { ConversationStreamService } from '../../../../services/events/conversation_stream_service';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
-import type { StreamRecord } from '../../../context/streaming/types';
+import type { ActiveStream, StreamRecord } from '../../../context/streaming/types';
 import { createUserMessageEvent } from './items/user_message_event.factory';
 import { createExecutionStartedEvent } from './items/execution_started.factory';
 import { createExecutionTerminatedEvent } from './items/execution_terminated_event.factory';
@@ -26,6 +26,7 @@ import { TimelineConnector } from './timeline_connector';
 interface MockState {
   conversation?: Conversation;
   record: StreamRecord;
+  activeStreams?: Map<string, ActiveStream>;
 }
 const mockStore = {
   state$: new BehaviorSubject<MockState>({ record: {} }),
@@ -45,6 +46,9 @@ jest.mock('../../../context/conversation/use_conversation_id', () => ({
 }));
 jest.mock('../../../context/streaming/streaming_context', () => ({
   useStreamRecord: () => mockStore.useMockState().record,
+  useStreamingContext: () => ({
+    activeStreams: mockStore.useMockState().activeStreams ?? new Map(),
+  }),
   useConversationStreamService: () => mockStreamService,
 }));
 const mockOnConnectorRender = jest.fn();
@@ -121,10 +125,12 @@ const setState = ({
   conversation,
   pendingMessage,
   withAttachments = false,
+  isAttaching = false,
 }: {
   conversation?: Conversation;
   pendingMessage?: string;
   withAttachments?: boolean;
+  isAttaching?: boolean;
 }) => {
   jest.mocked(useConversationId).mockReturnValue(conversationId);
   act(() => {
@@ -134,6 +140,11 @@ const setState = ({
         pendingMessage,
         pendingAttachments: withAttachments ? pendingAttachments : undefined,
       },
+      activeStreams: isAttaching
+        ? new Map<string, ActiveStream>([
+            [conversationId, { type: 'attach', streamId: 'stream-1' }],
+          ])
+        : undefined,
     });
   });
 };
@@ -191,6 +202,38 @@ describe.skip('TimelineConnector', () => {
       'userMessage:pending::user_message:',
       'agentTurn:active:running',
     ]);
+  });
+
+  it('shows a running turn under the saved message while attaching to its run', async () => {
+    setState({ conversation: conversationWith([savedUserMessage]), isAttaching: true });
+    render(<TimelineConnector />);
+
+    expect(renderedItems()).toEqual([
+      'userMessage:round-1::user_message:',
+      'agentTurn:active:running',
+    ]);
+
+    act(() => {
+      chatEvents$.next(started as ChatEvent);
+    });
+    await flushFrame();
+
+    expect(renderedItems()).toEqual([
+      'userMessage:round-1::user_message:',
+      'agentTurn:round-1::execution:running',
+    ]);
+
+    act(() => {
+      chatEvents$.next(terminated as ChatEvent);
+      streamEnded$.next();
+    });
+  });
+
+  it('shows no running turn under a saved message when nothing is attaching', () => {
+    setState({ conversation: conversationWith([savedUserMessage]) });
+    render(<TimelineConnector />);
+
+    expect(renderedItems()).toEqual(['userMessage:round-1::user_message:']);
   });
 
   it('keeps the pending message and the finished turn visible after the stream ends', async () => {

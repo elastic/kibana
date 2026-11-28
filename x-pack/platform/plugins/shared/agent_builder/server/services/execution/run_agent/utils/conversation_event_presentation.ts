@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { isAttachmentEvent } from '@kbn/agent-builder-common';
+import { isAttachmentEvent, isThreadEvent } from '@kbn/agent-builder-common';
 import { generateXmlTree } from '@kbn/agent-builder-genai-utils/tools/utils';
 import { formatDate } from '../prompts/utils/helpers';
 import { formatAttachmentEvent } from './attachment_event_presentation';
 import type { ProcessedStandaloneEvent } from './context_timeline';
+import { formatThreadEvent } from './thread_event_presentation';
 
 /**
  * Renders a custom conversation event for the LLM as a `<conversation_event>` block.
@@ -22,6 +23,8 @@ import type { ProcessedStandaloneEvent } from './context_timeline';
 export const formatConversationEvent = (event: ProcessedStandaloneEvent): string =>
   isAttachmentEvent(event)
     ? formatAttachmentEvent(event)
+    : isThreadEvent(event)
+    ? formatThreadEvent(event)
     : generateXmlTree({
         tagName: 'conversation_event',
         attributes: { type: event.type, timestamp: formatDate(event.created_at) },

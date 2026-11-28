@@ -147,6 +147,7 @@ describe('CommandMenuPopover', () => {
       );
 
       expect(screen.getByTestId('testPopover-content')).not.toBeVisible();
+      expect(screen.getByRole('dialog', { hidden: true })).not.toBeVisible();
     });
 
     it('shows the panel once the match reports visible content', () => {
@@ -160,6 +161,7 @@ describe('CommandMenuPopover', () => {
       );
 
       expect(screen.getByTestId('testPopover-content')).toBeVisible();
+      expect(screen.getByRole('dialog')).toBeVisible();
     });
 
     it('keeps the menu component mounted while hidden, so it can keep re-evaluating and recover on its own', () => {

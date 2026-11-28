@@ -14,6 +14,7 @@ export const mutationKeys = {
   attachExecution: ['attachExecution'] as const,
   sendUserMessage: (conversationId?: string) => ['sendUserMessage', conversationId] as const,
   createConversation: ['createConversation'] as const,
+  createThread: (parentId?: string) => ['createThread', parentId] as const,
   updateAgentAccessControl: (agentId: string) =>
     ['agentProfiles', agentId, 'accessControl', 'update'] as const,
   updateConversationAccessControl: (conversationId: string) =>

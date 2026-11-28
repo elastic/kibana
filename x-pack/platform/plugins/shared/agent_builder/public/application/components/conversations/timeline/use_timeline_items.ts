@@ -19,7 +19,7 @@ import { useConversation } from '../../../hooks/use_conversation';
 import { useLiveEvents } from '../../../hooks/use_live_events';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
-import { useStreamRecord } from '../../../context/streaming/streaming_context';
+import { useStreamingContext, useStreamRecord } from '../../../context/streaming/streaming_context';
 import { buildItems } from './to_timeline_items';
 import { resolveTimelineItems } from './resolve_timeline_items';
 import { reuseUnchangedItems } from './reuse_unchanged_items';
@@ -78,9 +78,20 @@ export const useTimelineItems = (): TimelineItem[] => {
   const conversationAttachments = conversation?.attachments;
 
   const { pendingMessage, pendingAttachments } = useStreamRecord(conversationId);
+  const { activeStreams } = useStreamingContext();
+  const docEvents = conversation?.events;
   const startedUserMessageId = savedUserMessageId(liveEvents);
   const pendingUserMessageId = startedUserMessageId ?? PENDING_USER_MESSAGE_ID;
-  const awaitingRunStart = !!pendingMessage && startedUserMessageId === undefined;
+
+  // An attached run replays nothing before its first event, so the saved message has no turn yet.
+  const isAttachedRunConnecting =
+    conversationId !== undefined &&
+    activeStreams.get(conversationId)?.type === 'attach' &&
+    liveEvents.length === 0 &&
+    docEvents?.at(-1)?.type === TimelineEventType.userMessage;
+
+  const awaitingRunStart =
+    (!!pendingMessage && startedUserMessageId === undefined) || isAttachedRunConnecting;
   const pendingUserMessage = useMemo<UserMessageEvent | null>(
     () =>
       pendingMessage
@@ -99,7 +110,6 @@ export const useTimelineItems = (): TimelineItem[] => {
     [pendingMessage, pendingAttachments, pendingUserMessageId]
   );
 
-  const docEvents = conversation?.events;
   // Once the saved twin is in the cache the message is no longer pending, even though the local
   // copy still exists.
   const isPendingUnsaved =

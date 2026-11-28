@@ -34,7 +34,12 @@ import { useMessageEditor } from './message_editor';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { ChatTriggerMode } from '../../../../../common/http_api/chat';
 import { useInputDraft } from '../../../hooks/use_input_draft';
+import { useSlashCommands } from './slash_commands/use_slash_commands';
+import type { SlashCommand } from './slash_commands/types';
 
+jest.mock('./slash_commands/use_slash_commands', () => ({
+  useSlashCommands: jest.fn(),
+}));
 jest.mock('../../../hooks/use_conversation_stream', () => ({
   useConversationStream: jest.fn(),
 }));
@@ -234,6 +239,7 @@ const mockedUseToasts = jest.mocked(useToasts);
 const mockedUseMessageEditor = jest.mocked(useMessageEditor);
 const mockedUseAgentBuilderServices = jest.mocked(useAgentBuilderServices);
 const mockedUseInputDraft = jest.mocked(useInputDraft);
+const mockedUseSlashCommands = jest.mocked(useSlashCommands);
 
 const submitMessage = jest.fn();
 const sendUserMessage = jest.fn();
@@ -319,6 +325,7 @@ describe('ConversationInput', () => {
       controller: editorController,
       overLimitCharacterCount: 0,
     } as never);
+    mockedUseSlashCommands.mockReturnValue([]);
   });
 
   it('calls onSubmitOverride with editor content and skips submitMessage when override is provided', () => {
@@ -1196,6 +1203,148 @@ describe('ConversationInput', () => {
       rerenderInput(rerender);
 
       expect(editorController.clear).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('slash commands', () => {
+    const runThread = jest.fn();
+    const clearDraft = jest.fn();
+    const threadCommand = (overrides: Partial<SlashCommand> = {}): SlashCommand => ({
+      name: 'thread',
+      description: 'Start new sub-conversation',
+      iconType: 'comment',
+      run: runThread,
+      ...overrides,
+    });
+    const submit = () =>
+      act(async () => {
+        fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
+      });
+
+    beforeEach(() => {
+      mockedUseConversationId.mockReturnValue('conv-1');
+      mockedUseSlashCommands.mockReturnValue([threadCommand()]);
+      runThread.mockResolvedValue(undefined);
+      mockedUseInputDraft.mockReturnValue({
+        draft: null,
+        saveDraft: jest.fn(),
+        clearDraft,
+        keepUnsentFor: mockKeepUnsentFor,
+      });
+    });
+
+    it('runs the command with the text after it instead of sending a message', async () => {
+      editorController.getContent.mockReturnValue('/thread dig into this');
+      renderInput(<ConversationInput />);
+
+      await submit();
+
+      expect(runThread).toHaveBeenCalledWith('dig into this');
+      expect(submitMessage).not.toHaveBeenCalled();
+      expect(mockSendSteer).not.toHaveBeenCalled();
+      expect(editorController.clear).toHaveBeenCalledTimes(1);
+      expect(clearDraft).toHaveBeenCalledTimes(1);
+      expect(editorController.setContent).not.toHaveBeenCalled();
+    });
+
+    it('runs a bare command with no arguments', async () => {
+      editorController.getContent.mockReturnValue('/thread');
+      renderInput(<ConversationInput />);
+
+      await submit();
+
+      expect(runThread).toHaveBeenCalledWith('');
+      expect(submitMessage).not.toHaveBeenCalled();
+      expect(editorController.clear).toHaveBeenCalledTimes(1);
+    });
+
+    it('runs the command instead of steering a running agent', async () => {
+      mockedUseConversationStream.mockReturnValue({
+        isResponseLoading: true,
+        canCancel: true,
+      } as never);
+      editorController.getContent.mockReturnValue('/thread dig into this');
+      renderInput(<ConversationInput />);
+
+      await submit();
+
+      expect(runThread).toHaveBeenCalledWith('dig into this');
+      expect(mockSendSteer).not.toHaveBeenCalled();
+    });
+
+    it('refuses an unavailable command with its reason and keeps the text', async () => {
+      mockedUseSlashCommands.mockReturnValue([
+        threadCommand({ unavailableReason: 'Send a message first.' }),
+      ]);
+      editorController.getContent.mockReturnValue('/thread dig into this');
+      renderInput(<ConversationInput />);
+
+      await submit();
+
+      expect(addErrorToast).toHaveBeenCalledWith('Send a message first.');
+      expect(runThread).not.toHaveBeenCalled();
+      expect(submitMessage).not.toHaveBeenCalled();
+      expect(editorController.clear).not.toHaveBeenCalled();
+      expect(clearDraft).not.toHaveBeenCalled();
+    });
+
+    it('refuses a command that carries a pasted image and keeps the text', async () => {
+      editorController.getPlaceholderNames.mockReturnValueOnce(['shot.png']);
+      editorController.getContent.mockReturnValue('/thread dig into this');
+      renderInput(<ConversationInput />);
+
+      await submit();
+
+      expect(addErrorToast).toHaveBeenCalledWith(expect.stringContaining('Images'));
+      expect(runThread).not.toHaveBeenCalled();
+      expect(editorController.clear).not.toHaveBeenCalled();
+    });
+
+    it('restores the text and reports the error when the command fails', async () => {
+      runThread.mockRejectedValue(new Error('Conversation not found'));
+      editorController.getContent.mockReturnValue('/thread dig into this');
+      renderInput(<ConversationInput />);
+
+      await submit();
+
+      expect(addErrorToast).toHaveBeenCalledWith({ title: 'Conversation not found' });
+      expect(editorController.setContent).toHaveBeenCalledWith('/thread dig into this');
+    });
+
+    it('holds further submits while the command runs', async () => {
+      let resolveRun: () => void = () => {};
+      runThread.mockReturnValue(new Promise<void>((resolve) => (resolveRun = resolve)));
+      editorController.getContent.mockReturnValue('/thread dig into this');
+      renderInput(<ConversationInput />);
+
+      await submit();
+      await submit();
+
+      expect(runThread).toHaveBeenCalledTimes(1);
+      await act(async () => resolveRun());
+      await submit();
+      expect(runThread).toHaveBeenCalledTimes(2);
+    });
+
+    it('sends text that only looks like a command as a message', async () => {
+      editorController.getContent.mockReturnValue('/threads are great');
+      renderInput(<ConversationInput />);
+
+      await submit();
+
+      expect(runThread).not.toHaveBeenCalled();
+      expect(submitMessage).toHaveBeenCalledWith('/threads are great', expect.anything());
+    });
+
+    it('sends the text as a message when there are no commands', async () => {
+      mockedUseSlashCommands.mockReturnValue([]);
+      editorController.getContent.mockReturnValue('/thread dig into this');
+      renderInput(<ConversationInput />);
+
+      await submit();
+
+      expect(runThread).not.toHaveBeenCalled();
+      expect(submitMessage).toHaveBeenCalledWith('/thread dig into this', expect.anything());
     });
   });
 });

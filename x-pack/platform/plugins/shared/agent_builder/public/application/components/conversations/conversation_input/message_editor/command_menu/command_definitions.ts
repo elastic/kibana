@@ -15,6 +15,11 @@ import { CommandId } from './types';
 import { useExperimentalFeatures } from '../../../../../hooks/use_experimental_features';
 import { useCanMention } from '../../mentions/use_can_mention';
 
+const skillCommandName = i18n.translate(
+  'xpack.agentBuilder.conversationInput.commandMenu.skillCommandName',
+  { defaultMessage: 'Skills and commands' }
+);
+
 const mentionCommandName = i18n.translate(
   'xpack.agentBuilder.conversationInput.commandMenu.mentionCommandName',
   { defaultMessage: 'Mention' }
@@ -27,7 +32,13 @@ const semanticKnowledgeCommandName = i18n.translate(
 
 // When adding a new command, also add its data prefetch hook to use_command_menu_prefetch.ts
 const COMMAND_DEFINITIONS: readonly CommandDefinition[] = [
-  { id: CommandId.Skill, scheme: 'skill', sequence: '/', name: 'Skill', menuComponent: Skills },
+  {
+    id: CommandId.Skill,
+    scheme: 'skill',
+    sequence: '/',
+    name: skillCommandName,
+    menuComponent: Skills,
+  },
   {
     id: CommandId.Sml,
     scheme: 'sml',

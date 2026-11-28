@@ -9,6 +9,8 @@ import { type HttpSetup, buildPath } from '@kbn/core-http-browser';
 import type { FeedbackChipId } from '@kbn/agent-builder-common';
 import type {
   CreateConversationResponse,
+  CreateThreadRequest,
+  CreateThreadResponse,
   AddConversationEventsRequestBody,
   AddConversationEventsResponse,
   GetConversationResponse,
@@ -84,6 +86,16 @@ export class ConversationsService {
     return await this.http.post<CreateConversationResponse>(`${publicApiPath}/conversations`, {
       body: JSON.stringify({ agent_id: agentId }),
     });
+  }
+
+  async createThread({
+    parentId,
+    ...body
+  }: CreateThreadRequest & { parentId: string }): Promise<CreateThreadResponse> {
+    return await this.http.post<CreateThreadResponse>(
+      buildPath(`${internalApiPath}/conversations/{parentId}/_thread`, { parentId }),
+      { body: JSON.stringify(body) }
+    );
   }
 
   async get({ conversationId }: ConversationGetOptions) {

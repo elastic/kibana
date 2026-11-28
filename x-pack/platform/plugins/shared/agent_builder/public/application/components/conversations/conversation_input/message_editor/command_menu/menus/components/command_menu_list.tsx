@@ -23,7 +23,7 @@ import {
   useEuiTheme,
   keys,
 } from '@elastic/eui';
-import type { EuiSelectableOption } from '@elastic/eui';
+import type { EuiSelectableOption, IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { CommandMenuHandle } from '../../types';
 
@@ -56,6 +56,10 @@ const enterIconStyles = css`
   flex-shrink: 0;
 `;
 
+const leadingIconStyles = css`
+  flex-shrink: 0;
+`;
+
 export interface CommandMenuListOption {
   readonly key: string;
   /**
@@ -63,11 +67,13 @@ export interface CommandMenuListOption {
    */
   readonly label: string;
   readonly renderLabel?: React.ReactNode;
+  /** Icon shown before the label. */
+  readonly iconType?: IconType;
 }
 
 /** After EuiSelectableList merges `option.data` into the option, `renderOption` receives this shape. */
 type CommandMenuListSelectableRow = EuiSelectableOption &
-  Partial<Pick<CommandMenuListOption, 'renderLabel'>>;
+  Partial<Pick<CommandMenuListOption, 'renderLabel' | 'iconType'>>;
 
 interface CommandMenuListProps {
   readonly options: readonly CommandMenuListOption[];
@@ -128,10 +134,10 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
 
     const selectableOptions: EuiSelectableOption[] = useMemo(
       () =>
-        options.map((option) => ({
-          label: option.label,
-          key: option.key,
-          data: option.renderLabel != null ? { renderLabel: option.renderLabel } : undefined,
+        options.map(({ label, key, renderLabel, iconType }) => ({
+          label,
+          key,
+          data: renderLabel != null || iconType != null ? { renderLabel, iconType } : undefined,
         })),
       [options]
     );
@@ -186,6 +192,16 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
       [euiTheme]
     );
 
+    const leadingStyles = useMemo(
+      () => css`
+        display: flex;
+        align-items: center;
+        gap: ${euiTheme.size.s};
+        min-width: 0;
+      `,
+      [euiTheme]
+    );
+
     const activeHighlightStyles = css`
       ${getRowSelector(activeIndex)} {
         background-color: ${euiTheme.components.buttons.backgroundEmptyTextHover};
@@ -226,9 +242,22 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
           singleSelection
           height={listHeight}
           renderOption={(option: CommandMenuListSelectableRow) => {
+            const label = <span css={labelStyles}>{option.renderLabel ?? option.label}</span>;
             return (
               <span css={rowStyles}>
-                <span css={labelStyles}>{option.renderLabel ?? option.label}</span>
+                {option.iconType ? (
+                  <span css={leadingStyles}>
+                    <EuiIcon
+                      type={option.iconType}
+                      size="m"
+                      aria-hidden={true}
+                      css={leadingIconStyles}
+                    />
+                    {label}
+                  </span>
+                ) : (
+                  label
+                )}
                 {option.key === activeKey && (
                   <EuiIcon
                     type="return"

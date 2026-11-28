@@ -43,6 +43,12 @@ const hiddenContentStyles = css`
   display: none;
 `;
 
+// The popover stays open while hidden so the menu stays mounted, so the empty panel itself has to
+// be hidden too: otherwise its border still draws a line at the caret.
+const hiddenPanelStyles = css`
+  visibility: hidden;
+`;
+
 export const CommandMenuPopover: React.FC<CommandMenuPopoverProps> = ({
   commandMatch,
   anchorPosition,
@@ -93,7 +99,11 @@ export const CommandMenuPopover: React.FC<CommandMenuPopoverProps> = ({
         }}
         anchorPosition="upLeft"
         panelPaddingSize="none"
-        panelProps={{ 'aria-label': panelAriaLabel, id: panelId }}
+        panelProps={{
+          'aria-label': panelAriaLabel,
+          id: panelId,
+          css: hasVisibleContent ? undefined : hiddenPanelStyles,
+        }}
         data-test-subj={dataTestSubj}
         ownFocus={false}
         display="block"
