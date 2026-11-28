@@ -1,5 +1,5 @@
 {
-  "sha1": "27a917e1137b3857d98a6109725edc69a568d5c1",
+  "sha1": "48f5d1efcc334c2c5fcd2573759fcac14cc81b69",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -162,6 +162,22 @@
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/health_scan_pagination.spec.ts",
         "line": 66,
         "column": 22
+      }
+    },
+    {
+      "id": "adc5ed2bcbc0764-701732bd1cfc895",
+      "title": "SLO global settings saves the SLI retention and shows it after a reload",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/slo_global_settings.spec.ts",
+        "line": 37,
+        "column": 42
       }
     },
     {

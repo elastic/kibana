@@ -35,7 +35,8 @@ cmd="node scripts/capture_oas_snapshot\
   --include-path /api/security/entity_store \
   --include-path /api/profiling \
   --include-path /api/synthetics \
-  --include-path /api/observability/slos"
+  --include-path /api/observability/slos \
+  --include-path /api/observability/slo_settings"
 
 run_check() {
   eval "$cmd"

@@ -16,6 +16,7 @@ import {
   SLO_CREATE_PATH,
   SLO_DETAIL_PATH,
   SLO_EDIT_PATH,
+  SLO_GLOBAL_SETTINGS_PATH,
   SLO_SETTINGS_PATH,
 } from '@kbn/slo-shared-plugin/common/locators/paths';
 import React from 'react';
@@ -66,6 +67,13 @@ export const getRoutes = (
       exact: true,
     },
     [SLO_SETTINGS_PATH]: {
+      handler: () => {
+        return <SloSettingsPage />;
+      },
+      params: {},
+      exact: true,
+    },
+    [SLO_GLOBAL_SETTINGS_PATH]: {
       handler: () => {
         return <SloSettingsPage />;
       },
