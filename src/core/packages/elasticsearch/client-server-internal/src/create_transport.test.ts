@@ -9,14 +9,14 @@
 
 import { transportConstructorMock, transportRequestMock } from './create_transport.test.mocks';
 
-import { errors } from '@elastic/elasticsearch';
+import { Client, errors } from '@elastic/elasticsearch';
 import type { BaseConnectionPool, TransportRequestOptions } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { Readable } from 'stream';
 import type { InternalUnauthorizedErrorHandler } from './retry_unauthorized';
 import type { ErrorHandlerAccessor, OnRequestHandler } from './create_transport';
-import { createTransport } from './create_transport';
+import { createTransport, KibanaTransport } from './create_transport';
 
 const createConnectionPool = () => {
   return { _connectionPool: 'mocked' } as unknown as BaseConnectionPool;
@@ -906,6 +906,189 @@ describe('createTransport', () => {
           querystring: { some_field: 'some_value' },
         })
       );
+    });
+  });
+
+  describe('shared class reuse and instance isolation', () => {
+    it('reuses the same KibanaTransport class and prototype across createTransport calls', () => {
+      const TransportA = createTransport({
+        scoped: true,
+        getExecutionContext,
+        getUnauthorizedErrorHandler,
+        onRequest: jest.fn(),
+        logger: mockLogger,
+      });
+      const TransportB = createTransport({
+        scoped: false,
+        getExecutionContext,
+        onRequest: jest.fn(),
+        logger: mockLogger,
+      });
+
+      const transportA = new TransportA(baseConstructorParams);
+      const transportB = new TransportB(baseConstructorParams);
+
+      expect(transportA).toBeInstanceOf(KibanaTransport);
+      expect(transportB).toBeInstanceOf(KibanaTransport);
+      expect(transportA).toBeInstanceOf(TransportA);
+      expect(transportB).toBeInstanceOf(TransportB);
+      expect(transportA.constructor).toBe(KibanaTransport);
+      expect(transportB.constructor).toBe(KibanaTransport);
+      expect(Object.getPrototypeOf(transportA)).toBe(KibanaTransport.prototype);
+      expect(Object.getPrototypeOf(transportB)).toBe(KibanaTransport.prototype);
+      expect(Object.getPrototypeOf(TransportA)).toBe(Object.getPrototypeOf(KibanaTransport));
+    });
+
+    it('isolates headers, onRequest, and unauthorized error handler across concurrent transports', async () => {
+      const onRequestA: jest.MockedFunction<OnRequestHandler> = jest.fn();
+      const onRequestB: jest.MockedFunction<OnRequestHandler> = jest.fn();
+      const handlerA: jest.MockedFunction<InternalUnauthorizedErrorHandler> = jest
+        .fn()
+        .mockResolvedValue({ type: 'retry', authHeaders: { authorization: 'Bearer refreshed-a' } });
+      const handlerB: jest.MockedFunction<InternalUnauthorizedErrorHandler> = jest
+        .fn()
+        .mockReturnValue({ type: 'notHandled' });
+
+      const TransportA = createTransport({
+        scoped: true,
+        getExecutionContext: () => 'exec-a',
+        getUnauthorizedErrorHandler: () => handlerA,
+        onRequest: onRequestA,
+        logger: mockLogger,
+      });
+      const TransportB = createTransport({
+        scoped: true,
+        getExecutionContext: () => 'exec-b',
+        getUnauthorizedErrorHandler: () => handlerB,
+        onRequest: onRequestB,
+        logger: mockLogger,
+      });
+
+      const transportA = new TransportA({
+        ...baseConstructorParams,
+        headers: { authorization: 'Bearer initial-a' },
+      });
+      const transportB = new TransportB({
+        ...baseConstructorParams,
+        headers: { authorization: 'Bearer initial-b' },
+      });
+
+      transportRequestMock.mockImplementation((_params, opts) => {
+        if (opts?.headers?.authorization === 'Bearer initial-a') {
+          return Promise.reject(createUnauthorizedError());
+        }
+        return Promise.resolve({ body: { auth: opts?.headers?.authorization } });
+      });
+
+      const [resA, resB] = await Promise.all([
+        transportA.request({ method: 'GET', path: '/a' }),
+        transportB.request({ method: 'GET', path: '/b' }),
+      ]);
+
+      expect(resA).toEqual({ body: { auth: 'Bearer refreshed-a' } });
+      expect(resB).toEqual({ body: { auth: 'Bearer initial-b' } });
+      expect(handlerA).toHaveBeenCalledTimes(1);
+      expect(handlerB).not.toHaveBeenCalled();
+
+      const [followUpA, followUpB] = await Promise.all([
+        transportA.request({ method: 'GET', path: '/a-next' }),
+        transportB.request({ method: 'GET', path: '/b-next' }),
+      ]);
+
+      expect(followUpA).toEqual({ body: { auth: 'Bearer refreshed-a' } });
+      expect(followUpB).toEqual({ body: { auth: 'Bearer initial-b' } });
+      expect(onRequestA).toHaveBeenCalledTimes(2);
+      expect(onRequestB).toHaveBeenCalledTimes(2);
+      expect(onRequestA).toHaveBeenLastCalledWith(
+        { scoped: true },
+        { method: 'GET', path: '/a-next' },
+        expect.objectContaining({
+          opaqueId: 'exec-a',
+          headers: { authorization: 'Bearer refreshed-a' },
+        }),
+        mockLogger
+      );
+      expect(onRequestB).toHaveBeenLastCalledWith(
+        { scoped: true },
+        { method: 'GET', path: '/b-next' },
+        expect.objectContaining({
+          opaqueId: 'exec-b',
+          headers: { authorization: 'Bearer initial-b' },
+        }),
+        mockLogger
+      );
+    });
+
+    it('works with Client.child() and grandchild child() while preserving isolation', async () => {
+      const rootOnRequest: jest.MockedFunction<OnRequestHandler> = jest.fn();
+      const onRequestA: jest.MockedFunction<OnRequestHandler> = jest.fn();
+      const onRequestB: jest.MockedFunction<OnRequestHandler> = jest.fn();
+      const handlerA: jest.MockedFunction<InternalUnauthorizedErrorHandler> = jest
+        .fn()
+        .mockResolvedValue({
+          type: 'retry',
+          authHeaders: { authorization: 'Bearer refreshed-grandchild-a' },
+        });
+
+      const rootClient = new Client({
+        nodes: ['http://localhost:9200'],
+        Transport: createTransport({
+          scoped: true,
+          onRequest: rootOnRequest,
+          logger: mockLogger,
+        }),
+      });
+
+      const childA = rootClient.child({
+        headers: { authorization: 'Bearer child-a' },
+        Transport: createTransport({
+          scoped: true,
+          getUnauthorizedErrorHandler: () => handlerA,
+          onRequest: onRequestA,
+          logger: mockLogger,
+        }),
+      });
+      const childB = rootClient.child({
+        headers: { authorization: 'Bearer child-b' },
+        Transport: createTransport({
+          scoped: true,
+          onRequest: onRequestB,
+          logger: mockLogger,
+        }),
+      });
+      const grandChildA = childA.child({
+        headers: { authorization: 'Bearer grandchild-a' },
+      });
+
+      expect(childA.transport).toBeInstanceOf(KibanaTransport);
+      expect(childB.transport).toBeInstanceOf(KibanaTransport);
+      expect(grandChildA.transport).toBeInstanceOf(KibanaTransport);
+      expect(childA.transport.constructor).toBe(KibanaTransport);
+      expect(childB.transport.constructor).toBe(KibanaTransport);
+      expect(grandChildA.transport.constructor).toBe(KibanaTransport);
+
+      transportRequestMock.mockImplementation((_params, opts) => {
+        if (opts?.headers?.authorization === 'Bearer grandchild-a') {
+          return Promise.reject(createUnauthorizedError());
+        }
+        return Promise.resolve({ body: { auth: opts?.headers?.authorization } });
+      });
+
+      const [resGrandChildA, resChildA, resChildB] = await Promise.all([
+        grandChildA.transport.request({ method: 'GET', path: '/gc-a' }),
+        childA.transport.request({ method: 'GET', path: '/c-a' }),
+        childB.transport.request({ method: 'GET', path: '/c-b' }),
+      ]);
+
+      expect(resGrandChildA).toEqual({ body: { auth: 'Bearer refreshed-grandchild-a' } });
+      expect(resChildA).toEqual({ body: { auth: 'Bearer child-a' } });
+      expect(resChildB).toEqual({ body: { auth: 'Bearer child-b' } });
+      expect(handlerA).toHaveBeenCalledTimes(1);
+      expect(onRequestA).toHaveBeenCalledTimes(2);
+      expect(onRequestB).toHaveBeenCalledTimes(1);
+      expect(rootOnRequest).not.toHaveBeenCalled();
+
+      await rootClient.close();
     });
   });
 });

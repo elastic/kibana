@@ -138,6 +138,128 @@ const createUnauthorizedStreamError = async (
   }) as UnauthorizedError;
 };
 
+export interface KibanaTransportConfig {
+  readonly scoped: boolean;
+  readonly getExecutionContext: () => string | undefined;
+  readonly getUnauthorizedErrorHandler?: ErrorHandlerAccessor;
+  readonly onRequest: OnRequestHandler;
+  readonly logger: Logger;
+}
+
+export class KibanaTransport extends Transport {
+  private headers: IncomingHttpHeaders;
+  private readonly config: KibanaTransportConfig;
+
+  constructor(config: KibanaTransportConfig, options: TransportOptions) {
+    const { headers = {}, ...otherOptions } = options;
+    super(otherOptions);
+    this.headers = headers;
+    this.config = config;
+  }
+
+  async request(params: TransportRequestParams, options?: TransportRequestOptions) {
+    const { scoped, getExecutionContext, onRequest, logger } = this.config;
+    const opts: TransportRequestOptions = options ? { ...options } : {};
+
+    // Extract retryOn401 from object-shaped asStream before normalizing
+    let retryOn401 = false;
+    if (opts.asStream != null && typeof opts.asStream === 'object') {
+      retryOn401 = (opts.asStream as KibanaAsStreamOptions).retryOn401 === true;
+      opts.asStream = true;
+    }
+
+    // sync override of maxResponseSize and maxCompressedResponseSize
+    if (options) {
+      if (
+        options.maxResponseSize !== undefined &&
+        options.maxCompressedResponseSize === undefined
+      ) {
+        opts.maxCompressedResponseSize = options.maxResponseSize;
+      } else if (
+        options.maxCompressedResponseSize !== undefined &&
+        options.maxResponseSize === undefined
+      ) {
+        opts.maxResponseSize = options.maxCompressedResponseSize;
+      }
+    }
+    const opaqueId = getExecutionContext();
+    if (opaqueId && !opts.opaqueId) {
+      // rewrites headers['x-opaque-id'] if it presents
+      opts.opaqueId = opaqueId;
+    }
+
+    // add stored headers to the options
+    opts.headers = {
+      ...this.headers,
+      ...options?.headers,
+    };
+
+    onRequest({ scoped }, params, opts, logger);
+
+    let response: TransportResult<any, any>;
+    try {
+      response = (await super.request(params, opts)) as TransportResult<any, any>;
+    } catch (e) {
+      if (isUnauthorizedError(e)) {
+        return await this.retryUnauthorizedRequest(e, params, opts, options?.headers);
+      }
+
+      throw e;
+    }
+
+    if (retryOn401 && isUnauthorizedStreamResponse(response)) {
+      logger.debug(
+        `Received streamed 401 response for [${params.method} ${params.path}]${
+          opts.opaqueId ? ` (opaqueId: ${opts.opaqueId})` : ''
+        }, attempting token refresh and retry`
+      );
+      return await this.retryUnauthorizedRequest(
+        await createUnauthorizedStreamError(response, logger),
+        params,
+        opts,
+        options?.headers
+      );
+    }
+
+    return response;
+  }
+
+  private async retryUnauthorizedRequest(
+    error: UnauthorizedError,
+    params: TransportRequestParams,
+    opts: TransportRequestOptions,
+    requestHeaders?: IncomingHttpHeaders
+  ) {
+    const { getUnauthorizedErrorHandler, logger } = this.config;
+    const unauthorizedErrorHandler = getUnauthorizedErrorHandler
+      ? getUnauthorizedErrorHandler()
+      : undefined;
+    if (unauthorizedErrorHandler) {
+      const result = await unauthorizedErrorHandler(error, opts.headers);
+      if (isRetryResult(result)) {
+        this.headers = {
+          ...this.headers,
+          ...result.authHeaders,
+        };
+        const retryOpts = { ...opts };
+        retryOpts.headers = {
+          ...this.headers,
+          ...requestHeaders,
+        };
+
+        const retryResponse = (await super.request(params, retryOpts)) as TransportResult<any, any>;
+        if (isUnauthorizedStreamResponse(retryResponse)) {
+          throw await createUnauthorizedStreamError(retryResponse, logger);
+        }
+
+        return retryResponse;
+      }
+    }
+
+    throw error;
+  }
+}
+
 export const createTransport = ({
   scoped = false,
   getExecutionContext = noop,
@@ -151,110 +273,13 @@ export const createTransport = ({
   onRequest: OnRequestHandler;
   logger: Logger;
 }): TransportClass => {
-  class KibanaTransport extends Transport {
-    private headers: IncomingHttpHeaders = {};
+  const config: KibanaTransportConfig = {
+    scoped,
+    getExecutionContext,
+    getUnauthorizedErrorHandler,
+    onRequest,
+    logger,
+  };
 
-    constructor(options: TransportOptions) {
-      const { headers = {}, ...otherOptions } = options;
-      super(otherOptions);
-      this.headers = headers;
-    }
-
-    async request(params: TransportRequestParams, options?: TransportRequestOptions) {
-      const opts: TransportRequestOptions = options ? { ...options } : {};
-
-      // Extract retryOn401 from object-shaped asStream before normalizing
-      let retryOn401 = false;
-      if (opts.asStream != null && typeof opts.asStream === 'object') {
-        retryOn401 = (opts.asStream as KibanaAsStreamOptions).retryOn401 === true;
-        opts.asStream = true;
-      }
-
-      // sync override of maxResponseSize and maxCompressedResponseSize
-      if (options) {
-        if (
-          options.maxResponseSize !== undefined &&
-          options.maxCompressedResponseSize === undefined
-        ) {
-          opts.maxCompressedResponseSize = options.maxResponseSize;
-        } else if (
-          options.maxCompressedResponseSize !== undefined &&
-          options.maxResponseSize === undefined
-        ) {
-          opts.maxResponseSize = options.maxCompressedResponseSize;
-        }
-      }
-      const opaqueId = getExecutionContext();
-      if (opaqueId && !opts.opaqueId) {
-        // rewrites headers['x-opaque-id'] if it presents
-        opts.opaqueId = opaqueId;
-      }
-
-      // add stored headers to the options
-      opts.headers = {
-        ...this.headers,
-        ...options?.headers,
-      };
-
-      onRequest({ scoped }, params, opts, logger);
-
-      const retryUnauthorizedRequest = async (error: UnauthorizedError) => {
-        const unauthorizedErrorHandler = getUnauthorizedErrorHandler
-          ? getUnauthorizedErrorHandler()
-          : undefined;
-        if (unauthorizedErrorHandler) {
-          const result = await unauthorizedErrorHandler(error, opts.headers);
-          if (isRetryResult(result)) {
-            this.headers = {
-              ...this.headers,
-              ...result.authHeaders,
-            };
-            const retryOpts = { ...opts };
-            retryOpts.headers = {
-              ...this.headers,
-              ...options?.headers,
-            };
-
-            const retryResponse = (await super.request(params, retryOpts)) as TransportResult<
-              any,
-              any
-            >;
-            if (isUnauthorizedStreamResponse(retryResponse)) {
-              throw await createUnauthorizedStreamError(retryResponse, logger);
-            }
-
-            return retryResponse;
-          }
-        }
-
-        throw error;
-      };
-
-      let response: TransportResult<any, any>;
-      try {
-        response = (await super.request(params, opts)) as TransportResult<any, any>;
-      } catch (e) {
-        if (isUnauthorizedError(e)) {
-          return await retryUnauthorizedRequest(e);
-        }
-
-        throw e;
-      }
-
-      if (retryOn401 && isUnauthorizedStreamResponse(response)) {
-        logger.debug(
-          `Received streamed 401 response for [${params.method} ${params.path}]${
-            opts.opaqueId ? ` (opaqueId: ${opts.opaqueId})` : ''
-          }, attempting token refresh and retry`
-        );
-        return await retryUnauthorizedRequest(
-          await createUnauthorizedStreamError(response, logger)
-        );
-      }
-
-      return response;
-    }
-  }
-
-  return KibanaTransport;
+  return KibanaTransport.bind(null, config) as unknown as TransportClass;
 };

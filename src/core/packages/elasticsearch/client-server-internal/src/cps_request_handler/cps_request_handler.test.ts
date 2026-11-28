@@ -527,6 +527,88 @@ describe('getCpsRequestHandler', () => {
           bulkBody: [{ index: 'my-index' }, { query: { match_all: {} } }],
         });
       });
+
+      it('skips JSON.parse when project_routing is absent from NDJSON string bulkBody', () => {
+        const onRequest = getCpsRequestHandler(false, PROJECT_ROUTING_ORIGIN, mockLogger);
+        const ndjson = '{ "index": "my-index" }\n{ "query": { "match_all": {} } }\n';
+        const params: TransportRequestParams = {
+          method: 'POST',
+          path: '/_msearch',
+          meta: { name: 'msearch', acceptedParams: queryAcceptedParams as any },
+          bulkBody: ndjson,
+        };
+
+        const parseSpy = jest.spyOn(JSON, 'parse');
+        try {
+          onRequest({ scoped: true }, params, {}, mockLogger);
+          expect(parseSpy).not.toHaveBeenCalled();
+          expect(params.bulkBody).toBe(ndjson);
+        } finally {
+          parseSpy.mockRestore();
+        }
+      });
+
+      it('only parses lines containing project_routing and leaves non-matching lines untouched', () => {
+        const onRequest = getCpsRequestHandler(false, PROJECT_ROUTING_ORIGIN, mockLogger);
+        const cleanHeaderLine = '{ "index" : "clean-1" }';
+        const routingBodyLine = JSON.stringify({
+          query: { match_all: {} },
+          project_routing: 'should-be-stripped',
+        });
+        const cleanHeaderLine2 = '{ "index" : "clean-2" }';
+        const valueMentionLine = '{ "query": { "match": { "msg": "project_routing" } } }';
+        const ndjson = [
+          cleanHeaderLine,
+          routingBodyLine,
+          cleanHeaderLine2,
+          valueMentionLine,
+          '',
+        ].join('\n');
+
+        const params: TransportRequestParams = {
+          method: 'POST',
+          path: '/_msearch',
+          meta: { name: 'msearch', acceptedParams: queryAcceptedParams as any },
+          bulkBody: ndjson,
+        };
+
+        const parseSpy = jest.spyOn(JSON, 'parse');
+        const stringifySpy = jest.spyOn(JSON, 'stringify');
+        try {
+          onRequest({ scoped: true }, params, {}, mockLogger);
+          expect(parseSpy).toHaveBeenCalledTimes(2);
+          expect(stringifySpy).toHaveBeenCalledTimes(1);
+        } finally {
+          parseSpy.mockRestore();
+          stringifySpy.mockRestore();
+        }
+
+        const lines = (params.bulkBody as string).split('\n');
+        expect(lines).toHaveLength(5);
+        expect(lines[0]).toBe(cleanHeaderLine);
+        expect(JSON.parse(lines[1])).toEqual({ query: { match_all: {} } });
+        expect(lines[2]).toBe(cleanHeaderLine2);
+        expect(lines[3]).toBe(valueMentionLine);
+        expect(lines[4]).toBe('');
+      });
+
+      it('leaves invalid JSON lines containing project_routing untouched', () => {
+        const onRequest = getCpsRequestHandler(false, PROJECT_ROUTING_ORIGIN, mockLogger);
+        const invalidLine = '{not-valid-json project_routing';
+        const validLine = JSON.stringify({ index: 'my-index', project_routing: 'strip-me' });
+        const params: TransportRequestParams = {
+          method: 'POST',
+          path: '/_msearch',
+          bulkBody: `${invalidLine}\n${validLine}\n`,
+        };
+
+        onRequest({ scoped: true }, params, {}, mockLogger);
+
+        const lines = (params.bulkBody as string).split('\n');
+        expect(lines[0]).toBe(invalidLine);
+        expect(JSON.parse(lines[1])).toEqual({ index: 'my-index' });
+        expect(lines[2]).toBe('');
+      });
     });
   });
 });

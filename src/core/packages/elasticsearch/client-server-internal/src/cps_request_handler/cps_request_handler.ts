@@ -187,33 +187,38 @@ function stripProjectRoutingNdjsonBody(params: Parameters<OnRequestHandler>[1]):
 
   if (Array.isArray(bulkBody)) {
     for (const entry of bulkBody) {
-      if (isPlainObject(entry)) {
+      if (
+        typeof entry === 'object' &&
+        entry !== null &&
+        'project_routing' in entry &&
+        isPlainObject(entry)
+      ) {
         stripProjectRoutingBody(entry as Record<string, unknown>);
       }
     }
   } else if (typeof bulkBody === 'string') {
-    params.bulkBody = bulkBody
-      .split('\n')
-      .map((line) => {
-        if (!line) return line;
-        try {
-          const parsed: unknown = JSON.parse(line);
-          if (isPlainObject(parsed)) {
-            const obj = parsed as Record<string, unknown>;
-            if (obj.project_routing != null) {
-              delete obj.project_routing;
-              return JSON.stringify(obj);
-            }
-          }
-        } catch {
-          // Not valid JSON; leave the line as-is.
-        }
-        return line;
-      })
-      .join('\n');
+    if (!bulkBody.includes('project_routing')) return;
+    params.bulkBody = bulkBody.split('\n').map(stripProjectRoutingLine).join('\n');
   }
   // Buffer and ReadableStream: cannot safely parse or rewrite — skip.
 }
+
+const stripProjectRoutingLine = (line: string): string => {
+  if (!line || !line.includes('project_routing')) return line;
+  try {
+    const parsed: unknown = JSON.parse(line);
+    if (isPlainObject(parsed)) {
+      const obj = parsed as Record<string, unknown>;
+      if (obj.project_routing != null) {
+        delete obj.project_routing;
+        return JSON.stringify(obj);
+      }
+    }
+  } catch {
+    // Not valid JSON; leave the line as-is.
+  }
+  return line;
+};
 
 /**
  * Determines why a request bypassed CPS routing.
