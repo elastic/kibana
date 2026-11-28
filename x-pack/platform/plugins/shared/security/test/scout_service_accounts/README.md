@@ -27,7 +27,9 @@ Scout server configuration. Role loading and service account responses are not m
 
 The config set loads the `service_accounts` test plugin from
 `x-pack/platform/test/security_api_integration/plugins/service_accounts`. It
-binds, unbinds and runs workloads over HTTP. It also sets UIAM's exchange token
+binds, unbinds and runs workloads over HTTP. Its bulk route, which changes many
+bindings in one call through `bulkUpdateWorkloadBindings`, is only exercised by
+the stateful bulk binding spec. It also sets UIAM's exchange token
 lifetime to one minute, the shortest UIAM allows, so the renewal tests finish in
 reasonable time.
 
