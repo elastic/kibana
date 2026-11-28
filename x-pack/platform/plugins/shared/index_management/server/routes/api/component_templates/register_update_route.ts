@@ -48,7 +48,7 @@ export const registerUpdateRoute = ({
           }>;
         }>({
           method: 'GET',
-          path: `/_component_template/${name}`,
+          path: `/_component_template/${encodeURIComponent(name)}`,
         });
         // TODO: Replace with the following when the client includes data_stream_options in ClusterComponentTemplateSummary
         // https://github.com/elastic/kibana/issues/220614

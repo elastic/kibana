@@ -6,9 +6,21 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
 
-export const templateSchema = schema.object({
-  name: schema.string({ maxLength: 1000 }),
+const rejectForwardSlash = (name: string) =>
+  name.includes('/')
+    ? i18n.translate('xpack.idxMgmt.templates.validation.nameForwardSlashError', {
+        defaultMessage: 'A template name must not contain the character "/"',
+      })
+    : undefined;
+
+export const createTemplateNameSchema = schema.string({
+  maxLength: 1000,
+  validate: rejectForwardSlash,
+});
+
+const templateSharedFields = {
   indexPatterns: schema.arrayOf(schema.string({ maxLength: 1000 }), { maxSize: 1000 }),
   version: schema.maybe(schema.number()),
   order: schema.maybe(schema.number()),
@@ -56,4 +68,14 @@ export const templateSchema = schema.object({
     isLegacy: schema.maybe(schema.boolean()),
   }),
   deprecated: schema.maybe(schema.boolean()),
+};
+
+export const templateSchema = schema.object({
+  name: schema.string({ maxLength: 1000 }),
+  ...templateSharedFields,
+});
+
+export const createTemplateSchema = schema.object({
+  name: createTemplateNameSchema,
+  ...templateSharedFields,
 });

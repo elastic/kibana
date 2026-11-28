@@ -103,6 +103,17 @@ describe('<ComponentTemplateCreate />', () => {
           expect(screen.getByTestId('nextButton')).toBeDisabled();
         });
 
+        test('should reject a name containing a forward slash', async () => {
+          const nameRow = screen.getByTestId('nameField');
+          const nameInput = within(nameRow).getByRole('textbox');
+
+          fireEvent.change(nameInput, { target: { value: 'a/b' } });
+          fireEvent.click(screen.getByTestId('nextButton'));
+
+          await screen.findByText("Name must not contain a '/'.");
+          expect(screen.getByTestId('nextButton')).toBeDisabled();
+        });
+
         test('should prevent proceeding when data lifecycle configuration is invalid', async () => {
           const nameRow = screen.getByTestId('nameField');
           const nameInput = within(nameRow).getByRole('textbox');

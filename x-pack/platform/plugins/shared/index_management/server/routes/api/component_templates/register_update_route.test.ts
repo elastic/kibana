@@ -42,6 +42,44 @@ describe('Component templates API - update route', () => {
       },
     };
 
+    describe('AND the template name contains reserved URL characters', () => {
+      it('SHOULD encode the transport path when pre-reading the template', async () => {
+        const specialName = 'foo/bar?x';
+        const specialRequest: RequestMock = {
+          ...mockRequest,
+          params: { name: specialName },
+          body: {
+            ...mockRequest.body,
+            name: specialName,
+            _kbnMeta: { usedBy: [], isManaged: false },
+          },
+        };
+
+        getTransportRequest(router).mockResolvedValue({
+          component_templates: [
+            {
+              name: specialName,
+              component_template: { template: {} },
+            },
+          ],
+        });
+
+        updateComponentTemplate.mockResolvedValue({ acknowledged: true });
+
+        await router.runRequest(specialRequest);
+
+        expect(
+          router.contextMock.core.elasticsearch.client.asCurrentUser.transport.request
+        ).toHaveBeenCalledWith({
+          method: 'GET',
+          path: '/_component_template/foo%2Fbar%3Fx',
+        });
+        expect(updateComponentTemplate).toHaveBeenCalledWith(
+          expect.objectContaining({ name: specialName })
+        );
+      });
+    });
+
     describe('AND the component has existing data_stream_options', () => {
       it('SHOULD persist them on update', async () => {
         getTransportRequest(router).mockResolvedValue({

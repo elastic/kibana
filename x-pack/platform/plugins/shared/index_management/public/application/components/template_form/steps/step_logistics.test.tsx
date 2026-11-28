@@ -83,6 +83,32 @@ describe('StepLogistics', () => {
       const nameInput = within(nameRow).getByRole('textbox');
       expect(nameInput).toBeDisabled();
     });
+
+    it('SHOULD keep a slash in the name valid when the field is disabled', async () => {
+      const onChange = jest.fn();
+
+      render(
+        <I18nProvider>
+          <StepLogistics
+            defaultValue={{ ...baseDefaultValue, name: 'a/b' }}
+            isEditing={true}
+            onChange={onChange}
+            isLegacy={false}
+          />
+        </I18nProvider>
+      );
+
+      const nameRow = await screen.findByTestId('nameField');
+      const nameInput = within(nameRow).getByRole('textbox');
+      expect(nameInput).toBeDisabled();
+      expect(
+        screen.queryByText('A template name must not contain the character "/"')
+      ).not.toBeInTheDocument();
+
+      await waitFor(() => expect(onChange).toHaveBeenCalled());
+      const lastCall = onChange.mock.calls.at(-1)?.[0];
+      expect(await lastCall.validate()).toBe(true);
+    });
   });
 
   describe('WHEN creating a new template', () => {
@@ -101,6 +127,30 @@ describe('StepLogistics', () => {
       const nameRow = await screen.findByTestId('nameField');
       const nameInput = within(nameRow).getByRole('textbox');
       expect(nameInput).toBeEnabled();
+    });
+
+    it('SHOULD reject a name containing a forward slash', async () => {
+      const onChange = jest.fn();
+
+      render(
+        <I18nProvider>
+          <StepLogistics
+            defaultValue={baseDefaultValue}
+            isEditing={false}
+            onChange={onChange}
+            isLegacy={false}
+          />
+        </I18nProvider>
+      );
+
+      const nameRow = await screen.findByTestId('nameField');
+      const nameInput = within(nameRow).getByRole('textbox');
+      fireEvent.change(nameInput, { target: { value: 'a/b' } });
+
+      await screen.findByText('A template name must not contain the character "/"');
+
+      const lastCall = onChange.mock.calls.at(-1)?.[0];
+      expect(await lastCall.validate()).toBe(false);
     });
   });
 

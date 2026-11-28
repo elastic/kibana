@@ -10,7 +10,7 @@ import { EuiCode } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import type { FormSchema } from '../../../shared_imports';
+import type { FieldConfig, FormSchema } from '../../../shared_imports';
 import { FIELD_TYPES, fieldValidators, fieldFormatters } from '../../../shared_imports';
 
 const { emptyField, indexTemplateNameField, isJsonField } = fieldValidators;
@@ -31,73 +31,86 @@ const parseJson = (jsonString: string): object => {
   return parsedJSON;
 };
 
-export const logisticsFormSchema: FormSchema = {
-  name: {
-    defaultValue: undefined,
-    label: i18n.translate('xpack.idxMgmt.componentTemplateForm.stepLogistics.nameFieldLabel', {
-      defaultMessage: 'Name',
-    }),
-    helpText: (
-      <FormattedMessage
-        id="xpack.idxMgmt.componentTemplateForm.stepLogistics.nameHelpText"
-        defaultMessage="Must not contain uppercase characters, a space, comma, hash, asterisk, or start with an underscore."
-      />
-    ),
-    type: FIELD_TYPES.TEXT,
-    validations: [
-      {
-        validator: emptyField(
-          i18n.translate('xpack.idxMgmt.componentTemplateForm.validation.nameRequiredError', {
-            defaultMessage: 'A component template name is required.',
-          })
-        ),
-      },
-      {
-        validator: indexTemplateNameField(i18n),
-      },
-    ],
-  },
-  version: {
-    type: FIELD_TYPES.NUMBER,
-    label: i18n.translate('xpack.idxMgmt.componentTemplateForm.stepLogistics.versionFieldLabel', {
-      defaultMessage: 'Version (optional)',
-    }),
-    formatters: [toInt],
-  },
-  _meta: {
-    label: i18n.translate('xpack.idxMgmt.componentTemplateForm.stepLogistics.metaFieldLabel', {
-      defaultMessage: '_meta field data (optional)',
-    }),
-    helpText: (
-      <FormattedMessage
-        id="xpack.idxMgmt.componentTemplateForm.stepLogistics.metaHelpText"
-        defaultMessage="Use JSON format: {code}"
-        values={{
-          code: <EuiCode>{JSON.stringify({ arbitrary_data: 'anything_goes' })}</EuiCode>,
-        }}
-      />
-    ),
-    serializer: (value: string) => {
-      const result = parseJson(value);
-      // If an empty object was passed, strip out this value entirely.
-      if (!Object.keys(result).length) {
-        return undefined;
-      }
-      return result;
+export const nameConfig: FieldConfig = {
+  defaultValue: undefined,
+  label: i18n.translate('xpack.idxMgmt.componentTemplateForm.stepLogistics.nameFieldLabel', {
+    defaultMessage: 'Name',
+  }),
+  helpText: (
+    <FormattedMessage
+      id="xpack.idxMgmt.componentTemplateForm.stepLogistics.nameHelpText"
+      defaultMessage="Must not contain uppercase characters, a space, comma, hash, asterisk, forward slash, or start with an underscore."
+    />
+  ),
+  type: FIELD_TYPES.TEXT,
+  validations: [
+    {
+      validator: emptyField(
+        i18n.translate('xpack.idxMgmt.componentTemplateForm.validation.nameRequiredError', {
+          defaultMessage: 'A component template name is required.',
+        })
+      ),
     },
-    deserializer: stringifyJson,
-    validations: [
-      {
-        validator: isJsonField(
-          i18n.translate(
-            'xpack.idxMgmt.componentTemplateForm.stepLogistics.validation.metaJsonError',
-            {
-              defaultMessage: 'The input is not valid.',
-            }
-          ),
-          { allowEmptyString: true }
-        ),
-      },
-    ],
-  },
+    {
+      validator: indexTemplateNameField(i18n),
+    },
+  ],
 };
+
+export const nameConfigWithoutValidations: FieldConfig = {
+  ...nameConfig,
+  validations: [],
+};
+
+const versionFieldConfig: FieldConfig = {
+  type: FIELD_TYPES.NUMBER,
+  label: i18n.translate('xpack.idxMgmt.componentTemplateForm.stepLogistics.versionFieldLabel', {
+    defaultMessage: 'Version (optional)',
+  }),
+  formatters: [toInt],
+};
+
+const metaFieldConfig: FieldConfig = {
+  label: i18n.translate('xpack.idxMgmt.componentTemplateForm.stepLogistics.metaFieldLabel', {
+    defaultMessage: '_meta field data (optional)',
+  }),
+  helpText: (
+    <FormattedMessage
+      id="xpack.idxMgmt.componentTemplateForm.stepLogistics.metaHelpText"
+      defaultMessage="Use JSON format: {code}"
+      values={{
+        code: <EuiCode>{JSON.stringify({ arbitrary_data: 'anything_goes' })}</EuiCode>,
+      }}
+    />
+  ),
+  serializer: (value: string) => {
+    const result = parseJson(value);
+    // If an empty object was passed, strip out this value entirely.
+    if (!Object.keys(result).length) {
+      return undefined;
+    }
+    return result;
+  },
+  deserializer: stringifyJson,
+  validations: [
+    {
+      validator: isJsonField(
+        i18n.translate(
+          'xpack.idxMgmt.componentTemplateForm.stepLogistics.validation.metaJsonError',
+          {
+            defaultMessage: 'The input is not valid.',
+          }
+        ),
+        { allowEmptyString: true }
+      ),
+    },
+  ],
+};
+
+export const getLogisticsFormSchema = (isEditing = false): FormSchema => ({
+  name: isEditing ? nameConfigWithoutValidations : nameConfig,
+  version: versionFieldConfig,
+  _meta: metaFieldConfig,
+});
+
+export const logisticsFormSchema: FormSchema = getLogisticsFormSchema();
