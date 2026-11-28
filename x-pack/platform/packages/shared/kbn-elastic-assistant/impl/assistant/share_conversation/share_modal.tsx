@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiModal,
@@ -44,14 +44,13 @@ const ShareModalComponent: React.FC<Props> = ({
   const { copyConversationUrl, updateConversationUsers } = useConversation();
 
   const { toasts } = useAssistantContext();
-  const [nextUsers, setNextUsers] = useState<UserProfile[]>([]);
 
   const conversationOwner = useMemo(
     () => getCurrentConversationOwner(selectedConversation),
     [selectedConversation]
   );
-  useEffect(() => {
-    const conversationUsers =
+  const savedUsers = useMemo<UserProfile[]>(
+    () =>
       selectedConversation?.users
         // do not show current user in UI
         .filter(
@@ -63,16 +62,19 @@ const ShareModalComponent: React.FC<Props> = ({
           enabled: true,
           user: { username: name ?? id ?? '' },
           data: {},
-        })) || [];
-    setNextUsers(conversationUsers);
-  }, [conversationOwner, selectedConversation]);
+        })) || [],
+    [conversationOwner, selectedConversation]
+  );
+  // undefined until the user edits the picker, so refetches update an untouched picker but never discard an edit
+  const [editedUsers, setEditedUsers] = useState<UserProfile[] | undefined>();
+  const nextUsers = editedUsers ?? savedUsers;
   const handleCopyUrl = useCallback(
     () => copyConversationUrl(selectedConversation),
     [copyConversationUrl, selectedConversation]
   );
 
   const onNextUsersSelect = useCallback((updatedUsers: UserProfile[]) => {
-    setNextUsers(updatedUsers);
+    setEditedUsers(updatedUsers);
   }, []);
 
   const onCancelShare = useCallback(() => {

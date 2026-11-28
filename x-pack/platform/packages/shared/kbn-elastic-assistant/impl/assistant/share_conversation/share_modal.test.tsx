@@ -11,6 +11,7 @@ import { ShareModal } from './share_modal';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 import { welcomeConvo } from '../../mock/conversation';
 import type { IToasts } from '@kbn/core-notifications-browser';
+import type { UserProfile } from '@kbn/core-user-profile-common';
 
 const mockRefetchCurrentConversation = jest.fn();
 const mockRefetchCurrentUserConversations = jest.fn();
@@ -26,6 +27,19 @@ jest.mock('../use_conversation', () => ({
     copyConversationUrl: mockCopyConversationUrl,
     updateConversationUsers: mockUpdateConversationUsers,
   }),
+}));
+jest.mock('./user_profiles_search', () => ({
+  UserProfilesSearch: ({ onUsersSelect }: { onUsersSelect: (users: UserProfile[]) => void }) => (
+    <button
+      data-test-subj="userProfilesSearch"
+      type="button"
+      onClick={() =>
+        onUsersSelect([{ uid: 'user2', user: { username: 'User Two' }, enabled: true, data: {} }])
+      }
+    >
+      {'UserProfilesSearch'}
+    </button>
+  ),
 }));
 
 const toastsMock = { addSuccess: mockAddSuccess, addError: mockAddError } as unknown as IToasts;
@@ -90,6 +104,58 @@ describe('ShareModal', () => {
       expect(mockRefetchCurrentUserConversations).toHaveBeenCalled();
       expect(mockRefetchCurrentConversation).toHaveBeenCalled();
       expect(mockAddSuccess).toHaveBeenCalled();
+    });
+  });
+
+  it('keeps the selected users when the same conversation is refetched while open', async () => {
+    mockUpdateConversationUsers.mockResolvedValueOnce({});
+    const { rerender } = render(
+      <TestProviders providerContext={{ toasts: toastsMock }}>
+        <ShareModal {...testProps} />
+      </TestProviders>
+    );
+    fireEvent.click(screen.getByTestId('userProfilesSearch'));
+    rerender(
+      <TestProviders providerContext={{ toasts: toastsMock }}>
+        <ShareModal {...testProps} selectedConversation={{ ...welcomeConvo }} />
+      </TestProviders>
+    );
+    fireEvent.click(screen.getByTestId('shareConversation'));
+    await waitFor(() => {
+      expect(mockUpdateConversationUsers).toHaveBeenCalledWith({
+        conversationId: welcomeConvo.id,
+        updatedUsers: [{ id: 'user2', name: 'User Two' }, welcomeConvo.createdBy],
+      });
+    });
+  });
+
+  it('uses the refetched users when the picker was not edited', async () => {
+    mockUpdateConversationUsers.mockResolvedValueOnce({});
+    const { rerender } = render(
+      <TestProviders providerContext={{ toasts: toastsMock }}>
+        <ShareModal
+          {...testProps}
+          selectedConversation={{
+            ...welcomeConvo,
+            users: [welcomeConvo.createdBy, { id: 'user1', name: 'User One' }],
+          }}
+        />
+      </TestProviders>
+    );
+    rerender(
+      <TestProviders providerContext={{ toasts: toastsMock }}>
+        <ShareModal
+          {...testProps}
+          selectedConversation={{ ...welcomeConvo, users: [welcomeConvo.createdBy] }}
+        />
+      </TestProviders>
+    );
+    fireEvent.click(screen.getByTestId('shareConversation'));
+    await waitFor(() => {
+      expect(mockUpdateConversationUsers).toHaveBeenCalledWith({
+        conversationId: welcomeConvo.id,
+        updatedUsers: [welcomeConvo.createdBy],
+      });
     });
   });
 
