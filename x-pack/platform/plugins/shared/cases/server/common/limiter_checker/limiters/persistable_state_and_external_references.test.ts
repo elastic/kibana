@@ -11,9 +11,18 @@ import {
   createExternalReferenceRequests,
   createFileRequests,
   createPersistableStateRequests,
+  createUnifiedAlertRequests,
   createUserRequests,
 } from '../test_utils';
 import { MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES } from '../../../../common/constants';
+import {
+  COMMENT_ATTACHMENT_TYPE,
+  FILE_ATTACHMENT_TYPE,
+  INDICATOR_ATTACHMENT_TYPE,
+  LENS_ATTACHMENT_TYPE,
+  OSQUERY_ATTACHMENT_TYPE,
+  SECURITY_ENDPOINT_ATTACHMENT_TYPE,
+} from '../../../../common/constants/attachments';
 
 describe('PersistableStateAndExternalReferencesLimiter', () => {
   const caseId = 'test-id';
@@ -79,6 +88,27 @@ describe('PersistableStateAndExternalReferencesLimiter', () => {
             numFiles: 1,
           })
         )
+      ).toBe(0);
+    });
+
+    it('counts unified persistable state and external reference attachments', () => {
+      expect(
+        limiter.countOfItemsInRequest([
+          { type: LENS_ATTACHMENT_TYPE, data: { state: {} }, owner: 'test' },
+          { type: INDICATOR_ATTACHMENT_TYPE, attachmentId: 'indicator-id', owner: 'test' },
+          { type: OSQUERY_ATTACHMENT_TYPE, attachmentId: 'action-id', owner: 'test' },
+          { type: SECURITY_ENDPOINT_ATTACHMENT_TYPE, attachmentId: 'action-id', owner: 'test' },
+        ])
+      ).toBe(4);
+    });
+
+    it('excludes unified file, comment and alert attachments from the count', () => {
+      expect(
+        limiter.countOfItemsInRequest([
+          { type: FILE_ATTACHMENT_TYPE, attachmentId: 'file-id', owner: 'test' },
+          { type: COMMENT_ATTACHMENT_TYPE, data: { content: 'a comment' }, owner: 'test' },
+          ...createUnifiedAlertRequests(1, 'alert-id'),
+        ])
       ).toBe(0);
     });
   });
