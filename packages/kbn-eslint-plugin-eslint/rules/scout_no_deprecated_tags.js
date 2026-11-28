@@ -63,7 +63,7 @@ module.exports = {
     },
   },
 
-  create(context) {
+  createOnce(context) {
     return {
       CallExpression(node) {
         if (!isDescribeCall(node) || node.arguments.length < 2) {

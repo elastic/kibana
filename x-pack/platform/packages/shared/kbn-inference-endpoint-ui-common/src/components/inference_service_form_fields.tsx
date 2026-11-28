@@ -26,6 +26,7 @@ import {
   EuiSpacer,
   EuiTitle,
   keys,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public';
@@ -141,6 +142,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
     undefined
   );
   const [isProviderPopoverOpen, setProviderPopoverOpen] = useState(false);
+  const providerPopoverPanelId = useGeneratedHtmlId({ prefix: 'providerPopoverPanel' });
   const [providerSchema, setProviderSchema] = useState<ConfigEntryView[]>([]);
   const [taskTypeOptions, setTaskTypeOptions] = useState<TaskTypeOption[]>([]);
   const [selectedTaskType, setSelectedTaskType] = useState<string>(DEFAULT_TASK_TYPE);
@@ -437,6 +439,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
           placeholder={LABELS.SELECT_PROVIDER}
           icon={{ type: 'chevronSingleDown', side: 'right' }}
           aria-expanded={isProviderPopoverOpen}
+          aria-controls={providerPopoverPanelId}
           role="combobox"
           onChange={() => {
             /* Intentionally left blank as onChange is required to avoid console error
@@ -454,6 +457,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
       handleProviderKeyboardOpen,
       providerName,
       isProviderPopoverOpen,
+      providerPopoverPanelId,
     ]
   );
 
@@ -614,6 +618,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
                 isOpen={isProviderPopoverOpen}
                 closePopover={closeProviderPopover}
                 className="rightArrowIcon"
+                panelProps={{ id: providerPopoverPanelId }}
               >
                 <SelectableProvider
                   currentSolution={currentSolution}

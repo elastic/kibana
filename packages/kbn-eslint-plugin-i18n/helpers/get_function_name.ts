@@ -7,11 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Node } from '@oxlint/plugins';
 import type { TSESTree } from '@typescript-eslint/typescript-estree';
 import { AST_NODE_TYPES } from '@typescript-eslint/typescript-estree';
 import { lowerCaseFirstLetter } from './utils';
 
-export function getFunctionName(func: TSESTree.FunctionDeclaration | TSESTree.Node): string {
+export function getFunctionName(node: Node | TSESTree.Node): string {
+  // Oxlint's AST has typescript-estree's shape for the nodes read here.
+  const func = node as TSESTree.Node;
   if (
     'id' in func &&
     func.id &&

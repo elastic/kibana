@@ -17,7 +17,7 @@ module.exports = {
    * Node.js path logic as described here:
    * https://babeljs.io/docs/options#matchpattern
    *
-   * Used by `kbn-babel-preset` and `kbn-eslint-config`.
+   * Used by `kbn-babel-preset` and `.oxlint/module_migration.mts`.
    */
   USES_STYLED_COMPONENTS: [
     /src[\/\\]platform[\/\\]packages[\/\\]private[\/\\]kbn-ui-shared-deps-npm[\/\\]/,

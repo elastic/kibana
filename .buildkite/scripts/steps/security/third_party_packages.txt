@@ -67,4 +67,7 @@ reselect-v4
 @ampproject/remapping
 magic-string
 graphql
+oxlint-tsgolint
 bump-cli
+@oxlint/plugins
+eslint-plugin-n

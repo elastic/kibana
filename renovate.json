@@ -889,7 +889,7 @@
     },
     {
       "groupName": "typescript",
-      "matchDepNames": ["typescript", "typescript-7"],
+      "matchDepNames": ["typescript", "typescript-7", "oxlint-tsgolint"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
@@ -951,6 +951,7 @@
         "eslint-plugin-jsx-a11y",
         "eslint-plugin-mocha",
         "eslint-plugin-no-unsanitized",
+        "eslint-plugin-n",
         "eslint-plugin-node",
         "eslint-plugin-playwright",
         "eslint-plugin-react",
@@ -2429,7 +2430,7 @@
     },
     {
       "groupName": "oxlint",
-      "matchDepNames": ["oxlint", "oxfmt"],
+      "matchDepNames": ["oxlint", "oxfmt", "@oxlint/plugins"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],

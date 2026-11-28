@@ -8,7 +8,7 @@
  */
 
 import { RuleTester } from 'eslint';
-import { NoUnusedImportsRule } from './no_unused_imports';
+import { rules } from '../..';
 import dedent from 'dedent';
 
 const fmt = (str: TemplateStringsArray) => dedent(str) + '\n';
@@ -44,7 +44,7 @@ const babelTester = [
 
 for (const [name, tester] of [tsTester, babelTester]) {
   describe(name, () => {
-    tester.run('@kbn/imports/no_unused_imports', NoUnusedImportsRule, {
+    tester.run('@kbn/imports/no_unused_imports', rules.no_unused_imports, {
       valid: [
         {
           filename: 'foo.ts',
@@ -129,14 +129,10 @@ for (const [name, tester] of [tsTester, babelTester]) {
             // @ts-expect-error
             // @ts-ignore
             // foo message
-            // eslint-disable-next-line some-other-rule
+            // eslint-disable-next-line no-console
             import type { foo, bar as Bar } from 'old'
           `,
           errors: [
-            {
-              line: 4,
-              message: `Definition for rule 'some-other-rule' was not found.`,
-            },
             {
               line: 5,
               message: 'All imports from "old" are unused and should be removed',
@@ -150,3 +146,48 @@ for (const [name, tester] of [tsTester, babelTester]) {
     });
   });
 }
+
+const [tsParserName, tsRuleTester] = tsTester;
+
+// Oxlint doesn't run `react/jsx-uses-react` next to this rule, so the rule marks the JSX pragma
+// and `Fragment` as used itself. These cases use the tester configured with `ecmaFeatures.jsx`.
+describe(`${tsParserName} JSX`, () => {
+  tsRuleTester.run('@kbn/imports/no_unused_imports', rules.no_unused_imports, {
+    valid: [
+      {
+        filename: 'foo.tsx',
+        code: fmt`
+          /** @jsx jsx */
+          import { jsx } from '@emotion/react'
+          export const a = <div />
+        `,
+      },
+      {
+        filename: 'foo.tsx',
+        code: fmt`
+          import { Fragment } from 'react'
+          export const a = <></>
+        `,
+      },
+    ],
+
+    invalid: [
+      {
+        filename: 'foo.tsx',
+        code: fmt`
+          import { unused } from 'x'
+          export const a = <div />
+        `,
+        errors: [
+          {
+            line: 1,
+            message: 'All imports from "x" are unused and should be removed',
+          },
+        ],
+        output: fmt`
+          export const a = <div />
+        `,
+      },
+    ],
+  });
+});

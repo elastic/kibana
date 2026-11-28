@@ -56,7 +56,7 @@ module.exports = {
     },
   },
 
-  create(context) {
+  createOnce(context) {
     return {
       CallExpression(node) {
         if (!isDescribeCall(node) && !isTestCall(node)) {

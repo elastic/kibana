@@ -10,21 +10,52 @@ echo '--- Lint: stylelint'
 node scripts/stylelint
 echo "stylelint ✅"
 
-echo '--- Lint: eslint'
-# disable "Exit immediately" mode so that we can run eslint and oxfmt, capture their exit codes,
-# and respond appropriately after possibly committing fixed files to the repo.
-# oxfmt runs last so that it formats any eslint autofixes in the same pass.
+# oxlint sometimes segfaults in its native code while exiting (`runOxlintShard` re-runs the shard).
+# Keep core dumps of crashed processes so their backtraces can be reported upstream.
+oxlint_core_dir="$(mktemp -d)"
+if sudo -n true 2>/dev/null; then
+  sudo sysctl -q -w "kernel.core_pattern=$oxlint_core_dir/core.%e.%p" || echo "core_pattern is not writable, oxlint crashes won't leave core dumps"
+  # `ulimit -c unlimited` left the limit at 0 on CI agents; raising the hard limit needs root
+  sudo prlimit --pid $$ --core=unlimited || echo "core size limit can't be raised, oxlint crashes won't leave core dumps"
+fi
+echo "oxlint core dumps: core_pattern=$(cat /proc/sys/kernel/core_pattern 2>/dev/null), ulimit -c=$(ulimit -c)"
+
+report_oxlint_crashes() {
+  local core report
+  for core in "$oxlint_core_dir"/core.*; do
+    [[ -f "$core" ]] || continue
+    echo "--- oxlint crashed, backtrace of $(basename "$core")"
+    if ! command -v gdb >/dev/null; then
+      { sudo apt-get update -qq && sudo apt-get install -y -qq gdb >/dev/null; } || { echo "gdb is unavailable, skipping backtrace"; continue; }
+    fi
+    mkdir -p target/oxlint_crashes
+    report="target/oxlint_crashes/$(basename "$core").txt"
+    gdb -q -batch -ex 'info sharedlibrary' -ex 'thread apply all bt' "$(command -v node)" "$core" > "$report" 2>&1
+    cat "$report"
+    buildkite-agent artifact upload "$report"
+    rm -f "$core"
+  done
+}
+
+# disable "Exit immediately" mode so that we can run oxlint, eslint and oxfmt, capture their exit
+# codes, and respond appropriately after possibly committing fixed files to the repo.
+# oxfmt runs last so that it formats any oxlint and eslint autofixes in the same pass.
 set +e;
 if is_pr && ! is_auto_commit_disabled; then
-  desc="node scripts/eslint_all_files --no-cache --fix && node scripts/oxfmt"
+  fix_flag="--fix"
   oxfmt_flag=""
-  node scripts/eslint_all_files --no-cache --fix
 else
-  desc="node scripts/eslint_all_files --no-cache && node scripts/oxfmt --check"
+  fix_flag=""
   oxfmt_flag="--check"
-  node scripts/eslint_all_files --no-cache
 fi
 
+echo '--- Lint: oxlint'
+node scripts/lint.js --quiet $fix_flag
+oxlint_exit=$?
+report_oxlint_crashes
+
+echo '--- Lint: eslint'
+node scripts/eslint_all_files --no-cache $fix_flag
 eslint_exit=$?
 
 echo '--- Lint: oxfmt'
@@ -33,17 +64,22 @@ oxfmt_exit=$?
 # re-enable "Exit immediately" mode
 set -e;
 
+desc="node scripts/lint.js --quiet $fix_flag && node scripts/eslint_all_files --no-cache $fix_flag && node scripts/oxfmt $oxfmt_flag"
 check_for_changed_files "$desc" true
 
+if [[ "${oxlint_exit}" != "0" ]]; then
+  echo "oxlint ❌"
+fi
 if [[ "${eslint_exit}" != "0" ]]; then
   echo "eslint ❌"
 fi
 if [[ "${oxfmt_exit}" != "0" ]]; then
   echo "oxfmt ❌"
 fi
-if [[ "${eslint_exit}" != "0" || "${oxfmt_exit}" != "0" ]]; then
+if [[ "${oxlint_exit}" != "0" || "${eslint_exit}" != "0" || "${oxfmt_exit}" != "0" ]]; then
   exit 1
 fi
 
+echo "oxlint ✅"
 echo "eslint ✅"
 echo "oxfmt ✅"
