@@ -1,0 +1,208 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { parse as parseYaml } from 'yaml';
+
+// This label only starts the pipeline. It does not configure the run.
+export const NIGHTSHIFT_EVAL_LABEL = 'ci:nightshift-evals';
+
+const DEFAULT_TIMEOUT_IN_MINUTES = 90;
+const TASK_NAME_PATTERN = /^[A-Za-z0-9_-]+$/;
+const COMMIT_SHA_PATTERN = /^[0-9a-f]{40}$/;
+
+export interface NightshiftEvalDownload {
+  // A gs:// path, copied to `dest` relative to the nightshift-evals checkout.
+  readonly src: string;
+  readonly dest: string;
+  readonly recursive?: boolean;
+}
+
+/** One task of nightshift-evals' `ci/tasks.yaml`. */
+export interface NightshiftEvalTaskConfig {
+  // Extra `uv run eval <task>` flags. An empty list runs every example.
+  readonly args: readonly string[];
+  readonly downloads?: readonly NightshiftEvalDownload[];
+  readonly timeoutMinutes?: number;
+}
+
+const isStringList = (value: readonly string[] | undefined): value is readonly string[] =>
+  Array.isArray(value) && value.every((item) => typeof item === 'string');
+
+const parseDownloads = (
+  task: string,
+  downloads: readonly Partial<NightshiftEvalDownload>[] | undefined
+): NightshiftEvalDownload[] =>
+  (downloads ?? []).map(({ src, dest, recursive }) => {
+    if (typeof src !== 'string' || !src.startsWith('gs://')) {
+      throw new Error(`ci/tasks.yaml: task "${task}" has a download without a gs:// \`src\``);
+    }
+    if (
+      typeof dest !== 'string' ||
+      dest === '' ||
+      dest.startsWith('/') ||
+      dest.split('/').includes('..')
+    ) {
+      throw new Error(`ci/tasks.yaml: task "${task}" has a download with a bad \`dest\`: ${dest}`);
+    }
+    return { src, dest, ...(recursive ? { recursive: true } : {}) };
+  });
+
+/**
+ * Tasks of nightshift-evals' `ci/tasks.yaml`. Throws on a file CI cannot run safely. A task without
+ * `args` is rejected, since an empty default would run every example of the task.
+ */
+export const parseNightshiftTasks = (raw: string): Record<string, NightshiftEvalTaskConfig> => {
+  const parsed = parseYaml(raw) as {
+    tasks?: Record<
+      string,
+      {
+        args?: readonly string[];
+        downloads?: readonly Partial<NightshiftEvalDownload>[];
+        timeoutMinutes?: number;
+      } | null
+    >;
+  } | null;
+
+  const entries = Object.entries(parsed?.tasks ?? {});
+  if (entries.length === 0) {
+    throw new Error('ci/tasks.yaml has no tasks');
+  }
+
+  return Object.fromEntries(
+    entries.map(([task, config]) => {
+      if (!TASK_NAME_PATTERN.test(task)) {
+        throw new Error(`ci/tasks.yaml: bad task name "${task}"`);
+      }
+      const args = config?.args;
+      if (!isStringList(args) || args.some((arg) => /\s/.test(arg))) {
+        throw new Error(
+          `ci/tasks.yaml: task "${task}" needs an \`args\` list of strings without whitespace`
+        );
+      }
+      const timeoutMinutes = config?.timeoutMinutes;
+      if (
+        timeoutMinutes !== undefined &&
+        !(Number.isInteger(timeoutMinutes) && timeoutMinutes > 0)
+      ) {
+        throw new Error(`ci/tasks.yaml: task "${task}" has a bad \`timeoutMinutes\``);
+      }
+      return [task, { args, downloads: parseDownloads(task, config?.downloads), timeoutMinutes }];
+    })
+  );
+};
+
+const normalizeBuildkiteKey = (value: string): string =>
+  value
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+
+const runStepKey = (task: string): string => `nightshift-evals-${normalizeBuildkiteKey(task)}`;
+
+const agentLines = (machineType: string): string[] => [
+  `    agents:`,
+  `      image: family/kibana-ubuntu-2404`,
+  `      imageProject: elastic-images-prod`,
+  `      provider: gcp`,
+  `      machineType: ${machineType}`,
+];
+
+/**
+ * YAML double-quoted scalar with `$` escaped to `$$` so Buildkite upload won't interpolate it.
+ */
+const toYamlString = (value: string): string => JSON.stringify(value).replace(/\$/g, '$$$$');
+
+/** Whether the PR labels (a comma-separated string) contain the start label. */
+const hasNightshiftEvalLabel = (githubPrLabels: string): boolean =>
+  githubPrLabels
+    .split(',')
+    .map((label) => label.trim())
+    .includes(NIGHTSHIFT_EVAL_LABEL);
+
+/**
+ * Command step that fires `kibana-nightshift-evals-pr`, or `null` without the start label.
+ * Fire-and-forget: `soft_fail` keeps a trigger hiccup off the PR. It waits for `build` so a commit
+ * that does not build never starts the long run. The child does not use the build, since
+ * nightshift-evals runs Kibana from source.
+ */
+export const getNightshiftEvalTriggerStep = (githubPrLabels: string): string | null => {
+  if (!hasNightshiftEvalLabel(githubPrLabels)) {
+    return null;
+  }
+
+  return [
+    `  - label: ':robot_face: Trigger Nightshift Evals'`,
+    `    key: nightshift-evals-trigger`,
+    `    depends_on:`,
+    `      - build`,
+    `    command: bash .buildkite/scripts/steps/nightshift_evals/trigger_pr.sh`,
+    `    timeout_in_minutes: 10`,
+    `    soft_fail: true`,
+    ...agentLines('n2-standard-2'),
+    `    retry:`,
+    `      automatic:`,
+    `        - exit_status: '*'`,
+    `          limit: 1`,
+  ].join('\n');
+};
+
+/** One run step per task and one PR comment step after all of them, as a YAML fragment. */
+export const getNightshiftEvalSteps = ({
+  tasks,
+  ref,
+}: {
+  tasks: Record<string, NightshiftEvalTaskConfig>;
+  // The nightshift-evals commit the plan step read `ci/tasks.yaml` from. The run steps check out
+  // the same commit, so the args and the scoring code come from one revision.
+  ref?: string;
+}): string => {
+  if (ref !== undefined && !COMMIT_SHA_PATTERN.test(ref)) {
+    throw new Error(`The nightshift-evals ref must be a full commit SHA, got "${ref}"`);
+  }
+  const taskNames = Object.keys(tasks);
+
+  const runSteps = taskNames.map((task) => {
+    const { args, downloads = [], timeoutMinutes = DEFAULT_TIMEOUT_IN_MINUTES } = tasks[task];
+    return [
+      `  - label: ${toYamlString(`Nightshift Evals: ${task}`)}`,
+      `    key: ${runStepKey(task)}`,
+      `    command: bash .buildkite/scripts/steps/nightshift_evals/run_task.sh`,
+      `    env:`,
+      `      KBN_EVALS: '1'`,
+      `      FTR_EIS_CCM: '1'`,
+      `      NIGHTSHIFT_EVAL_TASK: ${toYamlString(task)}`,
+      // Kibana's default model.
+      `      NIGHTSHIFT_EVAL_CONNECTOR_ID: ""`,
+      `      NIGHTSHIFT_EVAL_ARGS: ${toYamlString(args.join(' '))}`,
+      `      NIGHTSHIFT_EVAL_DOWNLOADS: ${toYamlString(JSON.stringify(downloads))}`,
+      ...(ref ? [`      NIGHTSHIFT_EVALS_REF: ${toYamlString(ref)}`] : []),
+      `    timeout_in_minutes: ${timeoutMinutes}`,
+      // No retry and no spot agents: a failed or lost run would otherwise re-run for up to the
+      // timeout again, spend the tokens twice, and leave partial scores in the results cluster.
+      ...agentLines('n2-standard-8'),
+    ].join('\n');
+  });
+
+  const commentStep = [
+    `  - label: 'Nightshift Evals: post PR comment'`,
+    `    key: nightshift-evals-pr-comment`,
+    `    command: bash .buildkite/scripts/steps/nightshift_evals/post_pr_comment.sh`,
+    `    env:`,
+    `      KBN_EVALS: '1'`,
+    `      NIGHTSHIFT_EVAL_TASKS: ${toYamlString(taskNames.join(','))}`,
+    `    depends_on:`,
+    ...taskNames.map((task) => `      - ${toYamlString(runStepKey(task))}`),
+    `    allow_dependency_failure: true`,
+    `    timeout_in_minutes: 10`,
+    ...agentLines('n2-standard-2'),
+  ].join('\n');
+
+  return [...runSteps, commentStep].join('\n');
+};
