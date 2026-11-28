@@ -1,5 +1,5 @@
 {
-  "sha1": "680f510d50bd941996c5df4aa965f1a6f4ce8fe9",
+  "sha1": "58539f9ed7dc4dfee63713224b26ff9b089ec996",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -825,7 +825,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/suggestions.spec.ts",
-        "line": 123,
+        "line": 122,
         "column": 42
       }
     },
@@ -839,7 +839,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/suggestions.spec.ts",
-        "line": 159,
+        "line": 158,
         "column": 29
       }
     },

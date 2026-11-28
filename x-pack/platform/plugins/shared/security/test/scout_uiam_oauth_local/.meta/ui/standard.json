@@ -1,5 +1,5 @@
 {
-  "sha1": "494b4ceee5efce568fe97077741564ad2c7b206e",
+  "sha1": "6e4559a7a06fa81bbe1163b973d099f95dffa8ff",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,8 +13,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/ui/tests/application_connections.spec.ts",
-        "line": 84,
-        "column": 9
+        "line": 72,
+        "column": 7
       }
     },
     {
@@ -26,8 +26,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/ui/tests/application_connections.spec.ts",
-        "line": 104,
-        "column": 9
+        "line": 80,
+        "column": 7
       }
     },
     {
@@ -39,8 +39,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/ui/tests/application_connections.spec.ts",
-        "line": 119,
-        "column": 9
+        "line": 89,
+        "column": 13
       }
     },
     {
@@ -52,8 +52,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/ui/tests/application_connections.spec.ts",
-        "line": 135,
-        "column": 9
+        "line": 105,
+        "column": 25
       }
     }
   ]
