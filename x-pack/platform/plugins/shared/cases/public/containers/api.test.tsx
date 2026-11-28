@@ -46,6 +46,7 @@ import {
   patchObservable,
   deleteObservable,
   bulkDeleteObservables,
+  extractObservables,
 } from './api';
 
 import {
@@ -1583,6 +1584,43 @@ describe('Cases API', () => {
     it('should return correct response', async () => {
       const resp = await bulkDeleteObservables(mockCase.id, observableIds, abortCtrl.signal);
       expect(resp).toEqual(basicCase);
+    });
+  });
+
+  describe('extractObservables', () => {
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue({
+        case: basicCaseSnake,
+        status: 'extracted',
+        newObservablesCount: 2,
+        alertsRequested: 3,
+        alertsFound: 2,
+      });
+    });
+
+    it('should be called with correct url, method, and signal', async () => {
+      await extractObservables(mockCase.id, abortCtrl.signal);
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        `${CASES_INTERNAL_URL}/${mockCase.id}/observables/_extract`,
+        {
+          method: 'POST',
+          signal: abortCtrl.signal,
+        }
+      );
+    });
+
+    it('should return the camel-cased case and the extraction counts', async () => {
+      const resp = await extractObservables(mockCase.id, abortCtrl.signal);
+
+      expect(resp).toEqual({
+        case: basicCase,
+        status: 'extracted',
+        newObservablesCount: 2,
+        alertsRequested: 3,
+        alertsFound: 2,
+      });
     });
   });
 });

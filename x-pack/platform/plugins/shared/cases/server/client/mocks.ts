@@ -109,6 +109,7 @@ const createCasesSubClientMock = (): CasesSubClientMock => {
     deleteObservable: jest.fn(),
     bulkAddObservables: jest.fn(),
     bulkDeleteObservables: jest.fn(),
+    extractObservables: jest.fn(),
     getApplicableFields: jest.fn(),
   });
 };

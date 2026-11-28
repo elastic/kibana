@@ -29,6 +29,7 @@ import type {
   UpdateSummary,
   CasesPatchResponse,
   BulkDeleteAttachmentsRequest,
+  ExtractObservablesResponse,
 } from '../../common/types/api';
 import type {
   CaseConnectors,
@@ -45,6 +46,7 @@ import type {
   SimilarCasesProps,
   CasesSimilarResponseUI,
   InternalFindCaseUserActions,
+  ExtractObservablesResponseUI,
 } from '../../common/ui/types';
 import { SortFieldCase } from '../../common/ui/types';
 import {
@@ -62,6 +64,7 @@ import {
   getCaseUpdateObservableUrl,
   getCaseDeleteObservableUrl,
   getCaseBulkDeleteObservablesUrl,
+  getCaseExtractObservablesUrl,
   getCaseSimilarCasesUrl,
   getCaseBulkDeleteAttachmentsUrl,
 } from '../../common/api';
@@ -733,6 +736,27 @@ export const bulkDeleteObservables = async (
     }
   );
   return convertCaseToCamelCase(decodeCaseResponse(response));
+};
+
+export const extractObservables = async (
+  caseId: string,
+  signal?: AbortSignal
+): Promise<ExtractObservablesResponseUI> => {
+  const response = await KibanaServices.get().http.fetch<ExtractObservablesResponse>(
+    getCaseExtractObservablesUrl(caseId),
+    {
+      method: 'POST',
+      signal,
+    }
+  );
+
+  return {
+    case: convertCaseToCamelCase(decodeCaseResponse(response.case)),
+    status: response.status,
+    newObservablesCount: response.newObservablesCount,
+    alertsRequested: response.alertsRequested,
+    alertsFound: response.alertsFound,
+  };
 };
 
 export const getSimilarCases = async ({
