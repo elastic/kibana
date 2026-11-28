@@ -90,7 +90,7 @@ exports[`User Summary Component it renders the default User Summary 1`] = `
                   tabindex="-1"
                 >
                   <span
-                    class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                    class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                     data-test-subj="render-content-user.id"
                   >
                     <span
@@ -135,7 +135,7 @@ exports[`User Summary Component it renders the default User Summary 1`] = `
                   tabindex="-1"
                 >
                   <span
-                    class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                    class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                     data-test-subj="render-content-user.domain"
                   >
                     <span
@@ -228,7 +228,7 @@ exports[`User Summary Component it renders the default User Summary 1`] = `
                   tabindex="-1"
                 >
                   <span
-                    class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                    class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                     data-test-subj="render-content-host.os.name"
                   >
                     <span
@@ -273,7 +273,7 @@ exports[`User Summary Component it renders the default User Summary 1`] = `
                   tabindex="-1"
                 >
                   <span
-                    class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                    class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                     data-test-subj="render-content-host.os.family"
                   >
                     <span
@@ -318,7 +318,7 @@ exports[`User Summary Component it renders the default User Summary 1`] = `
                   tabindex="-1"
                 >
                   <span
-                    class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                    class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                     data-test-subj="render-content-host.ip"
                   >
                     <span
@@ -447,7 +447,7 @@ exports[`User Summary Component it renders the panel view User Summary 1`] = `
                   tabindex="-1"
                 >
                   <span
-                    class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                    class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                     data-test-subj="render-content-user.id"
                   >
                     <span
@@ -492,7 +492,7 @@ exports[`User Summary Component it renders the panel view User Summary 1`] = `
                   tabindex="-1"
                 >
                   <span
-                    class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                    class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                     data-test-subj="render-content-user.domain"
                   >
                     <span
@@ -585,7 +585,7 @@ exports[`User Summary Component it renders the panel view User Summary 1`] = `
                   tabindex="-1"
                 >
                   <span
-                    class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                    class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                     data-test-subj="render-content-host.os.name"
                   >
                     <span
@@ -630,7 +630,7 @@ exports[`User Summary Component it renders the panel view User Summary 1`] = `
                   tabindex="-1"
                 >
                   <span
-                    class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                    class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                     data-test-subj="render-content-host.os.family"
                   >
                     <span
@@ -675,7 +675,7 @@ exports[`User Summary Component it renders the panel view User Summary 1`] = `
                   tabindex="-1"
                 >
                   <span
-                    class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                    class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                     data-test-subj="render-content-host.ip"
                   >
                     <span

@@ -14,6 +14,7 @@ import { CellActions, useDataGridColumnsCellActions } from '@kbn/cell-actions';
 import React, { useMemo } from 'react';
 import type { CellActionFieldValue, CellActionsData } from '@kbn/cell-actions/src/types';
 import type { EuiButtonIconProps } from '@elastic/eui';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { PageScope } from '../../../data_view_manager/constants';
 import type { SecurityCellActionMetadata } from '../../../app/actions/types';
 import { SecurityCellActionType } from '../../../app/actions/constants';
@@ -40,6 +41,11 @@ export interface SecurityCellActionsProps extends Omit<
   'data' | 'metadata' | 'disabledActionTypes' | 'triggerId'
 > {
   sourcererScopeId?: PageScope;
+  /**
+   * An already loaded data view. When provided, the component does not retrieve one itself
+   * (and `sourcererScopeId` is not used).
+   */
+  dataView?: DataView;
   data: SecurityCellActionsData | SecurityCellActionsData[];
   triggerId: string;
   disabledActionTypes?: SecurityCellActionType[];
@@ -57,14 +63,21 @@ export interface UseDataGridColumnsSecurityCellActionsProps extends UseDataGridC
 export const useDataGridColumnsSecurityCellActions: UseDataGridColumnsCellActions<UseDataGridColumnsSecurityCellActionsProps> =
   useDataGridColumnsCellActions;
 
-export const SecurityCellActions: React.FC<SecurityCellActionsProps> = ({
-  sourcererScopeId = PageScope.default,
+type SecurityCellActionsWithDataViewProps = Omit<SecurityCellActionsProps, 'sourcererScopeId'> & {
+  dataView: DataView;
+};
+
+/**
+ * Renders the cell actions using the provided data view. It does not retrieve any data view itself,
+ * which means it renders the actions on its first render when the data view is already loaded.
+ */
+const SecurityCellActionsWithDataView: React.FC<SecurityCellActionsWithDataViewProps> = ({
+  dataView,
   data,
   metadata,
   children,
   ...props
 }) => {
-  const { dataView } = useDataView(sourcererScopeId);
   const { id: dataViewId } = dataView;
 
   // Make a dependency key to prevent unnecessary re-renders when data object is defined inline
@@ -93,3 +106,27 @@ export const SecurityCellActions: React.FC<SecurityCellActionsProps> = ({
     <>{children}</>
   );
 };
+
+/**
+ * Retrieves the data view for the scope itself. `useDataView` keeps its result in per-instance state that
+ * starts empty, so this renders without actions first, then re-creates its children once the data view resolved.
+ * Prefer passing `dataView` when it is already available.
+ */
+const SecurityCellActionsRetrievingDataView: React.FC<
+  Omit<SecurityCellActionsProps, 'dataView'>
+> = ({ sourcererScopeId = PageScope.default, ...props }) => {
+  const { dataView } = useDataView(sourcererScopeId);
+
+  return <SecurityCellActionsWithDataView {...props} dataView={dataView} />;
+};
+
+export const SecurityCellActions: React.FC<SecurityCellActionsProps> = ({
+  dataView,
+  sourcererScopeId,
+  ...props
+}) =>
+  dataView ? (
+    <SecurityCellActionsWithDataView {...props} dataView={dataView} />
+  ) : (
+    <SecurityCellActionsRetrievingDataView {...props} sourcererScopeId={sourcererScopeId} />
+  );

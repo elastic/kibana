@@ -8,7 +8,10 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { TableId } from '@kbn/securitysolution-data-table';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { PageScope } from '../../../data_view_manager/constants';
 import { TestProviders } from '../../mock';
+import { CellActionsDataViewProvider } from './data_view_context';
 import { TimelineId } from '../../../../common/types';
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../../../timelines/components/row_renderers_browser/constants';
 
@@ -16,12 +19,14 @@ import { CellActionsRenderer } from './cell_actions_renderer';
 
 jest.mock('../../lib/kibana');
 
-const MockSecurityCellActions = jest.fn(({ children }: { children: React.ReactNode }) => (
+type MockSecurityCellActionsProps = { children: React.ReactNode } & Record<string, unknown>;
+
+const MockSecurityCellActions = jest.fn(({ children }: MockSecurityCellActionsProps) => (
   <div data-test-subj="mockSecurityCellActions">{children}</div>
 ));
 jest.mock('.', () => ({
   ...jest.requireActual('.'),
-  SecurityCellActions: (params: { children: React.ReactNode }) => MockSecurityCellActions(params),
+  SecurityCellActions: (params: MockSecurityCellActionsProps) => MockSecurityCellActions(params),
 }));
 
 const mockSourcererScopeId = 'testSourcererScopeId';
@@ -29,15 +34,78 @@ jest.mock('../../../helpers', () => ({
   getSourcererScopeId: jest.fn(() => mockSourcererScopeId),
 }));
 
+const lastCellActionsProps = () => MockSecurityCellActions.mock.lastCall?.[0];
+
 describe('cell actions renderer', () => {
+  beforeEach(() => {
+    MockSecurityCellActions.mockClear();
+  });
+
   describe('rendering', () => {
-    test('it renders theCellActionsRenderer', () => {
-      const { container } = render(
+    test('it renders its children inside the cell actions', () => {
+      const { getByTestId, getByText } = render(
         <CellActionsRenderer field="some-field" value="some-value" queryValue="some-query-value">
           <span>{'A child of this'}</span>
         </CellActionsRenderer>
       );
-      expect(container.firstChild).toMatchSnapshot();
+
+      const cellActions = getByTestId('mockSecurityCellActions');
+      const content = getByTestId('render-content-some-field');
+
+      expect(cellActions).toContainElement(content);
+      expect(content).toContainElement(getByText('A child of this'));
+    });
+
+    test('it gives the cell actions the field, the query value and the scopes', () => {
+      render(
+        <CellActionsRenderer field="some-field" value="some-value" queryValue="some-query-value">
+          <span>{'A child of this'}</span>
+        </CellActionsRenderer>
+      );
+
+      expect(lastCellActionsProps()).toEqual(
+        expect.objectContaining({
+          data: { field: 'some-field', value: 'some-query-value' },
+          sourcererScopeId: mockSourcererScopeId,
+          metadata: { scopeId: TimelineId.active },
+        })
+      );
+    });
+  });
+
+  describe('data view', () => {
+    const dataView = { id: 'some-data-view-id' } as unknown as DataView;
+    const scope = mockSourcererScopeId as unknown as PageScope;
+
+    const renderWithProvider = (providerScope: PageScope, providedDataView?: DataView) =>
+      render(
+        <CellActionsDataViewProvider scope={providerScope} dataView={providedDataView}>
+          <CellActionsRenderer field="some-field" value="some-value" />
+        </CellActionsDataViewProvider>
+      );
+
+    test('it gives the cell actions the data view provided for its scope', () => {
+      renderWithProvider(scope, dataView);
+
+      expect(lastCellActionsProps()?.dataView).toBe(dataView);
+    });
+
+    test('it does not give a data view to the cell actions when none is provided', () => {
+      render(<CellActionsRenderer field="some-field" value="some-value" />);
+
+      expect(lastCellActionsProps()?.dataView).toBeUndefined();
+    });
+
+    test('it does not use a data view that was provided for another scope', () => {
+      renderWithProvider('another-scope' as unknown as PageScope, dataView);
+
+      expect(lastCellActionsProps()?.dataView).toBeUndefined();
+    });
+
+    test('it does not give a data view to the cell actions when the provider has none yet', () => {
+      renderWithProvider(scope, undefined);
+
+      expect(lastCellActionsProps()?.dataView).toBeUndefined();
     });
   });
 

@@ -17,7 +17,8 @@ import { getAllFieldsByName } from '../../../common/containers/source';
 import type { AlertColumnHeaders } from './columns';
 import { eventRenderedViewColumns, getColumns } from './columns';
 import { useBrowserFields } from '../../../data_view_manager/hooks/use_browser_fields';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import type { UseDataViewReturnValue } from '../../../data_view_manager/hooks/use_data_view';
+import { CellActionsDataViewProvider } from '../../../common/components/cell_actions/data_view_context';
 
 interface AlertTableCellContextProps {
   browserFields: BrowserFields;
@@ -30,13 +31,15 @@ export const AlertTableCellContext = createContext<AlertTableCellContextProps | 
 export const AlertTableCellContextProvider = ({
   tableId = '',
   sourcererScope,
+  dataViewState: { dataView, status: dataViewStatus },
   children,
 }: {
   tableId?: string;
   sourcererScope: PageScope;
+  /** The data view of `sourcererScope`, as retrieved by the caller with `useDataView` */
+  dataViewState: UseDataViewReturnValue;
   children: React.ReactNode;
 }) => {
-  const { dataView } = useDataView(sourcererScope);
   const browserFields = useBrowserFields(dataView);
   const browserFieldsByName = useMemo(() => getAllFieldsByName(browserFields), [browserFields]);
   const license = useLicense();
@@ -62,7 +65,13 @@ export const AlertTableCellContextProvider = ({
 
   return (
     <AlertTableCellContext.Provider value={cellValueContext}>
-      {children}
+      {/* Only provide the data view once it is ready: until then cell actions retrieve it themselves */}
+      <CellActionsDataViewProvider
+        scope={sourcererScope}
+        dataView={dataViewStatus === 'ready' ? dataView : undefined}
+      >
+        {children}
+      </CellActionsDataViewProvider>
     </AlertTableCellContext.Provider>
   );
 };

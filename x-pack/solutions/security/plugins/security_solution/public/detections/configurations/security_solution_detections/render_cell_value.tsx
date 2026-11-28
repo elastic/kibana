@@ -51,7 +51,6 @@ export type RenderCellValueProps = Pick<
 export const CellValue = memo(function RenderCellValue({
   columnId,
   rowIndex,
-  pageScope,
   tableId,
   tableType,
   header,
@@ -167,7 +166,7 @@ export const CellValue = memo(function RenderCellValue({
         colIndex={colIndex}
         rowRenderers={rowRenderers ?? defaultRowRenderers}
         setCellProps={setCellProps}
-        scopeId={pageScope}
+        scopeId={tableType}
         truncate={truncate}
         asPlainText={false}
         context={userProfiles}
@@ -189,7 +188,7 @@ export const CellValue = memo(function RenderCellValue({
     colIndex,
     rowRenderers,
     setCellProps,
-    pageScope,
+    tableType,
     truncate,
     userProfiles,
   ]);

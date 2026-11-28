@@ -30,7 +30,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                   tabindex="-1"
                 >
                   <span
-                    class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                    class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                     data-test-subj="render-content-user.name"
                   >
                     <span
@@ -72,7 +72,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                   tabindex="-1"
                 >
                   <span
-                    class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                    class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                     data-test-subj="render-content-process.name"
                   >
                     <span
@@ -123,7 +123,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                   tabindex="-1"
                 >
                   <span
-                    class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                    class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                     data-test-subj="render-content-event.duration"
                   >
                     <div
@@ -158,7 +158,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                   tabindex="-1"
                 >
                   <span
-                    class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                    class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                     data-test-subj="render-content-event.start"
                   >
                     <div
@@ -189,7 +189,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                   tabindex="-1"
                 >
                   <span
-                    class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                    class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                     data-test-subj="render-content-event.end"
                   >
                     <div
@@ -234,7 +234,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                       tabindex="-1"
                     >
                       <span
-                        class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                        class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                         data-test-subj="render-content-network.direction"
                       >
                         <span
@@ -276,7 +276,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                       tabindex="-1"
                     >
                       <span
-                        class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                        class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                         data-test-subj="render-content-network.protocol"
                       >
                         <span
@@ -312,7 +312,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                       tabindex="-1"
                     >
                       <span
-                        class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                        class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                         data-test-subj="render-content-network.bytes"
                       >
                         <span
@@ -341,7 +341,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                       tabindex="-1"
                     >
                       <span
-                        class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                        class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                         data-test-subj="render-content-network.packets"
                       >
                         <span
@@ -370,7 +370,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                       tabindex="-1"
                     >
                       <span
-                        class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                        class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                         data-test-subj="render-content-network.transport"
                       >
                         <span
@@ -406,7 +406,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                       tabindex="-1"
                     >
                       <span
-                        class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                        class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                         data-test-subj="render-content-network.community_id"
                       >
                         <span
@@ -561,7 +561,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                         tabindex="-1"
                                       >
                                         <span
-                                          class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                                          class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                                           data-test-subj="render-content-source.geo.continent_name"
                                         >
                                           <span
@@ -592,7 +592,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                         tabindex="-1"
                                       >
                                         <span
-                                          class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                                          class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                                           data-test-subj="render-content-source.geo.country_name"
                                         >
                                           <span
@@ -633,7 +633,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                         tabindex="-1"
                                       >
                                         <span
-                                          class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                                          class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                                           data-test-subj="render-content-source.geo.country_iso_code"
                                         >
                                           <span
@@ -664,7 +664,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                         tabindex="-1"
                                       >
                                         <span
-                                          class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                                          class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                                           data-test-subj="render-content-source.geo.region_name"
                                         >
                                           <span
@@ -695,7 +695,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                         tabindex="-1"
                                       >
                                         <span
-                                          class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                                          class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                                           data-test-subj="render-content-source.geo.city_name"
                                         >
                                           <span
@@ -744,7 +744,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                             tabindex="-1"
                           >
                             <span
-                              class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                              class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                               data-test-subj="render-content-source.bytes"
                             >
                               <span
@@ -786,7 +786,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                             tabindex="-1"
                           >
                             <span
-                              class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                              class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                               data-test-subj="render-content-source.packets"
                             >
                               <span
@@ -859,7 +859,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                             tabindex="-1"
                           >
                             <span
-                              class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                              class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                               data-test-subj="render-content-destination.bytes"
                             >
                               <span
@@ -901,7 +901,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                             tabindex="-1"
                           >
                             <span
-                              class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                              class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                               data-test-subj="render-content-destination.packets"
                             >
                               <span
@@ -1052,7 +1052,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                         tabindex="-1"
                                       >
                                         <span
-                                          class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                                          class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                                           data-test-subj="render-content-destination.geo.continent_name"
                                         >
                                           <span
@@ -1083,7 +1083,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                         tabindex="-1"
                                       >
                                         <span
-                                          class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                                          class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                                           data-test-subj="render-content-destination.geo.country_name"
                                         >
                                           <span
@@ -1124,7 +1124,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                         tabindex="-1"
                                       >
                                         <span
-                                          class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                                          class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                                           data-test-subj="render-content-destination.geo.country_iso_code"
                                         >
                                           <span
@@ -1155,7 +1155,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                         tabindex="-1"
                                       >
                                         <span
-                                          class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                                          class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                                           data-test-subj="render-content-destination.geo.region_name"
                                         >
                                           <span
@@ -1186,7 +1186,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                         tabindex="-1"
                                       >
                                         <span
-                                          class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                                          class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                                           data-test-subj="render-content-destination.geo.city_name"
                                         >
                                           <span
@@ -1231,7 +1231,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
               tabindex="-1"
             >
               <span
-                class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                 data-test-subj="render-content-tls.fingerprints.ja3.hash"
               >
                 <span
@@ -1296,7 +1296,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
               tabindex="-1"
             >
               <span
-                class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                 data-test-subj="render-content-tls.client_certificate.fingerprint.sha1"
               >
                 <span
@@ -1361,7 +1361,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
               tabindex="-1"
             >
               <span
-                class="css-1s7tdhk-ProviderContentWrapper e14kwmf30"
+                class="css-1s7tdhk-ProviderContentWrapper e9yj7bi0"
                 data-test-subj="render-content-tls.server_certificate.fingerprint.sha1"
               >
                 <span
