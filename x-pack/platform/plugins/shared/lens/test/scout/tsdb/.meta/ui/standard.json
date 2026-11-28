@@ -1,5 +1,5 @@
 {
-  "sha1": "90f514e4bc36f7ea6e4facc47186a3f7610b0066",
+  "sha1": "570bd9db7d270c1ab4b52884f1da0994936db3b4",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -591,7 +591,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/query_behavior.spec.ts",
         "line": 211,
-        "column": 11
+        "column": 17
       }
     },
     {

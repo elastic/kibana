@@ -1,5 +1,5 @@
 {
-  "sha1": "8b9e2193af806eb9e48b8aa137e87da5cb2677ca",
+  "sha1": "0de40c92ff3b822c45914fa8faa382adfe2c60e3",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -1247,6 +1247,62 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/session_events.spec.ts",
         "line": 371,
+        "column": 27
+      }
+    },
+    {
+      "id": "656c5c3c05c0ab8-673d025bf4c224f",
+      "title": "context engine session memory _remember API enforces contextEngine:write per space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/session_memory_remember.spec.ts",
+        "line": 405,
+        "column": 55
+      }
+    },
+    {
+      "id": "656c5c3c05c0ab8-025ee051fefb5f4",
+      "title": "context engine session memory _remember API accepts a memory for the caller in the non-default space without manage_memory",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/session_memory_remember.spec.ts",
+        "line": 435,
+        "column": 13
+      }
+    },
+    {
+      "id": "656c5c3c05c0ab8-e03d50a630e045f",
+      "title": "context engine session memory _remember API resolves contextEngine:manage_memory in the request space when targeting another user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/session_memory_remember.spec.ts",
+        "line": 539,
+        "column": 27
+      }
+    },
+    {
+      "id": "656c5c3c05c0ab8-a79792028963289",
+      "title": "context engine session memory _remember API checks AI index existence and Elasticsearch write privileges in the request space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/session_memory_remember.spec.ts",
+        "line": 594,
         "column": 27
       }
     },

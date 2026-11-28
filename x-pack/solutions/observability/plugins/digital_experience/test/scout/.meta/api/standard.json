@@ -1,5 +1,5 @@
 {
-  "sha1": "e2ca361c6543863e25a538706667f3ddbace2cd1",
+  "sha1": "18adb5e2f483dd09275cc59cb39ba809790436fe",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -371,6 +371,118 @@
       }
     },
     {
+      "id": "ddb2a8bc50148b3-ba74e5652749ab7",
+      "title": "Digital Experience mobile app starts API averages the cold and warm starts in the KPIs, without the background launch nor the hot start",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_app_starts.spec.ts",
+        "line": 35,
+        "column": 42
+      }
+    },
+    {
+      "id": "ddb2a8bc50148b3-a4c7c0fbee0d39a",
+      "title": "Digital Experience mobile app starts API compares the starts with the previous period, the guard limits included and nothing on the range end",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_app_starts.spec.ts",
+        "line": 57,
+        "column": 11
+      }
+    },
+    {
+      "id": "ddb2a8bc50148b3-751cb8bbcb42c3a",
+      "title": "Digital Experience mobile app starts API charts only the starts of the time range, not those of the previous period nor its end",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_app_starts.spec.ts",
+        "line": 81,
+        "column": 42
+      }
+    },
+    {
+      "id": "ddb2a8bc50148b3-6f4e23af79d0cd3",
+      "title": "Digital Experience mobile app starts API has no average for an application whose SDK sent no app starts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_app_starts.spec.ts",
+        "line": 94,
+        "column": 21
+      }
+    },
+    {
+      "id": "ddb2a8bc50148b3-ff661994c8abd31",
+      "title": "Digital Experience mobile app starts API answers the cold and warm starts per bucket, a gap where there were none",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_app_starts.spec.ts",
+        "line": 109,
+        "column": 20
+      }
+    },
+    {
+      "id": "ddb2a8bc50148b3-75771faa6b00177",
+      "title": "Digital Experience mobile app starts API lines the buckets up with the user's time zone, the populated one in place of its empty one",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_app_starts.spec.ts",
+        "line": 133,
+        "column": 11
+      }
+    },
+    {
+      "id": "ddb2a8bc50148b3-2c95bfa609873de",
+      "title": "Digital Experience mobile app starts API respects the OS, release and environment filters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_app_starts.spec.ts",
+        "line": 160,
+        "column": 9
+      }
+    },
+    {
+      "id": "ddb2a8bc50148b3-5c4fb323f7bb498",
+      "title": "Digital Experience mobile app starts API answers 400 for a range that starts after it ends",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_app_starts.spec.ts",
+        "line": 191,
+        "column": 28
+      }
+    },
+    {
       "id": "f330a5f7a723147-1f78d7a3f6644cb",
       "title": "Digital Experience applications API with mobile data returns a row per mobile application, with its platforms and EDOT as its source, and never a backend Java service nor EDOT Browser on an iPhone",
       "expectedStatus": "passed",
@@ -441,6 +553,230 @@
       }
     },
     {
+      "id": "0af858c618ab024-e00adcfb5db97d4",
+      "title": "Digital Experience mobile crashes API authorization answers 403 to the crash routes without the Digital Experience privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_crashes_authorization.spec.ts",
+        "line": 72,
+        "column": 36
+      }
+    },
+    {
+      "id": "0af858c618ab024-5b7f909ed9c463c",
+      "title": "Digital Experience mobile crashes API authorization answers 403 to the crash routes without the APM privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_crashes_authorization.spec.ts",
+        "line": 72,
+        "column": 36
+      }
+    },
+    {
+      "id": "0af858c618ab024-2295114d5fb6beb",
+      "title": "Digital Experience mobile crashes API authorization lists the crash groups of a user who can't read the traces, as partial",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_crashes_authorization.spec.ts",
+        "line": 88,
+        "column": 39
+      }
+    },
+    {
+      "id": "0af858c618ab024-562469780190340",
+      "title": "Digital Experience mobile crashes API authorization answers a group's detail to a user who can't read the traces, without the session's spans",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_crashes_authorization.spec.ts",
+        "line": 107,
+        "column": 27
+      }
+    },
+    {
+      "id": "0af858c618ab024-2fe5c77cf4a8ed9",
+      "title": "Digital Experience mobile crashes API authorization answers no crash to a user who can't read the logs, where crashes are",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_crashes_authorization.spec.ts",
+        "line": 128,
+        "column": 41
+      }
+    },
+    {
+      "id": "9e0a065ecbfbadc-3d22ebafd7a2d1d",
+      "title": "Digital Experience mobile crashes API ranks the crash groups by affected users, ignoring line numbers, and marks new the one only the newest release has",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_crashes.spec.ts",
+        "line": 56,
+        "column": 25
+      }
+    },
+    {
+      "id": "9e0a065ecbfbadc-b976ec9bc001383",
+      "title": "Digital Experience mobile crashes API narrows the groups to a release, and still marks new by every release",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_crashes.spec.ts",
+        "line": 98,
+        "column": 23
+      }
+    },
+    {
+      "id": "9e0a065ecbfbadc-da225cd032d11dd",
+      "title": "Digital Experience mobile crashes API groups the iOS reports of one crash whatever their addresses, by when it happened rather than when it was sent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_crashes.spec.ts",
+        "line": 123,
+        "column": 7
+      }
+    },
+    {
+      "id": "9e0a065ecbfbadc-eda95a93eaeeacb",
+      "title": "Digital Experience mobile crashes API filters iOS crashes by the release that crashed, not the one that sent them",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_crashes.spec.ts",
+        "line": 140,
+        "column": 14
+      }
+    },
+    {
+      "id": "9e0a065ecbfbadc-4b646f712a21dbe",
+      "title": "Digital Experience mobile crashes API computes the fingerprints an ingest-time fingerprint must match, and prefers a stored one",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_crashes.spec.ts",
+        "line": 180,
+        "column": 20
+      }
+    },
+    {
+      "id": "9e0a065ecbfbadc-80dfa061edc2e9d",
+      "title": "Digital Experience mobile crashes API answers a group's latest crash, its breakdowns and its session before the crash",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_crashes.spec.ts",
+        "line": 191,
+        "column": 9
+      }
+    },
+    {
+      "id": "9e0a065ecbfbadc-a39e528ff094bc1",
+      "title": "Digital Experience mobile crashes API finds an iOS session's events whatever the case of its id, which EDOT iOS writes in uppercase",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_crashes.spec.ts",
+        "line": 263,
+        "column": 26
+      }
+    },
+    {
+      "id": "9e0a065ecbfbadc-7309428a61999cd",
+      "title": "Digital Experience mobile crashes API has no latest crash for a fingerprint without crashes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_crashes.spec.ts",
+        "line": 275,
+        "column": 5
+      }
+    },
+    {
+      "id": "9e0a065ecbfbadc-d9e43a156a29cdd",
+      "title": "Digital Experience mobile crashes API has no latest crash for a group the release filter leaves out",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_crashes.spec.ts",
+        "line": 279,
+        "column": 28
+      }
+    },
+    {
+      "id": "9e0a065ecbfbadc-da7929b78be7b8d",
+      "title": "Digital Experience mobile crashes API rejects a fingerprint longer than any",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_crashes.spec.ts",
+        "line": 285,
+        "column": 9
+      }
+    },
+    {
+      "id": "9e0a065ecbfbadc-763fd81924f6963",
+      "title": "Digital Experience mobile crashes API counts every crash the top values leave out as Other, those without a value too",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_crashes.spec.ts",
+        "line": 293,
+        "column": 18
+      }
+    },
+    {
       "id": "3018e93676da7c3-beb706a61498146",
       "title": "Digital Experience mobile APIs with partial index access reports the mobile applications as partial, counted from the traces only",
       "expectedStatus": "passed",
@@ -450,8 +786,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_partial_index_access.spec.ts",
-        "line": 51,
-        "column": 25
+        "line": 56,
+        "column": 7
       }
     },
     {
@@ -464,8 +800,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_partial_index_access.spec.ts",
-        "line": 62,
-        "column": 9
+        "line": 67,
+        "column": 16
       }
     },
     {
@@ -478,8 +814,22 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_partial_index_access.spec.ts",
-        "line": 75,
-        "column": 58
+        "line": 81,
+        "column": 44
+      }
+    },
+    {
+      "id": "3018e93676da7c3-6bebd3ac8ebcad6",
+      "title": "Digital Experience mobile APIs with partial index access reads no app starts from the logs without access to them",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_partial_index_access.spec.ts",
+        "line": 96,
+        "column": 42
       }
     },
     {
@@ -492,13 +842,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_partial_index_access.spec.ts",
-        "line": 91,
-        "column": 15
+        "line": 116,
+        "column": 17
       }
     },
     {
-      "id": "f72cccb296ccc7b-20920adee43453b",
-      "title": "Digital Experience mobile releases API authorization answers 403 naming the apm privilege, without it",
+      "id": "f72cccb296ccc7b-3fda529951f4fbb",
+      "title": "Digital Experience mobile releases and app starts API authorization answers 403 naming the apm privilege, without it, for the releases",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -506,8 +856,22 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_releases_authorization.spec.ts",
-        "line": 20,
-        "column": 9
+        "line": 27,
+        "column": 30
+      }
+    },
+    {
+      "id": "f72cccb296ccc7b-23034a08ca371a6",
+      "title": "Digital Experience mobile releases and app starts API authorization answers 403 naming the apm privilege, without it, for the app starts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_releases_authorization.spec.ts",
+        "line": 27,
+        "column": 30
       }
     },
     {
@@ -520,7 +884,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_releases.spec.ts",
-        "line": 26,
+        "line": 27,
         "column": 17
       }
     },
@@ -534,8 +898,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_releases.spec.ts",
-        "line": 46,
-        "column": 95
+        "line": 49,
+        "column": 14
       }
     },
     {
@@ -548,7 +912,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_releases.spec.ts",
-        "line": 59,
+        "line": 68,
         "column": 4
       }
     },
@@ -562,13 +926,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_releases.spec.ts",
-        "line": 74,
+        "line": 83,
         "column": 7
       }
     },
     {
-      "id": "6cb2d5f54f9f127-45924e971432b8e",
-      "title": "Digital Experience mobile releases API computes the error rate of a release and of its time bucket alike, above both floors",
+      "id": "6cb2d5f54f9f127-15af3d799fdb58a",
+      "title": "Digital Experience mobile releases API computes the error rate and cold start of a release, and the error rate of its time bucket, above the floors",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -576,8 +940,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_releases.spec.ts",
-        "line": 115,
-        "column": 20
+        "line": 128,
+        "column": 21
       }
     },
     {
@@ -590,8 +954,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_releases.spec.ts",
-        "line": 144,
-        "column": 32
+        "line": 158,
+        "column": 9
       }
     },
     {
@@ -604,7 +968,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_releases.spec.ts",
-        "line": 172,
+        "line": 188,
         "column": 32
       }
     },
@@ -618,7 +982,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/mobile_releases.spec.ts",
-        "line": 191,
+        "line": 207,
         "column": 14
       }
     },
@@ -879,8 +1243,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/sessions_task.spec.ts",
-        "line": 260,
-        "column": 13
+        "line": 297,
+        "column": 70
       }
     },
     {
@@ -1019,7 +1383,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/global.teardown.ts",
-        "line": 15,
+        "line": 16,
         "column": 35
       }
     },
@@ -1034,8 +1398,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/global.teardown.ts",
-        "line": 37,
-        "column": 19
+        "line": 41,
+        "column": 10
       }
     }
   ]

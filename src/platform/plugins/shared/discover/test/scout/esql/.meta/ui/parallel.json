@@ -1,5 +1,5 @@
 {
-  "sha1": "a97922e1ea76d9b85541d804115663ff3e00c862",
+  "sha1": "ce3d5395efd6c63654afd8fd8e5f953758389143",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -574,8 +574,8 @@
       }
     },
     {
-      "id": "15e7076675cd148-5c9d907f4056918",
-      "title": "Discover ES|QL results formatting with columnsMeta formats ES|QL columns using columnsMeta when the type differs from the data-view field",
+      "id": "15e7076675cd148-84ca34c4b24605c",
+      "title": "Discover ES|QL results formatting by column type formats ES|QL columns by the column type when it differs from the data-view field",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"

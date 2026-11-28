@@ -1,5 +1,5 @@
 {
-  "sha1": "ec57e6c98a24392ee874daf10fe694836b3a010e",
+  "sha1": "6a96978000ff9f00ab05f20a4c8b352d1e337249",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -770,8 +770,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/workflow_error_trigger.spec.ts",
-        "line": 171,
-        "column": 29
+        "line": 183,
+        "column": 27
       }
     },
     {
@@ -787,8 +787,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/workflow_error_trigger.spec.ts",
-        "line": 198,
-        "column": 54
+        "line": 211,
+        "column": 38
       }
     },
     {
@@ -804,8 +804,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/workflow_error_trigger.spec.ts",
-        "line": 210,
-        "column": 16
+        "line": 222,
+        "column": 25
       }
     },
     {
@@ -821,8 +821,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/workflow_error_trigger.spec.ts",
-        "line": 228,
-        "column": 24
+        "line": 246,
+        "column": 13
       }
     },
     {
@@ -838,8 +838,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/workflow_error_trigger.spec.ts",
-        "line": 250,
-        "column": 26
+        "line": 271,
+        "column": 31
       }
     },
     {
@@ -1397,7 +1397,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/executed_by_profile.spec.ts",
-        "line": 130,
+        "line": 128,
         "column": 17
       }
     },
@@ -1410,7 +1410,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/executed_by_profile.spec.ts",
-        "line": 145,
+        "line": 143,
         "column": 14
       }
     },
