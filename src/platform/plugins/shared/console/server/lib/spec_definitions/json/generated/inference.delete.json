@@ -16,8 +16,7 @@
         "completion",
         "chat_completion",
         "embedding",
-        "document_extraction",
-        "decision"
+        "document_extraction"
       ]
     },
     "methods": [

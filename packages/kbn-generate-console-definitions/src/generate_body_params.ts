@@ -356,6 +356,14 @@ const convertBodyValueOf = (
     return valueOf.value;
   }
   if (valueOf.kind === 'dictionary_of') {
+    // a named map of aggregations is served by the global aggregations rules
+    if (
+      valueOf.value.kind === 'instance_of' &&
+      valueOf.value.type.name === 'AggregationContainer' &&
+      valueOf.value.type.namespace === '_types.aggregations'
+    ) {
+      return { __scope_link: 'GLOBAL.aggregations' };
+    }
     const valueRule = convertBodyValueOf(valueOf.value, context);
     if (valueRule === UNSUPPORTED) {
       return {};

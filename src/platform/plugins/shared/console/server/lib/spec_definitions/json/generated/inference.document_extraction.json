@@ -19,8 +19,7 @@
               "type": {
                 "__one_of": [
                   "image",
-                  "pdf",
-                  "html"
+                  "pdf"
                 ]
               },
               "format": {
@@ -38,8 +37,7 @@
                 "type": {
                   "__one_of": [
                     "image",
-                    "pdf",
-                    "html"
+                    "pdf"
                   ]
                 },
                 "format": {
@@ -54,14 +52,7 @@
           ]
         ]
       },
-      "task_settings": {
-        "output_format": {
-          "__one_of": [
-            "markdown"
-          ]
-        },
-        "parameters": {}
-      }
+      "task_settings": ""
     },
     "methods": [
       "POST"
