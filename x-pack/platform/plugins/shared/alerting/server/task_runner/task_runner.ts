@@ -348,6 +348,8 @@ export class TaskRunner<
           params: rule.params,
         },
         ruleType: this.ruleType as UntypedNormalizedRuleType,
+        // The task state here is the rule's own, which the ad hoc task runner cannot offer.
+        shouldUntrackOrphanedAlerts: true,
         startedAt: this.taskInstance.startedAt,
         taskInstance: this.taskInstance,
       })
