@@ -176,9 +176,10 @@ export class DocumentFlyout {
     await option.and(this.page.locator('[aria-checked="true"]')).waitFor({ state: 'visible' });
   }
 
-  /** Click the "Apply" button in the assignees panel. */
+  /** Click the "Apply" button in the assignees panel and wait for the popover to close. */
   async applyAssignees() {
     await this.assigneesApplyButton.click();
+    await this.assigneesApplyPanel.waitFor({ state: 'hidden' });
   }
 
   /** Return the avatar locator for the given username, scoped to the flyout header assignees area. */
