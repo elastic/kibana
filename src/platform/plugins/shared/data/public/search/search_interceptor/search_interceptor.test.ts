@@ -2087,6 +2087,28 @@ describe('SearchInterceptor', () => {
         await expect(response.toPromise()).rejects.toThrow(EsError);
       });
 
+      test('Should throw AbortError on a Chrome transport-level fetch failure', async () => {
+        const mockResponse: any = new Error('Failed to fetch');
+        mockResponse.name = 'TypeError';
+        mockCoreSetup.http.post.mockRejectedValueOnce(mockResponse);
+        const mockRequest: IEsSearchRequest = {
+          params: {},
+        };
+        const response = searchInterceptor.search(mockRequest);
+        await expect(response.toPromise()).rejects.toBeInstanceOf(AbortError);
+      });
+
+      test('Should throw AbortError on a Firefox transport-level fetch failure', async () => {
+        const mockResponse: any = new Error('NetworkError when attempting to fetch resource.');
+        mockResponse.name = 'TypeError';
+        mockCoreSetup.http.post.mockRejectedValueOnce(mockResponse);
+        const mockRequest: IEsSearchRequest = {
+          params: {},
+        };
+        const response = searchInterceptor.search(mockRequest);
+        await expect(response.toPromise()).rejects.toBeInstanceOf(AbortError);
+      });
+
       test('Observable should fail if user aborts (test merged signal)', async () => {
         const abortController = new AbortController();
         mockCoreSetup.http.post.mockImplementationOnce((options: any) => {
