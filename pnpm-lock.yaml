@@ -6331,6 +6331,9 @@ importers:
       eslint-plugin-mocha:
         specifier: 10.1.0
         version: 10.1.0(eslint@8.57.0(supports-color@10.2.2))
+      eslint-plugin-n:
+        specifier: 18.2.2
+        version: 18.2.2(eslint@8.57.0(supports-color@10.2.2))(typescript@6.0.3)
       eslint-plugin-no-unsanitized:
         specifier: 4.0.2
         version: 4.0.2(eslint@8.57.0(supports-color@10.2.2))
@@ -18136,6 +18139,12 @@ packages:
     engines: {node: '>=6.0'}
     hasBin: true
 
+  eslint-compat-utils@0.5.1:
+    resolution: {integrity: sha512-3z3vFexKIEnjHE3zCMRo6fn/e44U7T1khUjg+Hp0ZQMCigh28rALD0nPFBcGZuiLC5rLZa2ubQHDRln09JfU2Q==}
+    engines: {node: '>=12'}
+    peerDependencies:
+      eslint: '>=6.0.0'
+
   eslint-config-prettier@9.1.0:
     resolution: {integrity: sha512-NSWl5BFQWEPi1j4TjVNItzYV7dZXZ+wP6I6ZhrBGpChQhZRUaElihE9uRRkcbRnNb76UMKDF3r+WTmNcGPKsqw==}
     hasBin: true
@@ -18182,6 +18191,12 @@ packages:
   eslint-plugin-depend@0.12.0:
     resolution: {integrity: sha512-bS5ESnC3eXDJPNv0RKkzRbLO45hRRLR/dleAUdbysXChWz1bAxa4MRh14EtDREn7fZieueqz4L7TfQQbzvdYHA==}
 
+  eslint-plugin-es-x@7.8.0:
+    resolution: {integrity: sha512-7Ds8+wAAoV3T+LAKeu39Y5BzXCrGKrcISfgKEqTS4BDN8SFEDQd0S43jiQ8vIa3wUKD07qitZdfzlenSi8/0qQ==}
+    engines: {node: ^14.18.0 || >=16.0.0}
+    peerDependencies:
+      eslint: '>=8'
+
   eslint-plugin-es@3.0.1:
     resolution: {integrity: sha512-GUmAsJaN4Fc7Gbtl8uOBlayo2DqhwWvEzykMHSCZHU3XdJ+NSzzZcVhXh3VxX5icqQ+oQdIEawXX8xkR3mIFmQ==}
     engines: {node: '>=8.10.0'}
@@ -18227,6 +18242,19 @@ packages:
     engines: {node: '>=14.0.0'}
     peerDependencies:
       eslint: '>=7.0.0'
+
+  eslint-plugin-n@18.2.2:
+    resolution: {integrity: sha512-gOO0lIqwEjZ750kv9/SptCWArUoAZXJoBr0vYWTO2dCBxctHUXlBIigiC8xuxxr/NKqgIT6Ehz1xRcilj8a5cA==}
+    engines: {node: ^20.19.0 || ^22.13.0 || >=24}
+    peerDependencies:
+      eslint: '>=8.57.1'
+      ts-declaration-location: ^1.0.6
+      typescript: 6.0.3
+    peerDependenciesMeta:
+      ts-declaration-location:
+        optional: true
+      typescript:
+        optional: true
 
   eslint-plugin-no-unsanitized@4.0.2:
     resolution: {integrity: sha512-Pry0S9YmHoz8NCEMRQh7N0Yexh2MYCNPIlrV52hTmS7qXnTghWsjXouF08bgsrrZqaW9tt1ZiK3j5NEmPE+EjQ==}
@@ -18966,6 +18994,10 @@ packages:
   globals@13.24.0:
     resolution: {integrity: sha512-AhO5QUcj8llrbG09iWhPU2B204J1xnPeL8kQmVorSsy+Sjj1sk8gIyh6cUocGmH4L0UuhAJy+hJMRA4mgA4mFQ==}
     engines: {node: '>=8'}
+
+  globals@15.15.0:
+    resolution: {integrity: sha512-7ACyT3wmyp3I61S4fG682L0VA2RGD9otkqGJIwNUMF1SWUombIIk+af1unuDYgMm082aHYwD+mzJvv9Iu8dsgg==}
+    engines: {node: '>=18'}
 
   globals@17.12.0:
     resolution: {integrity: sha512-cezEd/DTyyht9cvSSURyygXPfy04GtWO/5e6ZPvH7fCtjKz9PYOmuawphw1Ctd1f6C+5JypXfGD7ahNMXvevBA==}
@@ -35612,6 +35644,11 @@ snapshots:
     optionalDependencies:
       source-map: 0.6.1
 
+  eslint-compat-utils@0.5.1(eslint@8.57.0(supports-color@10.2.2)):
+    dependencies:
+      eslint: 8.57.0(supports-color@10.2.2)
+      semver: 7.8.6
+
   eslint-config-prettier@9.1.0(eslint@8.57.0(supports-color@10.2.2)):
     dependencies:
       eslint: 8.57.0(supports-color@10.2.2)
@@ -35659,6 +35696,13 @@ snapshots:
       fd-package-json: 1.2.0
       module-replacements: 2.3.2
       semver: 7.8.6
+
+  eslint-plugin-es-x@7.8.0(eslint@8.57.0(supports-color@10.2.2)):
+    dependencies:
+      '@eslint-community/eslint-utils': 4.10.1(eslint@8.57.0(supports-color@10.2.2))
+      '@eslint-community/regexpp': 4.12.2
+      eslint: 8.57.0(supports-color@10.2.2)
+      eslint-compat-utils: 0.5.1(eslint@8.57.0(supports-color@10.2.2))
 
   eslint-plugin-es@3.0.1(eslint@8.57.0(supports-color@10.2.2)):
     dependencies:
@@ -35748,6 +35792,20 @@ snapshots:
       eslint: 8.57.0(supports-color@10.2.2)
       eslint-utils: 3.0.0(eslint@8.57.0(supports-color@10.2.2))
       rambda: 7.5.0
+
+  eslint-plugin-n@18.2.2(eslint@8.57.0(supports-color@10.2.2))(typescript@6.0.3):
+    dependencies:
+      '@eslint-community/eslint-utils': 4.10.1(eslint@8.57.0(supports-color@10.2.2))
+      enhanced-resolve: 5.24.5
+      eslint: 8.57.0(supports-color@10.2.2)
+      eslint-plugin-es-x: 7.8.0(eslint@8.57.0(supports-color@10.2.2))
+      get-tsconfig: 4.14.0
+      globals: 15.15.0
+      globrex: 0.1.2
+      ignore: 5.3.2
+      semver: 7.8.6
+    optionalDependencies:
+      typescript: 6.0.3
 
   eslint-plugin-no-unsanitized@4.0.2(eslint@8.57.0(supports-color@10.2.2)):
     dependencies:
@@ -36725,6 +36783,8 @@ snapshots:
   globals@13.24.0:
     dependencies:
       type-fest: 0.20.2
+
+  globals@15.15.0: {}
 
   globals@17.12.0: {}
 
