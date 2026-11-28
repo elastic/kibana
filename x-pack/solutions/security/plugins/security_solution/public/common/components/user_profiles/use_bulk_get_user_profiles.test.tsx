@@ -14,7 +14,7 @@ import { useKibana } from '../../lib/kibana';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { useAppToastsMock } from '../../hooks/use_app_toasts.mock';
 import { createStartServicesMock } from '../../lib/kibana/kibana_react.mock';
-import { TestProviders } from '../../mock';
+import { createReactQueryWrapper } from '../../mock';
 
 jest.mock('../../lib/kibana');
 jest.mock('../../hooks/use_app_toasts');
@@ -40,7 +40,7 @@ describe('useBulkGetUserProfiles hook', () => {
     const spyOnUserProfiles = jest.spyOn(userProfiles, 'bulkGet');
     const assigneesIds = new Set(['user1']);
     const { result } = renderHook(() => useBulkGetUserProfiles({ uids: assigneesIds }), {
-      wrapper: TestProviders,
+      wrapper: createReactQueryWrapper(),
     });
 
     await waitFor(() => expect(result.current.isLoading).toEqual(false));
