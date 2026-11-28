@@ -71,7 +71,11 @@ export const addToTimelineFromFlyoutOverviewTabTable = (fieldId?: string) => {
  * Add data to timeline from flyout overview tab block
  */
 export const addToTimelineFromFlyoutOverviewTabBlock = () => {
-  clickFlyoutAddToTimelineAction(FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK_ITEM);
+  // The block renders its item bare until the data view loads, then remounts it inside the
+  // cell actions wrapper; only that wrapper reacts to hover.
+  clickFlyoutAddToTimelineAction(
+    `[data-test-subj^="cellActions-renderContent-"]:has(${FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK_ITEM})`
+  );
 };
 
 /**

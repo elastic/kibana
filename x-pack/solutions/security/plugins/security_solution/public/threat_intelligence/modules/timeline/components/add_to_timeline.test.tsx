@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import {
   generateMockIndicator,
   type Indicator,
@@ -20,7 +20,9 @@ import {
 import { TestProvidersComponent } from '../../../mocks/test_providers';
 import { useAddToTimelineButton } from '../hooks/use_add_to_timeline_button';
 import { useAddToTimeline } from '../hooks/use_add_to_timeline';
+import { useAddToTimeline as useAddProvidersToTimeline } from '../../../../common/hooks/use_add_to_timeline';
 import { extractTimelineCapabilities } from '../../../../common/utils/timeline_capabilities';
+import { generateDataProvider } from '../utils/data_provider';
 
 const TEST_ID = 'test';
 const TIMELINE_TEST_ID = 'test-add-to-timeline';
@@ -30,12 +32,16 @@ jest.mock('../hooks/use_add_to_timeline', () => ({
   useAddToTimeline: jest.fn(() => ({ addToTimelineProps: {} })),
 }));
 jest.mock('../hooks/use_add_to_timeline_button', () => ({ useAddToTimelineButton: jest.fn() }));
+jest.mock('../../../../common/hooks/use_add_to_timeline');
+
+const mockAddProvidersToTimeline = jest.fn();
 
 describe('<AddToTimelineButtonIcon /> <AddToTimelineContextMenu />', () => {
   beforeEach(() => {
     jest
       .mocked(useAddToTimelineButton)
       .mockReturnValue(() => <div data-test-subj={TIMELINE_TEST_ID} />);
+    jest.mocked(useAddProvidersToTimeline).mockReturnValue(mockAddProvidersToTimeline);
 
     (extractTimelineCapabilities as jest.Mock).mockReturnValue({ read: true });
   });
@@ -104,7 +110,11 @@ describe('<AddToTimelineButtonIcon /> <AddToTimelineContextMenu />', () => {
       </TestProvidersComponent>
     );
     expect(getByTestId(TEST_ID)).toHaveClass('euiContextMenuItem');
-    expect(getByTestId(TIMELINE_TEST_ID)).toBeInTheDocument();
+
+    fireEvent.click(getByTestId(TEST_ID));
+    expect(mockAddProvidersToTimeline).toHaveBeenCalledWith([
+      generateDataProvider(mockField, '0.0.0.0'),
+    ]);
   });
 
   it('should render EuiContextMenuItem when string data', () => {
@@ -117,7 +127,24 @@ describe('<AddToTimelineButtonIcon /> <AddToTimelineContextMenu />', () => {
       </TestProvidersComponent>
     );
     expect(getByTestId(TEST_ID)).toHaveClass('euiContextMenuItem');
-    expect(getByTestId(TIMELINE_TEST_ID)).toBeInTheDocument();
+
+    fireEvent.click(getByTestId(TEST_ID));
+    expect(mockAddProvidersToTimeline).toHaveBeenCalledWith([
+      generateDataProvider(mockField, mockString),
+    ]);
+  });
+
+  it('should add the data provider on click before the lazy add to timeline button has loaded', () => {
+    jest.mocked(useAddToTimelineButton).mockReturnValue(() => <></>);
+
+    const { getByTestId } = render(
+      <TestProvidersComponent>
+        <AddToTimelineContextMenu field="threat.indicator.ip" data="ip" data-test-subj={TEST_ID} />
+      </TestProvidersComponent>
+    );
+
+    fireEvent.click(getByTestId(TEST_ID));
+    expect(mockAddProvidersToTimeline).toHaveBeenCalledTimes(1);
   });
 
   it(`should render empty component when field doesn't exist in data`, () => {
