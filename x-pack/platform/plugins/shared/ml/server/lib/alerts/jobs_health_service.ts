@@ -17,6 +17,7 @@ import { parseInterval } from '@kbn/ml-parse-interval';
 import type { DatafeedStats } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed_stats';
 import type { FieldFormatsRegistryProvider } from '@kbn/ml-common-types/kibana';
 import type { MlClient } from '../ml_client';
+import { chunkIdsForRequestPath } from './utils';
 import type { JobSelection } from '../../routes/schemas/alerting_schema';
 import { datafeedsProvider, type DatafeedsService } from '../../models/job_service/datafeeds';
 import {
@@ -171,9 +172,23 @@ export function jobsHealthServiceProvider(
 
   const getDatafeeds = memoize(datafeedsService.getDatafeedByJobId);
 
-  const getJobStats = memoize(
-    async (jobIds: string[]) => (await mlClient.getJobStats({ job_id: jobIds.join(',') })).jobs
-  );
+  const getJobStats = async (jobIds: string[]) => {
+    const responses = await Promise.all(
+      chunkIdsForRequestPath(jobIds).map((jobIdsBatch) =>
+        mlClient.getJobStats({ job_id: jobIdsBatch })
+      )
+    );
+    return responses.flatMap(({ jobs }) => jobs);
+  };
+
+  const getDatafeedStats = async (datafeedIds: string[]): Promise<DatafeedStats[]> => {
+    const responses = await Promise.all(
+      chunkIdsForRequestPath(datafeedIds).map((datafeedIdsBatch) =>
+        mlClient.getDatafeedStats({ datafeed_id: datafeedIdsBatch })
+      )
+    );
+    return responses.flatMap(({ datafeeds }) => datafeeds as DatafeedStats[]);
+  };
 
   /** Gets values for translation string */
   const getJobsAlertingMessageValues = <T extends Array<{ job_id: string } | undefined>>(
@@ -197,12 +212,10 @@ export function jobsHealthServiceProvider(
       if (datafeeds) {
         const jobsStats = await getJobStats(jobIds);
 
-        const { datafeeds: datafeedsStats } = await mlClient.getDatafeedStats({
-          datafeed_id: datafeeds.map((d) => d.datafeed_id).join(','),
-        });
+        const datafeedsStats = await getDatafeedStats(datafeeds.map((d) => d.datafeed_id));
 
         // match datafeed stats with the job ids
-        return (datafeedsStats as DatafeedStats[])
+        return datafeedsStats
           .map((datafeedStats) => {
             const jobId = datafeedStats.timing_stats!.job_id;
             const jobState =
