@@ -16,7 +16,7 @@ import { ActionItem } from './cell_action_item';
 import { ExtraActionsButton } from './extra_actions_button';
 import { ACTIONS_AREA_LABEL, YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS } from './translations';
 import { partitionActions } from '../hooks/actions';
-import { ExtraActionsPopOverWithAnchor } from './extra_actions_popover';
+import { ExtraActionsPopOverWithAnchor, OVERLAY_ANCHOR_STYLE } from './extra_actions_popover';
 import type { CellActionExecutionContext } from '../types';
 import { useLoadActionsFn } from '../hooks/use_load_actions';
 
@@ -25,6 +25,17 @@ export const IS_DRAGGING_CLASS_NAME = 'is-dragging';
 
 // Overwrite Popover default minWidth to avoid displaying empty space
 const PANEL_STYLE = { minWidth: `24px` };
+
+// Same layout as the EuiPopover root (inline-block, positioned, capped to the parent's width).
+// A plain style object (instead of the css prop) keeps the per-cell render cost low.
+const ANCHOR_WRAPPER_STYLE = {
+  position: 'relative',
+  display: 'inline-block',
+  verticalAlign: 'middle',
+  maxWidth: '100%',
+} as const;
+
+const OVERLAY_ANCHOR_BUTTON = <span />;
 
 const hoverContentWrapperCSS = css`
   padding: 0 ${euiThemeVars.euiSizeS};
@@ -59,7 +70,10 @@ export const HoverActionsPopover: React.FC<Props> = ({
   const contentRef = useRef<HTMLDivElement>(null);
   const [isExtraActionsPopoverOpen, setIsExtraActionsPopoverOpen] = useState(false);
   const [showHoverContent, setShowHoverContent] = useState(false);
-
+  // The popovers are only mounted once the first hover intent is confirmed (see the debounce below).
+  // Mounting an EuiPopover per cell is expensive in large tables because each mount forces a
+  // synchronous layout, so a pointer that merely crosses a cell must not pay for it.
+  const [isActivated, setIsActivated] = useState(false);
   const [{ value: actions }, loadActions] = useLoadActionsFn({ disabledActionTypes });
 
   const { visibleActions, extraActions } = useMemo(
@@ -71,6 +85,7 @@ export const HoverActionsPopover: React.FC<Props> = ({
     () =>
       debounce(() => {
         if (!document.body.classList.contains(IS_DRAGGING_CLASS_NAME)) {
+          setIsActivated(true);
           setShowHoverContent(true);
         }
       }, HOVER_INTENT_DELAY),
@@ -86,6 +101,17 @@ export const HoverActionsPopover: React.FC<Props> = ({
     openPopOverDebounced.cancel();
     setShowHoverContent(false);
   }, [openPopOverDebounced]);
+
+  // The content is not inside the popover root (the anchor is an empty overlay), so EUI would treat a
+  // click on the still hovered content as an outside click. Keep it inside the dismissal boundary, the
+  // actions close when the pointer leaves, on Escape, or on a click anywhere else.
+  const onClickOutside = useCallback(
+    (event: Event) => {
+      if (event.target instanceof Node && contentRef.current?.contains(event.target)) return;
+      closePopover();
+    },
+    [closePopover]
+  );
 
   const closeExtraActions = useCallback(
     () => setIsExtraActionsPopoverOpen(false),
@@ -109,80 +135,80 @@ export const HoverActionsPopover: React.FC<Props> = ({
     openPopOverDebounced();
   }, [isExtraActionsPopoverOpen, actions, openPopOverDebounced, loadActions, actionContext]);
 
-  const content = useMemo(() => {
-    return (
-      // Hack - Forces extra actions popover to close when hover content is clicked.
-      // This hack is required because we anchor the popover to the hover content instead
-      // of anchoring it to the button that triggers the popover.
-      // eslint-disable-next-line jsx-a11y/click-events-have-key-events
-      <div ref={contentRef} onMouseEnter={onMouseEnter} onClick={closeExtraActions}>
-        {children}
-      </div>
-    );
-  }, [onMouseEnter, closeExtraActions, children]);
-
   const panelStyle = useMemo(
     () => (anchorPosition === 'rightCenter' ? { marginTop: euiThemeVars.euiSizeS } : {}),
     [anchorPosition]
   );
 
   return (
-    <>
-      <div onMouseLeave={closePopover}>
-        <EuiPopover
-          panelStyle={{ ...PANEL_STYLE, ...panelStyle }}
-          anchorPosition={anchorPosition}
-          button={content}
-          closePopover={closePopover}
-          hasArrow={false}
-          isOpen={showHoverContent}
-          offset={0}
-          // Avoid scrolling scrollable ancestors (e.g. flyout body) when focus moves into the panel;
-          // react-focus-on maps this to focusOptions: { preventScroll: true } on react-focus-lock.
-          focusTrapProps={{ preventScrollOnFocus: true, returnFocus: false }}
-          panelPaddingSize="none"
-          repositionOnScroll
-          panelProps={{ 'data-test-subj': 'hoverActionsPopover' }}
-          aria-label={ACTIONS_AREA_LABEL}
-        >
-          {showHoverContent && (
-            <div css={hoverContentWrapperCSS}>
-              <EuiScreenReaderOnly>
-                <p>
-                  {YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS(
-                    actionContext.data.map(({ field }) => field.name).join(', ')
+    <div onMouseLeave={closePopover}>
+      {/* Mimics the layout of the EuiPopover anchor wrapper (inline-block, positioned) so the layout
+          does not change when the popovers get mounted. */}
+      <div style={ANCHOR_WRAPPER_STYLE}>
+        {/* The content is never moved nor re-created when the popovers get mounted, so it keeps its
+            DOM node, local state and focus. The popovers are anchored to an overlay instead. */}
+        <div ref={contentRef} onMouseEnter={onMouseEnter}>
+          {children}
+        </div>
+        {isActivated && (
+          <>
+            <EuiPopover
+              panelStyle={{ ...PANEL_STYLE, ...panelStyle }}
+              anchorPosition={anchorPosition}
+              display="block"
+              style={OVERLAY_ANCHOR_STYLE}
+              button={OVERLAY_ANCHOR_BUTTON}
+              closePopover={closePopover}
+              hasArrow={false}
+              isOpen={showHoverContent}
+              offset={0}
+              // Avoid scrolling scrollable ancestors (e.g. flyout body) when focus moves into the panel;
+              // react-focus-on maps this to focusOptions: { preventScroll: true } on react-focus-lock.
+              focusTrapProps={{ preventScrollOnFocus: true, returnFocus: false, onClickOutside }}
+              panelPaddingSize="none"
+              repositionOnScroll
+              panelProps={{ 'data-test-subj': 'hoverActionsPopover' }}
+              aria-label={ACTIONS_AREA_LABEL}
+            >
+              {showHoverContent && (
+                <div css={hoverContentWrapperCSS}>
+                  <EuiScreenReaderOnly>
+                    <p>
+                      {YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS(
+                        actionContext.data.map(({ field }) => field.name).join(', ')
+                      )}
+                    </p>
+                  </EuiScreenReaderOnly>
+                  {visibleActions.map((action) => (
+                    <ActionItem
+                      key={action.id}
+                      action={action}
+                      actionContext={actionContext}
+                      showTooltip={showActionTooltips}
+                      onClick={closePopover}
+                    />
+                  ))}
+                  {extraActions.length > 0 && (
+                    <ExtraActionsButton
+                      onClick={onShowExtraActionsClick}
+                      showTooltip={showActionTooltips}
+                      extraActionsIconType={extraActionsIconType}
+                      extraActionsColor={extraActionsColor}
+                    />
                   )}
-                </p>
-              </EuiScreenReaderOnly>
-              {visibleActions.map((action) => (
-                <ActionItem
-                  key={action.id}
-                  action={action}
-                  actionContext={actionContext}
-                  showTooltip={showActionTooltips}
-                  onClick={closePopover}
-                />
-              ))}
-              {extraActions.length > 0 && (
-                <ExtraActionsButton
-                  onClick={onShowExtraActionsClick}
-                  showTooltip={showActionTooltips}
-                  extraActionsIconType={extraActionsIconType}
-                  extraActionsColor={extraActionsColor}
-                />
+                </div>
               )}
-            </div>
-          )}
-        </EuiPopover>
+            </EuiPopover>
+            <ExtraActionsPopOverWithAnchor
+              anchorPosition={anchorPosition}
+              actions={extraActions}
+              actionContext={actionContext}
+              closePopOver={closeExtraActions}
+              isOpen={isExtraActionsPopoverOpen}
+            />
+          </>
+        )}
       </div>
-      <ExtraActionsPopOverWithAnchor
-        anchorPosition={anchorPosition}
-        actions={extraActions}
-        anchorRef={contentRef}
-        actionContext={actionContext}
-        closePopOver={closeExtraActions}
-        isOpen={isExtraActionsPopoverOpen}
-      />
-    </>
+    </div>
   );
 };

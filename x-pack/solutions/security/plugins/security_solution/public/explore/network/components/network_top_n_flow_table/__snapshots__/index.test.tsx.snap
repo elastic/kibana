@@ -401,7 +401,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                   >
                     <div>
                       <div
-                        class="euiPopover emotion-euiPopover-inline-block"
+                        style="position: relative; display: inline-block; vertical-align: middle; max-width: 100%;"
                       >
                         <div>
                           <button
@@ -449,7 +449,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                   >
                     <div>
                       <div
-                        class="euiPopover emotion-euiPopover-inline-block"
+                        style="position: relative; display: inline-block; vertical-align: middle; max-width: 100%;"
                       >
                         <div>
                           Google, Inc
@@ -464,7 +464,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                   >
                     <div>
                       <div
-                        class="euiPopover emotion-euiPopover-inline-block"
+                        style="position: relative; display: inline-block; vertical-align: middle; max-width: 100%;"
                       >
                         <div>
                           15169
@@ -518,7 +518,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                   >
                     <div>
                       <div
-                        class="euiPopover emotion-euiPopover-inline-block"
+                        style="position: relative; display: inline-block; vertical-align: middle; max-width: 100%;"
                       >
                         <div>
                           <button
@@ -582,7 +582,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                   >
                     <div>
                       <div
-                        class="euiPopover emotion-euiPopover-inline-block"
+                        style="position: relative; display: inline-block; vertical-align: middle; max-width: 100%;"
                       >
                         <div>
                           TM Net, Internet Service Provider
@@ -597,7 +597,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                   >
                     <div>
                       <div
-                        class="euiPopover emotion-euiPopover-inline-block"
+                        style="position: relative; display: inline-block; vertical-align: middle; max-width: 100%;"
                       >
                         <div>
                           4788
@@ -1269,7 +1269,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                   >
                     <div>
                       <div
-                        class="euiPopover emotion-euiPopover-inline-block"
+                        style="position: relative; display: inline-block; vertical-align: middle; max-width: 100%;"
                       >
                         <div>
                           <button
@@ -1317,7 +1317,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                   >
                     <div>
                       <div
-                        class="euiPopover emotion-euiPopover-inline-block"
+                        style="position: relative; display: inline-block; vertical-align: middle; max-width: 100%;"
                       >
                         <div>
                           Google, Inc
@@ -1332,7 +1332,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                   >
                     <div>
                       <div
-                        class="euiPopover emotion-euiPopover-inline-block"
+                        style="position: relative; display: inline-block; vertical-align: middle; max-width: 100%;"
                       >
                         <div>
                           15169
@@ -1395,7 +1395,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                   >
                     <div>
                       <div
-                        class="euiPopover emotion-euiPopover-inline-block"
+                        style="position: relative; display: inline-block; vertical-align: middle; max-width: 100%;"
                       >
                         <div>
                           <button
@@ -1459,7 +1459,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                   >
                     <div>
                       <div
-                        class="euiPopover emotion-euiPopover-inline-block"
+                        style="position: relative; display: inline-block; vertical-align: middle; max-width: 100%;"
                       >
                         <div>
                           TM Net, Internet Service Provider
@@ -1474,7 +1474,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                   >
                     <div>
                       <div
-                        class="euiPopover emotion-euiPopover-inline-block"
+                        style="position: relative; display: inline-block; vertical-align: middle; max-width: 100%;"
                       >
                         <div>
                           4788

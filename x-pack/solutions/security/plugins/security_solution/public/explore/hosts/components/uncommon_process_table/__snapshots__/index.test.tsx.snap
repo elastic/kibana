@@ -371,7 +371,7 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
                 >
                   <div>
                     <div
-                      class="euiPopover emotion-euiPopover-inline-block"
+                      style="position: relative; display: inline-block; vertical-align: middle; max-width: 100%;"
                     >
                       <div>
                         root
@@ -429,7 +429,7 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
                 >
                   <div>
                     <div
-                      class="euiPopover emotion-euiPopover-inline-block"
+                      style="position: relative; display: inline-block; vertical-align: middle; max-width: 100%;"
                     >
                       <div>
                         <a
@@ -472,7 +472,7 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
                 >
                   <div>
                     <div
-                      class="euiPopover emotion-euiPopover-inline-block"
+                      style="position: relative; display: inline-block; vertical-align: middle; max-width: 100%;"
                     >
                       <div>
                         root
@@ -530,7 +530,7 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
                 >
                   <div>
                     <div
-                      class="euiPopover emotion-euiPopover-inline-block"
+                      style="position: relative; display: inline-block; vertical-align: middle; max-width: 100%;"
                     >
                       <div>
                         <a
@@ -550,7 +550,7 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
                 >
                   <div>
                     <div
-                      class="euiPopover emotion-euiPopover-inline-block"
+                      style="position: relative; display: inline-block; vertical-align: middle; max-width: 100%;"
                     >
                       <div>
                         <a
@@ -593,7 +593,7 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
                 >
                   <div>
                     <div
-                      class="euiPopover emotion-euiPopover-inline-block"
+                      style="position: relative; display: inline-block; vertical-align: middle; max-width: 100%;"
                     >
                       <div>
                         Evan
@@ -678,7 +678,7 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
                 >
                   <div>
                     <div
-                      class="euiPopover emotion-euiPopover-inline-block"
+                      style="position: relative; display: inline-block; vertical-align: middle; max-width: 100%;"
                     >
                       <div>
                         Evan
@@ -736,7 +736,7 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
                 >
                   <div>
                     <div
-                      class="euiPopover emotion-euiPopover-inline-block"
+                      style="position: relative; display: inline-block; vertical-align: middle; max-width: 100%;"
                     >
                       <div>
                         <a
@@ -756,7 +756,7 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
                 >
                   <div>
                     <div
-                      class="euiPopover emotion-euiPopover-inline-block"
+                      style="position: relative; display: inline-block; vertical-align: middle; max-width: 100%;"
                     >
                       <div>
                         <a
@@ -799,7 +799,7 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
                 >
                   <div>
                     <div
-                      class="euiPopover emotion-euiPopover-inline-block"
+                      style="position: relative; display: inline-block; vertical-align: middle; max-width: 100%;"
                     >
                       <div>
                         Evan

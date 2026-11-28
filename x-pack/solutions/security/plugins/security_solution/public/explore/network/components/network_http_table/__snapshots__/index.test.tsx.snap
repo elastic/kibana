@@ -401,7 +401,7 @@ exports[`NetworkHttp Table Component rendering it renders the default NetworkHtt
                   >
                     <div>
                       <div
-                        class="euiPopover emotion-euiPopover-inline-block"
+                        style="position: relative; display: inline-block; vertical-align: middle; max-width: 100%;"
                       >
                         <div>
                           suricata-iowa
@@ -423,7 +423,7 @@ exports[`NetworkHttp Table Component rendering it renders the default NetworkHtt
                   >
                     <div>
                       <div
-                        class="euiPopover emotion-euiPopover-inline-block"
+                        style="position: relative; display: inline-block; vertical-align: middle; max-width: 100%;"
                       >
                         <div>
                           <button
@@ -504,7 +504,7 @@ exports[`NetworkHttp Table Component rendering it renders the default NetworkHtt
                   >
                     <div>
                       <div
-                        class="euiPopover emotion-euiPopover-inline-block"
+                        style="position: relative; display: inline-block; vertical-align: middle; max-width: 100%;"
                       >
                         <div>
                           suricata-iowa
@@ -526,7 +526,7 @@ exports[`NetworkHttp Table Component rendering it renders the default NetworkHtt
                   >
                     <div>
                       <div
-                        class="euiPopover emotion-euiPopover-inline-block"
+                        style="position: relative; display: inline-block; vertical-align: middle; max-width: 100%;"
                       >
                         <div>
                           <button
@@ -610,7 +610,7 @@ exports[`NetworkHttp Table Component rendering it renders the default NetworkHtt
                   >
                     <div>
                       <div
-                        class="euiPopover emotion-euiPopover-inline-block"
+                        style="position: relative; display: inline-block; vertical-align: middle; max-width: 100%;"
                       >
                         <div>
                           suricata-iowa
@@ -632,7 +632,7 @@ exports[`NetworkHttp Table Component rendering it renders the default NetworkHtt
                   >
                     <div>
                       <div
-                        class="euiPopover emotion-euiPopover-inline-block"
+                        style="position: relative; display: inline-block; vertical-align: middle; max-width: 100%;"
                       >
                         <div>
                           <button
@@ -713,7 +713,7 @@ exports[`NetworkHttp Table Component rendering it renders the default NetworkHtt
                   >
                     <div>
                       <div
-                        class="euiPopover emotion-euiPopover-inline-block"
+                        style="position: relative; display: inline-block; vertical-align: middle; max-width: 100%;"
                       >
                         <div>
                           jessie
@@ -735,7 +735,7 @@ exports[`NetworkHttp Table Component rendering it renders the default NetworkHtt
                   >
                     <div>
                       <div
-                        class="euiPopover emotion-euiPopover-inline-block"
+                        style="position: relative; display: inline-block; vertical-align: middle; max-width: 100%;"
                       >
                         <div>
                           <button

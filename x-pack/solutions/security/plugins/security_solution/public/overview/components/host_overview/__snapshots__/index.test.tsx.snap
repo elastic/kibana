@@ -91,7 +91,7 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
                 >
                   <div>
                     <div
-                      class="euiPopover emotion-euiPopover-inline-block"
+                      style="position: relative; display: inline-block; vertical-align: middle; max-width: 100%;"
                     >
                       <div>
                         <div
@@ -784,7 +784,7 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
                 >
                   <div>
                     <div
-                      class="euiPopover emotion-euiPopover-inline-block"
+                      style="position: relative; display: inline-block; vertical-align: middle; max-width: 100%;"
                     >
                       <div>
                         <div

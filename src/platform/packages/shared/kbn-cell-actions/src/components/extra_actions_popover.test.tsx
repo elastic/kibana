@@ -51,13 +51,8 @@ describe('ExtraActionsPopOver', () => {
 });
 
 describe('ExtraActionsPopOverWithAnchor', () => {
-  const anchorElement = document.createElement('span');
-  document.body.appendChild(anchorElement);
-
   it('renders', () => {
-    const { queryByTestId } = render(
-      <ExtraActionsPopOverWithAnchor {...defaultProps} anchorRef={{ current: anchorElement }} />
-    );
+    const { queryByTestId } = render(<ExtraActionsPopOverWithAnchor {...defaultProps} />);
 
     expect(queryByTestId('extraActionsPopOverWithAnchor')).toBeInTheDocument();
   });
@@ -72,7 +67,6 @@ describe('ExtraActionsPopOverWithAnchor', () => {
         isOpen={true}
         closePopOver={closePopOver}
         actions={[action]}
-        anchorRef={{ current: anchorElement }}
       />
     );
 
