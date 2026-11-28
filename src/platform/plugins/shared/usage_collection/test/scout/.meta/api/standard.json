@@ -1,5 +1,5 @@
 {
-  "sha1": "bf12ecd19066375a4059ab2c1753e05293f86125",
+  "sha1": "e3ed71a454c2788f0ad3109ff21b7cd0006478fc",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -119,6 +119,32 @@
         "file": "src/platform/plugins/shared/usage_collection/test/scout/api/tests/stats.spec.ts",
         "line": 89,
         "column": 14
+      }
+    },
+    {
+      "id": "f43e7c710167d07-242d50d798f2cfa",
+      "title": "UI counters API stores ui counter events in usage counters saved objects",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/usage_collection/test/scout/api/tests/ui_counters.spec.ts",
+        "line": 44,
+        "column": 18
+      }
+    },
+    {
+      "id": "f43e7c710167d07-202cadd22d59f49",
+      "title": "UI counters API supports multiple events",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/usage_collection/test/scout/api/tests/ui_counters.spec.ts",
+        "line": 67,
+        "column": 60
       }
     },
     {

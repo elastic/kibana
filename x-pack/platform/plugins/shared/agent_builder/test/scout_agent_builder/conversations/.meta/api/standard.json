@@ -1,5 +1,5 @@
 {
-  "sha1": "4310430e71bb035ddf22aea72a284d0f02cac5b2",
+  "sha1": "ffc686a9c9b9a61c68030c89290fe338aebe52da",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -28,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_access_control_api.spec.ts",
-        "line": 496,
-        "column": 7
+        "line": 509,
+        "column": 5
       }
     },
     {
@@ -42,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_access_control_api.spec.ts",
-        "line": 952,
-        "column": 20
+        "line": 966,
+        "column": 59
       }
     },
     {
@@ -56,7 +56,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_access_control_api.spec.ts",
-        "line": 997,
+        "line": 1011,
         "column": 16
       }
     },
@@ -70,8 +70,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_access_control_api.spec.ts",
-        "line": 1190,
-        "column": 26
+        "line": 1204,
+        "column": 18
       }
     },
     {
@@ -84,8 +84,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_access_control_api.spec.ts",
-        "line": 1288,
-        "column": 26
+        "line": 1301,
+        "column": 13
       }
     },
     {
@@ -98,8 +98,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_access_control_api.spec.ts",
-        "line": 1349,
-        "column": 19
+        "line": 1363,
+        "column": 12
+      }
+    },
+    {
+      "id": "82fdabaac554eba-b43c3a416f85492",
+      "title": "Agent Builder — conversations access-control API callback origin lookup never resolves to another user's public conversation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_access_control_api.spec.ts",
+        "line": 1415,
+        "column": 12
       }
     },
     {
@@ -112,8 +126,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_access_control_api.spec.ts",
-        "line": 1401,
-        "column": 11
+        "line": 1478,
+        "column": 27
       }
     },
     {

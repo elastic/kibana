@@ -1,5 +1,5 @@
 {
-  "sha1": "31ae88a921506bcc850d048a01db3e74a69fce3f",
+  "sha1": "1063738e201ac6154adc3eca71b2fedc6ed42bab",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -181,8 +181,8 @@
       }
     },
     {
-      "id": "b1c1d174a14ef6b-1e1fc8d5deeb70c",
-      "title": "Digital Experience mobile applications shows the release health of an application with enough sessions, drawn",
+      "id": "b1c1d174a14ef6b-e809b5663abb140",
+      "title": "Digital Experience mobile applications shows the release health and app starts of an application with enough sessions, drawn",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -204,8 +204,36 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/mobile_application.spec.ts",
-        "line": 128,
-        "column": 79
+        "line": 169,
+        "column": 73
+      }
+    },
+    {
+      "id": "e91d5742f43bd49-25bbbe9745d9dfb",
+      "title": "Digital Experience mobile crashes lists a mobile application's crash groups and opens one's detail",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/mobile_crashes.spec.ts",
+        "line": 19,
+        "column": 28
+      }
+    },
+    {
+      "id": "e91d5742f43bd49-e2e6e1dbd277904",
+      "title": "Digital Experience mobile crashes reaches the Crashes tab from the Overview, keeping the filters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/mobile_crashes.spec.ts",
+        "line": 74,
+        "column": 13
       }
     },
     {
@@ -369,8 +397,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/otel_application_overview.spec.ts",
-        "line": 306,
-        "column": 13
+        "line": 302,
+        "column": 9
       }
     },
     {
@@ -383,7 +411,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/otel_application_overview.spec.ts",
-        "line": 339,
+        "line": 336,
         "column": 15
       }
     },
@@ -397,7 +425,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/otel_application_overview.spec.ts",
-        "line": 366,
+        "line": 361,
         "column": 15
       }
     },
@@ -411,8 +439,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/otel_application_overview.spec.ts",
-        "line": 394,
-        "column": 13
+        "line": 392,
+        "column": 15
       }
     },
     {
@@ -425,7 +453,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/otel_application_overview.spec.ts",
-        "line": 476,
+        "line": 472,
         "column": 15
       }
     },
@@ -439,7 +467,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/otel_application_overview.spec.ts",
-        "line": 494,
+        "line": 487,
         "column": 12
       }
     },
@@ -453,7 +481,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/otel_application_overview.spec.ts",
-        "line": 553,
+        "line": 546,
         "column": 13
       }
     },
@@ -467,7 +495,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/otel_application_overview.spec.ts",
-        "line": 611,
+        "line": 604,
         "column": 9
       }
     },
@@ -481,7 +509,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/otel_application_overview.spec.ts",
-        "line": 651,
+        "line": 644,
         "column": 15
       }
     },
@@ -564,7 +592,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/global.teardown.ts",
-        "line": 15,
+        "line": 16,
         "column": 35
       }
     },
@@ -579,8 +607,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/global.teardown.ts",
-        "line": 36,
-        "column": 1
+        "line": 39,
+        "column": 19
       }
     }
   ]

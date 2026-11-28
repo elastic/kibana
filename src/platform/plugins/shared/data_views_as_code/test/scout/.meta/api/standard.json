@@ -1,5 +1,5 @@
 {
-  "sha1": "f86f206b82777d6503eadc736a4162d3290f0c7c",
+  "sha1": "29b2f7ae66cb287f8dc8bf5d1634d61c543ec44f",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -368,7 +368,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views_as_code/test/scout/api/tests/post_data_view.spec.ts",
-        "line": 46,
+        "line": 48,
         "column": 5
       }
     },
@@ -388,8 +388,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views_as_code/test/scout/api/tests/post_data_view.spec.ts",
-        "line": 70,
-        "column": 12
+        "line": 72,
+        "column": 7
       }
     },
     {
@@ -408,7 +408,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views_as_code/test/scout/api/tests/post_data_view.spec.ts",
-        "line": 97,
+        "line": 99,
         "column": 14
       }
     },
@@ -428,8 +428,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views_as_code/test/scout/api/tests/post_data_view.spec.ts",
-        "line": 151,
-        "column": 10
+        "line": 153,
+        "column": 11
       }
     },
     {
@@ -448,8 +448,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views_as_code/test/scout/api/tests/post_data_view.spec.ts",
-        "line": 168,
-        "column": 24
+        "line": 170,
+        "column": 13
       }
     },
     {
@@ -468,8 +468,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views_as_code/test/scout/api/tests/post_data_view.spec.ts",
-        "line": 183,
-        "column": 30
+        "line": 186,
+        "column": 14
       }
     },
     {
@@ -488,8 +488,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views_as_code/test/scout/api/tests/post_data_view.spec.ts",
-        "line": 199,
-        "column": 11
+        "line": 200,
+        "column": 4
       }
     },
     {
@@ -508,8 +508,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views_as_code/test/scout/api/tests/post_data_view.spec.ts",
-        "line": 212,
-        "column": 5
+        "line": 214,
+        "column": 12
       }
     },
     {
@@ -528,8 +528,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views_as_code/test/scout/api/tests/post_data_view.spec.ts",
-        "line": 222,
-        "column": 8
+        "line": 224,
+        "column": 24
       }
     },
     {
@@ -548,8 +548,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views_as_code/test/scout/api/tests/post_data_view.spec.ts",
-        "line": 246,
-        "column": 24
+        "line": 248,
+        "column": 30
       }
     },
     {
@@ -568,8 +568,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views_as_code/test/scout/api/tests/post_data_view.spec.ts",
-        "line": 261,
-        "column": 23
+        "line": 263,
+        "column": 10
       }
     },
     {
@@ -588,8 +588,368 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views_as_code/test/scout/api/tests/post_data_view.spec.ts",
-        "line": 296,
+        "line": 298,
         "column": 12
+      }
+    },
+    {
+      "id": "e1e3a3ad0739513-883f7d90c2597be",
+      "title": "POST /api/data_views/v2 - as code can create a data view in the given spaces",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views_as_code/test/scout/api/tests/post_data_view.spec.ts",
+        "line": 331,
+        "column": 14
+      }
+    },
+    {
+      "id": "e1e3a3ad0739513-399008aa2b5b044",
+      "title": "POST /api/data_views/v2 - as code creates the data view only in the current space when spaces is omitted",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views_as_code/test/scout/api/tests/post_data_view.spec.ts",
+        "line": 366,
+        "column": 66
+      }
+    },
+    {
+      "id": "e1e3a3ad0739513-f949cd6a07c0b28",
+      "title": "POST /api/data_views/v2 - as code creates the data view only in the current space when spaces is omitted from a non-default space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views_as_code/test/scout/api/tests/post_data_view.spec.ts",
+        "line": 385,
+        "column": 12
+      }
+    },
+    {
+      "id": "e1e3a3ad0739513-8ad52323aef00e6",
+      "title": "POST /api/data_views/v2 - as code returns 400 when spaces does not include the current space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views_as_code/test/scout/api/tests/post_data_view.spec.ts",
+        "line": 416,
+        "column": 14
+      }
+    },
+    {
+      "id": "e1e3a3ad0739513-4ee312a6239de77",
+      "title": "POST /api/data_views/v2 - as code can create a data view in all spaces with `*`",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views_as_code/test/scout/api/tests/post_data_view.spec.ts",
+        "line": 434,
+        "column": 7
+      }
+    },
+    {
+      "id": "e1e3a3ad0739513-2e528f3d211a23a",
+      "title": "POST /api/data_views/v2 - as code returns 400 when spaces contains an empty id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views_as_code/test/scout/api/tests/post_data_view.spec.ts",
+        "line": 468,
+        "column": 85
+      }
+    },
+    {
+      "id": "484ac221ead6922-703924a31eb67fb",
+      "title": "PUT /api/data_views/v2/{id} - as code - spaces creates a data view in the given spaces when the id does not exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views_as_code/test/scout/api/tests/put_data_view_spaces.spec.ts",
+        "line": 82,
+        "column": 7
+      }
+    },
+    {
+      "id": "484ac221ead6922-2d34a326568c8de",
+      "title": "PUT /api/data_views/v2/{id} - as code - spaces returns 400 when creating with spaces that do not include the current space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views_as_code/test/scout/api/tests/put_data_view_spaces.spec.ts",
+        "line": 127,
+        "column": 26
+      }
+    },
+    {
+      "id": "484ac221ead6922-98a15fb56e5fb63",
+      "title": "PUT /api/data_views/v2/{id} - as code - spaces returns 400 when spaces contains an empty id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views_as_code/test/scout/api/tests/put_data_view_spaces.spec.ts",
+        "line": 147,
+        "column": 24
+      }
+    },
+    {
+      "id": "484ac221ead6922-a3af2ceed7d41de",
+      "title": "PUT /api/data_views/v2/{id} - as code - spaces without spaces in the body, updates the data view and leaves it only in the current space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views_as_code/test/scout/api/tests/put_data_view_spaces.spec.ts",
+        "line": 183,
+        "column": 26
+      }
+    },
+    {
+      "id": "484ac221ead6922-6cc1c5777cf161f",
+      "title": "PUT /api/data_views/v2/{id} - as code - spaces without spaces in the body, updates the data view when it is already only in the current space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views_as_code/test/scout/api/tests/put_data_view_spaces.spec.ts",
+        "line": 218,
+        "column": 20
+      }
+    },
+    {
+      "id": "484ac221ead6922-ef86717c4cf266a",
+      "title": "PUT /api/data_views/v2/{id} - as code - spaces without spaces in the body, returns 403 when the data view is in a space the user cannot access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views_as_code/test/scout/api/tests/put_data_view_spaces.spec.ts",
+        "line": 241,
+        "column": 14
+      }
+    },
+    {
+      "id": "484ac221ead6922-1d94399b932dce2",
+      "title": "PUT /api/data_views/v2/{id} - as code - spaces without spaces in the body, creates the data view only in the current space of a non-default space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views_as_code/test/scout/api/tests/put_data_view_spaces.spec.ts",
+        "line": 284,
+        "column": 34
+      }
+    },
+    {
+      "id": "484ac221ead6922-460daebb5c47616",
+      "title": "PUT /api/data_views/v2/{id} - as code - spaces without spaces in the body, updates the data view leaving it only in the current space of a non-default space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views_as_code/test/scout/api/tests/put_data_view_spaces.spec.ts",
+        "line": 315,
+        "column": 50
+      }
+    },
+    {
+      "id": "484ac221ead6922-73cd0b69b6ff9c4",
+      "title": "PUT /api/data_views/v2/{id} - as code - spaces with many spaces in the body, adds and removes spaces to match them",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views_as_code/test/scout/api/tests/put_data_view_spaces.spec.ts",
+        "line": 362,
+        "column": 11
+      }
+    },
+    {
+      "id": "484ac221ead6922-ea518a8fabdf093",
+      "title": "PUT /api/data_views/v2/{id} - as code - spaces with spaces in the body that do not include the current space, returns 400 and does not update the data view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views_as_code/test/scout/api/tests/put_data_view_spaces.spec.ts",
+        "line": 425,
+        "column": 12
+      }
+    },
+    {
+      "id": "484ac221ead6922-ce159c5d5588ef8",
+      "title": "PUT /api/data_views/v2/{id} - as code - spaces with many spaces in the body, updates the data view when they already match its spaces",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views_as_code/test/scout/api/tests/put_data_view_spaces.spec.ts",
+        "line": 481,
+        "column": 12
+      }
+    },
+    {
+      "id": "484ac221ead6922-d9bb95fbac0cf46",
+      "title": "PUT /api/data_views/v2/{id} - as code - spaces with many spaces in the body, returns 403 when the data view is in a space the user cannot access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views_as_code/test/scout/api/tests/put_data_view_spaces.spec.ts",
+        "line": 446,
+        "column": 24
       }
     },
     {

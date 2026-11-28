@@ -1,5 +1,5 @@
 {
-  "sha1": "e4f4a90e7cea95bf3c3030f4af78c08fbf0b6485",
+  "sha1": "7774871cc1cdf68d96e15c0bdc917f6358a28632",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -162,6 +162,71 @@
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/packs_policy_validation.spec.ts",
         "line": 116,
         "column": 71
+      }
+    },
+    {
+      "id": "856a7c850756fbc-848c616985d8bdc",
+      "title": "Osquery packs - shared integration targeting warns on a partial shared selection and reports effective targets on opt-in",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/packs_shared_integration.spec.ts",
+        "line": 112,
+        "column": 7
+      }
+    },
+    {
+      "id": "856a7c850756fbc-537db9eaac7ac95",
+      "title": "Osquery packs - shared integration targeting returns no warnings and matching targets for a dedicated integration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/packs_shared_integration.spec.ts",
+        "line": 202,
+        "column": 31
+      }
+    },
+    {
+      "id": "856a7c850756fbc-b3f7f11c0567259",
+      "title": "Osquery packs - shared integration targeting exposes the owning package policy on shared agent policies",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/packs_shared_integration.spec.ts",
+        "line": 233,
+        "column": 13
+      }
+    },
+    {
+      "id": "856a7c850756fbc-a345ed3bffd1a06",
+      "title": "Osquery packs - shared integration targeting warns only once a disabled partial pack is enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/packs_shared_integration.spec.ts",
+        "line": 249,
+        "column": 15
+      }
+    },
+    {
+      "id": "856a7c850756fbc-97c3ad444c12536",
+      "title": "Osquery packs - shared integration targeting reports agent policies attached to a shared integration later as effective only",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/packs_shared_integration.spec.ts",
+        "line": 284,
+        "column": 31
       }
     },
     {

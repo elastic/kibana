@@ -1,5 +1,5 @@
 {
-  "sha1": "522db71fc1487d20f60e9bde9c72869bd294645d",
+  "sha1": "ef43bcf986884ce57e233770fb57dcb69382c879",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -402,7 +402,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_bulk_assign.spec.ts",
-        "line": 40,
+        "line": 39,
         "column": 33
       }
     },
@@ -416,7 +416,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_bulk_assign.spec.ts",
-        "line": 59,
+        "line": 58,
         "column": 23
       }
     },
@@ -430,7 +430,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_bulk_assign.spec.ts",
-        "line": 85,
+        "line": 84,
         "column": 6
       }
     },
@@ -444,7 +444,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_bulk_assign.spec.ts",
-        "line": 129,
+        "line": 128,
         "column": 86
       }
     },
@@ -458,7 +458,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_bulk_assign.spec.ts",
-        "line": 168,
+        "line": 167,
         "column": 11
       }
     },
@@ -542,7 +542,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_create.spec.ts",
-        "line": 46,
+        "line": 45,
         "column": 27
       }
     },
@@ -556,7 +556,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_create.spec.ts",
-        "line": 63,
+        "line": 62,
         "column": 88
       }
     },
@@ -570,7 +570,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_create.spec.ts",
-        "line": 81,
+        "line": 80,
         "column": 12
       }
     },
@@ -584,7 +584,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_delete.spec.ts",
-        "line": 34,
+        "line": 33,
         "column": 31
       }
     },
@@ -598,7 +598,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_delete.spec.ts",
-        "line": 42,
+        "line": 41,
         "column": 75
       }
     },
@@ -612,7 +612,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_delete.spec.ts",
-        "line": 48,
+        "line": 47,
         "column": 5
       }
     },
@@ -626,7 +626,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_delete.spec.ts",
-        "line": 57,
+        "line": 56,
         "column": 14
       }
     },
@@ -738,7 +738,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_update.spec.ts",
-        "line": 34,
+        "line": 33,
         "column": 31
       }
     },
@@ -752,7 +752,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_update.spec.ts",
-        "line": 47,
+        "line": 46,
         "column": 12
       }
     },
@@ -766,7 +766,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_update.spec.ts",
-        "line": 64,
+        "line": 63,
         "column": 15
       }
     },
@@ -780,7 +780,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_update.spec.ts",
-        "line": 78,
+        "line": 77,
         "column": 63
       }
     },
