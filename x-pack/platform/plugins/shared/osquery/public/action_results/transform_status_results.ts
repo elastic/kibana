@@ -17,6 +17,10 @@ interface TransformStatusEdgesOptions {
   error?: string;
 }
 
+/** Error message of an action response: ECS `error.message`, or the legacy `error` string. */
+export const getResponseErrorMessage = (edge: ResultEdges[number]): string | undefined =>
+  (edge.fields?.['error.message']?.[0] ?? edge.fields?.error?.[0]) as string | undefined;
+
 function computeStatus(edge: ResultEdges[number], expired: boolean, error?: string): string {
   if (edge.fields?.['error.skipped'] || (error && !edge.fields?.completed_at)) {
     return i18n.translate('xpack.osquery.liveQueryActionResults.table.skippedStatusText', {
@@ -34,7 +38,7 @@ function computeStatus(edge: ResultEdges[number], expired: boolean, error?: stri
         });
   }
 
-  if (edge.fields?.['error.keyword']) {
+  if (getResponseErrorMessage(edge)) {
     return i18n.translate('xpack.osquery.liveQueryActionResults.table.errorStatusText', {
       defaultMessage: 'error',
     });
@@ -62,7 +66,7 @@ export function transformStatusEdgesToRecords({
     const actionResponse = source.action_response as { osquery?: { count?: number } } | undefined;
     const rowCount = actionResponse?.osquery?.count;
 
-    const errorValue = edge.fields?.error?.[0] as string | undefined;
+    const errorValue = getResponseErrorMessage(edge);
 
     const flattened: Record<string, unknown> = {
       status,

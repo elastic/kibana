@@ -101,6 +101,34 @@ describe('getResultCountsForActions', () => {
     });
   });
 
+  it('splits responses on the existence of error, for legacy and ECS error mappings', async () => {
+    const esClient = createMockEsClient({
+      aggregations: { action_ids: { buckets: [] } },
+    });
+
+    await getResultCountsForActions(esClient, ['action-1']);
+
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        aggs: {
+          action_ids: expect.objectContaining({
+            aggs: expect.objectContaining({
+              responses: {
+                filters: {
+                  keyed: false,
+                  filters: {
+                    success: { bool: { must_not: { exists: { field: 'error' } } } },
+                    error: { exists: { field: 'error' } },
+                  },
+                },
+              },
+            }),
+          }),
+        },
+      })
+    );
+  });
+
   it('uses the correct index with namespace', async () => {
     const esClient = createMockEsClient({
       aggregations: { action_ids: { buckets: [] } },

@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ResultEdges } from '../../common/search_strategy';
+import { getResponseErrorMessage } from './transform_status_results';
 
 /**
  * Enrich edges with error/expired states immutably.
@@ -18,7 +19,11 @@ export function enrichEdgesWithErrors(
   expired: boolean
 ): ResultEdges {
   return edges.map((edge) => {
-    if (edge.fields?.error || edge.fields?.['error.skipped'] || edge.fields?.completed_at) {
+    if (
+      getResponseErrorMessage(edge) ||
+      edge.fields?.['error.skipped'] ||
+      edge.fields?.completed_at
+    ) {
       return edge;
     }
 
@@ -32,7 +37,6 @@ export function enrichEdgesWithErrors(
         'xpack.osquery.liveQueryActionResults.table.expiredErrorText',
         { defaultMessage: 'The action request timed out.' }
       );
-      fields['error.keyword'] = [expiredMessage];
       fields.error = [expiredMessage];
     }
 

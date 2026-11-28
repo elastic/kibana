@@ -6,7 +6,6 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { estypes } from '@elastic/elasticsearch';
 import { chunk } from 'lodash';
 import { ACTION_RESPONSES_DATA_STREAM_INDEX } from '../../common/constants';
 import { buildIndexNamesWithNamespaces } from '../utils/build_index_name_with_namespace';
@@ -115,13 +114,15 @@ const fetchResultCountsBatch = async (
               field: 'action_response.osquery.count',
             },
           },
+          // `exists` matches both the legacy `error` text field and the ECS `error.message`
+          // object field, so responses from any osquery_manager package version are counted.
           responses: {
-            terms: {
-              script: {
-                lang: 'painless',
-                source:
-                  "if (doc['error.keyword'].size()==0) { return 'success' } else { return 'error' }",
-              } as estypes.Script,
+            filters: {
+              keyed: false,
+              filters: {
+                success: { bool: { must_not: { exists: { field: 'error' } } } },
+                error: { exists: { field: 'error' } },
+              },
             },
           },
         },
