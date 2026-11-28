@@ -877,18 +877,12 @@
       "enabled": true
     },
     {
-      "groupName": "prettier",
-      "matchDepNames": [
-        "prettier",
-        "eslint-plugin-prettier",
-        "eslint-config-prettier",
-        "@types/prettier"
-      ],
+      "groupName": "oxfmt",
+      "matchDepNames": ["oxfmt"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "release_note:skip"],
       "minimumReleaseAge": "7 days",
-      "allowedVersions": "<3.0",
       "enabled": true
     },
     {
@@ -899,6 +893,7 @@
         "@typescript-eslint/typescript-estree",
         "@elastic/eslint-plugin-eui",
         "eslint",
+        "eslint-config-prettier",
         "eslint-plugin-ban",
         "eslint-plugin-cypress",
         "eslint-plugin-depend",

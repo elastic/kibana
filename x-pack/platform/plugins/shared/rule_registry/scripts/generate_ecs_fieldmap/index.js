@@ -71,6 +71,7 @@ do not manually edit
   );
 
   await exec(`node scripts/eslint --fix ${outputFieldMapFilename}`);
+  await exec(`node scripts/oxfmt ${outputFieldMapFilename}`);
 }
 
 generate().catch((err) => {

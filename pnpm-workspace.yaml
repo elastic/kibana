@@ -715,6 +715,7 @@ packages:
   - 'src/platform/packages/shared/kbn-opentelemetry-attributes'
   - 'src/platform/packages/shared/kbn-opentelemetry-utils'
   - 'src/platform/packages/shared/kbn-osquery-io-ts-types'
+  - 'src/platform/packages/shared/kbn-oxfmt'
   - 'src/platform/packages/shared/kbn-palettes'
   - 'src/platform/packages/shared/kbn-profiling-utils'
   - 'src/platform/packages/shared/kbn-react-field'

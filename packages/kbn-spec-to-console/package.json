@@ -8,7 +8,7 @@
   },
   "private": true,
   "scripts": {
-    "format": "../../node_modules/.bin/prettier **/*.js --write"
+    "format": "node ../../scripts/oxfmt '**/*.js'"
   },
   "author": "",
   "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",

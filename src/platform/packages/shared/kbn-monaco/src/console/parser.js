@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable prettier/prettier,prefer-const,no-throw-literal,camelcase,@typescript-eslint/no-shadow,one-var,object-shorthand,eqeqeq */
+/* eslint-disable prefer-const,no-throw-literal,camelcase,@typescript-eslint/no-shadow,one-var,object-shorthand,eqeqeq */
 
 export const createParser = () => {
 

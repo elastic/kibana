@@ -159,6 +159,6 @@ You can pretty print just the generated code using this command:
 ```sh
 ./node_modules/handlebars/print-script '{{value}}' | \
   node -e 'process.stdin.on(`data`, c => console.log(`(${eval(`(${c})`).code})`))' | \
-  npx prettier --write --stdin-filepath template.js | \
+  node scripts/oxfmt --stdin-filepath template.js | \
   npx cli-highlight -l javascript
 ```

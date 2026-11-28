@@ -18,6 +18,7 @@ project:
   sourceRoot: packages/kbn-plugin-generator
 dependsOn:
   - '@kbn/dev-utils'
+  - '@kbn/oxfmt'
   - '@kbn/repo-info'
   - '@kbn/dev-cli-runner'
   - '@kbn/dev-cli-errors'

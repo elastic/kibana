@@ -18,6 +18,7 @@ import { ESLint } from 'eslint';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { createFailError, createFlagError, isFailError } from '@kbn/dev-cli-errors';
 import { sortPackageJson } from '@kbn/sort-package-json';
+import { runOxfmt } from '@kbn/oxfmt';
 
 import { validateElasticTeam } from '../lib/validate_elastic_team';
 import { PKG_TEMPLATE_DIR, determineDevPackageDir, determinePackageDir } from '../paths';
@@ -235,6 +236,7 @@ export const PackageCommand: GenerateCommand = {
       extensions: ['.js', '.mjs', '.ts', '.tsx'],
     });
     await ESLint.outputFixes(await eslint.lintFiles([packageDir]));
+    await runOxfmt([normalizedRepoRelativeDir]);
 
     const packageJsonPath = Path.resolve(REPO_ROOT, 'package.json');
     const packageJson = JSON.parse(await Fsp.readFile(packageJsonPath, 'utf8'));

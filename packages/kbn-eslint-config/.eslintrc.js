@@ -72,7 +72,6 @@ module.exports = {
     '@kbn/eslint-plugin-i18n',
     '@kbn/eslint-plugin-css',
     'eslint-plugin-depend',
-    'prettier',
   ],
 
   parserOptions: {
@@ -94,13 +93,6 @@ module.exports = {
           'moment', // https://github.com/es-tooling/module-replacements/blob/main/docs/modules/momentjs.md
           'jquery', // https://github.com/es-tooling/module-replacements/blob/main/docs/modules/jquery.md
         ],
-      },
-    ],
-
-    'prettier/prettier': [
-      'error',
-      {
-        endOfLine: 'auto',
       },
     ],
 

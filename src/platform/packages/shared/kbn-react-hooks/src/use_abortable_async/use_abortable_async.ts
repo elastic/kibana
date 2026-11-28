@@ -107,8 +107,9 @@ export function useAbortableAsync<T>(
     return () => {
       controller.abort();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, deps.concat(refreshId, clearValueOnNext));
+  },
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  deps.concat(refreshId, clearValueOnNext));
 
   return useMemo<AbortableAsyncState<T>>(() => {
     return {
