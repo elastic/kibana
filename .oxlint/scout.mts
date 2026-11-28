@@ -104,12 +104,4 @@ export const scoutOverrides: OxlintOverride[] = [
       '@kbn/eslint/scout_require_api_client_in_api_test': 'off',
     },
   },
-  {
-    // Raw EUI class selectors in Scout code, including kbn-scout* sources. The
-    // restricted classes are read from `@elastic/eui-test-helpers` at lint time.
-    files: ['**/kbn-scout*/src/playwright/**/*.ts', ...SCOUT_TEST_FILE_GLOBS],
-    rules: {
-      '@kbn/eslint/scout_no_raw_eui_selectors': 'error',
-    },
-  },
 ];
