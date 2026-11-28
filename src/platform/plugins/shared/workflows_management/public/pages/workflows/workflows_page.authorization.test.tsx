@@ -188,6 +188,10 @@ describe('WorkflowsPage authorization', () => {
     'header: $label — Create=$expectCreate, Import=$expectImport',
     async ({ createWorkflow, updateWorkflow, expectCreate, expectImport }) => {
       mockCapabilities(createWorkflow, updateWorkflow);
+      mockUseWorkflows.mockReturnValue({
+        ...emptyWorkflowsResult,
+        data: { results: [{}], total: 1 },
+      } as any);
 
       renderPage();
 
@@ -209,6 +213,37 @@ describe('WorkflowsPage authorization', () => {
       }
     }
   );
+
+  it('hides the header create button in the empty state, which has its own create entry points', async () => {
+    mockCapabilities(true, true);
+
+    renderPage();
+
+    await screen.findByTestId('appHeader');
+    expect(screen.queryByTestId('createWorkflowButton')).not.toBeInTheDocument();
+  });
+
+  it('hides the header create button while workflows are loading', async () => {
+    mockCapabilities(true, true);
+    mockUseWorkflows.mockReturnValue({
+      ...emptyWorkflowsResult,
+      data: undefined,
+      isLoading: true,
+    } as any);
+
+    renderPage();
+
+    await screen.findByTestId('appHeader');
+    expect(screen.queryByTestId('createWorkflowButton')).not.toBeInTheDocument();
+  });
+
+  it('shows the header create button when filters match no workflows', async () => {
+    mockCapabilities(true, true);
+
+    renderPage(['/?query=security']);
+
+    expect(await screen.findByTestId('createWorkflowButton')).toBeInTheDocument();
+  });
 
   it('resets page to 1 when the query changes', () => {
     mockCapabilities(true, true);
