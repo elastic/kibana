@@ -4908,8 +4908,8 @@ importers:
         specifier: 15.0.0
         version: 15.0.0(react@18.2.0)
       react-fast-compare:
-        specifier: 3.2.2
-        version: 3.2.2
+        specifier: 3.2.3
+        version: 3.2.3
       react-hook-form:
         specifier: 7.44.3
         version: 7.44.3(react@18.2.0)
@@ -22451,8 +22451,8 @@ packages:
   react-fast-compare@2.0.4:
     resolution: {integrity: sha512-suNP+J1VU1MWFKcyt7RtjiSWUjvidmQSlqu+eHslq+342xCbGTYmC0mEhPCOHxlW0CywylOC1u2DFAT+bv4dBw==}
 
-  react-fast-compare@3.2.2:
-    resolution: {integrity: sha512-nsO+KSNgo1SbJqJEYRE9ERzo7YtYbou/OqjSQKxV7jcKox7+usiUVZOAC+XnDOABXggQTno0Y1CpVnuWEc1boQ==}
+  react-fast-compare@3.2.3:
+    resolution: {integrity: sha512-WY9YHI1jjYC5a2lNRfHbeaNVQqiY+mMKWBSw1mPU0FgevlxI6V7izhNYz7Vp5ieFxetuRb6RmihPQxXEzg7oWQ==}
 
   react-focus-lock@2.9.5:
     resolution: {integrity: sha512-h6vrdgUbsH2HeD5I7I3Cx1PPrmwGuKYICS+kB9m+32X/9xHRrAbxgvaBpG7BFBN9h3tO+C3qX1QAVESmi4CiIA==}
@@ -40041,7 +40041,7 @@ snapshots:
 
   react-fast-compare@2.0.4: {}
 
-  react-fast-compare@3.2.2: {}
+  react-fast-compare@3.2.3: {}
 
   react-focus-lock@2.9.5(@types/react@18.2.79)(react@18.2.0):
     dependencies:
@@ -40129,7 +40129,7 @@ snapshots:
       '@popperjs/core': 2.11.8
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
-      react-fast-compare: 3.2.2
+      react-fast-compare: 3.2.3
       warning: 4.0.3
 
   react-recompose@0.33.0(react@18.2.0):
