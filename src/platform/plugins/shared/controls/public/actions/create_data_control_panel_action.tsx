@@ -27,6 +27,12 @@ import { dataViewsService } from '../services/kibana_services';
 
 let lastUsedDataViewId: string | undefined;
 
+/** The id of the first persisted data view published by the embeddable (skips ad hoc data views). */
+export const getFirstPersistedDataViewId = (embeddable: unknown): string | undefined =>
+  apiPublishesDataViews(embeddable)
+    ? embeddable.dataViews$.value?.find((dataView) => dataView.isPersisted())?.id
+    : undefined;
+
 export const createDataControlPanelAction = (): ActionDefinition<EmbeddableApiContext> => ({
   id: ACTION_CREATE_CONTROL,
   order: 1,
@@ -38,13 +44,10 @@ export const createDataControlPanelAction = (): ActionDefinition<EmbeddableApiCo
     const defaultDataViewId = apiHasEditorConfig(embeddable)
       ? embeddable.getEditorConfig()?.defaultDataViewId
       : undefined;
-    const publishedDataViewId = apiPublishesDataViews(embeddable)
-      ? embeddable.dataViews$.value?.[0]?.id
-      : undefined;
     const parentDataViewId =
       defaultDataViewId ??
       lastUsedDataViewId ??
-      publishedDataViewId ??
+      getFirstPersistedDataViewId(embeddable) ??
       (await dataViewsService.getDefaultDataView())?.id;
 
     openDataControlEditor({
