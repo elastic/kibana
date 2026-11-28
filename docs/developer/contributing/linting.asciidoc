@@ -20,6 +20,8 @@ Use `node scripts/oxfmt --check path/to/file.ts` to report formatting difference
 without writing files. Without paths, oxfmt processes the repository's configured
 JavaScript and TypeScript files, excluding vendored and generated code.
 
+In CI, oxfmt runs after ESLint in the linting job, not in quick checks.
+
 Here are some hints for getting eslint setup in your favorite editor:
 
 [width="100%",cols="13%,87%",options="header",]
