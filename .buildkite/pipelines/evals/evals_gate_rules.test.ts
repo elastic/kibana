@@ -12,7 +12,10 @@ import {
   combineDecisions,
   decideSuite,
   findReusableVerdict,
+  formatReusedVerdictDescription,
   getDecisionPathMatches,
+  requestsModelsBeyondDefaults,
+  isReusedVerdict,
   isSuiteSkipped,
   truncateDescription,
 } from './evals_gate_rules.ts';
@@ -66,6 +69,23 @@ describe('getDecisionPathMatches', () => {
 
   it('matches nothing for a suite that has not opted in', () => {
     expect(getDecisionPathMatches(['plugins/agent/server/a.ts'], { id: 'other' })).toEqual([]);
+  });
+});
+
+describe('requestsModelsBeyondDefaults', () => {
+  const suite = { defaultModelGroups: ['eis/anthropic-claude-5.5-sonnet'] };
+
+  it('counts a model label for a model the suite does not run by default', () => {
+    expect(requestsModelsBeyondDefaults(['models:eis/openai-gpt-5.4'], suite)).toBe(true);
+    expect(requestsModelsBeyondDefaults(['models:weekly-eis-models'], suite)).toBe(true);
+  });
+
+  it('ignores the default model, the judge label, and PRs without model labels', () => {
+    expect(requestsModelsBeyondDefaults(['models:eis/anthropic-claude-5.5-sonnet'], suite)).toBe(
+      false
+    );
+    expect(requestsModelsBeyondDefaults(['models:judge:eis/openai-gpt-5.4'], suite)).toBe(false);
+    expect(requestsModelsBeyondDefaults(['evals:gated'], suite)).toBe(false);
   });
 });
 
@@ -236,6 +256,16 @@ describe('truncateDescription', () => {
   });
 });
 
+describe('formatReusedVerdictDescription', () => {
+  it('marks the source commit, keeping the marker when the description is truncated', () => {
+    const marked = formatReusedVerdictDescription('x'.repeat(200), 'abcdef0123456789');
+    expect(marked).toHaveLength(140);
+    expect(marked.endsWith(' (from abcdef0)')).toBe(true);
+    expect(isReusedVerdict({ state: 'success', sha: HEAD, description: marked })).toBe(true);
+    expect(isReusedVerdict(verdict('success'))).toBe(false);
+  });
+});
+
 describe('findReusableVerdict', () => {
   const createLookup = ({
     shas,
@@ -281,6 +311,40 @@ describe('findReusableVerdict', () => {
       verdicts: { a: 'success', b: 'failure' },
       files: { a: [], b: [] },
     });
+
+    await expect(
+      findReusableVerdict({ lookup, headSha: HEAD, suite: GATED_SUITE })
+    ).resolves.toBeUndefined();
+  });
+
+  it('never reuses a pass over a regression measured on the head', async () => {
+    const lookup = createLookup({
+      shas: ['a', HEAD],
+      verdicts: { a: 'success', [HEAD]: 'failure' },
+      files: { a: [] },
+    });
+
+    await expect(
+      findReusableVerdict({ lookup, headSha: HEAD, suite: GATED_SUITE })
+    ).resolves.toBeUndefined();
+  });
+
+  it('skips copied passes, so a regression measured behind one still stops the search', async () => {
+    const copied: EvalsVerdict = {
+      state: 'success',
+      sha: 'c',
+      description: formatReusedVerdictDescription('no regression in goal_pass', 'aaaaaaa1'),
+    };
+    const verdicts: Record<string, EvalsVerdict> = {
+      a: verdict('success', 'a'),
+      b: verdict('failure', 'b'),
+      c: copied,
+    };
+    const lookup: VerdictLookup = {
+      listPullRequestCommitShas: async () => ['a', 'b', 'c', HEAD],
+      getVerdict: async (sha) => verdicts[sha],
+      listFilesBetween: async () => [],
+    };
 
     await expect(
       findReusableVerdict({ lookup, headSha: HEAD, suite: GATED_SUITE })

@@ -298,7 +298,8 @@ investigation starts.
 1. Check the cut on the evaluations cluster: its name, its `customer0` tag, and that its examples
    are investigation questions with distinct `metadata.case_id` values.
 2. Change the `golden` entry's `name` in
-   [`src/datasets/stored_datasets.ts`](src/datasets/stored_datasets.ts), and the table above.
+   [`src/datasets/stored_datasets.ts`](src/datasets/stored_datasets.ts), the table above, and
+   `regressionGate.dataset` in `evals.suites.json` (a test keeps the two in sync).
 3. Run it locally the way CI does. `NIGHTSHIFT_DATASETS` takes the entry's id, so this loads the
    new name and checks its tag:
 
@@ -308,8 +309,9 @@ investigation starts.
      --model eis-anthropic-claude-5-5-sonnet --judge eis-openai-gpt-6-sol
    ```
 
-4. Open a PR with the `evals:nightshift-investigations` and
-   `models:eis/anthropic-claude-5.5-sonnet` labels, so CI scores the new cut on the PR too.
+4. Open a PR with the `evals:nightshift-investigations` label, so CI scores the new cut on the PR
+   too. `main` has no baseline for the new cut yet, so the [regression gate](#pr-evals-gate) reports
+   that PR as inconclusive and doesn't block it.
 5. After the merge, the next daily and weekly builds run the new cut. Its scores start a new
    series, so compare runs within one cut, not across cuts.
 
@@ -396,6 +398,42 @@ NIGHTSHIFT_DATASETS=recovery-production \
   node scripts/evals start --suite nightshift-investigations --profile dev-vault --repetitions 1 \
   --model eis-anthropic-claude-5-5-sonnet --judge eis-openai-gpt-6-sol
 ```
+
+## PR evals gate
+
+PRs that change the investigation harness get a failing `evals gate` check until they have one of
+these labels ([how the gate works](../../../../platform/packages/shared/kbn-evals/README.md#requiring-an-evals-decision-on-prs)):
+
+- `evals:nightshift-investigations` runs the suite on Sonnet 5.5.
+- `evals:skip` skips it.
+
+A run fails the check only if `goal_pass` on the golden cut drops by 0.10 or more with p < 0.05
+against `main`. Fix it, or add `evals:accept-regression`. Infra problems and stale baselines never
+fail it. The check is advisory until the gate is calibrated, so it doesn't stop a merge on its own.
+
+The gated paths are `requireDecisionOnPaths` in
+[`evals.suites.json`](../../../../../.buildkite/pipelines/evals/evals.suites.json): all of the
+Nightshift plugin's `server` and `common` folders, minus plumbing such as routes, telemetry and
+saved objects, plus the agent-facing parts of `agentic_investigations`. New folders are gated by
+default. Only exclude a folder that holds no prompts or agent logic; a config test fails if an
+exclude hides a prompt file.
+
+<details>
+<summary>Calibrating the gate</summary>
+
+The golden cut has 15 examples, so the thresholds are unverified until the gate is backtested on
+consecutive daily runs. Compare newer run first, with a large baseline age, since age is measured
+against today:
+
+```bash
+# EVAL_KBN_URL and EVAL_KBN_API_KEY point at the evaluations cluster.
+node scripts/evals compare <newer-daily-run-id> <older-daily-run-id> \
+  --suite nightshift-investigations \
+  --gate-dataset ns-investigation-golden-2710 --gate-evaluator goal_pass \
+  --gate-min-drop 0.1 --gate-alpha 0.05 --gate-max-baseline-age-days 365
+```
+
+</details>
 
 ## Connector sets
 

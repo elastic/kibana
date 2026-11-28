@@ -12,8 +12,9 @@
 //
 // The labels are read live, not from the GITHUB_PR_LABELS snapshot taken when the PR build started,
 // so a decision label added while CI runs still takes effect. A gated suite whose verdict from an
-// earlier PR commit can be reused (no decision path changed since) gets `evals:skip-<id>` instead
-// of re-running.
+// earlier PR commit can be reused (no decision path changed since, and no models beyond its
+// defaults requested) gets `evals:skip-<id>` instead of re-running, and the verdict is copied onto
+// the head commit.
 
 import {
   getForwardablePrLabels,
@@ -24,11 +25,15 @@ import type { VerdictLookup } from '../../../pipelines/evals/evals_gate_rules.ts
 import {
   EVALS_SKIP_LABEL_PREFIX,
   findReusableVerdict,
+  formatReusedVerdictDescription,
+  getVerdictStatusContext,
+  requestsModelsBeyondDefaults,
   toVerdict,
 } from '../../../pipelines/evals/evals_gate_rules.ts';
 import {
   getChangedFilesBetween,
   getCommitStatus,
+  setCommitStatus,
   getLivePrLabels,
   getPrCommitShas,
 } from '#pipeline-utils';
@@ -54,8 +59,9 @@ const main = async (): Promise<void> => {
     .filter(Boolean);
   const headSha = process.env.BUILDKITE_COMMIT ?? '';
 
+  // A reused verdict only covers the suite's default models, so a PR asking for others runs it.
   const gatedSuites = getRunnableEvalSuites(labels.join(',')).filter(
-    ({ regressionGate }) => regressionGate
+    (suite) => suite.regressionGate && !requestsModelsBeyondDefaults(labels, suite)
   );
   for (const suite of gatedSuites) {
     try {
@@ -64,6 +70,17 @@ const main = async (): Promise<void> => {
         console.error(
           `Reusing the ${suite.id} verdict from ${verdict.sha}: no decision path changed since.`
         );
+        // The gate ignores a verdict that lands on a commit that's no longer the head, so a pass
+        // reused here would never reach it. Copy it onto the head; its status event settles the gate.
+        // Skip the run only once that worked, so a failed copy still runs the suite.
+        await setCommitStatus({
+          sha: headSha,
+          // Only passes are ever reused.
+          state: 'success',
+          context: getVerdictStatusContext(suite.id),
+          description: formatReusedVerdictDescription(verdict.description, verdict.sha),
+          targetUrl: process.env.BUILDKITE_BUILD_URL,
+        });
         labels.push(`${EVALS_SKIP_LABEL_PREFIX}${suite.id}`);
       }
     } catch (error) {

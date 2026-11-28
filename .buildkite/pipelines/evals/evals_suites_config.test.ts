@@ -309,6 +309,42 @@ describe('evals.suites.json evals decision', () => {
     expect(problems).toEqual([]);
   });
 
+  it('never hides a prompt behind an exclude', () => {
+    // Suites include whole plugins and exclude the folders that don't change agent behaviour, so a
+    // new folder is gated by default. An exclude is the one way a prompt can slip out, so none may
+    // cover a prompt file, except test artefacts, docs and online eval judge prompts, which aren't
+    // agent prompts. Plain `.md` is exempt because the agent's prompts are `.md.text`.
+    const isPromptFile = (file: string): boolean =>
+      file.endsWith('.text') ||
+      /prompt/i.test(Path.basename(file)) ||
+      file.includes('/instructions/');
+    const isExemptPromptFile = (file: string): boolean =>
+      /\.test\.tsx?$/.test(file) ||
+      /\.(snap|md)$/.test(file) ||
+      /\.mock\.ts$/.test(file) ||
+      /\/(__snapshots__|__fixtures__|test)\//.test(file) ||
+      file.includes('/online_evals/') ||
+      Path.basename(file).includes('online_evals');
+
+    const problems = decisionSuites.flatMap(({ id, requireDecisionOnPaths }) => {
+      const { include = [], exclude = [] } = requireDecisionOnPaths ?? {};
+      return getTrackedFiles()
+        .filter(
+          (file) =>
+            isPromptFile(file) &&
+            !isExemptPromptFile(file) &&
+            include.some((glob) => Path.matchesGlob(file, glob))
+        )
+        .flatMap((file) =>
+          exclude
+            .filter((glob) => Path.matchesGlob(file, glob))
+            .map((glob) => `${id}: exclude "${glob}" hides the prompt file ${file}`)
+        );
+    });
+
+    expect(problems).toEqual([]);
+  });
+
   it('lists include globs that each match a tracked file', () => {
     // A glob that matches nothing (e.g. after a directory move) silently stops requiring a decision.
     const trackedFiles = getTrackedFiles();
@@ -415,6 +451,19 @@ describe('Nightshift CI coverage', () => {
     if (!configPath) throw new Error('Nightshift config is missing');
     const suiteRoot = Path.dirname(Path.resolve(__dirname, '../../..', configPath));
     for (const file of files) expect(Fs.existsSync(Path.join(suiteRoot, file))).toBe(true);
+  });
+
+  it('gates golden goal_pass for the production model, the one the daily run baselines', () => {
+    const suite = suites.find(({ id }) => id === 'nightshift-investigations');
+    // daily_evals.yml runs Sonnet 5.5 on main; the gate compares against that baseline.
+    expect(suite?.defaultModelGroups).toEqual(['eis/anthropic-claude-5.5-sonnet']);
+    expect(suite?.regressionGate).toEqual({
+      dataset: 'ns-investigation-golden-2710',
+      evaluator: 'goal_pass',
+      minAbsoluteDrop: 0.1,
+      alpha: 0.05,
+      maxBaselineAgeDays: 3,
+    });
   });
 
   it('runs the writeup eval alone, with a default model, when a PR carries its label', () => {
