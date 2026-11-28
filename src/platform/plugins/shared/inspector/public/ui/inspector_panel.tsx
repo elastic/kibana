@@ -99,7 +99,7 @@ export class InspectorPanel extends Component<InspectorPanelProps, InspectorPane
 
     return (
       <KibanaContextProvider services={dependencies}>
-        <EuiFlyoutHeader hasBorder>
+        <EuiFlyoutHeader hasBorder data-test-subj="inspectorPanelHeader">
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={true}>
               <EuiTitle size="s">

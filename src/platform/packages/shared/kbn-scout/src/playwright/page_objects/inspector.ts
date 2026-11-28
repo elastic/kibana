@@ -15,6 +15,7 @@ import { KibanaCodeEditorWrapper } from '../ui_components';
 export class InspectorPage {
   private readonly appMenu: AppMenu;
   public readonly panel: Locator;
+  private readonly header: Locator;
   public readonly closeButton: Locator;
   public readonly viewChooser: Locator;
   public readonly tablePaginationPopoverButton: Locator;
@@ -34,6 +35,7 @@ export class InspectorPage {
     this.appMenu = new AppMenu(page);
     this.codeEditor = new KibanaCodeEditorWrapper(this.page);
     this.panel = page.testSubj.locator('inspectorPanel');
+    this.header = page.testSubj.locator('inspectorPanelHeader');
     this.closeButton = page.testSubj.locator('euiFlyoutCloseButton');
     this.viewChooser = page.testSubj.locator('inspectorViewChooser');
     this.tablePaginationPopoverButton = page.testSubj.locator('tablePaginationPopoverButton');
@@ -133,7 +135,8 @@ export class InspectorPage {
    * No-ops when the inspector renders only a single view (no view chooser).
    */
   async openInspectorView(viewId: string) {
-    await this.panel.waitFor({ state: 'visible' });
+    // The flyout shell renders before its lazily loaded content; the header commits with the chooser.
+    await this.header.waitFor({ state: 'visible' });
     if (!(await this.viewChooser.isVisible())) {
       return;
     }
