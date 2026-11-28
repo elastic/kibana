@@ -190,7 +190,13 @@ export class StreamsApp {
   }
 
   async gotoDataQualityTab(streamName: string) {
-    await this.gotoStreamManagementTab(streamName, 'dataQuality');
+    // The KPI cards sit behind the stream definition fetch, the dataset quality controller and two
+    // lazy chunks, and this card only gets its test subject once the last chunk has resolved
+    await this.gotoStreamManagementTab(streamName, 'dataQuality', {
+      readyWhen: this.page.testSubj.locator(
+        'datasetQualityDetailsSummaryKpiCard-Degraded documents'
+      ),
+    });
   }
 
   async gotoOverviewTab(streamName: string) {
