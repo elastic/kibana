@@ -7,9 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { LogRecord, Logger, LogMeta, LogLevelId } from '@kbn/logging';
+import type { LogRecord, Logger, LogMeta, LogLevelId, LogMessageSource } from '@kbn/logging';
+import { LogLevel } from '@kbn/logging';
+import { AbstractLogger } from '@kbn/core-logging-common-internal';
 import type { GlobalContext } from './global_context';
 import { mergeGlobalContext } from './global_context';
+
+const LEVEL_BY_METHOD = {
+  trace: LogLevel.Trace,
+  debug: LogLevel.Debug,
+  info: LogLevel.Info,
+  warn: LogLevel.Warn,
+  error: LogLevel.Error,
+  fatal: LogLevel.Fatal,
+} as const;
+
+type MessageMethod = 'trace' | 'debug' | 'info';
+type ErrorOrMessageMethod = 'warn' | 'error' | 'fatal';
 
 /** @internal */
 export class LoggerAdapter implements Logger {
@@ -42,31 +56,34 @@ export class LoggerAdapter implements Logger {
     this.globalContext = context;
   }
 
-  public trace(message: string, meta?: LogMeta): void {
-    this.logger.trace(message, mergeGlobalContext(this.globalContext, meta));
+  public trace(message: LogMessageSource, meta?: LogMeta): void {
+    this.forward('trace', message, meta);
   }
 
-  public debug(message: string, meta?: LogMeta): void {
-    this.logger.debug(message, mergeGlobalContext(this.globalContext, meta));
+  public debug(message: LogMessageSource, meta?: LogMeta): void {
+    this.forward('debug', message, meta);
   }
 
-  public info(message: string, meta?: LogMeta): void {
-    this.logger.info(message, mergeGlobalContext(this.globalContext, meta));
+  public info(message: LogMessageSource, meta?: LogMeta): void {
+    this.forward('info', message, meta);
   }
 
-  public warn(errorOrMessage: string | Error, meta?: LogMeta): void {
-    this.logger.warn(errorOrMessage, mergeGlobalContext(this.globalContext, meta));
+  public warn(errorOrMessage: LogMessageSource | Error, meta?: LogMeta): void {
+    this.forward('warn', errorOrMessage, meta);
   }
 
-  public error(errorOrMessage: string | Error, meta?: LogMeta): void {
-    this.logger.error(errorOrMessage, mergeGlobalContext(this.globalContext, meta));
+  public error(errorOrMessage: LogMessageSource | Error, meta?: LogMeta): void {
+    this.forward('error', errorOrMessage, meta);
   }
 
-  public fatal(errorOrMessage: string | Error, meta?: LogMeta): void {
-    this.logger.fatal(errorOrMessage, mergeGlobalContext(this.globalContext, meta));
+  public fatal(errorOrMessage: LogMessageSource | Error, meta?: LogMeta): void {
+    this.forward('fatal', errorOrMessage, meta);
   }
 
   public log(record: LogRecord) {
+    if (record.level && this.isLevelDisabled(record.level)) {
+      return;
+    }
     this.logger.log({ ...record, meta: mergeGlobalContext(this.globalContext, record.meta) });
   }
 
@@ -76,5 +93,42 @@ export class LoggerAdapter implements Logger {
 
   public get(...contextParts: string[]): Logger {
     return this.logger.get(...contextParts);
+  }
+
+  private isLevelDisabled(level: LogLevel): boolean {
+    if (this.logger instanceof AbstractLogger) {
+      return !this.logger.isGateLevelEnabled(level);
+    }
+    return this.logger.isLevelEnabled?.(level.id) === false;
+  }
+
+  private forward(method: MessageMethod, message: LogMessageSource, meta?: LogMeta): void;
+  private forward(
+    method: ErrorOrMessageMethod,
+    errorOrMessage: LogMessageSource | Error,
+    meta?: LogMeta
+  ): void;
+  private forward(
+    method: MessageMethod | ErrorOrMessageMethod,
+    errorOrMessage: LogMessageSource | Error,
+    meta?: LogMeta
+  ): void {
+    if (this.isLevelDisabled(LEVEL_BY_METHOD[method])) {
+      return;
+    }
+
+    const mergedMeta = mergeGlobalContext(this.globalContext, meta);
+    switch (method) {
+      case 'trace':
+      case 'debug':
+      case 'info':
+        this.logger[method](errorOrMessage as LogMessageSource, mergedMeta);
+        break;
+      case 'warn':
+      case 'error':
+      case 'fatal':
+        this.logger[method](errorOrMessage, mergedMeta);
+        break;
+    }
   }
 }

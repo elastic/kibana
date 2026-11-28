@@ -1,20 +1,20 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`appends records via multiple appenders.: console logs 1`] = `"[2012-01-31T18:33:22.011-05:00][INFO ][some-context] You know, just for your info."`;
+exports[`appends records via multiple appenders.: console logs 1`] = `"[2012-02-01T09:33:22.011-05:00][INFO ][some-context] You know, just for your info."`;
 
 exports[`appends records via multiple appenders.: file logs 1`] = `
-"[2012-01-31T13:33:22.011-05:00][WARN ][tests] Config is not ready!
+"[2012-02-01T04:33:22.011-05:00][WARN ][tests] Config is not ready!
 "
 `;
 
 exports[`appends records via multiple appenders.: file logs 2`] = `
-"[2012-01-31T08:33:22.011-05:00][ERROR][tests.child] Too bad that config is not ready :/
+"[2012-01-31T23:33:22.011-05:00][ERROR][tests.child] Too bad that config is not ready :/
 "
 `;
 
 exports[`asLoggerFactory() only allows to create new loggers. 1`] = `
 Object {
-  "@timestamp": "2012-01-30T12:33:22.011-05:00",
+  "@timestamp": "2012-01-31T03:33:22.011-05:00",
   "ecs": Object {
     "version": "9.3.0",
   },
@@ -32,7 +32,7 @@ Object {
 
 exports[`asLoggerFactory() only allows to create new loggers. 2`] = `
 Object {
-  "@timestamp": "2012-01-30T07:33:22.011-05:00",
+  "@timestamp": "2012-01-31T03:33:22.011-05:00",
   "ecs": Object {
     "version": "9.3.0",
   },
@@ -51,7 +51,7 @@ Object {
 
 exports[`asLoggerFactory() only allows to create new loggers. 3`] = `
 Object {
-  "@timestamp": "2012-01-30T02:33:22.011-05:00",
+  "@timestamp": "2012-01-31T03:33:22.011-05:00",
   "ecs": Object {
     "version": "9.3.0",
   },
@@ -88,7 +88,7 @@ Object {
 
 exports[`flushes memory buffer logger and switches to real logger once config is provided: new messages 1`] = `
 Object {
-  "@timestamp": "2012-01-31T23:33:22.011-05:00",
+  "@timestamp": "2012-02-01T09:33:22.011-05:00",
   "ecs": Object {
     "version": "9.3.0",
   },
@@ -107,7 +107,7 @@ Object {
 exports[`uses \`root\` logger if context name is not specified. 1`] = `
 Array [
   Array [
-    "[2012-01-30T17:33:22.011-05:00][INFO ][root] This message goes to a root context.",
+    "[2012-01-31T08:33:22.011-05:00][INFO ][root] This message goes to a root context.",
   ],
 ]
 `;
