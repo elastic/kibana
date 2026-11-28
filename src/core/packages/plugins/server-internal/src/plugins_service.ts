@@ -73,9 +73,10 @@ export interface PluginsServiceDiscoverDeps {
 }
 
 /** @internal */
-export class PluginsService
-  implements CoreService<InternalPluginsServiceSetup, InternalPluginsServiceStart>
-{
+export class PluginsService implements CoreService<
+  InternalPluginsServiceSetup,
+  InternalPluginsServiceStart
+> {
   private readonly log: Logger;
   private readonly prebootPluginsSystem: PluginsSystem<PluginType.preboot>;
   private arePrebootPluginsStopped = false;

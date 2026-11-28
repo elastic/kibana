@@ -11,7 +11,8 @@ import { EuiWrappingPopover, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 export interface GraphPopoverProps
-  extends PropsWithChildren,
+  extends
+    PropsWithChildren,
     CommonProps,
     Pick<
       EuiWrappingPopoverProps,

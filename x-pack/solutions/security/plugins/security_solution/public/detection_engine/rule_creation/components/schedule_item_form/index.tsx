@@ -61,8 +61,7 @@ const StyledEuiFormRow = styled(EuiFormRow)`
 
 const MyEuiSelect = styled(EuiSelect)`
   min-width: 106px; // Preserve layout when disabled & dropdown arrow is not rendered
-  background: ${({ theme }) =>
-    transparentize(theme.eui.euiColorPrimary, 0.1)} !important; // Override focus states etc.
+  background: ${({ theme }) => transparentize(theme.eui.euiColorPrimary, 0.1)} !important; // Override focus states etc.
   color: ${({ theme }) => theme.eui.euiColorPrimary};
   box-shadow: none;
 `;

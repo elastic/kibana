@@ -29,7 +29,7 @@ const LastTimesPopoverComponent: React.FC<Props> = ({
   const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
 
   const calculatedBy = attackDiscoveryAlertsEnabled
-    ? successfulGenerations ?? 0
+    ? (successfulGenerations ?? 0)
     : connectorIntervals.length;
 
   return (

@@ -166,7 +166,7 @@ export class ClusterClient implements ICustomClusterClient {
   private getSecondaryAuthHeaders(request: ScopeableRequest): Headers {
     const headerSource =
       isRealRequest(request) && !request.isFakeRequest
-        ? this.authHeaders?.get(request) ?? {}
+        ? (this.authHeaders?.get(request) ?? {})
         : request.headers;
     const authorizationHeader = Object.entries(headerSource).find(([key, value]) => {
       return key.toLowerCase() === AUTHORIZATION_HEADER && value !== undefined;

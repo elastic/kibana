@@ -28,9 +28,10 @@ import type {
 } from './types';
 import { registerLocators } from './locators';
 
-export class SearchPlaygroundPlugin
-  implements Plugin<SearchPlaygroundPluginSetup, SearchPlaygroundPluginStart>
-{
+export class SearchPlaygroundPlugin implements Plugin<
+  SearchPlaygroundPluginSetup,
+  SearchPlaygroundPluginStart
+> {
   private config: SearchPlaygroundConfigType;
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private licenseSubscription: Subscription | undefined;

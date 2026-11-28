@@ -30,11 +30,11 @@ export interface StartDependencies {
 }
 
 export interface SetupContract
-  extends UiActionsSetup,
-    Pick<UiActionsServiceEnhancements, 'registerDrilldown'> {}
+  extends UiActionsSetup, Pick<UiActionsServiceEnhancements, 'registerDrilldown'> {}
 
 export interface StartContract
-  extends UiActionsStart,
+  extends
+    UiActionsStart,
     Pick<
       UiActionsServiceEnhancements,
       | 'getActionFactory'
@@ -47,9 +47,12 @@ export interface StartContract
   DrilldownManager: PublicDrilldownManagerComponent;
 }
 
-export class AdvancedUiActionsPublicPlugin
-  implements Plugin<SetupContract, StartContract, SetupDependencies, StartDependencies>
-{
+export class AdvancedUiActionsPublicPlugin implements Plugin<
+  SetupContract,
+  StartContract,
+  SetupDependencies,
+  StartDependencies
+> {
   readonly licenseInfo = new BehaviorSubject<ILicense | undefined>(undefined);
   private getLicenseInfo(): ILicense {
     if (!this.licenseInfo.getValue()) {

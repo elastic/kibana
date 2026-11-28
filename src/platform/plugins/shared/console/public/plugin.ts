@@ -31,15 +31,12 @@ import {
   httpService,
 } from './services';
 
-export class ConsoleUIPlugin
-  implements
-    Plugin<
-      ConsolePluginSetup,
-      ConsolePluginStart,
-      AppSetupUIPluginDependencies,
-      AppPluginSetupDependencies
-    >
-{
+export class ConsoleUIPlugin implements Plugin<
+  ConsolePluginSetup,
+  ConsolePluginStart,
+  AppSetupUIPluginDependencies,
+  AppPluginSetupDependencies
+> {
   private readonly autocompleteInfo = new AutocompleteInfo();
   private _embeddableConsole: EmbeddableConsoleInfo;
 

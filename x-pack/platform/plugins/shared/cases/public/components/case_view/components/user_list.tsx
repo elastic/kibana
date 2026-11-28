@@ -63,7 +63,7 @@ const renderUsers = (
           onClick={handleSendEmail.bind(null, userInfo.user?.email)}
           iconType="email"
           aria-label={i18n.SEND_EMAIL_ARIA(
-            userInfo.user?.full_name ? userInfo.user?.full_name : userInfo.user?.username ?? ''
+            userInfo.user?.full_name ? userInfo.user?.full_name : (userInfo.user?.username ?? '')
           )}
           isDisabled={isEmpty(userInfo.user?.email)}
         />

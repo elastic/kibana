@@ -72,9 +72,12 @@ import { registerDiscoverEBTManagerAnalytics } from './plugin_imports/discover_e
  * Contains Discover, one of the oldest parts of Kibana
  * Discover provides embeddables for Dashboards
  */
-export class DiscoverPlugin
-  implements Plugin<DiscoverSetup, DiscoverStart, DiscoverSetupPlugins, DiscoverStartPlugins>
-{
+export class DiscoverPlugin implements Plugin<
+  DiscoverSetup,
+  DiscoverStart,
+  DiscoverSetupPlugins,
+  DiscoverStartPlugins
+> {
   private readonly discoverEbtContext$ = new BehaviorSubject<DiscoverEBTContextProps>({
     discoverProfiles: [],
   });

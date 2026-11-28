@@ -45,13 +45,13 @@ export function SloEditForm({ slo, initialValues, onSave }: Props) {
     defaultValues: isFlyoutMode
       ? sloFormValuesFromFlyoutState
       : sloFormValuesFromUrlState
-      ? sloFormValuesFromUrlState
-      : sloFormValuesFromSloResponse ?? SLO_EDIT_FORM_DEFAULT_VALUES,
+        ? sloFormValuesFromUrlState
+        : (sloFormValuesFromSloResponse ?? SLO_EDIT_FORM_DEFAULT_VALUES),
     values: isFlyoutMode
       ? sloFormValuesFromFlyoutState
       : sloFormValuesFromUrlState
-      ? sloFormValuesFromUrlState
-      : sloFormValuesFromSloResponse,
+        ? sloFormValuesFromUrlState
+        : sloFormValuesFromSloResponse,
     mode: 'all',
   });
   const { watch, getFieldState, getValues, formState } = form;

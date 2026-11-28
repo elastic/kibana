@@ -32,7 +32,7 @@ type ParametersFromOptions<TOptions extends StreamsAppFetchOptions | undefined> 
 
 export function useStreamsAppFetch<
   T,
-  TOptions extends StreamsAppFetchOptions | undefined = DefaultStreamsAppFetchOptions
+  TOptions extends StreamsAppFetchOptions | undefined = DefaultStreamsAppFetchOptions,
 >(
   callback: ({}: ParametersFromOptions<TOptions>) => T,
   deps: any[],

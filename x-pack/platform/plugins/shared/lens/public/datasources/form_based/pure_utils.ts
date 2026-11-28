@@ -39,7 +39,7 @@ export function shouldShowTimeSeriesOption(
 ) {
   return Boolean(
     dimensionGroups.find(({ groupId: id }) => groupId === id)?.isBreakdownDimension &&
-      containsColumnWithTimeSeriesMetric(layer, indexPattern)
+    containsColumnWithTimeSeriesMetric(layer, indexPattern)
   );
 }
 

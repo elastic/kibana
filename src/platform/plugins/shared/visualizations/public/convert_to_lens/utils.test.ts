@@ -162,9 +162,9 @@ describe('getBucketCollapseFn', () => {
         Array<SchemaConfig<SupportedAggregation>>,
         AggBasedColumn[],
         Record<string, string>,
-        AggBasedColumn[]
+        AggBasedColumn[],
       ],
-      Record<string, string[]>
+      Record<string, string[]>,
     ]
   >([
     [

@@ -101,7 +101,7 @@ export function ChangeDataView({
     const fetchDataViews = async () => {
       const savedDataViewRefs = savedDataViews
         ? savedDataViews
-        : (await data.dataViews.getIdsWithTitle()) ?? [];
+        : ((await data.dataViews.getIdsWithTitle()) ?? []);
       const adHocDataViewRefs = adHocDataViews?.map(mapAdHocDataView) ?? [];
       const managedDataViewRefs = managedDataViews?.map(mapManagedDataView) ?? [];
 

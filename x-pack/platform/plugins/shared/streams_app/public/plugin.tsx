@@ -27,15 +27,12 @@ const StreamsApplication = dynamic(() =>
   import('./application').then((mod) => ({ default: mod.StreamsApplication }))
 );
 
-export class StreamsAppPlugin
-  implements
-    Plugin<
-      StreamsAppPublicSetup,
-      StreamsAppPublicStart,
-      StreamsAppSetupDependencies,
-      StreamsAppStartDependencies
-    >
-{
+export class StreamsAppPlugin implements Plugin<
+  StreamsAppPublicSetup,
+  StreamsAppPublicStart,
+  StreamsAppSetupDependencies,
+  StreamsAppStartDependencies
+> {
   logger: Logger;
   telemetry: StreamsTelemetryService = new StreamsTelemetryService();
 

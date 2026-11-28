@@ -25,16 +25,19 @@ const recursiveCreateConfig = <T = unknown>(
   config: T,
   descriptor: ExposedToBrowserDescriptor<T> = {}
 ) => {
-  return Object.entries(config || {}).reduce((browserConfig, [key, value]) => {
-    const exposedConfig = descriptor[key as keyof ExposedToBrowserDescriptor<T>];
-    if (exposedConfig && typeof exposedConfig === 'object') {
-      browserConfig[key] = recursiveCreateConfig(value, exposedConfig);
-    }
-    if (exposedConfig === true) {
-      browserConfig[key] = value;
-    }
-    return browserConfig;
-  }, {} as Record<string, unknown>);
+  return Object.entries(config || {}).reduce(
+    (browserConfig, [key, value]) => {
+      const exposedConfig = descriptor[key as keyof ExposedToBrowserDescriptor<T>];
+      if (exposedConfig && typeof exposedConfig === 'object') {
+        browserConfig[key] = recursiveCreateConfig(value, exposedConfig);
+      }
+      if (exposedConfig === true) {
+        browserConfig[key] = value;
+      }
+      return browserConfig;
+    },
+    {} as Record<string, unknown>
+  );
 };
 
 /**

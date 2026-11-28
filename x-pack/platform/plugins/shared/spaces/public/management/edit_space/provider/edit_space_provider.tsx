@@ -34,11 +34,10 @@ import {
 } from './reducers';
 import type { SpacesManager } from '../../../spaces_manager';
 
-export interface EditSpaceProviderRootProps
-  extends Pick<
-    CoreStart,
-    'userProfile' | 'theme' | 'i18n' | 'overlays' | 'http' | 'notifications'
-  > {
+export interface EditSpaceProviderRootProps extends Pick<
+  CoreStart,
+  'userProfile' | 'theme' | 'i18n' | 'overlays' | 'http' | 'notifications'
+> {
   logger: Logger;
   capabilities: ApplicationStart['capabilities'];
   getUrlForApp: ApplicationStart['getUrlForApp'];
@@ -57,14 +56,13 @@ interface EditSpaceClients {
   privilegesClient: PrivilegesAPIClientPublicContract;
 }
 
-export interface EditSpaceServices
-  extends Omit<
-    EditSpaceProviderRootProps,
-    | 'getRolesAPIClient'
-    | 'getPrivilegesAPIClient'
-    | 'getSecurityLicense'
-    | 'getIsRoleManagementEnabled'
-  > {
+export interface EditSpaceServices extends Omit<
+  EditSpaceProviderRootProps,
+  | 'getRolesAPIClient'
+  | 'getPrivilegesAPIClient'
+  | 'getSecurityLicense'
+  | 'getIsRoleManagementEnabled'
+> {
   invokeClient<R extends unknown>(arg: (clients: EditSpaceClients) => Promise<R>): Promise<R>;
   license?: SecurityLicense;
   isRoleManagementEnabled: boolean;

@@ -223,7 +223,7 @@ export const addFieldToColumns = ({
   const column = allColumns[fieldId];
   const initColumnHeader =
     scopeId === TableId.alertsOnAlertsPage || scopeId === TableId.alertsOnRuleDetailsPage
-      ? defaultsHeader.find((c) => c.id === fieldId) ?? {}
+      ? (defaultsHeader.find((c) => c.id === fieldId) ?? {})
       : {};
 
   const scopedActions = getScopedActions(scopeId);

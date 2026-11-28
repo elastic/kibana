@@ -28,7 +28,7 @@ describe('AiAssistantSelectionPage', () => {
           aiAssistantManagementSelection: hasPermission,
         },
       },
-    } as unknown as CoreStart['application']['capabilities']);
+    }) as unknown as CoreStart['application']['capabilities'];
 
   const testCapabilities = generateMockCapabilities(true);
 

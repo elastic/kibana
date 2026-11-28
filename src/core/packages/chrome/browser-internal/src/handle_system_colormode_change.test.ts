@@ -79,7 +79,7 @@ describe('handleSystemColorModeChange', () => {
           darkMode,
         },
       },
-    } as any);
+    }) as any;
 
   const mockUiSettingsDarkMode = (
     uiSettings: jest.Mocked<IUiSettingsClient>,

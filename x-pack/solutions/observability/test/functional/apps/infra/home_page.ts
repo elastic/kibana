@@ -214,9 +214,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           ].forEach(({ metric, value }) => {
             it(`${metric} tile should show ${value}`, async () => {
               await retry.tryForTime(3 * 1000, async () => {
-                const tileValue = await pageObjects.assetDetails.getAssetDetailsKPITileValue(
-                  metric
-                );
+                const tileValue =
+                  await pageObjects.assetDetails.getAssetDetailsKPITileValue(metric);
                 expect(tileValue).to.eql(value);
               });
             });
@@ -289,9 +288,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           ].forEach(({ metric, value }) => {
             it(`${metric} tile should show ${value}`, async () => {
               await retry.tryForTime(5000, async () => {
-                const tileValue = await pageObjects.assetDetails.getAssetDetailsKPITileValue(
-                  metric
-                );
+                const tileValue =
+                  await pageObjects.assetDetails.getAssetDetailsKPITileValue(metric);
                 expect(tileValue).to.eql(value);
               });
             });
@@ -302,9 +300,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             { metric: 'memory', chartsCount: 1 },
           ].forEach(({ metric, chartsCount }) => {
             it(`should render ${chartsCount} ${metric} chart(s) in the Metrics section`, async () => {
-              const containers = await pageObjects.assetDetails.getOverviewTabDockerMetricCharts(
-                metric
-              );
+              const containers =
+                await pageObjects.assetDetails.getOverviewTabDockerMetricCharts(metric);
               expect(containers.length).to.equal(chartsCount);
             });
           });

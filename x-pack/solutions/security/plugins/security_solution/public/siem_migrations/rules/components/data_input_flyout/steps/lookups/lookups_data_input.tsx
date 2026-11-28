@@ -36,8 +36,10 @@ interface LookupsDataInputSubStepsProps {
   missingLookups: string[];
   onAllLookupsCreated: OnResourcesCreated;
 }
-interface LookupsDataInputProps
-  extends Omit<LookupsDataInputSubStepsProps, 'migrationStats' | 'missingLookups'> {
+interface LookupsDataInputProps extends Omit<
+  LookupsDataInputSubStepsProps,
+  'migrationStats' | 'missingLookups'
+> {
   dataInputStep: DataInputStep;
   migrationStats?: RuleMigrationTaskStats;
   missingLookups?: string[];

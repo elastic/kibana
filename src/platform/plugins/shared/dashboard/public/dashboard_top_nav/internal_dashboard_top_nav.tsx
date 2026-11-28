@@ -346,7 +346,7 @@ export function InternalDashboardTopNav({
         visible={viewMode !== 'print'}
         setMenuMountPoint={
           embedSettings || fullScreenMode
-            ? setCustomHeaderActionMenu ?? undefined
+            ? (setCustomHeaderActionMenu ?? undefined)
             : setHeaderActionMenu
         }
         className={fullScreenMode ? 'kbnTopNavMenu-isFullScreen' : undefined}

@@ -241,7 +241,7 @@ export class DeploymentParamsMapper {
       threadsPerAllocation *
       (adaptiveResources
         ? input.adaptive_allocations!.max_number_of_allocations!
-        : input.number_of_allocations ?? 0);
+        : (input.number_of_allocations ?? 0));
 
     // The deployment can be created via API with a number of allocations that do not exactly match our vCPU ranges.
     // In this case, we should find the closest vCPU range that does not exceed the max or static value of the range.

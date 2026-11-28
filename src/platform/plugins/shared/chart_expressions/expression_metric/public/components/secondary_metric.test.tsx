@@ -204,9 +204,9 @@ describe('Secondary metric', () => {
           item.icon === 'arrowUp'
             ? { icon: 'arrowDown', color: lowerColor }
             : item.icon === 'arrowDown'
-            ? { icon: 'arrowUp', color: higherColor }
-            : // equal and na are the same
-              { icon: item.icon, color: item.color };
+              ? { icon: 'arrowUp', color: higherColor }
+              : // equal and na are the same
+                { icon: item.icon, color: item.color };
         return {
           ...item,
           ...newProps,

@@ -890,14 +890,14 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
                     ],
                   }
                 : kafkaTopicsInput.value === kafkaTopicsType.Dynamic && kafkaDynamicTopicInput.value
-                ? {
-                    topics: [
-                      {
-                        topic: kafkaDynamicTopicInput.value,
-                      },
-                    ],
-                  }
-                : {}),
+                  ? {
+                      topics: [
+                        {
+                          topic: kafkaDynamicTopicInput.value,
+                        },
+                      ],
+                    }
+                  : {}),
               headers: kafkaHeadersInput.value,
               timeout: parseIntegerIfStringDefined(kafkaBrokerTimeoutInput.value),
               broker_timeout: parseIntegerIfStringDefined(

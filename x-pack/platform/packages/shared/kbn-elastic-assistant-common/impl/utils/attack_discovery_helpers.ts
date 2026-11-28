@@ -106,7 +106,7 @@ export const getOriginalAlertIds = ({
   replacements?: Replacements;
 }) => {
   return alertIds.map((alertId) =>
-    replacements != null ? replacements[alertId] ?? alertId : alertId
+    replacements != null ? (replacements[alertId] ?? alertId) : alertId
   );
 };
 

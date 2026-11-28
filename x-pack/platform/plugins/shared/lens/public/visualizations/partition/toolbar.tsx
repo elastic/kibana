@@ -173,7 +173,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
   const selectedOption = emptySizeRatioOptions
     ? emptySizeRatioOptions.find(
         ({ value }) =>
-          value === (state.shape === 'pie' ? 0 : layer.emptySizeRatio ?? EmptySizeRatios.SMALL)
+          value === (state.shape === 'pie' ? 0 : (layer.emptySizeRatio ?? EmptySizeRatios.SMALL))
       )
     : undefined;
 

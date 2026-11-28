@@ -18,7 +18,7 @@ export type HasVisualizeConfig = HasType<'visualization'> & {
 export const apiHasVisualizeConfig = (api: unknown): api is HasVisualizeConfig => {
   return Boolean(
     api &&
-      (api as HasType)?.type === 'visualization' &&
-      typeof (api as HasVisualizeConfig).getVis === 'function'
+    (api as HasType)?.type === 'visualization' &&
+    typeof (api as HasVisualizeConfig).getVis === 'function'
   );
 };

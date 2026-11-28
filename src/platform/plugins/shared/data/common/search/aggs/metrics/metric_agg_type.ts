@@ -20,8 +20,9 @@ export interface IMetricAggConfig extends AggConfig {
   type: InstanceType<typeof MetricAggType>;
 }
 
-export interface MetricAggParam<TMetricAggConfig extends AggConfig>
-  extends AggParamType<TMetricAggConfig> {
+export interface MetricAggParam<
+  TMetricAggConfig extends AggConfig,
+> extends AggParamType<TMetricAggConfig> {
   filterFieldTypes?: FieldTypes;
   onlyAggregatable?: boolean;
   scriptable?: boolean;
@@ -29,8 +30,10 @@ export interface MetricAggParam<TMetricAggConfig extends AggConfig>
 
 const metricType = 'metrics';
 
-interface MetricAggTypeConfig<TMetricAggConfig extends AggConfig>
-  extends AggTypeConfig<TMetricAggConfig, MetricAggParam<TMetricAggConfig>> {
+interface MetricAggTypeConfig<TMetricAggConfig extends AggConfig> extends AggTypeConfig<
+  TMetricAggConfig,
+  MetricAggParam<TMetricAggConfig>
+> {
   isScalable?: () => boolean;
   subtype?: string;
   enableEmptyAsNull?: boolean;

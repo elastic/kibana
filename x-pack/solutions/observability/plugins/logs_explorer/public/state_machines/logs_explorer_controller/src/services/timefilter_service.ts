@@ -17,21 +17,17 @@ export const subscribeToTimefilterService =
     } = query;
 
     const time$ = timefilter.getTimeUpdate$().pipe(
-      map(
-        (): LogsExplorerControllerEvent => ({
-          type: 'RECEIVE_TIMEFILTER_TIME',
-          time: timefilter.getTime(),
-        })
-      )
+      map((): LogsExplorerControllerEvent => ({
+        type: 'RECEIVE_TIMEFILTER_TIME',
+        time: timefilter.getTime(),
+      }))
     );
 
     const refreshInterval$ = timefilter.getRefreshIntervalUpdate$().pipe(
-      map(
-        (): LogsExplorerControllerEvent => ({
-          type: 'RECEIVE_TIMEFILTER_REFRESH_INTERVAL',
-          refreshInterval: timefilter.getRefreshInterval(),
-        })
-      )
+      map((): LogsExplorerControllerEvent => ({
+        type: 'RECEIVE_TIMEFILTER_REFRESH_INTERVAL',
+        refreshInterval: timefilter.getRefreshInterval(),
+      }))
     );
 
     return merge(time$, refreshInterval$);

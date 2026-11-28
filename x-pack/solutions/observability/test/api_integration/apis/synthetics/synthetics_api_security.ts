@@ -56,8 +56,8 @@ export default function ({ getService }: FtrProviderContext) {
       let tags = anyRequiredPrivileges?.length
         ? `[${readUser ? '' : 'uptime-read,'}${anyRequiredPrivileges.join(',')}]`
         : !writeAccess
-        ? '[uptime-read]'
-        : options.tags ?? '[uptime-read,uptime-write]';
+          ? '[uptime-read]'
+          : (options.tags ?? '[uptime-read,uptime-write]');
       if (
         (method === 'POST' || method === 'DELETE' || method === 'PUT') &&
         path.includes('private_locations')

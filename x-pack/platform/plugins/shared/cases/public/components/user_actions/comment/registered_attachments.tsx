@@ -78,7 +78,7 @@ const getAttachmentRenderer = memoize((cachingKey: string) => {
 export const createRegisteredAttachmentUserActionBuilder = <
   C extends Attachment,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  R extends AttachmentTypeRegistry<AttachmentType<any>>
+  R extends AttachmentTypeRegistry<AttachmentType<any>>,
 >({
   userAction,
   userProfiles,

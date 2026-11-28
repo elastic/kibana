@@ -27,8 +27,10 @@ import { useKibana } from '../hooks/use_kibana';
 import { ElasticLlmConversationCallout } from './elastic_llm_conversation_callout';
 import { KnowledgeBaseReindexingCallout } from '../knowledge_base/knowledge_base_reindexing_callout';
 
-export interface ChatTimelineItem
-  extends Pick<Message['message'], 'role' | 'content' | 'function_call'> {
+export interface ChatTimelineItem extends Pick<
+  Message['message'],
+  'role' | 'content' | 'function_call'
+> {
   id: string;
   title: ReactNode;
   actions: {

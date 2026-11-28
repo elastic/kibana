@@ -29,9 +29,10 @@ import {
 import { registerLocators } from './locators';
 import { INFERENCE_ENDPOINTS_PATH } from './components/routes';
 
-export class SearchInferenceEndpointsPlugin
-  implements Plugin<SearchInferenceEndpointsPluginSetup, SearchInferenceEndpointsPluginStart>
-{
+export class SearchInferenceEndpointsPlugin implements Plugin<
+  SearchInferenceEndpointsPluginSetup,
+  SearchInferenceEndpointsPluginStart
+> {
   private config: SearchInferenceEndpointsConfigType;
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private licenseSubscription: Subscription | undefined;

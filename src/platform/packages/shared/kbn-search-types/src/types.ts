@@ -18,7 +18,7 @@ import { IKibanaSearchRequest, IKibanaSearchResponse } from './kibana_search_typ
 
 export type ISearchGeneric = <
   SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
-  SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
+  SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse,
 >(
   request: SearchStrategyRequest,
   options?: ISearchOptions

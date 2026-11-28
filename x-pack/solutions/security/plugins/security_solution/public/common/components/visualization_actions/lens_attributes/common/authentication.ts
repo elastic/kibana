@@ -195,4 +195,4 @@ export const getAuthenticationLensAttributes: GetLensAttributes = ({ euiTheme })
         id: '{dataViewId}',
       },
     ],
-  } as LensAttributes);
+  }) as LensAttributes;

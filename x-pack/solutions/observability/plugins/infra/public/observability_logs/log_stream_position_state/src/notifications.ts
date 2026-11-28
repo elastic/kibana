@@ -40,5 +40,5 @@ export const LogStreamPositionNotificationEventSelectors = {
   pageEndBufferReached: (context: LogStreamPositionContext) =>
     ({
       type: 'PAGE_END_BUFFER_REACHED',
-    } as LogStreamPositionNotificationEvent),
+    }) as LogStreamPositionNotificationEvent,
 };

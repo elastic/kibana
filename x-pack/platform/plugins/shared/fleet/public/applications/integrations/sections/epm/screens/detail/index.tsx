@@ -315,8 +315,8 @@ export function Detail() {
     fromIntegrations === 'updates_available'
       ? getPath('integrations_installed_updates_available')
       : fromIntegrations === 'installed'
-      ? getPath('integrations_installed')
-      : getPath('integrations_all');
+        ? getPath('integrations_installed')
+        : getPath('integrations_all');
 
   const numOfDeferredInstallations = useMemo(
     () => getDeferredInstallationsCnt(packageInfo),
@@ -570,7 +570,7 @@ export function Detail() {
                   ]),
             ].map((item, index) => (
               <EuiFlexItem grow={false} key={index} data-test-subj={item['data-test-subj']}>
-                {item.isDivider ?? false ? (
+                {(item.isDivider ?? false) ? (
                   <Divider />
                 ) : item.label ? (
                   <EuiDescriptionList className="eui-textRight" compressed textStyle="reverse">

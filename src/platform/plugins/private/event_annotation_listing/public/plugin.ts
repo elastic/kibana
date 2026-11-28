@@ -43,15 +43,12 @@ export type EventAnnotationListingPluginStart = void;
 export type EventAnnotationListingPluginSetup = void;
 
 /** @public */
-export class EventAnnotationListingPlugin
-  implements
-    Plugin<
-      EventAnnotationListingPluginSetup,
-      EventAnnotationListingPluginStart,
-      SetupDependencies,
-      EventAnnotationListingStartDependencies
-    >
-{
+export class EventAnnotationListingPlugin implements Plugin<
+  EventAnnotationListingPluginSetup,
+  EventAnnotationListingPluginStart,
+  SetupDependencies,
+  EventAnnotationListingStartDependencies
+> {
   public setup(
     core: CoreSetup<EventAnnotationListingStartDependencies>,
     dependencies: SetupDependencies

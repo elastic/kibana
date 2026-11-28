@@ -84,8 +84,8 @@ export const inProgressTitle = (action: ActionStatus, isAutomatic: boolean | und
           action.nbAgentsAck >= action.nbAgentsActioned
             ? action.nbAgentsAck
             : action.nbAgentsAck === 0
-            ? action.nbAgentsActioned
-            : action.nbAgentsActioned - action.nbAgentsAck + ' of ' + action.nbAgentsActioned,
+              ? action.nbAgentsActioned
+              : action.nbAgentsActioned - action.nbAgentsAck + ' of ' + action.nbAgentsActioned,
         agents: action.nbAgentsActioned === 1 ? 'agent' : 'agents',
         inProgressText: getAction(action.type, action.actionId).inProgressText,
         reassignText:

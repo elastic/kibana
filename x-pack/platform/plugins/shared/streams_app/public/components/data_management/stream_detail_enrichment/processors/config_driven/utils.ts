@@ -16,7 +16,7 @@ import {
 
 export const getConvertFormStateToConfig = <
   FormState extends ConfigDrivenProcessorFormState,
-  ProcessorState extends ProcessorDefinition
+  ProcessorState extends ProcessorDefinition,
 >(
   key: ConfigDrivenProcessorType,
   fieldConfigurations: FieldConfiguration[],
@@ -63,7 +63,7 @@ export const getConvertFormStateToConfig = <
 
 export const getConvertProcessorToFormState = <
   ProcessorState extends ProcessorDefinition,
-  FormState extends ConfigDrivenProcessorFormState
+  FormState extends ConfigDrivenProcessorFormState,
 >(
   key: ConfigDrivenProcessorType,
   defaultFormState: FormState

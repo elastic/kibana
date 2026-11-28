@@ -152,7 +152,7 @@ export type FunctionSubtype =
 
 export interface ESQLFunction<
   Subtype extends FunctionSubtype = FunctionSubtype,
-  Name extends string = string
+  Name extends string = string,
 > extends ESQLAstBaseItem<Name> {
   type: 'function';
 
@@ -190,8 +190,10 @@ export interface ESQLUnaryExpression extends ESQLFunction<'unary-expression'> {
   args: [ESQLAstItem];
 }
 
-export interface ESQLPostfixUnaryExpression<Name extends string = string>
-  extends ESQLFunction<'postfix-unary-expression', Name> {
+export interface ESQLPostfixUnaryExpression<Name extends string = string> extends ESQLFunction<
+  'postfix-unary-expression',
+  Name
+> {
   subtype: 'postfix-unary-expression';
   args: [ESQLAstItem];
 }
@@ -211,7 +213,7 @@ export interface ESQLOrderExpression extends ESQLAstBaseItem {
 }
 
 export interface ESQLBinaryExpression<
-  Name extends BinaryExpressionOperator = BinaryExpressionOperator
+  Name extends BinaryExpressionOperator = BinaryExpressionOperator,
 > extends ESQLFunction<'binary-expression', Name> {
   subtype: 'binary-expression';
   args: [ESQLAstItem, ESQLAstItem];
@@ -466,7 +468,7 @@ export interface ESQLStringLiteral extends ESQLAstBaseItem {
 // @internal
 export interface ESQLParamLiteral<
   ParamType extends string = string,
-  ParamKind extends ESQLParamKinds = ESQLParamKinds
+  ParamKind extends ESQLParamKinds = ESQLParamKinds,
 > extends ESQLAstBaseItem {
   type: 'literal';
   literalType: 'param';
@@ -490,8 +492,9 @@ export type ESQLUnnamedParamLiteral<ParamKind extends ESQLParamKinds = ESQLParam
  *
  * @internal
  */
-export interface ESQLNamedParamLiteral<ParamKind extends ESQLParamKinds = ESQLParamKinds>
-  extends ESQLParamLiteral<'named', ParamKind> {
+export interface ESQLNamedParamLiteral<
+  ParamKind extends ESQLParamKinds = ESQLParamKinds,
+> extends ESQLParamLiteral<'named', ParamKind> {
   value: string;
 }
 
@@ -500,8 +503,9 @@ export interface ESQLNamedParamLiteral<ParamKind extends ESQLParamKinds = ESQLPa
  *
  * @internal
  */
-export interface ESQLPositionalParamLiteral<ParamKind extends ESQLParamKinds = ESQLParamKinds>
-  extends ESQLParamLiteral<'positional', ParamKind> {
+export interface ESQLPositionalParamLiteral<
+  ParamKind extends ESQLParamKinds = ESQLParamKinds,
+> extends ESQLParamLiteral<'positional', ParamKind> {
   value: number;
 }
 

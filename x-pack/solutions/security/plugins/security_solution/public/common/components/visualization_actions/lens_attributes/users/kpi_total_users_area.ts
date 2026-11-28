@@ -85,4 +85,4 @@ export const getKpiTotalUsersAreaLensAttributes: GetLensAttributes = () =>
         type: 'index-pattern',
       },
     ],
-  } as LensAttributes);
+  }) as LensAttributes;

@@ -51,7 +51,7 @@ export async function getAppTarget(
 
 export function initializeEditApi<
   ParentApiType = unknown,
-  ReturnType = ParentApiType extends HasAppContext ? HasEditCapabilities : {}
+  ReturnType = ParentApiType extends HasAppContext ? HasEditCapabilities : {},
 >({
   uuid,
   parentApi,

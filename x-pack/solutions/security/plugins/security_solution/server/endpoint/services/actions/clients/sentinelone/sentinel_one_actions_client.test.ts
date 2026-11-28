@@ -122,8 +122,7 @@ describe('SentinelOneActionsClient class', () => {
 
     it('should write action request and response to endpoint indexes when `responseActionsSentinelOneV2Enabled` FF is Disabled', async () => {
       // @ts-expect-error updating readonly attribute
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneV2Enabled =
-        false;
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneV2Enabled = false;
       await s1ActionsClient.isolate(createS1IsolationOptions());
 
       expect(classConstructorOptions.esClient.index).toHaveBeenCalledTimes(2);
@@ -182,8 +181,7 @@ describe('SentinelOneActionsClient class', () => {
 
     it('should write action request (only) to endpoint indexes when `responseActionsSentinelOneV2Enabled` FF is Enabled', async () => {
       // @ts-expect-error updating readonly attribute
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneV2Enabled =
-        true;
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneV2Enabled = true;
       await s1ActionsClient.isolate(createS1IsolationOptions());
 
       expect(classConstructorOptions.esClient.index).toHaveBeenCalledTimes(1);
@@ -273,8 +271,7 @@ describe('SentinelOneActionsClient class', () => {
 
     it('should write action request and response to endpoint indexes when `responseActionsSentinelOneV2Enabled` is Disabled', async () => {
       // @ts-expect-error updating readonly attribute
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneV2Enabled =
-        false;
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneV2Enabled = false;
       await s1ActionsClient.release(createS1IsolationOptions());
 
       expect(classConstructorOptions.esClient.index).toHaveBeenCalledTimes(2);
@@ -332,8 +329,7 @@ describe('SentinelOneActionsClient class', () => {
 
     it('should write action request (only) to endpoint indexes when `` is Enabled', async () => {
       // @ts-expect-error updating readonly attribute
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneV2Enabled =
-        true;
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneV2Enabled = true;
       await s1ActionsClient.release(createS1IsolationOptions());
 
       expect(classConstructorOptions.esClient.index).toHaveBeenCalledTimes(1);
@@ -1216,16 +1212,14 @@ describe('SentinelOneActionsClient class', () => {
 
     beforeEach(() => {
       // @ts-expect-error readonly prop assignment
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
-        true;
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled = true;
 
       getFileReqOptions = responseActionsClientMock.createGetFileOptions();
     });
 
     it('should error if feature flag is not enabled', async () => {
       // @ts-expect-error readonly prop assignment
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
-        false;
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled = false;
 
       await expect(s1ActionsClient.getFile(getFileReqOptions)).rejects.toHaveProperty(
         'message',
@@ -1275,8 +1269,7 @@ describe('SentinelOneActionsClient class', () => {
       connectorActionsMock =
         classConstructorOptions.connectorActions as DeeplyMockedKeys<NormalizedExternalConnectorClient>;
       // @ts-expect-error readonly prop assignment
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
-        true;
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled = true;
       s1ActionsClient = new SentinelOneActionsClient(classConstructorOptions);
 
       const executeMockFn = (subActionsClient.execute as jest.Mock).getMockImplementation();
@@ -1465,14 +1458,12 @@ describe('SentinelOneActionsClient class', () => {
       });
 
       // @ts-expect-error updating readonly attribute
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
-        true;
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled = true;
     });
 
     it('should throw error if feature flag is disabled', async () => {
       // @ts-expect-error updating readonly attribute
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
-        false;
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled = false;
 
       await expect(s1ActionsClient.getFileInfo('acb', '123')).rejects.toThrow(
         'File downloads are not supported for sentinel_one agent type. Feature disabled'
@@ -1532,8 +1523,7 @@ describe('SentinelOneActionsClient class', () => {
       s1DataGenerator = new SentinelOneDataGenerator('seed');
 
       // @ts-expect-error updating readonly attribute
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
-        true;
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled = true;
 
       const actionRequestsSearchResponse = s1DataGenerator.toEsSearchResponse([
         s1DataGenerator.generateActionEsHit({
@@ -1584,11 +1574,9 @@ describe('SentinelOneActionsClient class', () => {
 
     it('should throw error if feature flag is disabled', async () => {
       // @ts-expect-error updating readonly attribute
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
-        false;
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled = false;
       // @ts-expect-error updating readonly attribute
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneProcessesEnabled =
-        false;
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneProcessesEnabled = false;
 
       await expect(s1ActionsClient.getFileDownload('acb', '123')).rejects.toThrow(
         'File downloads are not supported for sentinel_one agent type. Feature disabled'
@@ -1677,8 +1665,7 @@ describe('SentinelOneActionsClient class', () => {
 
     beforeEach(() => {
       // @ts-expect-error readonly prop assignment
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneKillProcessEnabled =
-        true;
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneKillProcessEnabled = true;
 
       killProcessActionRequest = responseActionsClientMock.createKillProcessOptions({
         // @ts-expect-error TS2322 due to type being overloaded to handle kill/suspend process and specific option for S1
@@ -1688,8 +1675,7 @@ describe('SentinelOneActionsClient class', () => {
 
     it('should throw an error if feature flag is disabled', async () => {
       // @ts-expect-error readonly prop assignment
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneKillProcessEnabled =
-        false;
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneKillProcessEnabled = false;
 
       await expect(s1ActionsClient.killProcess(killProcessActionRequest)).rejects.toThrow(
         `kill-process not supported for sentinel_one agent type. Feature disabled`
@@ -1859,16 +1845,14 @@ describe('SentinelOneActionsClient class', () => {
 
     beforeEach(() => {
       // @ts-expect-error readonly prop assignment
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneProcessesEnabled =
-        true;
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneProcessesEnabled = true;
 
       processesActionRequest = responseActionsClientMock.createRunningProcessesOptions();
     });
 
     it('should error if feature flag is disabled', async () => {
       // @ts-expect-error readonly prop assignment
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneProcessesEnabled =
-        false;
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneProcessesEnabled = false;
 
       await expect(s1ActionsClient.runningProcesses(processesActionRequest)).rejects.toThrow(
         `processes not supported for sentinel_one agent type. Feature disabled`

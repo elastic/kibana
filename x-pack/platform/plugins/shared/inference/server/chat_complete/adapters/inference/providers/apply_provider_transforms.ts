@@ -30,14 +30,17 @@ const applyBedrockTransforms = (
   options: CreateOpenAIRequestOptions
 ): CreateOpenAIRequestOptions => {
   if (options.tools) {
-    options.tools = Object.entries(options.tools).reduce((tools, [toolName, toolDef]) => {
-      tools[toolName] = {
-        ...toolDef,
-        schema: toolDef.schema ? fixSchemaArrayProperties(toolDef.schema) : undefined,
-      };
+    options.tools = Object.entries(options.tools).reduce(
+      (tools, [toolName, toolDef]) => {
+        tools[toolName] = {
+          ...toolDef,
+          schema: toolDef.schema ? fixSchemaArrayProperties(toolDef.schema) : undefined,
+        };
 
-      return tools;
-    }, {} as Required<ToolOptions>['tools']);
+        return tools;
+      },
+      {} as Required<ToolOptions>['tools']
+    );
   }
 
   const hasToolUse = options.messages.some(

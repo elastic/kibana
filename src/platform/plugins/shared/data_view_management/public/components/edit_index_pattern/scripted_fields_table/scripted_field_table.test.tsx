@@ -41,7 +41,7 @@ const helpers = {
   getRouteHref: () => '#',
 };
 
-const getIndexPatternMock = (mockedFields: any = {}) => ({ ...mockedFields } as DataView);
+const getIndexPatternMock = (mockedFields: any = {}) => ({ ...mockedFields }) as DataView;
 
 describe('ScriptedFieldsTable', () => {
   let indexPattern: DataView;

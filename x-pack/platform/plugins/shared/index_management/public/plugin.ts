@@ -44,15 +44,12 @@ import { ComponentTemplateFlyout } from './application/components/component_temp
 import { DataStreamFlyout } from './application/sections/home/data_stream_list/data_stream_detail_panel/data_stream_flyout_embeddable';
 import { IndexTemplateFlyout } from './application/sections/home/template_list/template_details/index_template_flyout_embeddable';
 
-export class IndexMgmtUIPlugin
-  implements
-    Plugin<
-      IndexManagementPluginSetup,
-      IndexManagementPluginStart,
-      SetupDependencies,
-      StartDependencies
-    >
-{
+export class IndexMgmtUIPlugin implements Plugin<
+  IndexManagementPluginSetup,
+  IndexManagementPluginStart,
+  SetupDependencies,
+  StartDependencies
+> {
   private extensionsService = new ExtensionsService();
   private locator?: IndexManagementLocator;
   private kibanaVersion: SemVer;
@@ -125,9 +122,8 @@ export class IndexMgmtUIPlugin
           title: i18n.translate('xpack.idxMgmt.appTitle', { defaultMessage: 'Index Management' }),
           order: 0,
           mount: async (params) => {
-            const { mountManagementSection } = await import(
-              './application/mount_management_section'
-            );
+            const { mountManagementSection } =
+              await import('./application/mount_management_section');
             return mountManagementSection({
               coreSetup,
               usageCollection,

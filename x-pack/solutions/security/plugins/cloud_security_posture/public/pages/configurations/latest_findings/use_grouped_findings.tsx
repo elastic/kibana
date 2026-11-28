@@ -17,8 +17,7 @@ import { useKibana } from '../../../common/hooks/use_kibana';
 // Elasticsearch returns `null` when a sub-aggregation cannot be computed
 type NumberOrNull = number | null;
 
-export interface FindingsRootGroupingAggregation
-  extends RootAggregation<FindingsGroupingAggregation> {
+export interface FindingsRootGroupingAggregation extends RootAggregation<FindingsGroupingAggregation> {
   failedFindings?: {
     doc_count?: NumberOrNull;
   };

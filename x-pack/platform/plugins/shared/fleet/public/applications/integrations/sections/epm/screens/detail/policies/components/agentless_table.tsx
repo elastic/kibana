@@ -77,12 +77,15 @@ export const AgentlessPackagePoliciesTable = ({
       });
 
       setAgentsByPolicyId(
-        (agentsData?.items || []).reduce((acc, agent) => {
-          if (agent.policy_id) {
-            acc[agent.policy_id] = agent;
-          }
-          return acc;
-        }, {} as Record<string, Agent>)
+        (agentsData?.items || []).reduce(
+          (acc, agent) => {
+            if (agent.policy_id) {
+              acc[agent.policy_id] = agent;
+            }
+            return acc;
+          },
+          {} as Record<string, Agent>
+        )
       );
 
       if (error) {

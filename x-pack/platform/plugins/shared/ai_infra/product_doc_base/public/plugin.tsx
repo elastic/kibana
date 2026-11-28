@@ -20,15 +20,12 @@ interface ProductDocInstallServiceParams {
   inferenceId: string;
 }
 
-export class ProductDocBasePlugin
-  implements
-    Plugin<
-      ProductDocBasePluginSetup,
-      ProductDocBasePluginStart,
-      PluginSetupDependencies,
-      PluginStartDependencies
-    >
-{
+export class ProductDocBasePlugin implements Plugin<
+  ProductDocBasePluginSetup,
+  ProductDocBasePluginStart,
+  PluginSetupDependencies,
+  PluginStartDependencies
+> {
   logger: Logger;
 
   constructor(context: PluginInitializerContext<PublicPluginConfig>) {

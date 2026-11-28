@@ -12,5 +12,5 @@ import * as React from 'react';
 export type Annotation = [
   start: number,
   end: number,
-  annotation: (text: string) => React.ReactNode
+  annotation: (text: string) => React.ReactNode,
 ];

@@ -36,7 +36,7 @@ export type DataControlApi = DefaultControlApi &
   PublishesAsyncFilters;
 
 export interface CustomOptionsComponentProps<
-  State extends DefaultDataControlState = DefaultDataControlState
+  State extends DefaultDataControlState = DefaultDataControlState,
 > {
   initialState: Partial<State>;
   field: DataViewField;
@@ -47,7 +47,7 @@ export interface CustomOptionsComponentProps<
 
 export interface DataControlFactory<
   State extends DefaultDataControlState = DefaultDataControlState,
-  Api extends DataControlApi = DataControlApi
+  Api extends DataControlApi = DataControlApi,
 > extends ControlFactory<State, Api> {
   isFieldCompatible: (field: DataViewField) => boolean;
   CustomOptionsComponent?: React.FC<CustomOptionsComponentProps<State>>;

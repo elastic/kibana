@@ -656,9 +656,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
     });
 
-    const { saved_objects: createdObjects } = await soClient.bulkCreate<PackagePolicySOAttributes>(
-      policiesToCreate
-    );
+    const { saved_objects: createdObjects } =
+      await soClient.bulkCreate<PackagePolicySOAttributes>(policiesToCreate);
 
     // Filter out invalid SOs
     const newSos = createdObjects.filter((so) => !so.error && so.attributes);
@@ -1350,9 +1349,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
     });
 
-    const { saved_objects: updatedPolicies } = await soClient.bulkUpdate<PackagePolicySOAttributes>(
-      policiesToUpdate
-    );
+    const { saved_objects: updatedPolicies } =
+      await soClient.bulkUpdate<PackagePolicySOAttributes>(policiesToUpdate);
 
     // Bump revision of all associated agent policies (old and new)
     const associatedPolicyIds = new Set([
@@ -2894,9 +2892,9 @@ export function updatePackageInputs(
       // Ignore any inputs removed from this policy template in the new package version
       const policyTemplateStillIncludesInput = isInputOnlyPolicyTemplate(policyTemplate)
         ? policyTemplate.input === input.type
-        : policyTemplate.inputs?.some(
+        : (policyTemplate.inputs?.some(
             (policyTemplateInput) => policyTemplateInput.type === input.type
-          ) ?? false;
+          ) ?? false);
 
       return policyTemplateStillIncludesInput;
     }),

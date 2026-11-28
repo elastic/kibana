@@ -351,12 +351,10 @@ export const createLogViewStateMachine = ({
             ? logViews.getLogView(context.logViewReference)
             : throwError(() => new Error('Failed to load log view'))
         ).pipe(
-          map(
-            (logView): LogViewEvent => ({
-              type: 'LOADING_SUCCEEDED',
-              logView,
-            })
-          ),
+          map((logView): LogViewEvent => ({
+            type: 'LOADING_SUCCEEDED',
+            logView,
+          })),
           catchError((error) =>
             of<LogViewEvent>({
               type: 'LOADING_FAILED',
@@ -375,12 +373,10 @@ export const createLogViewStateMachine = ({
                   )
               )
         ).pipe(
-          map(
-            (logView): LogViewEvent => ({
-              type: 'UPDATING_SUCCEEDED',
-              logView,
-            })
-          ),
+          map((logView): LogViewEvent => ({
+            type: 'UPDATING_SUCCEEDED',
+            logView,
+          })),
           catchError((error) =>
             of<LogViewEvent>({
               type: 'UPDATING_FAILED',
@@ -399,12 +395,10 @@ export const createLogViewStateMachine = ({
               )
             : throwError(() => new Error('Failed to persist inline Log View.'))
         ).pipe(
-          map(
-            (logView): LogViewEvent => ({
-              type: 'PERSISTING_INLINE_LOG_VIEW_SUCCEEDED',
-              logView,
-            })
-          ),
+          map((logView): LogViewEvent => ({
+            type: 'PERSISTING_INLINE_LOG_VIEW_SUCCEEDED',
+            logView,
+          })),
           catchError((error) =>
             of<LogViewEvent>({
               type: 'PERSISTING_INLINE_LOG_VIEW_FAILED',
@@ -420,12 +414,10 @@ export const createLogViewStateMachine = ({
                 () => new Error('Failed to resolve log view: No log view found in context.')
               )
         ).pipe(
-          map(
-            (resolvedLogView): LogViewEvent => ({
-              type: 'RESOLUTION_SUCCEEDED',
-              resolvedLogView,
-            })
-          ),
+          map((resolvedLogView): LogViewEvent => ({
+            type: 'RESOLUTION_SUCCEEDED',
+            resolvedLogView,
+          })),
           catchError((error) =>
             of<LogViewEvent>({
               type: 'RESOLUTION_FAILED',
@@ -441,12 +433,10 @@ export const createLogViewStateMachine = ({
                 () => new Error('Failed to resolve log view: No log view found in context.')
               )
         ).pipe(
-          map(
-            (status): LogViewEvent => ({
-              type: 'CHECKING_STATUS_SUCCEEDED',
-              status,
-            })
-          ),
+          map((status): LogViewEvent => ({
+            type: 'CHECKING_STATUS_SUCCEEDED',
+            status,
+          })),
           catchError((error) =>
             of<LogViewEvent>({
               type: 'CHECKING_STATUS_FAILED',

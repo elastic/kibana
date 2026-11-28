@@ -22,7 +22,8 @@ import { DefaultEmbeddableApi, EmbeddableApiRegistration } from './types';
 export const EmbeddableRenderer = <
   SerializedState extends object = object,
   Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>,
-  ParentApi extends HasSerializedChildState<SerializedState> = HasSerializedChildState<SerializedState>
+  ParentApi extends HasSerializedChildState<SerializedState> =
+    HasSerializedChildState<SerializedState>,
 >({
   type,
   maybeId,

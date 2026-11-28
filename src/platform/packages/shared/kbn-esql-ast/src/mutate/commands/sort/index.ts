@@ -53,10 +53,10 @@ const createSortExpression = (
     typeof template === 'string'
       ? [template]
       : Array.isArray(template)
-      ? template
-      : typeof template.parts === 'string'
-      ? [template.parts]
-      : template.parts;
+        ? template
+        : typeof template.parts === 'string'
+          ? [template.parts]
+          : template.parts;
   const identifiers = parts.map((part) => Builder.identifier({ name: part }));
   const column = Builder.expression.column({
     args: identifiers,

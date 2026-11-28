@@ -9,8 +9,8 @@ import type { State } from '../../state';
 export const isDataStreamStepReadyToComplete = ({ integrationSettings }: State) =>
   Boolean(
     integrationSettings?.name &&
-      integrationSettings?.dataStreamTitle &&
-      integrationSettings?.dataStreamDescription &&
-      integrationSettings?.dataStreamName &&
-      integrationSettings?.logSamples
+    integrationSettings?.dataStreamTitle &&
+    integrationSettings?.dataStreamDescription &&
+    integrationSettings?.dataStreamName &&
+    integrationSettings?.logSamples
   );

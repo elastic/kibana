@@ -57,8 +57,8 @@ export const getTestCases = (spaceId?: string): { [key: string]: ExportTestCase 
     ...(spaceId === SPACE_1_ID
       ? CASES.SINGLE_NAMESPACE_SPACE_1
       : spaceId === SPACE_2_ID
-      ? CASES.SINGLE_NAMESPACE_SPACE_2
-      : CASES.SINGLE_NAMESPACE_DEFAULT_SPACE),
+        ? CASES.SINGLE_NAMESPACE_SPACE_2
+        : CASES.SINGLE_NAMESPACE_DEFAULT_SPACE),
   },
   singleNamespaceType: {
     // this test explicitly ensures that single-namespace objects from other spaces are not returned
@@ -68,16 +68,16 @@ export const getTestCases = (spaceId?: string): { [key: string]: ExportTestCase 
       spaceId === SPACE_1_ID
         ? CASES.SINGLE_NAMESPACE_SPACE_1
         : spaceId === SPACE_2_ID
-        ? CASES.SINGLE_NAMESPACE_SPACE_2
-        : CASES.SINGLE_NAMESPACE_DEFAULT_SPACE,
+          ? CASES.SINGLE_NAMESPACE_SPACE_2
+          : CASES.SINGLE_NAMESPACE_DEFAULT_SPACE,
   },
   multiNamespaceObject: {
     title: 'multi-namespace object',
     ...(spaceId === SPACE_1_ID
       ? CASES.MULTI_NAMESPACE_ONLY_SPACE_1
       : spaceId === SPACE_2_ID
-      ? CASES.MULTI_NAMESPACE_ONLY_SPACE_2
-      : CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1),
+        ? CASES.MULTI_NAMESPACE_ONLY_SPACE_2
+        : CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1),
   },
   multiNamespaceType: {
     title: 'multi-namespace type',
@@ -87,8 +87,8 @@ export const getTestCases = (spaceId?: string): { [key: string]: ExportTestCase 
       ...(spaceId === SPACE_1_ID
         ? [CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1, CASES.MULTI_NAMESPACE_ONLY_SPACE_1]
         : spaceId === SPACE_2_ID
-        ? [CASES.MULTI_NAMESPACE_ONLY_SPACE_2]
-        : [CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1]),
+          ? [CASES.MULTI_NAMESPACE_ONLY_SPACE_2]
+          : [CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1]),
       ...[
         CASES.CONFLICT_1_OBJ,
         CASES.CONFLICT_2A_OBJ,
@@ -116,8 +116,8 @@ export const getTestCases = (spaceId?: string): { [key: string]: ExportTestCase 
       ...(spaceId === SPACE_1_ID
         ? [CASES.MULTI_NAMESPACE_ISOLATED_ONLY_SPACE_1]
         : spaceId === SPACE_2_ID
-        ? []
-        : [CASES.MULTI_NAMESPACE_ISOLATED_ONLY_DEFAULT_SPACE]
+          ? []
+          : [CASES.MULTI_NAMESPACE_ISOLATED_ONLY_DEFAULT_SPACE]
       ).flat(),
     ],
   },

@@ -71,7 +71,7 @@ export type AssistantMessage = MessageBase<MessageRole.Assistant> & {
 export type ToolMessage<
   TName extends string = string,
   TToolResponse extends Record<string, any> | unknown = Record<string, any> | unknown,
-  TToolData extends Record<string, any> | undefined = Record<string, any> | undefined
+  TToolData extends Record<string, any> | undefined = Record<string, any> | undefined,
 > = MessageBase<MessageRole.Tool> & {
   /**
    * The name of the tool called. Used for refining the type of the response.

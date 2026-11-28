@@ -61,8 +61,7 @@ export function isSwimLaneEmbeddableContext(arg: unknown): arg is AnomalySwimLan
  * Persisted state for the Anomaly Swim Lane Embeddable.
  */
 export interface AnomalySwimLaneEmbeddableState
-  extends SerializedTitles,
-    AnomalySwimlaneEmbeddableCustomInput {}
+  extends SerializedTitles, AnomalySwimlaneEmbeddableCustomInput {}
 
 /**
  * The subset of the Anomaly Swim Lane Embeddable state that is actually used by the swimlane embeddable.

@@ -547,8 +547,8 @@ export const isApiESQLVariablesCompatible = (
 ): api is ESQLVariablesCompatibleDashboardApi => {
   return Boolean(
     api &&
-      (api as ESQLVariablesCompatibleDashboardApi)?.esqlVariables$ !== undefined &&
-      (api as ESQLVariablesCompatibleDashboardApi)?.controlGroupApi$ !== undefined &&
-      (api as ESQLVariablesCompatibleDashboardApi)?.children$ !== undefined
+    (api as ESQLVariablesCompatibleDashboardApi)?.esqlVariables$ !== undefined &&
+    (api as ESQLVariablesCompatibleDashboardApi)?.controlGroupApi$ !== undefined &&
+    (api as ESQLVariablesCompatibleDashboardApi)?.children$ !== undefined
   );
 };

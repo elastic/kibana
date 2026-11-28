@@ -14,7 +14,7 @@ import { SerializedPanelState } from './has_serializable_state';
  */
 export interface HasLibraryTransforms<
   ByReferenceSerializedState extends object = object,
-  ByValueSerializedState extends object = object
+  ByValueSerializedState extends object = object,
 > {
   checkForDuplicateTitle: (
     newTitle: string,
@@ -65,13 +65,12 @@ export const apiHasLibraryTransforms = <StateT extends object = object>(
 ): unknownApi is HasLibraryTransforms<StateT> => {
   return Boolean(
     unknownApi &&
-      typeof (unknownApi as HasLibraryTransforms<StateT>).canLinkToLibrary === 'function' &&
-      typeof (unknownApi as HasLibraryTransforms<StateT>).canUnlinkFromLibrary === 'function' &&
-      typeof (unknownApi as HasLibraryTransforms<StateT>).saveToLibrary === 'function' &&
-      typeof (unknownApi as HasLibraryTransforms<StateT>).getSerializedStateByReference ===
-        'function' &&
-      typeof (unknownApi as HasLibraryTransforms<StateT>).getSerializedStateByValue ===
-        'function' &&
-      typeof (unknownApi as HasLibraryTransforms<StateT>).checkForDuplicateTitle === 'function'
+    typeof (unknownApi as HasLibraryTransforms<StateT>).canLinkToLibrary === 'function' &&
+    typeof (unknownApi as HasLibraryTransforms<StateT>).canUnlinkFromLibrary === 'function' &&
+    typeof (unknownApi as HasLibraryTransforms<StateT>).saveToLibrary === 'function' &&
+    typeof (unknownApi as HasLibraryTransforms<StateT>).getSerializedStateByReference ===
+      'function' &&
+    typeof (unknownApi as HasLibraryTransforms<StateT>).getSerializedStateByValue === 'function' &&
+    typeof (unknownApi as HasLibraryTransforms<StateT>).checkForDuplicateTitle === 'function'
   );
 };

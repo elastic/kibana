@@ -21,8 +21,10 @@ export interface CurationSuggestion {
 }
 
 // A curation suggestion with linked ids hydrated with actual values
-export interface HydratedCurationSuggestion
-  extends Omit<CurationSuggestion, 'promoted' | 'curation_id'> {
+export interface HydratedCurationSuggestion extends Omit<
+  CurationSuggestion,
+  'promoted' | 'curation_id'
+> {
   organic: Curation['organic'];
   promoted: Curation['promoted'];
   curation?: Curation;

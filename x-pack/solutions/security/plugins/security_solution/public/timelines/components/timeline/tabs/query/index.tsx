@@ -118,7 +118,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     [experimentalSelectedPatterns, newDataViewPickerEnabled, oldSelectedPatterns]
   );
   const dataViewId = useMemo(
-    () => (newDataViewPickerEnabled ? experimentalDataView.id ?? '' : oldDataViewId),
+    () => (newDataViewPickerEnabled ? (experimentalDataView.id ?? '') : oldDataViewId),
     [experimentalDataView.id, newDataViewPickerEnabled, oldDataViewId]
   );
 
@@ -468,12 +468,12 @@ const makeMapStateToProps = () => {
       isEmpty(kqlQueryTimeline?.expression ?? '') &&
       timelineType === 'template'
         ? ' '
-        : kqlQueryTimeline?.expression ?? '';
+        : (kqlQueryTimeline?.expression ?? '');
 
     const kqlQueryLanguage =
       isEmpty(dataProviders) && timelineType === 'template'
         ? 'kuery'
-        : kqlQueryTimeline?.kind ?? 'kuery';
+        : (kqlQueryTimeline?.kind ?? 'kuery');
 
     return {
       activeTab,

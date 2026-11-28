@@ -15,7 +15,7 @@ const getModelVersionAddedFieldsForType = (typeDef: SavedObjectsType): string[] 
   const versions =
     typeof typeDef.modelVersions === 'function'
       ? typeDef.modelVersions()
-      : typeDef.modelVersions ?? {};
+      : (typeDef.modelVersions ?? {});
   Object.values(versions).forEach((version) => {
     const addedFields = getVersionAddedFields(version);
     addedFields.forEach((field) => addedFieldSet.add(field));

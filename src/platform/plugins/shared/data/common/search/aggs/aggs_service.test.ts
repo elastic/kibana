@@ -49,7 +49,7 @@ describe('Aggs service', () => {
       const aSetup = a.setup(setupDeps);
       aSetup.types.registerBucket(
         'foo',
-        () => ({ name: 'foo', type: 'buckets' } as BucketAggType<any>)
+        () => ({ name: 'foo', type: 'buckets' }) as BucketAggType<any>
       );
       const aStart = a.start(startDeps);
       expect(aStart.types.getAll().buckets.map((t) => t.name)).toMatchInlineSnapshot(`
@@ -175,11 +175,11 @@ describe('Aggs service', () => {
       const setup = service.setup(setupDeps);
       setup.types.registerBucket(
         'foo',
-        () => ({ name: 'foo', type: 'buckets' } as BucketAggType<any>)
+        () => ({ name: 'foo', type: 'buckets' }) as BucketAggType<any>
       );
       setup.types.registerMetric(
         'bar',
-        () => ({ name: 'bar', type: 'metrics' } as MetricAggType<any>)
+        () => ({ name: 'bar', type: 'metrics' }) as MetricAggType<any>
       );
       const start = service.start(startDeps);
 

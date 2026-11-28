@@ -26,7 +26,7 @@ export type EndpointResponderExtensionComponentProps =
 export type ActionRequestComponentProps<
   TArgs extends object = object,
   TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
+  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
 > = CommandExecutionComponentProps<
   { comment?: string } & TArgs,
   CommandResponseActionApiState<TOutputContent, TParameters>,

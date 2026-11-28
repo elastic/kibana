@@ -42,12 +42,12 @@ type ClearControlActionApi = HasType &
 const compatibilityCheck = (api: unknown | null): api is ClearControlActionApi =>
   Boolean(
     apiHasType(api) &&
-      apiHasUniqueId(api) &&
-      isClearableControl(api) &&
-      apiHasParentApi(api) &&
-      apiCanAccessViewMode(api.parentApi) &&
-      apiIsOfType(api.parentApi, CONTROL_GROUP_TYPE) &&
-      apiIsPresentationContainer(api.parentApi)
+    apiHasUniqueId(api) &&
+    isClearableControl(api) &&
+    apiHasParentApi(api) &&
+    apiCanAccessViewMode(api.parentApi) &&
+    apiIsOfType(api.parentApi, CONTROL_GROUP_TYPE) &&
+    apiIsPresentationContainer(api.parentApi)
   );
 
 export class ClearControlAction

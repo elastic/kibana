@@ -25,6 +25,6 @@ export const RuleFieldName = ({ fieldName, label }: RuleFieldNameProps) => {
       <ModifiedFieldBadge fieldName={fieldName} />
     </EuiFlexGroup>
   ) : (
-    label ?? humanizedFieldName
+    (label ?? humanizedFieldName)
   );
 };

@@ -65,8 +65,8 @@ const MessageColumnContent = euiStyled(LogEntryColumnContent)<MessageColumnConte
     props.wrapMode === 'long'
       ? longWrappedContentStyle
       : props.wrapMode === 'pre-wrapped'
-      ? preWrappedContentStyle
-      : unwrappedContentStyle};
+        ? preWrappedContentStyle
+        : unwrappedContentStyle};
 `;
 
 const formatMessageSegments = (

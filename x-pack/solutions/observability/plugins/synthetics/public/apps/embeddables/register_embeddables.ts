@@ -17,9 +17,8 @@ export const registerSyntheticsEmbeddables = (
   pluginsSetup.embeddable.registerReactEmbeddableFactory(
     SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
     async () => {
-      const { getStatsOverviewEmbeddableFactory } = await import(
-        './stats_overview/stats_overview_embeddable_factory'
-      );
+      const { getStatsOverviewEmbeddableFactory } =
+        await import('./stats_overview/stats_overview_embeddable_factory');
       return getStatsOverviewEmbeddableFactory(core.getStartServices);
     }
   );
@@ -27,9 +26,8 @@ export const registerSyntheticsEmbeddables = (
   pluginsSetup.embeddable.registerReactEmbeddableFactory(
     SYNTHETICS_MONITORS_EMBEDDABLE,
     async () => {
-      const { getMonitorsEmbeddableFactory } = await import(
-        './monitors_overview/monitors_embeddable_factory'
-      );
+      const { getMonitorsEmbeddableFactory } =
+        await import('./monitors_overview/monitors_embeddable_factory');
       return getMonitorsEmbeddableFactory(core.getStartServices);
     }
   );

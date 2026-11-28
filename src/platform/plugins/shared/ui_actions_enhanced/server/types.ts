@@ -13,13 +13,15 @@ import { SerializedAction, SerializedEvent, DynamicActionsState } from '../commo
 
 export type ActionFactoryRegistry = Map<string, ActionFactory>;
 
-export interface ActionFactoryDefinition<P extends SerializedEvent = SerializedEvent>
-  extends PersistableStateDefinition<P> {
+export interface ActionFactoryDefinition<
+  P extends SerializedEvent = SerializedEvent,
+> extends PersistableStateDefinition<P> {
   id: string;
 }
 
-export interface ActionFactory<P extends SerializedEvent = SerializedEvent>
-  extends PersistableState<P> {
+export interface ActionFactory<
+  P extends SerializedEvent = SerializedEvent,
+> extends PersistableState<P> {
   id: string;
 }
 

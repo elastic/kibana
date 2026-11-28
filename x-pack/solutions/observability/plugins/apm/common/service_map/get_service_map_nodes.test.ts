@@ -24,7 +24,7 @@ const createService = (service: { serviceName: string; agentName: string }) =>
   ({
     ...service,
     serviceEnvironment: 'production',
-  } as ServiceMapService);
+  }) as ServiceMapService;
 
 /**
  * Helper function to generate an external connection node.
@@ -39,7 +39,7 @@ const createExitSpan = (exitSpan: {
   ({
     ...exitSpan,
     serviceEnvironment: 'production',
-  } as ServiceMapExitSpan);
+  }) as ServiceMapExitSpan;
 
 const nodejsService = createService({ serviceName: 'opbeans-node', agentName: 'nodejs' });
 const javaService = createService({ serviceName: 'opbeans-java', agentName: 'java' });

@@ -19,7 +19,10 @@ import { IllegalArgumentError } from '../errors';
 import { SLODefinition } from '../domain/models';
 
 export class BulkPurgeRollupData {
-  constructor(private esClient: ElasticsearchClient, private repository: SLORepository) {}
+  constructor(
+    private esClient: ElasticsearchClient,
+    private repository: SLORepository
+  ) {}
 
   public async execute(params: BulkPurgeRollupParams): Promise<BulkPurgeRollupResponse> {
     const lookback = this.getTimestamp(params.purgePolicy);

@@ -67,10 +67,10 @@ export interface PresentationContainer<ApiType extends unknown = unknown> extend
 export const apiIsPresentationContainer = (api: unknown | null): api is PresentationContainer => {
   return Boolean(
     apiCanAddNewPanel(api) &&
-      typeof (api as PresentationContainer)?.removePanel === 'function' &&
-      typeof (api as PresentationContainer)?.replacePanel === 'function' &&
-      typeof (api as PresentationContainer)?.addNewPanel === 'function' &&
-      apiPublishesChildren(api)
+    typeof (api as PresentationContainer)?.removePanel === 'function' &&
+    typeof (api as PresentationContainer)?.replacePanel === 'function' &&
+    typeof (api as PresentationContainer)?.addNewPanel === 'function' &&
+    apiPublishesChildren(api)
   );
 };
 

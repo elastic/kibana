@@ -210,8 +210,8 @@ function calculateMetricAverages(
     averageMemoryUsagePercentValues.length === 0
       ? null
       : memoryUnit === '%'
-      ? scaleUpPercentage(averageOfValues(averageMemoryUsagePercentValues))
-      : Math.floor(averageOfValues(averageMemoryUsagePercentValues));
+        ? scaleUpPercentage(averageOfValues(averageMemoryUsagePercentValues))
+        : Math.floor(averageOfValues(averageMemoryUsagePercentValues));
 
   return { averageCpuUsagePercent, averageMemoryUsagePercent, memoryUnit };
 }

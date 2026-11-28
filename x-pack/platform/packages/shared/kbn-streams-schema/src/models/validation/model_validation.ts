@@ -36,7 +36,7 @@ export function joinValidation(left: ModelValidation, rights: ModelValidation[])
         rights.map((right) => right[key].right) as [
           ModelSchema[TKey],
           ModelSchema[TKey],
-          ...Array<ModelSchema[TKey]>
+          ...Array<ModelSchema[TKey]>,
         ]
       )
     );

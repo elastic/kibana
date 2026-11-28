@@ -39,11 +39,10 @@ export interface UseGetGroupSelectorArgs {
   title?: string;
 }
 
-interface UseGetGroupSelectorStateless
-  extends Pick<
-    UseGetGroupSelectorArgs,
-    'allowedFieldTypes' | 'defaultGroupingOptions' | 'groupingId' | 'fields' | 'maxGroupingLevels'
-  > {
+interface UseGetGroupSelectorStateless extends Pick<
+  UseGetGroupSelectorArgs,
+  'allowedFieldTypes' | 'defaultGroupingOptions' | 'groupingId' | 'fields' | 'maxGroupingLevels'
+> {
   onGroupChange: (selectedGroups: string[]) => void;
 }
 

@@ -178,12 +178,11 @@ const tableSettings: {
           'xpack.enterpriseSearch.analytics.collections.collectionsView.exploreTable.page',
           { defaultMessage: 'Page' }
         ),
-        render: (euiTheme: UseEuiTheme['euiTheme']) => (value: string) =>
-          (
-            <EuiText size="s" color={euiTheme.colors.primaryText}>
-              <p>{value}</p>
-            </EuiText>
-          ),
+        render: (euiTheme: UseEuiTheme['euiTheme']) => (value: string) => (
+          <EuiText size="s" color={euiTheme.colors.primaryText}>
+            <p>{value}</p>
+          </EuiText>
+        ),
         truncateText: true,
       },
       {
@@ -214,12 +213,11 @@ const tableSettings: {
           'xpack.enterpriseSearch.analytics.collections.collectionsView.exploreTable.page',
           { defaultMessage: 'Page' }
         ),
-        render: (euiTheme: UseEuiTheme['euiTheme']) => (value: string) =>
-          (
-            <EuiText size="s" color={euiTheme.colors.primaryText}>
-              <p>{value}</p>
-            </EuiText>
-          ),
+        render: (euiTheme: UseEuiTheme['euiTheme']) => (value: string) => (
+          <EuiText size="s" color={euiTheme.colors.primaryText}>
+            <p>{value}</p>
+          </EuiText>
+        ),
         truncateText: true,
       },
       {
@@ -250,17 +248,16 @@ const tableSettings: {
           'xpack.enterpriseSearch.analytics.collections.collectionsView.exploreTable.location',
           { defaultMessage: 'Location' }
         ),
-        render: (euiTheme: UseEuiTheme['euiTheme']) => (value: string, data: LocationsTable) =>
-          (
-            <EuiFlexGroup gutterSize="m" alignItems="center">
-              <EuiText>
-                <h3>{getFlag(data.countryISOCode)}</h3>
-              </EuiText>
-              <EuiText size="s" color={euiTheme.colors.primaryText}>
-                <p>{value}</p>
-              </EuiText>
-            </EuiFlexGroup>
-          ),
+        render: (euiTheme: UseEuiTheme['euiTheme']) => (value: string, data: LocationsTable) => (
+          <EuiFlexGroup gutterSize="m" alignItems="center">
+            <EuiText>
+              <h3>{getFlag(data.countryISOCode)}</h3>
+            </EuiText>
+            <EuiText size="s" color={euiTheme.colors.primaryText}>
+              <p>{value}</p>
+            </EuiText>
+          </EuiFlexGroup>
+        ),
         truncateText: true,
       },
       {

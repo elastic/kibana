@@ -32,9 +32,12 @@ import { registerCasesPersistableState } from './register_cases';
 import type { ConfigSchema } from './config_schema';
 import { setupCapabilities } from './lib/capabilities';
 
-export class AiopsPlugin
-  implements Plugin<AiopsPluginSetup, AiopsPluginStart, AiopsPluginSetupDeps, AiopsPluginStartDeps>
-{
+export class AiopsPlugin implements Plugin<
+  AiopsPluginSetup,
+  AiopsPluginStart,
+  AiopsPluginSetupDeps,
+  AiopsPluginStartDeps
+> {
   private readonly logger: Logger;
   private licenseSubscription: Subscription | null = null;
   private usageCounter?: UsageCounter;

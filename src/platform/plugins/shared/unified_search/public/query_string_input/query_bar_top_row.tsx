@@ -774,9 +774,9 @@ export const QueryBarTopRow = React.memo(
               responsive={false}
               gutterSize="s"
               css={css`
-                padding: ${isQueryLangSelected && !props.disableExternalPadding
-                  ? euiTheme.size.s
-                  : 0};
+                padding: ${
+                  isQueryLangSelected && !props.disableExternalPadding ? euiTheme.size.s : 0
+                };
               `}
               justifyContent={shouldShowDatePickerAsBadge() ? 'flexStart' : 'flexEnd'}
               wrap

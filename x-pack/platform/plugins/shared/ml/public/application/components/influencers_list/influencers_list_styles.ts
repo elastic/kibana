@@ -52,10 +52,10 @@ export const useInfluencersListStyles = () => {
           severity === 'critical'
             ? ML_SEVERITY_COLORS.CRITICAL
             : severity === 'major'
-            ? ML_SEVERITY_COLORS.MAJOR
-            : severity === 'minor'
-            ? ML_SEVERITY_COLORS.MINOR
-            : ML_SEVERITY_COLORS.WARNING,
+              ? ML_SEVERITY_COLORS.MAJOR
+              : severity === 'minor'
+                ? ML_SEVERITY_COLORS.MINOR
+                : ML_SEVERITY_COLORS.WARNING,
       }),
     scoreLabel: (severity: string) =>
       css({
@@ -69,10 +69,10 @@ export const useInfluencersListStyles = () => {
           severity === 'critical'
             ? ML_SEVERITY_COLORS.CRITICAL
             : severity === 'major'
-            ? ML_SEVERITY_COLORS.MAJOR
-            : severity === 'minor'
-            ? ML_SEVERITY_COLORS.MINOR
-            : ML_SEVERITY_COLORS.WARNING,
+              ? ML_SEVERITY_COLORS.MAJOR
+              : severity === 'minor'
+                ? ML_SEVERITY_COLORS.MINOR
+                : ML_SEVERITY_COLORS.WARNING,
       }),
     totalScoreLabel: css({
       width: euiTheme.euiSizeXL,

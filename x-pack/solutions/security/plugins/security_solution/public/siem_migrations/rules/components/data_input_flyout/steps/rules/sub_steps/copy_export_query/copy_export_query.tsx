@@ -40,7 +40,7 @@ export const CopyExportQuery = React.memo<CopyExportQueryProps>(({ onCopied }) =
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem>
-        {/* The click event is also dispatched when using the keyboard actions (space or enter) for "copy" button. 
+        {/* The click event is also dispatched when using the keyboard actions (space or enter) for "copy" button.
         No need to use keyboard specific events, disabling the a11y lint rule:*/}
         {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
         <div onClick={onClick}>

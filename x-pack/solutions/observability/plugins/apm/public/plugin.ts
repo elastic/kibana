@@ -263,9 +263,8 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     );
 
     const getApmDataHelper = async () => {
-      const { fetchObservabilityOverviewPageData, getHasData } = await import(
-        './services/rest/apm_observability_overview_fetchers'
-      );
+      const { fetchObservabilityOverviewPageData, getHasData } =
+        await import('./services/rest/apm_observability_overview_fetchers');
       const { hasFleetApmIntegrations } = await import('./tutorial/tutorial_apm_fleet_check');
 
       const { createCallApmApi } = await import('./services/rest/create_call_apm_api');

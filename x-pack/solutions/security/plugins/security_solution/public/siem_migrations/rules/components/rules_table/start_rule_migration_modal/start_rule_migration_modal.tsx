@@ -65,9 +65,8 @@ export const StartRuleMigrationModal: FC<StartRuleMigrationModalProps> = React.m
       connectorId || siemMigrations.rules.connectorIdStorage.get() || aiConnectors[0]?.id
     );
 
-    const [enablePrebuiltRulesMatching, setEnablePrebuiltRuleMatching] = useState<boolean>(
-      !skipPrebuiltRulesMatching
-    );
+    const [enablePrebuiltRulesMatching, setEnablePrebuiltRuleMatching] =
+      useState<boolean>(!skipPrebuiltRulesMatching);
 
     const modalTitleId = useGeneratedHtmlId();
 

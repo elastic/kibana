@@ -107,8 +107,8 @@ export function CellActionsPopover({
             {typeof renderValue === 'function'
               ? renderValue(value)
               : rawValue != null && typeof rawValue !== 'object'
-              ? (rawValue as React.ReactNode)
-              : value}
+                ? (rawValue as React.ReactNode)
+                : value}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -168,11 +168,10 @@ export function CellActionsPopover({
   );
 }
 
-export interface FieldBadgeWithActionsProps
-  extends Pick<
-    CellActionsPopoverProps,
-    'onFilter' | 'property' | 'value' | 'rawValue' | 'renderValue'
-  > {
+export interface FieldBadgeWithActionsProps extends Pick<
+  CellActionsPopoverProps,
+  'onFilter' | 'property' | 'value' | 'rawValue' | 'renderValue'
+> {
   icon?: EuiBadgeProps['iconType'];
   color?: string;
   truncateTitle?: boolean;

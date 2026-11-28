@@ -16,8 +16,10 @@ import type { InternalUserProfileServiceStart } from '@kbn/core-user-profile-bro
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
 
 /** @internal */
-export interface InternalCoreStart
-  extends Omit<CoreStart, 'application' | 'plugins' | 'http' | 'security' | 'userProfile'> {
+export interface InternalCoreStart extends Omit<
+  CoreStart,
+  'application' | 'plugins' | 'http' | 'security' | 'userProfile'
+> {
   application: InternalApplicationStart;
   featureFlags: FeatureFlagsStart;
   injectedMetadata: InternalInjectedMetadataStart;

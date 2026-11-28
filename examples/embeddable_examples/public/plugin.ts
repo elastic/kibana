@@ -54,32 +54,28 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
     const startServicesPromise = core.getStartServices();
 
     embeddable.registerReactEmbeddableFactory(FIELD_LIST_ID, async () => {
-      const { getFieldListFactory } = await import(
-        './react_embeddables/field_list/field_list_embeddable'
-      );
+      const { getFieldListFactory } =
+        await import('./react_embeddables/field_list/field_list_embeddable');
       const [coreStart, deps] = await startServicesPromise;
       return getFieldListFactory(coreStart, deps);
     });
 
     embeddable.registerReactEmbeddableFactory(EUI_MARKDOWN_ID, async () => {
-      const { markdownEmbeddableFactory } = await import(
-        './react_embeddables/eui_markdown/eui_markdown_react_embeddable'
-      );
+      const { markdownEmbeddableFactory } =
+        await import('./react_embeddables/eui_markdown/eui_markdown_react_embeddable');
       return markdownEmbeddableFactory;
     });
 
     embeddable.registerReactEmbeddableFactory(DATA_TABLE_ID, async () => {
-      const { getDataTableFactory } = await import(
-        './react_embeddables/data_table/data_table_react_embeddable'
-      );
+      const { getDataTableFactory } =
+        await import('./react_embeddables/data_table/data_table_react_embeddable');
       const [coreStart, deps] = await startServicesPromise;
       return getDataTableFactory(coreStart, deps);
     });
 
     embeddable.registerReactEmbeddableFactory(SAVED_BOOK_ID, async () => {
-      const { getSavedBookEmbeddableFactory } = await import(
-        './react_embeddables/saved_book/saved_book_react_embeddable'
-      );
+      const { getSavedBookEmbeddableFactory } =
+        await import('./react_embeddables/saved_book/saved_book_react_embeddable');
       const [coreStart] = await startServicesPromise;
       return getSavedBookEmbeddableFactory(coreStart);
     });

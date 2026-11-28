@@ -336,8 +336,8 @@ export const ProcessorConfiguration: FC<Props> = memo(
                         {editFieldMapping
                           ? CANCEL_EDIT_MESSAGE
                           : fieldMap !== undefined
-                          ? EDIT_MESSAGE
-                          : CREATE_FIELD_MAPPING_MESSAGE}
+                            ? EDIT_MESSAGE
+                            : CREATE_FIELD_MAPPING_MESSAGE}
                       </EuiButtonEmpty>
                     </EuiFlexItem>
                     {editFieldMapping ? (

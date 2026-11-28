@@ -123,9 +123,8 @@ export const getChangePointChartEmbeddableFactory = (
         isEditingEnabled: () => true,
         onEdit: async () => {
           try {
-            const { resolveEmbeddableChangePointUserInput } = await import(
-              './resolve_change_point_config_input'
-            );
+            const { resolveEmbeddableChangePointUserInput } =
+              await import('./resolve_change_point_config_input');
 
             const result = await resolveEmbeddableChangePointUserInput(
               coreStart,

@@ -33,7 +33,7 @@ export function getColorSeriesAccessorFn(
     if (splitValue === undefined) return null;
 
     const rawValue =
-      typeof splitValue === 'string' ? rawValueMap.get(splitValue) ?? splitValue : splitValue;
+      typeof splitValue === 'string' ? (rawValueMap.get(splitValue) ?? splitValue) : splitValue;
 
     return getColor(rawValue);
   };

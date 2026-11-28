@@ -32,15 +32,12 @@ const CspRouter = (props: CspRouterProps) => (
   </Suspense>
 );
 
-export class CspPlugin
-  implements
-    Plugin<
-      CspClientPluginSetup,
-      CspClientPluginStart,
-      CspClientPluginSetupDeps,
-      CspClientPluginStartDeps
-    >
-{
+export class CspPlugin implements Plugin<
+  CspClientPluginSetup,
+  CspClientPluginStart,
+  CspClientPluginSetupDeps,
+  CspClientPluginStartDeps
+> {
   private isCloudEnabled?: boolean;
 
   public setup(

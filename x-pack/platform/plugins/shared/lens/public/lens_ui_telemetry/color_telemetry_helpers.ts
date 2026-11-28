@@ -89,10 +89,10 @@ const getUnassignedTermsType = (
         otherColor.isLoop
           ? 'loop'
           : otherColor.color.type === 'colorCode'
-          ? 'custom'
-          : otherColor.color.paletteId === KbnPalette.Neutral
-          ? KbnPalette.Neutral
-          : 'palette'
+            ? 'custom'
+            : otherColor.color.paletteId === KbnPalette.Neutral
+              ? KbnPalette.Neutral
+              : 'palette'
       }`
     : undefined;
 };

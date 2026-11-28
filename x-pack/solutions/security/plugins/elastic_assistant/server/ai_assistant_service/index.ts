@@ -742,16 +742,14 @@ export class AIAssistantService {
   ) {
     try {
       this.options.logger.debug(`Initializing spaceId level resources for AIAssistantService`);
-      const conversationsIndexName = await this.conversationsDataStream.getInstalledSpaceName(
-        spaceId
-      );
+      const conversationsIndexName =
+        await this.conversationsDataStream.getInstalledSpaceName(spaceId);
       if (!conversationsIndexName) {
         await this.conversationsDataStream.installSpace(spaceId);
       }
 
-      const knowledgeBaseIndexName = await this.knowledgeBaseDataStream.getInstalledSpaceName(
-        spaceId
-      );
+      const knowledgeBaseIndexName =
+        await this.knowledgeBaseDataStream.getInstalledSpaceName(spaceId);
       if (!knowledgeBaseIndexName) {
         await this.knowledgeBaseDataStream.installSpace(spaceId);
       }
@@ -768,9 +766,8 @@ export class AIAssistantService {
         await this.anonymizationFieldsDataStream.installSpace(spaceId);
         await this.createDefaultAnonymizationFields(spaceId);
       }
-      const alertSummaryIndexName = await this.alertSummaryDataStream.getInstalledSpaceName(
-        spaceId
-      );
+      const alertSummaryIndexName =
+        await this.alertSummaryDataStream.getInstalledSpaceName(spaceId);
       if (!alertSummaryIndexName) {
         await this.alertSummaryDataStream.installSpace(spaceId);
       }

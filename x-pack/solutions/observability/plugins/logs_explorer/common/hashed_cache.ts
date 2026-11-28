@@ -13,9 +13,10 @@ export interface IHashedCache<KeyType, ValueType> {
   reset(): void;
 }
 
-export class HashedCache<KeyType extends hash.NotUndefined, ValueType extends {}>
-  implements IHashedCache<KeyType, ValueType>
-{
+export class HashedCache<
+  KeyType extends hash.NotUndefined,
+  ValueType extends {},
+> implements IHashedCache<KeyType, ValueType> {
   private cache: LRUCache<string, ValueType>;
 
   constructor(options: LRUCache.Options<string, ValueType, unknown> = { max: 500 }) {

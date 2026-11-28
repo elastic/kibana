@@ -26,10 +26,10 @@ type EmbeddableRuntimeState<T extends SupportedEmbeddableTypes> =
   T extends EmbeddableChangePointChartType
     ? ChangePointEmbeddableState
     : T extends EmbeddablePatternAnalysisType
-    ? PatternAnalysisEmbeddableRuntimeState
-    : T extends EmbeddableLogRateAnalysisType
-    ? LogRateAnalysisEmbeddableRuntimeState
-    : never;
+      ? PatternAnalysisEmbeddableRuntimeState
+      : T extends EmbeddableLogRateAnalysisType
+        ? LogRateAnalysisEmbeddableRuntimeState
+        : never;
 
 /**
  * Returns a callback for opening the cases modal with provided attachment state.

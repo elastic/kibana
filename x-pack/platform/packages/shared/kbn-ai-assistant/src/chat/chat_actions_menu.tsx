@@ -23,7 +23,7 @@ import { useKnowledgeBase } from '../hooks';
 
 type ConnectorLists = [
   preConfigured: ConnectorSelectableComponentProps['preConfiguredConnectors'],
-  custom: ConnectorSelectableComponentProps['customConnectors']
+  custom: ConnectorSelectableComponentProps['customConnectors'],
 ];
 export function ChatActionsMenu({
   connectors,

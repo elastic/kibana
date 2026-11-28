@@ -65,9 +65,8 @@ export class CoreKibanaRequest<
   Params = unknown,
   Query = unknown,
   Body = unknown,
-  Method extends RouteMethod = any
-> implements KibanaRequest<Params, Query, Body, Method>
-{
+  Method extends RouteMethod = any,
+> implements KibanaRequest<Params, Query, Body, Method> {
   /**
    * Factory for creating requests. Validates the request before creating an
    * instance of a KibanaRequest.

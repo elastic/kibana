@@ -17,7 +17,7 @@ export interface VersionableObject<
   UpIn = unknown,
   UpOut = unknown,
   DownIn = unknown,
-  DownOut = unknown
+  DownOut = unknown,
 > {
   schema?: Type<any>;
   down?: ObjectTransform<DownIn, DownOut>;
@@ -42,7 +42,7 @@ export interface ObjectTransforms<
   UpIn = unknown,
   UpOut = unknown,
   DownIn = unknown,
-  DownOut = unknown
+  DownOut = unknown,
 > {
   up: <I = UpIn, O = UpOut>(
     obj: I,

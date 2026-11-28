@@ -39,15 +39,12 @@ const typeToIdMap: Record<ProjectType, string> = {
   search: 'es',
 };
 
-export class ServerlessPlugin
-  implements
-    Plugin<
-      ServerlessServerSetup,
-      ServerlessServerStart,
-      ServerlessServerSetupDependencies,
-      ServerlessServerStartDependencies
-    >
-{
+export class ServerlessPlugin implements Plugin<
+  ServerlessServerSetup,
+  ServerlessServerStart,
+  ServerlessServerSetupDependencies,
+  ServerlessServerStartDependencies
+> {
   private readonly config: ServerlessConfig;
   private projectSettingsAdded: boolean = false;
 

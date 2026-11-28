@@ -51,8 +51,8 @@ export const useSelectedMonitor = ({
   const availableMonitor = isLoadedSyntheticsMonitorValid
     ? syntheticsMonitor
     : isMonitorFromListValid
-    ? monitorFromList
-    : null;
+      ? monitorFromList
+      : null;
 
   const isMonitorMissing =
     error?.body.statusCode === 404 &&

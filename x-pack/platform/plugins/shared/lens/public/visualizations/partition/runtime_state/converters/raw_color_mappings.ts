@@ -24,8 +24,10 @@ interface DeprecatedColorMappingLayer extends Omit<PieLayerState, 'colorMapping'
  *
  * @deprecated
  */
-export interface DeprecatedColorMappingPieVisualizationState
-  extends Omit<PieVisualizationState, 'layers'> {
+export interface DeprecatedColorMappingPieVisualizationState extends Omit<
+  PieVisualizationState,
+  'layers'
+> {
   layers: Array<DeprecatedColorMappingLayer | PieLayerState>;
 }
 

@@ -85,15 +85,12 @@ const getStreamingHeaders = (protocol: HttpProtocol): Record<string, string> => 
 interface Query {
   compress: boolean;
 }
-export class BfetchServerPlugin
-  implements
-    Plugin<
-      BfetchServerSetup,
-      BfetchServerStart,
-      BfetchServerSetupDependencies,
-      BfetchServerStartDependencies
-    >
-{
+export class BfetchServerPlugin implements Plugin<
+  BfetchServerSetup,
+  BfetchServerStart,
+  BfetchServerSetupDependencies,
+  BfetchServerStartDependencies
+> {
   private _analyticsService: AnalyticsServiceStart | undefined;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {}

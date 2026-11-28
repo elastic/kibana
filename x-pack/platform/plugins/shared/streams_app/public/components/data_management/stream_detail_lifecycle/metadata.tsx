@@ -166,14 +166,14 @@ export function RetentionMetadata({
             <EuiFlexItem grow={false}>
               <EuiBadge color={isDisabledLifecycle(lifecycle) ? 'default' : 'accent'}>
                 {isDslLifecycle(lifecycle)
-                  ? lifecycle.dsl.data_retention ?? '∞'
+                  ? (lifecycle.dsl.data_retention ?? '∞')
                   : isIlmLifecycle(lifecycle)
-                  ? i18n.translate('xpack.streams.streamDetailLifecycle.policyBased', {
-                      defaultMessage: 'Policy-based',
-                    })
-                  : i18n.translate('xpack.streams.streamDetailLifecycle.policyDisabled', {
-                      defaultMessage: 'Disabled',
-                    })}
+                    ? i18n.translate('xpack.streams.streamDetailLifecycle.policyBased', {
+                        defaultMessage: 'Policy-based',
+                      })
+                    : i18n.translate('xpack.streams.streamDetailLifecycle.policyDisabled', {
+                        defaultMessage: 'Disabled',
+                      })}
               </EuiBadge>
             </EuiFlexItem>
             {contextualMenu}

@@ -32,7 +32,7 @@ describe('validateNoTraversalInIdOverrides', () => {
           ],
         },
       ],
-    } as any);
+    }) as any;
 
   it('throws when input.config.id override contains a traversal sequence', () => {
     const policy = policyWithInputId('safe-input-id') as any;

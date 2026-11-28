@@ -52,17 +52,17 @@ export namespace IngestBaseStream {
   }
 
   export type Source<
-    TDefinition extends IngestBaseStream.Definition = IngestBaseStream.Definition
+    TDefinition extends IngestBaseStream.Definition = IngestBaseStream.Definition,
   > = BaseStream.Source<TDefinition>;
 
   export interface GetResponse<
-    TDefinition extends IngestBaseStream.Definition = IngestBaseStream.Definition
+    TDefinition extends IngestBaseStream.Definition = IngestBaseStream.Definition,
   > extends BaseStream.GetResponse<TDefinition> {
     privileges: IngestStreamPrivileges;
   }
 
   export type UpsertRequest<
-    TDefinition extends IngestBaseStream.Definition = IngestBaseStream.Definition
+    TDefinition extends IngestBaseStream.Definition = IngestBaseStream.Definition,
   > = BaseStream.UpsertRequest<TDefinition>;
 
   export interface Model {

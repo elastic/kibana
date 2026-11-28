@@ -22,9 +22,12 @@ interface StartDeps {
 export type ExpressionGaugePluginSetup = void;
 export type ExpressionGaugePluginStart = void;
 
-export class ExpressionGaugePlugin
-  implements Plugin<ExpressionGaugePluginSetup, ExpressionGaugePluginStart, SetupDeps, StartDeps>
-{
+export class ExpressionGaugePlugin implements Plugin<
+  ExpressionGaugePluginSetup,
+  ExpressionGaugePluginStart,
+  SetupDeps,
+  StartDeps
+> {
   public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionGaugePluginSetup {
     expressions.registerFunction(gaugeFunction);
   }

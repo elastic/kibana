@@ -843,9 +843,7 @@ describe('AlertsTable', () => {
       render(<AlertsTable {...tableProps} initialPageSize={2} />);
 
       await userEvent.click(
-        (
-          await screen.findAllByTestId('expandColumnCellOpenFlyoutButton-0')
-        )[0]
+        (await screen.findAllByTestId('expandColumnCellOpenFlyoutButton-0'))[0]
       );
       const result = await screen.findAllByTestId('alertsFlyout');
       expect(result.length).toBe(1);

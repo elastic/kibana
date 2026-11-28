@@ -35,9 +35,9 @@ export function getDensityFromStyle(style: EuiDataGridStyle) {
     style.fontSize === DATA_GRID_STYLE_COMPACT.fontSize
     ? DataGridDensity.COMPACT
     : style.cellPadding === DATA_GRID_STYLE_NORMAL.cellPadding &&
-      style.fontSize === DATA_GRID_STYLE_NORMAL.fontSize
-    ? DataGridDensity.NORMAL
-    : DataGridDensity.EXPANDED;
+        style.fontSize === DATA_GRID_STYLE_NORMAL.fontSize
+      ? DataGridDensity.NORMAL
+      : DataGridDensity.EXPANDED;
 }
 
 const DATA_GRID_DENSITY_STORAGE_KEY = 'dataGridDensity';

@@ -32,12 +32,12 @@ import { DataControlApi } from '../controls/data_controls/types';
 const compatibilityCheck = (api: unknown): api is DataControlApi => {
   return Boolean(
     apiHasType(api) &&
-      apiHasUniqueId(api) &&
-      hasEditCapabilities(api) &&
-      apiHasParentApi(api) &&
-      apiCanAccessViewMode(api.parentApi) &&
-      apiIsOfType(api.parentApi, CONTROL_GROUP_TYPE) &&
-      apiIsPresentationContainer(api.parentApi)
+    apiHasUniqueId(api) &&
+    hasEditCapabilities(api) &&
+    apiHasParentApi(api) &&
+    apiCanAccessViewMode(api.parentApi) &&
+    apiIsOfType(api.parentApi, CONTROL_GROUP_TYPE) &&
+    apiIsPresentationContainer(api.parentApi)
   );
 };
 

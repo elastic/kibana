@@ -111,10 +111,10 @@ export const FlyoutHome = (props: Props) => {
     props.hideJobType || (hostJobSummaries.length > 0 && k8sJobSummaries.length === 0)
       ? 'host'
       : hostJobSummaries.length === 0 && k8sJobSummaries.length > 0
-      ? 'pod'
-      : tab === 'anomalies'
-      ? selectedJobType
-      : undefined;
+        ? 'pod'
+        : tab === 'anomalies'
+          ? selectedJobType
+          : undefined;
 
   if (!hasInfraMLCapabilities) {
     return <SubscriptionSplashPrompt />;

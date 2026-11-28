@@ -224,9 +224,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const SPACE_ID = `test-space-${uuidv4()}`;
         const SPACE_NAME = `test-space-name ${uuidv4()}`;
         await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
-        const spaceScopedPrivateLocation = await privateLocationTestService.addTestPrivateLocation(
-          SPACE_ID
-        );
+        const spaceScopedPrivateLocation =
+          await privateLocationTestService.addTestPrivateLocation(SPACE_ID);
 
         const allMonitors = [...monitors, ...monitors];
         for (const mon of allMonitors) {

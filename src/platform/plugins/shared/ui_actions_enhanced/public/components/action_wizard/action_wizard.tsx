@@ -38,7 +38,7 @@ import './action_wizard.scss';
 import { ActionFactory, BaseActionConfig, BaseActionFactoryContext } from '../../dynamic_actions';
 
 export interface ActionWizardProps<
-  ActionFactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
+  ActionFactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext,
 > {
   /**
    * List of available action factories
@@ -223,7 +223,7 @@ const TriggerPicker: React.FC<TriggerPickerProps> = ({
 };
 
 interface SelectedActionFactoryProps<
-  ActionFactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
+  ActionFactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext,
 > {
   actionFactory: ActionFactory;
   config: BaseActionConfig;
@@ -306,7 +306,7 @@ const SelectedActionFactory: React.FC<SelectedActionFactoryProps> = ({
 };
 
 interface ActionFactorySelectorProps<
-  ActionFactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
+  ActionFactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext,
 > {
   actionFactories: ActionFactory[];
   context: ActionFactoryContext;

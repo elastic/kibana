@@ -41,8 +41,10 @@ export interface MinTimestamp {
 
 export type CloudSecuritySolutions = typeof CSPM | typeof KSPM | typeof CNVM | typeof CLOUD_DEFEND;
 
-export interface CloudSecurityMeteringCallbackInput
-  extends Omit<MeteringCallbackInput, 'cloudSetup' | 'abortController' | 'config'> {
+export interface CloudSecurityMeteringCallbackInput extends Omit<
+  MeteringCallbackInput,
+  'cloudSetup' | 'abortController' | 'config'
+> {
   projectId: string;
   cloudSecuritySolution: CloudSecuritySolutions;
   tier: Tier;

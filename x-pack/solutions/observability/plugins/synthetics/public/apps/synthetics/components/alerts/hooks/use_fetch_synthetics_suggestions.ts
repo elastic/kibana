@@ -63,7 +63,7 @@ export function useFetchSyntheticsSuggestions({
   );
 
   return {
-    suggestions: fieldName ? data?.[fieldName] ?? [] : [],
+    suggestions: fieldName ? (data?.[fieldName] ?? []) : [],
     allSuggestions: data,
     isLoading: Boolean(loading),
   };

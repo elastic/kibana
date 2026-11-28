@@ -32,10 +32,13 @@ const REGISTERED_SCOPES = [
 const createScopeMap = <T>(
   valueCreator: (scopeName: DataViewManagerScopeName) => T
 ): Record<DataViewManagerScopeName, T> => {
-  return REGISTERED_SCOPES.reduce((acc, scopeName) => {
-    acc[scopeName] = valueCreator(scopeName);
-    return acc;
-  }, {} as Record<DataViewManagerScopeName, T>);
+  return REGISTERED_SCOPES.reduce(
+    (acc, scopeName) => {
+      acc[scopeName] = valueCreator(scopeName);
+      return acc;
+    },
+    {} as Record<DataViewManagerScopeName, T>
+  );
 };
 
 /*

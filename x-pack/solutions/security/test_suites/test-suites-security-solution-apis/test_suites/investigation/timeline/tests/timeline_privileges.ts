@@ -341,7 +341,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
 
     describe('copy timeline', () => {
       let getTimeline: () => CreateTimelinesResponse = () =>
-        ({} as unknown as CreateTimelinesResponse);
+        ({}) as unknown as CreateTimelinesResponse;
       before(async () => {
         const superTest = await utils.createSuperTestWithUser(users.secTimelineAllUser);
         const { body } = await createBasicTimeline(superTest, 'test timeline');

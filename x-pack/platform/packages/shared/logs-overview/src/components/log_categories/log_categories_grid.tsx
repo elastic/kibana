@@ -63,7 +63,7 @@ export const LogCategoriesGrid: React.FC<LogCategoriesGridProps> = ({
           case 'change_time':
             return [
               (logCategory: LogCategory) =>
-                'timestamp' in logCategory.change ? logCategory.change.timestamp ?? '' : '',
+                'timestamp' in logCategory.change ? (logCategory.change.timestamp ?? '') : '',
               direction,
             ];
           default:
@@ -185,8 +185,9 @@ const logCategoriesGridLabel = i18n.translate(
   { defaultMessage: 'Log categories' }
 );
 
-interface TypedEuiDataGridColumnSortingConfig<ColumnId extends string>
-  extends EuiDataGridColumnSortingConfig {
+interface TypedEuiDataGridColumnSortingConfig<
+  ColumnId extends string,
+> extends EuiDataGridColumnSortingConfig {
   id: ColumnId;
 }
 

@@ -81,7 +81,10 @@ export class Parser {
   public readonly errors = new ESQLErrorListener();
   public readonly listener: ESQLAstBuilderListener;
 
-  constructor(public readonly src: string, public readonly options: ParseOptions = {}) {
+  constructor(
+    public readonly src: string,
+    public readonly options: ParseOptions = {}
+  ) {
     this.listener = new ESQLAstBuilderListener(src);
     const streams = (this.streams = CharStreams.fromString(src));
     const lexer = (this.lexer = new ESQLLexer(streams));

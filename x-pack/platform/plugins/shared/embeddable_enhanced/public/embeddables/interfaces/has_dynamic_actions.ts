@@ -19,9 +19,9 @@ export const apiHasDynamicActions = (api: unknown): api is Required<HasDynamicAc
   const apiMaybeHasDynamicActions = api as Required<HasDynamicActions>;
   return Boolean(
     apiMaybeHasDynamicActions &&
-      apiMaybeHasDynamicActions.enhancements &&
-      typeof apiMaybeHasDynamicActions.enhancements.dynamicActions === 'object' &&
-      typeof apiMaybeHasDynamicActions.setDynamicActions === 'function' &&
-      apiMaybeHasDynamicActions.dynamicActionsState$
+    apiMaybeHasDynamicActions.enhancements &&
+    typeof apiMaybeHasDynamicActions.enhancements.dynamicActions === 'object' &&
+    typeof apiMaybeHasDynamicActions.setDynamicActions === 'function' &&
+    apiMaybeHasDynamicActions.dynamicActionsState$
   );
 };

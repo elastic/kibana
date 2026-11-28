@@ -145,38 +145,36 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
     try {
       const modules = await recognizeIndex({ indexPatternTitle: dataViewTitle! });
 
-      return modules?.map(
-        (m): ResultLink => ({
-          id: m.id,
-          title: m.title,
-          description: m.description,
-          icon: m.logo?.icon ?? '',
-          type: 'index',
-          getUrl: async () => {
-            return await mlLocator.getUrl({
-              page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_RECOGNIZER,
-              pageState: {
-                id: m.id,
-                index: dataViewId,
-              },
-            });
-          },
-          canDisplay: async () => {
-            try {
-              const { timeFieldName } = await getDataView(dataViewId);
-              return (
-                isFullLicense() &&
-                timeFieldName !== undefined &&
-                checkPermission('canCreateJob') &&
-                mlNodesAvailable()
-              );
-            } catch (error) {
-              return false;
-            }
-          },
-          'data-test-subj': m.id,
-        })
-      );
+      return modules?.map((m): ResultLink => ({
+        id: m.id,
+        title: m.title,
+        description: m.description,
+        icon: m.logo?.icon ?? '',
+        type: 'index',
+        getUrl: async () => {
+          return await mlLocator.getUrl({
+            page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_RECOGNIZER,
+            pageState: {
+              id: m.id,
+              index: dataViewId,
+            },
+          });
+        },
+        canDisplay: async () => {
+          try {
+            const { timeFieldName } = await getDataView(dataViewId);
+            return (
+              isFullLicense() &&
+              timeFieldName !== undefined &&
+              checkPermission('canCreateJob') &&
+              mlNodesAvailable()
+            );
+          } catch (error) {
+            return false;
+          }
+        },
+        'data-test-subj': m.id,
+      }));
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Platinum, Enterprise or trial license needed');

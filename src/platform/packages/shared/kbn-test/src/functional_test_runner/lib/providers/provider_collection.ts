@@ -25,7 +25,10 @@ export class ProviderCollection {
 
   private readonly instances = new Map<ProviderFn, any>();
 
-  constructor(private readonly log: ToolingLog, private readonly providers: Providers) {}
+  constructor(
+    private readonly log: ToolingLog,
+    private readonly providers: Providers
+  ) {}
 
   public getService = (name: string) => this.getInstance('Service', name);
 

@@ -252,9 +252,8 @@ export class EnterpriseSearchPlugin implements Plugin {
         const pluginData = this.getPluginData();
 
         const { renderApp } = await import('./applications');
-        const { EnterpriseSearchOverview } = await import(
-          './applications/enterprise_search_overview'
-        );
+        const { EnterpriseSearchOverview } =
+          await import('./applications/enterprise_search_overview');
 
         return renderApp(EnterpriseSearchOverview, kibanaDeps, pluginData);
       },
@@ -278,9 +277,8 @@ export class EnterpriseSearchPlugin implements Plugin {
         const pluginData = this.getPluginData();
 
         const { renderApp } = await import('./applications');
-        const { EnterpriseSearchContent } = await import(
-          './applications/enterprise_search_content'
-        );
+        const { EnterpriseSearchContent } =
+          await import('./applications/enterprise_search_content');
 
         return renderApp(EnterpriseSearchContent, kibanaDeps, pluginData);
       },

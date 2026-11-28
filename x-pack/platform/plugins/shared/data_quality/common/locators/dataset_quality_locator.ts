@@ -10,9 +10,7 @@ import { DataQualityLocatorParams, DATA_QUALITY_LOCATOR_ID } from '@kbn/deeplink
 import { DataQualityLocatorDependencies } from './types';
 import { constructDatasetQualityLocatorPath } from './construct_dataset_quality_locator_path';
 
-export class DatasetQualityLocatorDefinition
-  implements LocatorDefinition<DataQualityLocatorParams>
-{
+export class DatasetQualityLocatorDefinition implements LocatorDefinition<DataQualityLocatorParams> {
   public readonly id = DATA_QUALITY_LOCATOR_ID;
 
   constructor(protected readonly deps: DataQualityLocatorDependencies) {}

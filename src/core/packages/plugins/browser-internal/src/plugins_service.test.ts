@@ -47,8 +47,8 @@ import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 
 export let mockPluginInitializers: Map<PluginName, MockedPluginInitializer>;
 
-mockPluginInitializerProvider.mockImplementation(
-  (pluginName) => mockPluginInitializers.get(pluginName)!
+mockPluginInitializerProvider.mockImplementation((pluginName) =>
+  mockPluginInitializers.get(pluginName)!
 );
 
 let plugins: InjectedMetadataPlugin[];

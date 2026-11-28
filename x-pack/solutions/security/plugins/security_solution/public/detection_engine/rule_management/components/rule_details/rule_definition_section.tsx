@@ -961,8 +961,9 @@ const prepareDefinitionSectionListItems = ({
   return definitionSectionListItems;
 };
 
-export interface RuleDefinitionSectionProps
-  extends React.ComponentProps<typeof EuiDescriptionList> {
+export interface RuleDefinitionSectionProps extends React.ComponentProps<
+  typeof EuiDescriptionList
+> {
   rule: Partial<RuleResponse>;
   columnWidths?: EuiDescriptionListProps['columnWidths'];
   isInteractive?: boolean;

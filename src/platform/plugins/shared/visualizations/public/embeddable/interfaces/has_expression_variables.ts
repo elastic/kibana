@@ -21,10 +21,10 @@ export const apiHasExpressionVariables = (api: unknown): api is HasExpressionVar
   const maybeHasExpressionVariables = api as HasExpressionVariables;
   return Boolean(
     api &&
-      apiIsOfType(api, 'visualization') &&
-      maybeHasExpressionVariables.getExpressionVariables &&
-      typeof maybeHasExpressionVariables.getExpressionVariables === 'function' &&
-      maybeHasExpressionVariables.getExpressionVariables$ &&
-      typeof maybeHasExpressionVariables.getExpressionVariables$ === 'function'
+    apiIsOfType(api, 'visualization') &&
+    maybeHasExpressionVariables.getExpressionVariables &&
+    typeof maybeHasExpressionVariables.getExpressionVariables === 'function' &&
+    maybeHasExpressionVariables.getExpressionVariables$ &&
+    typeof maybeHasExpressionVariables.getExpressionVariables$ === 'function'
   );
 };

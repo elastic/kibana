@@ -166,9 +166,8 @@ export const getAnomalySwimLaneEmbeddableFactory = (
           }),
         onEdit: async () => {
           try {
-            const { resolveAnomalySwimlaneUserInput } = await import(
-              './anomaly_swimlane_setup_flyout'
-            );
+            const { resolveAnomalySwimlaneUserInput } =
+              await import('./anomaly_swimlane_setup_flyout');
 
             const result = await resolveAnomalySwimlaneUserInput(
               { ...coreStartServices, ...pluginsStartServices },

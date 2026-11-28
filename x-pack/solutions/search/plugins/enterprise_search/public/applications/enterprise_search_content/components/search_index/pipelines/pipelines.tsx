@@ -77,7 +77,7 @@ export const SearchIndexPipelines: React.FC = () => {
       fetchDefaultPipeline(undefined);
       setPipelineState(
         isConnectorIndex(index) || isCrawlerIndex(index)
-          ? index.connector?.pipeline ?? defaultPipelineValues
+          ? (index.connector?.pipeline ?? defaultPipelineValues)
           : defaultPipelineValues
       );
     }

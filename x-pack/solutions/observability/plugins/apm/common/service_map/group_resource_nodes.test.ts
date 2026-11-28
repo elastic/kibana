@@ -15,7 +15,7 @@ describe('groupResourceNodes', () => {
     ({
       ...service,
       serviceEnvironment: 'production',
-    } as ServiceMapService);
+    }) as ServiceMapService;
 
   /**
    * Helper function to generate an external connection node.
@@ -30,7 +30,7 @@ describe('groupResourceNodes', () => {
     ({
       ...exitSpan,
       serviceEnvironment: 'production',
-    } as ServiceMapExitSpan);
+    }) as ServiceMapExitSpan;
 
   const nodejsService = createService({ serviceName: 'opbeans-node', agentName: 'nodejs' });
 

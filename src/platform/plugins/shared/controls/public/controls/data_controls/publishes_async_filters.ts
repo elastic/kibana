@@ -23,7 +23,7 @@ export const apiPublishesAsyncFilters = (
 ): unknownApi is PublishesAsyncFilters => {
   return Boolean(
     unknownApi &&
-      apiPublishesFilters(unknownApi) &&
-      (unknownApi as PublishesAsyncFilters)?.untilFiltersReady !== undefined
+    apiPublishesFilters(unknownApi) &&
+    (unknownApi as PublishesAsyncFilters)?.untilFiltersReady !== undefined
   );
 };

@@ -106,7 +106,7 @@ export type SentinelOneActionsClientOptions = ResponseActionsClientOptions & {
 };
 
 interface FetchScriptInfoResponse<
-  TScriptOptions extends SentinelOneScriptArgs = SentinelOneScriptArgs
+  TScriptOptions extends SentinelOneScriptArgs = SentinelOneScriptArgs,
 > {
   scriptId: string;
   scriptInfo: SentinelOneGetRemoteScriptsResponse['data'][number];
@@ -127,7 +127,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   private async handleResponseActionCreation<
     TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
     TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-    TMeta extends {} = {}
+    TMeta extends {} = {},
   >(
     reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
       TParameters,
@@ -169,7 +169,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   protected async writeActionRequestToEndpointIndex<
     TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
     TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-    TMeta extends {} = {}
+    TMeta extends {} = {},
   >(
     actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
       TParameters,
@@ -209,7 +209,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
    */
   private async sendAction<
     TResponse = unknown,
-    TParams extends Record<string, any> = Record<string, any>
+    TParams extends Record<string, any> = Record<string, any>,
   >(actionType: SUB_ACTION, actionParams: TParams): Promise<ActionTypeExecutorResult<TResponse>> {
     const executeOptions: Parameters<typeof this.connectorActionsClient.execute>[0] = {
       params: {
@@ -981,7 +981,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
    * @internal
    */
   private async fetchScriptInfo<
-    TScriptOptions extends SentinelOneScriptArgs = SentinelOneScriptArgs
+    TScriptOptions extends SentinelOneScriptArgs = SentinelOneScriptArgs,
   >(
     scriptType: Extract<ResponseActionsApiCommandNames, 'kill-process' | 'running-processes'>,
     osType: string | 'linux' | 'macos' | 'windows'
@@ -1084,7 +1084,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
   private async fetchEsResponseDocForAgentId<
     TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-    TMeta extends {} = {}
+    TMeta extends {} = {},
   >(actionId: string, agentId: string): Promise<LogsEndpointActionResponse<TOutputContent, TMeta>> {
     const agentResponse = (
       await this.fetchActionResponseEsDocs<TOutputContent, TMeta>(actionId, [agentId])

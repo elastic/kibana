@@ -156,7 +156,7 @@ export function useFetcher<TReturn, Fn extends (apiClient: ApiCallClient) => Pro
       if (!signal.aborted) {
         const errorDetails = err.response
           ? getDetailsFromErrorResponse(err)
-          : err.body?.message ?? err.message;
+          : (err.body?.message ?? err.message);
 
         if (showToastOnError) {
           notifications.toasts.danger({

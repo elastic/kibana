@@ -341,7 +341,7 @@ export function LayerPanel(props: LayerPanelProps) {
           hasLayerSettings: Boolean(
             (Object.values(visualizationLayerSettings).some(Boolean) &&
               activeVisualization.LayerSettingsComponent) ||
-              layerDatasource?.LayerSettingsComponent
+            layerDatasource?.LayerSettingsComponent
           ),
           openLayerSettings: () => setPanelSettingsOpen(true),
           onCloneLayer,

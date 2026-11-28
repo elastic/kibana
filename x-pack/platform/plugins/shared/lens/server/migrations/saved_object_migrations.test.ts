@@ -2230,7 +2230,7 @@ describe('Lens migrations', () => {
               },
             },
           },
-        } as unknown as SavedObjectUnsanitizedDoc<LensDocShape810>);
+        }) as unknown as SavedObjectUnsanitizedDoc<LensDocShape810>;
 
       expect(
         migrate(getDoc('lnsXY', undefined), context).attributes.state.visualization.legend

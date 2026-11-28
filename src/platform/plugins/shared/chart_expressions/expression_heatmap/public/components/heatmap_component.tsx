@@ -538,7 +538,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     const themeOverrides: PartialTheme = {
       legend: {
         labelOptions: {
-          maxLines: args.legend.shouldTruncate ? args.legend?.maxLines ?? 1 : 0,
+          maxLines: args.legend.shouldTruncate ? (args.legend?.maxLines ?? 1) : 0,
         },
       },
       heatmap: {
@@ -768,7 +768,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
                       `${
                         yAccessor && formattedTable.formattedColumns[yAccessor]
                           ? v
-                          : yValuesFormatter.convert(v) ?? ''
+                          : (yValuesFormatter.convert(v) ?? '')
                       }`
                   : undefined
               }

@@ -29,7 +29,7 @@ export type StreamChangeStatus = 'unchanged' | 'upserted' | 'deleted';
  * to the right hook based on this state
  */
 export abstract class StreamActiveRecord<
-  TDefinition extends Streams.all.Definition = Streams.all.Definition
+  TDefinition extends Streams.all.Definition = Streams.all.Definition,
 > {
   protected dependencies: StateDependencies;
   protected _definition: TDefinition;

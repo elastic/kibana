@@ -79,7 +79,7 @@ const convertCustomScheduleMappingClientToServer = (
       customSchedules,
       ([scheduleName, { name, interval, configurationOverrides, enabled }]): [
         string,
-        CrawlerCustomScheduleServer
+        CrawlerCustomScheduleServer,
       ] => [
         scheduleName,
         {

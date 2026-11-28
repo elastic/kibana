@@ -37,7 +37,7 @@ export type SharedData = Record<string, unknown>;
  */
 export class GlobalVisitorContext<
   Methods extends types.VisitorMethods = types.VisitorMethods,
-  Data extends SharedData = SharedData
+  Data extends SharedData = SharedData,
 > {
   constructor(
     /**
@@ -66,7 +66,7 @@ export class GlobalVisitorContext<
 
   private visitWithSpecificContext<
     Method extends keyof types.VisitorMethods,
-    Context extends contexts.VisitorContext
+    Context extends contexts.VisitorContext,
   >(
     method: Method,
     context: Context,

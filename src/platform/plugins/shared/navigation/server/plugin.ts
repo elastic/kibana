@@ -23,15 +23,12 @@ import type {
 } from './types';
 import { getUiSettings } from './ui_settings';
 
-export class NavigationServerPlugin
-  implements
-    Plugin<
-      NavigationServerSetup,
-      NavigationServerStart,
-      NavigationServerSetupDependencies,
-      NavigationServerStartDependencies
-    >
-{
+export class NavigationServerPlugin implements Plugin<
+  NavigationServerSetup,
+  NavigationServerStart,
+  NavigationServerSetupDependencies,
+  NavigationServerStartDependencies
+> {
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {

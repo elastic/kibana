@@ -32,7 +32,7 @@ const formatType = (type: unknown) => {
     exactly: strings.getExactlyFilterTypeLabel(),
     time: strings.getTimeFilterTypeLabel(),
   };
-  return typeof type === 'string' ? types[type] ?? type : null;
+  return typeof type === 'string' ? (types[type] ?? type) : null;
 };
 
 const formatters: Partial<Record<FilterField, (value?: unknown) => string | null>> = {

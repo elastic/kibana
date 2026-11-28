@@ -24,9 +24,10 @@ import {
   PKCS12ConfigType,
 } from './utils';
 
-export class SecurityService
-  implements CoreService<InternalSecurityServiceSetup, InternalSecurityServiceStart>
-{
+export class SecurityService implements CoreService<
+  InternalSecurityServiceSetup,
+  InternalSecurityServiceStart
+> {
   private readonly log: Logger;
   private securityApi?: CoreSecurityDelegateContract;
   private config$: Observable<Config>;

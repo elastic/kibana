@@ -68,9 +68,12 @@ const wrapError = (error: any): CustomHttpResponseOptions<ResponseError> => {
   };
 };
 
-export class MonitoringPlugin
-  implements Plugin<MonitoringPluginSetup, void, PluginsSetup, PluginsStart>
-{
+export class MonitoringPlugin implements Plugin<
+  MonitoringPluginSetup,
+  void,
+  PluginsSetup,
+  PluginsStart
+> {
   private readonly initializerContext: PluginInitializerContext;
   private readonly log: Logger;
   private readonly getLogger: (...scopes: string[]) => Logger;

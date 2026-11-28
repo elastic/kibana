@@ -152,7 +152,7 @@ export const useBulkAddToCaseActions = ({
             disabledLabel: ADD_TO_NEW_CASE,
             onClick: (alerts?: TimelineItem[]) => {
               const caseAttachments = alerts
-                ? casesService?.helpers.groupAlertsByRule(alerts) ?? []
+                ? (casesService?.helpers.groupAlertsByRule(alerts) ?? [])
                 : [];
 
               createCaseFlyout.open({
@@ -170,7 +170,7 @@ export const useBulkAddToCaseActions = ({
               selectCaseModal.open({
                 getAttachments: ({ theCase }) => {
                   if (theCase == null) {
-                    return alerts ? casesService?.helpers.groupAlertsByRule(alerts) ?? [] : [];
+                    return alerts ? (casesService?.helpers.groupAlertsByRule(alerts) ?? []) : [];
                   }
 
                   return getCaseAttachments({

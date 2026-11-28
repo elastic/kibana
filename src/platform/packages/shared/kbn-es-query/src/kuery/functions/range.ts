@@ -31,7 +31,7 @@ export interface KqlRangeFunctionNode extends KqlFunctionNode {
   arguments: [
     KqlLiteralNode,
     keyof Pick<RangeFilterParams, 'gt' | 'gte' | 'lt' | 'lte'>,
-    KqlLiteralNode
+    KqlLiteralNode,
   ];
 }
 

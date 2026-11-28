@@ -60,9 +60,10 @@ export interface DeprecationsSetupDeps {
 }
 
 /** @internal */
-export class DeprecationsService
-  implements CoreService<InternalDeprecationsServiceSetup, InternalDeprecationsServiceStart>
-{
+export class DeprecationsService implements CoreService<
+  InternalDeprecationsServiceSetup,
+  InternalDeprecationsServiceStart
+> {
   private readonly logger: Logger;
   private readonly configService: IConfigService;
   private deprecationsFactory?: DeprecationsFactory;

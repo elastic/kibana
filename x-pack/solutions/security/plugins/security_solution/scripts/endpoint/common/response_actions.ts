@@ -274,7 +274,7 @@ export const sendEndpointActionResponse = async (
 };
 
 type ResponseOutput<
-  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
 > = Pick<LogsEndpointActionResponse<TOutputContent>['EndpointActions']['data'], 'output'>;
 
 const getOutputDataIfNeeded = (action: ActionDetails): ResponseOutput => {

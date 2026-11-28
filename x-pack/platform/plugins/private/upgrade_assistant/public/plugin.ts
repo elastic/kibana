@@ -14,9 +14,12 @@ import { breadcrumbService } from './application/lib/breadcrumbs';
 import { uiMetricService } from './application/lib/ui_metric';
 import { SetupDependencies, StartDependencies, AppDependencies, ClientConfigType } from './types';
 
-export class UpgradeAssistantUIPlugin
-  implements Plugin<void, void, SetupDependencies, StartDependencies>
-{
+export class UpgradeAssistantUIPlugin implements Plugin<
+  void,
+  void,
+  SetupDependencies,
+  StartDependencies
+> {
   constructor(private ctx: PluginInitializerContext) {}
 
   setup(

@@ -108,9 +108,8 @@ export const getAnomalyChartsReactEmbeddableFactory = (
           }),
         onEdit: async () => {
           try {
-            const { resolveEmbeddableAnomalyChartsUserInput } = await import(
-              './anomaly_charts_setup_flyout'
-            );
+            const { resolveEmbeddableAnomalyChartsUserInput } =
+              await import('./anomaly_charts_setup_flyout');
             const result = await resolveEmbeddableAnomalyChartsUserInput(
               coreStartServices,
               pluginsStartServices,

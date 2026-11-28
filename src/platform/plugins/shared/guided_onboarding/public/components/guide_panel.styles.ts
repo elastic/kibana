@@ -96,7 +96,7 @@ export const getGuidePanelStyles = ({
       flyoutBodyWrapper: css`
         ${logicalCSS('height', '100%')}
         ${logicalCSSWithFallback('overflow-y', 'hidden')}
-      flex-grow: 1;
+        flex-grow: 1;
       `,
       flyoutBody: css`
         ${euiYScroll(euiThemeContext)}

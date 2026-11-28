@@ -161,7 +161,7 @@ describe('Data control editor', () => {
               api: controlGroupApi,
               Component: <>Should be first alphabetically</>,
             }),
-          } as DataControlFactory),
+          }) as DataControlFactory,
         supremeControl: async () =>
           ({
             type: 'supremeControl',
@@ -173,7 +173,7 @@ describe('Data control editor', () => {
               api: controlGroupApi,
               Component: <>This control is forced first via the factory order</>,
             }),
-          } as DataControlFactory),
+          }) as DataControlFactory,
       };
       (getAllControlTypes as jest.Mock).mockReturnValue(Object.keys(tempRegistry));
       (getControlFactory as jest.Mock).mockImplementation((key) => tempRegistry[key]());

@@ -85,20 +85,18 @@ export const mapProviderFields = (
     .filter((pk) =>
       (newProvider.configurations[pk].supported_task_types ?? [taskType]).includes(taskType)
     )
-    .map(
-      (k): ConfigEntryView => ({
-        key: k,
-        isValid: true,
-        validationErrors: [],
-        value: newProvider.configurations[k].default_value ?? null,
-        default_value: newProvider.configurations[k].default_value ?? null,
-        description: newProvider.configurations[k].description ?? null,
-        label: newProvider.configurations[k].label ?? '',
-        required: newProvider.configurations[k].required ?? false,
-        sensitive: newProvider.configurations[k].sensitive ?? false,
-        updatable: newProvider.configurations[k].updatable ?? false,
-        type: newProvider.configurations[k].type ?? FieldType.STRING,
-        supported_task_types: newProvider.configurations[k].supported_task_types ?? [],
-      })
-    );
+    .map((k): ConfigEntryView => ({
+      key: k,
+      isValid: true,
+      validationErrors: [],
+      value: newProvider.configurations[k].default_value ?? null,
+      default_value: newProvider.configurations[k].default_value ?? null,
+      description: newProvider.configurations[k].description ?? null,
+      label: newProvider.configurations[k].label ?? '',
+      required: newProvider.configurations[k].required ?? false,
+      sensitive: newProvider.configurations[k].sensitive ?? false,
+      updatable: newProvider.configurations[k].updatable ?? false,
+      type: newProvider.configurations[k].type ?? FieldType.STRING,
+      supported_task_types: newProvider.configurations[k].supported_task_types ?? [],
+    }));
 };

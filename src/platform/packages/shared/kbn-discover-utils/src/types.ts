@@ -64,7 +64,7 @@ export type DataTableColumnsMeta = Record<
 type FormattedHitPair = readonly [
   fieldDisplayName: string,
   formattedValue: string,
-  fieldName: string | null // `null` is when number of fields is limited and there is an extra pair about it
+  fieldName: string | null, // `null` is when number of fields is limited and there is an extra pair about it
 ];
 
 /**
@@ -73,9 +73,7 @@ type FormattedHitPair = readonly [
 export type FormattedHit = FormattedHitPair[];
 
 export interface LogDocumentOverview
-  extends LogResourceFields,
-    LogStackTraceFields,
-    LogCloudFields {
+  extends LogResourceFields, LogStackTraceFields, LogCloudFields {
   '@timestamp': string;
   'log.level'?: string;
   message?: string;
@@ -114,16 +112,10 @@ export interface LogCloudFields {
 }
 
 export interface TransactionDocumentOverview
-  extends TraceFields,
-    ServiceFields,
-    TransactionFields,
-    UserAgentFields {}
+  extends TraceFields, ServiceFields, TransactionFields, UserAgentFields {}
 
 export interface SpanDocumentOverview
-  extends TraceFields,
-    ServiceFields,
-    SpanFields,
-    UserAgentFields {
+  extends TraceFields, ServiceFields, SpanFields, UserAgentFields {
   'transaction.id'?: string;
   'transaction.name'?: string;
   duration?: number;

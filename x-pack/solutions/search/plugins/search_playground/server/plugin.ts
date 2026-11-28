@@ -24,15 +24,12 @@ import {
 import { defineRoutes } from './routes';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 
-export class SearchPlaygroundPlugin
-  implements
-    Plugin<
-      SearchPlaygroundPluginSetup,
-      SearchPlaygroundPluginStart,
-      {},
-      SearchPlaygroundPluginStartDependencies
-    >
-{
+export class SearchPlaygroundPlugin implements Plugin<
+  SearchPlaygroundPluginSetup,
+  SearchPlaygroundPluginStart,
+  {},
+  SearchPlaygroundPluginStartDependencies
+> {
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {

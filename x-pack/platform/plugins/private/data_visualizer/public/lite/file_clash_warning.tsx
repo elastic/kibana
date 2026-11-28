@@ -24,8 +24,8 @@ export const FileClashWarning: FC<Props> = ({ uploadStatus, filesStatus, removeC
   const clashType = fileClashes.some((fileClash) => fileClash.clashType === CLASH_TYPE.FORMAT)
     ? CLASH_TYPE.FORMAT
     : fileClashes.some((fileClash) => fileClash.clashType === CLASH_TYPE.MAPPING)
-    ? CLASH_TYPE.MAPPING
-    : CLASH_TYPE.UNSUPPORTED;
+      ? CLASH_TYPE.MAPPING
+      : CLASH_TYPE.UNSUPPORTED;
 
   const { title, description } =
     clashType === CLASH_TYPE.MAPPING
@@ -41,32 +41,35 @@ export const FileClashWarning: FC<Props> = ({ uploadStatus, filesStatus, removeC
           ),
         }
       : clashType === CLASH_TYPE.FORMAT
-      ? {
-          title: i18n.translate('xpack.dataVisualizer.file.fileClashWarning.fileFormatClashTitle', {
-            defaultMessage: 'Incompatible file formats',
-          }),
-          description: i18n.translate(
-            'xpack.dataVisualizer.file.fileClashWarning.fileFormatClashDescription',
-            {
-              defaultMessage:
-                'The selected files must have the same format. e.g. all CSV or all log files',
-            }
-          ),
-        }
-      : {
-          title: i18n.translate(
-            'xpack.dataVisualizer.file.fileClashWarning.fileFormatNotSupportedTitle',
-            {
-              defaultMessage: 'File format not supported',
-            }
-          ),
-          description: i18n.translate(
-            'xpack.dataVisualizer.file.fileClashWarning.fileFormatNotSupportedDescription',
-            {
-              defaultMessage: 'Some of the selected files are not supported for upload.',
-            }
-          ),
-        };
+        ? {
+            title: i18n.translate(
+              'xpack.dataVisualizer.file.fileClashWarning.fileFormatClashTitle',
+              {
+                defaultMessage: 'Incompatible file formats',
+              }
+            ),
+            description: i18n.translate(
+              'xpack.dataVisualizer.file.fileClashWarning.fileFormatClashDescription',
+              {
+                defaultMessage:
+                  'The selected files must have the same format. e.g. all CSV or all log files',
+              }
+            ),
+          }
+        : {
+            title: i18n.translate(
+              'xpack.dataVisualizer.file.fileClashWarning.fileFormatNotSupportedTitle',
+              {
+                defaultMessage: 'File format not supported',
+              }
+            ),
+            description: i18n.translate(
+              'xpack.dataVisualizer.file.fileClashWarning.fileFormatNotSupportedDescription',
+              {
+                defaultMessage: 'Some of the selected files are not supported for upload.',
+              }
+            ),
+          };
 
   return (
     <EuiCallOut title={title} color="danger">

@@ -11,9 +11,12 @@ import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '
 import { exampleFileKind } from '../common';
 import type { FilesExamplePluginsSetup, FilesExamplePluginsStart } from './types';
 
-export class FilesExamplePlugin
-  implements Plugin<unknown, unknown, FilesExamplePluginsSetup, FilesExamplePluginsStart>
-{
+export class FilesExamplePlugin implements Plugin<
+  unknown,
+  unknown,
+  FilesExamplePluginsSetup,
+  FilesExamplePluginsStart
+> {
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {

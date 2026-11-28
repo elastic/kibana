@@ -46,8 +46,9 @@ interface AssetBase<TAssetType extends AssetType> extends AssetLinkBase<TAssetTy
   title: string;
 }
 
-interface SavedObjectAssetBase<TAssetType extends AssetType = AssetType>
-  extends AssetBase<TAssetType> {
+interface SavedObjectAssetBase<
+  TAssetType extends AssetType = AssetType,
+> extends AssetBase<TAssetType> {
   tags: string[];
 }
 

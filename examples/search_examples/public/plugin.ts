@@ -18,15 +18,12 @@ import { SearchSessionsExamplesAppLocatorDefinition } from './search_sessions/ap
 import { PLUGIN_NAME } from '../common';
 import img from './search_examples.png';
 
-export class SearchExamplesPlugin
-  implements
-    Plugin<
-      SearchExamplesPluginSetup,
-      SearchExamplesPluginStart,
-      AppPluginSetupDependencies,
-      AppPluginStartDependencies
-    >
-{
+export class SearchExamplesPlugin implements Plugin<
+  SearchExamplesPluginSetup,
+  SearchExamplesPluginStart,
+  AppPluginSetupDependencies,
+  AppPluginStartDependencies
+> {
   public setup(
     core: CoreSetup<AppPluginStartDependencies>,
     { developerExamples, share }: AppPluginSetupDependencies

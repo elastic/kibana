@@ -153,7 +153,7 @@ export const HiddenAccordionExample: StoryFn<{}> = () => {
         traceId: item._source.trace_id,
         parentId: item._source.parent_span_id,
         serviceName: item._source.resource.attributes['service.name'],
-      } as TraceItem)
+      }) as TraceItem
   );
   return (
     <TraceWaterfall
@@ -175,7 +175,7 @@ export const OpenTelemetryExample: StoryFn<{}> = () => {
         traceId: item._source.trace_id,
         parentId: item._source.parent_span_id,
         serviceName: item._source.resource.attributes['service.name'],
-      } as TraceItem)
+      }) as TraceItem
   );
   return <TraceWaterfall traceItems={traceItems} />;
 };
@@ -191,7 +191,7 @@ export const APMExample: StoryFn<{}> = () => {
         traceId: item.trace.id,
         parentId: item.parent?.id,
         serviceName: item.service.name || item.service.name,
-      } as TraceItem)
+      }) as TraceItem
   );
 
   return <TraceWaterfall traceItems={traceItems} />;

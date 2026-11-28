@@ -41,7 +41,7 @@ const getEmptyPayload = () =>
         remote: {},
       },
     },
-  } as Payload);
+  }) as Payload;
 
 const getPayloadClusterProxyMode = (name: string): Payload => {
   const payload = getEmptyPayload();

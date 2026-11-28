@@ -23,9 +23,8 @@ export function registerEmbeddables(embeddable: EmbeddableSetup, core: MlCoreSet
   });
 
   embeddable.registerReactEmbeddableFactory(ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE, async () => {
-    const { getAnomalyChartsReactEmbeddableFactory } = await import(
-      './anomaly_charts/anomaly_charts_embeddable_factory'
-    );
+    const { getAnomalyChartsReactEmbeddableFactory } =
+      await import('./anomaly_charts/anomaly_charts_embeddable_factory');
     return getAnomalyChartsReactEmbeddableFactory(core.getStartServices);
   });
 

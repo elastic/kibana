@@ -40,10 +40,10 @@ describe('getCreatedAttackDiscoveryAlerts', () => {
       typeof responseData.hits?.total === 'object' && responseData.hits?.total !== null
         ? responseData.hits.total.value
         : typeof responseData.hits?.total === 'number'
-        ? responseData.hits.total
-        : responseData.hits && Array.isArray(responseData.hits.hits)
-        ? responseData.hits.hits.length
-        : 0;
+          ? responseData.hits.total
+          : responseData.hits && Array.isArray(responseData.hits.hits)
+            ? responseData.hits.hits.length
+            : 0;
 
     return {
       took: 1,

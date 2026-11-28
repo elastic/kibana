@@ -30,7 +30,7 @@ const PROXIED_METHODS: WeakMap<
 
 type RequiredApmFields<
   T extends Partial<FlattenedApmEvent>,
-  R extends keyof FlattenedApmEvent = never
+  R extends keyof FlattenedApmEvent = never,
 > = Partial<T> & Required<Pick<T, R>>;
 
 /**
@@ -40,7 +40,7 @@ type RequiredApmFields<
  */
 type ProxiedApmEvent<
   T extends Partial<FlattenedApmEvent>,
-  R extends keyof FlattenedApmEvent = never
+  R extends keyof FlattenedApmEvent = never,
 > = Readonly<MapToSingleOrMultiValue<RequiredApmFields<T, R>>>;
 
 /**
@@ -48,7 +48,7 @@ type ProxiedApmEvent<
  */
 interface ApmDocumentMethods<
   T extends Partial<FlattenedApmEvent>,
-  R extends keyof FlattenedApmEvent = never
+  R extends keyof FlattenedApmEvent = never,
 > {
   /**
    * Unflattens the APM Event, so fields can be accessed via `event.service?.name`.
@@ -78,7 +78,7 @@ interface ApmDocumentMethods<
  */
 export type ApmDocument<
   T extends Partial<FlattenedApmEvent>,
-  R extends keyof FlattenedApmEvent = never
+  R extends keyof FlattenedApmEvent = never,
 > = ProxiedApmEvent<T, R> & ApmDocumentMethods<T, R>;
 
 /**

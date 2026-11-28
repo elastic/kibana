@@ -213,10 +213,10 @@ export const createCustomThresholdExecutor = ({
         isNoDataFound && isAlertOnNoDataEnabled
           ? AlertStates.NO_DATA
           : isIndeterminateState
-          ? AlertStates.ALERT
-          : shouldAlertFire
-          ? AlertStates.ALERT
-          : AlertStates.OK;
+            ? AlertStates.ALERT
+            : shouldAlertFire
+              ? AlertStates.ALERT
+              : AlertStates.OK;
 
       let reason;
       if (nextState === AlertStates.ALERT && !isIndeterminateState) {
@@ -265,12 +265,12 @@ export const createCustomThresholdExecutor = ({
           nextState === AlertStates.OK
             ? RecoveredActionGroup.id
             : nextState === AlertStates.NO_DATA
-            ? NO_DATA_ACTIONS_ID
-            : FIRED_ACTIONS_ID;
+              ? NO_DATA_ACTIONS_ID
+              : FIRED_ACTIONS_ID;
 
         const additionalContext = hasAdditionalContext(params.groupBy, validGroupByForContext)
           ? alertResults && alertResults.length > 0
-            ? alertResults[0][group].context ?? {}
+            ? (alertResults[0][group].context ?? {})
             : {}
           : {};
 

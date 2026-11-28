@@ -39,9 +39,12 @@ export interface StartContract {
   ) => EmbeddableDynamicActionsManager;
 }
 
-export class EmbeddableEnhancedPlugin
-  implements Plugin<SetupContract, StartContract, SetupDependencies, StartDependencies>
-{
+export class EmbeddableEnhancedPlugin implements Plugin<
+  SetupContract,
+  StartContract,
+  SetupDependencies,
+  StartDependencies
+> {
   constructor(protected readonly context: PluginInitializerContext) {}
 
   public setup(core: CoreSetup<StartDependencies>, plugins: SetupDependencies): SetupContract {

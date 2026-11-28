@@ -189,7 +189,7 @@ export class SyntheticsEsClient {
 
   async msearch<
     TSearchRequest extends estypes.SearchRequest = estypes.SearchRequest,
-    TDocument = unknown
+    TDocument = unknown,
   >(
     requests: MsearchMultisearchBody[],
     operationName?: string

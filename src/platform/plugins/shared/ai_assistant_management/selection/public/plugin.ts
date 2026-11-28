@@ -35,15 +35,12 @@ export interface StartDependencies {
   licensing: LicensingPluginStart;
 }
 
-export class AIAssistantManagementPlugin
-  implements
-    Plugin<
-      AIAssistantManagementSelectionPluginPublicSetup,
-      AIAssistantManagementSelectionPluginPublicStart,
-      SetupDependencies,
-      StartDependencies
-    >
-{
+export class AIAssistantManagementPlugin implements Plugin<
+  AIAssistantManagementSelectionPluginPublicSetup,
+  AIAssistantManagementSelectionPluginPublicStart,
+  SetupDependencies,
+  StartDependencies
+> {
   private readonly kibanaBranch: string;
   private readonly buildFlavor: BuildFlavor;
   private registeredAiAssistantManagementSelectionApp?: ManagementApp;

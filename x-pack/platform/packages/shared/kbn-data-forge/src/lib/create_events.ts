@@ -65,10 +65,13 @@ export async function createEvents(
   ) {
     logger.info('Pausing queue');
     queue.pause();
-    setTimeout(() => {
-      logger.info('Resuming queue');
-      queue.resume();
-    }, schedule.delayInMinutes * 60 * 1000);
+    setTimeout(
+      () => {
+        logger.info('Resuming queue');
+        queue.resume();
+      },
+      schedule.delayInMinutes * 60 * 1000
+    );
   }
 
   const eventsPerCycle = schedule.eventsPerCycle ?? config.indexing.eventsPerCycle;

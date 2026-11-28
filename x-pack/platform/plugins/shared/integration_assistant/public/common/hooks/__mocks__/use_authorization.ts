@@ -7,17 +7,13 @@
 
 import type { Authorization, RoutesAuthorization } from '../use_authorization';
 
-export const useAuthorization = jest.fn(
-  (): Authorization => ({
-    canCreateIntegrations: true,
-    canExecuteConnectors: true,
-    canCreateConnectors: true,
-  })
-);
+export const useAuthorization = jest.fn((): Authorization => ({
+  canCreateIntegrations: true,
+  canExecuteConnectors: true,
+  canCreateConnectors: true,
+}));
 
-export const useRoutesAuthorization = jest.fn(
-  (): RoutesAuthorization => ({
-    canUseIntegrationAssistant: true,
-    canUseIntegrationUpload: true,
-  })
-);
+export const useRoutesAuthorization = jest.fn((): RoutesAuthorization => ({
+  canUseIntegrationAssistant: true,
+  canUseIntegrationUpload: true,
+}));

@@ -266,7 +266,7 @@ export function initializeActionApi(
 
   return {
     api: {
-      ...(isTextBasedLanguage(initialState) ? {} : dynamicActionsManager?.api ?? {}),
+      ...(isTextBasedLanguage(initialState) ? {} : (dynamicActionsManager?.api ?? {})),
       ...createViewUnderlyingDataApis(
         getLatestState,
         internalApi,

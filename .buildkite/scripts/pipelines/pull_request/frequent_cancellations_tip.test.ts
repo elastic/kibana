@@ -59,7 +59,7 @@ const build = ({
     started_at: minutesAgo(createdMinutesAgo),
     finished_at: minutesAgo(createdMinutesAgo - ranMinutes),
     pull_request: { id: prNumber, base: 'main', repository: 'elastic/kibana' },
-  } as unknown as Build);
+  }) as unknown as Build;
 
 describe('countRecentCancelledBuilds', () => {
   it('counts builds cancelled in the last 8 hours after running for a while', () => {

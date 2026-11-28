@@ -13,13 +13,17 @@ export type PersistableStateAttachmentState = Pick<
   'persistableStateAttachmentTypeId' | 'persistableStateAttachmentState'
 >;
 
-export interface PersistableStateAttachmentType
-  extends Omit<PersistableState<PersistableStateAttachmentState>, 'migrations'> {
+export interface PersistableStateAttachmentType extends Omit<
+  PersistableState<PersistableStateAttachmentState>,
+  'migrations'
+> {
   id: string;
 }
 
-export interface PersistableStateAttachmentTypeSetup
-  extends Omit<PersistableStateDefinition<PersistableStateAttachmentState>, 'migrations'> {
+export interface PersistableStateAttachmentTypeSetup extends Omit<
+  PersistableStateDefinition<PersistableStateAttachmentState>,
+  'migrations'
+> {
   id: string;
 }
 

@@ -13,10 +13,13 @@ import { ApmOtelFields, dedot } from '@kbn/apm-synthtrace-client';
 function extractAttributes(obj: Record<string, any>, attribute: string) {
   return Object.entries(obj)
     .filter(([key]) => key.startsWith(attribute))
-    .reduce((acc, [key, value]) => {
-      acc[key.replace(`${attribute}`, '')] = value;
-      return acc;
-    }, {} as Record<string, any>);
+    .reduce(
+      (acc, [key, value]) => {
+        acc[key.replace(`${attribute}`, '')] = value;
+        return acc;
+      },
+      {} as Record<string, any>
+    );
 }
 
 function removeAttributes(obj: Record<string, any>, attributes: string[]): ApmOtelFields {

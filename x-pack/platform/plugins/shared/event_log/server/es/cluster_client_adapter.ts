@@ -142,7 +142,7 @@ export class ClusterClientAdapter<
     id?: string;
     index: string;
     internalFields?: InternalFields;
-  } = Doc
+  } = Doc,
 > {
   private readonly logger: Logger;
   private readonly elasticsearchClientPromise: Promise<ElasticsearchClient>;

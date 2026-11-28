@@ -52,7 +52,7 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
         ({
           role: message.role,
           content: message.rawContent,
-        } as BedRockConverseMessage)
+        }) as BedRockConverseMessage
     );
     const systemMessage = noToolUsage
       ? [{ text: addNoToolUsageDirective(system) }]

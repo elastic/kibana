@@ -48,13 +48,17 @@ export interface BaseColumn<OperationType extends Operation, Params = undefined>
   params: Params;
 }
 
-export interface ColumnWithSourceField<Op extends OperationWithSourceField, Params = undefined>
-  extends BaseColumn<Op, Params> {
+export interface ColumnWithSourceField<
+  Op extends OperationWithSourceField,
+  Params = undefined,
+> extends BaseColumn<Op, Params> {
   sourceField: string;
 }
 
-export interface ColumnWithReferences<Op extends OperationWithReferences, Params = undefined>
-  extends BaseColumn<Op, Params> {
+export interface ColumnWithReferences<
+  Op extends OperationWithReferences,
+  Params = undefined,
+> extends BaseColumn<Op, Params> {
   references: string[];
 }
 
@@ -112,7 +116,7 @@ export type Column = AnyColumnWithReferences | AnyColumnWithSourceField | Filter
 
 export type GenericColumnWithMeta<
   Col extends Column | {},
-  Meta extends {} | unknown = undefined
+  Meta extends {} | unknown = undefined,
 > = Col & (Meta extends undefined ? undefined : { meta: Meta });
 
 export type ColumnWithMeta = GenericColumnWithMeta<Column, unknown>;

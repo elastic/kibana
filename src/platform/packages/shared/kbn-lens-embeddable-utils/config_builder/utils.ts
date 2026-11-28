@@ -215,7 +215,7 @@ function buildDatasourceStatesLayer(
             fieldName: column.name,
             columnId: column.id,
             meta: column.meta,
-          } as TextBasedLayerColumn)
+          }) as TextBasedLayerColumn
       ),
       index: '',
       query: undefined,

@@ -147,8 +147,8 @@ export function runRootCauseAnalysis({
   const investigationTimeRangePrompt = `## Time range
   
     The time range of the investigation is ${new Date(start).toISOString()} until ${new Date(
-    end
-  ).toISOString()}`;
+      end
+    ).toISOString()}`;
 
   initialContext = `${initialContext}
 

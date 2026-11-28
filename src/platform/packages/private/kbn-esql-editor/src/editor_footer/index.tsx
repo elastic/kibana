@@ -168,13 +168,13 @@ export const EditorFooter = memo(function EditorFooter({
                           {isSpaceReduced
                             ? '@timestamp'
                             : detectedTimestamp
-                            ? i18n.translate('esqlEditor.query.timestampDetected', {
-                                defaultMessage: '{detectedTimestamp} found',
-                                values: { detectedTimestamp },
-                              })
-                            : i18n.translate('esqlEditor.query.timestampNotDetected', {
-                                defaultMessage: '@timestamp not found',
-                              })}
+                              ? i18n.translate('esqlEditor.query.timestampDetected', {
+                                  defaultMessage: '{detectedTimestamp} found',
+                                  values: { detectedTimestamp },
+                                })
+                              : i18n.translate('esqlEditor.query.timestampNotDetected', {
+                                  defaultMessage: '@timestamp not found',
+                                })}
                         </p>
                       </EuiText>
                     </EuiFlexItem>

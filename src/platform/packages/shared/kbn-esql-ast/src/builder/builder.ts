@@ -130,18 +130,18 @@ export namespace Builder {
         const prefix: ESQLSource['prefix'] = !template.prefix
           ? undefined
           : typeof template.prefix === 'string'
-          ? Builder.expression.literal.string(template.prefix, { unquoted: true })
-          : template.prefix;
+            ? Builder.expression.literal.string(template.prefix, { unquoted: true })
+            : template.prefix;
         const index: ESQLSource['index'] = !template.index
           ? undefined
           : typeof template.index === 'string'
-          ? Builder.expression.literal.string(template.index, { unquoted: true })
-          : template.index;
+            ? Builder.expression.literal.string(template.index, { unquoted: true })
+            : template.index;
         const selector: ESQLSource['selector'] = !template.selector
           ? undefined
           : typeof template.selector === 'string'
-          ? Builder.expression.literal.string(template.selector, { unquoted: true })
-          : template.selector;
+            ? Builder.expression.literal.string(template.selector, { unquoted: true })
+            : template.selector;
         const sourceNode: ESQLSource = {
           ...template,
           ...Builder.parserFields(fromParser),

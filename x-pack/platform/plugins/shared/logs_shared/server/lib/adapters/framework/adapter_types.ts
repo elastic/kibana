@@ -30,8 +30,10 @@ export interface LogsSharedDatabaseResponse {
   timeout: boolean;
 }
 
-export interface LogsSharedDatabaseSearchResponse<Hit = {}, Aggregations = undefined>
-  extends LogsSharedDatabaseResponse {
+export interface LogsSharedDatabaseSearchResponse<
+  Hit = {},
+  Aggregations = undefined,
+> extends LogsSharedDatabaseResponse {
   _shards: {
     total: number;
     successful: number;
@@ -49,8 +51,10 @@ export interface LogsSharedDatabaseSearchResponse<Hit = {}, Aggregations = undef
   };
 }
 
-export interface LogsSharedDatabaseMultiResponse<Hit, Aggregation>
-  extends LogsSharedDatabaseResponse {
+export interface LogsSharedDatabaseMultiResponse<
+  Hit,
+  Aggregation,
+> extends LogsSharedDatabaseResponse {
   responses: Array<LogsSharedDatabaseSearchResponse<Hit, Aggregation>>;
 }
 

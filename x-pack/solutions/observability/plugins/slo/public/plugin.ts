@@ -40,9 +40,12 @@ import type {
 import { getLazyWithContextProviders } from './utils/get_lazy_with_context_providers';
 import { registerSloUiActions } from './ui_actions/register_ui_actions';
 
-export class SLOPlugin
-  implements Plugin<SLOPublicSetup, SLOPublicStart, SLOPublicPluginsSetup, SLOPublicPluginsStart>
-{
+export class SLOPlugin implements Plugin<
+  SLOPublicSetup,
+  SLOPublicStart,
+  SLOPublicPluginsSetup,
+  SLOPublicPluginsStart
+> {
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private experimentalFeatures: ExperimentalFeatures = {
     ruleFormV2: { enabled: false },
@@ -148,24 +151,21 @@ export class SLOPlugin
         );
 
         plugins.embeddable.registerReactEmbeddableFactory(SLO_OVERVIEW_EMBEDDABLE_ID, async () => {
-          const { getOverviewEmbeddableFactory } = await import(
-            './embeddable/slo/overview/slo_embeddable_factory'
-          );
+          const { getOverviewEmbeddableFactory } =
+            await import('./embeddable/slo/overview/slo_embeddable_factory');
           return getOverviewEmbeddableFactory({ coreStart, pluginsStart, sloClient });
         });
 
         plugins.embeddable.registerReactEmbeddableFactory(SLO_ALERTS_EMBEDDABLE_ID, async () => {
-          const { getAlertsEmbeddableFactory } = await import(
-            './embeddable/slo/alerts/slo_alerts_embeddable_factory'
-          );
+          const { getAlertsEmbeddableFactory } =
+            await import('./embeddable/slo/alerts/slo_alerts_embeddable_factory');
 
           return getAlertsEmbeddableFactory({ coreStart, pluginsStart, sloClient, kibanaVersion });
         });
 
         plugins.embeddable.registerReactEmbeddableFactory(SLO_ERROR_BUDGET_ID, async () => {
-          const { getErrorBudgetEmbeddableFactory } = await import(
-            './embeddable/slo/error_budget/error_budget_react_embeddable_factory'
-          );
+          const { getErrorBudgetEmbeddableFactory } =
+            await import('./embeddable/slo/error_budget/error_budget_react_embeddable_factory');
           return getErrorBudgetEmbeddableFactory({
             coreStart,
             pluginsStart,
@@ -174,9 +174,8 @@ export class SLOPlugin
         });
 
         plugins.embeddable.registerReactEmbeddableFactory(SLO_BURN_RATE_EMBEDDABLE_ID, async () => {
-          const { getBurnRateEmbeddableFactory } = await import(
-            './embeddable/slo/burn_rate/burn_rate_react_embeddable_factory'
-          );
+          const { getBurnRateEmbeddableFactory } =
+            await import('./embeddable/slo/burn_rate/burn_rate_react_embeddable_factory');
           return getBurnRateEmbeddableFactory({
             coreStart,
             pluginsStart,

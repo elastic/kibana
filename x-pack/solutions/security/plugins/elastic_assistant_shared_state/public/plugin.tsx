@@ -26,15 +26,12 @@ export type ElasticAssistantSharedStatePublicPluginStart = ReturnType<
   ElasticAssistantSharedStatePublicPlugin['start']
 >;
 
-export class ElasticAssistantSharedStatePublicPlugin
-  implements
-    Plugin<
-      ElasticAssistantSharedStatePublicPluginSetup,
-      ElasticAssistantSharedStatePublicPluginStart,
-      ElasticAssistantSharedStatePublicPluginSetupDependencies,
-      ElasticAssistantSharedStatePublicPluginStartDependencies
-    >
-{
+export class ElasticAssistantSharedStatePublicPlugin implements Plugin<
+  ElasticAssistantSharedStatePublicPluginSetup,
+  ElasticAssistantSharedStatePublicPluginStart,
+  ElasticAssistantSharedStatePublicPluginSetupDependencies,
+  ElasticAssistantSharedStatePublicPluginStartDependencies
+> {
   private readonly commentService: CommentsService;
   private readonly promptContextService: PromptContextService;
   private readonly assistantContextValueService: AssistantContextValueService;

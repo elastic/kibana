@@ -66,9 +66,8 @@ export const initEntityEngineRoute = (
             getDataViewsService()
           );
 
-          const privileges = await entityStoreClient.getEntityStoreInitPrivileges(
-            securitySolutionIndices
-          );
+          const privileges =
+            await entityStoreClient.getEntityStoreInitPrivileges(securitySolutionIndices);
 
           if (!privileges.has_all_required) {
             const missingPrivilegesMsg = getMissingPrivilegesErrorMessage(

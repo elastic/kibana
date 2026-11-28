@@ -48,7 +48,7 @@ const getCustomColumn = (dataViews: DataView[]) => {
       <div>
         {record.attributes.dataViewSpec
           ? record.attributes.dataViewSpec.name
-          : dataViewNameMap[record.attributes.indexPatternId] ?? (
+          : (dataViewNameMap[record.attributes.indexPatternId] ?? (
               <EuiText size="s" color={'danger'}>
                 <FormattedMessage
                   id="eventAnnotationListing.tableList.dataView.missing"
@@ -65,7 +65,7 @@ const getCustomColumn = (dataViews: DataView[]) => {
                   }}
                 />
               </EuiText>
-            )}
+            ))}
       </div>
     ),
   };

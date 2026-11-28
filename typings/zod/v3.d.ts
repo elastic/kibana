@@ -11,6 +11,6 @@ declare module 'zod' {
   export * from 'zod/v3';
   export type StandardSchemaV1<
     Input = unknown,
-    Output = Input
+    Output = Input,
   > = import('../../node_modules/zod/v3/standard-schema.cjs').StandardSchemaV1<Input, Output>;
 }

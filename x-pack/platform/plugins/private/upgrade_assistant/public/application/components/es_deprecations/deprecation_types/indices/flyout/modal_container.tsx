@@ -85,8 +85,8 @@ export const IndexModal: React.FunctionComponent<IndexModalProps> = ({
           updateAction === 'unfreeze'
             ? 'unfreeze'
             : updateAction === 'readonly'
-            ? 'makeReadonly'
-            : 'delete'
+              ? 'makeReadonly'
+              : 'delete'
         );
         break;
       }
@@ -138,9 +138,9 @@ export const IndexModal: React.FunctionComponent<IndexModalProps> = ({
           <WarningModalStep
             warnings={
               modalStep === 'confirmReadonly'
-                ? reindexState.reindexWarnings?.filter(
+                ? (reindexState.reindexWarnings?.filter(
                     ({ flow: warningFlow }) => warningFlow === 'readonly'
-                  ) ?? []
+                  ) ?? [])
                 : []
             }
             meta={reindexState.meta}

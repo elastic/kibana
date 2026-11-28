@@ -228,7 +228,8 @@ describe('defend insights route helpers', () => {
       });
       expect(
         new Date(
-          params.dataClient.updateDefendInsights.mock.calls[0][0].defendInsightsUpdateProps[0].lastViewedAt
+          params.dataClient.updateDefendInsights.mock.calls[0][0].defendInsightsUpdateProps[0]
+            .lastViewedAt
         ).getTime()
       ).toBeGreaterThan(startTime);
       expect(result).toEqual({ id: insightId });

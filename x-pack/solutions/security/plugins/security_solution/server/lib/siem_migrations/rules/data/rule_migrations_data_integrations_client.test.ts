@@ -30,7 +30,7 @@ const createMockPackage = (overrides: Partial<PackageListItem> = {}): PackageLis
       } as RegistryDataStream,
     ],
     ...overrides,
-  } as PackageListItem);
+  }) as PackageListItem;
 
 describe('RuleMigrationsDataIntegrationsClient', () => {
   const getIndexName = jest.fn().mockResolvedValue('mock-index');

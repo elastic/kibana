@@ -71,9 +71,12 @@ interface PluginStart {
   ruleRegistry: RuleRegistryPluginStartContract;
   dashboard: DashboardPluginStart;
 }
-export class ObservabilityPlugin
-  implements Plugin<ObservabilityPluginSetup, void, PluginSetup, PluginStart>
-{
+export class ObservabilityPlugin implements Plugin<
+  ObservabilityPluginSetup,
+  void,
+  PluginSetup,
+  PluginStart
+> {
   private logger: Logger;
 
   constructor(private readonly initContext: PluginInitializerContext) {

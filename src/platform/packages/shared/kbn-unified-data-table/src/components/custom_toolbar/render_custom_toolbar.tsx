@@ -93,9 +93,9 @@ export const internalRenderCustomToolbar = (
             {Boolean(leftSide) && buttons}
             {Boolean(
               keyboardShortcutsControl ||
-                displayControl ||
-                fullScreenControl ||
-                inTableSearchControl
+              displayControl ||
+              fullScreenControl ||
+              inTableSearchControl
             ) && (
               <EuiFlexItem grow={false}>
                 <div className="unifiedDataTableToolbarControlGroup">

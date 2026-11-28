@@ -935,9 +935,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           const currentFieldLimitValue = await currentFieldLimitInput.getAttribute('value');
           const currentFieldLimit = parseInt(currentFieldLimitValue as string, 10);
-          const currentFieldLimitDisabledStatus = await currentFieldLimitInput.getAttribute(
-            'disabled'
-          );
+          const currentFieldLimitDisabledStatus =
+            await currentFieldLimitInput.getAttribute('disabled');
 
           expect(currentFieldLimit).to.be(44);
           expect(currentFieldLimitDisabledStatus).to.be('true');

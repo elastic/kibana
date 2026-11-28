@@ -431,7 +431,7 @@ export const ESQLEditor = memo(function ESQLEditor({
           TimeRange,
           AbortController?,
           string?,
-          ESQLControlVariable[]?
+          ESQLControlVariable[]?,
         ]
       ) => ({
         timestamp: Date.now(),
@@ -449,7 +449,7 @@ export const ESQLEditor = memo(function ESQLEditor({
         ...args: [
           DataViewsPublicPluginStart,
           CoreStart,
-          (() => Promise<ILicense | undefined>) | undefined
+          (() => Promise<ILicense | undefined>) | undefined,
         ]
       ) => ({
         timestamp: Date.now(),
@@ -608,8 +608,8 @@ export const ESQLEditor = memo(function ESQLEditor({
           const clientParserStatus = parserMessages.errors?.length
             ? 'error'
             : parserMessages.warnings.length
-            ? 'warning'
-            : 'success';
+              ? 'warning'
+              : 'success';
 
           addQueriesToCache({
             queryString: code,

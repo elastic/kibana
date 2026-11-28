@@ -35,15 +35,12 @@ export interface BfetchPublicContract {
 export type BfetchPublicSetup = BfetchPublicContract;
 export type BfetchPublicStart = BfetchPublicContract;
 
-export class BfetchPublicPlugin
-  implements
-    Plugin<
-      BfetchPublicSetup,
-      BfetchPublicStart,
-      BfetchPublicSetupDependencies,
-      BfetchPublicStartDependencies
-    >
-{
+export class BfetchPublicPlugin implements Plugin<
+  BfetchPublicSetup,
+  BfetchPublicStart,
+  BfetchPublicSetupDependencies,
+  BfetchPublicStartDependencies
+> {
   private contract!: BfetchPublicContract;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {}

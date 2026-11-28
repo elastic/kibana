@@ -73,7 +73,7 @@ const useActiveByFilterKeyState = ({ filterOptions }: { filterOptions: FilterOpt
 
   return [newActiveByFilterKey, setActiveByFilterKey] as [
     FilterConfigState[],
-    (value: SetStateAction<FilterConfigState[]>) => void
+    (value: SetStateAction<FilterConfigState[]>) => void,
   ];
 };
 

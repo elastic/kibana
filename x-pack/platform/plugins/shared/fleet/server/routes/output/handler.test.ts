@@ -458,7 +458,7 @@ describe('output handler', () => {
       ({
         ...mockContext,
         fleet: Promise.resolve({ authz: { fleet: { readSettings } } }),
-      } as any);
+      }) as any;
 
     beforeEach(() => {
       jest.spyOn(outputService, 'list').mockResolvedValue({

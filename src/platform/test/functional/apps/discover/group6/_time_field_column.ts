@@ -89,8 +89,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             !hasTimeField
               ? ['@timestamp']
               : hideTimeFieldColumnSetting
-              ? ['Summary'] // legacy behaviour
-              : ['@timestamp', 'Summary'] // legacy behaviour
+                ? ['Summary'] // legacy behaviour
+                : ['@timestamp', 'Summary'] // legacy behaviour
           );
         });
 
@@ -132,8 +132,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             !hasTimeField
               ? ['@timestamp']
               : hideTimeFieldColumnSetting
-              ? ['Summary'] // legacy behaviour
-              : ['@timestamp', 'Summary'] // legacy behaviour
+                ? ['Summary'] // legacy behaviour
+                : ['@timestamp', 'Summary'] // legacy behaviour
           );
         });
       }

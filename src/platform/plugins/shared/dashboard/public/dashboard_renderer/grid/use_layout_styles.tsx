@@ -31,7 +31,8 @@ export const useLayoutStyles = () => {
       --dashboardHoverActionsActivePanelBoxShadow--singleWrapper: 0 0 0
         ${euiTheme.border.width.thin} ${euiTheme.colors.accentSecondary};
 
-      --dashboardHoverActionsActivePanelBoxShadow: -${euiTheme.border.width.thin} 0 ${euiTheme.colors.accentSecondary},
+      --dashboardHoverActionsActivePanelBoxShadow:
+        -${euiTheme.border.width.thin} 0 ${euiTheme.colors.accentSecondary},
         ${euiTheme.border.width.thin} 0 ${euiTheme.colors.accentSecondary},
         0 -${euiTheme.border.width.thin} ${euiTheme.colors.accentSecondary};
 
@@ -40,7 +41,8 @@ export const useLayoutStyles = () => {
           calc((var(--kbnGridGutterSize) / 2) * -1px);
         background-size: calc((var(--kbnGridColumnWidth) + var(--kbnGridGutterSize)) * 1px)
           calc((var(--kbnGridRowHeight) + var(--kbnGridGutterSize)) * 1px);
-        background-image: ${getRadialGradient('top left')}, ${getRadialGradient('top right')},
+        background-image:
+          ${getRadialGradient('top left')}, ${getRadialGradient('top right')},
           ${getRadialGradient('bottom left')}, ${getRadialGradient('bottom right')};
         background-origin: content-box;
       }

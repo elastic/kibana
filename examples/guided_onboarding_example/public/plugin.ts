@@ -15,9 +15,10 @@ import {
 } from './types';
 import { PLUGIN_NAME } from '../common';
 
-export class GuidedOnboardingExamplePlugin
-  implements Plugin<GuidedOnboardingExamplePluginSetup, GuidedOnboardingExamplePluginStart>
-{
+export class GuidedOnboardingExamplePlugin implements Plugin<
+  GuidedOnboardingExamplePluginSetup,
+  GuidedOnboardingExamplePluginStart
+> {
   public setup(core: CoreSetup): GuidedOnboardingExamplePluginSetup {
     // Register an application into the side navigation menu
     core.application.register({

@@ -83,15 +83,12 @@ export interface SavedSearchPublicStartDependencies {
   embeddable: EmbeddableStart;
 }
 
-export class SavedSearchPublicPlugin
-  implements
-    Plugin<
-      SavedSearchPublicPluginSetup,
-      SavedSearchPublicPluginStart,
-      SavedSearchPublicSetupDependencies,
-      SavedSearchPublicStartDependencies
-    >
-{
+export class SavedSearchPublicPlugin implements Plugin<
+  SavedSearchPublicPluginSetup,
+  SavedSearchPublicPluginStart,
+  SavedSearchPublicSetupDependencies,
+  SavedSearchPublicStartDependencies
+> {
   public setup(
     { getStartServices }: CoreSetup,
     { contentManagement, expressions, embeddable }: SavedSearchPublicSetupDependencies
@@ -156,7 +153,7 @@ export class SavedSearchPublicPlugin
       },
       byValueToSavedSearch: async <
         Serialized extends boolean = boolean,
-        ReturnType = Serialized extends true ? SerializableSavedSearch : SavedSearch
+        ReturnType = Serialized extends true ? SerializableSavedSearch : SavedSearch,
       >(
         result: SavedSearchUnwrapResult,
         serialized?: Serialized

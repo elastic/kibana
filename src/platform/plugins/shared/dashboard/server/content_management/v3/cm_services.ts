@@ -61,7 +61,7 @@ export const controlGroupInputSchema = schema.object({
         }),
         width: schema.oneOf(
           Object.values(CONTROL_WIDTH_OPTIONS).map((value) => schema.literal(value)) as [
-            Type<ControlWidth>
+            Type<ControlWidth>,
           ],
           {
             defaultValue: DEFAULT_CONTROL_WIDTH,
@@ -82,7 +82,7 @@ export const controlGroupInputSchema = schema.object({
   ),
   labelPosition: schema.oneOf(
     Object.values(CONTROL_LABEL_POSITION_OPTIONS).map((value) => schema.literal(value)) as [
-      Type<ControlLabelPosition>
+      Type<ControlLabelPosition>,
     ],
     {
       defaultValue: DEFAULT_CONTROL_LABEL_POSITION,
@@ -93,7 +93,7 @@ export const controlGroupInputSchema = schema.object({
   ),
   chainingSystem: schema.oneOf(
     Object.values(CONTROL_CHAINING_OPTIONS).map((value) => schema.literal(value)) as [
-      Type<ControlGroupChainingSystem>
+      Type<ControlGroupChainingSystem>,
     ],
     {
       defaultValue: DEFAULT_CONTROL_CHAINING,

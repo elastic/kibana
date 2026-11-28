@@ -109,8 +109,8 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             space.id === space1
               ? ruleSpace1.body.id
               : space.id === space2
-              ? ruleSpace2.body.id
-              : null;
+                ? ruleSpace2.body.id
+                : null;
           const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/internal/alerting/rule/${ruleIdToClone}/_clone`)
             .set('kbn-xsrf', 'foo')

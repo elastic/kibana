@@ -83,8 +83,8 @@ const getDistinctColor = (
         rankAtDepth: isSplitParentLayer
           ? parentSeries.findIndex((d) => d === categoricalKey)
           : index > -1
-          ? index
-          : 0,
+            ? index
+            : 0,
         totalSeriesAtDepth: isSplitParentLayer ? parentSeries.length : allSeries.length || 1,
       },
     ],
@@ -201,7 +201,7 @@ export const getColor = (
   const defaultColor = isDarkMode ? 'rgba(0,0,0,0)' : 'rgba(255,255,255,0)';
 
   const name = column.format
-    ? formatter.deserialize(column.format).convert(categoricalKey) ?? ''
+    ? (formatter.deserialize(column.format).convert(categoricalKey) ?? '')
     : '';
 
   if (visParams.distinctColors) {

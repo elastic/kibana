@@ -281,8 +281,8 @@ const withPreviousSuggestionSelected = (
     props.suggestions.length === 0
       ? null
       : state.selectedIndex !== null
-      ? (state.selectedIndex + props.suggestions.length - 1) % props.suggestions.length
-      : Math.max(props.suggestions.length - 1, 0),
+        ? (state.selectedIndex + props.suggestions.length - 1) % props.suggestions.length
+        : Math.max(props.suggestions.length - 1, 0),
 });
 
 const withNextSuggestionSelected = (
@@ -294,8 +294,8 @@ const withNextSuggestionSelected = (
     props.suggestions.length === 0
       ? null
       : state.selectedIndex !== null
-      ? (state.selectedIndex + 1) % props.suggestions.length
-      : 0,
+        ? (state.selectedIndex + 1) % props.suggestions.length
+        : 0,
 });
 
 const withSuggestionAtIndexSelected =
@@ -306,8 +306,8 @@ const withSuggestionAtIndexSelected =
       props.suggestions.length === 0
         ? null
         : suggestionIndex >= 0 && suggestionIndex < props.suggestions.length
-        ? suggestionIndex
-        : 0,
+          ? suggestionIndex
+          : 0,
   });
 
 const withSuggestionsVisible = (state: AutocompleteFieldState) => ({

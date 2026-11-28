@@ -17,9 +17,10 @@ import { defineRoutes } from './routes';
 import { guideStateSavedObjects, pluginStateSavedObjects } from './saved_objects';
 import type { GuidesConfig } from '../common';
 
-export class GuidedOnboardingPlugin
-  implements Plugin<GuidedOnboardingPluginSetup, GuidedOnboardingPluginStart>
-{
+export class GuidedOnboardingPlugin implements Plugin<
+  GuidedOnboardingPluginSetup,
+  GuidedOnboardingPluginStart
+> {
   private readonly logger: Logger;
   private readonly guidesConfig: GuidesConfig;
 

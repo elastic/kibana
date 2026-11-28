@@ -36,7 +36,7 @@ export interface GenericBulkCreateResponse<T extends BaseFieldsLatest> {
 }
 
 export const bulkCreateWithSuppression = async <
-  T extends SuppressionFieldsLatest & BaseFieldsLatest
+  T extends SuppressionFieldsLatest & BaseFieldsLatest,
 >({
   sharedParams,
   wrappedDocs,

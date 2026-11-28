@@ -43,15 +43,12 @@ interface ManagementStartDependencies {
   serverless?: ServerlessPluginStart;
 }
 
-export class ManagementPlugin
-  implements
-    Plugin<
-      ManagementSetup,
-      ManagementStart,
-      ManagementSetupDependencies,
-      ManagementStartDependencies
-    >
-{
+export class ManagementPlugin implements Plugin<
+  ManagementSetup,
+  ManagementStart,
+  ManagementSetupDependencies,
+  ManagementStartDependencies
+> {
   private readonly managementSections = new ManagementSectionsService();
 
   private readonly appUpdater = new BehaviorSubject<AppUpdater>(() => {

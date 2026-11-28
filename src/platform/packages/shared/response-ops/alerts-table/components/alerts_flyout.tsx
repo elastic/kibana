@@ -68,7 +68,7 @@ export const AlertsFlyout = <AC extends AdditionalContext>({
         ...renderContext,
         // Show the previous alert while loading the next one
         alert: alert === undefined && prevAlert != null ? prevAlert : alert,
-      } as FlyoutSectionProps<AC>),
+      }) as FlyoutSectionProps<AC>,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [alert, renderContext]
   );

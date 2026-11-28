@@ -52,8 +52,7 @@ export type {
  * Common API for all ML embeddables
  */
 export interface MlEmbeddableBaseApi<StateType extends object = object>
-  extends DefaultEmbeddableApi<StateType>,
-    PublishesTimeRange {}
+  extends DefaultEmbeddableApi<StateType>, PublishesTimeRange {}
 
 export type MlEntity = Record<string, MlEntityField['fieldValue']>;
 
@@ -65,8 +64,10 @@ export interface AnomalySwimlaneEmbeddableUserInput {
   viewBy?: string;
 }
 
-export interface AnomalySwimlaneEmbeddableCustomInput
-  extends Omit<AnomalySwimlaneEmbeddableUserInput, 'panelTitle'> {
+export interface AnomalySwimlaneEmbeddableCustomInput extends Omit<
+  AnomalySwimlaneEmbeddableUserInput,
+  'panelTitle'
+> {
   id?: string;
   perPage?: number;
 
@@ -85,7 +86,7 @@ export interface AnomalySwimlaneServices {
 export type AnomalySwimlaneEmbeddableServices = [
   CoreStart,
   MlDependencies,
-  AnomalySwimlaneServices
+  AnomalySwimlaneServices,
 ];
 
 export type EditSwimLaneActionApi = HasType<AnomalySwimLaneEmbeddableType> &
@@ -113,8 +114,7 @@ export interface AnomalyChartsEmbeddableRuntimeState {
   severityThreshold?: number;
   selectedEntities?: MlEntityField[];
 }
-export interface AnomalyChartsEmbeddableOverridableState
-  extends AnomalyChartsEmbeddableRuntimeState {
+export interface AnomalyChartsEmbeddableOverridableState extends AnomalyChartsEmbeddableRuntimeState {
   timeRange?: TimeRange;
 }
 export interface AnomalyChartsComponentApi {
@@ -136,8 +136,7 @@ export interface AnomalyChartsDataLoadingApi {
  * Persisted state for the Anomaly Charts Embeddable.
  */
 export interface AnomalyChartsEmbeddableState
-  extends SerializedTitles,
-    AnomalyChartsEmbeddableOverridableState {}
+  extends SerializedTitles, AnomalyChartsEmbeddableOverridableState {}
 
 export type AnomalyChartsApi = AnomalyChartsComponentApi & AnomalyChartsDataLoadingApi;
 
@@ -169,8 +168,7 @@ export interface AnomalyChartsAttachmentApi extends AnomalyChartsApi {
  * Persisted state for the Anomaly Charts Embeddable.
  */
 export interface AnomalyChartsEmbeddableState
-  extends SerializedTitles,
-    AnomalyChartsEmbeddableOverridableState {}
+  extends SerializedTitles, AnomalyChartsEmbeddableOverridableState {}
 
 /** Manual input by the user */
 export interface SingleMetricViewerEmbeddableUserInput {
@@ -182,8 +180,10 @@ export interface SingleMetricViewerEmbeddableUserInput {
   panelTitle?: string;
 }
 
-export interface SingleMetricViewerEmbeddableCustomInput
-  extends Omit<SingleMetricViewerEmbeddableUserInput, 'panelTitle'> {
+export interface SingleMetricViewerEmbeddableCustomInput extends Omit<
+  SingleMetricViewerEmbeddableUserInput,
+  'panelTitle'
+> {
   id?: string;
   filters?: Filter[];
   query?: Query;
@@ -199,8 +199,7 @@ export type SingleMetricViewerEmbeddableInput = SingleMetricViewerEmbeddableCust
  * Persisted state for the Single Metric Embeddable.
  */
 export interface SingleMetricViewerEmbeddableState
-  extends SerializedTitles,
-    SingleMetricViewerEmbeddableCustomInput {}
+  extends SerializedTitles, SingleMetricViewerEmbeddableCustomInput {}
 
 export type SingleMetricViewerEmbeddableApi =
   MlEmbeddableBaseApi<SingleMetricViewerEmbeddableState> &
@@ -255,7 +254,7 @@ export type AnomalyChartsEmbeddableServices = [CoreStart, MlDependencies, Anomal
 export type SingleMetricViewerEmbeddableServices = [
   CoreStart,
   MlDependencies,
-  SingleMetricViewerServices
+  SingleMetricViewerServices,
 ];
 export interface EditAnomalyChartsPanelContext {
   embeddable: AnomalyChartsEmbeddableApi;

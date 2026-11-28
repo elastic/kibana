@@ -37,7 +37,7 @@ export type Visitor<Ctx extends contexts.VisitorContext, Input = unknown, Output
  */
 export type VisitorInput<
   Methods extends VisitorMethods,
-  Method extends keyof Methods
+  Method extends keyof Methods,
 > = UndefinedToVoid<Parameters<EnsureFunction<NonNullable<Methods[Method]>>>[1]>;
 
 /**
@@ -45,27 +45,28 @@ export type VisitorInput<
  */
 export type VisitorOutput<
   Methods extends VisitorMethods,
-  Method extends keyof Methods
+  Method extends keyof Methods,
 > = ReturnType<EnsureFunction<NonNullable<Methods[Method]>>>;
 
 /**
  * Input that satisfies any expression visitor input constraints.
  */
-export type ExpressionVisitorInput<Methods extends VisitorMethods> = AnyToVoid<
-  | VisitorInput<Methods, 'visitExpression'> &
-      VisitorInput<Methods, 'visitQuery'> &
-      VisitorInput<Methods, 'visitColumnExpression'> &
-      VisitorInput<Methods, 'visitSourceExpression'> &
-      VisitorInput<Methods, 'visitFunctionCallExpression'> &
-      VisitorInput<Methods, 'visitLiteralExpression'> &
-      VisitorInput<Methods, 'visitListLiteralExpression'> &
-      VisitorInput<Methods, 'visitTimeIntervalLiteralExpression'> &
-      VisitorInput<Methods, 'visitInlineCastExpression'> &
-      VisitorInput<Methods, 'visitOrderExpression'> &
-      VisitorInput<Methods, 'visitIdentifierExpression'> &
-      VisitorInput<Methods, 'visitMapExpression'> &
-      VisitorInput<Methods, 'visitMapEntryExpression'>
->;
+export type ExpressionVisitorInput<Methods extends VisitorMethods> = AnyToVoid<VisitorInput<
+  Methods,
+  'visitExpression'
+> &
+  VisitorInput<Methods, 'visitQuery'> &
+  VisitorInput<Methods, 'visitColumnExpression'> &
+  VisitorInput<Methods, 'visitSourceExpression'> &
+  VisitorInput<Methods, 'visitFunctionCallExpression'> &
+  VisitorInput<Methods, 'visitLiteralExpression'> &
+  VisitorInput<Methods, 'visitListLiteralExpression'> &
+  VisitorInput<Methods, 'visitTimeIntervalLiteralExpression'> &
+  VisitorInput<Methods, 'visitInlineCastExpression'> &
+  VisitorInput<Methods, 'visitOrderExpression'> &
+  VisitorInput<Methods, 'visitIdentifierExpression'> &
+  VisitorInput<Methods, 'visitMapExpression'> &
+  VisitorInput<Methods, 'visitMapEntryExpression'>>;
 
 /**
  * Input that satisfies any expression visitor output constraints.
@@ -88,32 +89,33 @@ export type ExpressionVisitorOutput<Methods extends VisitorMethods> =
 /**
  * Input that satisfies any command visitor input constraints.
  */
-export type CommandVisitorInput<Methods extends VisitorMethods> = AnyToVoid<
-  | VisitorInput<Methods, 'visitCommand'> &
-      VisitorInput<Methods, 'visitFromCommand'> &
-      VisitorInput<Methods, 'visitLimitCommand'> &
-      VisitorInput<Methods, 'visitExplainCommand'> &
-      VisitorInput<Methods, 'visitRowCommand'> &
-      VisitorInput<Methods, 'visitTimeseriesCommand'> &
-      VisitorInput<Methods, 'visitShowCommand'> &
-      VisitorInput<Methods, 'visitMetaCommand'> &
-      VisitorInput<Methods, 'visitEvalCommand'> &
-      VisitorInput<Methods, 'visitStatsCommand'> &
-      VisitorInput<Methods, 'visitInlineStatsCommand'> &
-      VisitorInput<Methods, 'visitLookupCommand'> &
-      VisitorInput<Methods, 'visitKeepCommand'> &
-      VisitorInput<Methods, 'visitSortCommand'> &
-      VisitorInput<Methods, 'visitWhereCommand'> &
-      VisitorInput<Methods, 'visitDropCommand'> &
-      VisitorInput<Methods, 'visitRenameCommand'> &
-      VisitorInput<Methods, 'visitDissectCommand'> &
-      VisitorInput<Methods, 'visitGrokCommand'> &
-      VisitorInput<Methods, 'visitEnrichCommand'> &
-      VisitorInput<Methods, 'visitMvExpandCommand'> &
-      VisitorInput<Methods, 'visitJoinCommand'> &
-      VisitorInput<Methods, 'visitRerankCommand'> &
-      VisitorInput<Methods, 'visitChangePointCommand'>
->;
+export type CommandVisitorInput<Methods extends VisitorMethods> = AnyToVoid<VisitorInput<
+  Methods,
+  'visitCommand'
+> &
+  VisitorInput<Methods, 'visitFromCommand'> &
+  VisitorInput<Methods, 'visitLimitCommand'> &
+  VisitorInput<Methods, 'visitExplainCommand'> &
+  VisitorInput<Methods, 'visitRowCommand'> &
+  VisitorInput<Methods, 'visitTimeseriesCommand'> &
+  VisitorInput<Methods, 'visitShowCommand'> &
+  VisitorInput<Methods, 'visitMetaCommand'> &
+  VisitorInput<Methods, 'visitEvalCommand'> &
+  VisitorInput<Methods, 'visitStatsCommand'> &
+  VisitorInput<Methods, 'visitInlineStatsCommand'> &
+  VisitorInput<Methods, 'visitLookupCommand'> &
+  VisitorInput<Methods, 'visitKeepCommand'> &
+  VisitorInput<Methods, 'visitSortCommand'> &
+  VisitorInput<Methods, 'visitWhereCommand'> &
+  VisitorInput<Methods, 'visitDropCommand'> &
+  VisitorInput<Methods, 'visitRenameCommand'> &
+  VisitorInput<Methods, 'visitDissectCommand'> &
+  VisitorInput<Methods, 'visitGrokCommand'> &
+  VisitorInput<Methods, 'visitEnrichCommand'> &
+  VisitorInput<Methods, 'visitMvExpandCommand'> &
+  VisitorInput<Methods, 'visitJoinCommand'> &
+  VisitorInput<Methods, 'visitRerankCommand'> &
+  VisitorInput<Methods, 'visitChangePointCommand'>>;
 
 /**
  * Input that satisfies any command visitor output constraints.
@@ -147,7 +149,7 @@ export type CommandVisitorOutput<Methods extends VisitorMethods> =
 
 export interface VisitorMethods<
   Visitors extends VisitorMethods = any,
-  Data extends SharedData = SharedData
+  Data extends SharedData = SharedData,
 > {
   visitQuery?: Visitor<contexts.QueryVisitorContext<Visitors, Data>, any, any>;
   visitCommand?: Visitor<contexts.CommandVisitorContext<Visitors, Data>, any, any>;
@@ -251,30 +253,30 @@ export interface VisitorMethods<
 export type AstNodeToVisitorName<Node extends VisitorAstNode> = Node extends ESQLAstQueryNode
   ? 'visitQuery'
   : Node extends ast.ESQLCommand
-  ? 'visitCommand'
-  : Node extends ast.ESQLCommandOption
-  ? 'visitCommandOption'
-  : Node extends ast.ESQLSource
-  ? 'visitSourceExpression'
-  : Node extends ast.ESQLColumn
-  ? 'visitColumnExpression'
-  : Node extends ast.ESQLFunction
-  ? 'visitFunctionCallExpression'
-  : Node extends ast.ESQLLiteral
-  ? 'visitLiteralExpression'
-  : Node extends ast.ESQLList
-  ? 'visitListLiteralExpression'
-  : Node extends ast.ESQLTimeInterval
-  ? 'visitTimeIntervalLiteralExpression'
-  : Node extends ast.ESQLInlineCast
-  ? 'visitInlineCastExpression'
-  : Node extends ast.ESQLIdentifier
-  ? 'visitIdentifierExpression'
-  : Node extends ast.ESQLMap
-  ? 'visitMapExpression'
-  : Node extends ast.ESQLMapEntry
-  ? 'visitMapEntryExpression'
-  : never;
+    ? 'visitCommand'
+    : Node extends ast.ESQLCommandOption
+      ? 'visitCommandOption'
+      : Node extends ast.ESQLSource
+        ? 'visitSourceExpression'
+        : Node extends ast.ESQLColumn
+          ? 'visitColumnExpression'
+          : Node extends ast.ESQLFunction
+            ? 'visitFunctionCallExpression'
+            : Node extends ast.ESQLLiteral
+              ? 'visitLiteralExpression'
+              : Node extends ast.ESQLList
+                ? 'visitListLiteralExpression'
+                : Node extends ast.ESQLTimeInterval
+                  ? 'visitTimeIntervalLiteralExpression'
+                  : Node extends ast.ESQLInlineCast
+                    ? 'visitInlineCastExpression'
+                    : Node extends ast.ESQLIdentifier
+                      ? 'visitIdentifierExpression'
+                      : Node extends ast.ESQLMap
+                        ? 'visitMapExpression'
+                        : Node extends ast.ESQLMapEntry
+                          ? 'visitMapEntryExpression'
+                          : never;
 
 /**
  * Asserts that a type is a function.

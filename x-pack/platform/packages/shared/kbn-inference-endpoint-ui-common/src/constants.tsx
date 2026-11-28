@@ -12,7 +12,7 @@ import { GEMINI, DOCUMENTATION_BASE as DOCUMENTATION } from './translations';
 export enum ServiceProviderKeys {
   'alibabacloud-ai-search' = 'alibabacloud-ai-search',
   amazonbedrock = 'amazonbedrock',
-  'amazon_sagemaker' = 'amazon_sagemaker',
+  amazon_sagemaker = 'amazon_sagemaker',
   anthropic = 'anthropic',
   azureaistudio = 'azureaistudio',
   azureopenai = 'azureopenai',

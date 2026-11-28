@@ -34,15 +34,12 @@ import { registerUsageCollector } from './collectors/usage';
 import { toolCallEvent } from './analytics/tool_call';
 import { conversationDeleteEvent } from './analytics/conversation_delete';
 import { conversationDuplicateEvent } from './analytics/conversation_duplicate';
-export class ObservabilityAIAssistantPlugin
-  implements
-    Plugin<
-      ObservabilityAIAssistantServerSetup,
-      ObservabilityAIAssistantServerStart,
-      ObservabilityAIAssistantPluginSetupDependencies,
-      ObservabilityAIAssistantPluginStartDependencies
-    >
-{
+export class ObservabilityAIAssistantPlugin implements Plugin<
+  ObservabilityAIAssistantServerSetup,
+  ObservabilityAIAssistantServerStart,
+  ObservabilityAIAssistantPluginSetupDependencies,
+  ObservabilityAIAssistantPluginStartDependencies
+> {
   logger: Logger;
   config: ObservabilityAIAssistantConfig;
   service: ObservabilityAIAssistantService | undefined;

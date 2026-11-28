@@ -65,15 +65,12 @@ const logsSampleDataLinkLabel = i18n.translate('xpack.infra.sampleDataLinkLabel'
   defaultMessage: 'Logs',
 });
 
-export class InfraServerPlugin
-  implements
-    Plugin<
-      InfraPluginSetup,
-      InfraPluginStart,
-      InfraServerPluginSetupDeps,
-      InfraServerPluginStartDeps
-    >
-{
+export class InfraServerPlugin implements Plugin<
+  InfraPluginSetup,
+  InfraPluginStart,
+  InfraServerPluginSetupDeps,
+  InfraServerPluginStartDeps
+> {
   public config: InfraConfig;
   public libs!: InfraBackendLibs;
   public logger: Logger;

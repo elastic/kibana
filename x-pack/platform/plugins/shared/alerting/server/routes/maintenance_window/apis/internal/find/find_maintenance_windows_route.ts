@@ -64,9 +64,8 @@ export const findMaintenanceWindowsRoute = (
         const maintenanceWindowClient = (await context.alerting).getMaintenanceWindowClient();
 
         const options = transformFindMaintenanceWindowParamsV1(query);
-        const findResult: FindMaintenanceWindowsResult = await maintenanceWindowClient.find(
-          options
-        );
+        const findResult: FindMaintenanceWindowsResult =
+          await maintenanceWindowClient.find(options);
         const responseBody: FindMaintenanceWindowsResponseV1 =
           transformFindMaintenanceWindowResponseV1(findResult);
 

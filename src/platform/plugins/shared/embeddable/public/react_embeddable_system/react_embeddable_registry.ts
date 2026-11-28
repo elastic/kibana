@@ -21,7 +21,7 @@ const registry: { [key: string]: () => Promise<EmbeddableFactory<any, any>> } = 
  */
 export const registerReactEmbeddableFactory = <
   SerializedState extends object = object,
-  Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>
+  Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>,
 >(
   type: string,
   getFactory: () => Promise<EmbeddableFactory<SerializedState, Api>>
@@ -38,7 +38,7 @@ export const registerReactEmbeddableFactory = <
 
 export const getReactEmbeddableFactory = async <
   SerializedState extends object = object,
-  Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>
+  Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>,
 >(
   key: string
 ): Promise<EmbeddableFactory<SerializedState, Api>> => {

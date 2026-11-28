@@ -165,9 +165,8 @@ export class MonitorConfigRepository {
           ...(!isEmpty(spaces) && { initialNamespaces: spaces }),
         };
       });
-    const result = await this.soClient.bulkCreate<EncryptedSyntheticsMonitorAttributes>(
-      newMonitors
-    );
+    const result =
+      await this.soClient.bulkCreate<EncryptedSyntheticsMonitorAttributes>(newMonitors);
     return result.saved_objects;
   }
 
@@ -346,7 +345,7 @@ export class MonitorConfigRepository {
   }
 
   async getAll<
-    T extends EncryptedSyntheticsMonitorAttributes = EncryptedSyntheticsMonitorAttributes
+    T extends EncryptedSyntheticsMonitorAttributes = EncryptedSyntheticsMonitorAttributes,
   >({
     search,
     fields,

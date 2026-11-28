@@ -17,8 +17,9 @@ import type {
 } from '@kbn/content-management-favorites-server';
 import { firstValueFrom } from 'rxjs';
 
-export interface GetFavoritesResponse<Metadata extends object | void = void>
-  extends GetFavoritesResponseServer {
+export interface GetFavoritesResponse<
+  Metadata extends object | void = void,
+> extends GetFavoritesResponseServer {
   favoriteMetadata: Metadata extends object ? Record<string, Metadata> : never;
 }
 
@@ -37,9 +38,9 @@ export interface FavoritesClientPublic<Metadata extends object | void = void> {
   reportRemoveFavoriteClick(): void;
 }
 
-export class FavoritesClient<Metadata extends object | void = void>
-  implements FavoritesClientPublic<Metadata>
-{
+export class FavoritesClient<
+  Metadata extends object | void = void,
+> implements FavoritesClientPublic<Metadata> {
   constructor(
     private readonly appName: string,
     private readonly favoriteObjectType: string,

@@ -71,7 +71,7 @@ const panelContextValue = (dataFormattedForFieldBrowser: TimelineEventsDetailsIt
     scopeId: 'scopeId',
     dataFormattedForFieldBrowser,
     getFieldsData: mockGetFieldsData,
-  } as unknown as DocumentDetailsContext);
+  }) as unknown as DocumentDetailsContext;
 
 const renderDescription = (panelContext: DocumentDetailsContext) =>
   render(

@@ -37,22 +37,21 @@ const LazyIndicatorsPageWrapper = React.lazy(() => import('./containers/indicato
 export const createApp =
   (services: Services) =>
   () =>
-  ({ securitySolutionContext }: AppProps) =>
-    (
-      <IntlProvider>
-        <ReduxStoreProvider store={securitySolutionContext.securitySolutionStore}>
-          <SecuritySolutionContext.Provider value={securitySolutionContext}>
-            <KibanaContextProvider services={services}>
-              <EnterpriseGuard>
-                <Suspense fallback={<div />}>
-                  <LazyIndicatorsPageWrapper />
-                </Suspense>
-              </EnterpriseGuard>
-            </KibanaContextProvider>
-          </SecuritySolutionContext.Provider>
-        </ReduxStoreProvider>
-      </IntlProvider>
-    );
+  ({ securitySolutionContext }: AppProps) => (
+    <IntlProvider>
+      <ReduxStoreProvider store={securitySolutionContext.securitySolutionStore}>
+        <SecuritySolutionContext.Provider value={securitySolutionContext}>
+          <KibanaContextProvider services={services}>
+            <EnterpriseGuard>
+              <Suspense fallback={<div />}>
+                <LazyIndicatorsPageWrapper />
+              </Suspense>
+            </EnterpriseGuard>
+          </KibanaContextProvider>
+        </SecuritySolutionContext.Provider>
+      </ReduxStoreProvider>
+    </IntlProvider>
+  );
 
 export class ThreatIntelligencePlugin implements Plugin<void, void> {
   public async setup(

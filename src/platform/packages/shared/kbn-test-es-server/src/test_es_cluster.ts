@@ -168,7 +168,7 @@ export interface CreateTestEsClusterOptions {
 }
 
 export function createTestEsCluster<
-  Options extends CreateTestEsClusterOptions = CreateTestEsClusterOptions
+  Options extends CreateTestEsClusterOptions = CreateTestEsClusterOptions,
 >(options: Options): EsTestCluster<Options> {
   const {
     port = esTestConfig.getPort(),

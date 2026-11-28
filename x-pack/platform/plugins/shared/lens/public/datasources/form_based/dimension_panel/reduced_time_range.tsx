@@ -145,10 +145,10 @@ export function ReducedTimeRange({
                   'Additional time range filter can not be used together with date histogram or without a default time field specified on the data view',
               })
             : isLocalValueInvalid
-            ? i18n.translate('xpack.lens.indexPattern.reducedTimeRange.genericInvalidHelp', {
-                defaultMessage: 'Time range value is not valid.',
-              })
-            : undefined
+              ? i18n.translate('xpack.lens.indexPattern.reducedTimeRange.genericInvalidHelp', {
+                  defaultMessage: 'Time range value is not valid.',
+                })
+              : undefined
         }
         isInvalid={isLocalValueInvalid || shouldNotUseReducedTimeRange}
       >

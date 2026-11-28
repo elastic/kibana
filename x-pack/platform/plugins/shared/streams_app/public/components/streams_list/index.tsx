@@ -56,8 +56,8 @@ export function asTrees(streams: Streams.all.Definition[]) {
         type: Streams.UnwiredStream.Definition.is(stream)
           ? 'classic'
           : isRootStreamDefinition(stream)
-          ? 'root'
-          : 'wired',
+            ? 'root'
+            : 'wired',
       };
       currentTree.push(newNode);
     }

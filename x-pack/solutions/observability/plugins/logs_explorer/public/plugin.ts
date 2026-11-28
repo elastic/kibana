@@ -17,9 +17,10 @@ import type {
   LogsExplorerStartDeps,
 } from './types';
 
-export class LogsExplorerPlugin
-  implements Plugin<LogsExplorerPluginSetup, LogsExplorerPluginStart>
-{
+export class LogsExplorerPlugin implements Plugin<
+  LogsExplorerPluginSetup,
+  LogsExplorerPluginStart
+> {
   private locators?: LogsExplorerLocators;
 
   constructor(context: PluginInitializerContext) {}

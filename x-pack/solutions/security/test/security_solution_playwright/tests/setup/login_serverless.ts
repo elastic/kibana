@@ -12,9 +12,8 @@ import { test } from '../../fixtures/saml';
 export const authFile = '.auth/user.json';
 
 test('serverless', { tag: '@serverless' }, async ({ samlSessionManager }) => {
-  const cookie = await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(
-    'platform_engineer'
-  );
+  const cookie =
+    await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope('platform_engineer');
   const parsedUrl = new URL(process.env.KIBANA_URL!);
   const domain = parsedUrl.hostname;
   const maxAge = 100 * 365 * 24 * 60 * 60;

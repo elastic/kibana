@@ -144,7 +144,7 @@ function sortByOrder<T extends AppMenuActionBase>(a: T, b: T): number {
 }
 
 function getAppMenuSubmenuWithSortedItemsByOrder<
-  T extends AppMenuActionSubmenuBase = AppMenuActionSubmenuSecondary | AppMenuActionSubmenuCustom
+  T extends AppMenuActionSubmenuBase = AppMenuActionSubmenuSecondary | AppMenuActionSubmenuCustom,
 >(appMenuItem: T): T {
   return {
     ...appMenuItem,
@@ -163,7 +163,7 @@ function sortAppMenuItemsByOrder(appMenuItems: AppMenuItem[]): AppMenuItem[] {
 }
 
 function getAppMenuSubmenuWithAssignedOrder<
-  T extends AppMenuActionSubmenuBase = AppMenuActionSubmenuSecondary | AppMenuActionSubmenuCustom
+  T extends AppMenuActionSubmenuBase = AppMenuActionSubmenuSecondary | AppMenuActionSubmenuCustom,
 >(appMenuItem: T, order: number): T {
   let orderInSubmenu = 0;
   const actionsWithOrder = appMenuItem.actions.map((action) => {
@@ -181,7 +181,7 @@ function getAppMenuSubmenuWithAssignedOrder<
 }
 
 function extendSubmenuWithCustomActions<
-  T extends AppMenuActionSubmenuBase = AppMenuActionSubmenuSecondary | AppMenuActionSubmenuCustom
+  T extends AppMenuActionSubmenuBase = AppMenuActionSubmenuSecondary | AppMenuActionSubmenuCustom,
 >(
   appMenuItem: T,
   customActions: Array<AppMenuSubmenuActionCustom | AppMenuSubmenuHorizontalRule>

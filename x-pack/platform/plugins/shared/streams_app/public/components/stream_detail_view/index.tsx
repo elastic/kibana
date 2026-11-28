@@ -46,7 +46,7 @@ const getStreamDetailTabs = ({
         defaultMessage: 'Dashboards',
       }),
     },
-  } as const);
+  }) as const;
 
 export type StreamDetailTabs = ReturnType<typeof getStreamDetailTabs>;
 export type StreamDetailTabName = keyof StreamDetailTabs;

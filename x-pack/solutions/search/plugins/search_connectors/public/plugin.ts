@@ -15,15 +15,12 @@ import {
   SearchConnectorsPluginStartDependencies,
 } from './types';
 
-export class SearchConnectorsPlugin
-  implements
-    Plugin<
-      SearchConnectorsPluginSetup,
-      SearchConnectorsPluginStart,
-      SearchConnectorsPluginSetupDependencies,
-      SearchConnectorsPluginStartDependencies
-    >
-{
+export class SearchConnectorsPlugin implements Plugin<
+  SearchConnectorsPluginSetup,
+  SearchConnectorsPluginStart,
+  SearchConnectorsPluginSetupDependencies,
+  SearchConnectorsPluginStartDependencies
+> {
   public setup(
     core: CoreSetup<SearchConnectorsPluginStartDependencies, SearchConnectorsPluginStart>,
     setupDeps: SearchConnectorsPluginSetupDependencies

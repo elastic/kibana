@@ -132,7 +132,7 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
             // @ts-ignore - saved state can contain legacy row height mode
             state.rowHeight === LEGACY_SINGLE_ROW_HEIGHT_MODE
               ? RowHeightMode.custom
-              : state.rowHeight ?? DEFAULT_ROW_HEIGHT
+              : (state.rowHeight ?? DEFAULT_ROW_HEIGHT)
           }
           label={i18n.translate('xpack.lens.table.visualOptionsFitRowToContentLabel', {
             defaultMessage: 'Body cell lines',

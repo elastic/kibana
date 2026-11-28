@@ -17,9 +17,7 @@ import { constructLocatorPath } from './utils';
 
 export type SingleDatasetLocator = LocatorPublic<SingleDatasetLocatorParams>;
 
-export class SingleDatasetLocatorDefinition
-  implements LocatorDefinition<SingleDatasetLocatorParams>
-{
+export class SingleDatasetLocatorDefinition implements LocatorDefinition<SingleDatasetLocatorParams> {
   public readonly id = SINGLE_DATASET_LOCATOR_ID;
 
   constructor(protected readonly deps: ObsLogsExplorerLocatorDependencies) {}

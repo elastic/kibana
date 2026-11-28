@@ -212,8 +212,8 @@ export function RuleDetailsPage() {
     rule?.executionStatus.error?.reason === RuleExecutionStatusErrorReasons.License
       ? rulesStatusesTranslationsMapping.noLicense
       : rule
-      ? rulesStatusesTranslationsMapping[rule.executionStatus.status]
-      : '';
+        ? rulesStatusesTranslationsMapping[rule.executionStatus.status]
+        : '';
 
   if (isLoading || isRuleDeleting) return <CenterJustifiedSpinner />;
   if (!rule || isError) return <NoRuleFoundPanel />;

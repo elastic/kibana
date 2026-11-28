@@ -254,7 +254,7 @@ export function initializeLayoutManager(
     if (!apiToDuplicate || !layoutItemToDuplicate) throw new PanelNotFoundError();
 
     const allTitles = await getPanelTitles();
-    const lastTitle = apiPublishesTitle(apiToDuplicate) ? getTitle(apiToDuplicate) ?? '' : '';
+    const lastTitle = apiPublishesTitle(apiToDuplicate) ? (getTitle(apiToDuplicate) ?? '') : '';
     const newTitle = getClonedPanelTitle(allTitles, lastTitle);
 
     const uuidOfDuplicate = v4();

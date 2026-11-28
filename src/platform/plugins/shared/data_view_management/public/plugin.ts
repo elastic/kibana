@@ -54,15 +54,12 @@ const sectionsHeader = i18n.translate('indexPatternManagement.dataView.sectionsH
 
 export const IPM_APP_ID = 'dataViews';
 
-export class IndexPatternManagementPlugin
-  implements
-    Plugin<
-      IndexPatternManagementSetup,
-      IndexPatternManagementStart,
-      IndexPatternManagementSetupDependencies,
-      IndexPatternManagementStartDependencies
-    >
-{
+export class IndexPatternManagementPlugin implements Plugin<
+  IndexPatternManagementSetup,
+  IndexPatternManagementStart,
+  IndexPatternManagementSetupDependencies,
+  IndexPatternManagementStartDependencies
+> {
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(

@@ -61,12 +61,12 @@ export function DashboardEmptyScreen() {
           defaultMessage: 'This dashboard is empty. Let\u2019s fill it up!',
         })
       : showWriteControls
-      ? i18n.translate('dashboard.emptyScreen.viewModeTitle', {
-          defaultMessage: 'Add visualizations to your dashboard',
-        })
-      : i18n.translate('dashboard.emptyScreen.noPermissionsTitle', {
-          defaultMessage: 'This dashboard is empty.',
-        });
+        ? i18n.translate('dashboard.emptyScreen.viewModeTitle', {
+            defaultMessage: 'Add visualizations to your dashboard',
+          })
+        : i18n.translate('dashboard.emptyScreen.noPermissionsTitle', {
+            defaultMessage: 'This dashboard is empty.',
+          });
     return <h2>{titleString}</h2>;
   })();
 
@@ -76,12 +76,12 @@ export function DashboardEmptyScreen() {
           defaultMessage: 'Create a visualization of your data, or add one from the library.',
         })
       : showWriteControls
-      ? i18n.translate('dashboard.emptyScreen.viewModeSubtitle', {
-          defaultMessage: 'Enter edit mode, and then start adding your visualizations.',
-        })
-      : i18n.translate('dashboard.emptyScreen.noPermissionsSubtitle', {
-          defaultMessage: 'You need additional privileges to edit this dashboard.',
-        });
+        ? i18n.translate('dashboard.emptyScreen.viewModeSubtitle', {
+            defaultMessage: 'Enter edit mode, and then start adding your visualizations.',
+          })
+        : i18n.translate('dashboard.emptyScreen.noPermissionsSubtitle', {
+            defaultMessage: 'You need additional privileges to edit this dashboard.',
+          });
     return (
       <EuiText size="s" color="subdued">
         <span>{bodyString}</span>

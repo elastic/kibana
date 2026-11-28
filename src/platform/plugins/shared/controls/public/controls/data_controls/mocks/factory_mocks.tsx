@@ -25,7 +25,7 @@ export const getMockedSearchControlFactory = (api: any) =>
       api,
       Component: <>Search control component</>,
     }),
-  } as DataControlFactory);
+  }) as DataControlFactory;
 
 export const getMockedOptionsListControlFactory = (api: any) =>
   ({
@@ -43,7 +43,7 @@ export const getMockedOptionsListControlFactory = (api: any) =>
     CustomOptionsComponent: () => (
       <div data-test-subj="optionsListCustomSettings">Custom options list component</div>
     ),
-  } as DataControlFactory);
+  }) as DataControlFactory;
 
 export const getMockedRangeSliderControlFactory = (api: any) =>
   ({
@@ -55,4 +55,4 @@ export const getMockedRangeSliderControlFactory = (api: any) =>
       api,
       Component: <>Range slider component</>,
     }),
-  } as DataControlFactory);
+  }) as DataControlFactory;

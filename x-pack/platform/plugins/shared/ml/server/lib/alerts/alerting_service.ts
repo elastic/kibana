@@ -210,11 +210,14 @@ export function alertingServiceProvider(
     const fieldFormatMap = await getFieldsFormatMap(indexPattern);
 
     const fieldFormatters = fieldFormatMap
-      ? Object.entries(fieldFormatMap).reduce((acc, [fieldName, config]) => {
-          const formatter = fieldFormatsRegistry.deserialize(config);
-          acc[fieldName] = formatter.convert.bind(formatter);
-          return acc;
-        }, {} as Record<string, IFieldFormat['convert']>)
+      ? Object.entries(fieldFormatMap).reduce(
+          (acc, [fieldName, config]) => {
+            const formatter = fieldFormatsRegistry.deserialize(config);
+            acc[fieldName] = formatter.convert.bind(formatter);
+            return acc;
+          },
+          {} as Record<string, IFieldFormat['convert']>
+        )
       : {};
 
     // store formatters to pass to the executor state update
@@ -427,13 +430,19 @@ export function alertingServiceProvider(
     if (resultType === ML_ANOMALY_RESULT_TYPE.RECORD) {
       const recordSource = source as MlAnomalyRecordDoc;
 
-      const detectorsByJob = jobs.reduce((acc, job) => {
-        acc[job.job_id] = job.analysis_config.detectors.reduce((innterAcc, detector) => {
-          innterAcc[detector.detector_index!] = detector.detector_description;
-          return innterAcc;
-        }, {} as Record<number, string | undefined>);
-        return acc;
-      }, {} as Record<string, Record<number, string | undefined>>);
+      const detectorsByJob = jobs.reduce(
+        (acc, job) => {
+          acc[job.job_id] = job.analysis_config.detectors.reduce(
+            (innterAcc, detector) => {
+              innterAcc[detector.detector_index!] = detector.detector_description;
+              return innterAcc;
+            },
+            {} as Record<number, string | undefined>
+          );
+          return acc;
+        },
+        {} as Record<string, Record<number, string | undefined>>
+      );
 
       const detectorDescription = get(detectorsByJob, [
         recordSource.job_id,

@@ -104,8 +104,8 @@ export const TryInConsoleButton = ({
       type === 'link'
         ? 'tryInConsoleLink'
         : type === 'contextMenuItem'
-        ? 'tryInConsoleContextMenuItem'
-        : 'tryInConsoleButton',
+          ? 'tryInConsoleContextMenuItem'
+          : 'tryInConsoleButton',
     'aria-label': getAriaLabel(),
     'data-telemetry-id': telemetryId,
     onClick,

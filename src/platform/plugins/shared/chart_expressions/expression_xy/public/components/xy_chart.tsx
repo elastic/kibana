@@ -463,8 +463,8 @@ export function XYChart({
       .map((config) => ({
         ...config,
         position: config
-          ? getAxisGroupForReferenceLine(axesConfiguration, config, shouldRotate)?.position ??
-            Position.Left
+          ? (getAxisGroupForReferenceLine(axesConfiguration, config, shouldRotate)?.position ??
+            Position.Left)
           : Position.Bottom,
       })),
     ...groupedLineAnnotations,
@@ -862,7 +862,7 @@ export function XYChart({
                     color: undefined, // removes background for embeddables
                   },
                   legend: {
-                    labelOptions: { maxLines: legend.shouldTruncate ? legend?.maxLines ?? 1 : 0 },
+                    labelOptions: { maxLines: legend.shouldTruncate ? (legend?.maxLines ?? 1) : 0 },
                   },
                   // if not title or labels are shown for axes, add some padding if required by reference line markers
                   chartMargins: {
@@ -1052,8 +1052,9 @@ export function XYChart({
                   rangeAnnotations.length && shouldHideDetails
                     ? OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION
                     : isHorizontalTimeAxis
-                    ? MULTILAYER_TIME_AXIS_TICKLINE_PADDING + chartBaseTheme.axes.tickLabel.fontSize
-                    : Math.max(chartBaseTheme.axes.tickLine.size, OUTSIDE_RECT_ANNOTATION_WIDTH)
+                      ? MULTILAYER_TIME_AXIS_TICKLINE_PADDING +
+                        chartBaseTheme.axes.tickLabel.fontSize
+                      : Math.max(chartBaseTheme.axes.tickLine.size, OUTSIDE_RECT_ANNOTATION_WIDTH)
                 }
               />
             ) : null}

@@ -33,9 +33,10 @@ import type {
   ObservabilityLogsExplorerSetupDeps,
   ObservabilityLogsExplorerStartDeps,
 } from './types';
-export class ObservabilityLogsExplorerPlugin
-  implements Plugin<ObservabilityLogsExplorerPluginSetup, ObservabilityLogsExplorerPluginStart>
-{
+export class ObservabilityLogsExplorerPlugin implements Plugin<
+  ObservabilityLogsExplorerPluginSetup,
+  ObservabilityLogsExplorerPluginStart
+> {
   private locators?: ObservabilityLogsExplorerLocators;
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
 
@@ -58,9 +59,8 @@ export class ObservabilityLogsExplorerPlugin
       updater$: this.appStateUpdater,
       mount: async (appMountParams: ObservabilityLogsExplorerAppMountParameters) => {
         const [coreStart, pluginsStart, ownPluginStart] = await core.getStartServices();
-        const { renderObservabilityLogsExplorer } = await import(
-          './applications/observability_logs_explorer'
-        );
+        const { renderObservabilityLogsExplorer } =
+          await import('./applications/observability_logs_explorer');
 
         return renderObservabilityLogsExplorer(
           coreStart,
@@ -84,9 +84,8 @@ export class ObservabilityLogsExplorerPlugin
       visibleIn: [],
       mount: async (appMountParams: AppMountParameters) => {
         const [coreStart] = await core.getStartServices();
-        const { renderObservabilityLogsExplorerRedirect } = await import(
-          './applications/redirect_to_observability_logs_explorer'
-        );
+        const { renderObservabilityLogsExplorerRedirect } =
+          await import('./applications/redirect_to_observability_logs_explorer');
 
         return renderObservabilityLogsExplorerRedirect(coreStart, appMountParams);
       },
@@ -100,9 +99,8 @@ export class ObservabilityLogsExplorerPlugin
       visibleIn: [],
       mount: async (appMountParams: AppMountParameters) => {
         const [coreStart] = await core.getStartServices();
-        const { renderLastUsedLogsViewerRedirect } = await import(
-          './applications/last_used_logs_viewer'
-        );
+        const { renderLastUsedLogsViewerRedirect } =
+          await import('./applications/last_used_logs_viewer');
 
         return renderLastUsedLogsViewerRedirect(coreStart, appMountParams);
       },

@@ -57,7 +57,7 @@ export interface GenAISemConvAttributes {
 interface GenAISemConvEvent<
   TName extends string,
   TBody extends {},
-  TAttributeName extends keyof GenAISemConvAttributes
+  TAttributeName extends keyof GenAISemConvAttributes,
 > {
   name: TName;
   body: TBody;

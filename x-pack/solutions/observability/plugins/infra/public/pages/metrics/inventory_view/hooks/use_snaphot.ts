@@ -14,8 +14,10 @@ import type {
 } from '../../../../../common/http_api/snapshot_api';
 import { SnapshotNodeResponseRT } from '../../../../../common/http_api/snapshot_api';
 
-export interface UseSnapshotRequest
-  extends Omit<SnapshotRequest, 'filterQuery' | 'timerange' | 'includeTimeseries'> {
+export interface UseSnapshotRequest extends Omit<
+  SnapshotRequest,
+  'filterQuery' | 'timerange' | 'includeTimeseries'
+> {
   filterQuery?: string | null | symbol;
   currentTime: number;
   includeTimeseries?: boolean;

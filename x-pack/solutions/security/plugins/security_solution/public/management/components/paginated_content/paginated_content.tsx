@@ -69,10 +69,9 @@ export interface PaginatedContentProps<T, C extends ComponentWithAnyProps> exten
 // Work around below was created based on this discussion:
 // https://github.com/DefinitelyTyped/DefinitelyTyped/issues/37087#issuecomment-568218789
 interface TypedGenericComponentMemo {
-  <T, C extends ComponentWithAnyProps>(p: PaginatedContentProps<T, C>): ReactElement<
-    PaginatedContentProps<T, C>,
-    FunctionComponent<PaginatedContentProps<T, C>>
-  >;
+  <T, C extends ComponentWithAnyProps>(
+    p: PaginatedContentProps<T, C>
+  ): ReactElement<PaginatedContentProps<T, C>, FunctionComponent<PaginatedContentProps<T, C>>>;
 
   displayName: string;
 }

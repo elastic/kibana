@@ -321,9 +321,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     it('handles spaces', async () => {
       const SPACE_ID = `test-space-${uuidv4()}`;
       const SPACE_NAME = `test-space-name ${uuidv4()}`;
-      const spaceScopedPrivateLocation = await testPrivateLocations.addTestPrivateLocation(
-        SPACE_ID
-      );
+      const spaceScopedPrivateLocation =
+        await testPrivateLocations.addTestPrivateLocation(SPACE_ID);
       let monitorId = '';
       const monitor = {
         ...httpMonitorJson,

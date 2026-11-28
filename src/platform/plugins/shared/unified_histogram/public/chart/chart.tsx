@@ -263,7 +263,7 @@ export function Chart({
   const LensSaveModalComponent = services.lens.SaveModalComponent;
   const hasLensSuggestions = Boolean(
     isPlainRecord &&
-      lensVisServiceCurrentSuggestionContext?.type === UnifiedHistogramSuggestionType.lensSuggestion
+    lensVisServiceCurrentSuggestionContext?.type === UnifiedHistogramSuggestionType.lensSuggestion
   );
 
   const canCustomizeVisualization =

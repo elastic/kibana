@@ -18,7 +18,11 @@ import { normalizeUrl } from '../utils/normalize_url';
 type KibanaClientFetchOptions = RequestInit;
 
 export class KibanaClientHttpError extends Error {
-  constructor(message: string, public readonly statusCode: number, public readonly data?: unknown) {
+  constructor(
+    message: string,
+    public readonly statusCode: number,
+    public readonly data?: unknown
+  ) {
     super(message);
   }
 }

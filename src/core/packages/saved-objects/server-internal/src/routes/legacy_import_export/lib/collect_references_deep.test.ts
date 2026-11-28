@@ -98,8 +98,8 @@ test('collects dashboard and all dependencies', async () => {
       throw new Error('Invalid test data');
     }
     return Promise.resolve({
-      saved_objects: objects.map(
-        (obj: any) => data.find((row) => row.id === obj.id && row.type === obj.type)!
+      saved_objects: objects.map((obj: any) =>
+        data.find((row) => row.id === obj.id && row.type === obj.type)!
       ),
     });
   });

@@ -548,7 +548,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
     markSizeAccessor: markSizeColumnId,
     markFormat: (value) => markFormatter.convert(value),
     data: rows,
-    xScaleType: xColumnId ? layer.xScaleType ?? defaultXScaleType : 'ordinal',
+    xScaleType: xColumnId ? (layer.xScaleType ?? defaultXScaleType) : 'ordinal',
     yScaleType:
       formatter?.id === 'bytes' && yScaleType === ScaleType.Linear
         ? ScaleType.LinearBinary

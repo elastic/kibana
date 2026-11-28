@@ -43,8 +43,10 @@ export interface FieldEditorFormState {
   submit: FormHook<Field>['submit'];
 }
 
-export interface FieldFormInternal
-  extends Omit<Field, 'type' | 'internalType' | 'fields' | 'popularity'> {
+export interface FieldFormInternal extends Omit<
+  Field,
+  'type' | 'internalType' | 'fields' | 'popularity'
+> {
   fields?: Record<string, { type: RuntimePrimitiveTypes }>;
   type: TypeSelection;
   popularity?: string;

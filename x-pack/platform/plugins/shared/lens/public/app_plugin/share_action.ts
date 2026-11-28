@@ -16,11 +16,10 @@ import type { DatasourceMap, VisualizationMap } from '../types';
 import { extractReferencesFromState, getResolvedDateRange } from '../utils';
 import { getEditPath } from '../../common/constants';
 
-export interface ShareableConfiguration
-  extends Pick<
-    LensAppState,
-    'activeDatasourceId' | 'datasourceStates' | 'visualization' | 'filters' | 'query'
-  > {
+export interface ShareableConfiguration extends Pick<
+  LensAppState,
+  'activeDatasourceId' | 'datasourceStates' | 'visualization' | 'filters' | 'query'
+> {
   datasourceMap: DatasourceMap;
   visualizationMap: VisualizationMap;
   currentDoc: LensDocument | undefined;

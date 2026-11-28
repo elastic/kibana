@@ -36,11 +36,11 @@ const GUIDED_ONBOARDING_RULES_FILTER = {
 };
 
 export enum GuidedOnboardingRulesStatus {
-  'inactive' = 'inactive',
-  'installRules' = 'installRules',
-  'searchRules' = 'searchRules',
-  'enableRules' = 'enableRules',
-  'completed' = 'completed',
+  inactive = 'inactive',
+  installRules = 'installRules',
+  searchRules = 'searchRules',
+  enableRules = 'enableRules',
+  completed = 'completed',
 }
 
 export const RulesManagementTour = () => {

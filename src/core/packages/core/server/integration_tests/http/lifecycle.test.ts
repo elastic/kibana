@@ -280,7 +280,7 @@ describe('OnPreRouting', () => {
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
 
-    registerOnPreRouting((req, res, t) => ({} as any));
+    registerOnPreRouting((req, res, t) => ({}) as any);
     await server.start();
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
@@ -424,7 +424,7 @@ describe('OnPreAuth', () => {
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
 
-    registerOnPreAuth((req, res, t) => ({} as any));
+    registerOnPreAuth((req, res, t) => ({}) as any);
     await server.start();
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
@@ -594,7 +594,7 @@ describe('OnPostAuth', () => {
     const router = createRouter('/');
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
-    registerOnPostAuth((req, res, t) => ({} as any));
+    registerOnPostAuth((req, res, t) => ({}) as any);
     await server.start();
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
@@ -842,9 +842,8 @@ describe('Auth', () => {
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
 
-    const sessionStorageFactory = await createCookieSessionStorageFactory<StorageData>(
-      cookieOptions
-    );
+    const sessionStorageFactory =
+      await createCookieSessionStorageFactory<StorageData>(cookieOptions);
     registerAuth((req, res, toolkit) => {
       const user = { id: '42' };
       const sessionStorage = sessionStorageFactory.asScoped(req);
@@ -880,9 +879,8 @@ describe('Auth', () => {
     } = await server.setup(setupDeps);
     const router = createRouter('/');
 
-    const sessionStorageFactory = await createCookieSessionStorageFactory<StorageData>(
-      cookieOptions
-    );
+    const sessionStorageFactory =
+      await createCookieSessionStorageFactory<StorageData>(cookieOptions);
     registerAuth((req, res, toolkit) => {
       const user = { id: '42' };
       const sessionStorage = sessionStorageFactory.asScoped(req);
@@ -1131,7 +1129,7 @@ describe('Auth', () => {
     const router = createRouter('/');
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
-    registerOnPostAuth((req, res, t) => ({} as any));
+    registerOnPostAuth((req, res, t) => ({}) as any);
     await server.start();
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
@@ -1333,7 +1331,7 @@ describe('OnPreResponse', () => {
     const router = createRouter('/');
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
-    registerOnPreResponse((req, res, t) => ({} as any));
+    registerOnPreResponse((req, res, t) => ({}) as any);
     await server.start();
 
     const result = await supertest(innerServer.listener).get('/').expect(500);

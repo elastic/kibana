@@ -232,7 +232,7 @@ const StorageTreemapComponent: React.FC<Props> = ({
           {legendItems.map(({ color, ilmPhase, index, pattern, sizeInBytes, docsCount }) => (
             <ChartLegendItem
               color={color}
-              count={valueFormatter(accessor === 'sizeInBytes' ? sizeInBytes ?? 0 : docsCount)}
+              count={valueFormatter(accessor === 'sizeInBytes' ? (sizeInBytes ?? 0) : docsCount)}
               dataTestSubj={`chart-legend-item-${ilmPhase}${pattern}${index}`}
               key={`${ilmPhase}${pattern}${index}`}
               onClick={

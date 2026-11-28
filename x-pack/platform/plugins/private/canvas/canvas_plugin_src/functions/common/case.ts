@@ -53,13 +53,11 @@ export function caseFn(): ExpressionFunctionDefinition<'case', any, Arguments, O
       }).pipe(
         concatMap((matches) =>
           (matches ? then() : of(null)).pipe(
-            map(
-              (result): Case => ({
-                matches,
-                result,
-                type: 'case',
-              })
-            )
+            map((result): Case => ({
+              matches,
+              result,
+              type: 'case',
+            }))
           )
         )
       );

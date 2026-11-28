@@ -47,8 +47,8 @@ export interface EsQueryRuleMetaData {
 export type EsQueryRuleParams<T = SearchType> = T extends SearchType.searchSource
   ? CommonEsQueryRuleParams & OnlySearchSourceRuleParams
   : T extends SearchType.esqlQuery
-  ? CommonEsQueryRuleParams & OnlyEsqlQueryRuleParams
-  : CommonEsQueryRuleParams & OnlyEsQueryRuleParams;
+    ? CommonEsQueryRuleParams & OnlyEsqlQueryRuleParams
+    : CommonEsQueryRuleParams & OnlyEsQueryRuleParams;
 
 export interface OnlyEsQueryRuleParams {
   esQuery: string;

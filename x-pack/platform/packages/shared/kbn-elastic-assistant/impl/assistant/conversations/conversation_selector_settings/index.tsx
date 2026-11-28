@@ -79,7 +79,7 @@ export const ConversationSelectorSettings: React.FC<Props> = React.memo(
 
     const selectedOptions = useMemo<EuiComboBoxOptionOption[]>(() => {
       return selectedConversationTitle
-        ? conversationOptions.filter((c) => c.label === selectedConversationTitle) ?? []
+        ? (conversationOptions.filter((c) => c.label === selectedConversationTitle) ?? [])
         : [];
     }, [conversationOptions, selectedConversationTitle]);
 
@@ -88,10 +88,10 @@ export const ConversationSelectorSettings: React.FC<Props> = React.memo(
         const newConversation =
           conversationSelectorSettingsOption.length === 0
             ? undefined
-            : Object.values(conversations).find(
+            : (Object.values(conversations).find(
                 (conversation) =>
                   conversation.title === conversationSelectorSettingsOption[0]?.label
-              ) ?? conversationSelectorSettingsOption[0]?.label;
+              ) ?? conversationSelectorSettingsOption[0]?.label);
         onConversationSelectionChange(newConversation);
       },
       [onConversationSelectionChange, conversations]

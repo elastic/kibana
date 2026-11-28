@@ -75,12 +75,15 @@ describe('MS Defender response actions client', () => {
   };
 
   it.each(
-    Object.entries(supportedResponseActionClassMethods).reduce((acc, [key, value]) => {
-      if (!value) {
-        acc.push(key as keyof ResponseActionsClient);
-      }
-      return acc;
-    }, [] as Array<keyof ResponseActionsClient>)
+    Object.entries(supportedResponseActionClassMethods).reduce(
+      (acc, [key, value]) => {
+        if (!value) {
+          acc.push(key as keyof ResponseActionsClient);
+        }
+        return acc;
+      },
+      [] as Array<keyof ResponseActionsClient>
+    )
   )('should throw error for %s', async (methodName) => {
     // @ts-expect-error Purposely passing in empty object for options
     await expect(msClientMock[methodName]({})).rejects.toBeInstanceOf(
@@ -206,8 +209,7 @@ describe('MS Defender response actions client', () => {
   describe('#runscript()', () => {
     beforeEach(() => {
       // @ts-expect-error assign to readonly property
-      clientConstructorOptionsMock.endpointService.experimentalFeatures.microsoftDefenderEndpointRunScriptEnabled =
-        true;
+      clientConstructorOptionsMock.endpointService.experimentalFeatures.microsoftDefenderEndpointRunScriptEnabled = true;
     });
     it('should send runscript request to Microsoft with expected parameters', async () => {
       await msClientMock.runscript(
@@ -320,9 +322,7 @@ describe('MS Defender response actions client', () => {
         connectorActionsMock,
         MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.RUN_SCRIPT,
         responseActionsClientMock.createConnectorActionExecuteResponse({
-          data: {
-            /* missing id */
-          },
+          data: {/* missing id */},
         })
       );
 
@@ -403,8 +403,7 @@ describe('MS Defender response actions client', () => {
   describe('#getFileInfo()', () => {
     beforeEach(() => {
       // @ts-expect-error assign to readonly property
-      clientConstructorOptionsMock.endpointService.experimentalFeatures.microsoftDefenderEndpointRunScriptEnabled =
-        true;
+      clientConstructorOptionsMock.endpointService.experimentalFeatures.microsoftDefenderEndpointRunScriptEnabled = true;
 
       const generator = new EndpointActionGenerator('seed');
       const actionRequestsSearchResponse = generator.toEsSearchResponse([
@@ -430,8 +429,7 @@ describe('MS Defender response actions client', () => {
 
     it('should throw error if feature flag is disabled', async () => {
       // @ts-expect-error assign to readonly property
-      clientConstructorOptionsMock.endpointService.experimentalFeatures.microsoftDefenderEndpointRunScriptEnabled =
-        false;
+      clientConstructorOptionsMock.endpointService.experimentalFeatures.microsoftDefenderEndpointRunScriptEnabled = false;
 
       await expect(msClientMock.getFileInfo('abc', '123')).rejects.toThrow(
         'File downloads are not supported for microsoft_defender_endpoint agent type. Feature disabled'
@@ -549,8 +547,7 @@ describe('MS Defender response actions client', () => {
   describe('#getFileDownload()', () => {
     beforeEach(() => {
       // @ts-expect-error assign to readonly property
-      clientConstructorOptionsMock.endpointService.experimentalFeatures.microsoftDefenderEndpointRunScriptEnabled =
-        true;
+      clientConstructorOptionsMock.endpointService.experimentalFeatures.microsoftDefenderEndpointRunScriptEnabled = true;
 
       const generator = new EndpointActionGenerator('seed');
       const actionRequestsSearchResponse = generator.toEsSearchResponse([
@@ -595,8 +592,7 @@ describe('MS Defender response actions client', () => {
 
     it('should throw error if feature flag is disabled', async () => {
       // @ts-expect-error assign to readonly property
-      clientConstructorOptionsMock.endpointService.experimentalFeatures.microsoftDefenderEndpointRunScriptEnabled =
-        false;
+      clientConstructorOptionsMock.endpointService.experimentalFeatures.microsoftDefenderEndpointRunScriptEnabled = false;
 
       await expect(msClientMock.getFileDownload('abc', '123')).rejects.toThrow(
         'File downloads are not supported for microsoft_defender_endpoint agent type. Feature disabled'
@@ -974,8 +970,7 @@ describe('MS Defender response actions client', () => {
 
       beforeEach(() => {
         // @ts-expect-error assign to readonly property
-        clientConstructorOptionsMock.endpointService.experimentalFeatures.microsoftDefenderEndpointRunScriptEnabled =
-          true;
+        clientConstructorOptionsMock.endpointService.experimentalFeatures.microsoftDefenderEndpointRunScriptEnabled = true;
 
         const generator = new EndpointActionGenerator('seed');
 
@@ -1219,8 +1214,7 @@ describe('MS Defender response actions client', () => {
 
         beforeEach(() => {
           // @ts-expect-error assign to readonly property
-          clientConstructorOptionsMock.endpointService.experimentalFeatures.microsoftDefenderEndpointRunScriptEnabled =
-            true;
+          clientConstructorOptionsMock.endpointService.experimentalFeatures.microsoftDefenderEndpointRunScriptEnabled = true;
 
           const generator = new EndpointActionGenerator('seed');
 

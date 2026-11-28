@@ -68,8 +68,10 @@ export interface AppMenuActionSecondary extends AppMenuActionBase {
 /**
  * A secondary submenu action
  */
-export interface AppMenuSubmenuActionSecondary
-  extends Omit<AppMenuActionSecondary, 'controlProps'> {
+export interface AppMenuSubmenuActionSecondary extends Omit<
+  AppMenuActionSecondary,
+  'controlProps'
+> {
   readonly controlProps: AppMenuControlProps & ControlWithOptionalIcon;
 }
 
@@ -107,8 +109,9 @@ export interface AppMenuSubmenuHorizontalRule extends AppMenuActionBase {
 /**
  * A menu action which opens a submenu with more actions
  */
-export interface AppMenuActionSubmenuBase<T = AppMenuActionSecondary | AppMenuActionCustom>
-  extends AppMenuActionBase {
+export interface AppMenuActionSubmenuBase<
+  T = AppMenuActionSecondary | AppMenuActionCustom,
+> extends AppMenuActionBase {
   readonly type: T extends AppMenuActionSecondary
     ? AppMenuActionType.secondary
     : AppMenuActionType.custom;

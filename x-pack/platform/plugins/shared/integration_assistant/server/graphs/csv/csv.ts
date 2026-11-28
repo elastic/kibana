@@ -61,12 +61,15 @@ export async function handleCSV({
   const csvHandlingProcessors = [csvProcessor];
 
   if (headerColumns.length > 0) {
-    const dropValues = columns.reduce((acc, column, index) => {
-      if (headerColumns[index] !== undefined) {
-        acc[column] = String(headerColumns[index]);
-      }
-      return acc;
-    }, {} as Record<string, string>);
+    const dropValues = columns.reduce(
+      (acc, column, index) => {
+        if (headerColumns[index] !== undefined) {
+          acc[column] = String(headerColumns[index]);
+        }
+        return acc;
+      },
+      {} as Record<string, string>
+    );
     const dropProcessor = createDropProcessor(
       dropValues,
       prefix,

@@ -85,15 +85,14 @@ const defaultProps: MappingsEditorProps = {
 
 export const WithAppDependencies =
   (Comp: MemoExoticComponent<ComponentType<MappingsEditorProps>>, appDependencies?: any) =>
-  (props: Partial<MappingsEditorProps>) =>
-    (
-      <KibanaReactContextProvider>
-        <AppContextProvider value={appDependencies}>
-          <MappingsEditorProvider>
-            <GlobalFlyoutProvider>
-              <Comp {...defaultProps} {...props} />
-            </GlobalFlyoutProvider>
-          </MappingsEditorProvider>
-        </AppContextProvider>
-      </KibanaReactContextProvider>
-    );
+  (props: Partial<MappingsEditorProps>) => (
+    <KibanaReactContextProvider>
+      <AppContextProvider value={appDependencies}>
+        <MappingsEditorProvider>
+          <GlobalFlyoutProvider>
+            <Comp {...defaultProps} {...props} />
+          </GlobalFlyoutProvider>
+        </MappingsEditorProvider>
+      </AppContextProvider>
+    </KibanaReactContextProvider>
+  );

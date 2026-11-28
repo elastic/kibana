@@ -27,7 +27,7 @@ import type {
 import { doesLogsEndpointActionsIndexExist } from '../../utils';
 
 const formatRequestParams = <
-  T extends string | ResponseActionsApiCommandNames | ResponseActionAgentType
+  T extends string | ResponseActionsApiCommandNames | ResponseActionAgentType,
 >(
   value: T | T[] | undefined
 ): T[] | undefined => (typeof value === 'string' ? [value] : value);

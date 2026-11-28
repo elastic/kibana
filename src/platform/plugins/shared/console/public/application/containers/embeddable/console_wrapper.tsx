@@ -109,11 +109,10 @@ const loadDependencies = async (
   };
 };
 
-interface ConsoleWrapperProps
-  extends Omit<
-    EmbeddableConsoleDependencies,
-    'setDispatch' | 'alternateView' | 'setConsoleHeight' | 'getConsoleHeight'
-  > {
+interface ConsoleWrapperProps extends Omit<
+  EmbeddableConsoleDependencies,
+  'setDispatch' | 'alternateView' | 'setConsoleHeight' | 'getConsoleHeight'
+> {
   onKeyDown: (this: Window, ev: WindowEventMap['keydown']) => any;
   isOpen: boolean;
 }

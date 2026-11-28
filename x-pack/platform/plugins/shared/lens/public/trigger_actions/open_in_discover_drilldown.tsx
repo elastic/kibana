@@ -45,9 +45,11 @@ export type OpenInDiscoverTrigger = typeof APPLY_FILTER_TRIGGER;
 export type ActionFactoryContext = BaseActionFactoryContext & ActionContext;
 export type CollectConfigProps = CollectConfigPropsBase<Config, ActionFactoryContext>;
 
-export class OpenInDiscoverDrilldown
-  implements Drilldown<Config, ActionContext, ActionFactoryContext>
-{
+export class OpenInDiscoverDrilldown implements Drilldown<
+  Config,
+  ActionContext,
+  ActionFactoryContext
+> {
   public readonly id = 'OPEN_IN_DISCOVER_DRILLDOWN';
 
   constructor(private readonly deps: UrlDrilldownDeps) {}

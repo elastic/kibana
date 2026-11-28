@@ -265,7 +265,7 @@ export const getSearchEmbeddableFactory = ({
                       indexPatternId:
                         typeof runtimeState.serializedSearchSource?.index === 'string'
                           ? runtimeState.serializedSearchSource.index
-                          : runtimeState.serializedSearchSource?.index?.id ?? '',
+                          : (runtimeState.serializedSearchSource?.index?.id ?? ''),
                     },
                   })
                 )

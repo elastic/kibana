@@ -26,7 +26,7 @@ export type PresentationPanelHeaderProps<ApiType extends DefaultPresentationPane
 } & Pick<PresentationPanelInternalProps, 'showBadges' | 'getActions' | 'showNotifications'>;
 
 export const PresentationPanelHeader = <
-  ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi
+  ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
 >({
   api,
   viewMode,

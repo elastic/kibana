@@ -40,15 +40,12 @@ export const config: PluginConfigDescriptor<EntityManagerConfig> = {
   exposeToBrowser: exposeToBrowserConfig,
 };
 
-export class EntityManagerServerPlugin
-  implements
-    Plugin<
-      EntityManagerServerPluginSetup,
-      EntityManagerServerPluginStart,
-      EntityManagerPluginSetupDependencies,
-      EntityManagerPluginStartDependencies
-    >
-{
+export class EntityManagerServerPlugin implements Plugin<
+  EntityManagerServerPluginSetup,
+  EntityManagerServerPluginStart,
+  EntityManagerPluginSetupDependencies,
+  EntityManagerPluginStartDependencies
+> {
   public config: EntityManagerConfig;
   public logger: Logger;
   public server?: EntityManagerServerSetup;

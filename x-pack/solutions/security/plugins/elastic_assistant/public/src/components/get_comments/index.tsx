@@ -92,7 +92,7 @@ export const getComments: GetComments =
                 regenerateMessage={regenerateMessageOfConversation}
                 setIsStreaming={setIsStreaming}
                 contentReferencesVisible={contentReferencesVisible}
-                transformMessage={() => ({ content: '' } as unknown as ContentMessage)}
+                transformMessage={() => ({ content: '' }) as unknown as ContentMessage}
                 contentReferences={null}
                 messageRole="assistant"
                 isFetching
@@ -140,7 +140,7 @@ export const getComments: GetComments =
                   setIsStreaming={setIsStreaming}
                   contentReferences={null}
                   contentReferencesVisible={contentReferencesVisible}
-                  transformMessage={() => ({ content: '' } as unknown as ContentMessage)}
+                  transformMessage={() => ({ content: '' }) as unknown as ContentMessage}
                   messageRole={'assistant'}
                   // we never need to append to a code block in the system comment, which is what this index is used for
                   index={999}

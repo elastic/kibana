@@ -171,7 +171,7 @@ export const createAlertAttachmentUserActionBuilder = (
 });
 
 const getFirstItem = (items?: string | string[] | null): string | null => {
-  return Array.isArray(items) ? items[0] : items ?? null;
+  return Array.isArray(items) ? items[0] : (items ?? null);
 };
 
 export const getRuleId = (

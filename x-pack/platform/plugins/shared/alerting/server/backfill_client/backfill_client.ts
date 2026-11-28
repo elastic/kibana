@@ -193,9 +193,8 @@ export class BackfillClient {
 
     for (let i = 0; i < adHocSOsToCreate.length; i += chunkSize) {
       const chunk = adHocSOsToCreate.slice(i, i + chunkSize);
-      const bulkCreateChunkResponse = await unsecuredSavedObjectsClient.bulkCreate<AdHocRunSO>(
-        chunk
-      );
+      const bulkCreateChunkResponse =
+        await unsecuredSavedObjectsClient.bulkCreate<AdHocRunSO>(chunk);
       allSavedObjects.push(...bulkCreateChunkResponse.saved_objects);
     }
 

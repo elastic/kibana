@@ -30,10 +30,13 @@ export const makeControlOrdersZeroBased = (state: SerializableControlGroupState)
         panel.order = index;
         return { id, panel };
       })
-      .reduce((acc, { id, panel: currentPanel }) => {
-        acc[id] = currentPanel;
-        return acc;
-      }, {} as SerializableRecord & ControlPanelsState<SerializedControlState>);
+      .reduce(
+        (acc, { id, panel: currentPanel }) => {
+          acc[id] = currentPanel;
+          return acc;
+        },
+        {} as SerializableRecord & ControlPanelsState<SerializedControlState>
+      );
     state.panels = newPanels;
   }
   return state;

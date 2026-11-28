@@ -97,7 +97,7 @@ const getExcessProps = (props: rt.Props | rt.RecordC<rt.StringC, any>, r: any): 
   }, []);
 
 export const excess = <
-  C extends rt.InterfaceType<rt.Props> | GenericIntersectionC | rt.PartialType<rt.Props>
+  C extends rt.InterfaceType<rt.Props> | GenericIntersectionC | rt.PartialType<rt.Props>,
 >(
   codec: C
 ): C => {

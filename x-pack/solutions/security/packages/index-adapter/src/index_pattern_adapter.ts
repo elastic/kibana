@@ -14,7 +14,10 @@ export class IndexPatternAdapter extends IndexAdapter {
   protected installationPromises: Map<string, Promise<void>>;
   protected installIndexPromise?: Promise<InstallIndex>;
 
-  constructor(protected readonly prefix: string, options: IndexAdapterParams) {
+  constructor(
+    protected readonly prefix: string,
+    options: IndexAdapterParams
+  ) {
     super(`${prefix}-*`, options); // make indexTemplate `indexPatterns` match all index names
     this.installationPromises = new Map();
   }

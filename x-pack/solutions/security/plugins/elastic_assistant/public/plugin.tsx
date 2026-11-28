@@ -29,15 +29,12 @@ import { TelemetryService } from './src/common/lib/telemetry/telemetry_service';
 export type ElasticAssistantPublicPluginSetup = ReturnType<ElasticAssistantPublicPlugin['setup']>;
 export type ElasticAssistantPublicPluginStart = ReturnType<ElasticAssistantPublicPlugin['start']>;
 
-export class ElasticAssistantPublicPlugin
-  implements
-    Plugin<
-      ElasticAssistantPublicPluginSetup,
-      ElasticAssistantPublicPluginStart,
-      ElasticAssistantPublicPluginSetupDependencies,
-      ElasticAssistantPublicPluginStartDependencies
-    >
-{
+export class ElasticAssistantPublicPlugin implements Plugin<
+  ElasticAssistantPublicPluginSetup,
+  ElasticAssistantPublicPluginStart,
+  ElasticAssistantPublicPluginSetupDependencies,
+  ElasticAssistantPublicPluginStartDependencies
+> {
   private readonly storage = new Storage(localStorage);
   private readonly telemetry: TelemetryService = new TelemetryService();
 

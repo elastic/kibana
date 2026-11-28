@@ -67,15 +67,15 @@ export class AlertRuleFromVisAction implements Action<Context> {
     const embeddableData = data?.query
       ? data
       : data
-      ? {
-          ...data,
-          ...pick(getDataFromEmbeddable(embeddable), [
-            'query',
-            'dataView',
-            'usesPlaceholderValues',
-          ]),
-        }
-      : getDataFromEmbeddable(embeddable);
+        ? {
+            ...data,
+            ...pick(getDataFromEmbeddable(embeddable), [
+              'query',
+              'dataView',
+              'usesPlaceholderValues',
+            ]),
+          }
+        : getDataFromEmbeddable(embeddable);
     const { query } = embeddableData;
 
     // Get the timeField, default to `timestamp` if it can't be found

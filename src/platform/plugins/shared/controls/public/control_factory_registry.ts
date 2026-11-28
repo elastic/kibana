@@ -14,7 +14,7 @@ const registry: { [key: string]: () => Promise<ControlFactory<any, any>> } = {};
 
 export const registerControlFactory = <
   State extends object = object,
-  ApiType extends DefaultControlApi = DefaultControlApi
+  ApiType extends DefaultControlApi = DefaultControlApi,
 >(
   type: string,
   getFactory: () => Promise<ControlFactory<State, ApiType>>
@@ -31,7 +31,7 @@ export const registerControlFactory = <
 
 export const getControlFactory = async <
   State extends object = object,
-  ApiType extends DefaultControlApi = DefaultControlApi
+  ApiType extends DefaultControlApi = DefaultControlApi,
 >(
   key: string
 ): Promise<ControlFactory<State, ApiType>> => {

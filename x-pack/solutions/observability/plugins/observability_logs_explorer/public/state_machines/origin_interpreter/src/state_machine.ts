@@ -68,8 +68,7 @@ export const createPureOriginInterpreterStateMachine = (initialContext: OriginIn
     }
   );
 
-export interface OriginInterpreterStateMachineDependencies
-  extends ObservabilityLogsExplorerStartServices {
+export interface OriginInterpreterStateMachineDependencies extends ObservabilityLogsExplorerStartServices {
   initialContext?: OriginInterpreterContext;
   history: ObservabilityLogsExplorerHistory;
   toasts: IToasts;

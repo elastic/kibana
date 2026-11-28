@@ -93,36 +93,36 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         dateEnd,
       })
     : esqlQueryRule
-    ? await fetchEsqlQuery({
-        ruleId,
-        alertLimit,
-        params: params as OnlyEsqlQueryRuleParams,
-        spacePrefix,
-        services: {
-          share,
-          scopedClusterClient,
-          logger,
-          ruleResultService,
-        },
-        dateStart,
-        dateEnd,
-      })
-    : await fetchEsQuery({
-        ruleId,
-        name,
-        alertLimit,
-        params: params as OnlyEsQueryRuleParams,
-        timestamp: latestTimestamp,
-        spacePrefix,
-        services: {
-          share,
-          scopedClusterClient,
-          logger,
-          ruleResultService,
-        },
-        dateStart,
-        dateEnd,
-      });
+      ? await fetchEsqlQuery({
+          ruleId,
+          alertLimit,
+          params: params as OnlyEsqlQueryRuleParams,
+          spacePrefix,
+          services: {
+            share,
+            scopedClusterClient,
+            logger,
+            ruleResultService,
+          },
+          dateStart,
+          dateEnd,
+        })
+      : await fetchEsQuery({
+          ruleId,
+          name,
+          alertLimit,
+          params: params as OnlyEsQueryRuleParams,
+          timestamp: latestTimestamp,
+          spacePrefix,
+          services: {
+            share,
+            scopedClusterClient,
+            logger,
+            ruleResultService,
+          },
+          dateStart,
+          dateEnd,
+        });
 
   const resultGroupSet = new Set<string>();
   for (const result of parsedResults.results) {

@@ -17,8 +17,10 @@ type EuiButtonEmptyPropsForAnchor = Extract<
   AnchorHTMLAttributes<HTMLAnchorElement>
 >;
 
-export interface LocatorButtonEmptyProps<Params extends SerializableRecord>
-  extends Omit<EuiButtonEmptyPropsForAnchor, 'href'> {
+export interface LocatorButtonEmptyProps<Params extends SerializableRecord> extends Omit<
+  EuiButtonEmptyPropsForAnchor,
+  'href'
+> {
   locator: string | LocatorPublic<Params>;
   params: Params;
 }

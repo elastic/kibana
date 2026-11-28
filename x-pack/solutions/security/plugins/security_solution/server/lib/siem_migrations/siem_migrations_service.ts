@@ -19,7 +19,11 @@ export class SiemMigrationsService {
   private pluginStop$: Subject<void>;
   private rules: SiemRuleMigrationsService;
 
-  constructor(private config: ConfigType, logger: LoggerFactory, kibanaVersion: string) {
+  constructor(
+    private config: ConfigType,
+    logger: LoggerFactory,
+    kibanaVersion: string
+  ) {
     this.pluginStop$ = new ReplaySubject(1);
     this.rules = new SiemRuleMigrationsService(
       logger,

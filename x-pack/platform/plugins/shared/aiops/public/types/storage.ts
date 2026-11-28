@@ -32,12 +32,12 @@ export type AiOpsKey = keyof Exclude<AiOps, null>;
 export type AiOpsStorageMapped<T extends AiOpsKey> = T extends typeof AIOPS_FROZEN_TIER_PREFERENCE
   ? FrozenTierPreference | undefined
   : T extends typeof AIOPS_RANDOM_SAMPLING_MODE_PREFERENCE
-  ? RandomSamplerOption
-  : T extends typeof AIOPS_RANDOM_SAMPLING_PROBABILITY_PREFERENCE
-  ? RandomSamplerProbability
-  : T extends typeof AIOPS_PATTERN_ANALYSIS_MINIMUM_TIME_RANGE_PREFERENCE
-  ? MinimumTimeRangeOption
-  : null;
+    ? RandomSamplerOption
+    : T extends typeof AIOPS_RANDOM_SAMPLING_PROBABILITY_PREFERENCE
+      ? RandomSamplerProbability
+      : T extends typeof AIOPS_PATTERN_ANALYSIS_MINIMUM_TIME_RANGE_PREFERENCE
+        ? MinimumTimeRangeOption
+        : null;
 
 export const AIOPS_STORAGE_KEYS = [
   AIOPS_FROZEN_TIER_PREFERENCE,

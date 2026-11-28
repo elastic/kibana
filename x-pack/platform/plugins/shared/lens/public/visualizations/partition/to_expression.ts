@@ -281,7 +281,7 @@ const generateExprAst: GenerateExpressionAstFunction = (state, ...restArgs) =>
     [PieChartTypes.TREEMAP]: () => generateTreemapVisAst(state, ...restArgs),
     [PieChartTypes.MOSAIC]: () => generateMosaicVisAst(state, ...restArgs),
     [PieChartTypes.WAFFLE]: () => generateWaffleVisAst(state, ...restArgs),
-  }[state.shape]());
+  })[state.shape]();
 
 function expressionHelper(
   state: PieVisualizationState,

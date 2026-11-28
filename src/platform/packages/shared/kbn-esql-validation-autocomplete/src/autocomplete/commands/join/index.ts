@@ -222,7 +222,7 @@ export const suggest: CommandSuggestFunction<'join'> = async ({
             kind: 'Keyword',
             sortText: `${i}-MNEMONIC`,
             command: TRIGGER_SUGGESTION_COMMAND,
-          } as SuggestionRawDefinition)
+          }) as SuggestionRawDefinition
       );
     }
 

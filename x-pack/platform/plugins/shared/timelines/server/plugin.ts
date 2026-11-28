@@ -15,9 +15,12 @@ import { indexFieldsProvider } from './search_strategy/index_fields';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { ConfigSchema } from './config';
 
-export class TimelinesPlugin
-  implements Plugin<TimelinesPluginUI, TimelinesPluginStart, SetupPlugins, StartPlugins>
-{
+export class TimelinesPlugin implements Plugin<
+  TimelinesPluginUI,
+  TimelinesPluginStart,
+  SetupPlugins,
+  StartPlugins
+> {
   private readonly logger: Logger;
   private security?: SecurityPluginSetup;
 

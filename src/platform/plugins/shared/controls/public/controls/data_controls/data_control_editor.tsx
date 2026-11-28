@@ -61,7 +61,7 @@ import { ControlFactory } from '../types';
 import { confirmDeleteControl } from '../../common';
 
 export interface ControlEditorProps<
-  State extends DefaultDataControlState = DefaultDataControlState
+  State extends DefaultDataControlState = DefaultDataControlState,
 > {
   initialState: Partial<State>;
   controlType?: string;

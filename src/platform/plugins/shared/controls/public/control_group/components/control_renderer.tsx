@@ -21,7 +21,7 @@ import { ControlPanel } from './control_panel';
  */
 export const ControlRenderer = <
   StateType extends DefaultControlState = DefaultControlState,
-  ApiType extends DefaultControlApi = DefaultControlApi
+  ApiType extends DefaultControlApi = DefaultControlApi,
 >({
   type,
   uuid,

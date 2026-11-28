@@ -115,7 +115,8 @@ const StatefulTimelineComponent: React.FC<Props> = ({
   const { dataView: experimentalDataView } = useDataView(SourcererScopeName.timeline);
 
   const selectedDataViewId = useMemo(
-    () => (newDataViewPickerEnabled ? experimentalDataView.id ?? '' : selectedDataViewIdSourcerer),
+    () =>
+      newDataViewPickerEnabled ? (experimentalDataView.id ?? '') : selectedDataViewIdSourcerer,
     [experimentalDataView.id, newDataViewPickerEnabled, selectedDataViewIdSourcerer]
   );
 

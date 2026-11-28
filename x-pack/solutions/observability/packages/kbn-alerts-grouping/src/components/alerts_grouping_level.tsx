@@ -21,7 +21,7 @@ import {
 import { AlertsGroupingProps, BaseAlertsGroupAggregations } from '../types';
 
 export interface AlertsGroupingLevelProps<
-  T extends BaseAlertsGroupAggregations = BaseAlertsGroupAggregations
+  T extends BaseAlertsGroupAggregations = BaseAlertsGroupAggregations,
 > extends AlertsGroupingProps<T> {
   getGrouping: (
     props: Omit<DynamicGroupingProps<T>, 'groupSelector' | 'pagination'>

@@ -55,7 +55,7 @@ export function useFetchApmIndex(): UseFetchApmIndex {
   });
 
   return {
-    data: isInitialLoading ? '' : data ?? '',
+    data: isInitialLoading ? '' : (data ?? ''),
     isLoading: isInitialLoading || isLoading || isRefetching,
     isSuccess,
     isError,

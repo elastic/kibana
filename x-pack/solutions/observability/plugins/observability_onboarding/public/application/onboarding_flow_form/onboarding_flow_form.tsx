@@ -312,25 +312,25 @@ export const OnboardingFlowForm: FunctionComponent = () => {
                     }
                   )
                 : searchParams.get('category') === 'application'
-                ? i18n.translate(
-                    'xpack.observability_onboarding.experimentalOnboardingFlow.applicationPackagesTitle',
-                    {
-                      defaultMessage: 'Monitor your Application using:',
-                    }
-                  )
-                : searchParams.get('category') === 'cloud'
-                ? i18n.translate(
-                    'xpack.observability_onboarding.experimentalOnboardingFlow.cloudPackagesTitle',
-                    {
-                      defaultMessage: 'Select your Cloud provider:',
-                    }
-                  )
-                : i18n.translate(
-                    'xpack.observability_onboarding.experimentalOnboardingFlow.hostPackagesTitle',
-                    {
-                      defaultMessage: 'Monitor your Host using:',
-                    }
-                  )}
+                  ? i18n.translate(
+                      'xpack.observability_onboarding.experimentalOnboardingFlow.applicationPackagesTitle',
+                      {
+                        defaultMessage: 'Monitor your Application using:',
+                      }
+                    )
+                  : searchParams.get('category') === 'cloud'
+                    ? i18n.translate(
+                        'xpack.observability_onboarding.experimentalOnboardingFlow.cloudPackagesTitle',
+                        {
+                          defaultMessage: 'Select your Cloud provider:',
+                        }
+                      )
+                    : i18n.translate(
+                        'xpack.observability_onboarding.experimentalOnboardingFlow.hostPackagesTitle',
+                        {
+                          defaultMessage: 'Monitor your Host using:',
+                        }
+                      )}
             </strong>
           </EuiTitle>
           <EuiSpacer size="m" />

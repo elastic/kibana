@@ -59,7 +59,10 @@ function handleError(core: CoreStart, err: Error): Rx.Observable<JobSummarySet> 
 export class ReportingNotifierStreamHandler {
   private jobCompletionNotifications = jobCompletionNotifications();
 
-  constructor(private apiClient: ReportingAPIClient, private core: CoreStart) {}
+  constructor(
+    private apiClient: ReportingAPIClient,
+    private core: CoreStart
+  ) {}
 
   public startPolling(interval: number, stop$: Rx.Observable<void>) {
     Rx.timer(0, interval)

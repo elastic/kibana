@@ -46,10 +46,10 @@ export function useDateRangeRedirect() {
       ...query,
       rangeFrom: start?.isValid()
         ? query.rangeFrom
-        : timePickerSharedState.from ?? timePickerTimeDefaults.from,
+        : (timePickerSharedState.from ?? timePickerTimeDefaults.from),
       rangeTo: end?.isValid()
         ? query.rangeTo
-        : timePickerSharedState.to ?? timePickerTimeDefaults.to,
+        : (timePickerSharedState.to ?? timePickerTimeDefaults.to),
     };
 
     try {

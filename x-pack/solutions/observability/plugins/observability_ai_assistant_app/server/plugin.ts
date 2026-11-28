@@ -32,15 +32,12 @@ import type {
   ObservabilityAIAssistantAppServerStart,
 } from './types';
 
-export class ObservabilityAIAssistantAppPlugin
-  implements
-    Plugin<
-      ObservabilityAIAssistantAppServerSetup,
-      ObservabilityAIAssistantAppServerStart,
-      ObservabilityAIAssistantAppPluginSetupDependencies,
-      ObservabilityAIAssistantAppPluginStartDependencies
-    >
-{
+export class ObservabilityAIAssistantAppPlugin implements Plugin<
+  ObservabilityAIAssistantAppServerSetup,
+  ObservabilityAIAssistantAppServerStart,
+  ObservabilityAIAssistantAppPluginSetupDependencies,
+  ObservabilityAIAssistantAppPluginStartDependencies
+> {
   logger: Logger;
 
   constructor(context: PluginInitializerContext<ObservabilityAIAssistantAppConfig>) {

@@ -39,8 +39,7 @@ export interface LanguageProvidersModule<Deps = unknown> {
 }
 
 export interface CustomLangModuleType<Deps = unknown>
-  extends Omit<LangModuleType, 'getSuggestionProvider'>,
-    LanguageProvidersModule<Deps> {
+  extends Omit<LangModuleType, 'getSuggestionProvider'>, LanguageProvidersModule<Deps> {
   onLanguage: () => void;
   languageThemeResolver: (args: UseEuiTheme) => monaco.editor.IStandaloneThemeData;
 }

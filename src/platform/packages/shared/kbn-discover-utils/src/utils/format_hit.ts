@@ -24,7 +24,7 @@ import { formatFieldValue } from './format_value';
 type PartialHitPair = [
   fieldDisplayName: string,
   formattedValue: string | undefined,
-  fieldName: string | null
+  fieldName: string | null,
 ];
 
 const formattedHitCache = new WeakMap<

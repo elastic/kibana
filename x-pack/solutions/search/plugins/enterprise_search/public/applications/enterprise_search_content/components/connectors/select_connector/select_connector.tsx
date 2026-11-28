@@ -53,7 +53,7 @@ import { ConnectorDescriptionBadge } from './connector_description_badge_popout'
 export type ConnectorFilter = typeof CONNECTOR_NATIVE_TYPE | typeof CONNECTOR_CLIENTS_TYPE;
 
 export const parseConnectorFilter = (filter: string | string[] | null): ConnectorFilter | null => {
-  const temp = Array.isArray(filter) ? filter[0] : filter ?? null;
+  const temp = Array.isArray(filter) ? filter[0] : (filter ?? null);
   if (!temp) return null;
   if (temp === CONNECTOR_CLIENTS_TYPE) {
     return CONNECTOR_CLIENTS_TYPE;

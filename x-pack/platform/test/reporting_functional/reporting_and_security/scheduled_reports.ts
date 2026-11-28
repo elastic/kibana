@@ -81,9 +81,9 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
 
       // Verify past date validation error appears, retrying to wait for validation
       await retry.waitFor('form validation', async () =>
-        (
-          await testSubjects.getVisibleText('exportItemDetailsFlyout')
-        ).includes('Start date must be in the future')
+        (await testSubjects.getVisibleText('exportItemDetailsFlyout')).includes(
+          'Start date must be in the future'
+        )
       );
 
       // Fill in all required fields with a future date
@@ -110,9 +110,9 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
       // Try to submit without email recipient - should show validation error
       await testSubjects.click('scheduleExportSubmitButton');
       await retry.waitFor('form validation', async () =>
-        (
-          await testSubjects.getVisibleText('exportItemDetailsFlyout')
-        ).includes('Provide at least one recipient')
+        (await testSubjects.getVisibleText('exportItemDetailsFlyout')).includes(
+          'Provide at least one recipient'
+        )
       );
 
       // Add invalid email - should show validation warning

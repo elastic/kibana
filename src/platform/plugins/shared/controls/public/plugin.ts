@@ -19,9 +19,12 @@ import { setKibanaServices } from './services/kibana_services';
 import type { ControlsPluginSetupDeps, ControlsPluginStartDeps } from './types';
 import { registerActions } from './actions/register_actions';
 
-export class ControlsPlugin
-  implements Plugin<void, void, ControlsPluginSetupDeps, ControlsPluginStartDeps>
-{
+export class ControlsPlugin implements Plugin<
+  void,
+  void,
+  ControlsPluginSetupDeps,
+  ControlsPluginStartDeps
+> {
   public setup(
     _coreSetup: CoreSetup<ControlsPluginStartDeps>,
     _setupPlugins: ControlsPluginSetupDeps

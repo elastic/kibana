@@ -106,12 +106,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         1,
         '@timestamp'
       );
-      const activeMatchBackgroundColor = await firstRowFirstCellMatches[0].getComputedStyle(
-        'background-color'
-      );
-      const anotherMatchBackgroundColor = await secondRowRowFirstCellMatches[0].getComputedStyle(
-        'background-color'
-      );
+      const activeMatchBackgroundColor =
+        await firstRowFirstCellMatches[0].getComputedStyle('background-color');
+      const anotherMatchBackgroundColor =
+        await secondRowRowFirstCellMatches[0].getComputedStyle('background-color');
       expect(activeMatchBackgroundColor).to.contain('rgba');
       expect(anotherMatchBackgroundColor).to.contain('rgba');
       expect(activeMatchBackgroundColor).not.to.be(anotherMatchBackgroundColor);

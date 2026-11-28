@@ -26,7 +26,7 @@ import {
 
 export type Breadcrumb<
   TRouteMap extends RouteMap = RouteMap,
-  TPath extends PathsOf<TRouteMap> = PathsOf<TRouteMap>
+  TPath extends PathsOf<TRouteMap> = PathsOf<TRouteMap>,
 > = {
   title: string;
   path: TPath;

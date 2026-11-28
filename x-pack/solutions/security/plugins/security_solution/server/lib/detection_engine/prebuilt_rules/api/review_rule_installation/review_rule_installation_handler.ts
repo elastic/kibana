@@ -122,9 +122,8 @@ async function fetchRules({
 
   const installableVersionsPage = installableVersions.slice((page - 1) * perPage, page * perPage);
 
-  const installableRuleAssetsPage = await ruleAssetsClient.fetchAssetsByVersion(
-    installableVersionsPage
-  );
+  const installableRuleAssetsPage =
+    await ruleAssetsClient.fetchAssetsByVersion(installableVersionsPage);
 
   return {
     rules: installableRuleAssetsPage.map((prebuiltRuleAsset) =>

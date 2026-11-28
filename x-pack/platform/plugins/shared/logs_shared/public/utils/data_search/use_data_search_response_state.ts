@@ -14,7 +14,7 @@ import { ParsedDataSearchResponseDescriptor } from './types';
 export const useDataSearchResponseState = <
   Request extends IKibanaSearchRequest,
   Response,
-  InitialResponse
+  InitialResponse,
 >(
   response$: Observable<ParsedDataSearchResponseDescriptor<Request, Response | InitialResponse>>
 ) => {
