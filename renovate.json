@@ -951,6 +951,7 @@
         "eslint-plugin-jsx-a11y",
         "eslint-plugin-mocha",
         "eslint-plugin-no-unsanitized",
+        "eslint-plugin-n",
         "eslint-plugin-node",
         "eslint-plugin-playwright",
         "eslint-plugin-react",

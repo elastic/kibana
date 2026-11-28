@@ -8,7 +8,7 @@
  */
 
 import execa from 'execa';
-import { globby } from 'globby';
+import globby from 'globby';
 import { REPO_ROOT } from '@kbn/repo-info';
 
 export async function fixEslint(pattern: string) {
