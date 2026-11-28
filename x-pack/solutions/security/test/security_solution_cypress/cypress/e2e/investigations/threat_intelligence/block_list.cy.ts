@@ -9,7 +9,6 @@ import { visitWithTimeRange } from '../../../tasks/navigation';
 import {
   closeFlyout,
   navigateToBlocklist,
-  navigateToThreatIntelligence,
   openFlyout,
   openFlyoutTakeAction,
   openIndicatorsTableMoreActions,
@@ -20,6 +19,7 @@ import {
   openAddToBlockListFlyoutFromTable,
   openAddToBlocklistFromFlyout,
 } from '../../../tasks/threat_intelligence/blocklist';
+import { filterIndicatorsTableByFileSha256 } from '../../../tasks/threat_intelligence/indicators';
 import { login } from '../../../tasks/login';
 import {
   BLOCK_LIST_VALUE_INPUT,
@@ -57,8 +57,7 @@ describe('Block list with invalid indicators', { tags: ['@ess'] }, () => {
   });
 });
 
-// FLAKY: https://github.com/elastic/kibana/issues/239150
-describe.skip('Block list interactions', { tags: ['@ess'] }, () => {
+describe('Block list interactions', { tags: ['@ess'] }, () => {
   before(() => cy.task('esArchiverLoad', { archiveName: 'ti_indicators_data_multiple' }));
 
   after(() => cy.task('esArchiverUnload', { archiveName: 'ti_indicators_data_multiple' }));
@@ -75,6 +74,7 @@ describe.skip('Block list interactions', { tags: ['@ess'] }, () => {
 
     cy.log('add to blocklist from the table more action menu');
 
+    filterIndicatorsTableByFileSha256(firstIndicatorId);
     openIndicatorsTableMoreActions();
     openAddToBlockListFlyoutFromTable();
 
@@ -88,14 +88,17 @@ describe.skip('Block list interactions', { tags: ['@ess'] }, () => {
       .eq(0)
       .should('have.text', FIRST_BLOCK_LIST_NEW_DESCRIPTION);
 
-    navigateToThreatIntelligence();
+    // navigateToBlocklist dropped the time range, and the archived indicators fall outside the default one
+    visitWithTimeRange(URL);
+    waitForViewToBeLoaded();
 
     // second indicator is a valid indicator for add to blocklist feature
     const secondIndicatorId = 'd4ba36cfa7e4191199836b228f6d79bd74e86793bc183563b78591f508b066ed';
 
     cy.log('add to blocklist from the flyout');
 
-    openFlyout(1);
+    filterIndicatorsTableByFileSha256(secondIndicatorId);
+    openFlyout();
     openFlyoutTakeAction();
     openAddToBlocklistFromFlyout();
 
