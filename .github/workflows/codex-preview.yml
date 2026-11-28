@@ -1,0 +1,33 @@
+# Elastic Internal Docs (codex.elastic.dev) — builds the docs-dev/ docset only. Kibana's public
+# elastic.co docs live in docs/ and are built by docs-build.yml, so `path` keeps the two apart.
+#
+# The push trigger drives the reusable workflow's `update-link-index` job, which registers this
+# docset in elastic/codex-link-index and is what makes the nightly codex.elastic.dev build pick
+# it up. That job's token fetch is not `continue-on-error`, so it fails the build unless this
+# repo has a Backstage token policy:
+# https://backstage.elastic.dev/create/templates/default/register-elastic-internal-docs-token-policies
+name: elastic-internal-docs
+
+on:
+  push:
+    branches:
+      - main
+  pull_request: ~
+
+jobs:
+  preview:
+    permissions:
+      id-token: write
+      deployments: write
+      contents: read
+      pull-requests: write
+    uses: elastic/docs-actions/.github/workflows/codex-preview.yml@v1
+    with:
+      path: docs-dev
+      # Resolve `:::{storybook}` embeds against this PR's Storybook artifacts, the only place
+      # unmerged stories exist. Requires this PR's Buildkite storybook-docs step to have finished
+      # uploading. Empty outside a PR, leaving docset.yml's committed `main` default.
+      build-env: >-
+        ${{ github.event.pull_request.number
+        && format('KIBANA_STORYBOOK_REGISTRY=https://ci-artifacts.kibana.dev/storybooks/pr-{0}/storybook-docs/docs_registry.json', github.event.pull_request.number)
+        || '' }}

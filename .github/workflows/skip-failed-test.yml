@@ -1,3 +1,5 @@
+name: Skip failed test on comment
+
 on:
   issue_comment:
     types:
@@ -18,6 +20,7 @@ jobs:
           repository: 'elastic/kibana-github-actions'
           ref: main
           path: ./actions
+          persist-credentials: false
 
       - name: Install Actions
         run: npm ci --omit=dev --prefix ./actions
@@ -36,6 +39,7 @@ jobs:
           ref: main
           path: ./kibana-operations
           token: ${{secrets.KIBANAMACHINE_TOKEN}}
+          persist-credentials: false
 
       - name: Skip failed test
         working-directory: ./kibana-operations/triage
