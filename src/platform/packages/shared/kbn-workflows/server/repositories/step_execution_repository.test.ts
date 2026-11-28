@@ -26,7 +26,7 @@ const createStepExecution = (
     startedAt: '2025-01-01T00:00:00Z',
     globalExecutionIndex: 0,
     ...overrides,
-  } as EsWorkflowStepExecution);
+  }) as EsWorkflowStepExecution;
 
 describe('getStepExecutionsByIds', () => {
   let esClient: { mget: jest.Mock };

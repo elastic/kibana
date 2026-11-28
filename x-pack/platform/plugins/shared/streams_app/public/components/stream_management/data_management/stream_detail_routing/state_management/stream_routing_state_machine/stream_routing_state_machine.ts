@@ -287,8 +287,8 @@ export const streamRoutingMachine = setup({
               condition: event.toggle
                 ? event.condition
                 : context.currentRuleId
-                ? selectCurrentRule(context)?.where
-                : undefined,
+                  ? selectCurrentRule(context)?.where
+                  : undefined,
             })),
             sendTo('routingSamplesMachine', {
               type: 'routingSamples.setDocumentMatchFilter',

@@ -106,7 +106,7 @@ export const CaseViewAttachments = ({
   // to the per-author file count derived from caseData.comments so the badge
   // matches what the author is actually responsible for.
   const effectiveFileCount = isAuthorFilterActive
-    ? countsByType.get(FILE_ATTACHMENT_TYPE) ?? 0
+    ? (countsByType.get(FILE_ATTACHMENT_TYPE) ?? 0)
     : fileCount;
 
   const excludedTypes = useMemo(
@@ -130,7 +130,9 @@ export const CaseViewAttachments = ({
             return [];
           }
           const count =
-            type.id === FILE_ATTACHMENT_TYPE ? effectiveFileCount : countsByType.get(type.id) ?? 0;
+            type.id === FILE_ATTACHMENT_TYPE
+              ? effectiveFileCount
+              : (countsByType.get(type.id) ?? 0);
           if (count < 1) {
             return [];
           }

@@ -33,7 +33,8 @@ export const useStyles = () => {
       flex-direction: column;
       // This large box shadow helps prevent a flicker of dark
       // background when the content is shown and hidden
-      box-shadow: inset 0 ${variables.initialHeight} 0 ${variables.background},
+      box-shadow:
+        inset 0 ${variables.initialHeight} 0 ${variables.background},
         inset 0 600rem 0 ${euiTheme.colors.body};
       bottom: ${layoutVar('application.content.bottom', '0px')};
       right: ${layoutVar('application.content.right', '0px')};

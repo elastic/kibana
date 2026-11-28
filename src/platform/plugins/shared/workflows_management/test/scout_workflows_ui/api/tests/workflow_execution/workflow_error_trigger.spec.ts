@@ -291,9 +291,8 @@ spaceTest.describe(
     spaceTest(
       'async: parent completes immediately while async child fails and emits workflows.failed',
       async () => {
-        const { results: initialHandlerResults } = await workflowsApi.getExecutions(
-          errorHandlerWorkflowId
-        );
+        const { results: initialHandlerResults } =
+          await workflowsApi.getExecutions(errorHandlerWorkflowId);
         const initialHandlerCount = initialHandlerResults.length;
 
         const { workflowExecutionId: parentExecutionId } = await workflowsApi.run(

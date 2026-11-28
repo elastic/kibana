@@ -19,9 +19,7 @@ export interface RemoteClustersLocatorDefinitionDependencies {
   managementAppLocator: ManagementAppLocator;
 }
 
-export class RemoteClustersLocatorDefinition
-  implements LocatorDefinition<RemoteClustersLocatorParams>
-{
+export class RemoteClustersLocatorDefinition implements LocatorDefinition<RemoteClustersLocatorParams> {
   constructor(protected readonly deps: RemoteClustersLocatorDefinitionDependencies) {}
 
   public readonly id = REMOTE_CLUSTERS_LOCATOR_ID;

@@ -59,8 +59,8 @@ export const useChangeHistoryDetail = ({
     pendingChange && isPendingSelection
       ? toChangeHistoryPendingDetail(pendingChange)
       : changeId
-      ? data
-      : undefined;
+        ? data
+        : undefined;
 
   return {
     change,

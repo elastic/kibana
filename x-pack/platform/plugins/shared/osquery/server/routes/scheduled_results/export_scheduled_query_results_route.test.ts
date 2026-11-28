@@ -52,7 +52,7 @@ const createOsqueryContext = (): OsqueryAppContext =>
     config: jest.fn(),
     telemetryEventsSender: {},
     licensing: {},
-  } as unknown as OsqueryAppContext);
+  }) as unknown as OsqueryAppContext;
 
 describe('exportScheduledQueryResultsRoute', () => {
   let mockHandler: jest.Mock;

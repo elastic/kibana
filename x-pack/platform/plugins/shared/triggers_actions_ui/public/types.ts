@@ -247,7 +247,7 @@ export interface Sorting {
 
 export type ActionConnectorWithoutId<
   Config = Record<string, unknown>,
-  Secrets = Record<string, unknown>
+  Secrets = Record<string, unknown>,
 > = Omit<UserConfiguredActionConnector<Config, Secrets>, 'id'>;
 
 export type ActionConnectorTableItem = ActionConnector & {
@@ -276,7 +276,7 @@ export interface RuleTableItem extends Rule {
 export interface RuleTypeParamsExpressionProps<
   Params extends RuleTypeParams = RuleTypeParams,
   MetaData = Record<string, unknown>,
-  ActionGroupIds extends string = string
+  ActionGroupIds extends string = string,
 > {
   id?: string;
   ruleParams: Params;
@@ -336,7 +336,7 @@ export enum EditConnectorTabs {
 
 export interface RuleEditProps<
   Params extends RuleTypeParams = RuleTypeParams,
-  MetaData extends RuleTypeMetaData = RuleTypeMetaData
+  MetaData extends RuleTypeMetaData = RuleTypeMetaData,
 > {
   initialRule: Rule<Params>;
   ruleTypeRegistry: RuleTypeRegistryContract;
@@ -352,7 +352,7 @@ export interface RuleEditProps<
 
 export interface RuleAddProps<
   Params extends RuleTypeParams = RuleTypeParams,
-  MetaData extends RuleTypeMetaData = RuleTypeMetaData
+  MetaData extends RuleTypeMetaData = RuleTypeMetaData,
 > {
   /**
    * ID of the feature this rule should be created for.

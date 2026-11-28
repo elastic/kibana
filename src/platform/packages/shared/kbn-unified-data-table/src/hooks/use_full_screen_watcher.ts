@@ -52,12 +52,12 @@ export const UNIFIED_DATA_TABLE_FULL_SCREEN_CLASS = 'unifiedDataTable__fullScree
 // which preserves their stacking context and that of their descendants.
 const fullScreenStyles = css`
   *:not(
-      .${EUI_DATA_GRID_FULL_SCREEN_CLASS}, .${EUI_DATA_GRID_FULL_SCREEN_CLASS} *,
-      [data-euiportal='true'],
-      [data-euiportal='true'] *,
-      [data-kbn-preserve-zindex],
-      [data-kbn-preserve-zindex] *
-    ) {
+  .${EUI_DATA_GRID_FULL_SCREEN_CLASS}, .${EUI_DATA_GRID_FULL_SCREEN_CLASS} *,
+  [data-euiportal='true'],
+  [data-euiportal='true'] *,
+  [data-kbn-preserve-zindex],
+  [data-kbn-preserve-zindex] *
+  ) {
     z-index: unset !important;
   }
 `;

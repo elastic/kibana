@@ -409,10 +409,10 @@ function NodeStatusIcon({
         isRunning
           ? i18n.translate('workflowsUi.graphNode.statusRunning', { defaultMessage: 'Running' })
           : isSuccess
-          ? i18n.translate('workflowsUi.graphNode.statusSuccess', {
-              defaultMessage: 'Completed successfully',
-            })
-          : i18n.translate('workflowsUi.graphNode.statusFailed', { defaultMessage: 'Failed' })
+            ? i18n.translate('workflowsUi.graphNode.statusSuccess', {
+                defaultMessage: 'Completed successfully',
+              })
+            : i18n.translate('workflowsUi.graphNode.statusFailed', { defaultMessage: 'Failed' })
       }
     >
       {isRunning ? (

@@ -28,8 +28,8 @@ function AnnotationIcon({ annotation }: AnnotationIconProps) {
       type={
         eventEnd
           ? 'stopFill'
-          : (annotationsIconSet.find((icon) => icon.value === iconValue)?.icon as IconType) ??
-            (iconValue as IconType)
+          : ((annotationsIconSet.find((icon) => icon.value === iconValue)?.icon as IconType) ??
+            (iconValue as IconType))
       }
       color={color}
     />

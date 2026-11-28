@@ -676,8 +676,8 @@ const NonIlmLifecycleSummary = ({
     isDataPhaseEditing && dataPhaseSelectedPhase
       ? timelineModelPhases.find((p) => p.name === dataPhaseSelectedPhase)?.label
       : isEditingDeletePhase
-      ? timelineModelPhases.find((p) => p.isDelete)?.label
-      : undefined;
+        ? timelineModelPhases.find((p) => p.isDelete)?.label
+        : undefined;
 
   return (
     <>
@@ -686,10 +686,10 @@ const NonIlmLifecycleSummary = ({
           phases: timelineModelPhases,
           loading: false,
           downsampleSteps: isPreviewActive
-            ? previewTimelineDownsampleSteps ?? undefined
+            ? (previewTimelineDownsampleSteps ?? undefined)
             : isDsl
-            ? dslSummary.downsampleSteps
-            : undefined,
+              ? dslSummary.downsampleSteps
+              : undefined,
         }}
         title={title}
         titleBadge={titleBadge}

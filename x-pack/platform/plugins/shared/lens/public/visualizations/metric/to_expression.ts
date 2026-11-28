@@ -49,7 +49,7 @@ function computePaletteParams(
     // Positions are a custom-palette concept only. Named palettes distribute uniformly at render.
     stops:
       palette.params?.name === CUSTOM_PALETTE
-        ? palette.params?.stops?.map(({ stop }) => stop) ?? []
+        ? (palette.params?.stops?.map(({ stop }) => stop) ?? [])
         : [],
     reverse: false, // managed at UI level
   };

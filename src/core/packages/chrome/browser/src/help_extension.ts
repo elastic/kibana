@@ -70,8 +70,10 @@ export interface ChromeHelpExtensionMenuCustomLink extends ChromeHelpExtensionLi
 }
 
 /** @public */
-export interface ChromeGlobalHelpExtensionMenuLink
-  extends Omit<ChromeHelpExtensionMenuCustomLink, 'href'> {
+export interface ChromeGlobalHelpExtensionMenuLink extends Omit<
+  ChromeHelpExtensionMenuCustomLink,
+  'href'
+> {
   /**
    * URL of the link (required for global help links).
    */

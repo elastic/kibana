@@ -60,9 +60,12 @@ const createNavigationAvailable$ = (
   );
 };
 
-export class IngestHubPlugin
-  implements Plugin<IngestHubSetup, IngestHubStart, object, IngestHubStartDependencies>
-{
+export class IngestHubPlugin implements Plugin<
+  IngestHubSetup,
+  IngestHubStart,
+  object,
+  IngestHubStartDependencies
+> {
   private readonly ingestFlows: IngestFlow[] = [];
 
   constructor(private readonly context: PluginInitializerContext) {}

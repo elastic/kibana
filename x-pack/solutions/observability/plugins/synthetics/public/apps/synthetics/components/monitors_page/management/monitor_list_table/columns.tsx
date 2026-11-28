@@ -104,7 +104,7 @@ export function useMonitorListColumns({
       },
     },
     // Only show Project ID column if project monitors are present
-    ...(overviewStatus?.projectMonitorsCount ?? 0 > 0
+    ...((overviewStatus?.projectMonitorsCount ?? 0 > 0)
       ? [
           {
             align: 'left' as const,

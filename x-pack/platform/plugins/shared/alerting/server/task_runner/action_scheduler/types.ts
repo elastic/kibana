@@ -44,7 +44,7 @@ export interface ActionSchedulerOptions<
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string,
-  AlertData extends RuleAlertData
+  AlertData extends RuleAlertData,
 > {
   ruleType: NormalizedRuleType<
     Params,
@@ -91,7 +91,7 @@ export type Executable<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
 > = {
   action: RuleAction | RuleSystemAction;
 } & (
@@ -109,7 +109,7 @@ export interface GetActionsToScheduleOpts<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
 > {
   activeAlerts?: Record<string, Alert<State, Context, ActionGroupIds>>;
   recoveredAlerts?: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
@@ -125,7 +125,7 @@ export interface IActionScheduler<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
 > {
   get priority(): number;
   getActionsToSchedule(
@@ -143,7 +143,7 @@ export interface RuleUrl {
 
 export interface IsExecutableAlertOpts<
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
 > {
   alert: Alert<AlertInstanceState, AlertInstanceContext, ActionGroupIds | RecoveryActionGroupId>;
   action: RuleAction;
@@ -162,7 +162,7 @@ export interface HelperOpts<ActionGroupIds extends string, RecoveryActionGroupId
 
 export interface AddSummarizedAlertsOpts<
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
 > {
   alert: Alert<AlertInstanceState, AlertInstanceContext, ActionGroupIds | RecoveryActionGroupId>;
   summarizedAlerts: CombinedSummarizedAlerts | null;

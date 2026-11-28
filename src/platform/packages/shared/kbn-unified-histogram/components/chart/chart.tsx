@@ -135,7 +135,7 @@ export function UnifiedHistogramChart({
   } = fetchParams;
   const hasLensSuggestions = Boolean(
     isPlainRecord &&
-      lensVisServiceCurrentSuggestionContext?.type === UnifiedHistogramSuggestionType.lensSuggestion
+    lensVisServiceCurrentSuggestionContext?.type === UnifiedHistogramSuggestionType.lensSuggestion
   );
 
   useTotalHits({

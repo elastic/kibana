@@ -83,7 +83,9 @@ export function buildPackageInputs(
 
   for (const service of services) {
     const serviceVars: ServiceVars = storedServiceVars[service.id] ?? { trigger: null, vars: {} };
-    const defaultInput = service.inputs?.includes('aws-s3') ? 'aws-s3' : service.inputs?.[0] ?? '';
+    const defaultInput = service.inputs?.includes('aws-s3')
+      ? 'aws-s3'
+      : (service.inputs?.[0] ?? '');
     const inputType = serviceVars.trigger ?? defaultInput;
     if (!inputType) continue;
 

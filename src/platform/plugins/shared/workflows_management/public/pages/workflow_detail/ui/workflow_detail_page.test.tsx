@@ -70,7 +70,7 @@ const asTemplateQueryResult = (result: {
   isInitialLoading: boolean;
   isError: boolean;
 }): ReturnType<typeof useTemplate> =>
-  ({ ...result, isLoading: !result.data } as unknown as ReturnType<typeof useTemplate>);
+  ({ ...result, isLoading: !result.data }) as unknown as ReturnType<typeof useTemplate>;
 
 jest.mock('../../../entities/workflows/store/workflow_detail/thunks/load_connectors_thunk', () => ({
   loadConnectorsThunk: (...args: unknown[]) => mockLoadConnectors(...args),

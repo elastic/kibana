@@ -44,7 +44,7 @@ type WorkflowsNavNode =
         {
           breadcrumbStatus: 'hidden';
           children: [{ link: DeepLinkId }, { link: DeepLinkId }];
-        }
+        },
       ];
     };
 

@@ -11,9 +11,11 @@ import { PLUGIN_ID } from '../common';
 import { registerDataSetsRoutes } from './routes/register_routes';
 import type { DataFederationConfigType } from './config';
 
-export class DataFederationServerPlugin
-  implements Plugin<void, void, { features: FeaturesPluginSetup }>
-{
+export class DataFederationServerPlugin implements Plugin<
+  void,
+  void,
+  { features: FeaturesPluginSetup }
+> {
   private readonly config: DataFederationConfigType;
 
   constructor(initializerContext: PluginInitializerContext) {

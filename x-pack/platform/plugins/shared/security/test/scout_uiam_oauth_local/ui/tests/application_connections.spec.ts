@@ -125,9 +125,8 @@ test.describe(
       await pageObjects.applicationConnections.revokeConnection(connectionId);
 
       await expect(async () => {
-        const rowText = await pageObjects.applicationConnections.getListConnectionRowText(
-          connectionId
-        );
+        const rowText =
+          await pageObjects.applicationConnections.getListConnectionRowText(connectionId);
         expect(rowText).toContain('Revoked');
       }).toPass();
     });
@@ -146,9 +145,8 @@ test.describe(
 
       for (const connectionId of bulkConnectionIds) {
         await expect(async () => {
-          const rowText = await pageObjects.applicationConnections.getListConnectionRowText(
-            connectionId
-          );
+          const rowText =
+            await pageObjects.applicationConnections.getListConnectionRowText(connectionId);
           expect(rowText).toContain('Revoked');
         }).toPass();
       }

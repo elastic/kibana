@@ -222,8 +222,8 @@ export function AddToDatasetFlyout({
         options.initialExample?.metadata !== undefined
           ? options.initialExample.metadata
           : options.initialExamples?.[0]?.metadata !== undefined
-          ? options.initialExamples[0].metadata
-          : {},
+            ? options.initialExamples[0].metadata
+            : {},
     })
   );
   const [formError, setFormError] = useState<string | null>(null);

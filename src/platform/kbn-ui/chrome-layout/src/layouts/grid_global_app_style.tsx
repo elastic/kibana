@@ -138,14 +138,16 @@ const globalTempHackStyles = (_euiTheme: UseEuiTheme['euiTheme'], chromeStyle: C
     .euiFlyout[class*='right'] {
       // match the application area border-radius on the right edge,
       // but not for side-by-side child flyouts since they aren't positioned at the rightmost edge
-      ${chromeStyle === 'project' &&
-      `&:not([data-managed-flyout-layout-mode="side-by-side"][data-managed-flyout-level="child"]) {
+      ${
+        chromeStyle === 'project' &&
+        `&:not([data-managed-flyout-layout-mode="side-by-side"][data-managed-flyout-level="child"]) {
           border-top-right-radius: ${_euiTheme.border.radius.medium};
           border-bottom-right-radius: ${_euiTheme.border.radius.medium};
           .euiFlyoutFooter {
             border-bottom-right-radius: ${_euiTheme.border.radius.medium};
           }
-        }`}
+        }`
+      }
     }
 
     // When overlay is above the header (full-viewport modal style), only border-radius

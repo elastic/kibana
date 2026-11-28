@@ -34,7 +34,7 @@ interface CallToolTools {
 
 type CallbackOf<
   TCallToolTools extends CallToolTools,
-  TEmittedMessage extends Message
+  TEmittedMessage extends Message,
 > = (parameters: {
   messages: Message[];
   toolCalls: ToolCallOfToolOptions<TCallToolTools>[];
@@ -56,7 +56,7 @@ export function callTools<TCallToolOptions extends CallToolOptions>(
 export function callTools<
   TCallToolOptions extends Omit<CallToolOptions, 'tools' | 'toolChoice'> = never,
   TCallToolTools extends CallToolTools = never,
-  TEmittedMessage extends Message = never
+  TEmittedMessage extends Message = never,
 >(
   options: TCallToolOptions,
   getNextRequest: GetNextRequestCallback<TCallToolTools>,

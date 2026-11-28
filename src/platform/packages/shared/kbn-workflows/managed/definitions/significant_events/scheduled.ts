@@ -16,13 +16,11 @@ export const SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID =
 export const SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID =
   'system-significant-events-scheduled-review';
 
-export interface SignificantEventsScheduledDetectionWorkflowTemplateValues
-  extends ManagedWorkflowTemplateValues {
+export interface SignificantEventsScheduledDetectionWorkflowTemplateValues extends ManagedWorkflowTemplateValues {
   detectionIntervalMinutes: number;
 }
 
-export interface SignificantEventsScheduledReviewWorkflowTemplateValues
-  extends ManagedWorkflowTemplateValues {
+export interface SignificantEventsScheduledReviewWorkflowTemplateValues extends ManagedWorkflowTemplateValues {
   reviewIntervalMinutes: number;
   discoveryBatchSize: number;
   triageBatchSize: number;

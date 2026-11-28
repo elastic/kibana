@@ -74,10 +74,10 @@ export class SecurityPageObject extends FtrService {
         options.expectSpaceSelector
           ? 'spaceSelector'
           : options.expectForbidden
-          ? 'error'
-          : options.expectSuccess
-          ? 'chrome'
-          : undefined
+            ? 'error'
+            : options.expectSuccess
+              ? 'chrome'
+              : undefined
       );
     },
 

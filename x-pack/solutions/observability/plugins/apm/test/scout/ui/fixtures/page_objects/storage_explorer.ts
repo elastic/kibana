@@ -12,7 +12,10 @@ export class StorageExplorerPage {
   public storageChart: Locator;
   public pageTitle: Locator;
   public servicesTableLoadedIndicator: Locator;
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {
     this.storageChart = this.page.testSubj.locator('storageExplorerTimeseriesChart');
     this.pageTitle = this.page.getByRole('heading', { name: 'Storage explorer', level: 1 });
     this.servicesTableLoadedIndicator = this.page.testSubj.locator(

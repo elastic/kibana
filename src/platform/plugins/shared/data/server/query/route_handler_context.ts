@@ -20,8 +20,10 @@ import { isQuery } from '../../common';
 import { extract, inject } from '../../common/query/filters/persistable_state';
 import type { SavedQueryRestResponse } from './route_types';
 
-export interface InternalSavedQueryAttributes
-  extends Omit<SavedQueryAttributes, 'filters' | 'timefilter'> {
+export interface InternalSavedQueryAttributes extends Omit<
+  SavedQueryAttributes,
+  'filters' | 'timefilter'
+> {
   titleKeyword: string;
   filters?: SavedQueryAttributes['filters'] | null;
   timefilter?: SavedQueryAttributes['timefilter'] | null;
@@ -134,8 +136,8 @@ export async function registerSavedQueryRouteHandlerContext(context: RequestHand
 
     return Boolean(
       existingQuery &&
-        existingQuery.attributes.titleKeyword === preparedTitle &&
-        (!id || existingQuery.id !== id)
+      existingQuery.attributes.titleKeyword === preparedTitle &&
+      (!id || existingQuery.id !== id)
     );
   };
 

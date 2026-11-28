@@ -144,7 +144,7 @@ export function StreamsTreeTable({
   const { getStreamDocCounts, getStreamHistogram } = useStreamDocCountsFetch({
     groupTotalCountByTimestamp: true,
     getCanReadFailureStore: (streamName: string | undefined) =>
-      streamName ? privilegeMap.get(streamName) ?? false : hasFailureStoreAccess,
+      streamName ? (privilegeMap.get(streamName) ?? false) : hasFailureStoreAccess,
     numDataPoints: STREAMS_HISTOGRAM_NUM_DATA_POINTS,
     fetchIngestionDocCounts: true,
   });
@@ -159,30 +159,39 @@ export function StreamsTreeTable({
     if (!totalDocsResult.value) {
       return {} as Record<string, number>;
     }
-    return totalDocsResult.value.reduce((acc, { stream, count }) => {
-      acc[stream] = count;
-      return acc;
-    }, {} as Record<string, number>);
+    return totalDocsResult.value.reduce(
+      (acc, { stream, count }) => {
+        acc[stream] = count;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
   }, [totalDocsResult.value]);
 
   const failedByStream = React.useMemo(() => {
     if (!failedDocsResult.value) {
       return {} as Record<string, number>;
     }
-    return failedDocsResult.value.reduce((acc, { stream, count }) => {
-      acc[stream] = count;
-      return acc;
-    }, {} as Record<string, number>);
+    return failedDocsResult.value.reduce(
+      (acc, { stream, count }) => {
+        acc[stream] = count;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
   }, [failedDocsResult.value]);
 
   const degradedByStream = React.useMemo(() => {
     if (!degradedDocsResult.value) {
       return {} as Record<string, number>;
     }
-    return degradedDocsResult.value.reduce((acc, { stream, count }) => {
-      acc[stream] = count;
-      return acc;
-    }, {} as Record<string, number>);
+    return degradedDocsResult.value.reduce(
+      (acc, { stream, count }) => {
+        acc[stream] = count;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
   }, [degradedDocsResult.value]);
 
   const qualityByStream = React.useMemo(() => {

@@ -26,7 +26,7 @@ interface ConnectorLifecycleHandlerDeps {
     [
       CoreStart,
       { spaces?: SpacesPluginStart; agentContextLayer: AgentContextLayerPluginStart },
-      unknown
+      unknown,
     ]
   >;
 }

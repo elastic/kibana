@@ -12,9 +12,12 @@ import { aiSummarizeStepDefinition } from './steps/ai/ai_summarize_step/step';
 import { aiClassifyStepDefinition } from './steps/ai/ai_classify_step/step';
 import { registerInferenceFeatures } from './steps/ai/register_inference_features';
 
-export class InferenceWorkflowsPlugin
-  implements Plugin<{}, {}, InferenceWorkflowsSetupDeps, InferenceWorkflowsStartDeps>
-{
+export class InferenceWorkflowsPlugin implements Plugin<
+  {},
+  {},
+  InferenceWorkflowsSetupDeps,
+  InferenceWorkflowsStartDeps
+> {
   setup(core: CoreSetup<InferenceWorkflowsStartDeps>, deps: InferenceWorkflowsSetupDeps) {
     deps.workflowsExtensions.registerStepDefinition(aiPromptStepDefinition(core));
     deps.workflowsExtensions.registerStepDefinition(aiSummarizeStepDefinition(core));

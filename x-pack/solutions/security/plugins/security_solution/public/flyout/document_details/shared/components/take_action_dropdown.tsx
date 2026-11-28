@@ -305,8 +305,8 @@ export const TakeActionDropdown = memo(
               ...exceptionActionItems,
             ]
           : isEndpointEvent && canCreateEndpointEventFilters
-          ? eventFilterActionItems
-          : [],
+            ? eventFilterActionItems
+            : [],
       [
         eventFilterActionItems,
         isEndpointEvent,

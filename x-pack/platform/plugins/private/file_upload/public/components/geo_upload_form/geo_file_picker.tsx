@@ -140,7 +140,7 @@ export class GeoFilePicker extends Component<Props, State> {
 
           // Get sidecar files if available
           const sidecarFiles = hasSidecarFiles(this.state.importer)
-            ? this.state.importer.getSidecarFiles?.() ?? []
+            ? (this.state.importer.getSidecarFiles?.() ?? [])
             : [];
 
           const totalFiles = 1 + sidecarFiles.length;

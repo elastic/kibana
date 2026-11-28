@@ -95,7 +95,7 @@ const createMockModel = (value = 'name: test-workflow') => {
 let mockModel: ReturnType<typeof createMockModel>;
 
 const createMockEditor = (model: ReturnType<typeof createMockModel>) =>
-  ({ getModel: jest.fn().mockReturnValue(model) } as any);
+  ({ getModel: jest.fn().mockReturnValue(model) }) as any;
 
 const embeddableChatAccessReady = {
   hasRequiredLicense: true,

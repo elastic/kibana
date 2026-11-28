@@ -33,7 +33,7 @@ const createMockKiClient = ({
       .mockImplementation((_stream: string, options?: { types?: string[] }) =>
         Promise.resolve(isInferredCall(options) ? inferred : computed)
       ),
-  } as unknown as KnowledgeIndicatorClient);
+  }) as unknown as KnowledgeIndicatorClient;
 
 describe('shouldIdentifyFeatures', () => {
   const streamName = 'test-stream';

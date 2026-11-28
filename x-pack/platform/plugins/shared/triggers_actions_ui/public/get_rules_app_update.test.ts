@@ -14,7 +14,7 @@ const buildCapabilities = (insightsAndAlerting: Record<string, boolean>): Capabi
     navLinks: {},
     catalogue: {},
     management: { insightsAndAlerting },
-  } as unknown as Capabilities);
+  }) as unknown as Capabilities;
 
 describe('getRulesAppUpdate', () => {
   it('keeps the Rules app accessible in the side nav when the user has rules access', () => {

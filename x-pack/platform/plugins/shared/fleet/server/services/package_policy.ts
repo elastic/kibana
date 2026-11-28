@@ -1291,8 +1291,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       const pkgInfo = packageInfos.get(
         `${newSo.attributes.package?.name}-${newSo.attributes.package?.version}`
       )!;
-      const assetsMap = packageInfosandAssetsMap.get(`${pkgInfo.name}-${pkgInfo.version}`)
-        ?.assetsMap!;
+      const assetsMap = packageInfosandAssetsMap.get(
+        `${pkgInfo.name}-${pkgInfo.version}`
+      )?.assetsMap!;
       agentVersionConditionsUnchanged &&= addsNoAgentVersionConditions(pkgInfo, assetsMap);
       await this.compilePackagePolicyForVersions(
         soClient,
@@ -2668,7 +2669,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     });
 
     const bumpPromise =
-      options?.bumpRevision ?? true
+      (options?.bumpRevision ?? true)
         ? this.bumpAgentPoliciesRevision({ soClient, esClient }, [...associatedPolicyIds], {
             user: options?.user,
             asyncDeploy: options?.asyncDeploy,
@@ -4660,10 +4661,10 @@ export function updatePackageInputs(
       const policyInputEffectiveId = getInputEffectiveName(input);
       const policyTemplateStillIncludesInput = isInputOnlyPolicyTemplate(policyTemplate)
         ? policyTemplate.input === input.type
-        : policyTemplate.inputs?.some(
+        : (policyTemplate.inputs?.some(
             (policyTemplateInput) =>
               getInputEffectiveName(policyTemplateInput) === policyInputEffectiveId
-          ) ?? false;
+          ) ?? false);
       return policyTemplateStillIncludesInput;
     }),
   ];

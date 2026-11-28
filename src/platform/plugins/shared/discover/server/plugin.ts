@@ -36,9 +36,12 @@ import {
 } from '../common/constants';
 import { getSearchEmbeddableTransforms } from '../common/embeddable';
 
-export class DiscoverServerPlugin
-  implements Plugin<object, DiscoverServerPluginStart, object, DiscoverServerPluginStartDeps>
-{
+export class DiscoverServerPlugin implements Plugin<
+  object,
+  DiscoverServerPluginStart,
+  object,
+  DiscoverServerPluginStartDeps
+> {
   private readonly config: ConfigSchema;
   private subscriptions: Subscription[] = [];
   private embeddableTransformsEnabled = true;

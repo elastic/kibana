@@ -66,10 +66,12 @@ import { StaleInstancesCleanupTask } from './services/tasks/stale_instances_clea
 import { CompositeSloSummaryTask } from './services/tasks/composite_slo_summary_task/composite_slo_summary_task';
 import { registerDataProviders } from './agent_builder/register_data_provider';
 
-export class SLOPlugin
-  implements
-    Plugin<SLOServerSetup, SLOServerStart, SLOPluginSetupDependencies, SLOPluginStartDependencies>
-{
+export class SLOPlugin implements Plugin<
+  SLOServerSetup,
+  SLOServerStart,
+  SLOPluginSetupDependencies,
+  SLOPluginStartDependencies
+> {
   private readonly logger: Logger;
   private readonly config: SLOConfig;
   private readonly isServerless: boolean;

@@ -10,7 +10,7 @@ import { apmRouter } from '../routing/apm_route_config';
 import { isRouteWithComparison, isRouteWithTimeRange } from './is_route_with_time_range';
 
 const createLocation = (pathname: string): Location =>
-  ({ pathname, search: '', hash: '', state: undefined, key: '' } as Location);
+  ({ pathname, search: '', hash: '', state: undefined, key: '' }) as Location;
 
 describe('isRouteWithTimeRange', () => {
   it.each([

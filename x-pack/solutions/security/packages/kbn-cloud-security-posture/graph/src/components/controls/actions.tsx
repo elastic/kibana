@@ -132,8 +132,8 @@ export const Actions = ({
     !isSearchBarTourOpen && hasSearchWarning
       ? searchWarningMessage.content
       : !isSearchBarTourOpen
-      ? toggleSearchBarTooltip
-      : undefined;
+        ? toggleSearchBarTooltip
+        : undefined;
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none" {...props}>
@@ -194,7 +194,9 @@ export const Actions = ({
                       position: absolute;
                       left: ${-4.5 + (searchToggled ? 1 : 0)}px;
                       bottom: ${14 + (searchToggled ? 1 : 0)}px;
-                      transition: all ${euiTheme.animation.fast} ease-in, right 0s linear,
+                      transition:
+                        all ${euiTheme.animation.fast} ease-in,
+                        right 0s linear,
                         bottom 0s linear !important;
                     `}
                     color="warning"
@@ -206,7 +208,9 @@ export const Actions = ({
                       position: absolute;
                       right: ${-4.5 + (searchToggled ? 1 : 0)}px;
                       bottom: ${-4.5 + (searchToggled ? 1 : 0)}px;
-                      transition: all ${euiTheme.animation.fast} ease-in, right 0s linear,
+                      transition:
+                        all ${euiTheme.animation.fast} ease-in,
+                        right 0s linear,
                         bottom 0s linear !important;
                     `}
                   >

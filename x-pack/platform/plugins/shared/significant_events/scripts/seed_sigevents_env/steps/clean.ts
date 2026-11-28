@@ -48,7 +48,7 @@ export async function cleanSeedData(
   }
   const allQueries =
     listRes.status < 300
-      ? (listRes.data as { queries?: Array<{ id: string }> })?.queries ?? []
+      ? ((listRes.data as { queries?: Array<{ id: string }> })?.queries ?? [])
       : [];
   const queryIds = allQueries
     .map((q) => q.id)

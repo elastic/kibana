@@ -149,7 +149,7 @@ const makeLegacySO = (
     namespaces: ['default'],
     references: [caseRef],
     attributes: { ...baseCommonAttrs, ...attrs } as AttachmentPersistedAttributes,
-  } as SavedObject<AttachmentPersistedAttributes>);
+  }) as SavedObject<AttachmentPersistedAttributes>;
 
 const makeUnifiedSO = (
   id: string,
@@ -161,7 +161,7 @@ const makeUnifiedSO = (
     namespaces: ['default'],
     references: [caseRef],
     attributes: { ...baseCommonAttrs, ...attrs } as UnifiedAttachmentAttributes,
-  } as SavedObject<UnifiedAttachmentAttributes>);
+  }) as SavedObject<UnifiedAttachmentAttributes>;
 
 // ----- Per-subtype fixtures (legacy + unified per subtype) -----
 //

@@ -93,13 +93,13 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
     const outputId = isServerless
       ? SERVERLESS_AGENTLESS_OUTPUT_ID
       : isCloud
-      ? ECH_AGENTLESS_OUTPUT_ID
-      : undefined;
+        ? ECH_AGENTLESS_OUTPUT_ID
+        : undefined;
     const fleetServerId = isServerless
       ? SERVERLESS_AGENTLESS_FLEET_SERVER_HOST_ID
       : isCloud
-      ? ECH_AGENTLESS_FLEET_SERVER_HOST_ID
-      : undefined;
+        ? ECH_AGENTLESS_FLEET_SERVER_HOST_ID
+        : undefined;
 
     return {
       outputId,

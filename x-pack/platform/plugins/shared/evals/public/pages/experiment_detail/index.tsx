@@ -205,8 +205,8 @@ export const ExperimentDetailPage: React.FC = () => {
   const pageTitle = suiteId
     ? i18n.getRunPageTitle(suiteId)
     : experimentName
-    ? i18n.getPageTitleWithName(experimentName)
-    : i18n.getPageTitle(experimentId);
+      ? i18n.getPageTitleWithName(experimentName)
+      : i18n.getPageTitle(experimentId);
 
   const updateSearchParams = useCallback(
     (updater: (params: URLSearchParams) => void) => {

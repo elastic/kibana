@@ -71,7 +71,7 @@ export const AnalyzerPreview = memo(
     const indices = alertIndices.length > 0 ? alertIndices : dataViewIndices;
 
     const ancestorId = useMemo(() => getFieldValue(hit, ALERT_ANCESTORS_ID) as string, [hit]);
-    const documentId = shouldUseAncestor ? ancestorId : hit.raw._id ?? ''; // use ancestor as fallback for alert preview
+    const documentId = shouldUseAncestor ? ancestorId : (hit.raw._id ?? ''); // use ancestor as fallback for alert preview
     const { statsNodes, loading, error } = useAlertPrevalenceFromProcessTree({
       documentId,
       indices,

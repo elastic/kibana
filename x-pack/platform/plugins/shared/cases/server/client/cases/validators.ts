@@ -435,7 +435,7 @@ export const validateExtendedFieldsInRequest = async ({
   const templateId =
     updateReq.template === null
       ? null
-      : updateReq.template?.id ?? originalCase.attributes.template?.id;
+      : (updateReq.template?.id ?? originalCase.attributes.template?.id);
 
   await validateCaseExtendedFields({
     extendedFields: updateReq.extended_fields,

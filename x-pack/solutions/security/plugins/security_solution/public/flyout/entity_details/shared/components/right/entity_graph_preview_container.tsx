@@ -13,8 +13,10 @@ import {
 } from '../../../../../flyout_v2/shared/components/graph_preview_panel';
 import { useShouldShowGraph } from '../../../../shared/hooks/use_should_show_graph';
 
-export interface EntityGraphPreviewContainerProps
-  extends Pick<GraphPreviewPanelProps, 'onShowGraph' | 'showIcon'> {
+export interface EntityGraphPreviewContainerProps extends Pick<
+  GraphPreviewPanelProps,
+  'onShowGraph' | 'showIcon'
+> {
   /** Entity Store v2 entity ID (`entity.id`) to center the graph preview on. */
   entityId: string;
 }

@@ -1,3 +1,4 @@
+oxfmt
 @msw/serve
 cbor2
 @launchdarkly/js-client-sdk

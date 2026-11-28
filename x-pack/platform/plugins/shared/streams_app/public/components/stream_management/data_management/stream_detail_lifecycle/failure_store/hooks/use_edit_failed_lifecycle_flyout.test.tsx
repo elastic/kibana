@@ -55,7 +55,7 @@ const createDefinition = (): Streams.ingest.all.GetResponse =>
       name: 'logs-test',
       ingest: { failure_store: { disabled: {} } },
     },
-  } as unknown as Streams.ingest.all.GetResponse);
+  }) as unknown as Streams.ingest.all.GetResponse;
 
 const createKibana = (
   isServerless: boolean,
@@ -73,7 +73,7 @@ const createKibana = (
     },
     isServerless,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } as any);
+  }) as any;
 
 const Harness = ({
   isServerless,

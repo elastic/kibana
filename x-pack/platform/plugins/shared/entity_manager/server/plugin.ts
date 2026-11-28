@@ -35,15 +35,12 @@ export interface EntityManagerServerPluginStart {
   getScopedClient: (options: { request: KibanaRequest }) => Promise<EntityClient>;
 }
 
-export class EntityManagerServerPlugin
-  implements
-    Plugin<
-      EntityManagerServerPluginSetup,
-      EntityManagerServerPluginStart,
-      EntityManagerPluginSetupDependencies,
-      EntityManagerPluginStartDependencies
-    >
-{
+export class EntityManagerServerPlugin implements Plugin<
+  EntityManagerServerPluginSetup,
+  EntityManagerServerPluginStart,
+  EntityManagerPluginSetupDependencies,
+  EntityManagerPluginStartDependencies
+> {
   public config: EntityManagerConfig;
   public logger: Logger;
   public server?: EntityManagerServerSetup;

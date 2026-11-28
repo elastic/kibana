@@ -36,7 +36,10 @@ export class HostsPage {
   public readonly noDataPage: Locator;
   public readonly noDataPageActionButton: Locator;
 
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {
     this.tableLoaded = this.page.getByTestId('hostsView-table-loaded');
     this.tableLoading = this.page.getByTestId('hostsView-table-loading');
     this.tableRows = this.page.getByTestId('hostsView-tableRow');

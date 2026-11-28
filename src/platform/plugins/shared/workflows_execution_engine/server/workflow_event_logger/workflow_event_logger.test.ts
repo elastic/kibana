@@ -17,7 +17,7 @@ import { WorkflowTaskManagerAbortError } from '../workflow_task_shutdown';
 const createLogsRepositoryMock = () =>
   ({
     createLogs: jest.fn(),
-  } as unknown as jest.Mocked<LogsRepository>);
+  }) as unknown as jest.Mocked<LogsRepository>;
 
 describe('WorkflowEventLogger', () => {
   it('logs info events and preserves context fields', async () => {

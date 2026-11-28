@@ -30,7 +30,7 @@ describe('getHiddenVarGroupOptionsForPolicyTemplate', () => {
         },
       ],
       policy_templates: policyTemplates,
-    } as unknown as PackageInfo);
+    }) as unknown as PackageInfo;
 
   it('hides an option when every input of the policy template hides it', () => {
     const packageInfo = buildPackageInfo([

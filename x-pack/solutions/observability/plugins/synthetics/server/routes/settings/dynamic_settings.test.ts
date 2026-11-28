@@ -25,7 +25,7 @@ const buildRouteContext = (overrides: Partial<RouteContext> = {}): RouteContext 
     request: { body: {} },
     response: {},
     ...overrides,
-  } as unknown as RouteContext);
+  }) as unknown as RouteContext;
 
 describe('dynamic settings routes', () => {
   afterEach(() => {

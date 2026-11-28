@@ -251,7 +251,7 @@ export const createFiltersFromValueClickAction = async ({
     const filter =
       table.meta?.type === 'es_ql'
         ? await createFilterESQL(table, column, row)
-        : (await createFilter(table, column, row)) ?? [];
+        : ((await createFilter(table, column, row)) ?? []);
     filter.forEach((f) => {
       if (negate) {
         f = toggleFilterNegated(f);

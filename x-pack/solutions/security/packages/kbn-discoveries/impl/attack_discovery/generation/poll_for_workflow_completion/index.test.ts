@@ -28,13 +28,13 @@ describe('pollForWorkflowCompletion', () => {
     ({
       status,
       stepExecutions,
-    } as unknown as WorkflowExecutionDto);
+    }) as unknown as WorkflowExecutionDto;
 
   const createStepExecution = (stepType: string): WorkflowStepExecutionDto =>
     ({
       output: { some: 'data' },
       stepType,
-    } as unknown as WorkflowStepExecutionDto);
+    }) as unknown as WorkflowStepExecutionDto;
 
   beforeEach(() => {
     jest.clearAllMocks();

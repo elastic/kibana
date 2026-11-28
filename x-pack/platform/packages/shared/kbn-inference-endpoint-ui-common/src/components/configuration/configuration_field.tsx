@@ -247,8 +247,8 @@ function getInitialHeadersList(
       value && Object.keys(value).length > 0
         ? value
         : defaultValue && Object.keys(defaultValue).length > 0
-        ? defaultValue
-        : emptyHeaders;
+          ? defaultValue
+          : emptyHeaders;
     const headersList: Array<[string, string]> = Object.entries(headersObj as Map);
     return headersList.length > 0 ? headersList : emptyHeadersList;
   } catch (e) {
@@ -326,8 +326,8 @@ export const ConfigInputMapField: React.FC<ConfigInputFieldProps> = ({
                 showHeaderInputs
                   ? HIDE_HEADERS_SWITCH_LABEL
                   : isEdit
-                  ? VIEW_HEADERS_SWITCH_LABEL
-                  : ADD_HEADERS_SWITCH_LABEL
+                    ? VIEW_HEADERS_SWITCH_LABEL
+                    : ADD_HEADERS_SWITCH_LABEL
               }
               checked={showHeaderInputs}
               onChange={(e) => onChange(e)}

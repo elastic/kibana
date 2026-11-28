@@ -21,7 +21,7 @@ const resolveMock = jest.fn();
 const createContext = () =>
   ({
     savedObjectsClient: { resolve: resolveMock },
-  } as unknown as AttachmentResolveContext);
+  }) as unknown as AttachmentResolveContext;
 
 describe('createVisualizationAttachmentType resolve()', () => {
   beforeEach(() => {

@@ -30,7 +30,7 @@ type DefaultSynthtraceClients = [
   'infraEsClient',
   'logsEsClient',
   'syntheticsEsClient',
-  'streamsClient'
+  'streamsClient',
 ];
 
 export interface SynthtraceClients {
@@ -104,7 +104,7 @@ export class SynthtraceClientsManager {
   }
 
   async initFleetPackageForClient<
-    TClient extends SynthtraceClientTypes = SynthtraceClientsWithFleetPackage
+    TClient extends SynthtraceClientTypes = SynthtraceClientsWithFleetPackage,
   >(opts: {
     clients: Partial<GetClientsReturn<TClient>>;
     version?: string;

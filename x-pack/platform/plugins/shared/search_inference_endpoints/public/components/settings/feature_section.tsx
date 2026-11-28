@@ -124,7 +124,7 @@ export const FeatureSection: React.FC<FeatureSectionProps> = ({
                     globalDefaultId={
                       feature.ignoreGlobalDefault
                         ? NO_DEFAULT_MODEL
-                        : globalDefaultId ?? NO_DEFAULT_MODEL
+                        : (globalDefaultId ?? NO_DEFAULT_MODEL)
                     }
                     canManage={canManage}
                   />

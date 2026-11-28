@@ -40,18 +40,17 @@ export interface TableFieldConfiguration {
   valueCellContent: (params?: { truncate?: boolean }) => React.ReactNode;
 }
 
-export interface ContentFrameworkTableProps
-  extends Pick<
-    DocViewRenderProps,
-    | 'hit'
-    | 'dataView'
-    | 'columnsMeta'
-    | 'textBasedHits'
-    | 'filter'
-    | 'onAddColumn'
-    | 'onRemoveColumn'
-    | 'columns'
-  > {
+export interface ContentFrameworkTableProps extends Pick<
+  DocViewRenderProps,
+  | 'hit'
+  | 'dataView'
+  | 'columnsMeta'
+  | 'textBasedHits'
+  | 'filter'
+  | 'onAddColumn'
+  | 'onRemoveColumn'
+  | 'columns'
+> {
   fieldNames: string[];
   fieldConfigurations?: Record<string, FieldConfiguration>;
   id: string;

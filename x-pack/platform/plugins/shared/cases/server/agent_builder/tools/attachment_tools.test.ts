@@ -26,12 +26,12 @@ const buildToolContext = (attachments = buildMockAttachments()): ToolHandlerCont
     spaceId: 'default',
     logger: loggingSystemMock.createLogger(),
     attachments,
-  } as unknown as ToolHandlerContext);
+  }) as unknown as ToolHandlerContext;
 
 const buildRegistry = (
   entries: Array<{ id: string; schema?: z.ZodType }>
 ): UnifiedAttachmentTypeRegistry =>
-  ({ list: () => entries } as unknown as UnifiedAttachmentTypeRegistry);
+  ({ list: () => entries }) as unknown as UnifiedAttachmentTypeRegistry;
 
 // A minimal authorable attachment schema: discriminated by `type`, with an
 // `owner` key the step strips before composing the union.

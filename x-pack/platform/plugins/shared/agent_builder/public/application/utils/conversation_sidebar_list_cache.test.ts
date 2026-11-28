@@ -28,7 +28,7 @@ const buildRow = (id: string, agent_id = 'ag', title = 't'): ConversationWithout
 const buildConversationsService = (list: ConversationWithoutRounds[] = []) =>
   ({
     list: jest.fn().mockResolvedValue(list),
-  } as unknown as ConversationsService);
+  }) as unknown as ConversationsService;
 
 describe('conversation_sidebar_list_cache', () => {
   const agentId = 'ag';

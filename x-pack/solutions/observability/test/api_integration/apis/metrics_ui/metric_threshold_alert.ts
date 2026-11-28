@@ -1397,7 +1397,7 @@ export default function ({ getService }: FtrProviderContext) {
           comparator: COMPARATORS.GREATER_THAN_OR_EQUALS,
           timeSize: 5,
           ...(aggType !== 'count' ? { metric: 'test.metric' } : {}),
-        } as MetricExpressionParams);
+        }) as MetricExpressionParams;
 
       before(async () => {
         await esClient.index({

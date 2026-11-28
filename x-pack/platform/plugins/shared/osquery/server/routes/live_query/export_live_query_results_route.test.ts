@@ -41,7 +41,7 @@ const createOsqueryContext = (): OsqueryAppContext =>
     config: jest.fn(),
     telemetryEventsSender: {},
     licensing: {},
-  } as unknown as OsqueryAppContext);
+  }) as unknown as OsqueryAppContext;
 
 const buildSearchMock = (
   queries?: Array<{ action_id: string; query: string; ecs_mapping?: Record<string, string> }>

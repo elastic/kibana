@@ -133,7 +133,7 @@ describe('attachReplacementRanges', () => {
       kind: 'Variable' as const,
       sortText: text,
       ...(rangeToReplace ? { rangeToReplace } : {}),
-    } as ISuggestionItem);
+    }) as ISuggestionItem;
   const attachRanges = (
     innerText: string,
     suggestions: ISuggestionItem[],

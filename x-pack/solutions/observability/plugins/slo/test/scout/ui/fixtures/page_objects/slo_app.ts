@@ -8,7 +8,10 @@ import type { ScoutPage, ScoutTestConfig } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 
 export class SLOApp {
-  constructor(private readonly page: ScoutPage, private readonly config: ScoutTestConfig) {}
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly config: ScoutTestConfig
+  ) {}
 
   /** Navigate to SLO app (main list). Waits for "Manage SLOs" header link. */
   async goto() {

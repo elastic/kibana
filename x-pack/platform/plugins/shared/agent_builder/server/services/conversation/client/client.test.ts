@@ -92,7 +92,7 @@ describe('ConversationClient', () => {
           access_mode: accessMode,
         },
       },
-    } as Document);
+    }) as Document;
 
   beforeEach(() => {
     jest.clearAllMocks();

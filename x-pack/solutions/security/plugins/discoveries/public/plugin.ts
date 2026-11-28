@@ -26,15 +26,12 @@ import {
 const ATTACK_DISCOVERY_WORKFLOWS_ENABLED_FEATURE_FLAG =
   'securitySolution.attackDiscoveryWorkflowsEnabled';
 
-export class DiscoveriesPublicPlugin
-  implements
-    Plugin<
-      DiscoveriesPublicPluginSetup,
-      DiscoveriesPublicPluginStart,
-      DiscoveriesPublicPluginSetupDeps,
-      DiscoveriesPublicPluginStartDeps
-    >
-{
+export class DiscoveriesPublicPlugin implements Plugin<
+  DiscoveriesPublicPluginSetup,
+  DiscoveriesPublicPluginStart,
+  DiscoveriesPublicPluginSetupDeps,
+  DiscoveriesPublicPluginStartDeps
+> {
   constructor(_context: PluginInitializerContext) {}
 
   public setup(

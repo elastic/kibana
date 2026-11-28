@@ -16,9 +16,10 @@ import type {
   ObservabilityLogsExplorerStartDeps,
 } from './types';
 
-export class ObservabilityLogsExplorerPlugin
-  implements Plugin<ObservabilityLogsExplorerPluginSetup, ObservabilityLogsExplorerPluginStart>
-{
+export class ObservabilityLogsExplorerPlugin implements Plugin<
+  ObservabilityLogsExplorerPluginSetup,
+  ObservabilityLogsExplorerPluginStart
+> {
   constructor(context: PluginInitializerContext<ObservabilityLogsExplorerConfig>) {}
 
   public setup(

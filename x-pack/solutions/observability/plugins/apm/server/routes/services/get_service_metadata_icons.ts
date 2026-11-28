@@ -107,8 +107,8 @@ export async function getServiceMetadataIcons({
   const containerType = event.containsFields('kubernetes')
     ? 'Kubernetes'
     : event.containsFields(CONTAINER_ID)
-    ? 'Docker'
-    : undefined;
+      ? 'Docker'
+      : undefined;
 
   const serverlessType = getServerlessTypeFromCloudData(
     event[CLOUD_PROVIDER],

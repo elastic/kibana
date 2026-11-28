@@ -90,8 +90,8 @@ export const ExperimentsListPage: React.FC = () => {
         render: (_name: string | null | undefined, item: EvaluationExperimentSummary) => {
           const isSuiteRun = !!item.suite_id;
           const displayName = isSuiteRun
-            ? item.suite_id ?? item.experiment_name ?? item.experiment_id.slice(0, 12)
-            : item.experiment_name ?? item.experiment_id.slice(0, 12);
+            ? (item.suite_id ?? item.experiment_name ?? item.experiment_id.slice(0, 12))
+            : (item.experiment_name ?? item.experiment_id.slice(0, 12));
           const tooltipId = item.execution_id ?? item.experiment_id;
           const link = <EuiLink onClick={() => navigateToDetail(item)}>{displayName}</EuiLink>;
           return <EuiToolTip content={tooltipId}>{link}</EuiToolTip>;
@@ -236,8 +236,8 @@ export const ExperimentsListPage: React.FC = () => {
     const [a, b] = selectedExperiments;
     const isSuiteRun = !!a.suite_id || !!b.suite_id;
     const type = isSuiteRun ? 'execution' : 'experiment';
-    const baselineId = isSuiteRun ? a.execution_id ?? a.experiment_id : a.experiment_id;
-    const targetId = isSuiteRun ? b.execution_id ?? b.experiment_id : b.experiment_id;
+    const baselineId = isSuiteRun ? (a.execution_id ?? a.experiment_id) : a.experiment_id;
+    const targetId = isSuiteRun ? (b.execution_id ?? b.experiment_id) : b.experiment_id;
     const params = new URLSearchParams({ type, baseline: baselineId, target: targetId });
 
     history.push(`/compare?${params.toString()}`);

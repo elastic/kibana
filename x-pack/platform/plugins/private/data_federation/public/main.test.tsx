@@ -18,7 +18,7 @@ const createToastsMock = (): ToastsStart =>
   ({
     addSuccess: jest.fn(),
     addDanger: jest.fn(),
-  } as unknown as ToastsStart);
+  }) as unknown as ToastsStart;
 
 const createHttpMock = (): Pick<HttpSetup, 'get' | 'put' | 'delete'> => ({
   get: jest.fn(),

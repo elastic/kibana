@@ -78,33 +78,41 @@ const useHeaderStyles = (
     const bottomPad = (followed: boolean) => (followed ? euiTheme.size.xs : paddingBlock);
 
     const root = css`
-      ${sticky &&
-      css`
-        position: sticky;
-        top: 0;
-        z-index: ${euiTheme.levels.mask};
-      `}
+      ${
+        sticky &&
+        css`
+          position: sticky;
+          top: 0;
+          z-index: ${euiTheme.levels.mask};
+        `
+      }
       flex-shrink: 0;
       display: flex;
       flex-direction: column;
       min-width: 0;
       box-sizing: border-box;
       padding: 0;
-      ${paddingInline &&
-      css`
-        padding-inline: ${paddingInline};
-      `}
-      ${bleedMargin &&
-      css`
-        margin-inline: -${bleedMargin};
-        margin-top: -${bleedMargin};
-      `}
+      ${
+        paddingInline &&
+        css`
+          padding-inline: ${paddingInline};
+        `
+      }
+      ${
+        bleedMargin &&
+        css`
+          margin-inline: -${bleedMargin};
+          margin-top: -${bleedMargin};
+        `
+      }
       background: ${euiTheme.colors.backgroundBasePlain};
-      ${!borderless &&
-      css`
-        border-bottom: ${euiTheme.border.thin};
-        margin-bottom: -${euiTheme.border.width.thin};
-      `}
+      ${
+        !borderless &&
+        css`
+          border-bottom: ${euiTheme.border.thin};
+          margin-bottom: -${euiTheme.border.width.thin};
+        `
+      }
 
       &:hover .titleActionsReveal,
       &:focus-within .titleActionsReveal {
@@ -119,11 +127,13 @@ const useHeaderStyles = (
       gap: ${euiTheme.size.m};
       min-width: 0;
       min-height: ${APPLICATION_TOP_BAR_MIN_HEIGHT_PX}px;
-      ${!hasTitleAppend &&
-      css`
-        padding-block-start: ${paddingBlock};
-        padding-block-end: ${bottomPad(hasTabs || hasMetadata)};
-      `}
+      ${
+        !hasTitleAppend &&
+        css`
+          padding-block-start: ${paddingBlock};
+          padding-block-end: ${bottomPad(hasTabs || hasMetadata)};
+        `
+      }
     `;
 
     const titleCluster = css`
@@ -140,10 +150,12 @@ const useHeaderStyles = (
       flex: 0 1 auto;
       min-width: 0;
       max-width: 100%;
-      ${hasTitleAppend &&
-      css`
-        max-width: min(40%, 360px);
-      `}
+      ${
+        hasTitleAppend &&
+        css`
+          max-width: min(40%, 360px);
+        `
+      }
     `;
 
     const titleClusterSpacer = css`

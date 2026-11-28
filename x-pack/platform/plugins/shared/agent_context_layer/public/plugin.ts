@@ -19,15 +19,12 @@ export interface AgentContextLayerPublicPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AgentContextLayerPublicPluginStart {}
 
-export class AgentContextLayerPublicPlugin
-  implements
-    Plugin<
-      AgentContextLayerPublicPluginSetup,
-      AgentContextLayerPublicPluginStart,
-      AgentContextLayerPublicPluginSetupDeps,
-      AgentContextLayerPublicPluginStartDeps
-    >
-{
+export class AgentContextLayerPublicPlugin implements Plugin<
+  AgentContextLayerPublicPluginSetup,
+  AgentContextLayerPublicPluginStart,
+  AgentContextLayerPublicPluginSetupDeps,
+  AgentContextLayerPublicPluginStartDeps
+> {
   constructor(_context: PluginInitializerContext) {}
 
   public setup(

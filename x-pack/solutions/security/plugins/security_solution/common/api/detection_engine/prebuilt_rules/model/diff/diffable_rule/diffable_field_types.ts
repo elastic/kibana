@@ -28,8 +28,8 @@ import {
 // Rule data source
 
 export enum DataSourceType {
-  'index_patterns' = 'index_patterns',
-  'data_view' = 'data_view',
+  index_patterns = 'index_patterns',
+  data_view = 'data_view',
 }
 
 export type DataSourceIndexPatterns = z.infer<typeof DataSourceIndexPatterns>;
@@ -57,8 +57,8 @@ export const RuleDataSource = lazySchema(() =>
 // Rule data query
 
 export enum KqlQueryType {
-  'inline_query' = 'inline_query',
-  'saved_query' = 'saved_query',
+  inline_query = 'inline_query',
+  saved_query = 'saved_query',
 }
 
 export type InlineKqlQuery = z.infer<typeof InlineKqlQuery>;

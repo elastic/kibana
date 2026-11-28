@@ -346,7 +346,7 @@ export class CaseCommentModel {
     // whose length does not match attachmentId has no sensible interpretation and is
     // rejected, mirroring the legacy paired-array strictness.
     const dedupeUnifiedAttachment = <
-      T extends { attachmentId: string | string[]; metadata?: unknown }
+      T extends { attachmentId: string | string[]; metadata?: unknown },
     >(
       attachment: T,
       idsAlreadyInCase: Set<string>

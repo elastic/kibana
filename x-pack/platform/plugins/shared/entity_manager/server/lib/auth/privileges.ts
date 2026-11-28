@@ -30,17 +30,15 @@ export const canDeleteEntityDefinition = async (client: ElasticsearchClient) => 
 };
 
 const canManageAPIKey = async (client: ElasticsearchClient) => {
-  const { has_all_requested: hasAllRequested } = await client.security.hasPrivileges(
-    apiKeyCreationPrivileges
-  );
+  const { has_all_requested: hasAllRequested } =
+    await client.security.hasPrivileges(apiKeyCreationPrivileges);
 
   return hasAllRequested;
 };
 
 const canDeleteAPIKey = async (client: ElasticsearchClient) => {
-  const { has_all_requested: hasAllRequested } = await client.security.hasPrivileges(
-    apiKeyDeletionPrivileges
-  );
+  const { has_all_requested: hasAllRequested } =
+    await client.security.hasPrivileges(apiKeyDeletionPrivileges);
 
   return hasAllRequested;
 };

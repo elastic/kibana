@@ -777,8 +777,8 @@ export const CompareExperimentsPage: React.FC = () => {
                 csvCopyState === 'copied'
                   ? 'check'
                   : csvCopyState === 'failed'
-                  ? 'warning'
-                  : 'exportAction'
+                    ? 'warning'
+                    : 'exportAction'
               }
               onClick={handleCsvExport}
               disabled={csvCopyState !== 'idle'}
@@ -786,8 +786,8 @@ export const CompareExperimentsPage: React.FC = () => {
               {csvCopyState === 'copied'
                 ? i18n.EXPORT_CSV_COPIED
                 : csvCopyState === 'failed'
-                ? i18n.EXPORT_CSV_FAILED
-                : i18n.EXPORT_CSV}
+                  ? i18n.EXPORT_CSV_FAILED
+                  : i18n.EXPORT_CSV}
             </EuiButton>
           </EuiFlexItem>
         )}

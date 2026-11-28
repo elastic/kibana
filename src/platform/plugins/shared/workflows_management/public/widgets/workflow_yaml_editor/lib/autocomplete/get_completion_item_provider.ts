@@ -82,8 +82,8 @@ function quoteKibanaBuiltinRefSuggestion(
     typeof suggestion.insertText === 'string'
       ? suggestion.insertText
       : typeof suggestion.label === 'string'
-      ? suggestion.label
-      : suggestion.label.label;
+        ? suggestion.label
+        : suggestion.label.label;
 
   if (!raw.startsWith(KIBANA_WORKFLOW_INPUT_DEFINITION_REF_PREFIX)) {
     return suggestion;

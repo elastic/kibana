@@ -159,98 +159,103 @@ const shouldShowTooltip = ({
  * Security Solution DistributionBar component.
  * Shows visual representation of distribution of stats, such as alerts by criticality or misconfiguration findings by evaluation result.
  */
-export const DistributionBar: React.FC<DistributionBarProps> = React.memo(function DistributionBar(
-  props
-) {
-  const styles = useStyles();
-  const { stats, 'data-test-subj': dataTestSubj, hideLastTooltip } = props;
+export const DistributionBar: React.FC<DistributionBarProps> = React.memo(
+  function DistributionBar(props) {
+    const styles = useStyles();
+    const { stats, 'data-test-subj': dataTestSubj, hideLastTooltip } = props;
 
-  const [hoveredKey, setHoveredKey] = useState<string | null>(null);
-  const hasCurrentFilter = useMemo(() => stats.some((item) => item.isCurrentFilter), [stats]);
+    const [hoveredKey, setHoveredKey] = useState<string | null>(null);
+    const hasCurrentFilter = useMemo(() => stats.some((item) => item.isCurrentFilter), [stats]);
 
-  const parts = stats.map((stat, index) => {
-    const isLast = index === stats.length - 1;
-    const isHovered = hoveredKey === stat.key;
+    const parts = stats.map((stat, index) => {
+      const isLast = index === stats.length - 1;
+      const isHovered = hoveredKey === stat.key;
 
-    // Only show tooltip for segments thats hovered OR Set as Filter OR Last
-    const isCurrentFilter = stat.isCurrentFilter ?? false;
-    const showTooltip = shouldShowTooltip({
-      isHovered,
-      isCurrentFilter,
-      isLast,
-      hasFilterActive: hasCurrentFilter,
-      hideLastTooltip,
-      isHoveringAnyStatsBar: Boolean(hoveredKey),
+      // Only show tooltip for segments thats hovered OR Set as Filter OR Last
+      const isCurrentFilter = stat.isCurrentFilter ?? false;
+      const showTooltip = shouldShowTooltip({
+        isHovered,
+        isCurrentFilter,
+        isLast,
+        hasFilterActive: hasCurrentFilter,
+        hideLastTooltip,
+        isHoveringAnyStatsBar: Boolean(hoveredKey),
+      });
+
+      const partStyle = [
+        styles.part.base,
+        styles.part.tick,
+        styles.part.hover,
+        css`
+          background-color: ${stat.color};
+          flex: ${stat.count};
+        `,
+      ];
+
+      if (showTooltip) {
+        partStyle.push(styles.part.visibleTooltip);
+      }
+
+      const prettyNumber = numeral(stat.count).format('0,0a');
+
+      return (
+        <div
+          key={stat.key}
+          css={partStyle}
+          data-test-subj={`${dataTestSubj}__part`}
+          onClick={stat.filter}
+          onMouseEnter={() => setHoveredKey(stat.key)}
+          onMouseLeave={() => setHoveredKey(null)}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              stat.filter?.();
+            }
+          }}
+          tabIndex={0}
+          role="button"
+        >
+          <div css={[styles.tooltip, showTooltip && styles.part.visibleTooltip]}>
+            <EuiFlexGroup
+              gutterSize="none"
+              justifyContent="flexEnd"
+              wrap={false}
+              responsive={false}
+            >
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="hollow" css={styles.tooltipBadgeLeft}>
+                  {prettyNumber}
+                </EuiBadge>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="hollow" css={styles.tooltipBadgeRight}>
+                  <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon type="dot" size="s" color={stat.color} />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>{stat.label ?? stat.key}</EuiFlexItem>
+                    {stat.isCurrentFilter && stat.reset && (
+                      <EuiFlexItem grow={false}>
+                        <EuiIcon type="cross" size="m" onClick={stat.reset} />
+                      </EuiFlexItem>
+                    )}
+                  </EuiFlexGroup>
+                </EuiBadge>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </div>
+        </div>
+      );
     });
 
-    const partStyle = [
-      styles.part.base,
-      styles.part.tick,
-      styles.part.hover,
-      css`
-        background-color: ${stat.color};
-        flex: ${stat.count};
-      `,
-    ];
-
-    if (showTooltip) {
-      partStyle.push(styles.part.visibleTooltip);
-    }
-
-    const prettyNumber = numeral(stat.count).format('0,0a');
-
     return (
-      <div
-        key={stat.key}
-        css={partStyle}
-        data-test-subj={`${dataTestSubj}__part`}
-        onClick={stat.filter}
-        onMouseEnter={() => setHoveredKey(stat.key)}
-        onMouseLeave={() => setHoveredKey(null)}
-        onKeyDown={(event) => {
-          if (event.key === 'Enter' || event.key === ' ') {
-            stat.filter?.();
-          }
-        }}
-        tabIndex={0}
-        role="button"
+      <EuiFlexGroup
+        alignItems="center"
+        css={styles.bar}
+        data-test-subj={dataTestSubj}
+        responsive={false}
       >
-        <div css={[styles.tooltip, showTooltip && styles.part.visibleTooltip]}>
-          <EuiFlexGroup gutterSize="none" justifyContent="flexEnd" wrap={false} responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow" css={styles.tooltipBadgeLeft}>
-                {prettyNumber}
-              </EuiBadge>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow" css={styles.tooltipBadgeRight}>
-                <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon type="dot" size="s" color={stat.color} />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>{stat.label ?? stat.key}</EuiFlexItem>
-                  {stat.isCurrentFilter && stat.reset && (
-                    <EuiFlexItem grow={false}>
-                      <EuiIcon type="cross" size="m" onClick={stat.reset} />
-                    </EuiFlexItem>
-                  )}
-                </EuiFlexGroup>
-              </EuiBadge>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </div>
-      </div>
+        {parts.length ? parts : <EmptyBar data-test-subj={`${dataTestSubj}__emptyBar`} />}
+      </EuiFlexGroup>
     );
-  });
-
-  return (
-    <EuiFlexGroup
-      alignItems="center"
-      css={styles.bar}
-      data-test-subj={dataTestSubj}
-      responsive={false}
-    >
-      {parts.length ? parts : <EmptyBar data-test-subj={`${dataTestSubj}__emptyBar`} />}
-    </EuiFlexGroup>
-  );
-});
+  }
+);

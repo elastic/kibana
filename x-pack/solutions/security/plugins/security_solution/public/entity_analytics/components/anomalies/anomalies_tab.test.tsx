@@ -123,7 +123,7 @@ jest.mock('../../../common/lib/kibana', () => ({
           ({
             'dateFormat:tz': 'Japan',
             'dateFormat:dow': 'Wednesday',
-          }[key]),
+          })[key],
       },
     },
   }),

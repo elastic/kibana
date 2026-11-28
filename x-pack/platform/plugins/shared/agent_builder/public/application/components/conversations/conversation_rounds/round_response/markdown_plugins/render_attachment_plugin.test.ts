@@ -57,7 +57,7 @@ const createMockAttachment = (
     })),
     current_version: Math.max(...versions.map((v) => v.version), 0),
     active: true,
-  } as VersionedAttachment);
+  }) as VersionedAttachment;
 
 describe('resolveAttachmentVersion', () => {
   const attachmentId = 'attachment-1';

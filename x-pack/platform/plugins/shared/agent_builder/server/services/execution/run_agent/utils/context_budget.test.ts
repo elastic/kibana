@@ -30,7 +30,7 @@ const createSummary = (summarizedRoundCount: number, tokenCount: number): Compac
     created_at: new Date().toISOString(),
     token_count: tokenCount,
     structured_data: {},
-  } as unknown as CompactionSummary);
+  }) as unknown as CompactionSummary;
 
 describe('computeContextBudget', () => {
   it('should compute budget from connector context window size', () => {

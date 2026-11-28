@@ -9,7 +9,7 @@ import type { EvaluationCriterion, Evaluator, Example, TaskOutput } from '@kbn/e
 
 export interface CreateScenarioCriteriaLlmEvaluatorOptions<
   TExample extends Example = Example,
-  TTaskOutput extends TaskOutput = TaskOutput
+  TTaskOutput extends TaskOutput = TaskOutput,
 > {
   criteriaFn: (criteria: EvaluationCriterion[]) => Evaluator<TExample, TTaskOutput>;
   criteria?: EvaluationCriterion[];
@@ -36,7 +36,7 @@ export interface CreateScenarioCriteriaLlmEvaluatorOptions<
  */
 export const createScenarioCriteriaLlmEvaluator = <
   TExample extends Example = Example,
-  TTaskOutput extends TaskOutput = TaskOutput
+  TTaskOutput extends TaskOutput = TaskOutput,
 >({
   name = 'scenario_criteria',
   criteria,

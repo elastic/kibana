@@ -192,8 +192,8 @@ export function KnowledgeIndicatorDetailsFlyout({
 
   const title =
     knowledgeIndicator.kind === 'feature'
-      ? knowledgeIndicator.feature.title ?? knowledgeIndicator.feature.id
-      : knowledgeIndicator.query.title ?? knowledgeIndicator.query.id;
+      ? (knowledgeIndicator.feature.title ?? knowledgeIndicator.feature.id)
+      : (knowledgeIndicator.query.title ?? knowledgeIndicator.query.id);
 
   return (
     <>

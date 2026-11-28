@@ -14,7 +14,7 @@ const makeDataStream = (name: string, indexNames: Array<string | undefined>): Da
   ({
     name,
     indices: indexNames.map((index_name) => ({ index_name })),
-  } as DataStreams[number]);
+  }) as DataStreams[number];
 
 describe('getAllBackingIndicesByStream', () => {
   it('returns all backing indices for each stream, not just the write index', () => {

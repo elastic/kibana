@@ -14,15 +14,12 @@ import type {
 } from './types';
 import { registerAttachmentUiDefinitions } from './attachment_types';
 
-export class AgentBuilderPlatformPlugin
-  implements
-    Plugin<
-      AgentBuilderPlatformPluginSetup,
-      AgentBuilderPlatformPluginStart,
-      PluginSetupDependencies,
-      PluginStartDependencies
-    >
-{
+export class AgentBuilderPlatformPlugin implements Plugin<
+  AgentBuilderPlatformPluginSetup,
+  AgentBuilderPlatformPluginStart,
+  PluginSetupDependencies,
+  PluginStartDependencies
+> {
   setup(
     coreSetup: CoreSetup<PluginStartDependencies, AgentBuilderPlatformPluginStart>,
     setupDeps: PluginSetupDependencies

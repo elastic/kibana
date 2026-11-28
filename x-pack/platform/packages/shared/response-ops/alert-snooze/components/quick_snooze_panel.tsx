@@ -79,10 +79,10 @@ export const QuickSnoozePanel = ({ onScheduleChange }: QuickSnoozePanelProps) =>
   const previewText = isCustomDurationInvalid
     ? null
     : snoozeEndDate === null
-    ? selectedDuration === 'indefinitely'
-      ? i18n.INDEFINITELY_MESSAGE
-      : null
-    : i18n.getUnsnoozeOnDateMessage(moment(snoozeEndDate).format(SNOOZE_DATE_DISPLAY_FORMAT));
+      ? selectedDuration === 'indefinitely'
+        ? i18n.INDEFINITELY_MESSAGE
+        : null
+      : i18n.getUnsnoozeOnDateMessage(moment(snoozeEndDate).format(SNOOZE_DATE_DISPLAY_FORMAT));
 
   return (
     <>

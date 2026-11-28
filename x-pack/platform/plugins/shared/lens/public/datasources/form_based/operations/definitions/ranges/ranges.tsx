@@ -111,9 +111,9 @@ export const rangeOperation: OperationDefinition<
 
     return Boolean(
       newField &&
-        newField.type === 'number' &&
-        newField.aggregatable &&
-        (!newField.aggregationRestrictions || newField.aggregationRestrictions.range)
+      newField.type === 'number' &&
+      newField.aggregatable &&
+      (!newField.aggregationRestrictions || newField.aggregationRestrictions.range)
     );
   },
   onFieldChange: (oldColumn, field) => {

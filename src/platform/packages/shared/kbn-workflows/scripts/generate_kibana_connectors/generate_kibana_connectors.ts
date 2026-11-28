@@ -49,7 +49,7 @@ export async function run() {
   validateIncludedOperations(contracts);
   await generateZodSchemas(contracts);
   saveKibanaConnectors(contracts);
-  eslintFixGeneratedCode({
+  await eslintFixGeneratedCode({
     paths: [
       KIBANA_CONTRACTS_OUTPUT_FILE_PATH,
       `${KIBANA_GENERATED_OUTPUT_FOLDER_PATH}/kibana*.gen.ts`,

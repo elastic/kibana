@@ -26,8 +26,10 @@ export interface EvaluationDataset<TExample extends Example = Example> {
   id?: undefined;
 }
 
-export interface EvaluationDatasetWithId<TExample extends Example = Example>
-  extends Omit<EvaluationDataset<TExample>, 'id'> {
+export interface EvaluationDatasetWithId<TExample extends Example = Example> extends Omit<
+  EvaluationDataset<TExample>,
+  'id'
+> {
   id: string;
 }
 
@@ -36,7 +38,7 @@ export type TaskOutput = unknown;
 export interface Example<
   TInput extends Record<string, unknown> = Record<string, unknown>,
   TExpected = any,
-  TMetadata extends Record<string, unknown> | null = Record<string, unknown> | null
+  TMetadata extends Record<string, unknown> | null = Record<string, unknown> | null,
 > {
   /**
    * Stable identifier for this example, typically a content hash.
@@ -97,7 +99,7 @@ export type EvaluatorKind = 'LLM' | 'CODE';
 
 export interface Evaluator<
   TExample extends Example = Example,
-  TTaskOutput extends TaskOutput = TaskOutput
+  TTaskOutput extends TaskOutput = TaskOutput,
 > {
   name: string;
   kind: EvaluatorKind;
@@ -128,7 +130,7 @@ export type ExperimentTask<TExample extends Example, TTaskOutput extends TaskOut
 export interface EvalsExecutorClient {
   runExperiment<
     TEvaluationDataset extends EvaluationDataset,
-    TTaskOutput extends TaskOutput = TaskOutput
+    TTaskOutput extends TaskOutput = TaskOutput,
   >(
     options: {
       /**

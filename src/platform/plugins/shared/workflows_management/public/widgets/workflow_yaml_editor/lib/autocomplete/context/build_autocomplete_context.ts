@@ -134,7 +134,7 @@ export function buildAutocompleteContext({
   const word = model.getWordAtPosition(position) || model.getWordUntilPosition(position);
 
   const focusedStepInfo: StepInfo | null = focusedStepId
-    ? workflowLookup?.steps[focusedStepId] ?? null
+    ? (workflowLookup?.steps[focusedStepId] ?? null)
     : null;
   const focusedYamlPair = getFocusedYamlPair(workflowLookup, focusedStepId, absoluteOffset);
 
@@ -146,7 +146,7 @@ export function buildAutocompleteContext({
 
   const path = getPathAtOffset(yamlDocument, absoluteOffset);
   const yamlNode = yamlDocument.getIn(path, true);
-  const scalarType = isScalar(yamlNode) ? yamlNode.type ?? null : null;
+  const scalarType = isScalar(yamlNode) ? (yamlNode.type ?? null) : null;
 
   const lineUpToCursor = line.substring(0, position.column - 1);
   const parseResult = parseLineForCompletion(lineUpToCursor);

@@ -62,8 +62,8 @@ export const ServiceNode = memo(
         borderColor: hasScore
           ? getSeverityColor(score)
           : selected
-          ? euiTheme.colors.primary
-          : euiTheme.colors.mediumShade,
+            ? euiTheme.colors.primary
+            : euiTheme.colors.mediumShade,
         borderWidth: selected
           ? `${NODE_BORDER_WIDTH_SELECTED}px`
           : `${NODE_BORDER_WIDTH_DEFAULT}px`,

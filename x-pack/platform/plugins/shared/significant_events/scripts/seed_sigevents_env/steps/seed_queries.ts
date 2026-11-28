@@ -67,7 +67,7 @@ export async function seedQueries(
     const totalHits =
       typeof assetRes.hits.total === 'number'
         ? assetRes.hits.total
-        : assetRes.hits.total?.value ?? 0;
+        : (assetRes.hits.total?.value ?? 0);
     if (totalHits > ASSET_FETCH_SIZE) {
       log.warning(
         `seedQueries: .kibana_streams_assets has ${totalHits} docs for "${ctx.streamName}" — only first ${ASSET_FETCH_SIZE} read; some rule_ids may be missing`

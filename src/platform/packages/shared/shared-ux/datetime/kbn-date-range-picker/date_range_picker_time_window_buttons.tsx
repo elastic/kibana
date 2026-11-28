@@ -139,8 +139,8 @@ export function TimeWindowButtons({ config }: { config: TimeWindowButtonsConfig 
         toolTipContent: isInvalid
           ? translations.cannotZoomInInvalid
           : isWindowDurationZero
-          ? translations.cannotZoomInFurther
-          : translations.zoomInTooltip,
+            ? translations.cannotZoomInFurther
+            : translations.zoomInTooltip,
         'data-test-subj': 'dateRangePickerZoomInButton',
       });
     }

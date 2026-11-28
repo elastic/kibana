@@ -43,7 +43,7 @@ describe('Index migrator', () => {
       () =>
         ({
           run: jest.fn(),
-        } as unknown as RuleMigrationSpaceIndexMigratorModule.RuleMigrationSpaceIndexMigrator)
+        }) as unknown as RuleMigrationSpaceIndexMigratorModule.RuleMigrationSpaceIndexMigrator
     );
   });
 

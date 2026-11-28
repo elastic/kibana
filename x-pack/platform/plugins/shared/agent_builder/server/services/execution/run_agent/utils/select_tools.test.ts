@@ -36,7 +36,7 @@ const createExecutableTool = (id: string): ExecutableTool =>
     configuration: {},
     getSchema: () => z.object({}),
     execute: jest.fn(),
-  } as unknown as ExecutableTool);
+  }) as unknown as ExecutableTool;
 
 describe('selectTools', () => {
   it('returns origin metadata for internal, registry, and inline tools', async () => {

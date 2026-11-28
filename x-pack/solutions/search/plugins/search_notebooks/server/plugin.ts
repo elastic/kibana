@@ -22,9 +22,10 @@ import type {
 } from './types';
 import { createNotebooksCache } from './utils';
 
-export class SearchNotebooksPlugin
-  implements Plugin<SearchNotebooksPluginSetup, SearchNotebooksPluginStart>
-{
+export class SearchNotebooksPlugin implements Plugin<
+  SearchNotebooksPluginSetup,
+  SearchNotebooksPluginStart
+> {
   private readonly config: SearchNotebooksConfig;
   private readonly logger: Logger;
   private readonly notebooksCache: NotebooksCache;

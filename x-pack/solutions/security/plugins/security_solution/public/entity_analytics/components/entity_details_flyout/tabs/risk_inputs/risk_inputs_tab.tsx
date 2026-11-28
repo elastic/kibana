@@ -808,7 +808,7 @@ const ContextsSection = <T extends EntityType>({
         ? (contributorMember && getEntityName(contributorMember)) || criticality.contributorEUID
         : undefined;
     const relatedEntities = isResolutionView
-      ? contributorName ?? criticalityEntityNames.get(criticality.level)?.join(', ') ?? '-'
+      ? (contributorName ?? criticalityEntityNames.get(criticality.level)?.join(', ') ?? '-')
       : '';
     items.push({
       field: (
@@ -839,7 +839,7 @@ const ContextsSection = <T extends EntityType>({
     const watchlistId =
       typeof watchlistMetadata?.watchlist_id === 'string' ? watchlistMetadata.watchlist_id : '';
     const watchlistLabel = watchlistId
-      ? watchlistNamesById.get(watchlistId) ?? getWatchlistName(watchlistId)
+      ? (watchlistNamesById.get(watchlistId) ?? getWatchlistName(watchlistId))
       : i18n.translate(
           'xpack.securitySolution.flyout.entityDetails.riskInputs.unknownWatchlistLabel',
           {
@@ -872,7 +872,7 @@ const ContextsSection = <T extends EntityType>({
         />
       ),
       contribution: formatContribution(watchlist.contribution),
-      entities: isResolutionView ? watchlistEntityNames.get(watchlistId)?.join(', ') ?? '-' : '',
+      entities: isResolutionView ? (watchlistEntityNames.get(watchlistId)?.join(', ') ?? '-') : '',
     });
   });
 

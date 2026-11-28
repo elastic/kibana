@@ -71,7 +71,7 @@ const mockAgent = (overrides: Partial<Agent> = {}): Agent =>
     policy_id: 'policy-1',
     tags: [],
     ...overrides,
-  } as unknown as Agent);
+  }) as unknown as Agent;
 
 describe('AgentDetailsPage', () => {
   const setupMocks = ({

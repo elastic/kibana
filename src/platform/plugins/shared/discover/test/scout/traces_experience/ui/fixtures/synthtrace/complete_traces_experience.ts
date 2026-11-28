@@ -237,7 +237,7 @@ export function richTrace({ from, to }: { from: number; to: number }): RichTrace
           ({
             fields,
             serialize: () => [fields],
-          } as Serializable<ApmFields>)
+          }) as Serializable<ApmFields>
       );
 
   const wrapFields = (fields: ApmFields[]) =>
@@ -246,7 +246,7 @@ export function richTrace({ from, to }: { from: number; to: number }): RichTrace
         ({
           fields: f,
           serialize: () => [f],
-        } as Serializable<ApmFields>)
+        }) as Serializable<ApmFields>
     );
 
   const allEvents = [

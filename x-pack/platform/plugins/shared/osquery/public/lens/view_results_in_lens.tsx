@@ -57,7 +57,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInLensActionProps> =
             time_range: {
               from: startDate ?? defaultFrom,
               to: endDate ?? 'now',
-              mode: mode ?? (startDate || endDate) ? 'absolute' : 'relative',
+              mode: (mode ?? (startDate || endDate)) ? 'absolute' : 'relative',
             },
             attributes: isScheduled
               ? getLensAttributes(logsDataView, { scheduleId, executionCount })

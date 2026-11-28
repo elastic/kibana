@@ -26,9 +26,11 @@ export const NewItemIndicator = ({ isHighlighted }: NewItemIndicatorProps) => {
     top: 1px;
     right: 1px;
     pointer-events: none;
-    stroke: ${isHighlighted
-      ? euiTheme.components.buttons.backgroundPrimary
-      : euiTheme.components.buttons.backgroundText};
+    stroke: ${
+      isHighlighted
+        ? euiTheme.components.buttons.backgroundPrimary
+        : euiTheme.components.buttons.backgroundText
+    };
     stroke-width: 2px;
     paint-order: stroke;
   `;

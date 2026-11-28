@@ -21,18 +21,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('renders field formats example 1', async () => {
       const formattedValues = await Promise.all(
-        (
-          await testSubjects.findAll('example1 sample formatted')
-        ).map((wrapper) => wrapper.getVisibleText())
+        (await testSubjects.findAll('example1 sample formatted')).map((wrapper) =>
+          wrapper.getVisibleText()
+        )
       );
       expect(formattedValues).to.eql(['1000.00B', '97.66KB', '95.37MB']);
     });
 
     it('renders field formats example 2', async () => {
       const formattedValues = await Promise.all(
-        (
-          await testSubjects.findAll('example2 sample formatted')
-        ).map((wrapper) => wrapper.getVisibleText())
+        (await testSubjects.findAll('example2 sample formatted')).map((wrapper) =>
+          wrapper.getVisibleText()
+        )
       );
       expect(formattedValues).to.eql(['$1,000.00', '$100,000.00', '$100,000,000.00']);
     });

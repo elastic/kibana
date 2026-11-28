@@ -23,7 +23,7 @@ import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 
 interface CreateAlertActionRouteForTypeOptions<
-  TAction extends CreateAlertActionBody['action_type']
+  TAction extends CreateAlertActionBody['action_type'],
 > {
   actionType: TAction;
   pathSuffix: string;
@@ -33,7 +33,7 @@ interface CreateAlertActionRouteForTypeOptions<
 }
 
 export const createAlertActionRouteForType = <
-  TAction extends CreateAlertActionBody['action_type']
+  TAction extends CreateAlertActionBody['action_type'],
 >({
   actionType,
   pathSuffix,

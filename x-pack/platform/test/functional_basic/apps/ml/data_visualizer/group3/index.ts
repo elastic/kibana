@@ -21,9 +21,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     loadTestFile(
-      require.resolve(
-        '../../../../../functional/apps/ml/data_visualizer/group3/index_data_visualizer_grid_in_discover_basic'
-      )
+      require.resolve('../../../../../functional/apps/ml/data_visualizer/group3/index_data_visualizer_grid_in_discover_basic')
     );
     loadTestFile(require.resolve('./index_data_visualizer_actions_panel'));
   });

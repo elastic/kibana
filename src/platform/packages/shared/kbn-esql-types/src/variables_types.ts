@@ -52,8 +52,8 @@ export type QueryESQLControl = Extract<
 export const isQueryESQLControl = (control?: object): control is QueryESQLControl => {
   return Boolean(
     control &&
-      'control_type' in control &&
-      control.control_type === EsqlControlType.VALUES_FROM_QUERY
+    'control_type' in control &&
+    control.control_type === EsqlControlType.VALUES_FROM_QUERY
   );
 };
 
@@ -103,7 +103,7 @@ interface HasVariableName {
 export const controlHasVariableName = (controlState: unknown): controlState is HasVariableName => {
   return Boolean(
     controlState &&
-      (controlState as HasVariableName)?.variable_name !== undefined &&
-      typeof (controlState as HasVariableName).variable_name === 'string'
+    (controlState as HasVariableName)?.variable_name !== undefined &&
+    typeof (controlState as HasVariableName).variable_name === 'string'
   );
 };

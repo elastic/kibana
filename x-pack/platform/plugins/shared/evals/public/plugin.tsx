@@ -26,10 +26,12 @@ const DEFAULT_ADD_TO_DATASET_LABEL = i18n.translate('xpack.evals.addToDatasetAct
   defaultMessage: 'Add to dataset',
 });
 
-export class EvalsPublicPlugin
-  implements
-    Plugin<EvalsPublicSetup, EvalsPublicStart, EvalsSetupDependencies, EvalsStartDependencies>
-{
+export class EvalsPublicPlugin implements Plugin<
+  EvalsPublicSetup,
+  EvalsPublicStart,
+  EvalsSetupDependencies,
+  EvalsStartDependencies
+> {
   public setup(
     coreSetup: CoreSetup<EvalsStartDependencies>,
     { management }: EvalsSetupDependencies

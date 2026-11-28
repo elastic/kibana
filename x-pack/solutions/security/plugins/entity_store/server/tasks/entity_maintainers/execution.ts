@@ -97,7 +97,7 @@ export function createMaintainerStatus({
       lastErrorTimestamp: status?.metadata?.lastErrorTimestamp || null,
       namespace: resolvedNamespace,
     },
-    state: status?.metadata?.runs ? status.state ?? initialState : initialState,
+    state: status?.metadata?.runs ? (status.state ?? initialState) : initialState,
     taskStatus: status?.taskStatus ?? EntityMaintainerTaskStatus.STARTED,
   };
 }
@@ -319,8 +319,8 @@ export async function runEntityMaintainerTask({
           caughtError instanceof Error
             ? caughtError.constructor.name
             : caughtError != null
-            ? 'Error'
-            : undefined,
+              ? 'Error'
+              : undefined,
         errorMessage: caughtError instanceof Error ? caughtError.message : undefined,
       });
     } catch (flushErr) {

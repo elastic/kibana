@@ -411,7 +411,7 @@ export const RuleActionsConnectorsBody = ({
 
           const isSystemActionsSelected = Boolean(
             actionType.isSystemActionType &&
-              actions.find((action) => action.actionTypeId === actionTypeModel.id)
+            actions.find((action) => action.actionTypeId === actionTypeModel.id)
           );
 
           const shouldDisableSystemAction =

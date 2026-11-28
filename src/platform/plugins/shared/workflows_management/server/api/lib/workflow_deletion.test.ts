@@ -53,7 +53,7 @@ const makeStorageClient = (
 const makeEsClient = () =>
   ({
     deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
-  } as unknown as ElasticsearchClient);
+  }) as unknown as ElasticsearchClient;
 
 const noopExecutions = jest.fn().mockResolvedValue({ total: 0, results: [] });
 

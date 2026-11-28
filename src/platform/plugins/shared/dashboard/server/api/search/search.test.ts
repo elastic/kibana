@@ -35,7 +35,7 @@ describe('dashboard search sort options', () => {
       resolve: jest.fn().mockResolvedValue({
         core: { savedObjects: { client: savedObjectsClient } },
       }),
-    } as unknown as RequestHandlerContext);
+    }) as unknown as RequestHandlerContext;
 
   beforeEach(() => {
     savedObjectsClient.find.mockResolvedValue({

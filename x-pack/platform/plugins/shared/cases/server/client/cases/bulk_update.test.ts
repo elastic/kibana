@@ -854,7 +854,7 @@ describe('update', () => {
               templateId,
               owner: mockCases[0].attributes.owner,
             },
-          } as Awaited<ReturnType<typeof clientArgs.services.templatesService.getTemplate>>)
+          }) as Awaited<ReturnType<typeof clientArgs.services.templatesService.getTemplate>>
       );
 
       await bulkUpdate(
@@ -1023,7 +1023,7 @@ describe('update', () => {
               templateId,
               owner: mockCases[0].attributes.owner,
             },
-          } as Awaited<ReturnType<typeof args.services.templatesService.getTemplate>>)
+          }) as Awaited<ReturnType<typeof args.services.templatesService.getTemplate>>
       );
 
       return args;

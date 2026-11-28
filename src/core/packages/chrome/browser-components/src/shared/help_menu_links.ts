@@ -87,7 +87,7 @@ export const toContextMenuItem = (
         closeMenu();
       }
     },
-  } as EuiContextMenuPanelItemDescriptor);
+  }) as EuiContextMenuPanelItemDescriptor;
 
 const buildNewsfeedLink = (newsfeedHandler?: () => void): ChromeHelpMenuLink[] =>
   newsfeedHandler

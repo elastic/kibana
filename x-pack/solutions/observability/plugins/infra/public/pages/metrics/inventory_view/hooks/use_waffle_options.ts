@@ -80,7 +80,7 @@ function mapInventoryViewToState(savedView: InventoryView): WaffleOptionsState {
   // forces the default view to be set with what the time range metadata endpoint returns
   const preferredSchemaValue =
     nodeType === 'host' && savedView.id === staticInventoryViewId
-      ? preferredSchema ?? null
+      ? (preferredSchema ?? null)
       : // otherwise, use the preferred schema from the saved view
         preferredSchema;
 

@@ -118,7 +118,7 @@ export class DataStreamsService implements CoreService<DataStreamsSetup, DataStr
       initializeClient: async <
         S extends MappingsDefinition,
         FullDocumentType extends GetFieldsOf<S> = GetFieldsOf<S>,
-        SRM extends BaseSearchRuntimeMappings = never
+        SRM extends BaseSearchRuntimeMappings = never,
       >(
         dataStreamName: string
       ): Promise<IDataStreamClient<S, FullDocumentType, SRM>> => {

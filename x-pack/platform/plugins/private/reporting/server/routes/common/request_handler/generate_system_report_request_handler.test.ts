@@ -40,7 +40,7 @@ const getMockContext = () =>
   ({
     core: coreMock.createRequestHandlerContext(),
     reporting: Promise.resolve({} as ReportingSetup),
-  } as unknown as ReportingRequestHandlerContext);
+  }) as unknown as ReportingRequestHandlerContext;
 
 const mockLogger = loggingSystemMock.createLogger();
 

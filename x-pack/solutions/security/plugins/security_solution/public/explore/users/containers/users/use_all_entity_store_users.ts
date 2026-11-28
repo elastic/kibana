@@ -38,7 +38,7 @@ export const mapUserEntityRecordToUser = (record: Entity): User | null => {
 
     const lastSeenIso = record.entity?.lifecycle?.last_seen;
     const domainValues = record.user?.domain as string[] | string | undefined;
-    const domain = Array.isArray(domainValues) ? domainValues?.[0] ?? '' : domainValues ?? '';
+    const domain = Array.isArray(domainValues) ? (domainValues?.[0] ?? '') : (domainValues ?? '');
     const riskLevel = record.entity?.risk?.calculated_level as RiskSeverity | undefined;
 
     const identityFields: Record<string, string> = {

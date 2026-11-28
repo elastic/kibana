@@ -33,7 +33,7 @@ export type PropsWithDiscriminator<Discriminator extends string, T extends Props
 export class DiscriminatedUnionType<
   Discriminator extends string,
   RTS extends Array<ObjectType<any>>,
-  T extends PropsWithDiscriminator<Discriminator, Props>
+  T extends PropsWithDiscriminator<Discriminator, Props>,
 > extends Type<T> {
   private readonly discriminator: Discriminator;
   private readonly discriminatedValues: string[];

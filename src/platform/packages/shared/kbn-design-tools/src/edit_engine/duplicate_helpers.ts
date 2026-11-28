@@ -280,7 +280,7 @@ export const createDuplicate = async (
     // Static clones need referenceEl for scroll tracking.
     referenceEl: liveInfo
       ? existingSession?.referenceEl
-      : existingSession?.referenceEl ?? hoverTarget,
+      : (existingSession?.referenceEl ?? hoverTarget),
     liveReactElement: liveInfo,
     styleEdits: [],
     textEdits: [],

@@ -32,7 +32,7 @@ const EVIDENCE_DESCRIPTION_CRITERIA: EvaluationCriterion[] = [
 /** LLM evaluator: grades whether each evidence `description` follows the 4-part hypothesis-test structure. */
 export const createEvidenceDescriptionEvaluator = <
   TExample extends Example,
-  TOutput extends TaskOutput
+  TOutput extends TaskOutput,
 >({
   criteriaFn,
   transformOutput,

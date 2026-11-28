@@ -55,7 +55,7 @@ describe('autocomplete', () => {
     string,
     Array<string | PartialSuggestionWithText>,
     string?,
-    Parameters<typeof createCustomCallbackMocks>?
+    Parameters<typeof createCustomCallbackMocks>?,
   ];
 
   const _testSuggestionsFn = (

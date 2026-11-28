@@ -64,12 +64,12 @@ export function createEsAggsIdMapEntry({
     isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', col) &&
     interval !== undefined
   ) {
-    const sourceField = col.sourceField ? col.sourceField : indexPattern.timeFieldName ?? '';
+    const sourceField = col.sourceField ? col.sourceField : (indexPattern.timeFieldName ?? '');
     const { usedField } = getTimeZoneAndInterval({ ...col, sourceField }, indexPattern);
 
     const dropPartials = Boolean(
       col.params?.dropPartials &&
-        (indexPattern.timeFieldName === usedField?.name || !col.params?.ignoreTimeRange)
+      (indexPattern.timeFieldName === usedField?.name || !col.params?.ignoreTimeRange)
     );
 
     return [

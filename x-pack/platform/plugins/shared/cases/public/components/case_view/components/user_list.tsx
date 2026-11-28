@@ -61,7 +61,7 @@ const renderUsers = (
       <EuiFlexItem grow={false}>
         <EuiToolTip
           content={i18n.SEND_EMAIL_ARIA(
-            userInfo.user?.full_name ? userInfo.user?.full_name : userInfo.user?.username ?? ''
+            userInfo.user?.full_name ? userInfo.user?.full_name : (userInfo.user?.username ?? '')
           )}
           disableScreenReaderOutput
         >
@@ -70,7 +70,7 @@ const renderUsers = (
             onClick={handleSendEmail.bind(null, userInfo.user?.email)}
             iconType="mail"
             aria-label={i18n.SEND_EMAIL_ARIA(
-              userInfo.user?.full_name ? userInfo.user?.full_name : userInfo.user?.username ?? ''
+              userInfo.user?.full_name ? userInfo.user?.full_name : (userInfo.user?.username ?? '')
             )}
             isDisabled={isEmpty(userInfo.user?.email)}
           />

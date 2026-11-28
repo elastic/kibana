@@ -221,7 +221,7 @@ export const addFieldToColumns = ({
   const allColumns = getAllFieldsByName(browserFields);
   const column = allColumns[fieldId];
   const initColumnHeader = DETECTIONS_TABLE_IDS.some((tableId) => tableId === scopeId)
-    ? defaultsHeader.find((c) => c.id === fieldId) ?? {}
+    ? (defaultsHeader.find((c) => c.id === fieldId) ?? {})
     : {};
 
   const scopedActions = getScopedActions(scopeId);

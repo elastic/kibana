@@ -324,10 +324,10 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
   const elasticsearchUrlDefaultValue = isEditingRemoteEsOutput
     ? defaultOutput?.hosts || []
     : output?.hosts?.length
-    ? output.hosts
-    : isServerless
-    ? defaultOutput?.hosts || []
-    : [];
+      ? output.hosts
+      : isServerless
+        ? defaultOutput?.hosts || []
+        : [];
   const elasticsearchUrlDisabled = isServerless || isDisabled('hosts');
   const elasticsearchUrlInput = useComboInput(
     'esHostsComboxBox',
@@ -962,7 +962,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
         // (or null when unset) so saving other fields does not turn "unset" into `false`
         otel_disable_beatsauth: otelDisableBeatsauthInput.hasChanged
           ? otelDisableBeatsauthInput.value
-          : otelOutput?.otel_disable_beatsauth ?? null,
+          : (otelOutput?.otel_disable_beatsauth ?? null),
       };
 
       // the client SSL key of the Elasticsearch, remote Elasticsearch and Logstash outputs
@@ -1092,10 +1092,10 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
                     topic: kafkaStaticTopicInput.value,
                   }
                 : kafkaTopicsInput.value === kafkaTopicsType.Dynamic && kafkaDynamicTopicInput.value
-                ? {
-                    topic: kafkaDynamicTopicInput.value,
-                  }
-                : {}),
+                  ? {
+                      topic: kafkaDynamicTopicInput.value,
+                    }
+                  : {}),
               headers: kafkaHeadersInput.value,
               timeout: parseIntegerIfStringDefined(kafkaBrokerTimeoutInput.value),
               broker_timeout: parseIntegerIfStringDefined(
@@ -1303,10 +1303,10 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
   const isHostsMissing = isKafka
     ? !kafkaHostsInput.value.some((v) => v.trim())
     : isLogstash
-    ? !logstashHostsInput.value.some((v) => v.trim())
-    : isRemoteElasticsearch
-    ? !remoteElasticsearchUrlInput.value.some((v) => v.trim())
-    : !elasticsearchUrlInput.value.some((v) => v.trim());
+      ? !logstashHostsInput.value.some((v) => v.trim())
+      : isRemoteElasticsearch
+        ? !remoteElasticsearchUrlInput.value.some((v) => v.trim())
+        : !elasticsearchUrlInput.value.some((v) => v.trim());
 
   return {
     inputs,

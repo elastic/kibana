@@ -101,8 +101,8 @@ export function ActionsMenu({
     const effectiveSearch = searchValue.startsWith(STEPS_PREFIX)
       ? searchValue.slice(STEPS_PREFIX.length).trim()
       : searchValue.startsWith('#')
-      ? searchValue.slice(1).trim()
-      : searchValue;
+        ? searchValue.slice(1).trim()
+        : searchValue;
 
     if (itemData?.kind === 'command' || itemData?.kind === 'jump') {
       return (

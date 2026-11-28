@@ -34,7 +34,7 @@ describe('createResultTransformer', () => {
       getEntryByResultId: jest.fn(async (resultId: string) => entriesByResultId.get(resultId)),
       listEntries: jest.fn(async () => []),
       entryExists: jest.fn(),
-    } as unknown as ToolResultStore);
+    }) as unknown as ToolResultStore;
 
   const createFileEntry = (
     path: string,
@@ -62,7 +62,7 @@ describe('createResultTransformer', () => {
       get: jest.fn(async (toolId: string) => tools.get(toolId)),
       has: jest.fn(async (toolId: string) => tools.has(toolId)),
       list: jest.fn(async () => []),
-    } as unknown as ToolRegistry);
+    }) as unknown as ToolRegistry;
 
   const createMockToolManager = (
     summarizers: Map<
@@ -72,7 +72,7 @@ describe('createResultTransformer', () => {
   ): ToolManager =>
     ({
       getSummarizer: jest.fn((toolId: string) => summarizers.get(toolId)),
-    } as unknown as ToolManager);
+    }) as unknown as ToolManager;
 
   describe('tool-specific summarization', () => {
     it('applies summarizeToolReturn when tool has it defined', async () => {

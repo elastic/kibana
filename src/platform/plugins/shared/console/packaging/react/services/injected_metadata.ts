@@ -72,7 +72,7 @@ export function createInjectedMetadata(
     getCspConfig: () =>
       ({
         warnLegacyBrowsers: true,
-      } as unknown),
+      }) as unknown,
     getTheme: () =>
       ({
         darkMode: themeDarkMode,
@@ -82,7 +82,7 @@ export function createInjectedMetadata(
           default: [],
           dark: [],
         },
-      } as unknown),
+      }) as unknown,
     getExternalUrlConfig: () => ({
       policy: [
         {

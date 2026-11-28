@@ -34,7 +34,7 @@ export const createMockSpaces = (): jest.Mocked<SpacesPluginStart> => {
 export const createMockUiSettings = (): IUiSettingsClient =>
   ({
     get: jest.fn(() => 'YYYY-MM-DD HH:mm:ss'),
-  } as unknown as IUiSettingsClient);
+  }) as unknown as IUiSettingsClient;
 
 export const createMockUnifiedDocViewer = (): UnifiedDocViewerStart =>
   ({
@@ -43,7 +43,7 @@ export const createMockUnifiedDocViewer = (): UnifiedDocViewerStart =>
         { id: 'doc_view_table', render: () => <div data-test-subj="mock-doc-viewer-table" /> },
       ],
     },
-  } as unknown as UnifiedDocViewerStart);
+  }) as unknown as UnifiedDocViewerStart;
 
 export const createMockServices = (
   overrides: Partial<AlertEpisodeDetailsServices> = {}
@@ -85,4 +85,4 @@ export const createMockRule = (overrides: Partial<RuleResponse> = {}): RuleRespo
     metadata: { name: 'Rule 1' },
     query: { format: 'standalone', breach: { query: 'FROM logs' } },
     ...overrides,
-  } as RuleResponse);
+  }) as RuleResponse;

@@ -464,9 +464,8 @@ describe('action list services', () => {
     });
 
     it('should have `isExpired` as `true` if NOT complete and expiration is in the past', async () => {
-      (
-        actionRequests.hits.hits[0]._source as LogsEndpointAction
-      ).EndpointActions.expiration = `2021-04-30T16:08:47.449Z`;
+      (actionRequests.hits.hits[0]._source as LogsEndpointAction).EndpointActions.expiration =
+        `2021-04-30T16:08:47.449Z`;
       actionResponses.hits.hits.pop(); // remove the endpoint response
 
       await expect(
@@ -486,9 +485,8 @@ describe('action list services', () => {
     });
 
     it('should have `isExpired` as `false` if complete and expiration is in the past', async () => {
-      (
-        actionRequests.hits.hits[0]._source as LogsEndpointAction
-      ).EndpointActions.expiration = `2021-04-30T16:08:47.449Z`;
+      (actionRequests.hits.hits[0]._source as LogsEndpointAction).EndpointActions.expiration =
+        `2021-04-30T16:08:47.449Z`;
 
       await expect(
         await (
@@ -507,9 +505,8 @@ describe('action list services', () => {
     });
 
     it('should show status as `completed` if NOT expired and action IS completed AND is successful', async () => {
-      (
-        actionRequests.hits.hits[0]._source as LogsEndpointAction
-      ).EndpointActions.expiration = `2021-04-30T16:08:47.449Z`;
+      (actionRequests.hits.hits[0]._source as LogsEndpointAction).EndpointActions.expiration =
+        `2021-04-30T16:08:47.449Z`;
 
       await expect(
         await (
@@ -530,9 +527,8 @@ describe('action list services', () => {
     });
 
     it('should show status as `failed` if IS expired', async () => {
-      (
-        actionRequests.hits.hits[0]._source as LogsEndpointAction
-      ).EndpointActions.expiration = `2021-04-30T16:08:47.449Z`;
+      (actionRequests.hits.hits[0]._source as LogsEndpointAction).EndpointActions.expiration =
+        `2021-04-30T16:08:47.449Z`;
       actionResponses.hits.hits.pop(); // remove the endpoint response
 
       await expect(
@@ -554,9 +550,8 @@ describe('action list services', () => {
     });
 
     it('should show status as `failed` if IS completed AND was unsuccessful', async () => {
-      (
-        actionRequests.hits.hits[0]._source as LogsEndpointAction
-      ).EndpointActions.expiration = `2021-04-30T16:08:47.449Z`;
+      (actionRequests.hits.hits[0]._source as LogsEndpointAction).EndpointActions.expiration =
+        `2021-04-30T16:08:47.449Z`;
       (actionResponses.hits.hits[0]._source as LogsEndpointActionResponse).error = Error(
         'Some error in action response'
       );

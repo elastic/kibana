@@ -72,11 +72,11 @@ export const useSelectedMonitor = ({
   const availableLocalMonitor = isLoadedSyntheticsMonitorValid
     ? syntheticsMonitor
     : isMonitorFromListValid
-    ? monitorFromList
-    : null;
+      ? monitorFromList
+      : null;
 
   const availableMonitor: SelectedSyntheticsMonitor | null = isRemote
-    ? remoteMonitor ?? null
+    ? (remoteMonitor ?? null)
     : availableLocalMonitor;
 
   const isMonitorMissing =

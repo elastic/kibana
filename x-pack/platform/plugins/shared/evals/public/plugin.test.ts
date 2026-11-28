@@ -30,7 +30,7 @@ describe('EvalsPublicPlugin', () => {
         register: jest.fn(),
       },
       getStartServices: jest.fn(),
-    } as any);
+    }) as any;
 
   it('registers the Stack Management AI entry when management is available', () => {
     const plugin = new EvalsPublicPlugin();

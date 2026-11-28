@@ -107,7 +107,7 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
       ) as unknown as EsHitRecord[];
       const totalHits = rawResponse?.hits?.total;
       const totalCount =
-        typeof totalHits === 'number' ? totalHits : totalHits?.value ?? responseHits.length;
+        typeof totalHits === 'number' ? totalHits : (totalHits?.value ?? responseHits.length);
 
       return { hits: responseHits, total: totalCount };
     }, [rawResponse]);

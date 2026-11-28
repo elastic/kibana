@@ -49,7 +49,10 @@ import {
  * `AGENT_BUILDER_EVENT_TYPES` so call sites can be kept small, typed, and safe.
  */
 export class AnalyticsService {
-  constructor(private readonly analytics: AnalyticsServiceSetup, private readonly logger: Logger) {}
+  constructor(
+    private readonly analytics: AnalyticsServiceSetup,
+    private readonly logger: Logger
+  ) {}
 
   /**
    * Register Agent Builder server event types with core analytics.

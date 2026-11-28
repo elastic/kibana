@@ -25,26 +25,26 @@ const createDiscovery = (overrides: StoredRow): Discovery =>
     confidence: 0.8,
     detections: [],
     ...overrides,
-  } as Discovery);
+  }) as Discovery;
 
 const sourceResponse = (docs: Discovery[]): ESQLSearchResponse =>
   ({
     columns: [{ name: '_source', type: 'object' }],
     values: docs.map((d) => [d]),
-  } as unknown as ESQLSearchResponse);
+  }) as unknown as ESQLSearchResponse;
 
 const countResponse = (total: number): ESQLSearchResponse =>
   ({
     columns: [{ name: 'total', type: 'long' }],
     values: [[total]],
-  } as unknown as ESQLSearchResponse);
+  }) as unknown as ESQLSearchResponse;
 
 // Mirrors the slug-keyed processed derivation: one row per processed discovery_slug.
 const processedResponse = (slugs: string[]): ESQLSearchResponse =>
   ({
     columns: [{ name: 'discovery_slug', type: 'keyword' }],
     values: slugs.map((s) => [s]),
-  } as unknown as ESQLSearchResponse);
+  }) as unknown as ESQLSearchResponse;
 
 interface MockResponses {
   // Latest discovery per group, as returned by the data query (already collapsed by groupBy).

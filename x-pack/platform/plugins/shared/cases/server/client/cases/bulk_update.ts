@@ -734,7 +734,7 @@ export const bulkUpdate = async (
         // a cached miss from an absent prefetch and avoids a redundant getTemplate call.
         const prefetchedTemplate =
           template != null && template.id
-            ? (await prefetchedTemplates.get(`${template.id}@${template.version}`)) ?? null
+            ? ((await prefetchedTemplates.get(`${template.id}@${template.version}`)) ?? null)
             : undefined;
         return validateTemplateInRequest({
           updateReq,
@@ -857,7 +857,7 @@ export const bulkUpdate = async (
         requestedStatus: updateReq.status,
         originalStatus: originalCase.attributes.status,
         finalExtendedFields,
-        templateFields: templateKey != null ? templateFieldsByKey.get(templateKey) ?? [] : [],
+        templateFields: templateKey != null ? (templateFieldsByKey.get(templateKey) ?? []) : [],
         globalFields: globalFieldsByOwner.get(originalCase.attributes.owner) ?? [],
       });
     });
@@ -1259,7 +1259,7 @@ const createPatchCasesPayload = async ({
           const templateId =
             updateReq.template === null
               ? null
-              : updateReq.template?.id ?? originalCase.attributes.template?.id;
+              : (updateReq.template?.id ?? originalCase.attributes.template?.id);
           const globalFields = await resolveCachedGlobalFields(originalCase.attributes.owner);
           await validateCaseExtendedFields({
             extendedFields: finalExtendedFields,

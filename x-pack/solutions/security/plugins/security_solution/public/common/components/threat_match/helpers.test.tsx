@@ -30,7 +30,7 @@ const getMockIndexPattern = (): DataViewBase =>
     id: '1234',
     title: 'logstash-*',
     fields,
-  } as DataViewBase);
+  }) as DataViewBase;
 
 const getMockEntry = (): FormattedEntry => ({
   id: '123',

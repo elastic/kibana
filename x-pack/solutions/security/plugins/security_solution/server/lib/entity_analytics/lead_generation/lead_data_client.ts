@@ -283,7 +283,7 @@ export const createLeadDataClient = ({
       });
 
       const total =
-        typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits.total?.value ?? 0;
+        typeof resp.hits.total === 'number' ? resp.hits.total : (resp.hits.total?.value ?? 0);
 
       const leads = resp.hits.hits
         .map((hit) => hit._source)
@@ -395,7 +395,7 @@ export const createLeadDataClient = ({
 
       indexExists = true;
       totalLeads =
-        typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits.total?.value ?? 0;
+        typeof resp.hits.total === 'number' ? resp.hits.total : (resp.hits.total?.value ?? 0);
 
       const latestHit = resp.hits.hits[0];
       if (latestHit?._source) {

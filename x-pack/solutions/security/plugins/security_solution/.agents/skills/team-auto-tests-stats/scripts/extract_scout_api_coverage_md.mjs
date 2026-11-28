@@ -16,7 +16,9 @@ import path from 'path';
 
 const testDir = process.argv[2];
 if (!testDir) {
-  console.error('Usage: extract_scout_api_coverage_md.mjs <tests-directory> [relative-link-prefix]');
+  console.error(
+    'Usage: extract_scout_api_coverage_md.mjs <tests-directory> [relative-link-prefix]'
+  );
   process.exit(1);
 }
 
@@ -56,8 +58,7 @@ function escCell(s) {
  */
 function extractDescribeTitles(content) {
   const titles = [];
-  const re =
-    /\b(?:apiTest|spaceTest)\.describe(?:\.skip)?\(\s*(?:\r?\n\s*)?['"]([^'"]+)['"]/g;
+  const re = /\b(?:apiTest|spaceTest)\.describe(?:\.skip)?\(\s*(?:\r?\n\s*)?['"]([^'"]+)['"]/g;
   let m;
   while ((m = re.exec(content)) !== null) {
     titles.push(m[1].trim());
@@ -177,8 +178,7 @@ function extractTcTitles(content) {
   return titles;
 }
 
-const defaultRel =
-  '../x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/';
+const defaultRel = '../x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/';
 let REL = defaultRel;
 if (process.argv[3]) {
   REL = process.argv[3];

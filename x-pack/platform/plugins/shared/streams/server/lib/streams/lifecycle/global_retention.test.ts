@@ -28,7 +28,7 @@ const createResponseError = (statusCode: number): errors.ResponseError =>
 const createEsClientMock = ({ request }: { request: jest.Mock }): ElasticsearchClient =>
   ({
     transport: { request },
-  } as unknown as ElasticsearchClient);
+  }) as unknown as ElasticsearchClient;
 
 describe('getDataStreamGlobalRetention', () => {
   it('reads both default and max from the data stream lifecycle', async () => {

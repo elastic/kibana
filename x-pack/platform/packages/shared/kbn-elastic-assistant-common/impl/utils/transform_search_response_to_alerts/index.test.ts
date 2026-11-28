@@ -30,7 +30,7 @@ const createLoggerMock = (): Logger =>
     isLevelEnabled: jest.fn(() => true),
     trace: jest.fn(),
     warn: jest.fn(),
-  } as unknown as Logger);
+  }) as unknown as Logger;
 
 describe('transformSearchResponseToAlerts', () => {
   const logger: Logger = createLoggerMock();

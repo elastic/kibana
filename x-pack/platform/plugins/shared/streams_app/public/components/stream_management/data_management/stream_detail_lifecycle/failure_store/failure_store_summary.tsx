@@ -81,11 +81,11 @@ export const FailureStoreSummary = ({
 
   const retentionPeriodFromConfig = failureStoreConfig.retentionDisabled
     ? undefined
-    : failureStoreConfig.customRetentionPeriod ?? failureStoreConfig.defaultRetentionPeriod;
+    : (failureStoreConfig.customRetentionPeriod ?? failureStoreConfig.defaultRetentionPeriod);
 
   const retentionPeriod =
     isPreviewActive && isExternalFlyoutOpen
-      ? previewRetentionPeriod ?? undefined
+      ? (previewRetentionPeriod ?? undefined)
       : retentionPeriodFromConfig;
   const hasDeletePhase = Boolean(retentionPeriod);
 

@@ -163,8 +163,8 @@ const resolveTemplateLifecycle = (
       typeof tmplLifecycleEnabled === 'boolean'
         ? tmplLifecycleEnabled
         : resolvedTemplateFailureEnabled === true
-        ? true
-        : undefined;
+          ? true
+          : undefined;
 
     const resolvedTemplateDataRetention =
       (typeof tmplDataRetention === 'string' && tmplDataRetention.length > 0) ||
@@ -176,8 +176,8 @@ const resolveTemplateLifecycle = (
       resolvedTemplateFailureEnabled !== true
         ? true
         : resolvedTemplateLifecycleEnabled === false
-        ? dsLifecycleEnabled === false
-        : dsLifecycleEnabled !== false;
+          ? dsLifecycleEnabled === false
+          : dsLifecycleEnabled !== false;
 
     return (
       dsEnabled === resolvedTemplateFailureEnabled &&

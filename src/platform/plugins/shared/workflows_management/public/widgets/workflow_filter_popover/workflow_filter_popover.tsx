@@ -88,7 +88,7 @@ const WorkflowsFilterPopoverComponent = ({
   const handleSelectableOptionsChange = (newOptions: EuiSelectableOption[]) => {
     onSelectedValuesChanged(
       newOptions
-        .map(({ key, checked }): WorkflowFilterValue | null => (checked ? key ?? null : null))
+        .map(({ key, checked }): WorkflowFilterValue | null => (checked ? (key ?? null) : null))
         .filter((value): value is WorkflowFilterValue => value !== null)
     );
   };

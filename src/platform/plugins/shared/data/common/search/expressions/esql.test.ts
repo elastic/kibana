@@ -28,7 +28,7 @@ const mockUiSettings = (): UiSettingsCommon =>
       if (key === 'dateFormat:tz') return 'UTC';
       return undefined;
     }),
-  } as unknown as UiSettingsCommon);
+  }) as unknown as UiSettingsCommon;
 
 const createExecutionContext = (): ExecutionContext =>
   ({
@@ -37,7 +37,7 @@ const createExecutionContext = (): ExecutionContext =>
     getKibanaRequest: jest.fn(),
     getSearchSessionId: jest.fn(),
     getExecutionContext: jest.fn(),
-  } as unknown as ExecutionContext);
+  }) as unknown as ExecutionContext;
 
 const getMockSearchService = (
   columns: Array<{ name: string; type: string; _meta?: Record<string, unknown> }>,

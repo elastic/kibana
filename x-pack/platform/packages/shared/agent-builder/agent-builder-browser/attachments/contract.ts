@@ -124,7 +124,7 @@ export interface ActionButton {
  * Parameters passed to attachment lifecycle hooks.
  */
 export interface AttachmentLifecycleParams<
-  TAttachment extends UnknownAttachment = UnknownAttachment
+  TAttachment extends UnknownAttachment = UnknownAttachment,
 > {
   /** Returns the current attachment state */
   getAttachment: () => TAttachment;

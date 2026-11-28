@@ -49,7 +49,7 @@ const makeNodeProps = (
     yPos: 0,
     targetPosition: 'top' as any,
     sourcePosition: 'bottom' as any,
-  } as any);
+  }) as any;
 
 const renderNode = (
   data: Partial<WorkflowGraphNodeData> = {},

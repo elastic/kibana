@@ -216,18 +216,18 @@ export class ActionsClientChatOpenAI extends ChatOpenAICompletions {
           ? 'unified_completion_async_iterator'
           : 'unified_completion'
         : // langchain expects stream to be of type AsyncIterator<OpenAI.ChatCompletionChunk>
-        // for non-stream, use `run` instead of `invokeAI` in order to get the entire OpenAI.ChatCompletion response,
-        // which may contain non-content messages like functions
-        completionRequest.stream
-        ? 'invokeAsyncIterator'
-        : 'run';
+          // for non-stream, use `run` instead of `invokeAI` in order to get the entire OpenAI.ChatCompletion response,
+          // which may contain non-content messages like functions
+          completionRequest.stream
+          ? 'invokeAsyncIterator'
+          : 'run';
     // create a new connector request body with the assistant message:
     const subActionParams = {
       ...(llmType === 'inference'
         ? { body }
         : completionRequest.stream
-        ? { ...body, timeout: this.#timeout ?? DEFAULT_TIMEOUT }
-        : { body: JSON.stringify(body), timeout: this.#timeout ?? DEFAULT_TIMEOUT }),
+          ? { ...body, timeout: this.#timeout ?? DEFAULT_TIMEOUT }
+          : { body: JSON.stringify(body), timeout: this.#timeout ?? DEFAULT_TIMEOUT }),
       telemetryMetadata: this.telemetryMetadata,
       signal: this.#signal,
     };

@@ -319,7 +319,7 @@ export const HiddenAccordionExample: StoryFn<{}> = () => {
         errors: [],
         spanLinksCount: { incoming: 0, outgoing: 0 },
         docType: 'span',
-      } as TraceItem)
+      }) as TraceItem
   );
   return (
     <TraceWaterfall
@@ -344,7 +344,7 @@ export const OpenTelemetryExample: StoryFn<{}> = () => {
         errors: [],
         spanLinksCount: { incoming: 0, outgoing: 0 },
         docType: 'span',
-      } as TraceItem)
+      }) as TraceItem
   );
   return <TraceWaterfall traceItems={traceItems} />;
 };
@@ -363,7 +363,7 @@ export const APMExample: StoryFn<{}> = () => {
         errors: [],
         spanLinksCount: { incoming: 0, outgoing: 0 },
         docType: 'span',
-      } as TraceItem)
+      }) as TraceItem
   );
 
   return <TraceWaterfall traceItems={traceItems} />;

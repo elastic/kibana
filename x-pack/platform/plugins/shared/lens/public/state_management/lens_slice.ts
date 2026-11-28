@@ -134,13 +134,13 @@ export const getPreloadedState = ({
     filters: !initialContext
       ? data.query.filterManager.getGlobalFilters()
       : 'searchFilters' in initialContext && initialContext.searchFilters
-      ? initialContext.searchFilters
-      : data.query.filterManager.getFilters(),
+        ? initialContext.searchFilters
+        : data.query.filterManager.getFilters(),
     searchSessionId: data.search.session.getSessionId() ?? '',
     resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
     isLinkedToOriginatingApp: Boolean(
       isComingFromContainerView(embeddableEditorIncomingState) ||
-        (initialContext && 'isEmbeddable' in initialContext && initialContext.isEmbeddable)
+      (initialContext && 'isEmbeddable' in initialContext && initialContext.isEmbeddable)
     ),
     activeDatasourceId: initialDatasourceId,
     datasourceStates,

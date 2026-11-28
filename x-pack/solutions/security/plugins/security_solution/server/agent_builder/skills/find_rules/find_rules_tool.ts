@@ -267,8 +267,8 @@ export const createFindRulesInlineTool = ({
         findResult.total === 0
           ? 'No detection rules matched the filter.'
           : truncated
-          ? `Found ${findResult.total} detection rules — showing top ${rules.length}: ${ruleNames}. Results exceed the display limit. Narrow by severity, rule type, tag, or MITRE technique to see more specific results.`
-          : `Found ${findResult.total} detection rules: ${ruleNames}.`;
+            ? `Found ${findResult.total} detection rules — showing top ${rules.length}: ${ruleNames}. Results exceed the display limit. Narrow by severity, rule type, tag, or MITRE technique to see more specific results.`
+            : `Found ${findResult.total} detection rules: ${ruleNames}.`;
 
       return {
         results: [

@@ -10,9 +10,10 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 export type SignificantEventsPublicPluginSetup = Record<string, never>;
 export type SignificantEventsPublicPluginStart = Record<string, never>;
 
-export class SignificantEventsPublicPlugin
-  implements Plugin<SignificantEventsPublicPluginSetup, SignificantEventsPublicPluginStart>
-{
+export class SignificantEventsPublicPlugin implements Plugin<
+  SignificantEventsPublicPluginSetup,
+  SignificantEventsPublicPluginStart
+> {
   constructor(_ctx: PluginInitializerContext) {}
 
   setup(_core: CoreSetup): SignificantEventsPublicPluginSetup {

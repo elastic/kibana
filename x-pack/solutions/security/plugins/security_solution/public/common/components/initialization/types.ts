@@ -25,8 +25,8 @@ import type {
 type ExtractReadyPayload<T> = T extends { status: 'ready'; payload: infer P }
   ? P
   : T extends { status: 'ready' }
-  ? null
-  : never;
+    ? null
+    : never;
 
 /** The typed payload for a given flow ID, derived from the generated schema. */
 export type FlowPayload<K extends InitializationFlowId> = ExtractReadyPayload<

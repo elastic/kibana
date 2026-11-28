@@ -16,7 +16,7 @@ const createMockField = (overrides: Partial<DataViewField> & { name: string }): 
     name: overrides.name,
     customLabel: overrides.customLabel ?? '',
     visualizable: overrides.visualizable ?? true,
-  } as unknown as DataViewField);
+  }) as unknown as DataViewField;
 
 const mockFields: DataViewField[] = [
   createMockField({ name: 'entity.name', customLabel: 'Entity Name', visualizable: true }),
@@ -104,7 +104,7 @@ const createMockDataView = (fields: DataViewField[]): DataView =>
       getAll: () => fields,
       length: fields.length,
     },
-  } as unknown as DataView);
+  }) as unknown as DataView;
 
 describe('FieldsSelectorTable', () => {
   const defaultProps = {

@@ -23,8 +23,10 @@ export type UnifiedAttachmentState = Pick<UnifiedAttachmentPayload, 'type' | 'me
     | Pick<UnifiedValueAttachmentPayload, 'data'>
   );
 
-export interface UnifiedAttachmentType
-  extends Omit<PersistableState<UnifiedAttachmentState>, 'migrations' | 'inject' | 'extract'> {
+export interface UnifiedAttachmentType extends Omit<
+  PersistableState<UnifiedAttachmentState>,
+  'migrations' | 'inject' | 'extract'
+> {
   id: string;
   /** Full-payload zod schema. Sole validation source for unified attachments. */
   schema: z.ZodType;
@@ -35,11 +37,10 @@ export interface UnifiedAttachmentType
   workflowSchema?: z.ZodObject | false;
 }
 
-export interface UnifiedAttachmentTypeSetup
-  extends Omit<
-    PersistableStateDefinition<UnifiedAttachmentState>,
-    'migrations' | 'inject' | 'extract'
-  > {
+export interface UnifiedAttachmentTypeSetup extends Omit<
+  PersistableStateDefinition<UnifiedAttachmentState>,
+  'migrations' | 'inject' | 'extract'
+> {
   id: string;
   /** Full-payload zod schema. Sole validation source for unified attachments. */
   schema: z.ZodType;

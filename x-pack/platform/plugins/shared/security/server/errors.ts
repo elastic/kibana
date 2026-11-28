@@ -64,8 +64,8 @@ export function getDetailedErrorMessage(error: any): string {
     typeof error.cause === 'string'
       ? error.cause
       : error.cause instanceof Error
-      ? error.cause.message
-      : inspect(error.cause)
+        ? error.cause.message
+        : inspect(error.cause)
   })`;
 }
 

@@ -16,7 +16,7 @@ const buildPolicy = (processors?: string): PackagePolicy =>
       { streams: [{ vars: {} }] },
       { streams: [{ vars: processors ? { processors: { value: processors } } : {} }] },
     ],
-  } as unknown as PackagePolicy);
+  }) as unknown as PackagePolicy;
 
 const processorsFor = (configId: string) =>
   JSON.stringify([{ add_fields: { fields: { config_id: configId, meta: { space_id: 'a' } } } }]);

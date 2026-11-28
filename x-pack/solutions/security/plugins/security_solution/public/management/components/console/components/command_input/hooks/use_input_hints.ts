@@ -57,7 +57,7 @@ export const useInputHints = () => {
         const exampleUsage =
           typeof commandEnteredDefinition?.exampleUsage === 'function'
             ? commandEnteredDefinition?.exampleUsage(inputCommand)
-            : commandEnteredDefinition?.exampleUsage ?? '';
+            : (commandEnteredDefinition?.exampleUsage ?? '');
 
         let hint = exampleInstruction ?? '';
 

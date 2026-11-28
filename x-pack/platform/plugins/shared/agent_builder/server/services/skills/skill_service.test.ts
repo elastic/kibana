@@ -60,7 +60,7 @@ const createMockSkillDefinition = (overrides: Partial<SkillDefinition> = {}): Sk
 const createMockToolRegistry = (toolIds: string[] = []): ToolRegistry =>
   ({
     has: jest.fn(async (id: string) => toolIds.includes(id)),
-  } as unknown as ToolRegistry);
+  }) as unknown as ToolRegistry;
 
 describe('createSkillService', () => {
   beforeEach(() => {

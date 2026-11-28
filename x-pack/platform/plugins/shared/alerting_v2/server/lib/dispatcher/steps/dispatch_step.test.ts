@@ -20,7 +20,7 @@ const createMockWorkflowsManagement = (): jest.Mocked<WorkflowsServerPluginSetup
   ({
     getWorkflow: jest.fn(),
     scheduleWorkflow: jest.fn(),
-  } as unknown as jest.Mocked<WorkflowsServerPluginSetup['management']>);
+  }) as unknown as jest.Mocked<WorkflowsServerPluginSetup['management']>;
 
 const createWorkflowDetailDto = (
   overrides: Partial<WorkflowDetailDto> = {}

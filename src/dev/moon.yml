@@ -30,6 +30,7 @@ dependsOn:
   - '@kbn/storybook'
   - '@kbn/std'
   - '@kbn/dev-utils'
+  - '@kbn/oxfmt'
   - '@kbn/utils'
   - '@kbn/optimizer'
   - '@kbn/peggy'

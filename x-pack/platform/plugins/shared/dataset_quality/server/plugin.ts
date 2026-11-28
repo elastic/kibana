@@ -19,15 +19,12 @@ import type {
 } from './types';
 import { DATASET_QUALITY_ALL_SIGNALS_ID } from '../common/constants';
 
-export class DatasetQualityServerPlugin
-  implements
-    Plugin<
-      DatasetQualityPluginSetup,
-      DatasetQualityPluginStart,
-      DatasetQualityPluginSetupDependencies,
-      DatasetQualityPluginStartDependencies
-    >
-{
+export class DatasetQualityServerPlugin implements Plugin<
+  DatasetQualityPluginSetup,
+  DatasetQualityPluginStart,
+  DatasetQualityPluginSetupDependencies,
+  DatasetQualityPluginStartDependencies
+> {
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {

@@ -51,7 +51,7 @@ const CONFIDENCE_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
 /** LLM evaluator: scores whether `criticality` is justified by signal strength and confirmed impact. */
 export const createCriticalityCalibrationEvaluator = <
   TExample extends Example,
-  TOutput extends TaskOutput
+  TOutput extends TaskOutput,
 >({
   criteriaFn,
   transformOutput,
@@ -66,7 +66,7 @@ export const createCriticalityCalibrationEvaluator = <
 /** LLM evaluator: scores whether `confidence` reflects evidence/KI backing, with the no-KI ceiling. */
 export const createConfidenceCalibrationEvaluator = <
   TExample extends Example,
-  TOutput extends TaskOutput
+  TOutput extends TaskOutput,
 >({
   criteriaFn,
   transformOutput,

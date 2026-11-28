@@ -199,8 +199,8 @@ export const EditDeletePhaseFlyout = ({
   const disabledApplyTooltip = isSubmitting
     ? editDeletePhaseFlyoutI18n.applySubmittingDisabledTooltip
     : hasFormErrors
-    ? editDeletePhaseFlyoutI18n.applyDisabledTooltip
-    : undefined;
+      ? editDeletePhaseFlyoutI18n.applyDisabledTooltip
+      : undefined;
   const maximumRetentionHelpText = maximumRetentionPeriod
     ? getMaximumRetentionMessage(maximumRetentionPeriod)
     : undefined;

@@ -28,7 +28,7 @@ const makeEndpoint = (
     service: 'elastic',
     service_settings: { model_id: '' },
     ...overrides,
-  } as EisInferenceEndpoint);
+  }) as EisInferenceEndpoint;
 
 const makeGroupedModel = (overrides: Partial<GroupedModel> = {}): GroupedModel => ({
   service: 'elastic',

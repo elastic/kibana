@@ -73,7 +73,7 @@ type OmitClassicStreamUpsertProps<
     ingest: Omit<ClassicIngest, 'processing'> & {
       processing: Omit<ClassicIngest['processing'], 'updated_at'> & { updated_at?: string };
     };
-  }
+  },
 > = Omit<T, 'ingest'> & {
   ingest: Omit<ClassicIngest, 'processing'> & {
     processing: Omit<ClassicIngest['processing'], 'updated_at'> & { updated_at?: never };
@@ -165,9 +165,9 @@ ClassicStream.Definition.is = (
 ): stream is ClassicStream.Definition =>
   Boolean(
     'ingest' in stream &&
-      typeof stream.ingest === 'object' &&
-      stream.ingest &&
-      'classic' in stream.ingest
+    typeof stream.ingest === 'object' &&
+    stream.ingest &&
+    'classic' in stream.ingest
   );
 
 // Optimized implementation for GetResponse check - avoids full DeepStrict Zod parse

@@ -15,9 +15,10 @@ import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import type { CoreSetup, Plugin } from '@kbn/core/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 
-export class ManagementTestPlugin
-  implements Plugin<ManagementTestPluginSetup, ManagementTestPluginStart>
-{
+export class ManagementTestPlugin implements Plugin<
+  ManagementTestPluginSetup,
+  ManagementTestPluginStart
+> {
   public setup(core: CoreSetup, { management }: { management: ManagementSetup }) {
     const testSection = management.sections.section.data;
 

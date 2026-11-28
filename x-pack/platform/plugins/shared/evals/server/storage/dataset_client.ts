@@ -280,7 +280,7 @@ export class DatasetClient {
       total:
         typeof datasetsResponse.hits.total === 'number'
           ? datasetsResponse.hits.total
-          : datasetsResponse.hits.total?.value ?? 0,
+          : (datasetsResponse.hits.total?.value ?? 0),
     };
   }
 
@@ -463,7 +463,7 @@ export class DatasetClient {
     const total =
       typeof searchResponse.hits.total === 'number'
         ? searchResponse.hits.total
-        : searchResponse.hits.total?.value ?? 0;
+        : (searchResponse.hits.total?.value ?? 0);
     if (total > MAX_EXAMPLES_PER_DATASET) {
       throw new Error(
         `Dataset "${datasetId}" has ${total} examples, exceeding the maximum of ${MAX_EXAMPLES_PER_DATASET}`
@@ -630,7 +630,7 @@ export class DatasetClient {
     const total =
       typeof response.hits.total === 'number'
         ? response.hits.total
-        : response.hits.total?.value ?? 0;
+        : (response.hits.total?.value ?? 0);
     if (total > MAX_EXAMPLES_PER_DATASET) {
       throw new Error(
         `Dataset "${datasetId}" has ${total} examples, exceeding the maximum of ${MAX_EXAMPLES_PER_DATASET}`
@@ -698,7 +698,7 @@ export class DatasetClient {
 
     return typeof response.hits.total === 'number'
       ? response.hits.total
-      : response.hits.total?.value ?? 0;
+      : (response.hits.total?.value ?? 0);
   }
 
   /**

@@ -81,7 +81,7 @@ function getTotalFromResponse(
 ): number {
   if (!isPaginated) return resultsLength;
   const total = response.hits.total;
-  return typeof total === 'number' ? total : (total as { value: number } | undefined)?.value ?? 0;
+  return typeof total === 'number' ? total : ((total as { value: number } | undefined)?.value ?? 0);
 }
 
 export const searchStepExecutions = async ({

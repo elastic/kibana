@@ -87,7 +87,7 @@ describe('convertPreviousRounds', () => {
             id: type,
             validate: (input: unknown) => ({ valid: true, data: input }),
             format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
-          } as any),
+          }) as any,
       }),
       ...parts,
     };
@@ -522,17 +522,15 @@ describe('convertPreviousRounds', () => {
 
       // Custom transformer that modifies all results from a tool call
       const customTransformer: ToolCallResultTransformer = jest.fn(async (toolCallArg) => {
-        return toolCallArg.results.map(
-          (result): ToolResult => ({
-            tool_result_id: result.tool_result_id,
-            type: ToolResultType.other,
-            data: {
-              ...(result.data as Record<string, unknown>),
-              transformedBy: 'custom',
-              toolId: toolCallArg.tool_id,
-            },
-          })
-        );
+        return toolCallArg.results.map((result): ToolResult => ({
+          tool_result_id: result.tool_result_id,
+          type: ToolResultType.other,
+          data: {
+            ...(result.data as Record<string, unknown>),
+            transformedBy: 'custom',
+            toolId: toolCallArg.tool_id,
+          },
+        }));
       });
 
       const result = await convertPreviousRounds({
@@ -870,7 +868,7 @@ describe('convertPreviousRounds', () => {
         response: { message: 'Background result' },
         completed_at: { round_id: 'round-1' },
         ...overrides,
-      } as ConversationRoundStep);
+      }) as ConversationRoundStep;
 
     it('injects system notice for background execution complete step', async () => {
       const round = createRound({

@@ -238,9 +238,7 @@ describe('AllCasesListGeneric', () => {
     renderWithTestingProviders(<AllCasesList />);
 
     await userEvent.hover(
-      (
-        await screen.findAllByTestId('case-user-profile-avatar-damaged_raccoon')
-      )[0]
+      (await screen.findAllByTestId('case-user-profile-avatar-damaged_raccoon'))[0]
     );
 
     expect(await screen.findByText('damaged_raccoon@elastic.co')).toBeInTheDocument();

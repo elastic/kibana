@@ -29,20 +29,19 @@ import {
 
 export type { Row, Table, CellContext };
 
-export interface TableProps<G, L>
-  extends Omit<
-    TableOptions<G>,
-    | 'columns'
-    | 'data'
-    | 'state'
-    | 'getRowId'
-    | 'getSubRows'
-    | 'getCoreRowModel'
-    | 'getExpandedRowModel'
-    | 'onExpandedChange'
-    | 'onRowSelectionChange'
-    | 'getRowCanExpand'
-  > {
+export interface TableProps<G, L> extends Omit<
+  TableOptions<G>,
+  | 'columns'
+  | 'data'
+  | 'state'
+  | 'getRowId'
+  | 'getSubRows'
+  | 'getCoreRowModel'
+  | 'getExpandedRowModel'
+  | 'onExpandedChange'
+  | 'onRowSelectionChange'
+  | 'getRowCanExpand'
+> {
   allowMultipleRowToggle: boolean;
   header: FC<{ table: Table<G> }>;
   rowCell: FC<CellContext<G, L>>;

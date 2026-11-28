@@ -80,9 +80,9 @@ export const getComponent = (
   const trialStatus = initialState.trialStatus;
   const canStartTrial = Boolean(
     typeof trialStatus === 'object' &&
-      trialStatus !== null &&
-      'canStartTrial' in trialStatus &&
-      trialStatus.canStartTrial
+    trialStatus !== null &&
+    'canStartTrial' in trialStatus &&
+    trialStatus.canStartTrial
   );
   http.get.mockResolvedValue(canStartTrial);
 

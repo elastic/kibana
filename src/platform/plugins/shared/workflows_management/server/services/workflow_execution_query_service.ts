@@ -394,7 +394,7 @@ export class WorkflowExecutionQueryService {
     const total =
       typeof response.hits.total === 'number'
         ? response.hits.total
-        : response.hits.total?.value ?? 0;
+        : (response.hits.total?.value ?? 0);
 
     const allResults = response.hits.hits
       .map((hit) => hit._source)
@@ -511,7 +511,7 @@ export class WorkflowExecutionQueryService {
     const total =
       typeof response.hits.total === 'number'
         ? response.hits.total
-        : response.hits.total?.value ?? 0;
+        : (response.hits.total?.value ?? 0);
 
     const allResults = response.hits.hits
       .map((hit) => hit._source)

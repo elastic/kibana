@@ -164,7 +164,7 @@ const createMockAzurePackageInfo = (): PackageInfo =>
     data_streams: [],
     assets: [],
     owner: { github: 'elastic/security-team' },
-  } as unknown as PackageInfo);
+  }) as unknown as PackageInfo;
 
 const createMockAzurePolicy = (input: NewPackagePolicyInput): NewPackagePolicy =>
   ({
@@ -178,7 +178,7 @@ const createMockAzurePolicy = (input: NewPackagePolicyInput): NewPackagePolicy =
       title: 'Cloud Security Posture',
       version: '1.0.0',
     },
-  } as NewPackagePolicy);
+  }) as NewPackagePolicy;
 
 const getDefaultCloudSetup = () => ({
   isCloudEnabled: true,

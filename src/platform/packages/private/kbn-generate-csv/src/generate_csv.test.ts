@@ -59,7 +59,7 @@ const getMockConfig = (opts: Partial<CsvConfigType> = {}): CsvConfigType => ({
 const createMockJob = (baseObj: Partial<JobParamsCSV> = {}): JobParamsCSV =>
   ({
     ...baseObj,
-  } as JobParamsCSV);
+  }) as JobParamsCSV;
 const mockTaskInstanceFields = { startedAt: null, retryAt: null };
 
 const jobId = 'mock-job-id';
@@ -101,12 +101,13 @@ describe('CsvGenerator', () => {
     hits: { hits, total, max_score: 0 },
   });
 
-  const mockDataClientSearchDefault = jest.fn().mockImplementation(
-    (): Rx.Observable<{ rawResponse: SearchResponse<unknown> }> =>
+  const mockDataClientSearchDefault = jest
+    .fn()
+    .mockImplementation((): Rx.Observable<{ rawResponse: SearchResponse<unknown> }> =>
       Rx.of({
         rawResponse: getMockRawResponse(),
       })
-  );
+    );
 
   const mockFieldFormatsRegistry = {
     deserialize: jest.fn().mockImplementation(() => ({
@@ -249,7 +250,7 @@ describe('CsvGenerator', () => {
                 fields: {
                   message: ['this is a great message'],
                 },
-              } as unknown as estypes.SearchHit)
+              }) as unknown as estypes.SearchHit
           )
         ),
       })
@@ -302,7 +303,7 @@ describe('CsvGenerator', () => {
                     ip: ['110.135.176.89'],
                     message: ['super cali fragile istic XPLA docious'],
                   },
-                } as unknown as estypes.SearchHit)
+                }) as unknown as estypes.SearchHit
             )
           ),
         })
@@ -346,7 +347,7 @@ describe('CsvGenerator', () => {
                       ip: ['110.135.176.89'],
                       message: ['hit from the initial search'],
                     },
-                  } as unknown as estypes.SearchHit)
+                  }) as unknown as estypes.SearchHit
               ),
               HITS_TOTAL
             ),
@@ -363,7 +364,7 @@ describe('CsvGenerator', () => {
                       ip: ['110.135.176.89'],
                       message: ['hit from a subsequent scroll'],
                     },
-                  } as unknown as estypes.SearchHit)
+                  }) as unknown as estypes.SearchHit
               )
             ),
           })
@@ -914,7 +915,7 @@ describe('CsvGenerator', () => {
                       ip: ['110.135.176.89'],
                       message: ['hit from the initial search'],
                     },
-                  } as unknown as estypes.SearchHit)
+                  }) as unknown as estypes.SearchHit
               ),
               HITS_TOTAL
             ),
@@ -931,7 +932,7 @@ describe('CsvGenerator', () => {
                       ip: ['110.135.176.89'],
                       message: ['hit from a subsequent scroll'],
                     },
-                  } as unknown as estypes.SearchHit)
+                  }) as unknown as estypes.SearchHit
               )
             ),
           })
@@ -1620,7 +1621,7 @@ describe('CsvGenerator', () => {
                     ip: ['110.135.176.89'],
                     message: ['hit from the initial search'],
                   },
-                } as unknown as estypes.SearchHit)
+                }) as unknown as estypes.SearchHit
             ),
             HITS_TOTAL
           ),
@@ -1637,7 +1638,7 @@ describe('CsvGenerator', () => {
                     ip: ['110.135.176.89'],
                     message: ['hit from a subsequent scroll'],
                   },
-                } as unknown as estypes.SearchHit)
+                }) as unknown as estypes.SearchHit
             )
           ),
         })
@@ -1705,7 +1706,7 @@ describe('CsvGenerator', () => {
                     ip: ['110.135.176.89'],
                     message: ['hit from the initial search'],
                   },
-                } as unknown as estypes.SearchHit)
+                }) as unknown as estypes.SearchHit
             ),
             HITS_TOTAL
           ),
@@ -1722,7 +1723,7 @@ describe('CsvGenerator', () => {
                     ip: ['110.135.176.89'],
                     message: ['hit from a subsequent scroll'],
                   },
-                } as unknown as estypes.SearchHit)
+                }) as unknown as estypes.SearchHit
             )
           ),
         })

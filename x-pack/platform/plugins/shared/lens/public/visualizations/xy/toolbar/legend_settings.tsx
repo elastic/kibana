@@ -33,8 +33,8 @@ export const XyLegendSettings = ({
     state?.legend.isVisible && !state?.legend.showSingleSeries
       ? 'auto'
       : !state?.legend.isVisible
-      ? 'hide'
-      : 'show';
+        ? 'hide'
+        : 'show';
 
   const dataLayers = getDataLayers(state?.layers);
 

@@ -32,7 +32,10 @@ export class AssetDetailsPage {
   public readonly openAsPageButton: Locator;
   public readonly returnButton: Locator;
 
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {
     this.hostOverviewTab = createLazyPageObject(OverviewTab, this.page, this.kbnUrl, 'Host');
     this.dockerOverviewTab = createLazyPageObject(OverviewTab, this.page, this.kbnUrl, 'Docker');
 

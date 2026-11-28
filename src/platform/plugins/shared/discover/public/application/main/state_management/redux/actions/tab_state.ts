@@ -344,7 +344,7 @@ export const onQuerySubmit: InternalStateThunkActionCreator<
     TabActionPayload<{
       payload: { dateRange: TimeRange; query?: Query | AggregateQuery };
       isUpdate?: boolean;
-    }>
+    }>,
   ]
 > = ({ tabId, payload, isUpdate }) =>
   function onQuerySubmitThunkFn(

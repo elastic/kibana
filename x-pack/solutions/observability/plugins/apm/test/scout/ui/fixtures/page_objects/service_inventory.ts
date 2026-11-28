@@ -12,7 +12,10 @@ import { testData } from '..';
 export class ServiceInventoryPage {
   readonly servicesTable;
 
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {
     this.servicesTable = this.page.locator('.euiBasicTable');
   }
 

@@ -28,7 +28,7 @@ export interface BaseErrorBoundaryState {
  */
 export abstract class BaseErrorBoundary<
   P extends BaseErrorBoundaryProps,
-  S extends BaseErrorBoundaryState
+  S extends BaseErrorBoundaryState,
 > extends React.Component<P, S> {
   private beforeUnloadHandler = () => {
     const errorId = this.state.errorId;

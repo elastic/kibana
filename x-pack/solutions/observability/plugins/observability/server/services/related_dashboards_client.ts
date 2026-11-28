@@ -277,13 +277,16 @@ export class RelatedDashboardsClient {
     fields: string[],
     panels: DashboardPanel[]
   ): Array<{ matchingFields: Set<string>; panel: DashboardPanel }> {
-    const panelsByField = panels.reduce((acc, p) => {
-      const matchingFields = fields.filter((f) => this.getPanelFields(p).has(f));
-      if (matchingFields.length) {
-        acc.push({ matchingFields: new Set(matchingFields), panel: p });
-      }
-      return acc;
-    }, [] as Array<{ matchingFields: Set<string>; panel: DashboardPanel }>);
+    const panelsByField = panels.reduce(
+      (acc, p) => {
+        const matchingFields = fields.filter((f) => this.getPanelFields(p).has(f));
+        if (matchingFields.length) {
+          acc.push({ matchingFields: new Set(matchingFields), panel: p });
+        }
+        return acc;
+      },
+      [] as Array<{ matchingFields: Set<string>; panel: DashboardPanel }>
+    );
     return panelsByField;
   }
 

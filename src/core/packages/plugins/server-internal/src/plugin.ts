@@ -34,7 +34,7 @@ interface PluginDefinition<
   TSetup = unknown,
   TStart = unknown,
   TPluginsSetup extends object = object,
-  TPluginsStart extends object = object
+  TPluginsStart extends object = object,
 > {
   readonly config?: PluginConfigDescriptor;
   readonly module?: ContainerModule;
@@ -51,7 +51,7 @@ export class PluginWrapper<
   TSetup = unknown,
   TStart = unknown,
   TPluginsSetup extends object = object,
-  TPluginsStart extends object = object
+  TPluginsStart extends object = object,
 > {
   public readonly path: string;
   public readonly source: 'oss' | 'x-pack' | 'external';
