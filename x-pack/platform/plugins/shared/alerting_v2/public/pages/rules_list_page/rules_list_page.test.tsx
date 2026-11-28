@@ -32,10 +32,16 @@ let mockAgentBuilderShow = true;
 let mockExperimentalFeaturesEnabled = true;
 let mockAlertingV2ExperimentalFeaturesEnabled = true;
 let mockCanWriteRules = true;
+let mockUnifiedRuleCreationEnabled = false;
+const mockOpenChat = jest.fn();
+const mockListRuleTemplates = jest.fn();
 
 jest.mock('@kbn/core-di-browser', () => {
   const { UserCapabilities: ActualUserCapabilities } = jest.requireActual(
     '../../services/user_capabilities'
+  );
+  const { RuleTemplatesApi: ActualRuleTemplatesApi } = jest.requireActual(
+    '../../services/rule_templates_api'
   );
   return {
     useService: (token: unknown) => {
@@ -48,6 +54,14 @@ jest.mock('@kbn/core-di-browser', () => {
           canRead: () => true,
           can: () => mockCanWriteRules,
         };
+      }
+
+      if (token === ActualRuleTemplatesApi) {
+        return { listRuleTemplates: mockListRuleTemplates };
+      }
+
+      if (token === Symbol.for('plugin.start.agentBuilder')) {
+        return { openChat: mockOpenChat };
       }
 
       const services: Record<string, unknown> = {
@@ -66,6 +80,12 @@ jest.mock('@kbn/core-di-browser', () => {
               : id === 'alerting:v2:experimentalFeatures'
                 ? mockAlertingV2ExperimentalFeaturesEnabled
                 : undefined,
+        },
+        featureFlags: {
+          useBooleanValue: (flagName: string, fallback: boolean) =>
+            flagName === 'alertingV2.unifiedRuleCreation.enabled'
+              ? mockUnifiedRuleCreationEnabled
+              : fallback,
         },
         chrome: { docTitle: { change: mockDocTitleChange } },
         http: { basePath: { prepend: (p: string) => p } },
@@ -258,7 +278,9 @@ describe('RulesListPage', () => {
     mockExperimentalFeaturesEnabled = true;
     mockAlertingV2ExperimentalFeaturesEnabled = true;
     mockCanWriteRules = true;
+    mockUnifiedRuleCreationEnabled = false;
     latestComposeHistoryBack = undefined;
+    mockListRuleTemplates.mockResolvedValue({ items: [], total: 0, page: 1, per_page: 10 });
     mockUseDeleteRule.mockReturnValue({
       mutate: mockDeleteMutate,
       isLoading: false,
@@ -653,6 +675,176 @@ describe('RulesListPage', () => {
     expect(screen.getByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
     expect(screen.getByText('ES|QL rule')).toBeInTheDocument();
     expect(mockNavigateToUrl).not.toHaveBeenCalled();
+  });
+
+  it('does not show the create rule search when unified rule creation is disabled', async () => {
+    renderPage();
+    await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByTestId('createRuleButton'));
+
+    expect(screen.getByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
+    expect(screen.queryByTestId('ruleCreateSearchInput')).not.toBeInTheDocument();
+  });
+
+  it('shows the create rule search above the options when unified rule creation is enabled', async () => {
+    mockUnifiedRuleCreationEnabled = true;
+    renderPage();
+    await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByTestId('createRuleButton'));
+
+    expect(screen.getByTestId('ruleCreateSearchInput')).toBeInTheDocument();
+    expect(screen.getByText('ES|QL rule')).toBeInTheDocument();
+  });
+
+  it('sends the typed text to a new side chat conversation and closes the flyout', async () => {
+    mockUnifiedRuleCreationEnabled = true;
+    renderPage();
+    await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());
+    fireEvent.click(screen.getByTestId('createRuleButton'));
+
+    fireEvent.change(screen.getByTestId('ruleCreateSearchInput'), {
+      target: { value: 'alert on cpu' },
+    });
+    fireEvent.click(await screen.findByTestId('ruleCreateSearchSendToAgent'));
+
+    expect(mockOpenChat).toHaveBeenCalledWith({
+      newConversation: true,
+      initialMessage: expect.stringContaining('alert on cpu'),
+      autoSendInitialMessage: true,
+    });
+    expect(screen.queryByTestId('ruleCreateOptionsFlyout')).not.toBeInTheDocument();
+    expect(mockNavigateToApp).not.toHaveBeenCalled();
+  });
+
+  it('makes the create rule search search-only without Agent Builder access', async () => {
+    mockUnifiedRuleCreationEnabled = true;
+    mockAgentBuilderShow = false;
+    renderPage();
+    await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());
+    fireEvent.click(screen.getByTestId('createRuleButton'));
+
+    fireEvent.change(screen.getByTestId('ruleCreateSearchInput'), {
+      target: { value: 'alert on cpu' },
+    });
+
+    await screen.findAllByText('No matching builders, templates, or Classic rule types');
+    expect(screen.queryByTestId('ruleCreateSearchSendToAgent')).not.toBeInTheDocument();
+  });
+
+  it('searches Universal options in the create rule flyout and opens the selected flow', async () => {
+    mockUnifiedRuleCreationEnabled = true;
+    renderPage();
+    await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());
+    fireEvent.click(screen.getByTestId('createRuleButton'));
+
+    fireEvent.change(screen.getByTestId('ruleCreateSearchInput'), {
+      target: { value: 'esql' },
+    });
+
+    const esqlItem = await screen.findByTestId('ruleCreateSearchItem-universal-esql');
+    expect(esqlItem).toHaveTextContent('Write ES|QL query');
+
+    fireEvent.click(esqlItem);
+
+    expect(screen.getByTestId('composeDiscoverFlyout')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByTestId('ruleCreateSearchItem-universal-esql')).not.toBeInTheDocument();
+    });
+  });
+
+  it('navigates to the sequence builder when selected from the create rule search', async () => {
+    mockUnifiedRuleCreationEnabled = true;
+    const locators = createMockLocators();
+    render(
+      <ListPageTestProviders locators={locators}>
+        <RulesListPage />
+      </ListPageTestProviders>
+    );
+    await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());
+    fireEvent.click(screen.getByTestId('createRuleButton'));
+
+    fireEvent.change(screen.getByTestId('ruleCreateSearchInput'), {
+      target: { value: 'sequence' },
+    });
+
+    fireEvent.click(await screen.findByTestId('ruleCreateSearchItem-universal-sequence'));
+
+    expect(screen.queryByTestId('ruleCreateOptionsFlyout')).not.toBeInTheDocument();
+    expect(locators.rulesLocators.navigateSync).toHaveBeenCalledWith({ page: 'sequence_create' });
+  });
+
+  it('lists matching v2 templates in the search dropdown and installs from the selected template', async () => {
+    mockUnifiedRuleCreationEnabled = true;
+    mockListRuleTemplates.mockResolvedValue({
+      items: [
+        {
+          id: 'tpl-high-cpu',
+          engine: 'v2',
+          rule: {
+            kind: 'alert',
+            metadata: {
+              name: 'High CPU utilization',
+              description: 'Monitors CPU saturation on hosts',
+            },
+            schedule: { every: '1m' },
+            query: { base: 'FROM metrics-* | LIMIT 1' },
+            time_field: '@timestamp',
+          },
+        },
+      ],
+      total: 1,
+      page: 1,
+      per_page: 10,
+    });
+
+    renderPage();
+    await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());
+    fireEvent.click(screen.getByTestId('createRuleButton'));
+
+    fireEvent.change(screen.getByTestId('ruleCreateSearchInput'), {
+      target: { value: 'cpu' },
+    });
+
+    const templateItem = await screen.findByTestId(
+      'ruleCreateSearchItem-universal.templates-tpl-high-cpu'
+    );
+    expect(screen.getByText('From templates')).toBeInTheDocument();
+    expect(templateItem).toHaveTextContent('High CPU utilization');
+    expect(templateItem).toHaveTextContent('Monitors CPU saturation on hosts');
+
+    fireEvent.click(templateItem);
+
+    expect(screen.getByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
+    expect(screen.getByTestId('composeDiscoverFlyout')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('composeDiscoverFlyout'));
+
+    expect(mockCreateRuleMutate).toHaveBeenCalledWith(
+      { payload: {}, templateId: 'tpl-high-cpu' },
+      expect.objectContaining({ onSuccess: expect.any(Function) })
+    );
+  });
+
+  it('hides the templates section on request failure without affecting other sections', async () => {
+    mockUnifiedRuleCreationEnabled = true;
+    mockListRuleTemplates.mockRejectedValue(new Error('Forbidden'));
+
+    renderPage();
+    await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());
+    fireEvent.click(screen.getByTestId('createRuleButton'));
+
+    fireEvent.change(screen.getByTestId('ruleCreateSearchInput'), {
+      target: { value: 'threshold' },
+    });
+
+    expect(
+      await screen.findByTestId('ruleCreateSearchItem-universal-threshold')
+    ).toBeInTheDocument();
+    await waitFor(() => expect(mockListRuleTemplates).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(screen.queryByText('From templates')).not.toBeInTheDocument());
+    expect(screen.getByTestId('ruleCreateSearchItem-universal-threshold')).toBeInTheDocument();
   });
 
   it('closes create rule options flyout without navigating', async () => {

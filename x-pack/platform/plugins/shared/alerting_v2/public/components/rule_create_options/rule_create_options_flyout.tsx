@@ -14,6 +14,7 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiSpacer,
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
@@ -24,6 +25,7 @@ import {
   useEuiFlyoutReregister,
 } from '@kbn/alerting-v2-rule-form';
 import { i18n } from '@kbn/i18n';
+import { RuleCreateSearch, type RuleCreateSearchProps } from '../rule_create_search';
 import { RuleCreateOptionsPanel, type LegacyRuleTypeItem } from './rule_create_options_panel';
 
 const FLYOUT_TITLE_ID = 'ruleCreateOptionsFlyoutTitle';
@@ -58,6 +60,8 @@ export interface RuleCreateOptionsFlyoutProps {
    * Cascades while the form is not open dismiss the picker.
    */
   retainOnCascade?: boolean;
+  /** Shows the create rule search above the options. Omit to render the options only. */
+  search?: RuleCreateSearchProps;
 }
 
 export const RuleCreateOptionsFlyout = ({
@@ -69,6 +73,7 @@ export const RuleCreateOptionsFlyout = ({
   legacyRuleTypes,
   historyKey,
   retainOnCascade = false,
+  search,
 }: RuleCreateOptionsFlyoutProps) => {
   const isStacked = historyKey !== undefined;
   const { flyoutKey, reregister } = useEuiFlyoutReregister();
@@ -151,6 +156,12 @@ export const RuleCreateOptionsFlyout = ({
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
+        {search ? (
+          <>
+            <RuleCreateSearch {...search} />
+            <EuiSpacer size="l" />
+          </>
+        ) : null}
         <RuleCreateOptionsPanel
           layout="vertical"
           onCreateEsqlRule={onCreateEsqlRule}
