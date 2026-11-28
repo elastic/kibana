@@ -419,6 +419,7 @@ export class CasesAnalyticsV2Service {
       this.writer = new CasesAnalyticsV2Writer({
         esClient: deps.esClient,
         logger: this.logger,
+        savedObjectsClient: deps.internalSavedObjectsClient,
       });
     } else {
       this.logger.error(

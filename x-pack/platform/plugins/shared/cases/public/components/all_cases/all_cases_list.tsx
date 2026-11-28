@@ -93,10 +93,9 @@ export const AllCasesList = React.memo<AllCasesListProps>(
 
     const { templatesEnabled } = useCasesConfig();
 
-    const { kpiMetrics, kpiResults, isLoadingKpiResults, isAnalyticsEnabled } =
+    const { kpiMetrics, kpiTilesDisplay, kpiResults, isLoadingKpiResults, isAnalyticsEnabled } =
       useCasesListKpiMetrics({
-        from: filterOptions.from,
-        to: filterOptions.to,
+        filterOptions,
         enabled: !isSelectorView,
       });
     const { globalInlineFields } = useGlobalInlineFields({ enabled: templatesEnabled });
@@ -378,6 +377,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
               mttr={data.mttr}
               isLoading={isLoadingCases}
               kpiMetrics={kpiMetrics}
+              kpiTilesDisplay={kpiTilesDisplay}
               kpiResults={kpiResults}
               isLoadingKpiResults={isLoadingKpiResults}
               isAnalyticsEnabled={isAnalyticsEnabled}

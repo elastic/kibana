@@ -105,7 +105,9 @@ export const ConfigureCases: React.FC = React.memo(() => {
     onDeleteObservableType,
     AddOrEditObservableTypeFlyout,
     kpiMetrics,
+    kpiTilesDisplay,
     onSaveKpiMetrics,
+    onSaveKpiTilesDisplay,
   } = useConfigureCasesController<LegacyFlyoutType>();
 
   const showObservableTypesSection =
@@ -246,8 +248,10 @@ export const ConfigureCases: React.FC = React.memo(() => {
                 >
                   <KpiMetricsSettings
                     kpiMetrics={kpiMetrics}
+                    tilesDisplay={kpiTilesDisplay}
                     isLoading={isLoadingCaseConfiguration}
                     onSave={onSaveKpiMetrics}
+                    onSaveTilesDisplay={onSaveKpiTilesDisplay}
                   />
                 </SettingsSection>
 

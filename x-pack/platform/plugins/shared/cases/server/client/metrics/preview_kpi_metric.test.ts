@@ -40,7 +40,7 @@ const createClientArgs = ({ enabled = true }: { enabled?: boolean } = {}) => {
     _shards: { total: 1, successful: 1, failed: 0 },
     hits: { total: { value: 4, relation: 'eq' as const }, hits: [] },
   };
-  clientArgs.analyticsV2Reader.msearch.mockResolvedValue([response]);
+  clientArgs.analyticsV2Reader.msearch.mockResolvedValue([response, response]);
 
   return args;
 };
@@ -75,6 +75,7 @@ describe('previewKpiMetric', () => {
       type: 'value',
       format: 'number',
       value: 4,
+      previousValue: 4,
     });
   });
 

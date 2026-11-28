@@ -1230,6 +1230,87 @@ describe('updateAlertsStatus', () => {
     });
   });
 
+  describe('getAlertGeneratedTimes', () => {
+    it('searches the local indices as the caller and keys the times by the alert id', async () => {
+      esClient.search.mockResolvedValueOnce({
+        hits: {
+          hits: [
+            {
+              _id: 'alert-1',
+              _index: '.internal.alerts-stack.alerts-default-000001',
+              _source: {
+                '@timestamp': '2026-11-04T10:39:11.627Z',
+                'kibana.alert.start': '2026-11-04T09:42:15.885Z',
+              },
+            },
+          ],
+        },
+      } as never);
+
+      const result = await alertService.getAlertGeneratedTimes({
+        ids: ['alert-1', 'alert-2'],
+        indices: ['.alerts-stack.alerts-default', 'remote:.alerts-stack.alerts-default'],
+      });
+
+      expect(esClient.search).toHaveBeenCalledWith({
+        index: ['.alerts-stack.alerts-default'],
+        size: 2,
+        query: {
+          bool: {
+            filter: [
+              { ids: { values: ['alert-1', 'alert-2'] } },
+              { exists: { field: 'kibana.alert.uuid' } },
+            ],
+          },
+        },
+        _source: ['@timestamp', 'kibana.alert.start'],
+        track_total_hits: false,
+        ignore_unavailable: true,
+        allow_no_indices: true,
+      });
+      expect(result).toEqual({
+        readable: true,
+        alerts: new Map([
+          ['alert-1', { timestamp: '2026-11-04T10:39:11.627Z', start: '2026-11-04T09:42:15.885Z' }],
+        ]),
+      });
+    });
+
+    it('runs no search with no local index', async () => {
+      await expect(
+        alertService.getAlertGeneratedTimes({
+          ids: ['alert-1'],
+          indices: ['remote:.alerts-stack.alerts-default'],
+        })
+      ).resolves.toEqual({ readable: true, alerts: new Map() });
+      expect(esClient.search).not.toHaveBeenCalled();
+    });
+
+    it('reports a refused read as not readable', async () => {
+      esClient.search.mockRejectedValueOnce(
+        Object.assign(new Error('forbidden'), { statusCode: 403 })
+      );
+
+      await expect(
+        alertService.getAlertGeneratedTimes({
+          ids: ['alert-1'],
+          indices: ['.alerts-stack.alerts-default'],
+        })
+      ).resolves.toEqual({ readable: false });
+    });
+
+    it('throws for another search error', async () => {
+      esClient.search.mockRejectedValueOnce(new Error('boom'));
+
+      await expect(
+        alertService.getAlertGeneratedTimes({
+          ids: ['alert-1'],
+          indices: ['.alerts-stack.alerts-default'],
+        })
+      ).rejects.toThrow('Failed to read the alert generated times');
+    });
+  });
+
   describe('confirmAlertIndices', () => {
     const ALIAS = '.alerts-security.alerts-default';
     const BACKING_INDEX = '.internal.alerts-security.alerts-default-000001';

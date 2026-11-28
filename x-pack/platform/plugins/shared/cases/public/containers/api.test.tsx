@@ -17,6 +17,7 @@ import {
   INTERNAL_GET_CASE_USER_ACTIONS_STATS_URL,
   INTERNAL_DELETE_FILE_ATTACHMENTS_URL,
   INTERNAL_GET_CASE_CATEGORIES_URL,
+  INTERNAL_KPI_METRICS_URL,
 } from '../../common/constants';
 import { SortFieldCase } from '../../common/ui/types';
 
@@ -40,6 +41,7 @@ import {
   getCaseUserActionsStats,
   deleteFileAttachments,
   getCategories,
+  getKpiMetrics,
   replaceCustomField,
   postObservable,
   getSimilarCases,
@@ -797,6 +799,34 @@ describe('Cases API', () => {
     it('should return correct response', async () => {
       const resp = await getTags({ owner: [SECURITY_SOLUTION_OWNER], signal: abortCtrl.signal });
       expect(resp).toEqual(tags);
+    });
+  });
+
+  describe('getKpiMetrics', () => {
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue({ enabled: true, metrics: [] });
+    });
+
+    it('sends the owner, the date range, and the case list filters in a POST body', async () => {
+      await getKpiMetrics({
+        owner: SECURITY_SOLUTION_OWNER,
+        from: 'now-30d',
+        to: 'now',
+        filters: { tags: ['phishing'], status: [CaseStatuses.open] },
+        signal: abortCtrl.signal,
+      });
+
+      expect(fetchMock).toHaveBeenCalledWith(INTERNAL_KPI_METRICS_URL, {
+        method: 'POST',
+        signal: abortCtrl.signal,
+        body: JSON.stringify({
+          owner: SECURITY_SOLUTION_OWNER,
+          from: 'now-30d',
+          to: 'now',
+          filters: { tags: ['phishing'], status: [CaseStatuses.open] },
+        }),
+      });
     });
   });
 

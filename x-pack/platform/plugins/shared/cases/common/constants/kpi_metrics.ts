@@ -7,7 +7,7 @@
 
 export type KpiMetricIndex = 'cases' | 'activity' | 'attachments';
 export type KpiFieldType = 'keyword' | 'numeric' | 'date';
-export type KpiMetricFormat = 'number' | 'duration';
+export type KpiMetricFormat = 'number' | 'duration' | 'percent';
 export type KpiMetricSource = 'caseSearch' | 'analytics';
 
 export interface KpiFieldCatalogEntry {
@@ -31,12 +31,18 @@ export const KPI_FIELD_CATALOG: Record<KpiMetricIndex, readonly KpiFieldCatalogE
     { field: 'case.category', type: 'keyword' },
     { field: 'case.assignees.full_name', type: 'keyword' },
     { field: 'case.assignees.username', type: 'keyword' },
+    { field: 'case.assignees.uid', type: 'keyword' },
     { field: 'case.template.id', type: 'keyword' },
     { field: 'case.created_by.username', type: 'keyword' },
+    { field: 'case.closed_by.username', type: 'keyword' },
+    { field: 'case.closed_by.full_name', type: 'keyword' },
     { field: 'case.duration', type: 'numeric', unit: 's' },
     { field: 'case.time_to_acknowledge', type: 'numeric', unit: 's' },
     { field: 'case.time_to_investigate', type: 'numeric', unit: 's' },
     { field: 'case.time_to_resolve', type: 'numeric', unit: 's' },
+    { field: 'case.active_time_open', type: 'numeric', unit: 's' },
+    { field: 'case.time_to_pickup', type: 'numeric', unit: 's' },
+    { field: 'case.reopen_count', type: 'numeric' },
     { field: 'case.total_alerts', type: 'numeric' },
     { field: 'case.total_comments', type: 'numeric' },
     { field: 'case.total_events', type: 'numeric' },
@@ -57,6 +63,7 @@ export const KPI_FIELD_CATALOG: Record<KpiMetricIndex, readonly KpiFieldCatalogE
   ],
   attachments: [
     { field: 'attachment.type', type: 'keyword' },
+    { field: 'attachment.attachment_id', type: 'keyword' },
     { field: 'attachment.alert.rule.id', type: 'keyword' },
     { field: 'attachment.alert.rule.name', type: 'keyword' },
     { field: 'attachment.alert.indices', type: 'keyword' },
@@ -90,6 +97,18 @@ export const PREDEFINED_KPI_METRICS: readonly PredefinedKpiMetric[] = [
     format: 'duration',
     source: 'caseSearch',
   },
+  {
+    id: 'alert_time_to_acknowledge_avg',
+    label: 'Average time to acknowledge an alert',
+    format: 'duration',
+    source: 'analytics',
+  },
+  {
+    id: 'alert_time_to_acknowledge_median',
+    label: 'Median time to acknowledge an alert',
+    format: 'duration',
+    source: 'analytics',
+  },
 ];
 
 export const PREDEFINED_KPI_METRIC_IDS = PREDEFINED_KPI_METRICS.map((metric) => metric.id);
@@ -99,6 +118,27 @@ export const PREDEFINED_KPI_METRIC_IDS = PREDEFINED_KPI_METRICS.map((metric) => 
  */
 export const KPI_METRIC_PREVIEW_ID = 'preview';
 
+/**
+ * The maximum number of cases that the case list filters can select for the custom metrics
+ */
+export const MAX_KPI_FILTER_CASE_IDS = 10000;
+
+/**
+ * The maximum number of alert attachment documents and unique alert ids in one period of an alert metric
+ */
+export const MAX_KPI_ALERTS = 10000;
+
+/**
+ * The maximum number of assignment and status events that the alert acknowledge metrics read in one period
+ */
+export const MAX_KPI_ACKNOWLEDGE_EVENTS = 10000;
+
+/**
+ * The maximum and the default number of values that a breakdown metric shows
+ */
+export const MAX_KPI_BREAKDOWN_SIZE = 10;
+export const DEFAULT_KPI_BREAKDOWN_SIZE = 5;
+
 export const getKpiField = (
   index: KpiMetricIndex,
   field: string
@@ -107,3 +147,9 @@ export const getKpiField = (
 
 export const getPredefinedKpiMetric = (id: string): PredefinedKpiMetric | undefined =>
   PREDEFINED_KPI_METRICS.find((metric) => metric.id === id);
+
+/**
+ * Returns true when the server calculates the predefined metric from the analytics indices.
+ */
+export const isAnalyticsPredefinedKpiMetric = (id: string): boolean =>
+  getPredefinedKpiMetric(id)?.source === 'analytics';

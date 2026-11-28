@@ -3994,6 +3994,50 @@ describe('CasesService', () => {
         });
       });
 
+      it('searchCaseIds uses the same search query as the case list and returns only the ids', async () => {
+        const searchMock = mockSearch();
+
+        await service.searchCasesGroupedByID({
+          caseOptions: { search: 'my search term' },
+          namespaces,
+        });
+
+        searchMock.mockResolvedValue({
+          hits: {
+            hits: [{ _id: 'cases:case-1' }, { _id: 'cases:case-2' }],
+            total: { value: 2 },
+          },
+        });
+
+        const result = await service.searchCaseIds({
+          caseOptions: { search: 'my search term' },
+          namespaces,
+          maxIds: 100,
+        });
+
+        const [[listCall], [idsCall]] = searchMock.mock.calls;
+        expect(idsCall.query).toEqual(listCall.query);
+        expect(idsCall).toEqual(
+          expect.objectContaining({ size: 100, _source: false, track_total_hits: true })
+        );
+        expect(result).toEqual({ ids: ['case-1', 'case-2'], total: 2 });
+      });
+
+      it('searchCaseIds returns the total of all matches, also above maxIds', async () => {
+        const searchMock = mockSearch();
+        searchMock.mockResolvedValue({
+          hits: { hits: [{ _id: 'cases:case-1' }], total: { value: 50 } },
+        });
+
+        const result = await service.searchCaseIds({
+          caseOptions: {},
+          namespaces,
+          maxIds: 1,
+        });
+
+        expect(result).toEqual({ ids: ['case-1'], total: 50 });
+      });
+
       it('returns zero counts and null mttr when the stats query matches nothing', async () => {
         const searchMock = mockSearch();
         searchMock.mockResolvedValue({

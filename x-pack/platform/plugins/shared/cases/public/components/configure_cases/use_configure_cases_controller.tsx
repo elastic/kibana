@@ -9,7 +9,11 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { ActionConnectorTableItem } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
-import type { ActionConnector, ObservableTypeConfiguration } from '../../../common/types/domain';
+import type {
+  ActionConnector,
+  KpiTilesDisplay,
+  ObservableTypeConfiguration,
+} from '../../../common/types/domain';
 import type { KpiMetricRequest } from '../../../common/types/api';
 import { getNoneConnector } from '../../../common/utils/connectors';
 import { useKibana } from '../../common/lib/kibana';
@@ -79,6 +83,7 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
     metrics,
   } = currentConfiguration;
   const kpiMetrics = metrics?.casesList;
+  const kpiTilesDisplay = metrics?.casesListDisplay;
 
   const {
     mutate: persistCaseConfigure,
@@ -420,7 +425,7 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
         workflowTags,
         id: configurationId,
         version: configurationVersion,
-        metrics: { casesList: updatedKpiMetrics },
+        metrics: { ...metrics, casesList: updatedKpiMetrics },
       });
     },
     [
@@ -430,6 +435,35 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
       templates,
       observableTypes,
       workflowTags,
+      metrics,
+      persistCaseConfigure,
+      configurationId,
+      configurationVersion,
+    ]
+  );
+
+  const onSaveKpiTilesDisplay = useCallback(
+    (casesListDisplay: KpiTilesDisplay) => {
+      persistCaseConfigure({
+        connector,
+        closureType,
+        customFields,
+        templates,
+        observableTypes,
+        workflowTags,
+        id: configurationId,
+        version: configurationVersion,
+        metrics: { ...metrics, casesListDisplay },
+      });
+    },
+    [
+      connector,
+      closureType,
+      customFields,
+      templates,
+      observableTypes,
+      workflowTags,
+      metrics,
       persistCaseConfigure,
       configurationId,
       configurationVersion,
@@ -494,7 +528,9 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
     onChangeWorkflowTags,
     AddOrEditObservableTypeFlyout,
     kpiMetrics,
+    kpiTilesDisplay,
     onSaveKpiMetrics,
+    onSaveKpiTilesDisplay,
   };
 };
 

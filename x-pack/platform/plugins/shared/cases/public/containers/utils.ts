@@ -231,6 +231,37 @@ export const constructCustomFieldsFilter = (
     : {};
 };
 
+const isNotAllOption = (option: string): boolean => option !== 'all';
+
+/**
+ * Converts the case list filters, without the date range, to the fields of the case search request.
+ */
+export const buildCasesSearchFilters = (filterOptions: Omit<FilterOptions, 'from' | 'to'>) => {
+  const status = filterOptions.status.filter(isNotAllOption);
+  const severity = filterOptions.severity.filter(isNotAllOption);
+
+  return {
+    ...(status.length > 0 ? { status } : {}),
+    ...(severity.length > 0 ? { severity } : {}),
+    ...constructAssigneesFilter(filterOptions.assignees),
+    ...constructReportersFilter(filterOptions.reporters),
+    ...(filterOptions.tags.length > 0 ? { tags: filterOptions.tags } : {}),
+    ...(filterOptions.search.length > 0 ? { search: filterOptions.search } : {}),
+    ...(filterOptions.searchFields.length > 0 ? { searchFields: filterOptions.searchFields } : {}),
+    ...(filterOptions.owner.length > 0 ? { owner: filterOptions.owner } : {}),
+    ...(filterOptions.category.length > 0 ? { category: filterOptions.category } : {}),
+    ...constructCustomFieldsFilter(filterOptions.customFields),
+    ...(filterOptions.extendedFieldFilters && filterOptions.extendedFieldFilters.length > 0
+      ? { extendedFieldFilters: filterOptions.extendedFieldFilters }
+      : {}),
+  };
+};
+
+/**
+ * The case list filters in the body of the KPI metrics request. The server decodes them with the case search schema.
+ */
+export type KpiMetricsCaseFiltersBody = Omit<ReturnType<typeof buildCasesSearchFilters>, 'owner'>;
+
 export interface ParsedExtendedFieldSearch {
   extendedFieldFilters: ExtendedFieldFilter[];
   freeText: string;
@@ -298,4 +329,42 @@ export const getIncrementalIdSearchOverrides = (search: string) => {
     };
   }
   return overrides;
+};
+
+/**
+ * Returns the filter overrides that the search text gives: an incremental id search, or the
+ * `label:value` extended field filters merged with the picker filters.
+ */
+export const getCasesSearchOverrides = (
+  filterOptions: Partial<FilterOptions> = {}
+): Partial<FilterOptions> => {
+  const rawSearch = filterOptions.search ?? '';
+  const overrides = getIncrementalIdSearchOverrides(rawSearch);
+
+  if (Object.keys(overrides).length > 0) {
+    return overrides;
+  }
+
+  const { extendedFieldFilters: parsedSearchFilters, freeText } =
+    parseExtendedFieldSearch(rawSearch);
+  if (parsedSearchFilters.length === 0) {
+    return {};
+  }
+  const searchFilters = parsedSearchFilters.filter(({ value }) => value.length > 0);
+  const pickerFilters = filterOptions.extendedFieldFilters ?? [];
+  const seen = new Set(
+    pickerFilters.map((entry) => `${entry.label.toLowerCase()}\0${entry.value}`)
+  );
+  const merged = [
+    ...pickerFilters,
+    ...searchFilters.filter((entry) => {
+      const key = `${entry.label.toLowerCase()}\0${entry.value}`;
+      if (seen.has(key)) {
+        return false;
+      }
+      seen.add(key);
+      return true;
+    }),
+  ];
+  return { search: freeText, extendedFieldFilters: merged };
 };

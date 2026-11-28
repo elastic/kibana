@@ -12,7 +12,7 @@ import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
 import { decodeWithExcessOrThrowZod } from '../../common/runtime_types';
 import type { CasesClientArgs } from '../types';
-import { runKpiMetrics } from './kpi';
+import { resolveKpiRange, runKpiMetrics } from './kpi';
 
 /**
  * Returns the value of one unsaved custom metric. Only a user who can edit the case settings can preview.
@@ -43,7 +43,7 @@ export const previewKpiMetric = async (
 
     const [result] = await runKpiMetrics({
       metrics: [{ ...metric, id: KPI_METRIC_PREVIEW_ID }],
-      context: { spaceId, owner, from, to },
+      context: { spaceId, owner, ...resolveKpiRange({ from, to }) },
       reader: analyticsV2Reader,
     });
 

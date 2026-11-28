@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import type { KpiMetricsConfigurationRequest } from '../../../common/types/api';
+import type { KpiMetricRequest, KpiMetricsConfigurationRequest } from '../../../common/types/api';
 import type {
   CustomFieldsConfiguration,
   CustomFieldTypes,
@@ -17,7 +17,11 @@ import {
   validateCustomFieldKeysAgainstConfiguration,
   validateCustomFieldTypesInRequest as validateCaseCustomFieldTypesInRequest,
 } from '../cases/validators';
-import { getKpiMetricFieldError, getKpiMetricQueryError } from '../metrics/kpi';
+import {
+  getKpiMetricFieldError,
+  getKpiMetricQueryError,
+  isAlertTimeToAcknowledgeMetric,
+} from '../metrics/kpi';
 
 /**
  * Throws an error if the request tries to change the type of existing custom fields.
@@ -89,9 +93,38 @@ export const validateTemplatesCustomFieldsInRequest = ({
   });
 };
 
+const ALERT_METRIC_OPTIONS = [
+  'acknowledgeTrigger',
+  'aggregateBy',
+  'dateBasis',
+  'caseQuery',
+] as const;
+
+const getPredefinedOptionErrors = (
+  metric: Extract<KpiMetricRequest, { kind: 'predefined' }>
+): string[] => {
+  const options = ALERT_METRIC_OPTIONS.filter((option) => metric[option] != null);
+
+  if (options.length === 0) {
+    return [];
+  }
+
+  if (!isAlertTimeToAcknowledgeMetric(metric.predefinedId)) {
+    return [
+      `The options ${options.join(', ')} are only for the alert time to acknowledge metrics.`,
+    ];
+  }
+
+  const queryError =
+    metric.caseQuery != null ? getKpiMetricQueryError(metric.caseQuery) : undefined;
+
+  return queryError != null ? [queryError] : [];
+};
+
 /**
  * Throws an error if a page has duplicated metric ids, or if a custom KPI metric has a KQL syntax error
- * or a field that the catalog does not allow.
+ * or a field that the catalog does not allow. Also throws if an alert metric option is on another metric,
+ * or if the case query of an alert metric has a KQL syntax error.
  */
 export const validateKpiMetricsInRequest = ({
   metrics,
@@ -111,8 +144,10 @@ export const validateKpiMetricsInRequest = ({
 
   const errors = [...(metrics.casesList ?? []), ...(metrics.caseDetails ?? [])].flatMap(
     (metric) => {
-      if (metric.kind !== 'custom') {
-        return [];
+      if (metric.kind === 'predefined') {
+        return getPredefinedOptionErrors(metric).map(
+          (error) => `"${metric.predefinedId}": ${error}`
+        );
       }
 
       return [getKpiMetricQueryError(metric.query), getKpiMetricFieldError(metric)]

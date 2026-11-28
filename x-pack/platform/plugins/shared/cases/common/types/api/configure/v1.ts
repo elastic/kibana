@@ -28,6 +28,7 @@ import {
   MAX_METRIC_ID_LENGTH,
   MAX_METRIC_PREDEFINED_ID_LENGTH,
   MAX_METRIC_FIELD_LENGTH,
+  MAX_KPI_BREAKDOWN_SIZE,
 } from '../../../constants';
 import { limitedArraySchema, limitedStringSchema, regexStringSchema } from '../../../schema';
 import {
@@ -38,7 +39,12 @@ import {
 import {
   ClosureTypeSchema,
   ConfigurationBasicWithoutOwnerSchema,
+  KpiAcknowledgeTriggerSchema,
+  KpiTilesDisplaySchema,
+  KpiAggregateBySchema,
+  KpiDateBasisSchema,
   KpiMetricAggregationTypeSchema,
+  KpiMetricDateFieldSchema,
   KpiMetricDirectionSchema,
   KpiMetricDisplaySchema,
   KpiMetricIndexSchema,
@@ -218,6 +224,14 @@ export const PredefinedKpiMetricRequestSchema = lazySchema(() =>
       min: 1,
       max: MAX_METRIC_PREDEFINED_ID_LENGTH,
     }),
+    acknowledgeTrigger: KpiAcknowledgeTriggerSchema.optional(),
+    aggregateBy: KpiAggregateBySchema.optional(),
+    dateBasis: KpiDateBasisSchema.optional(),
+    caseQuery: limitedStringSchema({
+      fieldName: 'metric case query',
+      min: 0,
+      max: MAX_METRIC_QUERY_LENGTH,
+    }).optional(),
   })
 );
 
@@ -227,6 +241,7 @@ export const CustomKpiMetricRequestSchema = lazySchema(() =>
     label: limitedStringSchema({ fieldName: 'metric label', min: 1, max: MAX_METRIC_LABEL_LENGTH }),
     index: KpiMetricIndexSchema,
     query: limitedStringSchema({ fieldName: 'metric query', min: 0, max: MAX_METRIC_QUERY_LENGTH }),
+    dateField: KpiMetricDateFieldSchema.optional(),
     aggregation: z
       .object({
         type: KpiMetricAggregationTypeSchema,
@@ -234,7 +249,12 @@ export const CustomKpiMetricRequestSchema = lazySchema(() =>
       })
       .optional(),
     percent: z.boolean().optional(),
-    groupBy: z.object({ field: KpiMetricFieldSchema }).optional(),
+    groupBy: z
+      .object({
+        field: KpiMetricFieldSchema,
+        size: z.number().int().min(1).max(MAX_KPI_BREAKDOWN_SIZE).optional(),
+      })
+      .optional(),
   })
 );
 
@@ -254,6 +274,7 @@ export const KpiMetricsConfigurationRequestSchema = lazySchema(() =>
   z.object({
     casesList: KpiMetricsListRequestSchema('metrics.casesList').optional(),
     caseDetails: KpiMetricsListRequestSchema('metrics.caseDetails').optional(),
+    casesListDisplay: KpiTilesDisplaySchema.optional(),
   })
 );
 

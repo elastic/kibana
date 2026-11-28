@@ -44,6 +44,29 @@ describe('useGetKpiMetrics', () => {
     );
   });
 
+  it('calls the api again with the new case list filters', async () => {
+    const spyOnGetKpiMetrics = jest.spyOn(api, 'getKpiMetrics');
+
+    const { rerender } = renderHook(
+      ({ tags }: { tags: string[] }) => useGetKpiMetrics({ filters: { tags }, enabled: true }),
+      { wrapper, initialProps: { tags: ['phishing'] } }
+    );
+
+    await waitFor(() =>
+      expect(spyOnGetKpiMetrics).toHaveBeenCalledWith(
+        expect.objectContaining({ filters: { tags: ['phishing'] } })
+      )
+    );
+
+    rerender({ tags: ['malware'] });
+
+    await waitFor(() =>
+      expect(spyOnGetKpiMetrics).toHaveBeenCalledWith(
+        expect.objectContaining({ filters: { tags: ['malware'] } })
+      )
+    );
+  });
+
   it('does not call the api when analytics v2 is disabled', async () => {
     (useCasesConfig as jest.Mock).mockReturnValue({ analyticsV2Enabled: false });
     const spyOnGetKpiMetrics = jest.spyOn(api, 'getKpiMetrics');

@@ -6,14 +6,19 @@
  */
 
 import React from 'react';
-import { screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { CustomKpiMetricConfiguration } from '../../../common/types/domain';
 import { noCasesSettingsPermission, renderWithTestingProviders } from '../../common/mock';
 import * as api from '../../containers/api';
+import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
+import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
 import { KpiMetricsSettings } from '.';
 
 jest.mock('../../containers/api');
+jest.mock('../../containers/user_profiles/use_bulk_get_user_profiles');
+
+const useBulkGetUserProfilesMock = useBulkGetUserProfiles as jest.Mock;
 
 const customMetric = (id: string): CustomKpiMetricConfiguration => ({
   id,
@@ -29,20 +34,25 @@ describe('KpiMetricsSettings', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    useBulkGetUserProfilesMock.mockReturnValue({ data: new Map() });
   });
 
   it('shows the four default metrics when no list is saved', async () => {
-    renderWithTestingProviders(<KpiMetricsSettings isLoading={false} onSave={onSave} />);
+    renderWithTestingProviders(
+      <KpiMetricsSettings onSaveTilesDisplay={jest.fn()} isLoading={false} onSave={onSave} />
+    );
 
     expect(await screen.findByTestId('kpi-metrics-default-note')).toBeInTheDocument();
     expect(screen.getByText('Open cases')).toBeInTheDocument();
     expect(screen.getByText('Average time to close')).toBeInTheDocument();
     expect(screen.getAllByTestId(/^kpi-metric-row-/)).toHaveLength(4);
+    expect(screen.queryByText('Average time to acknowledge an alert')).not.toBeInTheDocument();
   });
 
   it('saves the list without the deleted metric', async () => {
     renderWithTestingProviders(
       <KpiMetricsSettings
+        onSaveTilesDisplay={jest.fn()}
         kpiMetrics={[customMetric('a'), customMetric('b')]}
         isLoading={false}
         onSave={onSave}
@@ -57,6 +67,7 @@ describe('KpiMetricsSettings', () => {
   it('saves the new order when a metric moves down', async () => {
     renderWithTestingProviders(
       <KpiMetricsSettings
+        onSaveTilesDisplay={jest.fn()}
         kpiMetrics={[customMetric('a'), customMetric('b')]}
         isLoading={false}
         onSave={onSave}
@@ -70,7 +81,12 @@ describe('KpiMetricsSettings', () => {
 
   it('adds a custom metric from the flyout', async () => {
     renderWithTestingProviders(
-      <KpiMetricsSettings kpiMetrics={[]} isLoading={false} onSave={onSave} />
+      <KpiMetricsSettings
+        onSaveTilesDisplay={jest.fn()}
+        kpiMetrics={[]}
+        isLoading={false}
+        onSave={onSave}
+      />
     );
 
     await userEvent.click(await screen.findByTestId('kpi-metric-add'));
@@ -95,12 +111,16 @@ describe('KpiMetricsSettings', () => {
     const metric: CustomKpiMetricConfiguration = {
       ...customMetric('a'),
       direction: 'lower_is_better',
-      percent: true,
-      groupBy: { field: 'case.severity' },
+      groupBy: { field: 'case.severity', size: 5 },
     };
 
     renderWithTestingProviders(
-      <KpiMetricsSettings kpiMetrics={[metric]} isLoading={false} onSave={onSave} />
+      <KpiMetricsSettings
+        onSaveTilesDisplay={jest.fn()}
+        kpiMetrics={[metric]}
+        isLoading={false}
+        onSave={onSave}
+      />
     );
 
     await userEvent.click(await screen.findByTestId('kpi-metric-edit-0'));
@@ -111,7 +131,12 @@ describe('KpiMetricsSettings', () => {
 
   it('does not save a custom metric without a label', async () => {
     renderWithTestingProviders(
-      <KpiMetricsSettings kpiMetrics={[]} isLoading={false} onSave={onSave} />
+      <KpiMetricsSettings
+        onSaveTilesDisplay={jest.fn()}
+        kpiMetrics={[]}
+        isLoading={false}
+        onSave={onSave}
+      />
     );
 
     await userEvent.click(await screen.findByTestId('kpi-metric-add'));
@@ -125,7 +150,12 @@ describe('KpiMetricsSettings', () => {
     const kpiMetrics = Array.from({ length: 8 }, (_, index) => customMetric(`m${index}`));
 
     renderWithTestingProviders(
-      <KpiMetricsSettings kpiMetrics={kpiMetrics} isLoading={false} onSave={onSave} />
+      <KpiMetricsSettings
+        onSaveTilesDisplay={jest.fn()}
+        kpiMetrics={kpiMetrics}
+        isLoading={false}
+        onSave={onSave}
+      />
     );
 
     expect(await screen.findByTestId('kpi-metrics-max')).toBeInTheDocument();
@@ -134,16 +164,276 @@ describe('KpiMetricsSettings', () => {
 
   it('is read-only without the settings permission', async () => {
     renderWithTestingProviders(
-      <KpiMetricsSettings kpiMetrics={[customMetric('a')]} isLoading={false} onSave={onSave} />,
+      <KpiMetricsSettings
+        onSaveTilesDisplay={jest.fn()}
+        kpiMetrics={[customMetric('a')]}
+        isLoading={false}
+        onSave={onSave}
+      />,
       { wrapperProps: { permissions: noCasesSettingsPermission() } }
     );
 
     expect(await screen.findByTestId('kpi-metric-add')).toBeDisabled();
     expect(screen.getByTestId('kpi-metric-delete-0')).toBeDisabled();
     expect(screen.getByTestId('kpi-metric-edit-0')).toBeDisabled();
+    expect(screen.getByTestId('kpi-tiles-display')).toBeDisabled();
+  });
+
+  it('saves the trend color of an edited metric', async () => {
+    renderWithTestingProviders(
+      <KpiMetricsSettings
+        onSaveTilesDisplay={jest.fn()}
+        kpiMetrics={[customMetric('a')]}
+        isLoading={false}
+        onSave={onSave}
+      />
+    );
+
+    await userEvent.click(await screen.findByTestId('kpi-metric-edit-0'));
+    await userEvent.selectOptions(
+      await screen.findByTestId('kpi-metric-direction'),
+      'lower_is_better'
+    );
+    await userEvent.click(screen.getByTestId('kpi-metric-save'));
+
+    expect(onSave).toHaveBeenCalledWith([{ ...customMetric('a'), direction: 'lower_is_better' }]);
+  });
+
+  it('saves a percent metric', async () => {
+    renderWithTestingProviders(
+      <KpiMetricsSettings
+        onSaveTilesDisplay={jest.fn()}
+        kpiMetrics={[customMetric('a')]}
+        isLoading={false}
+        onSave={onSave}
+      />
+    );
+
+    await userEvent.click(await screen.findByTestId('kpi-metric-edit-0'));
+    await userEvent.click(await screen.findByTestId('kpi-metric-percent'));
+    await userEvent.click(screen.getByTestId('kpi-metric-save'));
+
+    expect(onSave).toHaveBeenCalledWith([{ ...customMetric('a'), percent: true }]);
+  });
+
+  it('describes a saved percent metric', async () => {
+    renderWithTestingProviders(
+      <KpiMetricsSettings
+        onSaveTilesDisplay={jest.fn()}
+        kpiMetrics={[{ ...customMetric('a'), percent: true }]}
+        isLoading={false}
+        onSave={onSave}
+      />
+    );
+
+    expect(await screen.findByTestId('kpi-metric-row-0')).toHaveTextContent(
+      'cases · Percent · case.status: closed'
+    );
+  });
+
+  describe('group by', () => {
+    it('shows the group-by row for a count and not for an average', async () => {
+      renderWithTestingProviders(
+        <KpiMetricsSettings
+          onSaveTilesDisplay={jest.fn()}
+          kpiMetrics={[]}
+          isLoading={false}
+          onSave={onSave}
+        />
+      );
+
+      await userEvent.click(await screen.findByTestId('kpi-metric-add'));
+      expect(await screen.findByTestId('kpi-metric-group-by')).toBeInTheDocument();
+
+      await userEvent.selectOptions(screen.getByTestId('kpi-metric-aggregation'), 'avg');
+      expect(screen.queryByTestId('kpi-metric-group-by')).not.toBeInTheDocument();
+    });
+
+    it('saves the group-by field with size 5 and no threshold', async () => {
+      const metric: CustomKpiMetricConfiguration = {
+        ...customMetric('a'),
+        threshold: { comparator: 'above', value: 10 },
+      };
+
+      renderWithTestingProviders(
+        <KpiMetricsSettings
+          onSaveTilesDisplay={jest.fn()}
+          kpiMetrics={[metric]}
+          isLoading={false}
+          onSave={onSave}
+        />
+      );
+
+      await userEvent.click(await screen.findByTestId('kpi-metric-edit-0'));
+      await userEvent.type(
+        within(await screen.findByTestId('kpi-metric-group-by')).getByTestId('comboBoxSearchInput'),
+        'case.severity{enter}'
+      );
+
+      expect(await screen.findByTestId('kpi-metric-group-by-size')).toHaveValue(5);
+      expect(screen.queryByTestId('kpi-metric-percent')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('kpi-metric-threshold-comparator')).not.toBeInTheDocument();
+
+      await userEvent.click(screen.getByTestId('kpi-metric-save'));
+
+      await waitFor(() =>
+        expect(onSave).toHaveBeenCalledWith([
+          { ...customMetric('a'), groupBy: { field: 'case.severity', size: 5 } },
+        ])
+      );
+    });
+
+    it('describes a saved breakdown metric', async () => {
+      renderWithTestingProviders(
+        <KpiMetricsSettings
+          onSaveTilesDisplay={jest.fn()}
+          kpiMetrics={[{ ...customMetric('a'), groupBy: { field: 'case.severity' } }]}
+          isLoading={false}
+          onSave={onSave}
+        />
+      );
+
+      expect(await screen.findByTestId('kpi-metric-row-0')).toHaveTextContent(
+        'cases · Count by case.severity · case.status: closed'
+      );
+    });
+  });
+
+  describe('date field', () => {
+    it('shows the date row only for the cases index and resets it on an index change', async () => {
+      renderWithTestingProviders(
+        <KpiMetricsSettings
+          onSaveTilesDisplay={jest.fn()}
+          kpiMetrics={[{ ...customMetric('a'), dateField: 'closed_at' }]}
+          isLoading={false}
+          onSave={onSave}
+        />
+      );
+
+      await userEvent.click(await screen.findByTestId('kpi-metric-edit-0'));
+      expect(await screen.findByTestId('kpi-metric-date-field')).toHaveValue('closed_at');
+
+      await userEvent.selectOptions(screen.getByTestId('kpi-metric-index'), 'activity');
+      expect(screen.queryByTestId('kpi-metric-date-field')).not.toBeInTheDocument();
+
+      await userEvent.selectOptions(screen.getByTestId('kpi-metric-index'), 'cases');
+      expect(screen.getByTestId('kpi-metric-date-field')).toHaveValue('created_at');
+    });
+
+    it('saves the closed date', async () => {
+      renderWithTestingProviders(
+        <KpiMetricsSettings
+          onSaveTilesDisplay={jest.fn()}
+          kpiMetrics={[customMetric('a')]}
+          isLoading={false}
+          onSave={onSave}
+        />
+      );
+
+      await userEvent.click(await screen.findByTestId('kpi-metric-edit-0'));
+      await userEvent.selectOptions(
+        await screen.findByTestId('kpi-metric-date-field'),
+        'closed_at'
+      );
+      await userEvent.click(screen.getByTestId('kpi-metric-save'));
+
+      expect(onSave).toHaveBeenCalledWith([{ ...customMetric('a'), dateField: 'closed_at' }]);
+    });
+  });
+
+  describe('threshold unit', () => {
+    const durationMetric: CustomKpiMetricConfiguration = {
+      ...customMetric('a'),
+      query: '',
+      aggregation: { type: 'median', field: 'case.time_to_resolve' },
+    };
+
+    it('shows the unit select for a duration field and hides it for a count', async () => {
+      renderWithTestingProviders(
+        <KpiMetricsSettings
+          onSaveTilesDisplay={jest.fn()}
+          kpiMetrics={[durationMetric, customMetric('b')]}
+          isLoading={false}
+          onSave={onSave}
+        />
+      );
+
+      await userEvent.click(await screen.findByTestId('kpi-metric-edit-0'));
+      await userEvent.selectOptions(
+        await screen.findByTestId('kpi-metric-threshold-comparator'),
+        'above'
+      );
+      expect(screen.getByTestId('kpi-metric-threshold-unit')).toHaveValue('h');
+
+      await userEvent.click(screen.getByTestId('kpi-metric-cancel'));
+      await userEvent.click(await screen.findByTestId('kpi-metric-edit-1'));
+      await userEvent.selectOptions(
+        await screen.findByTestId('kpi-metric-threshold-comparator'),
+        'above'
+      );
+      expect(screen.getByTestId('kpi-metric-threshold-value')).toBeInTheDocument();
+      expect(screen.queryByTestId('kpi-metric-threshold-unit')).not.toBeInTheDocument();
+    });
+
+    it('saves 3 days in seconds with the unit', async () => {
+      renderWithTestingProviders(
+        <KpiMetricsSettings
+          onSaveTilesDisplay={jest.fn()}
+          kpiMetrics={[durationMetric]}
+          isLoading={false}
+          onSave={onSave}
+        />
+      );
+
+      await userEvent.click(await screen.findByTestId('kpi-metric-edit-0'));
+      await userEvent.selectOptions(
+        await screen.findByTestId('kpi-metric-threshold-comparator'),
+        'above'
+      );
+      await userEvent.type(screen.getByTestId('kpi-metric-threshold-value'), '3');
+      await userEvent.selectOptions(screen.getByTestId('kpi-metric-threshold-unit'), 'd');
+      await userEvent.click(screen.getByTestId('kpi-metric-save'));
+
+      expect(onSave).toHaveBeenCalledWith([
+        { ...durationMetric, threshold: { comparator: 'above', value: 259200, unit: 'd' } },
+      ]);
+    });
   });
 
   describe('Test query', () => {
+    it('sends the date field of the unsaved metric', async () => {
+      const previewSpy = jest.spyOn(api, 'previewKpiMetric').mockResolvedValue({
+        id: 'preview',
+        type: 'value',
+        format: 'number',
+        value: 9,
+      });
+
+      renderWithTestingProviders(
+        <KpiMetricsSettings
+          onSaveTilesDisplay={jest.fn()}
+          kpiMetrics={[customMetric('a')]}
+          isLoading={false}
+          onSave={onSave}
+        />
+      );
+
+      await userEvent.click(await screen.findByTestId('kpi-metric-edit-0'));
+      await userEvent.selectOptions(
+        await screen.findByTestId('kpi-metric-date-field'),
+        'closed_at'
+      );
+      await userEvent.click(screen.getByTestId('kpi-metric-test-query'));
+
+      await waitFor(() =>
+        expect(previewSpy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            metric: expect.objectContaining({ kind: 'custom', dateField: 'closed_at' }),
+          })
+        )
+      );
+    });
+
     it('shows the value of the unsaved metric', async () => {
       const previewSpy = jest.spyOn(api, 'previewKpiMetric').mockResolvedValue({
         id: 'preview',
@@ -153,7 +443,12 @@ describe('KpiMetricsSettings', () => {
       });
 
       renderWithTestingProviders(
-        <KpiMetricsSettings kpiMetrics={[customMetric('a')]} isLoading={false} onSave={onSave} />
+        <KpiMetricsSettings
+          onSaveTilesDisplay={jest.fn()}
+          kpiMetrics={[customMetric('a')]}
+          isLoading={false}
+          onSave={onSave}
+        />
       );
 
       await userEvent.click(await screen.findByTestId('kpi-metric-edit-0'));
@@ -172,6 +467,241 @@ describe('KpiMetricsSettings', () => {
       expect(onSave).not.toHaveBeenCalled();
     });
 
+    it('shows the acknowledge trigger only for an alert metric', async () => {
+      const alertMetric = {
+        id: 'alert-1',
+        kind: 'predefined' as const,
+        predefinedId: 'alert_time_to_acknowledge_avg',
+        display: 'value' as const,
+      };
+      renderWithTestingProviders(
+        <KpiMetricsSettings
+          onSaveTilesDisplay={jest.fn()}
+          kpiMetrics={[alertMetric]}
+          isLoading={false}
+          onSave={onSave}
+        />
+      );
+
+      await userEvent.click(await screen.findByTestId('kpi-metric-edit-0'));
+      await userEvent.selectOptions(
+        await screen.findByTestId('kpi-metric-acknowledge-trigger'),
+        'assigned'
+      );
+      await userEvent.click(screen.getByTestId('kpi-metric-save'));
+
+      await waitFor(() =>
+        expect(onSave).toHaveBeenCalledWith([{ ...alertMetric, acknowledgeTrigger: 'assigned' }])
+      );
+    });
+
+    it('saves the per-case mode of an alert metric', async () => {
+      const alertMetric = {
+        id: 'alert-1',
+        kind: 'predefined' as const,
+        predefinedId: 'alert_time_to_acknowledge_median',
+        display: 'value' as const,
+      };
+      renderWithTestingProviders(
+        <KpiMetricsSettings
+          onSaveTilesDisplay={jest.fn()}
+          kpiMetrics={[alertMetric]}
+          isLoading={false}
+          onSave={onSave}
+        />
+      );
+
+      await userEvent.click(await screen.findByTestId('kpi-metric-edit-0'));
+      await userEvent.click(await screen.findByTestId('kpi-metric-aggregate-by-case'));
+      await userEvent.click(screen.getByTestId('kpi-metric-save'));
+
+      await waitFor(() =>
+        expect(onSave).toHaveBeenCalledWith([{ ...alertMetric, aggregateBy: 'case' }])
+      );
+    });
+
+    it('saves the case query of an alert metric and shows an error for a query that is not valid', async () => {
+      const alertMetric = {
+        id: 'alert-1',
+        kind: 'predefined' as const,
+        predefinedId: 'alert_time_to_acknowledge_median',
+        display: 'value' as const,
+      };
+      renderWithTestingProviders(
+        <KpiMetricsSettings
+          onSaveTilesDisplay={jest.fn()}
+          kpiMetrics={[alertMetric]}
+          isLoading={false}
+          onSave={onSave}
+        />
+      );
+
+      await userEvent.click(await screen.findByTestId('kpi-metric-edit-0'));
+      await userEvent.type(await screen.findByTestId('kpi-metric-case-query'), 'case.status: (');
+      await userEvent.click(screen.getByTestId('kpi-metric-save'));
+
+      expect(await screen.findByText('The case query is not valid KQL.')).toBeInTheDocument();
+      expect(onSave).not.toHaveBeenCalled();
+
+      await userEvent.clear(screen.getByTestId('kpi-metric-case-query'));
+      await userEvent.type(screen.getByTestId('kpi-metric-case-query'), 'case.category: Network');
+      await userEvent.click(screen.getByTestId('kpi-metric-save'));
+
+      await waitFor(() =>
+        expect(onSave).toHaveBeenCalledWith([
+          { ...alertMetric, caseQuery: 'case.category: Network' },
+        ])
+      );
+    });
+
+    it('selects the team default of the tiles display', async () => {
+      const onSaveTilesDisplay = jest.fn();
+      renderWithTestingProviders(
+        <KpiMetricsSettings
+          isLoading={false}
+          onSave={onSave}
+          tilesDisplay="expanded"
+          onSaveTilesDisplay={onSaveTilesDisplay}
+        />
+      );
+
+      await userEvent.selectOptions(await screen.findByTestId('kpi-tiles-display'), 'collapsed');
+
+      expect(onSaveTilesDisplay).toHaveBeenCalledWith('collapsed');
+    });
+
+    it('shows the saved team default of the tiles display', async () => {
+      renderWithTestingProviders(
+        <KpiMetricsSettings
+          isLoading={false}
+          onSave={onSave}
+          tilesDisplay="collapsed"
+          onSaveTilesDisplay={jest.fn()}
+        />
+      );
+
+      expect(await screen.findByTestId('kpi-tiles-display')).toHaveValue('collapsed');
+    });
+
+    it('saves the close date basis of an alert metric', async () => {
+      const alertMetric = {
+        id: 'alert-1',
+        kind: 'predefined' as const,
+        predefinedId: 'alert_time_to_acknowledge_avg',
+        display: 'value' as const,
+      };
+      renderWithTestingProviders(
+        <KpiMetricsSettings
+          onSaveTilesDisplay={jest.fn()}
+          kpiMetrics={[alertMetric]}
+          isLoading={false}
+          onSave={onSave}
+        />
+      );
+
+      await userEvent.click(await screen.findByTestId('kpi-metric-edit-0'));
+      await userEvent.selectOptions(
+        await screen.findByTestId('kpi-metric-date-basis'),
+        'case_closed_at'
+      );
+      await userEvent.click(screen.getByTestId('kpi-metric-save'));
+
+      await waitFor(() =>
+        expect(onSave).toHaveBeenCalledWith([{ ...alertMetric, dateBasis: 'case_closed_at' }])
+      );
+    });
+
+    it('does not show the acknowledge trigger for a case search metric', async () => {
+      renderWithTestingProviders(
+        <KpiMetricsSettings
+          onSaveTilesDisplay={jest.fn()}
+          kpiMetrics={[
+            { id: 'open-1', kind: 'predefined', predefinedId: 'open_cases', display: 'value' },
+          ]}
+          isLoading={false}
+          onSave={onSave}
+        />
+      );
+
+      await userEvent.click(await screen.findByTestId('kpi-metric-edit-0'));
+
+      expect(await screen.findByTestId('kpi-metric-predefined-id')).toBeInTheDocument();
+      expect(screen.queryByTestId('kpi-metric-acknowledge-trigger')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('kpi-metric-aggregate-by-case')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('kpi-metric-date-basis')).not.toBeInTheDocument();
+    });
+
+    it('shows a duration in the unit of the threshold', async () => {
+      jest.spyOn(api, 'previewKpiMetric').mockResolvedValue({
+        id: 'preview',
+        type: 'value',
+        format: 'duration',
+        value: 144000,
+      });
+
+      renderWithTestingProviders(
+        <KpiMetricsSettings
+          onSaveTilesDisplay={jest.fn()}
+          kpiMetrics={[
+            {
+              ...customMetric('a'),
+              query: '',
+              aggregation: { type: 'median', field: 'case.time_to_resolve' },
+              threshold: { comparator: 'above', value: 144000, unit: 'h' },
+            },
+          ]}
+          isLoading={false}
+          onSave={onSave}
+        />
+      );
+
+      await userEvent.click(await screen.findByTestId('kpi-metric-edit-0'));
+      await userEvent.click(await screen.findByTestId('kpi-metric-test-query'));
+
+      expect(await screen.findByTestId('kpi-metric-preview-value')).toHaveTextContent('40 h');
+    });
+
+    it('shows the assignee names in the breakdown preview', async () => {
+      const [profile] = userProfiles;
+      useBulkGetUserProfilesMock.mockReturnValue({ data: userProfilesMap });
+      jest.spyOn(api, 'previewKpiMetric').mockResolvedValue({
+        id: 'preview',
+        type: 'breakdown',
+        field: 'case.assignees.uid',
+        total: 5,
+        buckets: [
+          { key: profile.uid, count: 3 },
+          { key: 'unknown-uid', count: 2 },
+        ],
+        otherCount: 0,
+        missingCount: 0,
+      });
+
+      renderWithTestingProviders(
+        <KpiMetricsSettings
+          onSaveTilesDisplay={jest.fn()}
+          kpiMetrics={[
+            {
+              ...customMetric('a'),
+              groupBy: { field: 'case.assignees.uid', size: 5 },
+            },
+          ]}
+          isLoading={false}
+          onSave={onSave}
+        />
+      );
+
+      await userEvent.click(await screen.findByTestId('kpi-metric-edit-0'));
+      await userEvent.click(await screen.findByTestId('kpi-metric-test-query'));
+
+      const preview = await screen.findByTestId('kpi-metric-preview-value');
+      expect(preview).toHaveTextContent('Damaged Raccoon 3');
+      expect(preview).toHaveTextContent('unknown-uid 2');
+      expect(useBulkGetUserProfilesMock).toHaveBeenLastCalledWith({
+        uids: [profile.uid, 'unknown-uid'],
+      });
+    });
+
     it('shows the error of the unsaved metric', async () => {
       jest.spyOn(api, 'previewKpiMetric').mockResolvedValue({
         id: 'preview',
@@ -180,7 +710,12 @@ describe('KpiMetricsSettings', () => {
       });
 
       renderWithTestingProviders(
-        <KpiMetricsSettings kpiMetrics={[customMetric('a')]} isLoading={false} onSave={onSave} />
+        <KpiMetricsSettings
+          onSaveTilesDisplay={jest.fn()}
+          kpiMetrics={[customMetric('a')]}
+          isLoading={false}
+          onSave={onSave}
+        />
       );
 
       await userEvent.click(await screen.findByTestId('kpi-metric-edit-0'));
