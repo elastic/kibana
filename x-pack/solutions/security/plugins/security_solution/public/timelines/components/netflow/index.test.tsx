@@ -7,8 +7,6 @@
 
 import { get } from 'lodash/fp';
 import React from 'react';
-// Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
-import 'jest-styled-components';
 import { render, screen, within } from '@testing-library/react';
 import { asArrayIfExists } from '../../../common/lib/helpers';
 import { TestProviders } from '../../../common/mock/test_providers';
@@ -152,9 +150,15 @@ describe('Netflow', () => {
     (CellActionsWrapper as unknown as jest.Mock).mockImplementation(MockedCellActionsWrapper);
   });
 
-  test('renders correctly against snapshot', () => {
-    const { asFragment } = render(<TestProviders>{getNetflowInstance()}</TestProviders>);
-    expect(asFragment()).toMatchSnapshot();
+  test('it links the source port to its service definition', () => {
+    render(<TestProviders>{getNetflowInstance()}</TestProviders>);
+
+    expect(
+      within(screen.getByTestId('source-ip-group')).getByTestId('port-or-service-name-link')
+    ).toHaveAttribute(
+      'href',
+      'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=9987'
+    );
   });
 
   test('it renders a destination label', () => {
