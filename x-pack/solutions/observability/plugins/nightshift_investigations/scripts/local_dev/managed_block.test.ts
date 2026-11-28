@@ -9,16 +9,18 @@ import { parse } from 'yaml';
 import { MANAGED_BLOCK_START } from './constants';
 import {
   getLocalDevSettings,
+  hasRelayConfig,
   planManagedBlock,
   redactManagedBlock,
   removeManagedBlock,
 } from './managed_block';
 
-const settings = getLocalDevSettings({
+const sandbox = {
   host: 'sandbox.example',
   port: 9090,
   apiKey: 'kibana-local-dev:s3cret-password',
-});
+};
+const settings = getLocalDevSettings(sandbox);
 
 describe('planManagedBlock', () => {
   it('appends a block that Kibana reads, and re-running it changes nothing', () => {
@@ -85,5 +87,47 @@ describe('redactManagedBlock', () => {
     expect(redacted).not.toMatch(/s3cret/);
     expect(redacted).toContain('xpack.sandbox.api_key: <redacted>');
     expect(redacted).toContain('xpack.sandbox.host: sandbox.example');
+  });
+});
+
+describe('relay settings', () => {
+  const relay = { url: 'http://localhost:3000' };
+  const uiam = { certificate: '/certs/kibana.crt', key: '/certs/kibana.key' };
+
+  it('writes the relay url into the block, and only when a relay is given', () => {
+    const withRelay = planManagedBlock('', getLocalDevSettings(sandbox, relay));
+    expect(parse(withRelay.content)['xpack.actions.relay.url']).toBe('http://localhost:3000');
+    expect(withRelay.content).not.toContain('uiam');
+    expect(planManagedBlock('', settings).content).not.toContain('xpack.actions.relay');
+  });
+
+  it('sets the Kibana URL the Relay calls back', () => {
+    const { content } = planManagedBlock(
+      '',
+      getLocalDevSettings(sandbox, { ...relay, kibanaUrl: 'http://host.docker.internal:5601' })
+    );
+    expect(parse(content)['xpack.actions.relay.kibanaUrl']).toBe(
+      'http://host.docker.internal:5601'
+    );
+  });
+
+  it('enables UIAM with the certificate Relay needs for it, when asked', () => {
+    const { content } = planManagedBlock('', getLocalDevSettings(sandbox, { ...relay, uiam }));
+    expect(parse(content)).toMatchObject({
+      'xpack.actions.relay.uiam.enabled': true,
+      'xpack.actions.relay.ssl.certificate': '/certs/kibana.crt',
+      'xpack.actions.relay.ssl.key': '/certs/kibana.key',
+    });
+  });
+
+  it('sees a relay configured outside the block, dotted or nested, but not the block itself', () => {
+    expect(hasRelayConfig('xpack.actions.relay.url: https://relay.example\n')).toBe(true);
+    expect(
+      hasRelayConfig('xpack:\n  actions:\n    relay:\n      url: https://relay.example\n')
+    ).toBe(true);
+    expect(hasRelayConfig('server.port: 5601\n')).toBe(false);
+
+    const { content } = planManagedBlock('', getLocalDevSettings(sandbox, { ...relay, uiam }));
+    expect(hasRelayConfig(content)).toBe(false);
   });
 });

@@ -13,13 +13,22 @@ import type { SandboxConnection } from './secrets';
 type SettingValue = string | number | boolean;
 
 const SANDBOX_API_KEY_SETTING = 'xpack.sandbox.api_key';
+const RELAY_SETTING_PREFIX = 'xpack.actions.relay';
+const RELAY_URL_SETTING = `${RELAY_SETTING_PREFIX}.url`;
 
 /** The settings a local Kibana needs to run Nightshift investigations in the eval sandbox. */
-export const getLocalDevSettings = ({
-  host,
-  port,
-  apiKey,
-}: SandboxConnection): Record<string, SettingValue> => ({
+export interface RelaySettings {
+  url: string;
+  /** The Kibana URL the Relay calls back; `localhost` would be the container itself. */
+  kibanaUrl?: string;
+  /** On Serverless the Relay authenticates Kibana through UIAM, with Kibana's UIAM certificate. */
+  uiam?: { certificate: string; key: string };
+}
+
+export const getLocalDevSettings = (
+  { host, port, apiKey }: SandboxConnection,
+  relay?: RelaySettings
+): Record<string, SettingValue> => ({
   // Nightshift itself: the feature flag gates the app and every investigation route.
   'feature_flags.overrides.nightshift.enabled': true,
   'xpack.nightshift_investigations.enabled': true,
@@ -31,6 +40,15 @@ export const getLocalDevSettings = ({
   'xpack.sandbox.host': host,
   'xpack.sandbox.port': port,
   [SANDBOX_API_KEY_SETTING]: apiKey,
+  ...(relay ? { [RELAY_URL_SETTING]: relay.url } : {}),
+  ...(relay?.kibanaUrl ? { [`${RELAY_SETTING_PREFIX}.kibanaUrl`]: relay.kibanaUrl } : {}),
+  ...(relay?.uiam
+    ? {
+        [`${RELAY_SETTING_PREFIX}.uiam.enabled`]: true,
+        [`${RELAY_SETTING_PREFIX}.ssl.certificate`]: relay.uiam.certificate,
+        [`${RELAY_SETTING_PREFIX}.ssl.key`]: relay.uiam.key,
+      }
+    : {}),
 });
 
 /** Splits a kibana.yml into the managed block and the rest of the file. */
@@ -73,6 +91,14 @@ const readSettings = (yamlContent: string): Record<string, unknown> => {
     throw new Error('The Kibana config is not valid YAML; fix it and re-run');
   }
   return parsed && typeof parsed === 'object' ? getFlattenedObject(parsed) : {};
+};
+
+/** Whether the config sets any `xpack.actions.relay` setting outside the managed block. */
+export const hasRelayConfig = (content: string): boolean => {
+  const { before, after } = splitManagedBlock(content);
+  return Object.keys(readSettings(`${before}\n${after}`)).some((key) =>
+    key.startsWith(RELAY_SETTING_PREFIX)
+  );
 };
 
 export interface PlannedBlock {

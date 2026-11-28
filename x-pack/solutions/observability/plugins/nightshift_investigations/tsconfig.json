@@ -88,6 +88,7 @@
     "@kbn/core-security-server",
     "@kbn/evals",
     "@kbn/dev-cli-errors",
+    "@kbn/dev-utils",
     "@kbn/repo-info",
     "@kbn/setup-node-env",
     "@kbn/user-profile-components"

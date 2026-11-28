@@ -255,6 +255,15 @@ export const configSchema = schema.object({
           schema.uri({ scheme: ['https'] })
         ),
         ssl: schema.maybe(relaySSLConfigSchema),
+        // Development only: the Kibana URL sent to Relay at install, instead of the public base
+        // URL. For a Relay Kibana reaches under another address than the Relay reaches Kibana,
+        // such as a Relay in a container.
+        kibanaUrl: schema.conditional(
+          schema.contextRef('dev'),
+          true,
+          schema.maybe(schema.uri({ scheme: ['https', 'http'] })),
+          schema.never()
+        ),
         // Serverless only: authenticate Relay requests with a per-request ephemeral UIAM token for
         // Kibana's own identity, on top of mTLS. Requires `xpack.security.uiam` to be configured.
         uiam: schema.maybe(

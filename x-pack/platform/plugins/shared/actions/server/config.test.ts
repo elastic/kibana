@@ -880,6 +880,35 @@ describe('config validation', () => {
     });
   });
 
+  describe('relay.kibanaUrl', () => {
+    test('is accepted in development mode', () => {
+      const result = configSchema.validate(
+        { relay: { url: 'http://relay.test', kibanaUrl: 'http://host.docker.internal:5601' } },
+        { dev: true }
+      );
+
+      expect(result.relay?.kibanaUrl).toEqual('http://host.docker.internal:5601');
+    });
+
+    test('is rejected in production mode', () => {
+      expect(() =>
+        configSchema.validate(
+          { relay: { url: 'https://relay.test', kibanaUrl: 'https://kibana.test' } },
+          { dev: false }
+        )
+      ).toThrow(/\[relay\.kibanaUrl\]/);
+    });
+
+    test('is optional', () => {
+      const result = configSchema.validate(
+        { relay: { url: 'https://relay.test' } },
+        { dev: false }
+      );
+
+      expect(result.relay?.kibanaUrl).toBeUndefined();
+    });
+  });
+
   describe('relay.uiam', () => {
     test('defaults to disabled on serverless', () => {
       const result = configSchema.validate(
