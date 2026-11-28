@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { SinonFakeTimers } from 'sinon';
-import { useFakeTimers } from 'sinon';
+import sinon from 'sinon';
 import type { CalculatePayload } from './model_memory_estimator';
 import { modelMemoryEstimatorProvider } from './model_memory_estimator';
 import type { JobValidator } from '../../job_validator';
@@ -15,7 +14,7 @@ import type { JobCreator } from '../job_creator';
 import { BehaviorSubject } from 'rxjs';
 
 describe('delay', () => {
-  let clock: SinonFakeTimers;
+  let clock: ReturnType<typeof sinon.useFakeTimers>;
   let modelMemoryEstimator: ReturnType<typeof modelMemoryEstimatorProvider>;
   let mockJobCreator: JobCreator;
   let wizardInitialized$: BehaviorSubject<boolean>;
@@ -23,7 +22,7 @@ describe('delay', () => {
   let mockMlApiServices: MlApi;
 
   beforeEach(() => {
-    clock = useFakeTimers();
+    clock = sinon.useFakeTimers();
     mockJobValidator = {
       isModelMemoryEstimationPayloadValid: true,
     } as JobValidator;
