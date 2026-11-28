@@ -483,11 +483,7 @@ export const AlertEpisodeDetailsFlyout = ({
                 data-test-subj="alertingV2EpisodeFlyoutAccordionAbout"
               >
                 <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
-                  <AlertEpisodeReasonSection
-                    episodeId={episodeId}
-                    services={services}
-                    compressed
-                  />
+                  <AlertEpisodeReasonSection episodeId={episodeId} services={services} compressed />
                   <AlertEpisodeGroupingSection
                     episodeId={episodeId}
                     services={services}
