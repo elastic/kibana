@@ -343,10 +343,12 @@ describe('generateReportHandler', () => {
 
     it('should include runtime fields for agent status', async () => {
       const mockRuntimeScript = 'if (doc["last_checkin"].size() > 0) { emit("online") }';
+      const mockParams = { inactivityCutoffs: { policy1: 1234567890123 }, offlineCutoff: 1234567 };
       mockBuildAgentStatusRuntimeField.mockResolvedValue({
         status: {
           script: {
             source: mockRuntimeScript,
+            params: mockParams,
           },
         },
       });
@@ -365,6 +367,8 @@ describe('generateReportHandler', () => {
                   status: expect.objectContaining({
                     script: expect.objectContaining({
                       source: mockRuntimeScript,
+                      // the status script reads the inactivity cutoffs from its params
+                      params: mockParams,
                     }),
                   }),
                 }),
@@ -374,6 +378,35 @@ describe('generateReportHandler', () => {
         }),
         expect.any(Function)
       );
+    });
+  });
+
+  describe('status script scoping', () => {
+    const setSpace = (spaceId: string) => {
+      (mockContext as any).fleet = Promise.resolve({ spaceId });
+    };
+
+    it('only uses the inactivity timeouts of the current space when space awareness is enabled', async () => {
+      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(true);
+      setSpace('space-a');
+
+      await generateReportHandler(mockContext, mockRequest, mockResponse);
+
+      // the script params end up in the report job payload, they must not list other spaces' policies
+      expect(mockBuildAgentStatusRuntimeField).toHaveBeenCalledWith(undefined, undefined, {
+        spaceId: 'space-a',
+      });
+    });
+
+    it('uses the inactivity timeouts of all spaces when space awareness is disabled', async () => {
+      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+      setSpace('space-a');
+
+      await generateReportHandler(mockContext, mockRequest, mockResponse);
+
+      expect(mockBuildAgentStatusRuntimeField).toHaveBeenCalledWith(undefined, undefined, {
+        spaceId: undefined,
+      });
     });
   });
 

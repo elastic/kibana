@@ -17,12 +17,10 @@ import {
   EuiFieldNumber,
   EuiFieldText,
   EuiSuperSelect,
-  EuiToolTip,
   EuiRadioGroup,
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiBadge,
   EuiSwitch,
   EuiButtonEmpty,
   EuiConfirmModal,
@@ -33,17 +31,10 @@ import { i18n } from '@kbn/i18n';
 
 import { MissingPrivilegesToolTip } from '../../../../../../components/missing_privileges_tooltip';
 
-import {
-  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
-  dataTypes,
-  DEFAULT_MAX_AGENT_POLICIES_WITH_INACTIVITY_TIMEOUT,
-  UNKNOWN_SPACE,
-} from '../../../../../../../common/constants';
+import { dataTypes, UNKNOWN_SPACE } from '../../../../../../../common/constants';
 import type { NewAgentPolicy, AgentPolicy } from '../../../../types';
 import {
   useStartServices,
-  useConfig,
-  useGetAgentPolicies,
   useLicense,
   useUIExtension,
   useLink,
@@ -95,11 +86,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
     'endpoint',
     'endpoint-agent-tamper-protection'
   );
-  const config = useConfig();
   const authz = useAuthz();
-  const maxAgentPoliciesWithInactivityTimeout =
-    config.developer?.maxAgentPoliciesWithInactivityTimeout ??
-    DEFAULT_MAX_AGENT_POLICIES_WITH_INACTIVITY_TIMEOUT;
   const [touchedFields, setTouchedFields] = useState<{ [key: string]: boolean }>({});
 
   const {
@@ -109,16 +96,6 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
     isLoading: isLoadingOptions,
   } = useOutputOptions(agentPolicy);
 
-  const { data: agentPoliciesData } = useGetAgentPolicies({
-    page: 1,
-    perPage: 0,
-    kuery: `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.inactivity_timeout:*`,
-  });
-
-  const totalAgentPoliciesWithInactivityTimeout = agentPoliciesData?.total ?? 0;
-  const tooManyAgentPoliciesForInactivityTimeout =
-    maxAgentPoliciesWithInactivityTimeout !== undefined &&
-    totalAgentPoliciesWithInactivityTimeout > (maxAgentPoliciesWithInactivityTimeout ?? 0);
   const { dataDownloadSourceOptions, isLoading: isLoadingDownloadSources } =
     useDownloadSourcesOptions();
 
@@ -633,32 +610,12 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
               id="xpack.fleet.agentPolicyForm.inactivityTimeoutLabel"
               defaultMessage="Inactivity timeout"
             />
-            {tooManyAgentPoliciesForInactivityTimeout && (
-              <>
-                &nbsp;
-                <EuiToolTip
-                  content={
-                    <FormattedMessage
-                      id="xpack.fleet.agentPolicyForm.inactivityTimeoutTooltip"
-                      defaultMessage="The maximum of 750 agent policies with an inactivity timeout has been exceeded. Remove inactivity timeouts or agent policies to allow agents to become inactive again."
-                    />
-                  }
-                >
-                  <EuiBadge color="warning" tabIndex={0}>
-                    <FormattedMessage
-                      id="xpack.fleet.agentPolicyForm.inactivityTimeoutBadge"
-                      defaultMessage="Warning"
-                    />
-                  </EuiBadge>
-                </EuiToolTip>
-              </>
-            )}
           </h3>
         }
         description={
           <FormattedMessage
             id="xpack.fleet.agentPolicyForm.inactivityTimeoutDescription"
-            defaultMessage="An optional timeout in seconds. If provided, an agent will automatically change to inactive status and be filtered out of the agents list. A maximum of 750 agent policies can have an inactivity timeout."
+            defaultMessage="An optional timeout in seconds. If provided, an agent will automatically change to inactive status and be filtered out of the agents list."
           />
         }
       >

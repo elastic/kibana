@@ -95,7 +95,6 @@ export interface FleetConfigType {
     maxConcurrentDatastreamOperations?: number;
   };
   developer?: {
-    maxAgentPoliciesWithInactivityTimeout?: number;
     disableRegistryVersionCheck?: boolean;
     bundledPackageLocation?: string;
     testSecretsIndex?: string;

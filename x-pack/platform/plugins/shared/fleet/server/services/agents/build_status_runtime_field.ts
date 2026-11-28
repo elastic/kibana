@@ -7,15 +7,9 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import type { Logger } from '@kbn/core/server';
-
-import { DEFAULT_MAX_AGENT_POLICIES_WITH_INACTIVITY_TIMEOUT } from '../../../common/constants';
 
 import { AGENT_POLLING_THRESHOLD_MS } from '../../constants';
 import { agentPolicyService } from '../agent_policy';
-import { appContextService } from '../app_context';
-
-const escapePainlessString = (s: string) => s.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 
 const MISSED_INTERVALS_BEFORE_OFFLINE = 12;
 const MS_BEFORE_OFFLINE = MISSED_INTERVALS_BEFORE_OFFLINE * AGENT_POLLING_THRESHOLD_MS;
@@ -29,6 +23,12 @@ type StatusRuntimeMapping = NonNullable<estypes.MappingRuntimeFields> & {
     script: {
       lang: 'painless';
       source: string;
+      params: {
+        // base policy id -> epoch millis; agents on that policy whose last check-in is older are inactive
+        inactivityCutoffs: Record<string, number>;
+        // epoch millis; agents whose last check-in is older are offline
+        offlineCutoff: number;
+      };
     };
   };
 };
@@ -53,74 +53,14 @@ const _buildPolicyBaseIdDeclaration = (opts: {
         );`;
 };
 
-let inactivityTimeoutsDisabled = false;
-const _buildInactiveCondition = (opts: {
-  now: number;
-  inactivityTimeouts: InactivityTimeouts;
-  maxAgentPoliciesWithInactivityTimeout: number;
-  logger?: Logger;
-}): string | null => {
-  const { now, inactivityTimeouts, maxAgentPoliciesWithInactivityTimeout, logger } = opts;
-  // if there are no policies with inactivity timeouts, then no agents are inactive
-  if (inactivityTimeouts.length === 0) {
-    return null;
-  }
-
-  const totalAgentPoliciesWithInactivityTimeouts = inactivityTimeouts.reduce(
-    (total, { policyIds }) => total + policyIds.length,
-    0
-  );
-
-  // if too many agent policies have inactivity timeouts, then we can't use the inactivity timeout
-  // as the query becomes too large see github.com/elastic/kibana/issues/150577
-  if (totalAgentPoliciesWithInactivityTimeouts > maxAgentPoliciesWithInactivityTimeout) {
-    if (!inactivityTimeoutsDisabled) {
-      // only log this once as this function is executed a lot
-      logger?.warn(
-        `There are ${totalAgentPoliciesWithInactivityTimeouts} agent policies with an inactivity timeout set but the maximum allowed is ${maxAgentPoliciesWithInactivityTimeout}. Agents will not be marked as inactive.`
-      );
-      inactivityTimeoutsDisabled = true;
-    }
-    return null;
-  }
-
-  if (inactivityTimeoutsDisabled) {
-    logger?.info(
-      `There are ${totalAgentPoliciesWithInactivityTimeouts} agent policies which is now below the maximum allowed of ${maxAgentPoliciesWithInactivityTimeout}. Agents will now be marked as inactive again.`
-    );
-    inactivityTimeoutsDisabled = false;
-  }
-
-  const policyClauses = inactivityTimeouts
-    .map(({ inactivityTimeout, policyIds }) => {
-      const inactivityTimeoutMs = inactivityTimeout * 1000;
-      const policyIdMatches = `[${policyIds
-        .map((id) => `'${escapePainlessString(id)}'`)
-        .join(',')}].contains(agentPolicyBaseId)`;
-
-      return `${policyIdMatches} && lastCheckinMillis < ${now - inactivityTimeoutMs}L`;
-    })
-    .join(' || ');
-
-  return `lastCheckinMillis > 0 && agentPolicyBaseId.length() > 0 && (${policyClauses})`;
-};
-
-function _buildSource(
-  inactivityTimeouts: InactivityTimeouts,
-  maxAgentPoliciesWithInactivityTimeout: number,
-  pathPrefix?: string,
-  logger?: Logger
-) {
+// The source must not depend on the inactivity timeouts or on the current time: policies and cutoffs
+// are passed as script params so the source stays well below `script.max_size_in_bytes` whatever the
+// number of policies is (see github.com/elastic/kibana/issues/150577) and Elasticsearch can cache
+// the compiled script.
+function _buildSource(pathPrefix?: string) {
   const normalizedPrefix = pathPrefix ? `${pathPrefix}${pathPrefix.endsWith('.') ? '' : '.'}` : '';
   const field = (path: string) => `doc['${normalizedPrefix + path}']`;
   const fieldPath = (path: string) => `'${normalizedPrefix + path}'`;
-  const now = Date.now();
-  const agentIsInactiveCondition = _buildInactiveCondition({
-    now,
-    inactivityTimeouts,
-    maxAgentPoliciesWithInactivityTimeout,
-    logger,
-  });
 
   return `
     long lastCheckinMillis = doc.containsKey(${fieldPath('last_checkin')}) && ${field(
@@ -132,13 +72,14 @@ function _buildSource(
           ? ${field('enrolled_at')}.value.toInstant().toEpochMilli()
           : -1
         );
-    ${agentIsInactiveCondition ? _buildPolicyBaseIdDeclaration({ field, fieldPath }) : ''}
+    ${_buildPolicyBaseIdDeclaration({ field, fieldPath })}
+    def inactivityCutoff = agentPolicyBaseId.length() > 0 ? params.inactivityCutoffs.get(agentPolicyBaseId) : null;
     if (!doc.containsKey(${fieldPath('active')}) || (${field('active')}.size() > 0 && ${field(
       'active'
     )}.value == false)) {
       emit('unenrolled');
     }
-    ${agentIsInactiveCondition ? `else if (${agentIsInactiveCondition}) {emit('inactive');}` : ''}
+    else if (inactivityCutoff != null && lastCheckinMillis > 0 && lastCheckinMillis < ((Number) inactivityCutoff).longValue()) {emit('inactive');}
     else if (doc.containsKey('audit_unenrolled_reason') && ${field(
       'audit_unenrolled_reason'
     )}.size() > 0 && ${field('audit_unenrolled_reason')}.value == 'uninstall'){emit('uninstalled');}
@@ -147,8 +88,7 @@ function _buildSource(
     )}.size() > 0 && ${field('audit_unenrolled_reason')}.value == 'orphaned'){emit('orphaned');}
     else if (
         lastCheckinMillis > 0
-        && lastCheckinMillis
-        < ${now - MS_BEFORE_OFFLINE}L
+        && lastCheckinMillis < params.offlineCutoff
     ) {
       emit('offline');
     } else if (
@@ -182,31 +122,52 @@ function _buildSource(
     }`.replace(/\s{2,}/g, ' '); // replace newlines and double spaces to save characters
 }
 
+const sourceCache = new Map<string, string>();
+const getSource = (pathPrefix?: string) => {
+  const key = pathPrefix ?? '';
+  let source = sourceCache.get(key);
+  if (source === undefined) {
+    source = _buildSource(pathPrefix);
+    sourceCache.set(key, source);
+  }
+  return source;
+};
+
 // exported for testing
 export function _buildStatusRuntimeField(opts: {
   inactivityTimeouts: InactivityTimeouts;
-  maxAgentPoliciesWithInactivityTimeout?: number;
   pathPrefix?: string;
-  logger?: Logger;
 }): StatusRuntimeMapping {
-  const {
-    inactivityTimeouts,
-    maxAgentPoliciesWithInactivityTimeout = DEFAULT_MAX_AGENT_POLICIES_WITH_INACTIVITY_TIMEOUT,
-    pathPrefix,
-    logger,
-  } = opts;
-  const source = _buildSource(
-    inactivityTimeouts,
-    maxAgentPoliciesWithInactivityTimeout,
-    pathPrefix,
-    logger
-  );
+  const { inactivityTimeouts, pathPrefix } = opts;
+  const now = Date.now();
+
+  // Policy ids are user provided, a Map avoids collisions with `Object.prototype` members such as
+  // `toString` and the `__proto__` setter, which a plain object would silently mishandle.
+  const cutoffsByPolicyId = new Map<string, number>();
+  for (const { inactivityTimeout, policyIds } of inactivityTimeouts) {
+    const cutoff = now - inactivityTimeout * 1000;
+    for (const policyId of policyIds) {
+      // a policy should only be in one group, if not the shortest timeout (largest cutoff) wins
+      const existingCutoff = cutoffsByPolicyId.get(policyId);
+      cutoffsByPolicyId.set(
+        policyId,
+        existingCutoff === undefined ? cutoff : Math.max(existingCutoff, cutoff)
+      );
+    }
+  }
+  // `Object.fromEntries` defines own properties, so `__proto__` is kept as a regular key
+  const inactivityCutoffs: Record<string, number> = Object.fromEntries(cutoffsByPolicyId);
+
   return {
     status: {
       type: 'keyword',
       script: {
         lang: 'painless',
-        source,
+        source: getSource(pathPrefix),
+        params: {
+          inactivityCutoffs,
+          offlineCutoff: now - MS_BEFORE_OFFLINE,
+        },
       },
     },
   };
@@ -216,27 +177,20 @@ export function _buildStatusRuntimeField(opts: {
 // pathPrefix is used to prefix the field path in the source
 // pathPrefix is used by the endpoint team currently to run
 // agent queries against the endpoint metadata index
+// spaceId limits the inactivity timeouts to the agent policies available in that space, it is used
+// when the result is exposed to users (for example in the CSV report job) so that it does not list
+// the policies of other spaces. By default the policies of all spaces are used.
 export async function buildAgentStatusRuntimeField(
   soClient?: SavedObjectsClientContract, // Deprecated, it's now using an internal client
-  pathPrefix?: string
+  pathPrefix?: string,
+  options: { spaceId?: string } = {}
 ) {
-  const config = appContextService.getConfig();
-
-  let logger: Logger | undefined;
-  try {
-    logger = appContextService.getLogger();
-  } catch (e) {
-    // ignore, logger is optional
-    // this code can be used and tested without an app context
-  }
-  const maxAgentPoliciesWithInactivityTimeout =
-    config?.developer?.maxAgentPoliciesWithInactivityTimeout;
-  const inactivityTimeouts = await agentPolicyService.getInactivityTimeouts();
+  const inactivityTimeouts = await agentPolicyService.getInactivityTimeouts({
+    spaceId: options.spaceId,
+  });
 
   return _buildStatusRuntimeField({
     inactivityTimeouts,
-    maxAgentPoliciesWithInactivityTimeout,
     pathPrefix,
-    logger,
   });
 }
