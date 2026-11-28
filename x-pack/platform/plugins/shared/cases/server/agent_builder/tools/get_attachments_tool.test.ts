@@ -20,6 +20,7 @@ const buildToolContext = (): ToolHandlerContext =>
     logger: loggingSystemMock.createLogger(),
     attachments: {
       add: jest.fn().mockResolvedValue({ id: 'att-1' }),
+      getActive: jest.fn().mockReturnValue([]),
       get: jest.fn(),
       delete: jest.fn(),
       update: jest.fn(),
