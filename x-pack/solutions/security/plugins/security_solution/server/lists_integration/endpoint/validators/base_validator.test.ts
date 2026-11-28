@@ -113,6 +113,98 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
     await expect(initValidator()._validateBasicData(exceptionLikeItem)).resolves.toBeUndefined();
   });
 
+  describe('entry value character validation', () => {
+    it('accepts clean values and ignores non-value-bearing entries', () => {
+      exceptionLikeItem.entries = [
+        {
+          field: 'process.executable.caseless',
+          type: 'match',
+          operator: 'included',
+          value: 'C:\\Program Files\\Elastic\\endpoint.exe',
+        },
+        { field: 'event.category', type: 'exists', operator: 'included' },
+      ] as ExceptionItemLikeOptions['entries'];
+
+      expect(() => initValidator()._validateEntryValueCharacters(exceptionLikeItem)).not.toThrow();
+    });
+
+    it('rejects a null character in a nested entry', () => {
+      exceptionLikeItem.entries = [
+        {
+          field: 'process.executable.caseless',
+          type: 'wildcard',
+          operator: 'included',
+          value: 'C:\\Elastic\\*.exe',
+        },
+        {
+          field: 'process.Ext.code_signature',
+          type: 'nested',
+          entries: [
+            {
+              field: 'subject_name',
+              type: 'match_any',
+              operator: 'included',
+              value: ['Elastic', 'bad\u0000signer'],
+            },
+          ],
+        },
+      ] as ExceptionItemLikeOptions['entries'];
+
+      expect(() => initValidator()._validateEntryValueCharacters(exceptionLikeItem)).toThrow(
+        /null characters in fields: subject_name/
+      );
+    });
+
+    it('trims edge whitespace with trimEntryValues', () => {
+      exceptionLikeItem.entries = [
+        {
+          field: 'process.executable.caseless',
+          type: 'match',
+          operator: 'included',
+          value: ' C:\\Program Files\\Elastic\\endpoint.exe ',
+        },
+        {
+          field: 'process.Ext.code_signature',
+          type: 'nested',
+          entries: [
+            {
+              field: 'subject_name',
+              type: 'match_any',
+              operator: 'included',
+              value: [' Elastic ', '  '],
+            },
+          ],
+        },
+      ] as ExceptionItemLikeOptions['entries'];
+
+      initValidator()._trimEntryValues(exceptionLikeItem);
+
+      expect(exceptionLikeItem.entries[0]).toEqual(
+        expect.objectContaining({ value: 'C:\\Program Files\\Elastic\\endpoint.exe' })
+      );
+      // Members that trim down to nothing are dropped.
+      expect(
+        (exceptionLikeItem.entries[1] as { entries: Array<{ value: string[] }> }).entries[0].value
+      ).toEqual(['Elastic']);
+    });
+
+    it('does not echo a rejected value', () => {
+      const rejectedValue = 'private-value\u0000';
+      exceptionLikeItem.entries = [
+        {
+          field: 'user.name',
+          type: 'match',
+          operator: 'included',
+          value: rejectedValue,
+        },
+      ] as ExceptionItemLikeOptions['entries'];
+
+      expect(() => initValidator()._validateEntryValueCharacters(exceptionLikeItem)).toThrow(
+        expect.not.stringContaining(rejectedValue)
+      );
+    });
+  });
+
   it.each([
     [
       'name is empty',
