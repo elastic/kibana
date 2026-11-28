@@ -51,6 +51,7 @@ import {
 } from '../create_package_policy_page/components';
 import {
   applyIlmPolicyChange,
+  applyLogsdbColumnarChange,
   applyNamespaceCustomizationChange,
   computeDefaultVarGroupSelections,
   type VarGroupSelection,
@@ -325,6 +326,8 @@ export const EditPackagePolicyForm = memo<{
   }, [agentVersionGuardKey]);
   // Retrieve agent count
   const [agentCount, setAgentCount] = useState<number>(0);
+  // The columnar index mode picked on this page, applied through the package API once saved.
+  const [logsdbColumnar, setLogsdbColumnar] = useState<boolean | undefined>();
   const [impactedAgentCount, setImpactedAgentCount] = useState<number>(0);
   useEffect(() => {
     const getAgentCount = async () => {
@@ -457,6 +460,13 @@ export const EditPackagePolicyForm = memo<{
     );
     if (!error) {
       if (packageInfo) {
+        await applyLogsdbColumnarChange(
+          packageInfo.name,
+          packageInfo.version,
+          logsdbColumnar,
+          notifications,
+          packageInfo.title ?? packageInfo.name
+        );
         await applyNamespaceCustomizationChange(
           packageInfo.name,
           packageInfo.version,
@@ -611,6 +621,15 @@ export const EditPackagePolicyForm = memo<{
                 }
               }}
               packagePolicyId={packagePolicyId}
+              logsdbColumnar={logsdbColumnar}
+              onLogsdbColumnarChange={
+                !extensionView
+                  ? (enabled) => {
+                      setLogsdbColumnar(enabled);
+                      setIsEdited(true);
+                    }
+                  : undefined
+              }
             />
           )}
 
@@ -654,6 +673,7 @@ export const EditPackagePolicyForm = memo<{
     [
       agentPolicies,
       extensionView,
+      logsdbColumnar,
       formState,
       handleExtensionViewOnChange,
       hasAgentlessAgentPolicy,
