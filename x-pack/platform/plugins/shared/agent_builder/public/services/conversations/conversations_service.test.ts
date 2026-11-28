@@ -25,6 +25,28 @@ describe('ConversationsService', () => {
     expect(created).toEqual({ id: 'conv-1' });
   });
 
+  it('posts a thread to the _thread endpoint of its parent', async () => {
+    const response = { thread_id: 'thread-1', conversation: { id: 'thread-1' } };
+    const post = jest.fn().mockResolvedValue(response);
+    const service = new ConversationsService({ http: { post } as never });
+
+    const result = await service.createThread({
+      parentId: 'parent-1',
+      client_thread_id: 'thread-1',
+      highlight: { text: 'dig into this' },
+      connector_id: 'connector-1',
+    });
+
+    expect(post).toHaveBeenCalledWith(`${internalApiPath}/conversations/parent-1/_thread`, {
+      body: JSON.stringify({
+        client_thread_id: 'thread-1',
+        highlight: { text: 'dig into this' },
+        connector_id: 'connector-1',
+      }),
+    });
+    expect(result).toEqual(response);
+  });
+
   it('requests _search with the snake_case query mapping', async () => {
     const get = jest.fn().mockResolvedValue({
       pagination: { total: 0, page: 1, per_page: 25 },
