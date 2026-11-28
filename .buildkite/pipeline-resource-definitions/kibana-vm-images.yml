@@ -21,6 +21,8 @@ spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
+        # Routes the Packer VM's traffic through the Citadel proxy (see vm-images/.buildkite/build.sh in ci-agent-images)
+        CITADEL_VM_IMAGE_PROXY: 'true'
       default_branch: main
       repository: elastic/ci-agent-images
       pipeline_file: vm-images/.buildkite/pipeline.yml
