@@ -1,5 +1,5 @@
 {
-  "sha1": "0755c79d1126f8015177596d070dbd338d7ac766",
+  "sha1": "59018f841a1c3075940d2e88ceeeb3ac36e49990",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -165,7 +165,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/create_edit_space.spec.ts",
         "line": 171,
-        "column": 43
+        "column": 15
       }
     },
     {
@@ -178,7 +178,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/create_edit_space.spec.ts",
-        "line": 189,
+        "line": 187,
         "column": 13
       }
     },
@@ -192,7 +192,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/create_edit_space.spec.ts",
-        "line": 199,
+        "line": 197,
         "column": 8
       }
     },

@@ -1,5 +1,5 @@
 {
-  "sha1": "7117df751fa280f7d57b344d93b98076e18cc144",
+  "sha1": "9b542ea5f07426574359fb0b8e3e91473acfd20a",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -1662,7 +1662,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/sources.spec.ts",
-        "line": 111,
+        "line": 112,
         "column": 16
       }
     },
@@ -1678,8 +1678,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/sources.spec.ts",
-        "line": 140,
-        "column": 27
+        "line": 142,
+        "column": 31
       }
     },
     {
@@ -1694,7 +1694,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/sources.spec.ts",
-        "line": 154,
+        "line": 156,
         "column": 26
       }
     },
@@ -1710,7 +1710,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/sources.spec.ts",
-        "line": 159,
+        "line": 161,
         "column": 75
       }
     },
@@ -1726,7 +1726,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/sources.spec.ts",
-        "line": 179,
+        "line": 182,
         "column": 14
       }
     },
@@ -1742,7 +1742,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/sources.spec.ts",
-        "line": 194,
+        "line": 197,
         "column": 5
       }
     },
@@ -1758,7 +1758,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/sources.spec.ts",
-        "line": 205,
+        "line": 208,
         "column": 16
       }
     }
