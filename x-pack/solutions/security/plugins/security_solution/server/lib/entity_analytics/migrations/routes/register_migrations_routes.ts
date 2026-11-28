@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { entityAnalyticsRunMigrationsRoute } from './run_migrations';
+import { assetCriticalityLibraryMigrationRoute } from '../../asset_criticality/migration_poc/run_library_migration_route';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 
 export const registerMigrationsRoutes = ({
@@ -15,4 +16,6 @@ export const registerMigrationsRoutes = ({
   hasEncryptionKey,
 }: EntityAnalyticsRoutesDeps) => {
   entityAnalyticsRunMigrationsRoute(router, logger, getStartServices, config, hasEncryptionKey);
+  // Proof of concept, invoked by hand alongside the route above to compare the two.
+  assetCriticalityLibraryMigrationRoute(router, logger);
 };
