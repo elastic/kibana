@@ -910,11 +910,16 @@ export class DashboardApp {
       const actionInPanel = panelWrapper.locator(`[data-test-subj="${actionTestSubj}"]`);
       await actionInPanel.click();
     } else {
-      // Open context menu and click action. The menu renders in a portal outside the panel, so it
-      // cannot be panel-scoped; filtering to the visible match skips the hidden quick-action
-      // buttons that every other panel on the dashboard renders under the same test subject.
+      // Open context menu and click action. The menu renders in a portal outside the panel, so look
+      // in the open menu, or in this panel's hover actions, which the open menu keeps shown.
       await this.openPanelContextMenu(title);
-      await this.page.testSubj.locator(actionTestSubj).filter({ visible: true }).click();
+      const actionSelector = `[data-test-subj="${actionTestSubj}"]`;
+      const contextMenuItems = this.page.testSubj.locator('presentationPanelContextMenuItems');
+      await panelWrapper
+        .locator(actionSelector)
+        .or(contextMenuItems.locator(actionSelector))
+        .filter({ visible: true })
+        .click();
       // Wait for context menu to close after clicking the action
       await expect(this.page.testSubj.locator('embeddablePanelContextMenuOpen')).toBeHidden();
     }
