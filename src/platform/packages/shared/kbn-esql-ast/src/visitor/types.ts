@@ -51,22 +51,21 @@ export type VisitorOutput<
 /**
  * Input that satisfies any expression visitor input constraints.
  */
-export type ExpressionVisitorInput<Methods extends VisitorMethods> = AnyToVoid<VisitorInput<
-  Methods,
-  'visitExpression'
-> &
-  VisitorInput<Methods, 'visitQuery'> &
-  VisitorInput<Methods, 'visitColumnExpression'> &
-  VisitorInput<Methods, 'visitSourceExpression'> &
-  VisitorInput<Methods, 'visitFunctionCallExpression'> &
-  VisitorInput<Methods, 'visitLiteralExpression'> &
-  VisitorInput<Methods, 'visitListLiteralExpression'> &
-  VisitorInput<Methods, 'visitTimeIntervalLiteralExpression'> &
-  VisitorInput<Methods, 'visitInlineCastExpression'> &
-  VisitorInput<Methods, 'visitOrderExpression'> &
-  VisitorInput<Methods, 'visitIdentifierExpression'> &
-  VisitorInput<Methods, 'visitMapExpression'> &
-  VisitorInput<Methods, 'visitMapEntryExpression'>>;
+export type ExpressionVisitorInput<Methods extends VisitorMethods> = AnyToVoid<
+  VisitorInput<Methods, 'visitExpression'> &
+    VisitorInput<Methods, 'visitQuery'> &
+    VisitorInput<Methods, 'visitColumnExpression'> &
+    VisitorInput<Methods, 'visitSourceExpression'> &
+    VisitorInput<Methods, 'visitFunctionCallExpression'> &
+    VisitorInput<Methods, 'visitLiteralExpression'> &
+    VisitorInput<Methods, 'visitListLiteralExpression'> &
+    VisitorInput<Methods, 'visitTimeIntervalLiteralExpression'> &
+    VisitorInput<Methods, 'visitInlineCastExpression'> &
+    VisitorInput<Methods, 'visitOrderExpression'> &
+    VisitorInput<Methods, 'visitIdentifierExpression'> &
+    VisitorInput<Methods, 'visitMapExpression'> &
+    VisitorInput<Methods, 'visitMapEntryExpression'>
+>;
 
 /**
  * Input that satisfies any expression visitor output constraints.
@@ -89,33 +88,32 @@ export type ExpressionVisitorOutput<Methods extends VisitorMethods> =
 /**
  * Input that satisfies any command visitor input constraints.
  */
-export type CommandVisitorInput<Methods extends VisitorMethods> = AnyToVoid<VisitorInput<
-  Methods,
-  'visitCommand'
-> &
-  VisitorInput<Methods, 'visitFromCommand'> &
-  VisitorInput<Methods, 'visitLimitCommand'> &
-  VisitorInput<Methods, 'visitExplainCommand'> &
-  VisitorInput<Methods, 'visitRowCommand'> &
-  VisitorInput<Methods, 'visitTimeseriesCommand'> &
-  VisitorInput<Methods, 'visitShowCommand'> &
-  VisitorInput<Methods, 'visitMetaCommand'> &
-  VisitorInput<Methods, 'visitEvalCommand'> &
-  VisitorInput<Methods, 'visitStatsCommand'> &
-  VisitorInput<Methods, 'visitInlineStatsCommand'> &
-  VisitorInput<Methods, 'visitLookupCommand'> &
-  VisitorInput<Methods, 'visitKeepCommand'> &
-  VisitorInput<Methods, 'visitSortCommand'> &
-  VisitorInput<Methods, 'visitWhereCommand'> &
-  VisitorInput<Methods, 'visitDropCommand'> &
-  VisitorInput<Methods, 'visitRenameCommand'> &
-  VisitorInput<Methods, 'visitDissectCommand'> &
-  VisitorInput<Methods, 'visitGrokCommand'> &
-  VisitorInput<Methods, 'visitEnrichCommand'> &
-  VisitorInput<Methods, 'visitMvExpandCommand'> &
-  VisitorInput<Methods, 'visitJoinCommand'> &
-  VisitorInput<Methods, 'visitRerankCommand'> &
-  VisitorInput<Methods, 'visitChangePointCommand'>>;
+export type CommandVisitorInput<Methods extends VisitorMethods> = AnyToVoid<
+  VisitorInput<Methods, 'visitCommand'> &
+    VisitorInput<Methods, 'visitFromCommand'> &
+    VisitorInput<Methods, 'visitLimitCommand'> &
+    VisitorInput<Methods, 'visitExplainCommand'> &
+    VisitorInput<Methods, 'visitRowCommand'> &
+    VisitorInput<Methods, 'visitTimeseriesCommand'> &
+    VisitorInput<Methods, 'visitShowCommand'> &
+    VisitorInput<Methods, 'visitMetaCommand'> &
+    VisitorInput<Methods, 'visitEvalCommand'> &
+    VisitorInput<Methods, 'visitStatsCommand'> &
+    VisitorInput<Methods, 'visitInlineStatsCommand'> &
+    VisitorInput<Methods, 'visitLookupCommand'> &
+    VisitorInput<Methods, 'visitKeepCommand'> &
+    VisitorInput<Methods, 'visitSortCommand'> &
+    VisitorInput<Methods, 'visitWhereCommand'> &
+    VisitorInput<Methods, 'visitDropCommand'> &
+    VisitorInput<Methods, 'visitRenameCommand'> &
+    VisitorInput<Methods, 'visitDissectCommand'> &
+    VisitorInput<Methods, 'visitGrokCommand'> &
+    VisitorInput<Methods, 'visitEnrichCommand'> &
+    VisitorInput<Methods, 'visitMvExpandCommand'> &
+    VisitorInput<Methods, 'visitJoinCommand'> &
+    VisitorInput<Methods, 'visitRerankCommand'> &
+    VisitorInput<Methods, 'visitChangePointCommand'>
+>;
 
 /**
  * Input that satisfies any command visitor output constraints.
