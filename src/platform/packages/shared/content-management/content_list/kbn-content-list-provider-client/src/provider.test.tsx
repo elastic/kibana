@@ -65,7 +65,7 @@ describe('ContentListClientProvider', () => {
   const createMockCore = (pageSize = 20): ContentListKibanaCore =>
     ({
       uiSettings: { get: jest.fn(() => pageSize) },
-    } as unknown as ContentListKibanaCore);
+    }) as unknown as ContentListKibanaCore;
 
   const createMockServices = (): ContentListClientServices => ({});
 

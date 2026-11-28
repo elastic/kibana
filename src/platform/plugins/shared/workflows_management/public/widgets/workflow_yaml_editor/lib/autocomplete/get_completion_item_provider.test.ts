@@ -64,7 +64,7 @@ describe('getCompletionItemProvider', () => {
       triggerKind: monaco.languages.CompletionTriggerKind.Invoke,
     } as monaco.languages.CompletionContext;
 
-    getState = jest.fn(() => ({} as any));
+    getState = jest.fn(() => ({}) as any);
     (isDeprecatedStepType as jest.Mock).mockReturnValue(false);
   });
 

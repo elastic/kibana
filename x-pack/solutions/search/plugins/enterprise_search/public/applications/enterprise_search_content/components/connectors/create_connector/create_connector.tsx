@@ -196,9 +196,11 @@ export const CreateConnector: React.FC = () => {
             color="subdued"
             paddingSize="l"
             css={css`
-              ${currentStep === 'start'
-                ? `background-image: url(${connectorsBackgroundImage});`
-                : ''}
+              ${
+                currentStep === 'start'
+                  ? `background-image: url(${connectorsBackgroundImage});`
+                  : ''
+              }
               background-size: contain;
               background-repeat: no-repeat;
               background-position: bottom center;

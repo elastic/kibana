@@ -61,7 +61,7 @@ const noMatchGroupsResponse = { aggregations: { email_groups: { buckets: [] } } 
 const createEsClient = () =>
   ({
     search: jest.fn().mockResolvedValue(noEmailsSearchResponse),
-  } as unknown as jest.Mocked<ElasticsearchClient>);
+  }) as unknown as jest.Mocked<ElasticsearchClient>;
 
 const runConfig = async (
   esClient: ElasticsearchClient,

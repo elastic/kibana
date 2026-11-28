@@ -50,9 +50,12 @@ export interface LinksStartDependencies {
   usageCollection?: UsageCollectionStart;
 }
 
-export class LinksPlugin
-  implements Plugin<void, void, LinksSetupDependencies, LinksStartDependencies>
-{
+export class LinksPlugin implements Plugin<
+  void,
+  void,
+  LinksSetupDependencies,
+  LinksStartDependencies
+> {
   constructor() {}
 
   public setup(core: CoreSetup<LinksStartDependencies>, plugins: LinksSetupDependencies) {

@@ -50,9 +50,12 @@ export interface UnifiedDocViewerStartDeps {
   discoverShared: DiscoverSharedPublicStart;
 }
 
-export class UnifiedDocViewerPublicPlugin
-  implements Plugin<UnifiedDocViewerSetup, UnifiedDocViewerStart, {}, UnifiedDocViewerStartDeps>
-{
+export class UnifiedDocViewerPublicPlugin implements Plugin<
+  UnifiedDocViewerSetup,
+  UnifiedDocViewerStart,
+  {},
+  UnifiedDocViewerStartDeps
+> {
   private docViewsRegistry = new DocViewsRegistry();
 
   public setup(core: CoreSetup<UnifiedDocViewerStartDeps, UnifiedDocViewerStart>) {

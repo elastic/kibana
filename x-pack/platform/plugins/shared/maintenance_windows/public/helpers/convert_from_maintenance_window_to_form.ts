@@ -41,8 +41,8 @@ export const convertFromMaintenanceWindowToForm = (
   const ends = rRule.until
     ? RecurrenceEnd.ON_DATE
     : rRule.count
-    ? RecurrenceEnd.AFTER_X
-    : RecurrenceEnd.NEVER;
+      ? RecurrenceEnd.AFTER_X
+      : RecurrenceEnd.NEVER;
 
   const recurringSchedule: RecurringSchedule = {
     frequency: isCustomFrequency ? 'CUSTOM' : frequency,

@@ -19,7 +19,7 @@ interface Props {
 export const IntegrationTile = ({ tile }: Props) => {
   const history = useHistory();
   const { euiTheme, colorMode } = useEuiTheme();
-  const resolvedLogo = colorMode === 'DARK' ? tile.darkLogo ?? tile.logo : tile.logo;
+  const resolvedLogo = colorMode === 'DARK' ? (tile.darkLogo ?? tile.logo) : tile.logo;
   const routeNavigation = tile.route ? reactRouterNavigate(history, tile.route) : undefined;
 
   return (

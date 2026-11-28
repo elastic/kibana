@@ -67,7 +67,7 @@ const createMockState = (overrides: Partial<EntityURLStateResult> = {}): EntityU
     onSort: jest.fn(),
     onChangePage: jest.fn(),
     ...overrides,
-  } as EntityURLStateResult);
+  }) as EntityURLStateResult;
 
 describe('buildResolutionGroupingQuery', () => {
   const defaultParams = {

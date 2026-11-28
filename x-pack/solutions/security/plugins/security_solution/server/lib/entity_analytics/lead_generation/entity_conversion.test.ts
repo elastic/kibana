@@ -16,7 +16,7 @@ import {
 type EntityRecord = Parameters<typeof entityRecordToLeadEntity>[0];
 
 const buildRecord = (entity: EntityRecord['entity'] | undefined): EntityRecord =>
-  ({ entity } as unknown as EntityRecord);
+  ({ entity }) as unknown as EntityRecord;
 
 describe('entityRecordToLeadEntity', () => {
   it('returns a LeadEntity with id, type, and name when the record has an EUID', () => {

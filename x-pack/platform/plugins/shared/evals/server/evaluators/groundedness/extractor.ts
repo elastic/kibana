@@ -23,7 +23,10 @@ interface GroundednessEvidence {
 }
 
 export class IncompleteGroundednessEvidenceError extends Error {
-  constructor(public readonly evidence: GroundednessEvidence, options?: { cause?: unknown }) {
+  constructor(
+    public readonly evidence: GroundednessEvidence,
+    options?: { cause?: unknown }
+  ) {
     super('Groundedness evidence may be incomplete', options);
     this.name = 'IncompleteGroundednessEvidenceError';
   }

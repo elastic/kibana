@@ -58,7 +58,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
   const [expandedRuleId, setExpandedRuleId] = useState<string | null>(null);
   const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
 
-  const expandedRule = expandedRuleId ? items.find((r) => r.id === expandedRuleId) ?? null : null;
+  const expandedRule = expandedRuleId ? (items.find((r) => r.id === expandedRuleId) ?? null) : null;
 
   const deleteRuleMutation = useDeleteRule();
   const bulkDeleteMutation = useBulkDeleteRules();

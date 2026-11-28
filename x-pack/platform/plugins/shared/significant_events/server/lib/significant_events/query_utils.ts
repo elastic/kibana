@@ -14,7 +14,10 @@ export interface BulkCreateOptions {
 }
 
 export class BulkCreateOperationError extends Error {
-  constructor(message: string, public response: BulkResponse) {
+  constructor(
+    message: string,
+    public response: BulkResponse
+  ) {
     super(message);
     this.name = 'BulkCreateOperationError';
   }

@@ -34,7 +34,7 @@ const mockActivateFormSync = jest.fn();
 
 const getCapturedAttachment = (): UseAgentBuilderAttachmentParams => {
   const [attachment] = mockUseAgentBuilderAttachment.mock.calls[0] as [
-    UseAgentBuilderAttachmentParams
+    UseAgentBuilderAttachmentParams,
   ];
   return attachment;
 };

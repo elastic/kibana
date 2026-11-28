@@ -19,7 +19,7 @@ const mockAggregationResponse = (buckets: Array<{ key: string; doc_count: number
     aggregations: {
       schedule_intervals: { sum_other_doc_count: 0, buckets },
     },
-  } as unknown as Awaited<ReturnType<SavedObjectsClientContract['find']>>);
+  }) as unknown as Awaited<ReturnType<SavedObjectsClientContract['find']>>;
 
 describe('RulesSavedObjectService', () => {
   let rulesSavedObjectService: RulesSavedObjectService;

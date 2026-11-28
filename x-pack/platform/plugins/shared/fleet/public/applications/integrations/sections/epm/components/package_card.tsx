@@ -243,17 +243,19 @@ export function PackageCard({
 
           [class*='euiCard__description'] {
             flex-grow: 1;
-            ${descriptionLineClamp
-              ? installationStatusVisible
-                ? getLineClampStyles(1) // Show only one line of description if installation status is shown
-                : getLineClampStyles(descriptionLineClamp)
-              : ''}
+            ${
+              descriptionLineClamp
+                ? installationStatusVisible
+                  ? getLineClampStyles(1) // Show only one line of description if installation status is shown
+                  : getLineClampStyles(descriptionLineClamp)
+                : ''
+            }
           }
 
           [class*='euiCard__titleButton'] {
-            width: ${installationStatusVisible
-              ? `calc(100% - ${theme.euiTheme.base * 4}px)`
-              : '100%'};
+            width: ${
+              installationStatusVisible ? `calc(100% - ${theme.euiTheme.base * 4}px)` : '100%'
+            };
             ${getLineClampStyles(titleLineClamp)}
           }
 
@@ -292,9 +294,9 @@ export function PackageCard({
           gutterSize="xs"
           wrap={true}
           css={css`
-            width: ${installationStatusVisible
-              ? `calc(100% - ${theme.euiTheme.base * 4}px)`
-              : '100%'};
+            width: ${
+              installationStatusVisible ? `calc(100% - ${theme.euiTheme.base * 4}px)` : '100%'
+            };
             overflow-x: hidden;
             text-overflow: ellipsis;
 
@@ -302,11 +304,13 @@ export function PackageCard({
               min-width: 0;
             }
 
-            ${isCollectionCard
-              ? `& > .euiFlexItem:last-child {
+            ${
+              isCollectionCard
+                ? `& > .euiFlexItem:last-child {
               min-width: auto;
             }`
-              : ''}
+                : ''
+            }
           `}
         >
           {showLabels && extraLabelsBadges ? extraLabelsBadges : null}

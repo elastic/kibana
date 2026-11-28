@@ -94,16 +94,16 @@ export const AlertProcessingKeyInsight: React.FC<Props> = ({ valueMetrics }) => 
               {isFilteredAll
                 ? i18n.FILTERED_ALERTS_2_NONE
                 : isFilteredNone
-                ? i18n.FILTERED_ALERTS_2_ALL
-                : i18n.FILTERED_ALERTS_2}
+                  ? i18n.FILTERED_ALERTS_2_ALL
+                  : i18n.FILTERED_ALERTS_2}
             </li>
             <li>
               <strong>
                 {(isEscalatedAll
                   ? i18n.ESCALATED_ALERTS_1_ALL
                   : isEscalatedNone
-                  ? i18n.ESCALATED_ALERTS_1_NONE
-                  : i18n.ESCALATED_ALERTS_1)({
+                    ? i18n.ESCALATED_ALERTS_1_NONE
+                    : i18n.ESCALATED_ALERTS_1)({
                   percentage: escalatedPercentage,
                   count: escalatedCount,
                 })}
@@ -111,8 +111,8 @@ export const AlertProcessingKeyInsight: React.FC<Props> = ({ valueMetrics }) => 
               {isEscalatedAll
                 ? i18n.ESCALATED_ALERTS_2_ALL
                 : isEscalatedNone
-                ? i18n.ESCALATED_ALERTS_2_NONE
-                : i18n.ESCALATED_ALERTS_2}
+                  ? i18n.ESCALATED_ALERTS_2_NONE
+                  : i18n.ESCALATED_ALERTS_2}
             </li>
           </ul>
           <EuiHorizontalRule />

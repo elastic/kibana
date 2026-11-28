@@ -41,7 +41,7 @@ const makeYamlChangedEvent = (payload: Record<string, unknown>): BrowserChatEven
       custom_event: WORKFLOW_YAML_CHANGED_EVENT,
       data: payload,
     },
-  } as unknown as BrowserChatEvent);
+  }) as unknown as BrowserChatEvent;
 
 const createMockEditor = (initialValue: string) => {
   let content = initialValue;

@@ -18,7 +18,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 export interface UseCancellableSearch {
   runRequest: <
     RequestBody extends IKibanaSearchRequest,
-    ResponseType extends IKibanaSearchResponse
+    ResponseType extends IKibanaSearchResponse,
   >(
     requestBody: RequestBody,
     options?: ISearchOptions

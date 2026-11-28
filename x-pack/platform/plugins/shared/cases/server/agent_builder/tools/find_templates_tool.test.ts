@@ -15,7 +15,7 @@ const buildToolContext = (): ToolHandlerContext =>
     request: httpServerMock.createKibanaRequest(),
     spaceId: 'default',
     logger: loggingSystemMock.createLogger(),
-  } as unknown as ToolHandlerContext);
+  }) as unknown as ToolHandlerContext;
 
 const buildTemplate = (overrides: Record<string, unknown> = {}) => ({
   templateId: 'template-1',

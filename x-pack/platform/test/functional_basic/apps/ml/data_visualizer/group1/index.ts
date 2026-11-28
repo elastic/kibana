@@ -38,9 +38,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
     // The file data visualizer should work the same as with a trial license
     loadTestFile(
-      require.resolve(
-        '../../../../../functional/apps/ml/data_visualizer/group2/file_data_visualizer'
-      )
+      require.resolve('../../../../../functional/apps/ml/data_visualizer/group2/file_data_visualizer')
     );
   });
 }

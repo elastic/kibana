@@ -770,8 +770,8 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                         .join(` ${andThresholdText} `)}
                       isActive={Boolean(
                         watchThresholdPopoverOpen ||
-                          errors.threshold0.length ||
-                          (errors.threshold1 && errors.threshold1.length)
+                        errors.threshold0.length ||
+                        (errors.threshold1 && errors.threshold1.length)
                       )}
                       onClick={() => {
                         setWatchThresholdPopoverOpen(true);

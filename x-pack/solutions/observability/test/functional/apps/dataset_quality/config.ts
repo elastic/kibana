@@ -11,19 +11,15 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 
 import type { FtrProviderContext as InheritedFtrProviderContext } from '../../ftr_provider_context';
 
-export type InheritedServices = InheritedFtrProviderContext extends GenericFtrProviderContext<
-  infer TServices,
-  {}
->
-  ? TServices
-  : {};
+export type InheritedServices =
+  InheritedFtrProviderContext extends GenericFtrProviderContext<infer TServices, {}>
+    ? TServices
+    : {};
 
-export type InheritedPageObjects = InheritedFtrProviderContext extends GenericFtrProviderContext<
-  infer TServices,
-  infer TPageObjects
->
-  ? TPageObjects
-  : {};
+export type InheritedPageObjects =
+  InheritedFtrProviderContext extends GenericFtrProviderContext<infer TServices, infer TPageObjects>
+    ? TPageObjects
+    : {};
 
 interface DatasetQualityConfig {
   services: InheritedServices & {

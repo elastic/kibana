@@ -54,7 +54,7 @@ export function getFieldDisplayValueFromFilter(
     (f: DataViewFieldBase | DataViewField) => f.name === fieldName
   );
 
-  return field && 'customLabel' in field ? (field as DataViewField).customLabel ?? '' : '';
+  return field && 'customLabel' in field ? ((field as DataViewField).customLabel ?? '') : '';
 }
 
 export function getDisplayValueFromFilter(filter: Filter, indexPatterns: DataViewBase[]): string {

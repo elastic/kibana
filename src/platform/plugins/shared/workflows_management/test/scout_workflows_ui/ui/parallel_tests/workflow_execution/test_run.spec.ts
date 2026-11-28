@@ -216,15 +216,13 @@ test.describe('Workflow execution - Test runs', { tag: [...tags.stateful.classic
 
     await pageObjects.workflowExecution.expandStepsTree();
     await pageObjects.workflowExecution.getStep('log_event').then((step) => step.click());
-    const logEventStepOutput = await pageObjects.workflowExecution.getStepResultJson<string>(
-      'output'
-    );
+    const logEventStepOutput =
+      await pageObjects.workflowExecution.getStepResultJson<string>('output');
     expect(JSON.parse(logEventStepOutput)).toStrictEqual(testEvent);
 
     await pageObjects.workflowExecution.getStep('log_inputs').then((step) => step.click());
-    const logInputsStepOutput = await pageObjects.workflowExecution.getStepResultJson<string>(
-      'output'
-    );
+    const logInputsStepOutput =
+      await pageObjects.workflowExecution.getStepResultJson<string>('output');
     expect(JSON.parse(logInputsStepOutput)).toStrictEqual(testInputs);
   });
 });

@@ -222,7 +222,7 @@ describe('TaskClaiming', () => {
           },
           updateByQuery: store.updateByQuery.mock.calls[0] as [
             UpdateByQuerySearchOpts,
-            UpdateByQueryOpts
+            UpdateByQueryOpts,
           ],
         },
       };

@@ -298,8 +298,8 @@ export function savedObjectEvent({
   const message = error
     ? `Failed attempt to ${present} ${doc}`
     : outcome === 'unknown'
-    ? `User is ${progressive} ${doc}`
-    : `User has ${past} ${doc}`;
+      ? `User is ${progressive} ${doc}`
+      : `User has ${past} ${doc}`;
   const type = savedObjectAuditTypes[action];
 
   if (
@@ -374,8 +374,8 @@ export function spaceAuditEvent({
   const message = error
     ? `Failed attempt to ${present} ${doc}`
     : outcome === 'unknown'
-    ? `User is ${progressive} ${doc}`
-    : `User has ${past} ${doc}`;
+      ? `User is ${progressive} ${doc}`
+      : `User has ${past} ${doc}`;
   const type = spaceAuditTypes[action];
 
   return {

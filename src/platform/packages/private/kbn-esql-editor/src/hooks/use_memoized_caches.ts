@@ -50,7 +50,7 @@ export const useMemoizedCaches = ({
             signal?: AbortSignal;
             dropNullColumns?: boolean;
             variables?: ESQLControlVariable[];
-          }
+          },
         ]
       ) => ({
         timestamp: Date.now(),
@@ -75,7 +75,7 @@ export const useMemoizedCaches = ({
           CoreStart,
           (() => Promise<ILicense | undefined>) | undefined,
           ((sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>) | undefined,
-          AbortSignal | undefined
+          AbortSignal | undefined,
         ]
       ) => ({
         timestamp: Date.now(),

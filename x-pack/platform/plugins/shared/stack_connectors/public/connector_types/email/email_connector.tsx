@@ -397,7 +397,7 @@ const getDefaultService = ({
 
   const defaultService = hasAll
     ? AdditionalEmailServices.OTHER
-    : (foundService?.value as string) ?? '';
+    : ((foundService?.value as string) ?? '');
 
   return defaultService;
 };

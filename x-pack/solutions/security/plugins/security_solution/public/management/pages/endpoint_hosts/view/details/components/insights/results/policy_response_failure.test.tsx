@@ -24,7 +24,7 @@ const baseInsight = (
     metadata: {
       display_name: 'Failed to configure malware protection',
     },
-  } as unknown as SecurityWorkflowInsight);
+  }) as unknown as SecurityWorkflowInsight;
 
 const getRemediationButton = () => screen.getByTestId('workflowInsightsResult-0-remediation');
 

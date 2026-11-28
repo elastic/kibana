@@ -35,21 +35,19 @@ const makeTaskInstance = () => {
 
 describe('createUiamProvisioningTaskRunner', () => {
   it('returns state and runAt and strips telemetry; reports event with telemetry', async () => {
-    const runTask = jest.fn(
-      async (): Promise<UiamProvisioningRunTaskOutcome> => ({
-        state: { runs: 3 },
-        runAt: new Date('2026-01-01T00:00:00.000Z'),
-        telemetry: {
-          total: 1,
-          completed: 1,
-          failed: 0,
-          skipped: 0,
-          has_error: false,
-          has_more_to_provision: false,
-          run_number: 3,
-        },
-      })
-    );
+    const runTask = jest.fn(async (): Promise<UiamProvisioningRunTaskOutcome> => ({
+      state: { runs: 3 },
+      runAt: new Date('2026-01-01T00:00:00.000Z'),
+      telemetry: {
+        total: 1,
+        completed: 1,
+        failed: 0,
+        skipped: 0,
+        has_error: false,
+        has_more_to_provision: false,
+        run_number: 3,
+      },
+    }));
     const reportProvisioningRunEvent = jest.fn();
     const runnerFactory = createUiamProvisioningTaskRunner(
       {} as CoreSetup<TaskManagerPluginsStart, TaskManagerStartContract>,

@@ -47,7 +47,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
   const [activeFlyoutServiceId, setActiveFlyoutServiceId] = useState<string | null>(null);
 
   const activeFlyoutService = activeFlyoutServiceId
-    ? selectedServices.find((s) => s.id === activeFlyoutServiceId) ?? null
+    ? (selectedServices.find((s) => s.id === activeFlyoutServiceId) ?? null)
     : null;
 
   const handleTransportChange = (serviceId: string) => (transport: TransportType) => {

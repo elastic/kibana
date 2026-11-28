@@ -147,10 +147,10 @@ export function distributedTrace(): SynthtraceGenerator<ApmFields> {
   const wrapEvents = (events: Array<Serializable<ApmFields>>): Array<Serializable<ApmFields>> =>
     events
       .flatMap((e) => e.serialize())
-      .map((fields) => ({ fields, serialize: () => [fields] } as Serializable<ApmFields>));
+      .map((fields) => ({ fields, serialize: () => [fields] }) as Serializable<ApmFields>);
 
   const wrapFields = (fields: ApmFields[]): Array<Serializable<ApmFields>> =>
-    fields.map((f) => ({ fields: f, serialize: () => [f] } as Serializable<ApmFields>));
+    fields.map((f) => ({ fields: f, serialize: () => [f] }) as Serializable<ApmFields>);
 
   const allEvents = [...wrapEvents(traceEvents), ...wrapFields(errorDocs)];
 

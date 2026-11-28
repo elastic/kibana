@@ -651,8 +651,8 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
         const columnNameOrIndex = columnNamesOrIndexes.includes(columnName)
           ? columnName
           : columnNamesOrIndexes.includes(columnIndex)
-          ? columnIndex
-          : undefined;
+            ? columnIndex
+            : undefined;
 
         if (columnNameOrIndex) {
           const headerElement = thWrapper;

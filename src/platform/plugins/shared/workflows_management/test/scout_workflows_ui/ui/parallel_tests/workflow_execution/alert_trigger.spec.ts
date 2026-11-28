@@ -213,9 +213,8 @@ test.describe.skip(
         );
         await logEachAlertButton.click();
 
-        const alertOutput = await pageObjects.workflowExecution.getStepResultJson<unknown>(
-          'output'
-        );
+        const alertOutput =
+          await pageObjects.workflowExecution.getStepResultJson<unknown>('output');
         iterationOutputs.push(JSON.stringify(alertOutput));
       }
 

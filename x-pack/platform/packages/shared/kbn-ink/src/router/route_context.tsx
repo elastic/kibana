@@ -10,7 +10,7 @@ import { BehaviorSubject, map } from 'rxjs';
 import type { ActiveRouteObject, RouteHandle } from './types';
 
 interface InkRouteTopLevelContext<
-  THandle extends RouteHandle | undefined = RouteHandle | undefined
+  THandle extends RouteHandle | undefined = RouteHandle | undefined,
 > {
   active$: Observable<ActiveRouteObject<THandle>[]>;
   register(entry: ActiveRouteObject<THandle>): () => void;
@@ -35,7 +35,7 @@ function createAPI(): InkRouteTopLevelContext {
  * @internal
  */
 export function useInkRouteContext<
-  THandle extends RouteHandle | undefined = RouteHandle | undefined
+  THandle extends RouteHandle | undefined = RouteHandle | undefined,
 >(): InkRouteTopLevelContext<THandle>;
 
 export function useInkRouteContext(): InkRouteTopLevelContext {

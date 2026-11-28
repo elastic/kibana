@@ -38,7 +38,7 @@ export type MigrationsRunning<
   I extends ItemDocument = ItemDocument,
   P extends object = {},
   C extends object = {},
-  O extends object = {}
+  O extends object = {},
 > = Map<string, SiemMigrationTaskRunner<M, I, P, C, O>>;
 
 export abstract class SiemMigrationsTaskClient<
@@ -46,7 +46,7 @@ export abstract class SiemMigrationsTaskClient<
   I extends ItemDocument = ItemDocument,
   P extends object = {}, // The migration task input parameters schema
   C extends object = {}, // The migration task config schema
-  O extends object = {} // The migration task output schema
+  O extends object = {}, // The migration task output schema
 > {
   protected abstract readonly TaskRunnerClass: SiemTaskRunnerConstructor<M, I, P, C, O>;
   protected abstract readonly EvaluatorClass?: SiemMigrationEvaluatorConstructor<M, I, P, C, O>;

@@ -52,7 +52,7 @@ describe('UpdateAgentTagsActionRunner', () => {
   let soClient: jest.Mocked<SavedObjectsClientContract>;
 
   const agentsOf = (count: number) =>
-    Array.from({ length: count }, (_, index) => ({ id: `agent${index}` } as Agent));
+    Array.from({ length: count }, (_, index) => ({ id: `agent${index}` }) as Agent);
   const runnerFor = (params: { spaceId?: string; total?: number } = {}) =>
     new TestRunner(
       esClient,

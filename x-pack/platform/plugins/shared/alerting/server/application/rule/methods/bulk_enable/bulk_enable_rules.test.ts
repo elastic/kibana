@@ -127,7 +127,7 @@ beforeEach(() => {
       ({
         tasks: [],
         errors: [],
-      } as unknown as BulkUpdateTaskResult)
+      }) as unknown as BulkUpdateTaskResult
   );
   (auditLogger.log as jest.Mock).mockClear();
   (bulkMigrateLegacyActions as jest.Mock).mockResolvedValue([]);
@@ -990,7 +990,7 @@ describe('bulkEnableRules', () => {
           ({
             tasks: [{ id: 'id1' }],
             errors: [],
-          } as unknown as BulkUpdateTaskResult)
+          }) as unknown as BulkUpdateTaskResult
       );
 
       await rulesClient.bulkEnableRules({ filter: 'fake_filter' });

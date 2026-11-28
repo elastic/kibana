@@ -11,9 +11,12 @@ import type { FleetStartContract } from '@kbn/fleet-plugin/server';
 import type { IngestHubServerSetupDeps, IngestHubServerStartDeps } from './types';
 import { registerIamPermissionsRoute } from './routes/iam_permissions';
 
-export class IngestHubPlugin
-  implements Plugin<void, void, IngestHubServerSetupDeps, IngestHubServerStartDeps>
-{
+export class IngestHubPlugin implements Plugin<
+  void,
+  void,
+  IngestHubServerSetupDeps,
+  IngestHubServerStartDeps
+> {
   private fleetStart: FleetStartContract | undefined;
   private readonly initializerContext: PluginInitializerContext;
 

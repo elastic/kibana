@@ -118,13 +118,15 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
   };
 
   const buttonCss = css`
-    background-color: ${isPopoverOpen
-      ? getIsSelectedColor({
-          color: 'text',
-          euiTheme,
-          isFilled: false,
-        })
-      : undefined};
+    background-color: ${
+      isPopoverOpen
+        ? getIsSelectedColor({
+            color: 'text',
+            euiTheme,
+            isFilled: false,
+          })
+        : undefined
+    };
   `;
 
   const buttonComponent = splitButtonProps ? (

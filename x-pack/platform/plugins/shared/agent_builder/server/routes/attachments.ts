@@ -195,9 +195,8 @@ export function registerAttachmentRoutes({
           savedObjectsClient: coreStart.savedObjects.getScopedClient(request),
         };
 
-        const staleResults = await stateManager.evaluateStalenessForActiveAttachments(
-          resolveContext
-        );
+        const staleResults =
+          await stateManager.evaluateStalenessForActiveAttachments(resolveContext);
         const staleCount = staleResults.filter((result) => result.is_stale).length;
         for (const result of staleResults) {
           if (!result.is_stale && result.error) {

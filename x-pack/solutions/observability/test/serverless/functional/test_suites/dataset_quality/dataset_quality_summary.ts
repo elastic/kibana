@@ -64,9 +64,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.datasetQuality.refreshTable();
       // Sometimes the summary flashes with wrong count, retry to stabilize. This should be fixed at the root, but for now we retry.
       await retry.try(async () => {
-        const summary = await PageObjects.datasetQuality.parseSummaryPanel(
-          excludeKeysFromServerless
-        );
+        const summary =
+          await PageObjects.datasetQuality.parseSummaryPanel(excludeKeysFromServerless);
         expect(summary).to.eql({
           datasetHealthPoor: '0',
           datasetHealthDegraded: '0',

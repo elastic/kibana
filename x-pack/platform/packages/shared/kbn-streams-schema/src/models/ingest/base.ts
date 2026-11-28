@@ -86,7 +86,7 @@ export const IngestBase: Validation<unknown, IngestBase> = validation(
 type OmitIngestBaseUpsertProps<
   T extends {
     processing: Omit<IngestStreamProcessing, 'updated_at'> & { updated_at?: string };
-  }
+  },
 > = Omit<T, 'processing'> & {
   processing: StrictOmit<IngestBase['processing'], 'updated_at'>;
 };
@@ -114,11 +114,11 @@ export namespace IngestBaseStream {
   }
 
   export type Source<
-    TDefinition extends IngestBaseStream.Definition = IngestBaseStream.Definition
+    TDefinition extends IngestBaseStream.Definition = IngestBaseStream.Definition,
   > = BaseStream.Source<TDefinition>;
 
   export interface GetResponse<
-    TDefinition extends IngestBaseStream.Definition = IngestBaseStream.Definition
+    TDefinition extends IngestBaseStream.Definition = IngestBaseStream.Definition,
   > extends BaseStream.GetResponse<TDefinition> {
     privileges: IngestStreamPrivileges;
     index_mode?: IngestStreamIndexMode;
@@ -126,7 +126,8 @@ export namespace IngestBaseStream {
   }
 
   export type UpsertRequest<
-    TDefinition extends OmitIngestBaseStreamUpsertProps<IngestBaseStream.Definition> = OmitIngestBaseStreamUpsertProps<IngestBaseStream.Definition>
+    TDefinition extends OmitIngestBaseStreamUpsertProps<IngestBaseStream.Definition> =
+      OmitIngestBaseStreamUpsertProps<IngestBaseStream.Definition>,
   > = BaseStream.UpsertRequest<TDefinition>;
 
   export interface Model {
@@ -142,7 +143,7 @@ type OmitIngestBaseStreamUpsertProps<
     ingest: Omit<IngestBase, 'processing'> & {
       processing: Omit<IngestBase['processing'], 'updated_at'> & { updated_at?: string };
     };
-  }
+  },
 > = Omit<T, 'ingest'> & {
   ingest: Omit<IngestBase, 'processing'> & {
     processing: Omit<IngestBase['processing'], 'updated_at'> & { updated_at?: never };

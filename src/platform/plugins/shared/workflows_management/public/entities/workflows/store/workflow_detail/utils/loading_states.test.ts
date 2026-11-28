@@ -24,7 +24,7 @@ jest.mock('../../../../../shared/lib/query_client', () => ({
 
 type MatcherEntry = [
   (action: Action) => boolean,
-  (state: WorkflowDetailState, action: Action) => void
+  (state: WorkflowDetailState, action: Action) => void,
 ];
 
 interface MockBuilder {

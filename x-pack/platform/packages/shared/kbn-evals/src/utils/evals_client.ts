@@ -156,7 +156,10 @@ const buildExperimentQuery = (options?: GetExperimentFilters) => ({
 const VERSIONED_HEADERS = { 'elastic-api-version': API_VERSIONS.internal.v1 };
 
 export class EvalsClient {
-  constructor(private readonly kbnClient: KbnClient, private readonly log: SomeDevLog) {}
+  constructor(
+    private readonly kbnClient: KbnClient,
+    private readonly log: SomeDevLog
+  ) {}
 
   async ingestScores(request: IngestScoresRequestBodyInput): Promise<IngestScoresResult> {
     const body = IngestScoresRequestBody.parse(request);

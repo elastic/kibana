@@ -18,11 +18,10 @@ import {
 import { css } from '@emotion/react';
 import { usePushFlyoutFocus } from '@kbn/data-lifecycle-phases';
 
-export interface LifecycleFlyoutProps
-  extends Pick<
-    EuiFlyoutProps,
-    'onClose' | 'size' | 'type' | 'ownFocus' | 'paddingSize' | 'aria-labelledby'
-  > {
+export interface LifecycleFlyoutProps extends Pick<
+  EuiFlyoutProps,
+  'onClose' | 'size' | 'type' | 'ownFocus' | 'paddingSize' | 'aria-labelledby'
+> {
   titleId: string;
   title: string;
   headerContent?: React.ReactNode;

@@ -47,7 +47,7 @@ export function useIntegrationTiles(): IntegrationCardItem[] {
 
   return useMemo(() => {
     return INTEGRATION_TILES.flatMap((category) => category.tiles).map((tile) => {
-      const resolvedLogo = colorMode === 'DARK' ? tile.darkLogo ?? tile.logo : tile.logo;
+      const resolvedLogo = colorMode === 'DARK' ? (tile.darkLogo ?? tile.logo) : tile.logo;
       return {
         id: `quickstart-${tile.id}`,
         name: tile.id,

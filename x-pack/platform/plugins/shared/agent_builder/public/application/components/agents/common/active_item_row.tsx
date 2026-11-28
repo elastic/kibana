@@ -53,9 +53,9 @@ export const ActiveItemRow: React.FC<ActiveItemRowProps> = ({
     padding: ${euiTheme.size.s} ${euiTheme.size.m};
     cursor: pointer;
     border-radius: ${euiTheme.border.radius.medium};
-    background-color: ${isSelected
-      ? euiTheme.colors.backgroundBaseInteractiveHover
-      : 'transparent'};
+    background-color: ${
+      isSelected ? euiTheme.colors.backgroundBaseInteractiveHover : 'transparent'
+    };
     &:hover {
       background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
     }
@@ -91,9 +91,9 @@ export const ActiveItemRow: React.FC<ActiveItemRowProps> = ({
         <EuiText
           size="s"
           css={css`
-            font-weight: ${isSelected
-              ? euiTheme.font.weight.semiBold
-              : euiTheme.font.weight.regular};
+            font-weight: ${
+              isSelected ? euiTheme.font.weight.semiBold : euiTheme.font.weight.regular
+            };
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;

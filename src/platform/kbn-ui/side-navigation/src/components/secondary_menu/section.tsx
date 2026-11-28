@@ -31,15 +31,16 @@ export const SecondaryMenuSectionComponent = ({
     position: relative;
 
     &:not(:last-child) {
-      ${highContrastMode
-        ? `
+      ${
+        highContrastMode
+          ? `
         border-bottom: ${euiTheme.border.width.thin} solid ${euiTheme.border.color};
         margin-left: ${euiTheme.size.m};
         margin-right: ${euiTheme.size.m};
         padding-left: 0;
         padding-right: 0;
       `
-        : `
+          : `
         &::after {
           content: '';
           position: absolute;
@@ -49,7 +50,8 @@ export const SecondaryMenuSectionComponent = ({
           height: ${euiTheme.border.width.thin};
           background-color: ${euiTheme.colors.borderBaseSubdued};
         }
-      `}
+      `
+      }
     }
   `;
 

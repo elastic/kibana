@@ -104,4 +104,4 @@ export const createMockAppContext = (): AppDependencies =>
       enableTogglingDataRetention: true,
       isServerless: false,
     },
-  } as unknown as AppDependencies);
+  }) as unknown as AppDependencies;

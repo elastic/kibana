@@ -42,7 +42,7 @@ export const scriptSchema = schema.maybe(
 
 export const primitiveTypeSchema = schema.oneOf(
   PRIMITIVE_RUNTIME_FIELD_TYPES.map((type) => schema.literal(type)) as [
-    Type<(typeof PRIMITIVE_RUNTIME_FIELD_TYPES)[number]>
+    Type<(typeof PRIMITIVE_RUNTIME_FIELD_TYPES)[number]>,
   ],
   {
     meta: {

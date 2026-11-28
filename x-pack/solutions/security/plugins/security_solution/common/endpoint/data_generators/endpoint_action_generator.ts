@@ -53,7 +53,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
   generate<
     TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
     TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-    TMeta extends {} = {}
+    TMeta extends {} = {},
   >(
     overrides: DeepPartial<LogsEndpointAction<TParameters, TOutputContent, TMeta>> = {}
   ): LogsEndpointAction<TParameters, TOutputContent, TMeta> {
@@ -101,7 +101,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
   generateActionEsHit<
     TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
     TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-    TMeta extends {} = {}
+    TMeta extends {} = {},
   >(
     overrides: DeepPartial<LogsEndpointAction<TParameters, TOutputContent, TMeta>> = {}
   ): estypes.SearchHit<LogsEndpointAction<TParameters, TOutputContent, TMeta>> {
@@ -112,7 +112,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
 
   /** Generates an endpoint action response */
   generateResponse<
-    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
   >(
     overrides: DeepPartial<LogsEndpointActionResponse<TOutputContent>> = {}
   ): LogsEndpointActionResponse<TOutputContent> {
@@ -266,7 +266,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
 
   generateActionDetails<
     TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-    TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
+    TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
   >({
     agents: overrideAgents,
     command: overrideCommand,
@@ -284,10 +284,13 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       agentType: 'endpoint',
       command,
       completedAt: '2022-04-30T16:08:47.449Z',
-      hosts: agents.reduce((acc, agentId) => {
-        acc[agentId] = { name: `Host-${agentId}` };
-        return acc;
-      }, {} as ActionDetails['hosts']),
+      hosts: agents.reduce(
+        (acc, agentId) => {
+          acc[agentId] = { name: `Host-${agentId}` };
+          return acc;
+        },
+        {} as ActionDetails['hosts']
+      ),
       id: '123',
       isCompleted: true,
       isExpired: false,
@@ -300,16 +303,19 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       createdBy: 'auserid',
       parameters: undefined,
       outputs: undefined,
-      agentState: agents.reduce((acc, agentId) => {
-        acc[agentId] = {
-          errors: undefined,
-          isCompleted: true,
-          completedAt: '2022-04-30T16:08:47.449Z',
-          wasSuccessful: true,
-          wasCanceled: false,
-        };
-        return acc;
-      }, {} as ActionDetails['agentState']),
+      agentState: agents.reduce(
+        (acc, agentId) => {
+          acc[agentId] = {
+            errors: undefined,
+            isCompleted: true,
+            completedAt: '2022-04-30T16:08:47.449Z',
+            wasSuccessful: true,
+            wasCanceled: false,
+          };
+          return acc;
+        },
+        {} as ActionDetails['agentState']
+      ),
       alertIds: undefined,
       ruleId: undefined,
       ruleName: undefined,
@@ -464,17 +470,20 @@ export class EndpointActionGenerator extends BaseDataGenerator {
     }
 
     if (isProcessesAction(details)) {
-      details.outputs = agents.reduce((acc, agentId) => {
-        acc[agentId] = {
-          type: 'json',
-          content: {
-            code: 'success',
-            entries: this.randomResponseActionProcesses(),
-          },
-        };
+      details.outputs = agents.reduce(
+        (acc, agentId) => {
+          acc[agentId] = {
+            type: 'json',
+            content: {
+              code: 'success',
+              entries: this.randomResponseActionProcesses(),
+            },
+          };
 
-        return acc;
-      }, {} as Required<ActionDetails<GetProcessesActionOutputContent>>['outputs']);
+          return acc;
+        },
+        {} as Required<ActionDetails<GetProcessesActionOutputContent>>['outputs']
+      );
     }
 
     if (isMemoryDumpAction(details)) {
@@ -585,7 +594,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
   }
 
   generateActivityLogActionResponse<
-    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
   >(
     overrides: DeepPartial<EndpointActivityLogActionResponse<TOutputContent>>
   ): EndpointActivityLogActionResponse<TOutputContent> {

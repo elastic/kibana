@@ -365,14 +365,12 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
 
         return [
           ...additionalControls,
-          ...['chartBarVerticalStack', 'heart', 'inspect'].map(
-            (iconType): RowControlColumn => ({
-              id: `exampleControl_${iconType}`,
-              render: (Control, rowProps) => (
-                <ExampleRowControl Control={Control} iconType={iconType} rowProps={rowProps} />
-              ),
-            })
-          ),
+          ...['chartBarVerticalStack', 'heart', 'inspect'].map((iconType): RowControlColumn => ({
+            id: `exampleControl_${iconType}`,
+            render: (Control, rowProps) => (
+              <ExampleRowControl Control={Control} iconType={iconType} rowProps={rowProps} />
+            ),
+          })),
         ];
       },
     getDefaultAppState: () => () => ({
@@ -392,27 +390,26 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
       ],
       rowHeight: 5,
     }),
-    getAdditionalCellActions: (prev) => () =>
-      [
-        ...prev(),
-        {
-          id: 'example-data-source-action',
-          getDisplayName: () => 'Example data source action',
-          getIconType: () => 'plus',
-          execute: () => {
-            alert('Example data source action executed');
-          },
+    getAdditionalCellActions: (prev) => () => [
+      ...prev(),
+      {
+        id: 'example-data-source-action',
+        getDisplayName: () => 'Example data source action',
+        getIconType: () => 'plus',
+        execute: () => {
+          alert('Example data source action executed');
         },
-        {
-          id: 'another-example-data-source-action',
-          getDisplayName: () => 'Another example data source action',
-          getIconType: () => 'minus',
-          execute: () => {
-            alert('Another example data source action executed');
-          },
-          isCompatible: ({ field }) => field.name !== 'message',
+      },
+      {
+        id: 'another-example-data-source-action',
+        getDisplayName: () => 'Another example data source action',
+        getIconType: () => 'minus',
+        execute: () => {
+          alert('Another example data source action executed');
         },
-      ],
+        isCompatible: ({ field }) => field.name !== 'message',
+      },
+    ],
     getPaginationConfig: (prev) => () => ({
       ...prev(),
       paginationMode: 'singlePage',

@@ -44,12 +44,10 @@ export const RemoteClustersForm = () => {
   const { data: remoteClusters, loading: loadingClusters } = useFetcher(async () => {
     try {
       const response = await http?.get<RemoteCluster[]>('/api/remote_clusters');
-      return (response ?? []).map(
-        (cluster): RemoteCluster => ({
-          name: cluster.name,
-          isConnected: cluster.isConnected,
-        })
-      );
+      return (response ?? []).map((cluster): RemoteCluster => ({
+        name: cluster.name,
+        isConnected: cluster.isConnected,
+      }));
     } catch (e) {
       return [] as RemoteCluster[];
     }

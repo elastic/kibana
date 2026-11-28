@@ -15,15 +15,12 @@ import type {
   AgentBuilderVisualizationsPluginPublicStartDependencies,
 } from './types';
 
-export class AgentBuilderVisualizationsPublicPlugin
-  implements
-    Plugin<
-      AgentBuilderVisualizationsPluginPublicSetup,
-      AgentBuilderVisualizationsPluginPublicStart,
-      AgentBuilderVisualizationsPluginPublicSetupDependencies,
-      AgentBuilderVisualizationsPluginPublicStartDependencies
-    >
-{
+export class AgentBuilderVisualizationsPublicPlugin implements Plugin<
+  AgentBuilderVisualizationsPluginPublicSetup,
+  AgentBuilderVisualizationsPluginPublicStart,
+  AgentBuilderVisualizationsPluginPublicSetupDependencies,
+  AgentBuilderVisualizationsPluginPublicStartDependencies
+> {
   constructor(_initContext: PluginInitializerContext) {}
 
   setup(

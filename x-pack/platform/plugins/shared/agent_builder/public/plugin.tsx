@@ -70,15 +70,12 @@ import {
 import { storageKeys } from './application/storage_keys';
 import { AGENTBUILDER_APP_ID } from '../common/features';
 
-export class AgentBuilderPlugin
-  implements
-    Plugin<
-      AgentBuilderPluginSetup,
-      AgentBuilderPluginStart,
-      AgentBuilderSetupDependencies,
-      AgentBuilderStartDependencies
-    >
-{
+export class AgentBuilderPlugin implements Plugin<
+  AgentBuilderPluginSetup,
+  AgentBuilderPluginStart,
+  AgentBuilderSetupDependencies,
+  AgentBuilderStartDependencies
+> {
   logger: Logger;
   private conversationActiveConfig: EmbeddableConversationProps = {};
   private internalServices?: AgentBuilderInternalService;
@@ -253,9 +250,8 @@ export class AgentBuilderPlugin
     setSidebarServices(core, internalServices);
 
     const LazyConfiguredEmbeddableConversation = React.lazy(async () => {
-      const { createEmbeddableConversation } = await import(
-        './embeddable/create_embeddable_conversation'
-      );
+      const { createEmbeddableConversation } =
+        await import('./embeddable/create_embeddable_conversation');
 
       return {
         default: createEmbeddableConversation({
@@ -280,9 +276,8 @@ export class AgentBuilderPlugin
     );
 
     const LazyConfiguredEmbeddableConversationInput = React.lazy(async () => {
-      const { createEmbeddableConversationInput } = await import(
-        './embeddable/create_embeddable_conversation_input'
-      );
+      const { createEmbeddableConversationInput } =
+        await import('./embeddable/create_embeddable_conversation_input');
 
       return {
         default: createEmbeddableConversationInput({

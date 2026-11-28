@@ -565,7 +565,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('classic view table tab', () => {
         it('should restore state for searchValue, pinnedFields when switching tabs', async () => {
-          /* Tab 1 settings: 
+          /* Tab 1 settings:
           // searchValue: "geo", 
           // pinnedFields: ["geo.src"], 
           */
@@ -583,7 +583,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await dataGrid.togglePinActionInFlyout('geo.src');
           expect(await dataGrid.isFieldPinnedInFlyout('geo.src')).to.be(true);
 
-          /* Tab 2 settings: 
+          /* Tab 2 settings:
           // searchValue: ".sr", 
           // pinnedFields: ["geo.srcdest"], 
           // showOnlySelectedFields toggle on
@@ -620,7 +620,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('should restore state for fieldTypeFilters, showSelectedOnly when switching tabs', async () => {
-          /* Tab 1 settings: 
+          /* Tab 1 settings:
           // fieldTypeFilters: date, 
           // showSelectedOnly toggle off, 
           */
@@ -652,7 +652,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             'false'
           );
 
-          /* Tab 2 settings: 
+          /* Tab 2 settings:
           // fieldTypeFilters: number, 
           // showSelectedOnly toggle on,
           */
@@ -706,7 +706,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('should restore state for rowsPerPage and pageNumber when switching tabs', async () => {
-          /* Tab 1 settings: 
+          /* Tab 1 settings:
           // rowsPerPage: 50, 
           // pageNumber 1, 
           */
@@ -732,7 +732,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           );
           expect(await currentPage1.getVisibleText()).to.be('1');
 
-          /* Tab 2 settings: 
+          /* Tab 2 settings:
           // rowsPerPage: 25, 
           // pageNumber 2, 
           */
@@ -788,7 +788,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('ES|QL view table tab', () => {
         it('should restore state for hideNullValues', async () => {
-          /* Tab 1 settings: 
+          /* Tab 1 settings:
           // hideNullValues toggle off,
           */
           await discover.selectTextBaseLang();
@@ -804,7 +804,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           );
           expect(await hideNullValuesSwitchTab1.getAttribute('aria-checked')).to.be('false');
 
-          /* Tab 2 settings: 
+          /* Tab 2 settings:
           // hideNullValues toggle on,
           */
           await unifiedTabs.createNewTab();

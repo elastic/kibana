@@ -30,7 +30,7 @@ import { REF_DATA_KEYS } from '../../../lib/reference_data';
 export const fetchActionRequestById = async <
   TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
   TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-  TMeta extends {} = {}
+  TMeta extends {} = {},
 >(
   endpointService: EndpointAppContextService,
   spaceId: string,

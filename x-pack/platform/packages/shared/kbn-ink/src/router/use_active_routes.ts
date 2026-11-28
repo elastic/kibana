@@ -12,7 +12,7 @@ import type { ActiveRouteObject, RouteHandle } from './types';
  * Returns the currently active (as in, being rendered) routes.
  */
 export function useActiveRoutes<
-  THandle extends RouteHandle | undefined = RouteHandle | undefined
+  THandle extends RouteHandle | undefined = RouteHandle | undefined,
 >(): ActiveRouteObject<THandle>[] {
   const { active$ } = useInkRouteContext<THandle>();
 

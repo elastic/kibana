@@ -19,7 +19,7 @@ const mockRequest = {} as any;
 const makeMockScheduler = (): jest.Mocked<WorkflowTaskScheduler> =>
   ({
     scheduleWorkflowTask: jest.fn().mockResolvedValue('task-1'),
-  } as any);
+  }) as any;
 
 const baseDefinition: WorkflowYaml = {
   triggers: [{ type: 'scheduled', with: { every: '5m' } }, { type: 'manual' }],

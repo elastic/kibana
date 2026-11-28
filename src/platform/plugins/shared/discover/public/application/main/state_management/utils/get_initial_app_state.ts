@@ -98,8 +98,8 @@ function getDefaultColumns(
   return defaultColumnsFromConfig?.length
     ? [...defaultColumnsFromConfig]
     : hasPersistedEmptyColumns
-    ? []
-    : undefined;
+      ? []
+      : undefined;
 }
 
 function getDefaultQuery({
@@ -169,7 +169,7 @@ function getDefaultAppState({
   const sort =
     dataView && 'getFieldByName' in dataView
       ? getSortArray(persistedTab?.sort ?? [], dataView, isEsqlQuery)
-      : persistedTab?.sort ?? [];
+      : (persistedTab?.sort ?? []);
   const columns = getDefaultColumns(persistedTab, uiSettings);
   const chartHidden = getChartHidden(storage, 'discover');
   const tableHidden = getTableHidden(storage, 'discover');

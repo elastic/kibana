@@ -91,7 +91,7 @@ const createMockModel = (content: string = '  message: "{{ steps.search.output.h
     getOffsetAt: jest.fn().mockReturnValue(10),
     getLineContent: jest.fn().mockReturnValue(content),
     getLineDecorations: jest.fn().mockReturnValue([]),
-  } as unknown as monaco.editor.ITextModel);
+  }) as unknown as monaco.editor.ITextModel;
 
 const createMockPosition = (line = 1, column = 25) => new monaco.Position(line, column);
 
@@ -539,7 +539,7 @@ describe('UnifiedHoverProvider - lazy-loading step I/O', () => {
         getYamlDocument: () =>
           ({
             getIn: jest.fn().mockReturnValue(null),
-          } as never),
+          }) as never,
       });
 
       const result = await deprecatedHoverProvider.provideHover(

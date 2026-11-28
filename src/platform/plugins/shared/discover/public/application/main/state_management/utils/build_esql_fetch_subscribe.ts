@@ -188,8 +188,8 @@ export const buildEsqlFetchSubscribe = ({
         const nextColumns = changeDefaultColumns
           ? nextDefaultColumns
           : changeSelectedColumns
-          ? nextSelectedColumns
-          : undefined;
+            ? nextSelectedColumns
+            : undefined;
 
         const nextState = {
           ...(nextColumns && { columns: nextColumns }),

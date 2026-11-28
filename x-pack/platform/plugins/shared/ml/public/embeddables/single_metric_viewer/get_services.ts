@@ -42,9 +42,7 @@ export const getMlServices = async (
     await import('../../application/services/ml_api_service'),
     await import('../../application/services/results_service'),
     await import('../../application/capabilities/check_capabilities'),
-    await import(
-      '../../application/timeseriesexplorer/timeseriesexplorer_utils/time_series_search_service'
-    ),
+    await import('../../application/timeseriesexplorer/timeseriesexplorer_utils/time_series_search_service'),
     await import('../../application/services/toast_notification_service'),
     await import('../../application/services/job_service'),
   ]);

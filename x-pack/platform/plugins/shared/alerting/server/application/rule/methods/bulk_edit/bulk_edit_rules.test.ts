@@ -3664,7 +3664,7 @@ describe('bulkEdit()', () => {
         },
         references: [],
         ...(error ? { error } : {}),
-      } as SavedObject<RawRule>);
+      }) as SavedObject<RawRule>;
 
     const createChangeTrackingService = () => ({
       log: jest.fn().mockResolvedValue(undefined),

@@ -105,9 +105,11 @@ export interface PluginStartDependencies {
 /**
  * Represents Security Plugin instance that will be managed by the Kibana plugin system.
  */
-export class SecurityPlugin
-  implements Plugin<SecurityPluginSetup, SecurityPluginStart, PluginSetupDependencies>
-{
+export class SecurityPlugin implements Plugin<
+  SecurityPluginSetup,
+  SecurityPluginStart,
+  PluginSetupDependencies
+> {
   private readonly logger: Logger;
   private authorizationSetup?: AuthorizationServiceSetupInternal;
   private auditSetup?: AuditServiceSetup;

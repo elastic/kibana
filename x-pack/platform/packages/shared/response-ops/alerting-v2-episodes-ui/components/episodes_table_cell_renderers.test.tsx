@@ -98,7 +98,7 @@ describe('EpisodeRuleCell', () => {
       metadata: { name },
       query: { format: 'standalone', breach: { query: `FROM ${name}` } },
       ...(grouping ? { grouping } : {}),
-    } as unknown as Rule);
+    }) as unknown as Rule;
 
   it('renders a skeleton when rules are loading and cache is empty', () => {
     const row = makeRow({ 'rule.id': 'r1' });

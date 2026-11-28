@@ -363,7 +363,8 @@ const createScanOptionsMock = (
 };
 
 const createRunScriptOptionsMock = <
-  TParams extends RunScriptActionRequestBody['parameters'] = RunScriptActionRequestBody['parameters']
+  TParams extends RunScriptActionRequestBody['parameters'] =
+    RunScriptActionRequestBody['parameters'],
 >(
   overrides: Partial<RunScriptActionRequestBody<TParams>> = {}
 ): RunScriptActionRequestBody<TParams> => {

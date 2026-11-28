@@ -79,14 +79,14 @@ const createMockCoreStart = (): CoreStart =>
   ({
     application: { currentAppId$: new BehaviorSubject<string | null>(null) },
     analytics: { reportEvent: jest.fn() },
-  } as unknown as CoreStart);
+  }) as unknown as CoreStart;
 
 const createMockServices = (): AgentBuilderInternalService =>
   ({
     agentService: { list: jest.fn().mockResolvedValue([]) },
     conversationsService: { get: jest.fn().mockRejectedValue(new Error('not found')) },
     startDependencies: {} as AgentBuilderStartDependencies,
-  } as unknown as AgentBuilderInternalService);
+  }) as unknown as AgentBuilderInternalService;
 
 const createMockAttachment = (overrides: Partial<AttachmentInput> = {}): AttachmentInput => ({
   type: 'test.attachment',

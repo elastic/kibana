@@ -14,15 +14,12 @@ import type {
   DataViewsAsCodeServerPluginStartDependencies,
 } from './types';
 
-export class DataViewsAsCodeServerPlugin
-  implements
-    Plugin<
-      void,
-      void,
-      DataViewsAsCodeServerPluginSetupDependencies,
-      DataViewsAsCodeServerPluginStartDependencies
-    >
-{
+export class DataViewsAsCodeServerPlugin implements Plugin<
+  void,
+  void,
+  DataViewsAsCodeServerPluginSetupDependencies,
+  DataViewsAsCodeServerPluginStartDependencies
+> {
   public setup(core: CoreSetup<DataViewsAsCodeServerPluginStartDependencies, void>) {
     registerRoutes(core);
   }

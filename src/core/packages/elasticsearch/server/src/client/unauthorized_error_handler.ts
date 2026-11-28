@@ -29,8 +29,7 @@ export interface UnauthorizedErrorHandlerResultRetryParams {
 /**
  * @public
  */
-export interface UnauthorizedErrorHandlerRetryResult
-  extends UnauthorizedErrorHandlerResultRetryParams {
+export interface UnauthorizedErrorHandlerRetryResult extends UnauthorizedErrorHandlerResultRetryParams {
   type: 'retry';
 }
 

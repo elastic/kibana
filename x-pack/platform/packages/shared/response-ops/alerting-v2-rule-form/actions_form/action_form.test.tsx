@@ -98,8 +98,8 @@ jest.mock('./hooks/use_fetch_connectors_by_type', () => ({
       connectorTypeId === '.email'
         ? [{ id: 'email-1', name: 'Email connector', connectorTypeId: '.email' }]
         : connectorTypeId === '.slack'
-        ? [{ id: 'slack-1', name: 'Slack connector', connectorTypeId: '.slack' }]
-        : [],
+          ? [{ id: 'slack-1', name: 'Slack connector', connectorTypeId: '.slack' }]
+          : [],
     isLoading: false,
   }),
 }));

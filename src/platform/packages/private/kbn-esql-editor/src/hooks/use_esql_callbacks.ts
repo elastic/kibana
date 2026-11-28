@@ -49,7 +49,7 @@ type MemoizedFieldsFromESQL = MemoizedFn<
       signal?: AbortSignal;
       dropNullColumns?: boolean;
       variables?: ESQLControlVariable[];
-    }
+    },
   ],
   ReturnType<typeof getEsqlColumns>
 >;
@@ -59,7 +59,7 @@ type MemoizedSources = MemoizedFn<
     CoreStart,
     (() => Promise<ILicense | undefined>) | undefined,
     ((sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>) | undefined,
-    AbortSignal | undefined
+    AbortSignal | undefined,
   ],
   ReturnType<typeof getESQLSources>
 >;

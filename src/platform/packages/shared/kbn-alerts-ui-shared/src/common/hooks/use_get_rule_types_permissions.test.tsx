@@ -24,7 +24,7 @@ const buildAlert = (fields: { ruleTypeId?: string; consumer?: string }): Alert =
     _index: '.alerts',
     ...(fields.ruleTypeId ? { [ALERT_RULE_TYPE_ID]: [fields.ruleTypeId] } : {}),
     ...(fields.consumer ? { [ALERT_RULE_CONSUMER]: [fields.consumer] } : {}),
-  } as Alert);
+  }) as Alert;
 
 const http = httpServiceMock.createStartContract();
 const { toasts } = notificationServiceMock.createStartContract();

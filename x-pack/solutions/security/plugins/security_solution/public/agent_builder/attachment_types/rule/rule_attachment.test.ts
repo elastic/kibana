@@ -51,7 +51,7 @@ const makeApplication = (canEdit: boolean) =>
       [RULES_FEATURE_LATEST]: { edit_rules: canEdit },
     },
     navigateToApp: jest.fn(),
-  } as unknown as ApplicationStart);
+  }) as unknown as ApplicationStart;
 
 const makeUiSettings = (esqlEnabled = true) =>
   ({
@@ -59,7 +59,7 @@ const makeUiSettings = (esqlEnabled = true) =>
       if (key === ENABLE_ESQL) return esqlEnabled;
       return undefined;
     }),
-  } as unknown as IUiSettingsClient);
+  }) as unknown as IUiSettingsClient;
 
 const makeActionButtonsParams = (ruleJson: string) => ({
   attachment: makeAttachment(ruleJson),

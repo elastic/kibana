@@ -76,7 +76,7 @@ export const PackResultsHeader = React.memo<PackResultsHeadersProps>(
     executionCount,
     onSaveQuery,
   }) => {
-    const iconProps = useMemo(() => ({ color: 'text', size: 'xs', iconSize: 'l' } as const), []);
+    const iconProps = useMemo(() => ({ color: 'text', size: 'xs', iconSize: 'l' }) as const, []);
     const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
     const isExportEnabled = useIsExperimentalFeatureEnabled('exportResults');
     const permissions = useKibana().services.application.capabilities.osquery;

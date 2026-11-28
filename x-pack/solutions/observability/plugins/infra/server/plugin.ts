@@ -61,15 +61,12 @@ export interface KbnServer extends Server {
   usage: any;
 }
 
-export class InfraServerPlugin
-  implements
-    Plugin<
-      InfraPluginSetup,
-      InfraPluginStart,
-      InfraServerPluginSetupDeps,
-      InfraServerPluginStartDeps
-    >
-{
+export class InfraServerPlugin implements Plugin<
+  InfraPluginSetup,
+  InfraPluginStart,
+  InfraServerPluginSetupDeps,
+  InfraServerPluginStartDeps
+> {
   public config: InfraConfig;
   public libs!: InfraBackendLibs;
   public logger: Logger;

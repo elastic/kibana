@@ -133,7 +133,7 @@ export class DetectionClient {
     );
     return {
       hits: result.hits.map(
-        (raw) => ({ ...raw, processed: processedIds.has(raw.detection_id ?? '') } as Detection)
+        (raw) => ({ ...raw, processed: processedIds.has(raw.detection_id ?? '') }) as Detection
       ),
     };
   }

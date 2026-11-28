@@ -37,10 +37,10 @@ const makeServer = () => {
 };
 
 const policy = (overrides: Partial<NewPackagePolicyWithId> = {}): NewPackagePolicyWithId =>
-  ({ id: 'testId-policyId', policy_ids: ['policyId'], ...overrides } as NewPackagePolicyWithId);
+  ({ id: 'testId-policyId', policy_ids: ['policyId'], ...overrides }) as NewPackagePolicyWithId;
 
 const agentPolicy = (spaceIds?: string[]): AgentPolicy =>
-  ({ id: 'policyId', space_ids: spaceIds } as AgentPolicy);
+  ({ id: 'policyId', space_ids: spaceIds }) as AgentPolicy;
 
 describe('PackagePolicyService.getDefaultAndSpacePackagePolicies (via bulkCreate)', () => {
   const clientPassedToFleet = (fleetBulkCreate: jest.Mock) => fleetBulkCreate.mock.calls[0][0];

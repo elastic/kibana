@@ -24,9 +24,8 @@ import * as timelineMarkdownPlugin from '../../common/components/markdown_editor
 import { useUpsellingMessage } from '../../common/hooks/use_upselling';
 
 const LazySelectTimelineModal = lazy(async () => {
-  const { SelectTimelineModal: Component } = await import(
-    '../attachments/timeline/select_timeline_modal'
-  );
+  const { SelectTimelineModal: Component } =
+    await import('../attachments/timeline/select_timeline_modal');
   return { default: Component };
 });
 

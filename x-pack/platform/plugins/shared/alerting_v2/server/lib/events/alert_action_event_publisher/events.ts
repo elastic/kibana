@@ -46,8 +46,10 @@ export interface AlertActionEventEnvelope {
  * >;
  * ```
  */
-export interface BaseAlertActionEvent<TType extends string, TPayload extends object>
-  extends AlertActionEventEnvelope {
+export interface BaseAlertActionEvent<
+  TType extends string,
+  TPayload extends object,
+> extends AlertActionEventEnvelope {
   readonly type: TType;
   readonly payload: TPayload;
 }

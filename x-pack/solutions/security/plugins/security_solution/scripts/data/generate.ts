@@ -745,8 +745,8 @@ const bulkIndexStreamed = async ({
         item.kind === 'data'
           ? idx.endpointEvents
           : item.kind === 'endpoint_alert'
-          ? idx.endpointAlerts
-          : idx.insightsAlerts;
+            ? idx.endpointAlerts
+            : idx.insightsAlerts;
 
       const buf = ensureBuf(index);
       buf.push(item.doc);

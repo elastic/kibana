@@ -9,7 +9,7 @@ import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { prepareTrendInputs } from './prepare_trend_inputs';
 
 const thresholdRule = (query: object): RuleResponse =>
-  ({ id: 'rule1', query } as unknown as RuleResponse);
+  ({ id: 'rule1', query }) as unknown as RuleResponse;
 
 const breachComposed = {
   format: 'composed',

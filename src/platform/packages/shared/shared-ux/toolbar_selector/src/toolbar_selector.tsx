@@ -222,8 +222,8 @@ export const ToolbarSelector = ({
               labelPopoverDisabled
                 ? undefined
                 : buttonTooltipContent !== undefined
-                ? buttonTooltipContent
-                : buttonLabel
+                  ? buttonTooltipContent
+                  : buttonLabel
             }
             display="block"
           >

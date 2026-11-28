@@ -29,7 +29,7 @@ describe('WorkflowsPlugin', () => {
         ({
           getCoreStart: jest.fn().mockResolvedValue({ security: { authc: {} } }),
           cleanupUnregisteredOrphans: jest.fn().mockResolvedValue(undefined),
-        } as unknown as WorkflowsService)
+        }) as unknown as WorkflowsService
     );
   });
 

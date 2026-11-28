@@ -140,8 +140,8 @@ function inspectImports(
         ? 'export type'
         : 'export'
       : importer.importKind === 'type'
-      ? 'import type'
-      : 'import';
+        ? 'import type'
+        : 'import';
 
     const specifiers: SomeNode[] = importer.specifiers;
     return {
@@ -152,8 +152,8 @@ function inspectImports(
             const name = isStringLiteral(specifier.imported)
               ? specifier.imported.value
               : specifier.imported?.type === 'Identifier'
-              ? specifier.imported.name
-              : 'name';
+                ? specifier.imported.name
+                : 'name';
             const local = specifier.local.name;
             return {
               node: specifier,
@@ -167,8 +167,8 @@ function inspectImports(
             const name = isStringLiteral(specifier.exported)
               ? specifier.exported.value
               : specifier.exported?.type === 'Identifier'
-              ? specifier.exported.name
-              : 'name';
+                ? specifier.exported.name
+                : 'name';
             const local = specifier.local.type === 'Identifier' ? specifier.local.name : '';
             return {
               node: specifier,

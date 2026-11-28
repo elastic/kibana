@@ -29,7 +29,7 @@ const createConversationExecution = (url: string | null = callbackUrl): AgentExe
       nextInput: { message: 'hello' },
       ...(url ? { callback: { url } } : {}),
     },
-  } as unknown as AgentExecution);
+  }) as unknown as AgentExecution;
 const createStandaloneExecution = (): AgentExecution =>
   ({
     executionId: 'execution-1',
@@ -37,7 +37,7 @@ const createStandaloneExecution = (): AgentExecution =>
     agentParams: {
       nextInput: { message: 'hello' },
     },
-  } as unknown as AgentExecution);
+  }) as unknown as AgentExecution;
 const responseTimeout = 60000;
 const createCallbackDeliveryService = (ensureUriAllowed = jest.fn()) =>
   new CallbackDeliveryService({

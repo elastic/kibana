@@ -29,7 +29,7 @@ import type { AppDispatch } from '../../../entities/workflows/store/store';
 
 const mockChangeHistoryAdapter: ChangeHistoryAdapter = {
   listChanges: async () => ({ items: [], total: 0 }),
-  getChange: async () => ({} as unknown as ChangeHistoryDetail),
+  getChange: async () => ({}) as unknown as ChangeHistoryDetail,
 };
 
 const defaultWorkflow: WorkflowDetailDto = {

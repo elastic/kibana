@@ -34,22 +34,28 @@ interface BeingCanceledTask<TParams extends {} = {}> extends PersistedTaskBase<T
 interface CanceledTask<TParams extends {} = {}> extends PersistedTaskBase<TParams> {
   status: TaskStatus.Canceled;
 }
-interface CompletedTask<TParams extends {} = {}, TPayload extends {} = {}>
-  extends PersistedTaskBase<TParams> {
+interface CompletedTask<
+  TParams extends {} = {},
+  TPayload extends {} = {},
+> extends PersistedTaskBase<TParams> {
   status: TaskStatus.Completed;
   task: PersistedTaskBase<TParams>['task'] & {
     payload: TPayload;
   };
 }
-interface AcknowledgedTask<TParams extends {} = {}, TPayload extends {} = {}>
-  extends PersistedTaskBase<TParams> {
+interface AcknowledgedTask<
+  TParams extends {} = {},
+  TPayload extends {} = {},
+> extends PersistedTaskBase<TParams> {
   status: TaskStatus.Acknowledged;
   task: PersistedTaskBase<TParams>['task'] & {
     payload: TPayload;
   };
 }
-interface FailedTask<TParams extends {} = {}, TPayload extends {} = {}>
-  extends PersistedTaskBase<TParams> {
+interface FailedTask<
+  TParams extends {} = {},
+  TPayload extends {} = {},
+> extends PersistedTaskBase<TParams> {
   status: TaskStatus.Failed;
   task: PersistedTaskBase<TParams>['task'] & {
     error: string;

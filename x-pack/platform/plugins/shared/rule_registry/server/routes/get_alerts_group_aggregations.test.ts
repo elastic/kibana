@@ -164,7 +164,7 @@ const getMockAggregations = () =>
         value: 185,
       },
     },
-  } as unknown as ReturnType<AlertsClient['getGroupAggregations']>);
+  }) as unknown as ReturnType<AlertsClient['getGroupAggregations']>;
 
 describe('getAlertsGroupAggregations', () => {
   let server: ReturnType<typeof serverMock.create>;

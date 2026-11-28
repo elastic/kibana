@@ -44,9 +44,10 @@ const LazyDesignToolsButton = lazy(() =>
   }))
 );
 
-export class DeveloperToolbarPlugin
-  implements Plugin<DeveloperToolbarSetup, DeveloperToolbarStart>
-{
+export class DeveloperToolbarPlugin implements Plugin<
+  DeveloperToolbarSetup,
+  DeveloperToolbarStart
+> {
   private items$ = new BehaviorSubject<DeveloperToolbarItemProps[]>([]);
 
   constructor(private readonly context: PluginInitializerContext) {}

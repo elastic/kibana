@@ -255,7 +255,7 @@ export const FirecrawlConnector: ConnectorSpec = {
             ? i18n.translate('core.kibanaConnectorSpecs.firecrawl.test.unauthorizedMessage', {
                 defaultMessage: 'Invalid or missing API key',
               })
-            : err.message ?? 'Unknown error';
+            : (err.message ?? 'Unknown error');
         return {
           ok: false,
           message: i18n.translate('core.kibanaConnectorSpecs.firecrawl.test.failureMessage', {

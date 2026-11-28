@@ -36,7 +36,7 @@ import {
 import { useKnowledgeIndicatorsUrlState } from './use_knowledge_indicators_url_state';
 
 export const getKnowledgeIndicatorTitle = (ki: KnowledgeIndicator): string =>
-  ki.kind === 'feature' ? ki.feature.title ?? ki.feature.id : ki.query.title ?? ki.query.id;
+  ki.kind === 'feature' ? (ki.feature.title ?? ki.feature.id) : (ki.query.title ?? ki.query.id);
 
 export function useKnowledgeIndicatorsTable() {
   const {

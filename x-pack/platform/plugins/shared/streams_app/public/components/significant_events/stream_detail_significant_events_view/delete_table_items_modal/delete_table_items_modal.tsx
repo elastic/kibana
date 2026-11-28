@@ -48,8 +48,8 @@ export function DeleteTableItemsModal({
       items.map((item) => {
         const titleValue =
           item.kind === 'feature'
-            ? item.feature.title ?? item.feature.id
-            : item.query.title ?? item.query.id;
+            ? (item.feature.title ?? item.feature.id)
+            : (item.query.title ?? item.query.id);
 
         return {
           title: titleValue,

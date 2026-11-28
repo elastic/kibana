@@ -256,8 +256,8 @@ export const HostOtelPage: React.FC<HostOtelPageProps> = ({
       ...(hasData || hasPreExistingDataFinal
         ? { status: 'complete' as const }
         : isMonitoringStepActive
-        ? { status: 'current' as const }
-        : {}),
+          ? { status: 'current' as const }
+          : {}),
       children: (
         <OtelLogsVisualizeStep
           isMonitoringStepActive={isMonitoringStepActive}

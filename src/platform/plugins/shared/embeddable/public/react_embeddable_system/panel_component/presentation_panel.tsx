@@ -33,7 +33,7 @@ import { VisibilityTracker } from './visibility_tracker';
 
 const PresentationPanelChrome = <
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
-  ComponentPropsType extends {} = {}
+  ComponentPropsType extends {} = {},
 >({
   children,
 
@@ -151,7 +151,7 @@ const PresentationPanelChrome = <
 
 export const PresentationPanel = <
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
-  ComponentPropsType extends {} = {}
+  ComponentPropsType extends {} = {},
 >({
   Component,
   componentApi,

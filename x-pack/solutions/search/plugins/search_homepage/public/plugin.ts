@@ -33,9 +33,12 @@ const appInfo: SearchHomepageAppInfo = {
   title: i18n.translate('xpack.searchHomepage.appTitle', { defaultMessage: 'Home' }),
 };
 
-export class SearchHomepagePlugin
-  implements Plugin<SearchHomepagePluginSetup, SearchHomepagePluginStart, {}, {}>
-{
+export class SearchHomepagePlugin implements Plugin<
+  SearchHomepagePluginSetup,
+  SearchHomepagePluginStart,
+  {},
+  {}
+> {
   private readonly kibanaVersion: string;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {

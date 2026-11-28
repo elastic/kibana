@@ -24,7 +24,7 @@ import {
 } from './rule_lifecycle_telemetry';
 
 const mockAnalytics = (): AnalyticsServiceSetup =>
-  ({ reportEvent: jest.fn() } as unknown as AnalyticsServiceSetup);
+  ({ reportEvent: jest.fn() }) as unknown as AnalyticsServiceSetup;
 
 const mockLogger = (): Logger =>
   ({
@@ -33,7 +33,7 @@ const mockLogger = (): Logger =>
     info: jest.fn(),
     warn: jest.fn(),
     error: jest.fn(),
-  } as unknown as Logger);
+  }) as unknown as Logger;
 
 describe('sendRuleLifecycleTelemetryEvent', () => {
   beforeEach(() => {

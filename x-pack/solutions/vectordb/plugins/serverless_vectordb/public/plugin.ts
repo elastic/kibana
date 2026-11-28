@@ -20,15 +20,12 @@ import type {
   ServerlessVectordbStartDependencies,
 } from './types';
 
-export class ServerlessVectordbPlugin
-  implements
-    Plugin<
-      ServerlessVectordbPluginSetup,
-      ServerlessVectordbPluginStart,
-      {},
-      ServerlessVectordbStartDependencies
-    >
-{
+export class ServerlessVectordbPlugin implements Plugin<
+  ServerlessVectordbPluginSetup,
+  ServerlessVectordbPluginStart,
+  {},
+  ServerlessVectordbStartDependencies
+> {
   public setup(
     core: CoreSetup<ServerlessVectordbStartDependencies, ServerlessVectordbPluginStart>
   ): ServerlessVectordbPluginSetup {

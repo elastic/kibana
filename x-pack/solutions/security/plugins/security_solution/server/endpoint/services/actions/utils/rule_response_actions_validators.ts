@@ -134,7 +134,7 @@ export type CheckOsqueryResponseActionAuthz = (actionParams: {
 }) => Promise<void>;
 
 export interface ValidateRuleResponseActionsOptions<
-  T extends RuleResponseActions = RuleResponseActions
+  T extends RuleResponseActions = RuleResponseActions,
 > {
   /**
    * Endpoint Authz can be retrieve via Route context or `endpointService.getEndpointAuthz(httpRequest)`
@@ -169,7 +169,7 @@ export interface ValidateRuleResponseActionsOptions<
  * be included in rule definitions as well as validate that the response actions payload data is valid.
  */
 export const validateRuleResponseActions = async <
-  T extends RuleResponseActions = RuleResponseActions
+  T extends RuleResponseActions = RuleResponseActions,
 >({
   endpointService,
   endpointAuthz,
@@ -347,7 +347,7 @@ export const validateRuleResponseActions = async <
 type ImportRuleResponseActions = Pick<RuleToImport, 'response_actions' | 'id' | 'rule_id'>;
 
 export type ValidateRuleImportResponseActionsOptions<
-  T extends ImportRuleResponseActions = ImportRuleResponseActions
+  T extends ImportRuleResponseActions = ImportRuleResponseActions,
 > = Pick<
   ValidateRuleResponseActionsOptions,
   'endpointAuthz' | 'endpointService' | 'spaceId' | 'checkOsqueryResponseActionAuthz'
@@ -356,7 +356,7 @@ export type ValidateRuleImportResponseActionsOptions<
 };
 
 export interface ValidateRuleImportResponseActionsResult<
-  T extends ImportRuleResponseActions = ImportRuleResponseActions
+  T extends ImportRuleResponseActions = ImportRuleResponseActions,
 > {
   valid: T[];
   errors: BulkError[];
@@ -371,7 +371,7 @@ export interface ValidateRuleImportResponseActionsResult<
  * @param ruleResponseActions
  */
 export const validateRuleImportResponseActions = async <
-  T extends ImportRuleResponseActions = ImportRuleResponseActions
+  T extends ImportRuleResponseActions = ImportRuleResponseActions,
 >({
   endpointService,
   endpointAuthz,

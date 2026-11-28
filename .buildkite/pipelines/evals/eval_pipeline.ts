@@ -240,7 +240,7 @@ export function getEvalPipeline(githubPrLabels: string): string | null {
 
   const resolveModelGroups = (suite: EvalsSuiteMetadataEntry): string[] => {
     const weeklyModels = useWeeklyEisModels
-      ? suite.weeklyEisModelGroups ?? DEFAULT_WEEKLY_EIS_MODELS
+      ? (suite.weeklyEisModelGroups ?? DEFAULT_WEEKLY_EIS_MODELS)
       : [];
     const resolved = [...new Set([...explicitModelGroups, ...weeklyModels])];
     if (resolved.length > 0) {

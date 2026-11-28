@@ -71,8 +71,8 @@ export function validateToolCalls({
         error instanceof z.ZodError
           ? error?.issues?.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ')
           : error instanceof Error
-          ? error.message
-          : 'Unknown validation error';
+            ? error.message
+            : 'Unknown validation error';
 
       throw createToolValidationError(
         `Tool call arguments for ${toolCall.function.name} (${toolCall.toolCallId}) were invalid`,

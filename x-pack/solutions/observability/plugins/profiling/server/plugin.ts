@@ -24,15 +24,12 @@ import type {
 } from './types';
 import { createProfilingEsClient } from './utils/create_profiling_es_client';
 
-export class ProfilingPlugin
-  implements
-    Plugin<
-      ProfilingPluginSetup,
-      ProfilingPluginStart,
-      ProfilingPluginSetupDeps,
-      ProfilingPluginStartDeps
-    >
-{
+export class ProfilingPlugin implements Plugin<
+  ProfilingPluginSetup,
+  ProfilingPluginStart,
+  ProfilingPluginSetupDeps,
+  ProfilingPluginStartDeps
+> {
   private readonly logger: Logger;
 
   constructor(private readonly initializerContext: PluginInitializerContext<ProfilingConfig>) {

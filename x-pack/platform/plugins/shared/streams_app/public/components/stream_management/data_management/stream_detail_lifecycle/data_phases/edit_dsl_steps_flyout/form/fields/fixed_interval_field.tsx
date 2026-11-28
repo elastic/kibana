@@ -103,7 +103,7 @@ const FixedIntervalFieldControl = ({
     return formatDuration(value, unit, { integerOnly: true, minExclusive: 0 });
   };
 
-  const lowerBoundMs = stepIndex > 0 ? getFixedIntervalMsAt(stepIndex - 1) ?? 0 : 0;
+  const lowerBoundMs = stepIndex > 0 ? (getFixedIntervalMsAt(stepIndex - 1) ?? 0) : 0;
   const previousIntervalValue =
     stepIndex > 0 ? getFixedIntervalDurationAt(stepIndex - 1) : undefined;
 
@@ -119,11 +119,11 @@ const FixedIntervalFieldControl = ({
   const upper = frozenAfterEsFormat
     ? { neighbor: { type: 'phase' as const, phase: 'frozen' as const }, value: frozenAfterEsFormat }
     : dataRetentionEsFormat
-    ? {
-        neighbor: { type: 'phase' as const, phase: 'delete' as const },
-        value: dataRetentionEsFormat,
-      }
-    : undefined;
+      ? {
+          neighbor: { type: 'phase' as const, phase: 'delete' as const },
+          value: dataRetentionEsFormat,
+        }
+      : undefined;
 
   const helpText = getIntervalBoundHelpText({ multipleOf, upper });
 
@@ -251,12 +251,12 @@ export const FixedIntervalField = ({
             phase: 'frozen' as const,
           }
         : dataRetentionMs !== undefined && dataRetentionEsFormat
-        ? {
-            boundaryMs: dataRetentionMs,
-            boundaryEsFormat: dataRetentionEsFormat,
-            phase: 'delete' as const,
-          }
-        : undefined;
+          ? {
+              boundaryMs: dataRetentionMs,
+              boundaryEsFormat: dataRetentionEsFormat,
+              phase: 'delete' as const,
+            }
+          : undefined;
 
     return [
       { validator: requiredFixedIntervalValue },

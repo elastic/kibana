@@ -25,7 +25,8 @@ import { useCascadedDocumentsContext } from '../cascaded_documents_provider';
 import { useCascadedDocumentsTelemetry } from '../telemetry';
 
 interface UseGroupedCascadeDataProps
-  extends Pick<UnifiedDataTableProps, 'rows'>,
+  extends
+    Pick<UnifiedDataTableProps, 'rows'>,
     Pick<CascadedDocumentsContext, 'selectedCascadeGroups' | 'esqlVariables'> {
   queryMeta: ESQLStatsQueryMeta;
 }

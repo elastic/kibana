@@ -138,11 +138,14 @@ export const SyntheticsRefreshContextProvider: FC<
     if (refreshPaused) {
       return;
     }
-    const interval = setInterval(() => {
-      if (document.visibilityState !== 'hidden') {
-        refreshApp();
-      }
-    }, (refreshInterval || AUTOREFRESH_INTERVAL_SECONDS) * 1000);
+    const interval = setInterval(
+      () => {
+        if (document.visibilityState !== 'hidden') {
+          refreshApp();
+        }
+      },
+      (refreshInterval || AUTOREFRESH_INTERVAL_SECONDS) * 1000
+    );
     return () => clearInterval(interval);
   }, [refreshPaused, refreshApp, refreshInterval]);
 

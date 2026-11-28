@@ -53,7 +53,7 @@ describe('api_endpoints handler', () => {
       },
       plugins: {},
       services: { esLegacyConfigService },
-    } as unknown as Parameters<typeof handler>[0]);
+    }) as unknown as Parameters<typeof handler>[0];
 
   beforeEach(() => {
     jest.clearAllMocks();

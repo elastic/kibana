@@ -80,10 +80,13 @@ export const registerRoutes = (core: CoreSetup<FixtureStartDeps>, logger: Logger
 
         const allTypes = unifiedAttachmentTypeRegistry.list();
 
-        const hashMap = allTypes.reduce((map, type) => {
-          map[type.id] = getUnifiedAttachmentTypeHash(type);
-          return map;
-        }, {} as Record<string, string>);
+        const hashMap = allTypes.reduce(
+          (map, type) => {
+            map[type.id] = getUnifiedAttachmentTypeHash(type);
+            return map;
+          },
+          {} as Record<string, string>
+        );
 
         return response.ok({
           body: hashMap,

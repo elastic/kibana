@@ -124,8 +124,10 @@ const EuiDataGridContainer = styled.div<GridContainerProps>`
   width: 100%;
 `;
 
-interface AlertTableProps
-  extends SetOptional<SecurityAlertsTableProps, 'id' | 'ruleTypeIds' | 'query'> {
+interface AlertTableProps extends SetOptional<
+  SecurityAlertsTableProps,
+  'id' | 'ruleTypeIds' | 'query'
+> {
   inputFilters?: Filter[];
   tableType?: TableId;
   pageScope?: PageScope;
@@ -255,7 +257,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
         fontSize: 's',
         header: 'underline',
         stripes: isEventRenderedView,
-      } as EuiDataGridStyle),
+      }) as EuiDataGridStyle,
     [isEventRenderedView]
   );
 
@@ -430,12 +432,12 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
       isEventRenderedView
         ? `${DEFAULT_DATA_GRID_HEIGHT}px`
         : /*
-         * We keep fixed height in Event rendered because of the row height issue
-         * as mentioned here
-         */
-        count > 20
-        ? `${DEFAULT_DATA_GRID_HEIGHT}px`
-        : undefined,
+           * We keep fixed height in Event rendered because of the row height issue
+           * as mentioned here
+           */
+          count > 20
+          ? `${DEFAULT_DATA_GRID_HEIGHT}px`
+          : undefined,
     [count, isEventRenderedView]
   );
 

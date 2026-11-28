@@ -253,12 +253,10 @@ export class EsqlService {
     });
 
     return {
-      inferenceEndpoints: endpoints.map(
-        (endpoint): InferenceEndpointAutocompleteItem => ({
-          inference_id: endpoint.inference_id,
-          task_type: endpoint.task_type,
-        })
-      ),
+      inferenceEndpoints: endpoints.map((endpoint): InferenceEndpointAutocompleteItem => ({
+        inference_id: endpoint.inference_id,
+        task_type: endpoint.task_type,
+      })),
     };
   }
 

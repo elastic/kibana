@@ -25,7 +25,7 @@ const createCpsManager = ({
     whenReady: jest.fn().mockResolvedValue(undefined),
     getTotalProjectCount: jest.fn().mockReturnValue(totalProjectCount),
     getDefaultProjectRouting: jest.fn().mockReturnValue(defaultProjectRouting),
-  } as unknown as ICPSManager);
+  }) as unknown as ICPSManager;
 
 const startServicesWithProjectCount = (
   totalProjectCount: number,

@@ -39,12 +39,12 @@ const makeApplication = () =>
   ({
     capabilities: { [RULES_FEATURE_LATEST]: { edit_rules: true } },
     navigateToApp: jest.fn(),
-  } as unknown as ApplicationStart);
+  }) as unknown as ApplicationStart;
 
 const makeUiSettings = () =>
   ({
     get: jest.fn(),
-  } as unknown as IUiSettingsClient);
+  }) as unknown as IUiSettingsClient;
 
 const renderInlineContent = (rule: Record<string, unknown>) => {
   const aiRuleCreation = new AiRuleCreationService();

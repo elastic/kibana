@@ -33,9 +33,9 @@ export const createMockLogger = (): Logger =>
     info: jest.fn(),
     warn: jest.fn(),
     error: jest.fn(),
-  } as unknown as Logger);
+  }) as unknown as Logger;
 
-export const createFakeKibanaRequest = (): KibanaRequest => ({ headers: {} } as KibanaRequest);
+export const createFakeKibanaRequest = (): KibanaRequest => ({ headers: {} }) as KibanaRequest;
 
 export interface MockWorkflowRuntime {
   start: jest.Mock;
@@ -91,7 +91,7 @@ export const buildMockSetupDependenciesReturn = (options: {
     workflowExecutionRepository: options.workflowExecutionRepository,
     esClient: {},
     telemetryClient: options.telemetryClient ?? createMockTelemetryClient(),
-  } as unknown as Awaited<ReturnType<typeof setupDependencies>>);
+  }) as unknown as Awaited<ReturnType<typeof setupDependencies>>;
 
 /** Payload passed to `workflowExecutionLoop` from `runWorkflow` / `resumeWorkflow` (mocked deps). */
 export const getExpectedWorkflowExecutionLoopCallArgs = (options: {

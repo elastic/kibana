@@ -232,8 +232,8 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
       const tooltipContent = option.disabled
         ? i18n.DISABLED_WORKFLOW_TOOLTIP
         : option.validationResult
-        ? option.validationResult.message
-        : undefined;
+          ? option.validationResult.message
+          : undefined;
 
       if (tooltipContent) {
         return <EuiToolTip content={tooltipContent}>{content}</EuiToolTip>;
@@ -314,8 +314,8 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
   const helpText = fetchError
     ? finalConfig.errorMessages?.loadFailed
     : isLoading
-    ? i18n.LOADING_WORKFLOWS
-    : undefined;
+      ? i18n.LOADING_WORKFLOWS
+      : undefined;
 
   const renderListView = useCallback(
     (list: ReactElement, search?: ReactElement) => {

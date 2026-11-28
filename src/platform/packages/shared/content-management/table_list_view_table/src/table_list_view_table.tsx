@@ -63,13 +63,15 @@ const disabledEditAction = {
   }),
 };
 
-interface ContentEditorConfig
-  extends Pick<OpenContentEditorParams, 'isReadonly' | 'onSave' | 'customValidators'> {
+interface ContentEditorConfig extends Pick<
+  OpenContentEditorParams,
+  'isReadonly' | 'onSave' | 'customValidators'
+> {
   enabled?: boolean;
 }
 
 export interface TableListViewTableProps<
-  T extends UserContentCommonSchema = UserContentCommonSchema
+  T extends UserContentCommonSchema = UserContentCommonSchema,
 > {
   entityName: string;
   entityNamePlural: string;
@@ -228,8 +230,8 @@ const urlStateDeserializer = (params: URLQueryParams): URLState => {
       sanitizedParams.sort === 'title'
         ? 'attributes.title'
         : sanitizedParams.sort === 'accessedAt'
-        ? 'accessedAt'
-        : 'updatedAt';
+          ? 'accessedAt'
+          : 'updatedAt';
 
     stateFromURL.sort = { field, direction: field === 'attributes.title' ? 'asc' : 'desc' };
 
@@ -641,8 +643,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           ) : (
             <NoCreatorTip iconType={'minus'} includeVersionTip={isKibanaVersioningEnabled} />
           ),
-        sortable:
-          false /* createdBy column is not sortable because it doesn't make sense to sort by id*/,
+        sortable: false /* createdBy column is not sortable because it doesn't make sense to sort by id*/,
         width: '4.5em',
         minWidth: '4.5em',
         align: 'center',
@@ -1159,8 +1160,8 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   const testSubjectState = isDeletingItems
     ? 'table-is-deleting'
     : hasInitialFetchReturned && !isFetchingItems
-    ? 'table-is-ready'
-    : 'table-is-loading';
+      ? 'table-is-ready'
+      : 'table-is-loading';
 
   return (
     <>

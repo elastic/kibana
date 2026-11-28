@@ -55,16 +55,14 @@ describe('searchKnowledgeIndicators', () => {
 
   it('supports kind=[query] (queries-only)', async () => {
     const getFeatures = jest.fn();
-    const getQueries = jest.fn(
-      async (): Promise<QueryLink[]> => [
-        {
-          query: makeStreamQuery({ id: 'q1' }),
-          rule_backed: false,
-          rule_id: 'rule-1',
-          stream_name: 'logs.test',
-        },
-      ]
-    );
+    const getQueries = jest.fn(async (): Promise<QueryLink[]> => [
+      {
+        query: makeStreamQuery({ id: 'q1' }),
+        rule_backed: false,
+        rule_id: 'rule-1',
+        stream_name: 'logs.test',
+      },
+    ]);
 
     const res = await searchKnowledgeIndicators({
       params: { kind: ['query'] },

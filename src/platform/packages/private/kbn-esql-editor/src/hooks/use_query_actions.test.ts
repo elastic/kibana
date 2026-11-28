@@ -40,7 +40,7 @@ const createMockTelemetryService = () =>
   ({
     trackQuerySubmitted: jest.fn(),
     trackQueryHistoryClicked: jest.fn(),
-  } as unknown as ESQLEditorTelemetryService);
+  }) as unknown as ESQLEditorTelemetryService;
 
 const defaultParams = () => ({
   editorRef: createMockEditorRef(),

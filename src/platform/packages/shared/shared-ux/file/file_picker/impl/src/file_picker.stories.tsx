@@ -26,7 +26,7 @@ const getFileKind = (id: string) =>
     id: kind,
     http: {},
     allowedMimeTypes: ['*'],
-  } as FileKindBrowser);
+  }) as FileKindBrowser;
 
 const defaultProps: FilePickerProps = {
   kind,

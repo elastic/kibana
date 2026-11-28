@@ -78,9 +78,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         newAsyncSearchId = newSearchResponse.id;
 
-        asyncExpirationTimeAfterSessionWasSaved = await searchSessions.getAsyncSearchExpirationTime(
-          newAsyncSearchId
-        );
+        asyncExpirationTimeAfterSessionWasSaved =
+          await searchSessions.getAsyncSearchExpirationTime(newAsyncSearchId);
 
         return (
           asyncExpirationTimeAfterSessionWasSaved > asyncExpirationTimeBeforeSessionWasSaved &&
@@ -166,9 +165,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await searchSessions.save({ isSubmitButton: true });
 
-        const savedSessionId = await dashboardPanelActions.getSearchSessionIdByTitle(
-          'Lens with other bucket'
-        );
+        const savedSessionId =
+          await dashboardPanelActions.getSearchSessionIdByTitle('Lens with other bucket');
 
         await searchSessionsManagement.goTo();
         let searchSessionList = await searchSessionsManagement.getList();

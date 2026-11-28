@@ -17,7 +17,7 @@ import { QuerySummary } from '../query_summary';
 export const EsqlRecoveryContent: React.FC<CustomRecoveryRenderProps> = ({ state, dispatch }) => {
   const query = useWatch<FormValues, 'query'>({ name: 'query' });
   const baseQuery = query?.format === 'composed' ? query.base : '';
-  const recoveryBlock = query?.format === 'composed' ? query.recovery?.segment ?? '' : '';
+  const recoveryBlock = query?.format === 'composed' ? (query.recovery?.segment ?? '') : '';
 
   return (
     <>

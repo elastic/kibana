@@ -50,14 +50,14 @@ const createSpaces = (spaceId = 'default') => ({
   },
 });
 
-const createRequest = () => ({} as KibanaRequest);
+const createRequest = () => ({}) as KibanaRequest;
 const createLogger = () =>
   ({
     debug: jest.fn(),
     info: jest.fn(),
     warn: jest.fn(),
     error: jest.fn(),
-  } as unknown as Logger);
+  }) as unknown as Logger;
 
 describe('triggerInvestigationWorkflow', () => {
   it('returns the execution id when the workflow starts successfully', async () => {

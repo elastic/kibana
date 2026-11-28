@@ -170,9 +170,7 @@ const search1 = {
       tip: '',
     },
   ],
-  children: [
-    /* See search1Child */
-  ],
+  children: [/* See search1Child */],
   hasChildren: true,
   selfTime: 0.028784999999999998,
   timePercentage: '100.00',

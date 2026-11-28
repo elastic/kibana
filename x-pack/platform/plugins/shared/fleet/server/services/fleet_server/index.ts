@@ -43,7 +43,7 @@ export const getFleetServerPolicies = async (
   // Extract associated fleet server agent policy IDs
   const fleetServerAgentPolicyIds = fleetServerPackagePolicies.items.flatMap((p) => {
     // @ts-expect-error upgrade typescript v5.9.3
-    return p.policy_ids?.map((id) => ({ id, spaceId: getValidSpaceId(p.spaceIds) } ?? []));
+    return p.policy_ids?.map((id) => ({ id, spaceId: getValidSpaceId(p.spaceIds) }) ?? []);
   });
 
   // Retrieve associated agent policies

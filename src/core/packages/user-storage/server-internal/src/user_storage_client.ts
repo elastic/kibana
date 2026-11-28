@@ -102,9 +102,8 @@ export class UserStorageClient implements IUserStorageClient {
     let globalData: Record<string, unknown> | undefined;
 
     if (objectsToFetch.length > 0) {
-      const { saved_objects: docs } = await this.soClient.bulkGet<UserStorageAttributes>(
-        objectsToFetch
-      );
+      const { saved_objects: docs } =
+        await this.soClient.bulkGet<UserStorageAttributes>(objectsToFetch);
       for (const doc of docs) {
         // bulkGet surfaces a missing SO via `doc.error` rather than throwing.
         if (doc.error) continue;

@@ -20,7 +20,7 @@ export const withOAuthManagementGate = <
   Body,
   Context extends SecurityRequestHandlerContext,
   Method extends RouteMethod,
-  ResponseFactory extends KibanaResponseFactory
+  ResponseFactory extends KibanaResponseFactory,
 >(
   handler: RequestHandler<Params, Query, Body, Context, Method, ResponseFactory>
 ): RequestHandler<Params, Query, Body, Context, Method, ResponseFactory> => {

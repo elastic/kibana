@@ -52,7 +52,7 @@ const UploadFileHint = React.memo<{ kind: string }>(({ kind }) => {
     // `maxSizeBytes` may be a per-file callback (Cases derives a smaller limit
     // for images), so resolve it with a representative image and non-image file.
     const resolveMax = (file: File): number =>
-      typeof maxSizeBytes === 'function' ? maxSizeBytes(file) : maxSizeBytes ?? MAX_FILE_SIZE;
+      typeof maxSizeBytes === 'function' ? maxSizeBytes(file) : (maxSizeBytes ?? MAX_FILE_SIZE);
     const generalMax = resolveMax({ type: 'application/pdf' } as File);
     const imageMax = resolveMax({ type: 'image/png' } as File);
     const format = (bytes: number) => numeral(bytes).format('0,0.[0] b');

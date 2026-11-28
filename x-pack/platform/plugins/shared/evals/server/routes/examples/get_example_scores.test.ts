@@ -24,7 +24,7 @@ describe('GET /internal/evals/examples/{exampleId}/scores', () => {
       logger,
       canEncrypt: false,
       evaluatorRegistry: { list: () => [], get: () => undefined },
-      getInferenceStart: async () => ({ getClient: jest.fn() } as unknown as InferenceServerStart),
+      getInferenceStart: async () => ({ getClient: jest.fn() }) as unknown as InferenceServerStart,
       getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
     });

@@ -25,10 +25,7 @@ export function registerOnboardingApp(
     updater$: from(startServicesPromise).pipe(
       switchMap(([coreStart]) =>
         coreStart.featureFlags.getBooleanValue$(INGEST_HUB_ONBOARDING_ENABLED_FLAG, false).pipe(
-          map(
-            (enabled): AppUpdater =>
-              () => ({ visibleIn: enabled ? ['globalSearch'] : [] })
-          )
+          map((enabled): AppUpdater => () => ({ visibleIn: enabled ? ['globalSearch'] : [] }))
         )
       )
     ),

@@ -17,11 +17,9 @@ export const services = {
 
 export type InheritedFtrProviderContext = GenericFtrProviderContext<typeof services, {}>;
 
-export type InheritedServices = InheritedFtrProviderContext extends GenericFtrProviderContext<
-  infer TServices,
-  {}
->
-  ? TServices
-  : {};
+export type InheritedServices =
+  InheritedFtrProviderContext extends GenericFtrProviderContext<infer TServices, {}>
+    ? TServices
+    : {};
 
 export type { SupertestWithRoleScopeType } from '@kbn/test-suites-xpack-platform/serverless/shared/services';

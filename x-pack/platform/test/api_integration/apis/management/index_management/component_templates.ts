@@ -187,9 +187,8 @@ export default function ({ getService }: FtrProviderContext) {
         expect(status).to.eql(200);
         expect(body).to.eql({ acknowledged: true });
 
-        const { status: getStatus, body: getBody } = await getOneComponentTemplate(
-          FROZEN_COMPONENT_NAME
-        );
+        const { status: getStatus, body: getBody } =
+          await getOneComponentTemplate(FROZEN_COMPONENT_NAME);
         expect(getStatus).to.eql(200);
         expect(getBody.template.lifecycle).to.eql({
           enabled: true,

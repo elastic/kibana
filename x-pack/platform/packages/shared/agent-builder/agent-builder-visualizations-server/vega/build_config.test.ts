@@ -30,7 +30,7 @@ const mockedBuildCallbacks = jest.mocked(buildServerESQLCallbacks);
 const mockedCreateGraph = jest.mocked(createVegaGraph);
 
 const createMockLogger = (): Logger =>
-  ({ debug: jest.fn(), error: jest.fn(), info: jest.fn(), warn: jest.fn() } as unknown as Logger);
+  ({ debug: jest.fn(), error: jest.fn(), info: jest.fn(), warn: jest.fn() }) as unknown as Logger;
 
 const PROVIDED_ESQL = 'FROM logs-* | STATS count = COUNT(*)';
 const SPEC = '{"$schema":"vega-lite","mark":"bar"}';

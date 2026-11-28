@@ -106,9 +106,9 @@ export const getItems: (
         }
       ),
       score: isPrivmonEnabled
-        ? entityData?.risk.modifiers?.find((modifier) => modifier.type === 'asset_criticality')
-            ?.contribution ?? 0
-        : entityData?.risk.category_2_score ?? 0,
+        ? (entityData?.risk.modifiers?.find((modifier) => modifier.type === 'asset_criticality')
+            ?.contribution ?? 0)
+        : (entityData?.risk.category_2_score ?? 0),
       count: undefined,
     },
   ];

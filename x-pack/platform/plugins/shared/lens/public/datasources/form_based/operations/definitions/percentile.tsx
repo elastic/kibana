@@ -155,9 +155,9 @@ export const percentileOperation: OperationDefinition<
 
     return Boolean(
       newField &&
-        supportedFieldTypes.includes(newField.type) &&
-        newField.aggregatable &&
-        (!newField.aggregationRestrictions || !newField.aggregationRestrictions.percentiles)
+      supportedFieldTypes.includes(newField.type) &&
+      newField.aggregatable &&
+      (!newField.aggregationRestrictions || !newField.aggregationRestrictions.percentiles)
     );
   },
   getDefaultLabel: (column, columns, indexPattern) =>

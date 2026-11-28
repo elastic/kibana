@@ -159,8 +159,8 @@ export const getFieldStatsChartEmbeddableFactory = (
               http: deps.http,
             })
           : validDataViewId
-          ? await deps.data.dataViews.get(validDataViewId)
-          : undefined;
+            ? await deps.data.dataViews.get(validDataViewId)
+            : undefined;
         initialDataView = dataView;
       } catch (error) {
         // Only need to publish blocking error if viewtype is data view, and no data view found
@@ -208,7 +208,7 @@ export const getFieldStatsChartEmbeddableFactory = (
             ...titleManager.getLatestState(),
             ...timeRangeManager.getLatestState(),
             ...serializeFieldStatsChartState(),
-          } as FieldStatsTableEmbeddableState),
+          }) as FieldStatsTableEmbeddableState,
         anyStateChange$: merge(
           titleManager.anyStateChange$,
           timeRangeManager.anyStateChange$,
@@ -250,9 +250,8 @@ export const getFieldStatsChartEmbeddableFactory = (
               focusedPanelId: uuid,
             },
             loadContent: async ({ closeFlyout }) => {
-              const { EmbeddableFieldStatsUserInput } = await import(
-                './field_stats_embeddable_input'
-              );
+              const { EmbeddableFieldStatsUserInput } =
+                await import('./field_stats_embeddable_input');
               return (
                 <EmbeddableFieldStatsUserInput
                   coreStart={coreStart}

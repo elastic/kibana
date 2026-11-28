@@ -34,7 +34,7 @@ export interface HasSerializableState<SerializedState extends object = object> {
 export const apiHasSerializableState = (api: unknown | null): api is HasSerializableState => {
   return Boolean(
     (api as HasSerializableState)?.serializeState &&
-      (api as HasSerializableState)?.applySerializedState &&
-      (api as HasSerializableState)?.anyStateChange$
+    (api as HasSerializableState)?.applySerializedState &&
+    (api as HasSerializableState)?.anyStateChange$
   );
 };

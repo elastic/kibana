@@ -13,7 +13,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { getFirstPersistedDataViewId } from './create_data_control_panel_action';
 
 const getSource = (id: string, isPersisted: boolean) =>
-  ({ id, isPersisted: () => isPersisted } as unknown as DataView);
+  ({ id, isPersisted: () => isPersisted }) as unknown as DataView;
 
 const getEmbeddable = (dataViews?: DataView[]) => ({
   dataViews$: new BehaviorSubject<DataView[] | undefined>(dataViews),

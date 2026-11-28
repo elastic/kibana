@@ -39,8 +39,10 @@ import { OriginDocTypeContext } from './origin_doc_type_context';
 import { UnifiedDocViewer } from '../lazy_doc_viewer';
 import { useFlyoutA11y } from './use_flyout_a11y';
 
-export interface UnifiedDocViewerFlyoutProps
-  extends Pick<DocViewerProps, 'initialTabId' | 'onUpdateSelectedTabId'> {
+export interface UnifiedDocViewerFlyoutProps extends Pick<
+  DocViewerProps,
+  'initialTabId' | 'onUpdateSelectedTabId'
+> {
   docViewerRef?: DocViewerProps['ref'];
   'data-test-subj'?: string;
   flyoutTitle?: string;

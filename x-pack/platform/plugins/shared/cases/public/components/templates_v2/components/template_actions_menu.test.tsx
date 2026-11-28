@@ -43,7 +43,7 @@ const createEditor = (lineNumber: number) =>
     addAction: () => ({ dispose: jest.fn() }),
     focus: jest.fn(),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- partial Monaco editor test double
-  } as any);
+  }) as any;
 
 const renderMenu = (opts: { lineNumber?: number; value?: string; onChange?: jest.Mock } = {}) => {
   const onChange = opts.onChange ?? jest.fn();

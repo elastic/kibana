@@ -1072,7 +1072,7 @@ describe('SearchInterceptor', () => {
           .catch(() => {});
         const [path, options] = mockCoreSetup.http.post.mock.calls[0] as unknown as [
           path: string,
-          options: HttpFetchOptions
+          options: HttpFetchOptions,
         ];
         const body = JSON.parse(options?.body as string);
         expect(path).toEqual('/internal/search/ese');
@@ -2487,7 +2487,7 @@ describe('SearchInterceptor', () => {
           .mockImplementation(
             (passedProjectRouting?: string) => passedProjectRouting ?? projectRouting
           ),
-      } as unknown as ICPSManager);
+      }) as unknown as ICPSManager;
 
     const getSearchInterceptor = (overrides?: Partial<SearchInterceptorDeps>) => {
       return new SearchInterceptor({

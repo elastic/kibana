@@ -42,8 +42,8 @@ export const AlertEpisodeDetailsHeader = ({
   const titleContent = isLoading
     ? i18n.HEADER_LOADING_TITLE
     : isRuleLoaded(ruleState)
-    ? ruleState.rule.metadata.name
-    : i18n.HEADER_EPISODE_TITLE_FALLBACK;
+      ? ruleState.rule.metadata.name
+      : i18n.HEADER_EPISODE_TITLE_FALLBACK;
   const showTags = tags.length > 0;
   const showBadgeRow = Boolean(status) || isSupportedEpisodeSeverity(severity) || showTags;
   const nonTagBadgeCount = (status ? 1 : 0) + (isSupportedEpisodeSeverity(severity) ? 1 : 0);

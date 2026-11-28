@@ -1401,7 +1401,7 @@ describe('StepIoService', () => {
       // Second call (only if pinned IDs are returned): eager output fetch.
       if (pinnedOutputs.length > 0) {
         calls.mockResolvedValueOnce(
-          pinnedOutputs.map((p) => ({ id: p.id, output: p.output } as EsWorkflowStepExecution))
+          pinnedOutputs.map((p) => ({ id: p.id, output: p.output }) as EsWorkflowStepExecution)
         );
       }
       await harness.service.load();

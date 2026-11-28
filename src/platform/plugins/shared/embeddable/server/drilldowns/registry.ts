@@ -79,7 +79,7 @@ export function getDrilldownRegistry() {
           schema.arrayOf(
             schema.oneOf(
               drilldownSchemas as unknown as [
-                Type<Readonly<{} & { label: string; type: string; trigger: string }>>
+                Type<Readonly<{} & { label: string; type: string; trigger: string }>>,
               ]
             ),
             {

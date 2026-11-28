@@ -57,7 +57,7 @@ const makeProject = (name: string, dir: string): TsProject =>
     config: { compilerOptions: {} },
     getBase: () => undefined,
     getKbnRefs: () => [],
-  } as unknown as TsProject);
+  }) as unknown as TsProject;
 
 jest.mock('@kbn/ts-projects', () => ({
   TS_PROJECTS: [
@@ -141,7 +141,7 @@ const createLog = (): SomeDevLog =>
     error: jest.fn(),
     debug: jest.fn(),
     verbose: jest.fn(),
-  } as unknown as SomeDevLog);
+  }) as unknown as SomeDevLog;
 
 const createProcRunner = () => ({
   run: jest.fn().mockResolvedValue(undefined),

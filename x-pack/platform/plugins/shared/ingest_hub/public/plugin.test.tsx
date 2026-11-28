@@ -19,7 +19,7 @@ const createPluginContext = (buildFlavor: 'traditional' | 'serverless' = 'tradit
     env: {
       packageInfo: { buildFlavor },
     },
-  } as unknown as PluginInitializerContext);
+  }) as unknown as PluginInitializerContext;
 
 const enableFeatureFlag = (coreStart: ReturnType<typeof coreMock.createStart>) => {
   (coreStart.featureFlags.getBooleanValue$ as jest.Mock).mockReturnValue(of(true));

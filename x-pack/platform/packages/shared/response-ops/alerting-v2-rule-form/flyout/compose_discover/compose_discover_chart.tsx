@@ -31,7 +31,7 @@ const toDatatableColumns = (columns: QueryColumn[]): DatatableColumn[] =>
         id: col.id,
         name: col.id,
         meta: { type: esFieldTypeToKibanaFieldType(col.esType), esType: col.esType },
-      } as DatatableColumn)
+      }) as DatatableColumn
   );
 
 export const ComposeDiscoverChart: React.FC<ComposeDiscoverChartProps> = ({

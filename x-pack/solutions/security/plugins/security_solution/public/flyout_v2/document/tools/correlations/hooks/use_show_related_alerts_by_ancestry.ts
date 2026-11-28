@@ -41,7 +41,7 @@ export const useShowRelatedAlertsByAncestry = ({
   const isRulePreview = isRulePreviewDocument(hit);
 
   const ancestorId = (getFieldValue(hit, ALERT_ANCESTORS_ID) as string) ?? '';
-  const ancestryDocumentId = isRulePreview ? ancestorId : hit.raw._id ?? '';
+  const ancestryDocumentId = isRulePreview ? ancestorId : (hit.raw._id ?? '');
 
   const hasAtLeastPlatinum = useLicense().isPlatinumPlus();
 

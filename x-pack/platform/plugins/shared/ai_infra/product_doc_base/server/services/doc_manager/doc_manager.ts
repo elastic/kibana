@@ -157,7 +157,7 @@ export class DocumentationManager implements DocumentationManagerAPI {
     const idsToUpdate: string[] =
       Array.isArray(inferenceIds) && inferenceIds?.length > 0
         ? inferenceIds
-        : (await this.docInstallClient.getPreviouslyInstalledInferenceIds()) ?? [];
+        : ((await this.docInstallClient.getPreviouslyInstalledInferenceIds()) ?? []);
     this.logger.info(
       `Updating product documentation to latest version for Inference IDs: ${idsToUpdate}`
     );

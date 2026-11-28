@@ -208,8 +208,8 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
       const statusColor = hasMissingDependencies
         ? euiTheme.colors.borderBaseDanger // Warning/Incomplete
         : hasActiveRules
-        ? euiTheme.colors.borderBaseAccentSecondary // Healthy
-        : euiTheme.colors.lightShade; // Inactive
+          ? euiTheme.colors.borderBaseAccentSecondary // Healthy
+          : euiTheme.colors.lightShade; // Inactive
 
       return {
         tacticId: `tactic-${index}`,

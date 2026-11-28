@@ -35,7 +35,7 @@ const createAttack = (overrides: Partial<AttackDiscoveryAlert> = {}): AttackDisc
     timestamp: '2024-01-01T00:00:00.000Z',
     index: '.alerts-security.attack-discovery.alerts-default',
     ...overrides,
-  } as AttackDiscoveryAlert);
+  }) as AttackDiscoveryAlert;
 
 describe('useAttackExploreInAttacksContextMenuItems', () => {
   const closePopover = jest.fn();

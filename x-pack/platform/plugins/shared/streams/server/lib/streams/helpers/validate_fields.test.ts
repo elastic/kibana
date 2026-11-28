@@ -720,7 +720,7 @@ describe('validateClassicFields', () => {
           field_overrides: fieldOverrides,
         },
       },
-    } as Streams.ClassicStream.Definition);
+    }) as Streams.ClassicStream.Definition;
 
   it('should throw for system fields in classic stream', () => {
     const definition = createClassicStreamDefinition('metrics-custom', {

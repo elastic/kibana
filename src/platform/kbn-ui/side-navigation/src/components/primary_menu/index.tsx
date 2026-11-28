@@ -45,8 +45,9 @@ export interface PrimaryMenuProps {
   isOverflowMeasured: boolean;
 }
 
-interface PrimaryMenuComponent
-  extends ForwardRefExoticComponent<PrimaryMenuProps & RefAttributes<HTMLElement>> {
+interface PrimaryMenuComponent extends ForwardRefExoticComponent<
+  PrimaryMenuProps & RefAttributes<HTMLElement>
+> {
   Item: typeof PrimaryMenuItem;
 }
 

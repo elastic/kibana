@@ -30,7 +30,10 @@ export class ServiceDetailsPage {
   public readonly metricsTab: MetricsTab;
   public readonly infrastructureTab: InfrastructureTab;
 
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {
     this.dependenciesTab = createLazyPageObject(
       DependenciesTab,
       this.page,

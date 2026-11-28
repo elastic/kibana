@@ -281,7 +281,7 @@ async function main() {
     if (!resolved) {
       const known = teams
         .map((t) =>
-          t && typeof t === 'object' ? t.team_alias ?? t.team_name ?? t.name : undefined
+          t && typeof t === 'object' ? (t.team_alias ?? t.team_name ?? t.name) : undefined
         )
         .filter(Boolean)
         .slice(0, 50);

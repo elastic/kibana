@@ -251,8 +251,8 @@ class FunctionValidator {
     const parentAggFunction = this.parentAggFunction
       ? this.parentAggFunction
       : this.definition?.type === FunctionDefinitionTypes.AGG
-      ? this.definition?.name
-      : undefined;
+        ? this.definition?.name
+        : undefined;
 
     const flatArgs = this.fn.args.flat();
     for (let i = 0; i < flatArgs.length; i++) {

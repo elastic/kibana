@@ -177,6 +177,6 @@ export const getArgumentsForCommand = (command: CommandDefinition): string[] => 
         });
       })
     : requiredArgs || optionalArgs
-    ? [buildArgumentText({ required: requiredArgs, optional: optionalArgs })]
-    : [];
+      ? [buildArgumentText({ required: requiredArgs, optional: optionalArgs })]
+      : [];
 };

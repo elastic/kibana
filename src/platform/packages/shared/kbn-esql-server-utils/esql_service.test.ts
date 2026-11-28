@@ -12,7 +12,7 @@ import { SOURCES_TYPES } from '@kbn/esql-types';
 import { EsqlService } from './esql_service';
 
 const makeClient = (resolveIndexMock: jest.Mock) =>
-  ({ indices: { resolveIndex: resolveIndexMock } } as unknown as ElasticsearchClient);
+  ({ indices: { resolveIndex: resolveIndexMock } }) as unknown as ElasticsearchClient;
 
 const emptyResponse = { indices: [], aliases: [], data_streams: [] };
 

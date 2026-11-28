@@ -428,9 +428,12 @@ export abstract class ActionRunner {
     if (!this.checkTaskId || this.heartbeatTimer) {
       return;
     }
-    this.heartbeatTimer = setInterval(() => {
-      void this.writeCheckTaskState({});
-    }, RUNNER_HEARTBEAT_INTERVAL_MINUTES * 60 * 1000);
+    this.heartbeatTimer = setInterval(
+      () => {
+        void this.writeCheckTaskState({});
+      },
+      RUNNER_HEARTBEAT_INTERVAL_MINUTES * 60 * 1000
+    );
     // Must never hold Kibana open on shutdown.
     this.heartbeatTimer.unref?.();
   }

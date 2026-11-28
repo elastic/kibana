@@ -77,46 +77,48 @@ export type ToPrimitives<O extends { properties: Record<string, MappingProperty>
       [K in keyof O['properties']]: {} extends O['properties'][K]
         ? never
         : O['properties'][K] extends { type: infer T }
-        ? T extends 'keyword'
-          ? O['properties'][K] extends { enum: infer TEnums }
-            ? TEnums extends Array<infer TEnum>
-              ? TEnum
-              : never
-            : string
-          : T extends 'text'
-          ? string
-          : T extends 'match_only_text'
-          ? string
-          : T extends 'semantic_text'
-          ? string
-          : T extends 'integer'
-          ? number
-          : T extends 'long'
-          ? number
-          : T extends 'short'
-          ? number
-          : T extends 'float'
-          ? number
-          : T extends 'double'
-          ? number
-          : T extends 'byte'
-          ? number
-          : T extends 'boolean'
-          ? boolean
-          : T extends 'date'
-          ? O['properties'][K] extends { format: 'strict_date_optional_time' }
-            ? string
-            : string | number
-          : T extends 'date_nanos'
-          ? string
-          : T extends 'flattened'
-          ? Record<string, unknown>
-          : T extends 'object'
-          ? O['properties'][K] extends AnyMappingDefinition
-            ? ToPrimitives<O['properties'][K]>
-            : never
-          : never
-        : never;
+          ? T extends 'keyword'
+            ? O['properties'][K] extends { enum: infer TEnums }
+              ? TEnums extends Array<infer TEnum>
+                ? TEnum
+                : never
+              : string
+            : T extends 'text'
+              ? string
+              : T extends 'match_only_text'
+                ? string
+                : T extends 'semantic_text'
+                  ? string
+                  : T extends 'integer'
+                    ? number
+                    : T extends 'long'
+                      ? number
+                      : T extends 'short'
+                        ? number
+                        : T extends 'float'
+                          ? number
+                          : T extends 'double'
+                            ? number
+                            : T extends 'byte'
+                              ? number
+                              : T extends 'boolean'
+                                ? boolean
+                                : T extends 'date'
+                                  ? O['properties'][K] extends {
+                                      format: 'strict_date_optional_time';
+                                    }
+                                    ? string
+                                    : string | number
+                                  : T extends 'date_nanos'
+                                    ? string
+                                    : T extends 'flattened'
+                                      ? Record<string, unknown>
+                                      : T extends 'object'
+                                        ? O['properties'][K] extends AnyMappingDefinition
+                                          ? ToPrimitives<O['properties'][K]>
+                                          : never
+                                        : never
+          : never;
     };
 
 export type AnyMappingDefinition = MappingsDefinition<MappingProperty>;
@@ -143,14 +145,15 @@ export type GetFieldsOf<Definition extends MappingsDefinition<MappingProperty>> 
 // If this is not the case, the EnsureSubsetOf type is set to never, which will cause a type error in the consuming code.
 export type EnsureSubsetOf<
   SubsetDefinition extends AnyMappingDefinition,
-  AllFields extends GetFieldsOf<SubsetDefinition>
-> = Exact<GetFieldsOf<SubsetDefinition>, PartialWithArrayValues<AllFields>> extends true
-  ? true
-  : MissingKeysError<
-      Exclude<
-        UnionKeys<GetFieldsOf<SubsetDefinition>> extends string
-          ? UnionKeys<GetFieldsOf<SubsetDefinition>>
-          : never,
-        UnionKeys<AllFields>
-      >
-    >;
+  AllFields extends GetFieldsOf<SubsetDefinition>,
+> =
+  Exact<GetFieldsOf<SubsetDefinition>, PartialWithArrayValues<AllFields>> extends true
+    ? true
+    : MissingKeysError<
+        Exclude<
+          UnionKeys<GetFieldsOf<SubsetDefinition>> extends string
+            ? UnionKeys<GetFieldsOf<SubsetDefinition>>
+            : never,
+          UnionKeys<AllFields>
+        >
+      >;

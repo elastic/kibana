@@ -377,8 +377,8 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
           transformSettingsNumFailureRetries === ''
             ? undefined
             : typeof transformSettingsNumFailureRetries === 'number'
-            ? transformSettingsNumFailureRetries
-            : parseInt(transformSettingsNumFailureRetries, 10),
+              ? transformSettingsNumFailureRetries
+              : parseInt(transformSettingsNumFailureRetries, 10),
         destinationIndex,
         destinationIngestPipeline,
         touched: true,

@@ -20,7 +20,7 @@ export const createWorkflowAction = (workflowId: string): RuleAlertType['actions
         summaryMode: true,
       },
     },
-  } as RuleAlertType['actions'][number]);
+  }) as RuleAlertType['actions'][number];
 
 export const createWorkflowSystemAction = (
   workflowId: string
@@ -35,7 +35,7 @@ export const createWorkflowSystemAction = (
         summaryMode: true,
       },
     },
-  } as NonNullable<RuleAlertType['systemActions']>[number]);
+  }) as NonNullable<RuleAlertType['systemActions']>[number];
 
 export const createConnectorAction = (id = 'connector-id'): RuleAlertType['actions'][number] =>
   ({
@@ -50,7 +50,7 @@ export const createConnectorAction = (id = 'connector-id'): RuleAlertType['actio
       notifyWhen: 'onActiveAlert',
       throttle: null,
     },
-  } as RuleAlertType['actions'][number]);
+  }) as RuleAlertType['actions'][number];
 
 export const createRule = ({
   id,
@@ -72,4 +72,4 @@ export const createRule = ({
     params: {
       immutable: false,
     },
-  } as RuleAlertType);
+  }) as RuleAlertType;

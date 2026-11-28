@@ -22,7 +22,8 @@ import { usePolicyNavLinks } from '../hooks/use_policy_nav_links';
 import { DescriptionField } from './description_field';
 
 export interface CardCompressedHeaderProps
-  extends Pick<CommonProps, 'data-test-subj'>,
+  extends
+    Pick<CommonProps, 'data-test-subj'>,
     Pick<
       ArtifactEntryCollapsibleCardProps,
       'onExpandCollapse' | 'expanded' | 'actions' | 'policies'

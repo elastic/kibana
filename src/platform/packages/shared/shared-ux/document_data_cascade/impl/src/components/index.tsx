@@ -32,7 +32,7 @@ export type DataCascadeComponent = <G extends GroupNode = GroupNode, L extends L
  */
 export const DataCascade = forwardRef(function DataCascadeWithProvider<
   G extends GroupNode,
-  L extends LeafNode
+  L extends LeafNode,
 >(
   {
     cascadeGroups,

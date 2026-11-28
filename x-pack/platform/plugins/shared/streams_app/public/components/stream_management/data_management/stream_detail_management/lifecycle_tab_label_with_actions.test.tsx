@@ -193,7 +193,7 @@ describe('LifecycleTabLabel', () => {
   const createNotifications = () =>
     ({
       toasts: { addSuccess: jest.fn() },
-    } as unknown as CoreStart['notifications']);
+    }) as unknown as CoreStart['notifications'];
 
   const createShare = (
     locatorGetUrl = jest.fn(async () => '/app/management/data/index_management')
@@ -204,7 +204,7 @@ describe('LifecycleTabLabel', () => {
           get: jest.fn(() => ({ getUrl: locatorGetUrl })),
         },
       },
-    } as unknown as SharePublicStart);
+    }) as unknown as SharePublicStart;
 
   beforeEach(() => {
     jest.clearAllMocks();

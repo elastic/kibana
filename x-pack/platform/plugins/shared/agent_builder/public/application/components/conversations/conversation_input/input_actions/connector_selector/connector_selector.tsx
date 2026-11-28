@@ -229,7 +229,7 @@ export const ConnectorSelector: React.FC<{}> = () => {
         label,
         isGroupLabel: true as const,
         'data-test-subj': dataTestSubj,
-      } as ConnectorOptionData);
+      }) as ConnectorOptionData;
 
     const recommendedOptions = recommendedConnectors.map(toOption);
     const otherOptions = otherConnectors.map(toOption);

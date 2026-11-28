@@ -289,11 +289,14 @@ export const EntitiesDataTable = ({
   const [persistedSettings, setPersistedSettings] = useLocalStorage<UnifiedDataTableSettings>(
     columnsSettingsLocalStorageKey,
     {
-      columns: DEFAULT_COLUMNS.reduce((columnSettings, column) => {
-        const columnDefaultSettings = column.width ? { width: column.width } : {};
-        const newColumn = { [column.id]: columnDefaultSettings };
-        return { ...columnSettings, ...newColumn };
-      }, {} as UnifiedDataTableSettings['columns']),
+      columns: DEFAULT_COLUMNS.reduce(
+        (columnSettings, column) => {
+          const columnDefaultSettings = column.width ? { width: column.width } : {};
+          const newColumn = { [column.id]: columnDefaultSettings };
+          return { ...columnSettings, ...newColumn };
+        },
+        {} as UnifiedDataTableSettings['columns']
+      ),
     }
   );
 

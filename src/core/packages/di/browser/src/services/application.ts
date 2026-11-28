@@ -15,7 +15,8 @@ import type { App, AppMount, AppMountParameters } from '@kbn/core-application-br
  * @public
  */
 export interface ApplicationDefinition<HistoryLocationState = unknown>
-  extends Omit<App<HistoryLocationState>, 'mount'>,
+  extends
+    Omit<App<HistoryLocationState>, 'mount'>,
     Newable<ApplicationHandler<HistoryLocationState>> {}
 
 /**

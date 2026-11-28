@@ -36,22 +36,26 @@ const root = (chromeStyle: ChromeStyle = 'classic'): EmotionFn => {
       flex-direction: column;
 
       // Only apply distinguished background styling for "project" chrome style
-      ${isProjectStyle &&
-      css`
-        background-color: ${useEuiTheme.euiTheme.colors.backgroundBasePlain};
-        border-radius: ${useEuiTheme.euiTheme.border.radius.medium};
+      ${
+        isProjectStyle &&
+        css`
+          background-color: ${useEuiTheme.euiTheme.colors.backgroundBasePlain};
+          border-radius: ${useEuiTheme.euiTheme.border.radius.medium};
 
-        // use outline so it doesn't affect size/layout and cause a scrollbar
-        outline: ${getHighContrastBorder(useEuiTheme)};
+          // use outline so it doesn't affect size/layout and cause a scrollbar
+          outline: ${getHighContrastBorder(useEuiTheme)};
 
-        ${euiShadow(useEuiTheme, 'xs', { border: 'none' })};
-      `}
-      ${!isProjectStyle &&
-      css`
-        background-color: transparent;
-        border-radius: 0;
-        border: none;
-      `}
+          ${euiShadow(useEuiTheme, 'xs', { border: 'none' })};
+        `
+      }
+      ${
+        !isProjectStyle &&
+        css`
+          background-color: transparent;
+          border-radius: 0;
+          border: none;
+        `
+      }
 
       &:focus-visible {
         border: 2px solid ${useEuiTheme.euiTheme.colors.textParagraph};

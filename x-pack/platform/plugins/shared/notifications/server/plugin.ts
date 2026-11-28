@@ -15,15 +15,12 @@ import type {
 import type { NotificationsConfigType } from './config';
 import { EmailServiceProvider } from './services/connectors_email_service_provider';
 
-export class NotificationsPlugin
-  implements
-    Plugin<
-      NotificationsServerSetup,
-      NotificationsServerStart,
-      NotificationsServerSetupDependencies,
-      NotificationsServerStartDependencies
-    >
-{
+export class NotificationsPlugin implements Plugin<
+  NotificationsServerSetup,
+  NotificationsServerStart,
+  NotificationsServerSetupDependencies,
+  NotificationsServerStartDependencies
+> {
   private emailServiceProvider: EmailServiceProvider;
 
   constructor(initializerContext: PluginInitializerContext<NotificationsConfigType>) {

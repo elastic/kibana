@@ -62,10 +62,10 @@ export const TypeIcon = React.memo<TypeIconProps>(({ type, kind, title, ...rest 
     () =>
       kind === 'trigger'
         ? resolveTriggerIconType(type, workflowsExtensions)
-        : resolveRegisteredStepIcon(type, {
+        : (resolveRegisteredStepIcon(type, {
             workflowsExtensions,
             actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
-          }) ?? getStepIconType(getBaseConnectorType(type)),
+          }) ?? getStepIconType(getBaseConnectorType(type))),
     [kind, type, workflowsExtensions, triggersActionsUi]
   );
 

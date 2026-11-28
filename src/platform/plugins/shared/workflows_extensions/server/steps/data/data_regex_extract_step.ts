@@ -20,7 +20,7 @@ function extractFieldsFromMatch(
   for (const [fieldName, groupRef] of Object.entries(fields)) {
     if (groupRef.startsWith('$')) {
       const index = parseInt(groupRef.slice(1), 10);
-      extractedFields[fieldName] = isNaN(index) ? null : match[index] ?? null;
+      extractedFields[fieldName] = isNaN(index) ? null : (match[index] ?? null);
     } else {
       extractedFields[fieldName] = match.groups?.[groupRef] ?? null;
     }

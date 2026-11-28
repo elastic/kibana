@@ -558,9 +558,9 @@ export const Slack: ConnectorSpec = {
             text:
               m.text && m.text.length > 0
                 ? m.text
-                : m.attachments?.find((a) => a.fallback)?.fallback ??
+                : (m.attachments?.find((a) => a.fallback)?.fallback ??
                   m.attachments?.find((a) => a.text)?.text ??
-                  m.text,
+                  m.text),
             thread_ts: m.thread_ts,
             reply_count: m.reply_count,
             blocks: m.blocks,

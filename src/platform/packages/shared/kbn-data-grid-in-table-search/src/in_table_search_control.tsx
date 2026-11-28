@@ -51,8 +51,10 @@ const innerCss = css`
   }
 `;
 
-export interface InTableSearchControlProps
-  extends Omit<UseFindMatchesProps, 'onScrollToActiveMatch'> {
+export interface InTableSearchControlProps extends Omit<
+  UseFindMatchesProps,
+  'onScrollToActiveMatch'
+> {
   pageSize: number | null; // null when the pagination is disabled
   getColumnIndexFromId: (columnId: string) => number;
   scrollToCell: (params: { rowIndex: number; columnIndex: number; align: 'center' }) => void;

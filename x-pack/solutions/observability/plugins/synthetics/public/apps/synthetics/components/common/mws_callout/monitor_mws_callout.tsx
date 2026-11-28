@@ -20,7 +20,7 @@ export const MonitorMWsCallout = () => {
 
   const monitorMWIds =
     monitor && !isRemoteSyntheticsMonitor(monitor)
-      ? monitor[ConfigKey.MAINTENANCE_WINDOWS] ?? []
+      ? (monitor[ConfigKey.MAINTENANCE_WINDOWS] ?? [])
       : [];
   const { activeMWs, hasPendingChanges, isSyncOverdue } = useHasPendingMwChanges(monitorMWIds);
 

@@ -36,7 +36,7 @@ const createMockEsClient = (): jest.Mocked<ElasticsearchClient> =>
     esql: {
       query: jest.fn(),
     },
-  } as unknown as jest.Mocked<ElasticsearchClient>);
+  }) as unknown as jest.Mocked<ElasticsearchClient>;
 
 /**
  * Build a `termsEnum` mock that serves a corpus permission universe keyed by

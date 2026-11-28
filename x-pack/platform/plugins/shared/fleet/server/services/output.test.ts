@@ -2662,7 +2662,7 @@ describe('Output Service', () => {
         mockedIsOutputSecretStorageEnabled.mockResolvedValue(true);
         mockedExtractAndUpdateOutputSecrets.mockImplementation(
           async ({ outputUpdate }) =>
-            ({ outputUpdate, secretReferences: [], secretsToDelete: [] } as any)
+            ({ outputUpdate, secretReferences: [], secretsToDelete: [] }) as any
         );
       });
 

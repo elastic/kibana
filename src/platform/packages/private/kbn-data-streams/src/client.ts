@@ -39,9 +39,8 @@ export const DEFAULT_SPACE = 'default';
 export class DataStreamClient<
   MappingsInDefinition extends MappingsDefinition,
   FullDocumentType extends GetFieldsOf<MappingsInDefinition> = GetFieldsOf<MappingsInDefinition>,
-  SRM extends BaseSearchRuntimeMappings = never
-> implements IDataStreamClient<MappingsInDefinition, FullDocumentType, SRM>
-{
+  SRM extends BaseSearchRuntimeMappings = never,
+> implements IDataStreamClient<MappingsInDefinition, FullDocumentType, SRM> {
   private readonly runtimeFields: string[];
   private constructor(
     private readonly client: ElasticsearchClient,
@@ -63,7 +62,7 @@ export class DataStreamClient<
   public static async initialize<
     MappingsInDefinition extends MappingsDefinition,
     FullDocumentType extends GetFieldsOf<MappingsInDefinition> = GetFieldsOf<MappingsInDefinition>,
-    SRM extends BaseSearchRuntimeMappings = never
+    SRM extends BaseSearchRuntimeMappings = never,
   >(args: {
     dataStream: DataStreamDefinition<MappingsInDefinition, FullDocumentType, SRM>;
     elasticsearchClient: ElasticsearchClient;
@@ -148,7 +147,7 @@ export class DataStreamClient<
   public static fromDefinition<
     MappingsInDefinition extends MappingsDefinition,
     FullDocumentType extends GetFieldsOf<MappingsInDefinition> = GetFieldsOf<MappingsInDefinition>,
-    SRM extends BaseSearchRuntimeMappings = never
+    SRM extends BaseSearchRuntimeMappings = never,
   >(args: {
     dataStream: DataStreamDefinition<MappingsInDefinition, FullDocumentType, SRM>;
     elasticsearchClient: ElasticsearchClient;

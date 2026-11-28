@@ -353,7 +353,7 @@ export class WorkflowCrudService {
     }
     const triggerDefinitions = params.lightweightValidation
       ? undefined
-      : this.deps.workflowsExtensions?.getAllTriggerDefinitions() ?? [];
+      : (this.deps.workflowsExtensions?.getAllTriggerDefinitions() ?? []);
 
     return prepareWorkflowDocumentFromYaml({
       id: params.id,
@@ -779,7 +779,7 @@ export class WorkflowCrudService {
       ? await this.deps.validationService.getWorkflowZodSchema({ loose: false }, spaceId, request)
       : undefined;
     const triggerDefinitions = workflowYaml
-      ? this.deps.workflowsExtensions?.getAllTriggerDefinitions() ?? []
+      ? (this.deps.workflowsExtensions?.getAllTriggerDefinitions() ?? [])
       : undefined;
     const yamlResult =
       workflowYaml && zodSchema && triggerDefinitions

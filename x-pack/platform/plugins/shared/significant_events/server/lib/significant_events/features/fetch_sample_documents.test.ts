@@ -47,7 +47,7 @@ const createFeature = ({
     confidence: 80,
     updated_at: updatedAt,
     filter: { field, eq: value },
-  } as FeatureWithFilter);
+  }) as FeatureWithFilter;
 
 const logger = {
   debug: jest.fn(),

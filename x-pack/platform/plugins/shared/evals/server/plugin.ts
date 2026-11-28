@@ -33,10 +33,12 @@ import { DatasetService } from './storage/dataset_service';
 import { EvaluationScoreService } from './storage/evaluation_score_service';
 import { evaluationsDataStreamDefinition } from './storage/scores_index_template';
 
-export class EvalsPlugin
-  implements
-    Plugin<EvalsPluginSetup, EvalsPluginStart, EvalsSetupDependencies, EvalsStartDependencies>
-{
+export class EvalsPlugin implements Plugin<
+  EvalsPluginSetup,
+  EvalsPluginStart,
+  EvalsSetupDependencies,
+  EvalsStartDependencies
+> {
   private readonly logger: Logger;
   private readonly config: EvalsConfig;
   private readonly isServerless: boolean;

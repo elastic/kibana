@@ -96,7 +96,7 @@ export function getPanelSchema() {
         version: Type<string | undefined>;
         type: Type<string>;
         config: ObjectType<{}>;
-      }>
+      }>,
     ]
   );
 }

@@ -36,7 +36,7 @@ export const AugmentMessageCodeBlocksPortal = () => {
     const codeBlockDetails = currentConversation.messages.map(({ content }) =>
       analyzeMarkdown(
         showAnonymizedValues
-          ? content ?? ''
+          ? (content ?? '')
           : replaceAnonymizedValuesWithOriginalValues({
               messageContent: content ?? '',
               replacements: currentConversation.replacements,

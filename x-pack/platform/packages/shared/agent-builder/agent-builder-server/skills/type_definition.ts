@@ -68,7 +68,7 @@ type DirectoryPath = FilePathsFromStructure<SkillsDirectoryStructure>;
  */
 export interface SkillDefinition<
   TName extends string = string,
-  TBasePath extends DirectoryPath = DirectoryPath
+  TBasePath extends DirectoryPath = DirectoryPath,
 > {
   /**
    * Stable unique identifier for the skill.

@@ -429,7 +429,7 @@ const alignIds: NormalizerConfig<MetricAttributes> = {
       getColumnRemapping(viz).filter((pair): pair is [string, string] => pair[0] != null)
     );
     const remap = (id: string | undefined): string | undefined =>
-      id == null ? id : idMap.get(id) ?? id;
+      id == null ? id : (idMap.get(id) ?? id);
 
     viz.layerId = DEFAULT_LAYER_ID;
     if (viz.trendlineLayerId) viz.trendlineLayerId = TRENDLINE_LAYER_ID;

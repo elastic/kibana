@@ -222,7 +222,7 @@ export class RenderingService {
             Promise<Record<string, UserProvidedValues>>,
             Promise<Record<string, UserProvidedValues>>,
             Promise<UserSettings> | undefined,
-            Promise<Record<string, unknown>>
+            Promise<Record<string, unknown>>,
           ])
     );
 

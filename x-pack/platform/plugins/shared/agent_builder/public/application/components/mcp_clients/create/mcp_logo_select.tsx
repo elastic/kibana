@@ -42,9 +42,10 @@ export const McpLogoSelect = ({ value, onChange }: McpLogoSelectProps) => {
 
   const { value: iconUrls = EMPTY_ICON_URLS } = useAbortableAsync(async () => {
     const entries = await Promise.all(
-      Object.entries(LOGO_OPTIONS).map(
-        async ([id, option]): Promise<readonly [string, string]> => [id, await option.loadIconUrl()]
-      )
+      Object.entries(LOGO_OPTIONS).map(async ([id, option]): Promise<readonly [string, string]> => [
+        id,
+        await option.loadIconUrl(),
+      ])
     );
     return new Map<string, string>(entries);
   }, []);

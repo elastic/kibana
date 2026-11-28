@@ -117,7 +117,7 @@ const renderChartSection = (overrides: Partial<ChartSectionProps> = {}) => {
   }
 
   const configFactory = getChartSection(
-    () => ({ replaceDefaultChart: false } as ChartSectionConfiguration),
+    () => ({ replaceDefaultChart: false }) as ChartSectionConfiguration,
     {
       context: { category: DataSourceCategory.Metrics },
       toolkit: {

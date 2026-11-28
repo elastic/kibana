@@ -36,7 +36,7 @@ describe('generateExecutorFunction', () => {
       services: {} as never,
       configurationUtilities: {} as never,
       connectorUsageCollector: {} as never,
-    } as Parameters<ReturnType<typeof generateExecutorFunction>>[0]);
+    }) as Parameters<ReturnType<typeof generateExecutorFunction>>[0];
 
   beforeEach(() => {
     jest.resetAllMocks();

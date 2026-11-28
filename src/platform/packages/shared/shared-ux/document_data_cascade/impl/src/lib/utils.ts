@@ -48,10 +48,13 @@ export function getCascadeRowNodePathValueRecord<G extends GroupNode, L extends 
   if (rowDepth === 0) {
     return { [nodePath[0]]: rowData[nodePath[0]] };
   } else {
-    return nodePath.reduce((acc, columnName) => {
-      acc[columnName] = rowData[columnName];
-      return acc;
-    }, {} as Record<string, string>);
+    return nodePath.reduce(
+      (acc, columnName) => {
+        acc[columnName] = rowData[columnName];
+        return acc;
+      },
+      {} as Record<string, string>
+    );
   }
 }
 

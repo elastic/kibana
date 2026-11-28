@@ -45,7 +45,7 @@ export function savedObjectToItem(
           ({
             ...link,
             ...(link.options && { options: getOptions(link.type, link.options) }),
-          } as Link)
+          }) as Link
       ),
     },
     references: (references ?? []).filter(({ type }) => type === 'tag'),

@@ -40,15 +40,12 @@ import type {
 import { registerUISettings } from './ui_settings';
 import { stepSchemas } from '../common/step_schemas';
 
-export class WorkflowsPlugin
-  implements
-    Plugin<
-      WorkflowsServerPluginSetup,
-      WorkflowsServerPluginStart,
-      WorkflowsServerPluginSetupDeps,
-      WorkflowsServerPluginStartDeps
-    >
-{
+export class WorkflowsPlugin implements Plugin<
+  WorkflowsServerPluginSetup,
+  WorkflowsServerPluginStart,
+  WorkflowsServerPluginSetupDeps,
+  WorkflowsServerPluginStartDeps
+> {
   private readonly logger: Logger;
   private config: WorkflowsManagementConfig;
   private readonly kibanaVersion: string;

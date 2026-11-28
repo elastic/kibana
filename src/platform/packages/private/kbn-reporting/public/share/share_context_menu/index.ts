@@ -25,7 +25,7 @@ export type StartServices = [
     | 'notifications'
   >,
   unknown,
-  unknown
+  unknown,
 ];
 
 export interface ExportModalShareOpts {

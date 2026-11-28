@@ -88,7 +88,7 @@ export const IconButtonGroup = ({
       'aria-label': title ?? label,
       id: `${htmlIdGenerator()()}${index}`,
       label,
-      title: toolTipContent !== undefined ? '' : title ?? label,
+      title: toolTipContent !== undefined ? '' : (title ?? label),
       toolTipContent,
       css: css`
         ${iconButtonStyles};

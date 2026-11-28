@@ -47,4 +47,4 @@ export const createSignificantEventsJudgeAgent = ({
         },
       ],
     },
-  } as const);
+  }) as const;

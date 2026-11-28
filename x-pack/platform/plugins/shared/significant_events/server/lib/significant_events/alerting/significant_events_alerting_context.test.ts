@@ -37,7 +37,7 @@ describe('createSignificantEventsAlertingContextResolver', () => {
         }
         return Promise.resolve(undefined);
       }),
-    } as never);
+    }) as never;
 
   const alertingRulesClient = {} as RulesClient;
   const v2Client = {} as RulesClientApi;

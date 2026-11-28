@@ -50,7 +50,7 @@ interface FunctionBuilderArguments<FnDef extends AnyExpressionFunctionDefinition
 }
 
 export interface ExpressionAstFunctionBuilder<
-  FnDef extends AnyExpressionFunctionDefinition = AnyExpressionFunctionDefinition
+  FnDef extends AnyExpressionFunctionDefinition = AnyExpressionFunctionDefinition,
 > {
   /**
    * Used to identify expression function builder objects.
@@ -145,7 +145,7 @@ export interface ExpressionAstFunctionBuilder<
  * @return `this`
  */
 export function buildExpressionFunction<
-  FnDef extends AnyExpressionFunctionDefinition = AnyExpressionFunctionDefinition
+  FnDef extends AnyExpressionFunctionDefinition = AnyExpressionFunctionDefinition,
 >(
   fnName: InferFunctionDefinition<FnDef>['name'],
   /**

@@ -322,8 +322,8 @@ export const TraceWaterfall: React.FC<TraceWaterfallProps> = ({
                   idx === 0
                     ? 'none'
                     : idx === tickLabels.length - 1
-                    ? 'translateX(-100%)'
-                    : 'translateX(-50%)',
+                      ? 'translateX(-100%)'
+                      : 'translateX(-50%)',
                 fontSize: 10,
                 color: euiTheme.colors.mediumShade,
                 whiteSpace: 'nowrap',

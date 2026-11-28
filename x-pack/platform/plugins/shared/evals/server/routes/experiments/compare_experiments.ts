@@ -77,11 +77,11 @@ export const registerCompareExperimentsRoute = ({ router, logger }: RouteDepende
           const totalHitsA =
             typeof responseA.hits.total === 'number'
               ? responseA.hits.total
-              : responseA.hits.total?.value ?? 0;
+              : (responseA.hits.total?.value ?? 0);
           const totalHitsB =
             typeof responseB.hits.total === 'number'
               ? responseB.hits.total
-              : responseB.hits.total?.value ?? 0;
+              : (responseB.hits.total?.value ?? 0);
           const truncatedA = totalHitsA > MAX_SCORES_PER_EXPERIMENT;
           const truncatedB = totalHitsB > MAX_SCORES_PER_EXPERIMENT;
 

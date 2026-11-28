@@ -64,8 +64,10 @@ const transactionFieldNames = [
   USER_AGENT_VERSION,
 ];
 
-export interface AboutProps
-  extends Pick<DocViewRenderProps, 'filter' | 'onAddColumn' | 'onRemoveColumn' | 'columns'> {
+export interface AboutProps extends Pick<
+  DocViewRenderProps,
+  'filter' | 'onAddColumn' | 'onRemoveColumn' | 'columns'
+> {
   hit: DataTableRecord;
   dataView: DocViewRenderProps['dataView'];
 }
@@ -92,7 +94,7 @@ export const About = ({
     [flattenedHit, isSpan]
   );
 
-  const durationField = isSpan ? SPAN_DURATION ?? DURATION : TRANSACTION_DURATION;
+  const durationField = isSpan ? (SPAN_DURATION ?? DURATION) : TRANSACTION_DURATION;
 
   aboutFieldConfigurations[durationField] = {
     ...aboutFieldConfigurations[durationField],

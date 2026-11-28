@@ -18,5 +18,5 @@ export type ActiveRouteObject<THandle extends RouteHandle | undefined = RouteHan
 
 export type WithHandle<
   TBase extends Record<string, any>,
-  THandle extends RouteHandle | undefined = RouteHandle | undefined
+  THandle extends RouteHandle | undefined = RouteHandle | undefined,
 > = TBase & (THandle extends RouteHandle ? { handle: THandle } : {});

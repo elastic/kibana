@@ -155,7 +155,7 @@ export const copyPreviewAlertsToRealAlertsIndex = async ({
     }
 
     // Reindex destination cannot be an alias in self-managed ES; use the resolved write index.
-    const reindexDest = destIsDataStream ? destIndex : destWriteIndex ?? destIndex;
+    const reindexDest = destIsDataStream ? destIndex : (destWriteIndex ?? destIndex);
 
     const script = (() => {
       if (!targetRule) return;

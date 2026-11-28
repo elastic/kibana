@@ -245,9 +245,8 @@ function parseLitellmChatContent(responseJson) {
     throw new Error('LiteLLM response was not JSON');
   }
 
-  const choices = /** @type {{ choices?: Array<{ message?: { content?: string } }> }} */ (
-    responseJson
-  ).choices;
+  const choices =
+    /** @type {{ choices?: Array<{ message?: { content?: string } }> }} */ (responseJson).choices;
 
   const content = choices?.[0]?.message?.content;
   if (typeof content !== 'string' || !content.trim()) {

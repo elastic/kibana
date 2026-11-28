@@ -24,7 +24,7 @@ import type { AlertActionEvent } from '../../alert_action_event_publisher/events
  */
 export interface AlertActionWorkflowTriggerBinding<
   TEvent extends AlertActionEvent = AlertActionEvent,
-  TSchema extends z.ZodObject = z.ZodObject
+  TSchema extends z.ZodObject = z.ZodObject,
 > {
   readonly eventType: TEvent['type'];
   readonly triggerId: string;

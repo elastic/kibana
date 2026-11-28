@@ -147,7 +147,7 @@ export function ServiceMap({
             kuery: '',
             comparisonEnabled: query.comparisonEnabled,
             offset: query.offset,
-            serviceGroup: 'serviceGroup' in query ? query.serviceGroup ?? '' : '',
+            serviceGroup: 'serviceGroup' in query ? (query.serviceGroup ?? '') : '',
           },
         })
       : undefined;
@@ -187,8 +187,8 @@ export function ServiceMap({
   const mapHeight = isFullscreen
     ? windowHeight - PADDING_BOTTOM
     : useStoredHeight
-    ? heightBeforeFullscreenRef.current
-    : heightWithPadding;
+      ? heightBeforeFullscreenRef.current
+      : heightWithPadding;
 
   const onToggleFullscreen = useCallback(() => {
     setIsFullscreen((prev) => {

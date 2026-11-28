@@ -351,11 +351,13 @@ export const Popover = ({
             : children}
         </div>
       </EuiPopover>
-      {persistent && isOpenedByClick && isOpen && (
-        // The persistent popover does not affect keyboard navigation users
-        // eslint-disable-next-line jsx-a11y/click-events-have-key-events
-        <div onClick={handleClose} css={maskStyles} />
-      )}
+      {persistent &&
+        isOpenedByClick &&
+        isOpen && (
+          // The persistent popover does not affect keyboard navigation users
+          // eslint-disable-next-line jsx-a11y/click-events-have-key-events
+          <div onClick={handleClose} css={maskStyles} />
+        )}
     </div>
   );
 };

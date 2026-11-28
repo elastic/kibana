@@ -9,7 +9,7 @@ import { getEpisodesFromDocIds, uniqueGroupEpisodes } from './bulk_selection';
 import type { AlertEpisode } from '../queries/episodes_query';
 
 const ep = (id: string, groupHash: string): AlertEpisode =>
-  ({ 'episode.id': id, group_hash: groupHash } as AlertEpisode);
+  ({ 'episode.id': id, group_hash: groupHash }) as AlertEpisode;
 
 describe('getEpisodesFromDocIds', () => {
   const data = [ep('ep1', 'gh1'), ep('ep2', 'gh2'), ep('ep3', 'gh1')];

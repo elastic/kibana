@@ -347,8 +347,8 @@ export const FormControls: FC<{
           isDataViewTimeBased === false
             ? TimeFieldWarning
             : fields.length === 0
-            ? TextFieldWarning
-            : undefined
+              ? TextFieldWarning
+              : undefined
         }
       />
 

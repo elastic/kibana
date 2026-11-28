@@ -33,7 +33,7 @@ const mockedGenerateEsql = jest.mocked(generateEsql);
 const mockedExecuteEsql = jest.mocked(executeEsql);
 
 const createMockLogger = (): Logger =>
-  ({ debug: jest.fn(), error: jest.fn(), info: jest.fn(), warn: jest.fn() } as unknown as Logger);
+  ({ debug: jest.fn(), error: jest.fn(), info: jest.fn(), warn: jest.fn() }) as unknown as Logger;
 
 const asCodeBlock = (spec: object) => '```json\n' + JSON.stringify(spec) + '\n```';
 

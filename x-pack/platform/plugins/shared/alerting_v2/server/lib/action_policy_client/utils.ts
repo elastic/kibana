@@ -51,7 +51,7 @@ const normalizeThrottle = (
   const keepInterval = strategy == null || needsInterval(strategy);
   return {
     strategy,
-    interval: keepInterval ? interval ?? null : null,
+    interval: keepInterval ? (interval ?? null) : null,
   };
 };
 

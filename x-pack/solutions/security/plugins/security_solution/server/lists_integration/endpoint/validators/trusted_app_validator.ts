@@ -50,7 +50,7 @@ type ConditionEntryFieldAllowedType =
   | TypeOf<typeof ProcessMacCodeSigner>;
 
 type TrustedAppConditionEntry<
-  T extends ConditionEntryFieldAllowedType = ConditionEntryFieldAllowedType
+  T extends ConditionEntryFieldAllowedType = ConditionEntryFieldAllowedType,
 > =
   | {
       field: T;

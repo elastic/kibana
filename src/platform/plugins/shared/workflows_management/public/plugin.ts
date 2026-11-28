@@ -44,15 +44,12 @@ import type {
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { stepSchemas } from '../common/step_schemas';
 
-export class WorkflowsPlugin
-  implements
-    Plugin<
-      WorkflowsPublicPluginSetup,
-      WorkflowsPublicPluginStart,
-      WorkflowsPublicPluginSetupDependencies,
-      WorkflowsPublicPluginStartDependencies
-    >
-{
+export class WorkflowsPlugin implements Plugin<
+  WorkflowsPublicPluginSetup,
+  WorkflowsPublicPluginStart,
+  WorkflowsPublicPluginSetupDependencies,
+  WorkflowsPublicPluginStartDependencies
+> {
   private logger: Logger;
   private appUpdater$: Subject<AppUpdater>;
   private telemetryService: TelemetryService;

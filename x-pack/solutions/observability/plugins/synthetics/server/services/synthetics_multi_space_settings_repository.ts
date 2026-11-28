@@ -40,9 +40,7 @@ const normalizeSharedSpaces = (spaces: string[]): string[] =>
 // all spaces (via the `*` namespace option) and pick the most-recently-updated object as the
 // canonical one when duplicates exist; saves always update that object instead of creating
 // another, regardless of which space the request originated from.
-export class DefaultSyntheticsMultiSpaceSettingsRepository
-  implements SyntheticsMultiSpaceSettingsRepository
-{
+export class DefaultSyntheticsMultiSpaceSettingsRepository implements SyntheticsMultiSpaceSettingsRepository {
   constructor(private readonly soClient: SavedObjectsClientContract) {}
 
   async get(): Promise<SyntheticsMultiSpaceSettingsWithSpaces> {

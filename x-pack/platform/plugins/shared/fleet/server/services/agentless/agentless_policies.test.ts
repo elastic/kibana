@@ -96,7 +96,7 @@ describe('AgentlessPoliciesService', () => {
           updated_by: 'system',
         };
       });
-      jest.mocked(agentPolicyService.delete).mockImplementationOnce(async () => ({} as any));
+      jest.mocked(agentPolicyService.delete).mockImplementationOnce(async () => ({}) as any);
 
       jest.mocked(getPackageInfo).mockImplementation(async ({ pkgName, pkgVersion }) => {
         if (pkgName === 'agentless_integration') {
@@ -331,7 +331,7 @@ describe('AgentlessPoliciesService', () => {
                 deployment_modes: { agentless: { enabled: true, resources: {} } },
               },
             ],
-          } as any)
+          }) as any
       );
     });
 
@@ -881,7 +881,7 @@ describe('AgentlessPoliciesService', () => {
       jest.resetAllMocks();
       packagePolicyService = createPackagePolicyServiceMock();
 
-      jest.mocked(agentPolicyService.delete).mockImplementationOnce(async () => ({} as any));
+      jest.mocked(agentPolicyService.delete).mockImplementationOnce(async () => ({}) as any);
     });
 
     it('should delete an existing agentless policy', async () => {
@@ -2119,7 +2119,7 @@ describe('AgentlessPoliciesService', () => {
             ],
           },
         ],
-      } as any);
+      }) as any;
 
     beforeEach(() => {
       const cloudSetup = cloudMock.createSetup();
@@ -2176,7 +2176,7 @@ describe('AgentlessPoliciesService', () => {
         };
       });
 
-      jest.mocked(agentPolicyService.delete).mockImplementation(async () => ({} as any));
+      jest.mocked(agentPolicyService.delete).mockImplementation(async () => ({}) as any);
     });
 
     it('should create agentless policy with AWS cloud connector', async () => {

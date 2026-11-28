@@ -130,7 +130,7 @@ export type AppHeaderMetadataItem =
 export type AppHeaderMetadataItems = readonly [
   AppHeaderMetadataItem,
   AppHeaderMetadataItem?,
-  AppHeaderMetadataItem?
+  AppHeaderMetadataItem?,
 ];
 
 /** @public */

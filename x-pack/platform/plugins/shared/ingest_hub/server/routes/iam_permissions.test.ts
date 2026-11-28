@@ -24,7 +24,7 @@ const makePackageInfo = (
     policy_templates: [],
     data_streams: [],
     ...overrides,
-  } as unknown as PackageInfo);
+  }) as unknown as PackageInfo;
 
 describe('registerIamPermissionsRoute', () => {
   let router: ReturnType<typeof httpServiceMock.createRouter>;

@@ -393,16 +393,16 @@ const TakeActionComponent: React.FC<Props> = ({
             ]
           : []
         : isAssistantVisible
-        ? [
-            {
-              'data-test-subj': 'viewInAiAssistant',
-              disabled: viewInAiAssistantDisabled,
-              key: 'viewInAiAssistant',
-              name: i18n.VIEW_IN_AI_ASSISTANT,
-              onClick: onViewInAiAssistant,
-            },
-          ]
-        : []
+          ? [
+              {
+                'data-test-subj': 'viewInAiAssistant',
+                disabled: viewInAiAssistantDisabled,
+                key: 'viewInAiAssistant',
+                name: i18n.VIEW_IN_AI_ASSISTANT,
+                onClick: onViewInAiAssistant,
+              },
+            ]
+          : []
       : [];
 
     const datasetItems =

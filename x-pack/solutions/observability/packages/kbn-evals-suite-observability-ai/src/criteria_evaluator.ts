@@ -22,7 +22,7 @@ export function createCriteriaEvaluator({
     name: 'Criteria',
     kind: 'LLM' as const,
     evaluate: async ({ input, output, expected, metadata }: any) => {
-      const criteria = getCriteria ? getCriteria(expected) : expected.criteria ?? [];
+      const criteria = getCriteria ? getCriteria(expected) : (expected.criteria ?? []);
       const result = await evaluators
         .criteria(criteria)
         .evaluate({ input, expected, output, metadata });

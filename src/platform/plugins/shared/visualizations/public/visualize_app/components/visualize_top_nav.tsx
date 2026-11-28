@@ -320,9 +320,9 @@ const TopNav = ({
 
   const shouldShowDataViewPicker = Boolean(
     vis.type.editorConfig?.enableDataViewChange &&
-      ((vis.data.indexPattern && !vis.data.savedSearchId) ||
-        isFallbackDataView(vis.data.indexPattern)) &&
-      indexPatterns.length
+    ((vis.data.indexPattern && !vis.data.savedSearchId) ||
+      isFallbackDataView(vis.data.indexPattern)) &&
+    indexPatterns.length
   );
 
   const onChangeDataView = useCallback(

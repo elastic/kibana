@@ -58,7 +58,7 @@ const createMockValidationResult = (
     message: 'Test error',
     owner: 'yaml',
     ...overrides,
-  } as YamlValidationResult);
+  }) as YamlValidationResult;
 
 describe('WorkflowsBaseTelemetry', () => {
   let mockClient: TelemetryServiceClient;

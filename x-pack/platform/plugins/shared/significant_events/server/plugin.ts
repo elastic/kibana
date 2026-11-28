@@ -78,15 +78,12 @@ export interface SignificantEventsPluginSetup {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SignificantEventsPluginStart {}
 
-export class SignificantEventsPlugin
-  implements
-    Plugin<
-      SignificantEventsPluginSetup,
-      SignificantEventsPluginStart,
-      SignificantEventsPluginSetupDependencies,
-      SignificantEventsPluginStartDependencies
-    >
-{
+export class SignificantEventsPlugin implements Plugin<
+  SignificantEventsPluginSetup,
+  SignificantEventsPluginStart,
+  SignificantEventsPluginSetupDependencies,
+  SignificantEventsPluginStartDependencies
+> {
   public logger: Logger;
   public server?: StreamsServer;
   private isDev: boolean;

@@ -78,7 +78,7 @@ const warnOnPassthroughComponents = (
 export interface PartFactory<
   TPresetMap extends object = Record<string, unknown>,
   TOutput = ReactNode,
-  TContext = void
+  TContext = void,
 > {
   /**
    * Create a preset component. The props type is inferred from the
@@ -234,7 +234,7 @@ export interface AssemblyFactory<TName extends string = string> {
   definePart: <
     TPresetMap extends object = Record<string, unknown>,
     TOutput = ReactNode,
-    TContext = void
+    TContext = void,
   >(partDefinition: {
     name: string;
   }) => PartFactory<TPresetMap, TOutput, TContext>;
@@ -324,7 +324,7 @@ export const defineAssembly = <const TName extends string>(config: {
   definePart: <
     TPresetMap extends object = Record<string, unknown>,
     TOutput = ReactNode,
-    TContext = void
+    TContext = void,
   >(partDefinition: {
     name: string;
   }): PartFactory<TPresetMap, TOutput, TContext> => {

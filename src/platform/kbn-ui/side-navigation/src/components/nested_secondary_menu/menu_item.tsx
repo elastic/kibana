@@ -14,8 +14,10 @@ import type { IconType } from '@elastic/eui';
 import { SecondaryMenu } from '../secondary_menu';
 import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
 
-export interface ItemProps
-  extends Omit<ComponentProps<typeof SecondaryMenu.Item>, 'isHighlighted' | 'href'> {
+export interface ItemProps extends Omit<
+  ComponentProps<typeof SecondaryMenu.Item>,
+  'isHighlighted' | 'href'
+> {
   children: ReactNode;
   href?: string;
   iconType?: IconType;

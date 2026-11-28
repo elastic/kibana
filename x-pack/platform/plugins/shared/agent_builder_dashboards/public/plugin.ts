@@ -15,15 +15,12 @@ import type {
 } from './types';
 import { registerDashboardAttachmentUiDefinition } from './attachment_types';
 
-export class AgentBuilderDashboardsPlugin
-  implements
-    Plugin<
-      AgentBuilderDashboardsPluginPublicSetup,
-      AgentBuilderDashboardsPluginPublicStart,
-      AgentBuilderDashboardsPluginPublicSetupDependencies,
-      AgentBuilderDashboardsPluginPublicStartDependencies
-    >
-{
+export class AgentBuilderDashboardsPlugin implements Plugin<
+  AgentBuilderDashboardsPluginPublicSetup,
+  AgentBuilderDashboardsPluginPublicStart,
+  AgentBuilderDashboardsPluginPublicSetupDependencies,
+  AgentBuilderDashboardsPluginPublicStartDependencies
+> {
   private cleanupAttachmentUi?: () => void;
 
   constructor(_initContext: PluginInitializerContext) {}
