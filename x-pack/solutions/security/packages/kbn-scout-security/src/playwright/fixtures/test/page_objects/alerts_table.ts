@@ -8,6 +8,8 @@
 import { euiSelectors } from '@kbn/scout';
 import type { ScoutPage, Locator } from '@kbn/scout';
 import { expect } from '../../../../../ui';
+import type { AbsoluteTimeRange } from './helpers/timerange_url_param';
+import { toTimerangeParam } from './helpers/timerange_url_param';
 
 const PAGE_URL = 'security/alerts';
 
@@ -55,9 +57,13 @@ export class AlertsTablePage {
   /**
    * Opens the alerts page, optionally restricting the alerts table to `visibleColumns` (field names)
    * so that columns the ~16 defaults would push outside the horizontally virtualized viewport are
-   * rendered on first paint.
+   * rendered on first paint, and optionally with an absolute global `timeRange` instead of the
+   * default "Today", which drops alerts seeded before midnight.
    */
-  async navigate({ visibleColumns }: { visibleColumns?: string[] } = {}) {
+  async navigate({
+    visibleColumns,
+    timeRange,
+  }: { visibleColumns?: string[]; timeRange?: AbsoluteTimeRange } = {}) {
     if (visibleColumns) {
       await this.page.addInitScript(
         ({ key, columns }) => {
@@ -66,7 +72,10 @@ export class AlertsTablePage {
         { key: ALERTS_TABLE_STATE_STORAGE_KEY, columns: visibleColumns }
       );
     }
-    await this.page.gotoApp(PAGE_URL);
+    await this.page.gotoApp(
+      PAGE_URL,
+      timeRange ? { params: { timerange: toTimerangeParam(timeRange) } } : undefined
+    );
   }
 
   async openAlertContextMenu(ruleName: string) {

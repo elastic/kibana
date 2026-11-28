@@ -7,19 +7,10 @@
 
 import type { Locator, ScoutPage } from '@kbn/scout';
 import { APP_LOAD_TIMEOUT_MS } from '../../../constants/timeouts';
+import type { AbsoluteTimeRange } from './helpers/timerange_url_param';
+import { toTimerangeParam } from './helpers/timerange_url_param';
 
 const OVERVIEW_APP = 'security/overview';
-
-export interface AbsoluteTimeRange {
-  from: string;
-  to: string;
-}
-
-/** Builds the rison value of the Security `timerange` URL param for an absolute range. */
-const toTimerangeParam = ({ from, to }: AbsoluteTimeRange): string => {
-  const range = `(from:'${from}',kind:absolute,to:'${to}')`;
-  return `(global:(linkTo:!(timeline),timerange:${range}),timeline:(linkTo:!(global),timerange:${range}))`;
-};
 
 /**
  * Security Overview page, focused on the threat intelligence panel.

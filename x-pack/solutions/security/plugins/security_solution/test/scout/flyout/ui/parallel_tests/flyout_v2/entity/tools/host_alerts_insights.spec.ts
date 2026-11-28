@@ -20,6 +20,7 @@ spaceTest.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
     let ruleName: string;
+    let alertsTimeRange: { from: string; to: string };
 
     spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace }, testInfo) => {
       // Rule execution can be slow under parallel load.
@@ -34,6 +35,9 @@ spaceTest.describe(
         index: [sourceIndex],
       });
       await apiServices.detectionAlerts.waitForAlerts(ruleName, 1, 60_000);
+      const { from, to } = await apiServices.detectionAlerts.getAlertsTimeRange(ruleName);
+      // Some Security queries treat `to` as exclusive, so the latest alert needs headroom.
+      alertsTimeRange = { from, to: new Date(Date.parse(to) + 60_000).toISOString() };
 
       await browserAuth.loginAsPlatformEngineer();
     });
@@ -48,7 +52,8 @@ spaceTest.describe(
       'expanding an alert row opens the document flyout for that rule',
       async ({ pageObjects }) => {
         const { alertsTablePage, hostFlyout, documentFlyout } = pageObjects;
-        await alertsTablePage.navigate();
+        // The default "Today" range drops the alert when seeding and navigation straddle midnight.
+        await alertsTablePage.navigate({ timeRange: alertsTimeRange });
         await alertsTablePage.waitForRuleAlert(ruleName);
         await alertsTablePage.clickHostNameCell(HOST_NAME);
         await hostFlyout.waitForHostFlyout();
