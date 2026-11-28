@@ -6,6 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
+import { APP_LOAD_TIMEOUT_MS } from '../../../constants/timeouts';
 
 const OVERVIEW_APP = 'security/overview';
 
@@ -46,10 +47,10 @@ export class SecurityOverviewPage {
 
   /** Opens Overview, optionally with an absolute global time range instead of the default. */
   async navigate(timeRange?: AbsoluteTimeRange): Promise<void> {
-    await this.page.gotoApp(
-      OVERVIEW_APP,
-      timeRange ? { params: { timerange: toTimerangeParam(timeRange) } } : undefined
-    );
-    await this.threatIntelPanel.waitFor({ state: 'visible' });
+    await this.page.gotoApp(OVERVIEW_APP, {
+      ...(timeRange ? { params: { timerange: toTimerangeParam(timeRange) } } : {}),
+      readyWhen: this.threatIntelPanel,
+      readyTimeout: APP_LOAD_TIMEOUT_MS,
+    });
   }
 }
