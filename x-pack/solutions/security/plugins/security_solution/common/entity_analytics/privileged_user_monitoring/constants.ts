@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-// Static index names: may be more obvious and easier to manage.
-export const PRIVMON_BASE_INDEX_NAME = '.entity_analytics.monitoring';
-export const ML_ANOMALIES_INDEX = '.ml-anomalies-shared*';
-
 // CSV Upload
 export const PRIVMON_USERS_CSV_MAX_SIZE_BYTES = 1024 * 1024; // 1MB
 export const PRIVMON_USERS_CSV_SIZE_TOLERANCE_BYTES = 1024 * 50; // ~= 50kb

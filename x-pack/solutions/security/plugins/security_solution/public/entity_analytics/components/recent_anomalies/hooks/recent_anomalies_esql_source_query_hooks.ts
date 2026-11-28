@@ -8,7 +8,7 @@
 import type { EntityStoreEuidApi } from '@kbn/entity-store/public';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { useResolvedLatestEntitiesIndexName } from '../../../../common/hooks/use_resolved_latest_entities_index_name';
-import { ML_ANOMALIES_INDEX } from '../../../../../common/constants';
+import { ML_ANOMALIES_SHARED_INDEX } from '../../../../../common/constants';
 import { useIntervalForHeatmap } from '../anomaly_heatmap_interval';
 import type { AnomalyBand } from '../anomaly_bands';
 import { getHiddenBandsFilters } from '../hidden_bands_filter';
@@ -150,7 +150,7 @@ export const useRecentAnomaliesTopRowsEsqlSource = ({
 
   if (viewBy === 'jobId') {
     return `SET unmapped_fields="nullify";
-    FROM ${ML_ANOMALIES_INDEX}
+    FROM ${ML_ANOMALIES_SHARED_INDEX}
     ${BASE_RECORD_FILTER}
     ${TIME_RANGE_FILTER}
     ${getJobIdsFilter(jobIds)}
@@ -167,7 +167,7 @@ export const useRecentAnomaliesTopRowsEsqlSource = ({
 
   // Entity mode
   return `SET unmapped_fields="nullify";
-    FROM ${ML_ANOMALIES_INDEX}
+    FROM ${ML_ANOMALIES_SHARED_INDEX}
     ${BASE_RECORD_FILTER}
     ${TIME_RANGE_FILTER}
     ${getJobIdsFilter(jobIds)}
@@ -203,7 +203,7 @@ export const useRecentAnomaliesDataEsqlSource = ({
 
   if (viewBy === 'jobId') {
     return `SET unmapped_fields="nullify";
-    FROM ${ML_ANOMALIES_INDEX}
+    FROM ${ML_ANOMALIES_SHARED_INDEX}
     ${BASE_RECORD_FILTER} AND job_id IN (${formattedLabels})
     ${TIME_RANGE_FILTER}
     ${getEuidEvaluationBlock(euidApi)}
@@ -224,7 +224,7 @@ export const useRecentAnomaliesDataEsqlSource = ({
 
   // Entity mode
   return `SET unmapped_fields="nullify";
-    FROM ${ML_ANOMALIES_INDEX}
+    FROM ${ML_ANOMALIES_SHARED_INDEX}
     ${BASE_RECORD_FILTER}
     ${TIME_RANGE_FILTER}
     ${getJobIdsFilter(jobIds)}

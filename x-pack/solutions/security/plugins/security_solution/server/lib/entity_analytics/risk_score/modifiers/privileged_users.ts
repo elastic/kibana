@@ -18,6 +18,7 @@ import type { RiskScoreBucket } from '../../types';
 import type { PrivmonUserCrudService } from '../../privilege_monitoring/users/privileged_users_crud';
 
 import type { ExperimentalFeatures } from '../../../../../common';
+import { PRIVILEGED_USER_MODIFIER } from '../../../../../common/entity_analytics/watchlists/constants';
 import type { Modifier } from './types';
 
 interface ApplyCriticalityModifierParams {
@@ -38,8 +39,7 @@ interface ApplyCriticalityModifierParams {
   globalWeight?: number;
 }
 
-// QUESTION: This should take labels/sources/roles into account?
-export const PRIVILEGED_USER_MODIFIER = 1.5;
+export { PRIVILEGED_USER_MODIFIER };
 
 export const applyPrivmonModifier = async ({
   page: { buckets, identifierField, bounds },

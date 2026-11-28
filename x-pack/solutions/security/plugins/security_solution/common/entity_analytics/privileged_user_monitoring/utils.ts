@@ -6,7 +6,7 @@
  */
 
 import {
-  ML_ANOMALIES_INDEX,
+  ML_ANOMALIES_SHARED_INDEX,
   RISK_SCORE_INDEX_PATTERN,
   PRIVMON_BASE_INDEX_NAME,
 } from '../constants';
@@ -24,5 +24,5 @@ export const getPrivilegeUserMonitoringRequiredEsIndexPrivileges = (namespace: s
   [getPrivilegedMonitorUsersIndex(namespace)]: ['read'],
   [RISK_SCORE_INDEX_PATTERN]: ['read'],
   [getAlertsIndex(namespace)]: ['read'],
-  [ML_ANOMALIES_INDEX]: ['read'],
+  [ML_ANOMALIES_SHARED_INDEX]: ['read'],
 });
