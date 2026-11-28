@@ -11,7 +11,9 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { ExecutionStatus } from '@kbn/workflows';
 import {
   DEFAULT_PROPOSAL_TITLE,
+  OPEN_PROPOSAL_STATUSES,
   PROPOSAL_ATTACHMENT_TYPE,
+  SETTLED_PROPOSAL_STATUSES,
   type ListProposalsQuery,
 } from '@kbn/proposals-common';
 import type { ProposalDocument, ProposalsStorageClient } from '../storage/proposals_storage';
@@ -137,6 +139,12 @@ const createWorkflowsApi = () => ({
 
 /** A deadline that has already passed, independent of the clock the suite runs at. */
 const PAST_DEADLINE = '2000-01-01T00:00:00.000Z';
+
+/** The search a `list` pages with, as opposed to its orphan sweep, which counts nothing. */
+const pageSearch = (storage: ReturnType<typeof createStorage>) =>
+  (storage.search.mock.calls as any[][]).find(
+    ([searchRequest]) => searchRequest.track_total_hits === true
+  )![0];
 
 /** Pass `null` for `workflowsApi` to simulate the API being unavailable. */
 const createService = (
@@ -3306,7 +3314,7 @@ describe('ProposalsService', () => {
         request
       );
 
-      const [[searchArgs]] = storage.search.mock.calls;
+      const searchArgs = pageSearch(storage);
       expect(searchArgs.query.bool.filter).toEqual(
         expect.arrayContaining([
           { term: { spaceId: SPACE_ID } },
@@ -3325,7 +3333,7 @@ describe('ProposalsService', () => {
 
       await service.list(listQuery({ origin: 'alertzero' }), SPACE_ID, request);
 
-      const [[searchArgs]] = storage.search.mock.calls;
+      const searchArgs = pageSearch(storage);
       expect(searchArgs.query.bool.filter).toEqual(
         expect.arrayContaining([{ term: { origin: 'alertzero' } }])
       );
@@ -3341,7 +3349,7 @@ describe('ProposalsService', () => {
         request
       );
 
-      const [[searchArgs]] = storage.search.mock.calls;
+      const searchArgs = pageSearch(storage);
       expect(searchArgs.query.bool.filter).toEqual(
         expect.arrayContaining([{ terms: { conversationId: ['conv-1', 'conv-2'] } }])
       );
@@ -3353,7 +3361,7 @@ describe('ProposalsService', () => {
 
       await service.list(listQuery(), SPACE_ID, request);
 
-      const [[searchArgs]] = storage.search.mock.calls;
+      const searchArgs = pageSearch(storage);
       // The keyword enums sort alphabetically, so the queue's order comes from
       // the numeric ranks written at creation.
       expect(searchArgs.sort).toEqual([
@@ -3370,7 +3378,7 @@ describe('ProposalsService', () => {
 
       await service.list(listQuery({ size: 25, from: 50 }), SPACE_ID, request);
 
-      const [[searchArgs]] = storage.search.mock.calls;
+      const searchArgs = pageSearch(storage);
       expect(searchArgs.size).toBe(25);
       expect(searchArgs.from).toBe(50);
       expect(searchArgs.track_total_hits).toBe(true);
@@ -3382,7 +3390,7 @@ describe('ProposalsService', () => {
 
       await service.list(listQuery({ excludeExpired: true }), SPACE_ID, request);
 
-      const [[searchArgs]] = storage.search.mock.calls;
+      const searchArgs = pageSearch(storage);
       // A proposal without a deadline never expires, so it has to survive.
       expect(searchArgs.query.bool.filter).toEqual(
         expect.arrayContaining([
@@ -3405,7 +3413,7 @@ describe('ProposalsService', () => {
 
       await service.list(listQuery(), SPACE_ID, request);
 
-      const [[searchArgs]] = storage.search.mock.calls;
+      const searchArgs = pageSearch(storage);
       expect(JSON.stringify(searchArgs.query.bool.filter)).not.toContain('expiresAt');
     });
 
@@ -3417,7 +3425,7 @@ describe('ProposalsService', () => {
 
       // `pending` is only ever valid while undecided, so no separate
       // decision-absence clause is needed to say "awaiting".
-      const [[searchArgs]] = storage.search.mock.calls;
+      const searchArgs = pageSearch(storage);
       expect(searchArgs.query.bool.filter).toEqual(
         expect.arrayContaining([{ term: { status: 'pending' } }])
       );
@@ -3430,7 +3438,7 @@ describe('ProposalsService', () => {
 
       await service.list(listQuery({ decision: 'dismissed' }), SPACE_ID, request);
 
-      const [[searchArgs]] = storage.search.mock.calls;
+      const searchArgs = pageSearch(storage);
       expect(searchArgs.query.bool.filter).toEqual(
         expect.arrayContaining([{ term: { decision: 'dismissed' } }])
       );
@@ -3442,7 +3450,7 @@ describe('ProposalsService', () => {
 
       await service.list(listQuery({ excludeSuperseded: true }), SPACE_ID, request);
 
-      const [[searchArgs]] = storage.search.mock.calls;
+      const searchArgs = pageSearch(storage);
       expect(searchArgs.query.bool.filter).toEqual(
         expect.arrayContaining([{ bool: { must_not: { exists: { field: 'supersededBy' } } } }])
       );
@@ -3454,7 +3462,7 @@ describe('ProposalsService', () => {
 
       await service.list(listQuery({ order: 'newest' }), SPACE_ID, request);
 
-      const [[searchArgs]] = storage.search.mock.calls;
+      const searchArgs = pageSearch(storage);
       expect(searchArgs.sort).toEqual([
         { createdAt: { order: 'desc' } },
         { rootProposalId: { order: 'asc' } },
@@ -3469,7 +3477,7 @@ describe('ProposalsService', () => {
 
       await service.list(listQuery(), SPACE_ID, request);
 
-      const [[searchArgs]] = storage.search.mock.calls;
+      const searchArgs = pageSearch(storage);
       expect(searchArgs.sort[0]).toEqual({ [IMPACT_RANK_FIELD]: { order: 'asc' } });
     });
 
@@ -3479,7 +3487,7 @@ describe('ProposalsService', () => {
 
       await service.list(listQuery({ decidedWithinHours: 72 }), SPACE_ID, request);
 
-      const [[searchArgs]] = storage.search.mock.calls;
+      const searchArgs = pageSearch(storage);
       expect(searchArgs.query.bool.filter).toEqual(
         expect.arrayContaining([{ range: { decidedAt: { gte: 'now-72h' } } }])
       );
@@ -3491,7 +3499,7 @@ describe('ProposalsService', () => {
 
       await service.list(listQuery(), SPACE_ID, request);
 
-      const [[searchArgs]] = storage.search.mock.calls;
+      const searchArgs = pageSearch(storage);
       expect(JSON.stringify(searchArgs.query.bool.filter)).not.toContain('decidedAt');
     });
 
@@ -3501,7 +3509,7 @@ describe('ProposalsService', () => {
 
       await service.list(listQuery(), SPACE_ID, request);
 
-      const [[searchArgs]] = storage.search.mock.calls;
+      const searchArgs = pageSearch(storage);
       const filter = JSON.stringify(searchArgs.query.bool.filter);
       expect(filter).not.toContain('decision');
       expect(filter).not.toContain('supersededBy');
@@ -3820,6 +3828,119 @@ describe('ProposalsService', () => {
 
       expect(proposals).toEqual([expect.objectContaining({ id: 'proposal-1', status: 'expired' })]);
       expect(total).toBe(1);
+    });
+
+    describe('beyond the page being read', () => {
+      type Clause = Record<string, any>;
+
+      /** Enough of the query DSL for the filters `list` sends. */
+      const matches = (document: Record<string, unknown>, clause: Clause): boolean => {
+        if (clause.ids) return clause.ids.values.includes(document.id);
+        if (clause.term) {
+          const [[field, value]] = Object.entries(clause.term);
+          return document[field] === value;
+        }
+        if (clause.terms) {
+          const [[field, values]] = Object.entries(clause.terms) as Array<[string, unknown[]]>;
+          return values.includes(document[field]);
+        }
+        if (clause.exists) return document[clause.exists.field] !== undefined;
+        if (clause.bool?.must_not) {
+          return ![clause.bool.must_not].flat().some((inner) => matches(document, inner));
+        }
+        throw new Error(`Unsupported clause in test store: ${JSON.stringify(clause)}`);
+      };
+
+      /** A store that applies writes, so a read after a settle sees it. */
+      const createStore = (documents: Record<string, ProposalDocument>) => {
+        const storage = createStorage();
+        storage.search.mockImplementation(async (searchRequest: any) => {
+          const filters: Clause[] = searchRequest.query.bool.filter;
+          const found = Object.entries(documents).filter(([id, document]) =>
+            filters.every((clause) => matches({ id, ...document }, clause))
+          );
+          const from = searchRequest.from ?? 0;
+          const hits = found
+            .slice(from, from + searchRequest.size)
+            .map(([id, document]) => searchHit(document, id));
+          return { hits: { hits, total: { value: found.length } } };
+        });
+        storage.index.mockImplementation(async ({ id, document }: any) => {
+          documents[id] = document;
+          return { _id: id, _seq_no: 8, _primary_term: 1 };
+        });
+        return storage;
+      };
+
+      const pendingWithGate = (count: number, prefix: string) =>
+        Object.fromEntries(
+          Array.from({ length: count }, (_, index) => [
+            `${prefix}-${index}`,
+            baseDocument({ workflowExecutionId: `${prefix}-exec-${index}` }),
+          ])
+        );
+
+      /** Gates whose execution id starts with `endedPrefix` were cancelled; the rest wait. */
+      const gatesEndedFor = (
+        workflowsApi: ReturnType<typeof createWorkflowsApi>,
+        endedPrefix: string
+      ) =>
+        workflowsApi.getWorkflowExecutionStatuses.mockImplementation(async (ids: string[]) =>
+          ids.map((id) => ({
+            id,
+            workflowId: 'system-create-proposal',
+            status: id.startsWith(endedPrefix)
+              ? ExecutionStatus.CANCELLED
+              : ExecutionStatus.WAITING_FOR_INPUT,
+          }))
+        );
+
+      const openQueue = (overrides: Partial<ListProposalsQuery> = {}) => ({
+        ...listQuery({ excludeSuperseded: true, ...overrides }),
+        statuses: OPEN_PROPOSAL_STATUSES,
+      });
+
+      it('should leave proposals whose gate has ended out of a count-only read', async () => {
+        const documents = { ...pendingWithGate(3, 'orphan'), ...pendingWithGate(2, 'live') };
+        const storage = createStore(documents);
+        const { service, workflowsApi } = createService(storage);
+        gatesEndedFor(workflowsApi, 'orphan');
+
+        const { proposals, total } = await service.list(openQueue({ size: 0 }), SPACE_ID, request);
+
+        expect(proposals).toEqual([]);
+        expect(total).toBe(2);
+        expect(documents['orphan-0'].status).toBe('expired');
+      });
+
+      it('should fill an opened page with live proposals when the first rows have ended gates', async () => {
+        // The reported queue: every reopen settled one page of orphans and showed no rows.
+        const documents = { ...pendingWithGate(12, 'orphan'), ...pendingWithGate(2, 'live') };
+        const storage = createStore(documents);
+        const { service, workflowsApi } = createService(storage);
+        gatesEndedFor(workflowsApi, 'orphan');
+
+        const { proposals, total } = await service.list(openQueue({ size: 10 }), SPACE_ID, request);
+
+        expect(proposals.map(({ id }) => id)).toEqual(['live-0', 'live-1']);
+        expect(total).toBe(2);
+      });
+
+      it('should not read any gate for a read that only asks for settled proposals', async () => {
+        const storage = createStore({
+          ...pendingWithGate(2, 'orphan'),
+          done: baseDocument({ status: 'succeeded', decision: 'approved' }),
+        });
+        const { service, workflowsApi } = createService(storage);
+
+        await service.list(
+          { ...listQuery(), statuses: SETTLED_PROPOSAL_STATUSES },
+          SPACE_ID,
+          request
+        );
+
+        expect(workflowsApi.getWorkflowExecutionStatuses).not.toHaveBeenCalled();
+      });
     });
   });
 
