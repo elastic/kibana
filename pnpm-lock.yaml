@@ -4410,8 +4410,8 @@ importers:
         specifier: 1.45.0
         version: 1.45.0
       '@reduxjs/toolkit':
-        specifier: 2.12.0
-        version: 2.12.0(react-redux@9.2.0(@types/react@18.2.79)(react@18.2.0)(redux@5.0.1))(react@18.2.0)
+        specifier: 2.14.0
+        version: 2.14.0(@types/react@18.2.79)(react-redux@9.2.0(@types/react@18.2.79)(react@18.2.0)(redux@5.0.1))(react@18.2.0)
       '@slack/webhook':
         specifier: 7.0.6
         version: 7.0.6(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)
@@ -4486,7 +4486,7 @@ importers:
         version: 6.0.0
       '@xyflow/react':
         specifier: 12.12.1
-        version: 12.12.1(@types/react-dom@18.2.25)(@types/react@18.2.79)(immer@11.1.8)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        version: 12.12.1(@types/react-dom@18.2.25)(@types/react@18.2.79)(immer@11.2.10)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       adm-zip:
         specifier: 0.6.1
         version: 0.6.1
@@ -4686,8 +4686,8 @@ importers:
         specifier: 0.7.1
         version: 0.7.1
       immer:
-        specifier: 11.1.8
-        version: 11.1.8
+        specifier: 11.2.10
+        version: 11.2.10
       immer-v9:
         specifier: npm:immer@9.0.21
         version: immer@9.0.21
@@ -14042,6 +14042,20 @@ packages:
       react-redux:
         optional: true
 
+  '@reduxjs/toolkit@2.14.0':
+    resolution: {integrity: sha512-m/PxMwRe0xLL6XUsAgy0YjInklHcfi9uMwFhJk+QINqjxqPvyc89T5cMjszA5bDmTE0gwGc7zr9LRO4gL+mhaw==}
+    peerDependencies:
+      '@types/react': 18.2.79
+      react: ^16.9.0 || ^17.0.0 || ^18 || ^19
+      react-redux: ^7.2.1 || ^8.1.3 || ^9.0.0
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      react:
+        optional: true
+      react-redux:
+        optional: true
+
   '@rsbuild/plugin-check-syntax@1.6.1':
     resolution: {integrity: sha512-26xtEYN0QjZYoyt0lWnvIztBWjEZJvcfw7MN4f5B4SpNggmnF7F7aNPrgkY3EccXVFx1VGQBhnCkBV//OoS07Q==}
     peerDependencies:
@@ -19374,6 +19388,9 @@ packages:
 
   immer@11.1.8:
     resolution: {integrity: sha512-/tbkHMW7y10Lx6i1crLjD4/OhNkRG+Fo7byZHtah0547nIeXYcpIXaUh0IAQY6gO5459qpGGYapcEOHtFXkIuA==}
+
+  immer@11.2.10:
+    resolution: {integrity: sha512-pzANBj+0A9u+prdhBJ14DVi44vCvVUQzBa8DKt6I0AMCokPHtt722BK9IX5bFC70xUSU9TnzLRIJLTGqIzjEFw==}
 
   immer@9.0.21:
     resolution: {integrity: sha512-bc4NBHqOqSfRW7POMkHd51LvClaeMXpm8dx0e8oE2GORbq5aRK7Bxl4FyzVLdGtLmvLKL7BTDBG5ACQm4HWjTA==}
@@ -29960,11 +29977,24 @@ snapshots:
     dependencies:
       '@standard-schema/spec': 1.1.0
       '@standard-schema/utils': 0.3.0
-      immer: 11.1.8
+      immer: 11.2.10
       redux: 5.0.1
       redux-thunk: 3.1.0(redux@5.0.1)
       reselect: 5.1.0
     optionalDependencies:
+      react: 18.2.0
+      react-redux: 9.2.0(@types/react@18.2.79)(react@18.2.0)(redux@5.0.1)
+
+  '@reduxjs/toolkit@2.14.0(@types/react@18.2.79)(react-redux@9.2.0(@types/react@18.2.79)(react@18.2.0)(redux@5.0.1))(react@18.2.0)':
+    dependencies:
+      '@standard-schema/spec': 1.1.0
+      '@standard-schema/utils': 0.3.0
+      immer: 11.2.10
+      redux: 5.0.1
+      redux-thunk: 3.1.0(redux@5.0.1)
+      reselect: 5.1.0
+    optionalDependencies:
+      '@types/react': 18.2.79
       react: 18.2.0
       react-redux: 9.2.0(@types/react@18.2.79)(react@18.2.0)(redux@5.0.1)
 
@@ -32032,13 +32062,13 @@ snapshots:
 
   '@xtuc/long@4.2.2': {}
 
-  '@xyflow/react@12.12.1(@types/react-dom@18.2.25)(@types/react@18.2.79)(immer@11.1.8)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
+  '@xyflow/react@12.12.1(@types/react-dom@18.2.25)(@types/react@18.2.79)(immer@11.2.10)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
       '@xyflow/system': 0.0.84
       classcat: 5.0.5
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
-      zustand: 4.5.7(@types/react@18.2.79)(immer@11.1.8)(react@18.2.0)
+      zustand: 4.5.7(@types/react@18.2.79)(immer@11.2.10)(react@18.2.0)
     optionalDependencies:
       '@types/react': 18.2.79
       '@types/react-dom': 18.2.25
@@ -36288,6 +36318,8 @@ snapshots:
   immediate@3.0.6: {}
 
   immer@11.1.8: {}
+
+  immer@11.2.10: {}
 
   immer@9.0.21: {}
 
@@ -43472,12 +43504,12 @@ snapshots:
 
   zod@4.6.5: {}
 
-  zustand@4.5.7(@types/react@18.2.79)(immer@11.1.8)(react@18.2.0):
+  zustand@4.5.7(@types/react@18.2.79)(immer@11.2.10)(react@18.2.0):
     dependencies:
       use-sync-external-store: 1.7.0(react@18.2.0)
     optionalDependencies:
       '@types/react': 18.2.79
-      immer: 11.1.8
+      immer: 11.2.10
       react: 18.2.0
 
   zwitch@1.0.5: {}
