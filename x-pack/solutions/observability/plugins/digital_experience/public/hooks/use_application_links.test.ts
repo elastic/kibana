@@ -161,4 +161,27 @@ describe('useApplicationLinks', () => {
       expect(href.searchParams.get('kuery')).toBe('url.full : *checkout*');
     });
   });
+
+  it("leaves the Overview's filters and query out of the report links, which cover the whole application", () => {
+    mockSearch('?source=otel&kuery=host.name%3Aa');
+    mockRouteQuery({ source: 'otel', kuery: 'host.name:a' });
+
+    const { result } = renderHook(() => useApplicationLinks('shop', 'otel'));
+
+    expect(result.current.errorsHref).toContain('kuery=');
+    expect(result.current.reportsHref).not.toContain('kuery=');
+    expect(result.current.scorecardReportHref).not.toContain('kuery=');
+  });
+
+  it('opens the scorecard at the last week, not the range the picker holds', () => {
+    mockSearch('?source=otel&rangeFrom=now-15m&rangeTo=now');
+    mockRouteQuery({ source: 'otel' });
+
+    const { result } = renderHook(() => useApplicationLinks('shop', 'otel'));
+
+    const href = new URL(result.current.scorecardReportHref, 'http://localhost');
+    expect(href.searchParams.get('rangeFrom')).toBe('now-7d/d');
+    expect(href.searchParams.get('rangeTo')).toBe('now-1d/d');
+    expect(result.current.reportsHref).not.toContain('now-7d');
+  });
 });

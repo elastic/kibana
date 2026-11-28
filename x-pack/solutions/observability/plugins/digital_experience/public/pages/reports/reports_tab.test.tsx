@@ -11,19 +11,16 @@ import { ReportsTab } from './reports_tab';
 import { REPORT_TEMPLATES } from './report_templates';
 
 describe('ReportsTab', () => {
-  it('lists a card for every report template', () => {
-    render(<ReportsTab />);
+  it('lists a card for every report template, linking to its report', () => {
+    render(<ReportsTab hrefs={{ scorecard: '/scorecard-href' }} />);
 
     REPORT_TEMPLATES.forEach(({ id, title }) => {
-      expect(screen.getByTestId(`digitalExperienceReportCard-${id}`)).toHaveTextContent(title);
+      const card = screen.getByTestId(`digitalExperienceReportCard-${id}`);
+      expect(card).toHaveTextContent(title);
     });
-  });
-
-  it('marks a template that is not available yet', () => {
-    render(<ReportsTab />);
-
-    expect(screen.getByTestId('digitalExperienceReportCard-scorecard')).toHaveTextContent(
-      'Coming soon'
+    expect(screen.getByRole('link', { name: /Weekly scorecard/ })).toHaveAttribute(
+      'href',
+      '/scorecard-href'
     );
   });
 });

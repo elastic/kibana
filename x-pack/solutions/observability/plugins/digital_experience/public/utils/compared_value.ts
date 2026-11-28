@@ -5,15 +5,17 @@
  * 2.0.
  */
 
+import {
+  isBelow,
+  NEGLIGIBLE_PERCENTAGE_POINTS,
+  NEGLIGIBLE_RELATIVE_CHANGE,
+  type ChangeUnit,
+} from '../../common/negligible_change';
 import type { ComparedValue } from '../../common/types/applications';
 import type { Formatters } from '../hooks/use_formatters';
 import { percentagePointsLabel } from '../labels';
 
-/**
- * How a value's change is shown: as a share of the previous value for counts and rates, or in
- * percentage points for shares, so a crash-free rate going from 98% to 99% reads "+1 pp", not "+1%".
- */
-export type ChangeUnit = 'relative' | 'percentagePoints';
+export type { ChangeUnit };
 
 /** Which way a change goes as shown: `0` when it rounds to nothing, e.g. 99.9999% to 99.9995%. */
 export type ChangeDirection = -1 | 0 | 1;
@@ -28,17 +30,6 @@ export interface FormattedChange {
    */
   readonly isNegligible: boolean;
 }
-
-/** The largest relative change, and change in percentage points, that is still noise. */
-export const NEGLIGIBLE_RELATIVE_CHANGE = 0.02;
-export const NEGLIGIBLE_PERCENTAGE_POINTS = 0.5;
-
-// Subtracting shares is inexact, e.g. 0.105 - 0.1 is 0.004999…, so a change right at a cutoff
-// would count as noise: the cutoffs allow for that much error.
-const FLOAT_TOLERANCE = 1e-9;
-
-const isBelow = (change: number, cutoff: number): boolean =>
-  Math.abs(change) < cutoff - FLOAT_TOLERANCE;
 
 type SignedFormatters = Pick<Formatters, 'formatSignedNumber' | 'formatSignedPercent'>;
 

@@ -6,16 +6,20 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { ReportTemplateId } from '../../../common/types/applications';
 
-export type ReportTemplateId = 'scorecard';
+/**
+ * The range the weekly scorecard opens at: the last seven full days, up to the end of yesterday.
+ * Date math rounds a range's end up, so `now/d` would add the part of today that has passed: an
+ * eighth day, compared with a previous period of eight full ones.
+ */
+export const SCORECARD_TIME_RANGE = { rangeFrom: 'now-7d/d', rangeTo: 'now-1d/d' } as const;
 
 export interface ReportTemplate {
   id: ReportTemplateId;
   title: string;
   description: string;
   iconType: string;
-  /** Templates that are listed but can't be opened yet. */
-  isAvailable: boolean;
 }
 
 /** The reports an application can have, in display order; fixed in code. */
@@ -29,7 +33,6 @@ export const REPORT_TEMPLATES: readonly ReportTemplate[] = [
       defaultMessage:
         'Page loads, load time, errors and Core Web Vitals, each compared with the previous period.',
     }),
-    iconType: 'visArea',
-    isAvailable: false,
+    iconType: 'chartArea',
   },
 ];

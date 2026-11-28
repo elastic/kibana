@@ -13,7 +13,6 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHealth,
   EuiHighlight,
   EuiInMemoryTable,
   EuiLink,
@@ -24,11 +23,11 @@ import { i18n } from '@kbn/i18n';
 import { EmptyCellValue } from '@kbn/shared-ux-column-presets';
 import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import type { VitalRatings } from '../../../../common/types/applications';
-import type { CoreWebVital, VitalRating } from '../../../../common/core_web_vitals';
+import type { CoreWebVital } from '../../../../common/core_web_vitals';
 import { CORE_WEB_VITAL } from '../../../../common/core_web_vitals';
 import { DIGITAL_EXPERIENCE_FEATURE_ID } from '../../../../common/feature';
-import { RATING_COLORS, RATING_LABELS } from '../../../utils/web_vitals';
 import { WebVitalValue } from '../../../components/web_vital_badges';
+import { VitalRatingShares } from '../../../components/vital_rating_shares';
 import {
   APPLICATIONS_LIST_EBT_ELEMENTS,
   DIGITAL_EXPERIENCE_EBT_ACTIONS,
@@ -53,9 +52,6 @@ import {
 // Long names shrink and truncate; the badges keep their size.
 const nameCss = css({ minWidth: 0 });
 
-/** In display order. */
-const VITAL_RATINGS: VitalRating[] = ['good', 'needsImprovement', 'poor'];
-
 const vitalTooltip = (
   sampleCount: number,
   ratings: VitalRatings | null,
@@ -69,26 +65,7 @@ const vitalTooltip = (
         values: { sampleCount },
       })}
     </p>
-    {ratings && (
-      <EuiFlexGroup
-        data-test-subj="digitalExperienceVitalRatings"
-        direction="column"
-        gutterSize="xs"
-        responsive={false}
-      >
-        {VITAL_RATINGS.map((rating) => (
-          <EuiFlexGroup
-            key={rating}
-            justifyContent="spaceBetween"
-            gutterSize="l"
-            responsive={false}
-          >
-            <EuiHealth color={RATING_COLORS[rating]}>{RATING_LABELS[rating]}</EuiHealth>
-            <span>{formatPercent(ratings[rating])}</span>
-          </EuiFlexGroup>
-        ))}
-      </EuiFlexGroup>
-    )}
+    {ratings && <VitalRatingShares ratings={ratings} formatPercent={formatPercent} />}
   </>
 );
 
