@@ -8,7 +8,7 @@
  */
 
 import type { ScoutServerConfig } from '../../../../../types';
-import { servers as evalsTracingConfig } from '../../evals_tracing/stateful/classic.stateful.config';
+import { servers as evalsSecurityConfig } from '../../evals_security/stateful/classic.stateful.config';
 
 /**
  * Custom Scout stateful server configuration for PCI DSS v4.0.1 compliance evals.
@@ -19,11 +19,11 @@ import { servers as evalsTracingConfig } from '../../evals_tracing/stateful/clas
  *   node scripts/scout start-server --arch stateful --domain classic --serverConfigSet evals_pci_compliance
  */
 export const servers: ScoutServerConfig = {
-  ...evalsTracingConfig,
+  ...evalsSecurityConfig,
   kbnTestServer: {
-    ...evalsTracingConfig.kbnTestServer,
+    ...evalsSecurityConfig.kbnTestServer,
     serverArgs: [
-      ...evalsTracingConfig.kbnTestServer.serverArgs,
+      ...evalsSecurityConfig.kbnTestServer.serverArgs,
       '--uiSettings.overrides.agentBuilder:experimentalFeatures=true',
       `--xpack.securitySolution.enableExperimental=${JSON.stringify([
         'pciComplianceAgentBuilder',
