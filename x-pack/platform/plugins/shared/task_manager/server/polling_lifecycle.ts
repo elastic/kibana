@@ -66,6 +66,7 @@ import { TaskClaiming } from './queries/task_claiming';
 import type { ClaimOwnershipResult } from './task_claimers';
 import type { TaskPartitioner } from './lib/task_partitioner';
 import type { TaskPoller } from './polling/task_poller';
+import { pollCycleRecorder } from './polling/poll_cycle_recorder';
 import {
   createCapacityScan,
   createPollIntervalScan,
@@ -339,6 +340,23 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
         return capacity;
       },
       work: this.pollForWork,
+      onCycleComplete: ({
+        startedAt,
+        finishedAt,
+        nudged,
+        pollInterval: interval,
+        capacityAvailable,
+        result,
+      }) =>
+        pollCycleRecorder.record({
+          started_at: startedAt,
+          finished_at: finishedAt,
+          trigger: nudged ? 'nudge' : 'interval',
+          poll_interval_ms: interval,
+          capacity_available: capacityAvailable,
+          skipped_no_capacity: capacityAvailable <= 0,
+          tasks_claimed: result?.stats?.tasksClaimed,
+        }),
     });
 
     this.subscribeToPoller(this.poller.events$);
