@@ -528,6 +528,31 @@ describe('generateBodyParams', () => {
     });
   });
 
+  it('returns __scope_link to _processor for ProcessorContainer', () => {
+    const processorContainer: SpecificationTypes.Interface = {
+      kind: 'interface',
+      name: { name: 'ProcessorContainer', namespace: 'ingest._types' },
+      properties: [getMockProperty({ propertyName: 'append' })],
+      specLocation: '',
+    };
+    const schema: SpecificationTypes.Model = { ...mockSchema, types: [processorContainer] };
+    const requestType = makeRequestWithBody([
+      getMockProperty({
+        propertyName: 'on_failure',
+        type: {
+          kind: 'array_of',
+          value: {
+            kind: 'instance_of',
+            type: { name: 'ProcessorContainer', namespace: 'ingest._types' },
+          },
+        },
+      }),
+    ]);
+    expect(generateBodyParams(requestType, schema)).toEqual({
+      on_failure: [{ __scope_link: '_processor' }],
+    });
+  });
+
   it('WHEN QueryContainer has another namespace SHOULD generate its declared properties', () => {
     const queryContainer: SpecificationTypes.Interface = {
       kind: 'interface',
