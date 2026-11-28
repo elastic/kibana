@@ -32,9 +32,9 @@ describe('retry filter', () => {
       expect(isRecoverable(error)).toBe(true);
     });
 
-    it('returns true for tool validation error', () => {
+    it('returns false for tool validation error', () => {
       const error = createToolValidationError('tool validation error', { toolCalls: [] });
-      expect(isRecoverable(error)).toBe(true);
+      expect(isRecoverable(error)).toBe(false);
     });
 
     it('returns true for request aborted error', () => {

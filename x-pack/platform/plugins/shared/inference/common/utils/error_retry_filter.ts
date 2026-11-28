@@ -27,9 +27,10 @@ const STATUS_NO_RETRY = [
 const retryAll = () => true;
 
 const isRecoverable = (err: any) => {
-  // tool validation error are from malformed json or generation not matching the schema
+  // Resending the identical request rarely fixes malformed tool calls; callers recover
+  // by sending the validation error back to the model instead.
   if (isToolValidationError(err)) {
-    return true;
+    return false;
   }
   if (isInferenceRequestAbortedError(err)) {
     return true;
