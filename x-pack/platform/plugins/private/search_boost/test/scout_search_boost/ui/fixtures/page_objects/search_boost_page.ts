@@ -7,6 +7,7 @@
 
 import type { Locator, ScoutPage } from '@kbn/scout';
 import { escapeRegExp } from 'lodash';
+import type { BoostProfileType } from '../../../../../common/types';
 import { getProfilePath, getRulePath } from '../../../../../public/links';
 
 type BoostTab = 'rules' | 'profiles';
@@ -25,6 +26,8 @@ export class SearchBoostPage {
   readonly matchesTable: Locator;
   readonly profileRulesTable: Locator;
   readonly dataStreamFlyout: Locator;
+  readonly projectDefaults: Locator;
+  readonly matchesPopover: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.dataManagementNavItem = page
@@ -46,6 +49,9 @@ export class SearchBoostPage {
     this.matchesTable = page.getByTestId('searchBoostMatchesTable');
     this.profileRulesTable = page.getByTestId('searchBoostProfileRulesTable');
     this.dataStreamFlyout = page.getByTestId('dataStreamDetailPanel');
+    this.projectDefaults = page.getByTestId('searchBoostProjectDefaults');
+    // The popover's own test subject stays on its anchor; the panel is in a portal.
+    this.matchesPopover = page.getByTestId('searchBoostMatchesPopoverList');
   }
 
   async gotoHome() {
@@ -81,6 +87,23 @@ export class SearchBoostPage {
   /** Lists only what matches, so other rules or profiles on the stack can't push it to another page. */
   async search(text: string) {
     await this.searchBox.fill(text);
+  }
+
+  /** The profile shown on the project default card of the given type. */
+  projectDefaultValue(type: BoostProfileType) {
+    return this.projectDefaults.getByTestId(`searchBoostProjectDefaultValue-${type}`);
+  }
+
+  /** The badge with what the project default of the given type applies to. */
+  projectDefaultCount(type: BoostProfileType) {
+    return this.projectDefaults.getByTestId(`searchBoostProjectDefaultCount-${type}`);
+  }
+
+  /** The item for the given name in the open matches popover. */
+  matchesPopoverItem(name: string) {
+    return this.matchesPopover
+      .getByTestId('searchBoostMatchesPopoverItem')
+      .filter({ has: this.page.getByText(name, { exact: true }) });
   }
 
   /** The table row of the given rule or profile. */

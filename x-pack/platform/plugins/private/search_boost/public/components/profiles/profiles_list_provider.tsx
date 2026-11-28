@@ -8,6 +8,8 @@
 import type { ReactNode } from 'react';
 import React, { useMemo } from 'react';
 import type { ActiveFilters, ContentListItem, FindItemsParams } from '@kbn/content-list-provider';
+import { isManagedProfile } from '../../../common/profiles';
+import { isDefaultRule } from '../../../common/rules';
 import type { BoostProfile, BoostProfileType, BoostRule } from '../../../common/types';
 import { InMemoryListProvider } from '../in_memory_list_provider';
 import { useItemActions } from '../item_actions';
@@ -24,6 +26,7 @@ import {
 type ProfileItem = ContentListItem &
   BoostProfile & {
     source: BoostProfile;
+    isManaged: boolean;
     minBoost: number;
     maxBoost: number;
     typeLabel: string;
@@ -41,9 +44,10 @@ const FIELDS = [TYPE_FIELD_DEFINITION];
 const toItems = (profiles: BoostProfile[], rules: BoostRule[]): ProfileItem[] => {
   const ruleCounts = new Map<string, number>();
   const defaultRuleProfiles = new Set<string>();
-  for (const { boost_profile: profileName, is_builtin: isBuiltin } of rules) {
+  for (const rule of rules) {
+    const profileName = rule.boost_profile;
     ruleCounts.set(profileName, (ruleCounts.get(profileName) ?? 0) + 1);
-    if (isBuiltin) {
+    if (isDefaultRule(rule)) {
       defaultRuleProfiles.add(profileName);
     }
   }
@@ -56,6 +60,7 @@ const toItems = (profiles: BoostProfile[], rules: BoostRule[]): ProfileItem[] =>
       source: profile,
       id: profile.name,
       title: profile.name,
+      isManaged: isManagedProfile(profile),
       minBoost,
       maxBoost,
       typeLabel: PROFILE_TYPE_LABELS[profile.type],
@@ -112,7 +117,7 @@ export const ProfilesListProvider = ({
     onEdit,
     onDuplicate,
     onDelete,
-    editRestriction: (item) => (getItem(item)?.is_builtin ? MANAGED_EDIT_REASON : undefined),
+    editRestriction: (item) => (getItem(item)?.isManaged ? MANAGED_EDIT_REASON : undefined),
     deleteRestriction: (item) => {
       const defaultRuleType = getItem(item)?.defaultRuleType;
       return defaultRuleType && USED_BY_DEFAULT_RULE_REASONS[defaultRuleType];

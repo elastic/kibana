@@ -5,30 +5,23 @@
  * 2.0.
  */
 
-import { isConvertedProfile } from './profiles';
-import type { BoostProfile } from './types';
+import { isLabeledProfileName, isManagedProfile } from './profiles';
 
-const profile = (name: string, isBuiltin: boolean): BoostProfile => ({
-  name,
-  type: 'indices',
-  is_builtin: isBuiltin,
-  min_boost: 1,
-  max_boost: 1,
-  availability: 'base',
-  prewarm: false,
-  pinned: false,
+describe('isManagedProfile', () => {
+  it('recognizes builtin profiles', () => {
+    expect(isManagedProfile({ is_builtin: true })).toBe(true);
+    expect(isManagedProfile({ is_builtin: false })).toBe(false);
+  });
 });
 
-describe('isConvertedProfile', () => {
-  it('recognizes a builtin profile whose name starts with `_converted_`', () => {
-    expect(isConvertedProfile(profile('_converted_indices', true))).toBe(true);
+describe('isLabeledProfileName', () => {
+  it('recognizes the builtin profiles that have their own label', () => {
+    expect(isLabeledProfileName('default_indices')).toBe(true);
+    expect(isLabeledProfileName('data_streams_3d')).toBe(true);
   });
 
-  it('leaves out other builtin profiles', () => {
-    expect(isConvertedProfile(profile('default_indices', true))).toBe(false);
-  });
-
-  it('leaves out custom profiles, whatever their name', () => {
-    expect(isConvertedProfile(profile('_converted_indices', false))).toBe(false);
+  it('leaves out converted and custom profile names', () => {
+    expect(isLabeledProfileName('_converted_indices')).toBe(false);
+    expect(isLabeledProfileName('catalog-fast')).toBe(false);
   });
 });

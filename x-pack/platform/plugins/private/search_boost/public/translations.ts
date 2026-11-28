@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import type { BoostProfileType } from '../common/types';
-import type { ManagedProfileName } from '../common/managed_profiles';
-import { isManagedProfileName } from '../common/managed_profiles';
+import type { LabeledProfileName } from '../common/profiles';
+import { isLabeledProfileName } from '../common/profiles';
 
 export const SEARCH_BOOST_PAGE_DESCRIPTION = i18n.translate('xpack.searchBoost.page.description', {
   defaultMessage:
@@ -119,12 +119,12 @@ const EDIT_PROJECT_DEFAULT_LABELS: Readonly<Record<BoostProfileType, string>> = 
 export const getEditProjectDefaultLabel = (type: BoostProfileType): string =>
   EDIT_PROJECT_DEFAULT_LABELS[type];
 
-interface ManagedProfileMessage {
+interface LabeledProfileMessage {
   label: string;
   description: string;
 }
 
-const MANAGED_PROFILE_MESSAGES: Readonly<Record<ManagedProfileName, ManagedProfileMessage>> = {
+const LABELED_PROFILE_MESSAGES: Readonly<Record<LabeledProfileName, LabeledProfileMessage>> = {
   default_indices: {
     label: i18n.translate('xpack.searchBoost.managedProfile.defaultIndices.label', {
       defaultMessage: 'Default',
@@ -169,9 +169,16 @@ const MANAGED_PROFILE_MESSAGES: Readonly<Record<ManagedProfileName, ManagedProfi
   },
 };
 
-/** Label and description of an Elastic-managed profile, or `undefined` for any other profile name. */
-export const getManagedProfileMessage = (profileName: string): ManagedProfileMessage | undefined =>
-  isManagedProfileName(profileName) ? MANAGED_PROFILE_MESSAGES[profileName] : undefined;
+/** Label and description of a labeled Elastic-managed profile, or `undefined` for any other name. */
+export const getLabeledProfileMessage = (profileName: string): LabeledProfileMessage | undefined =>
+  isLabeledProfileName(profileName) ? LABELED_PROFILE_MESSAGES[profileName] : undefined;
+
+export const NO_PROJECT_DEFAULT_MESSAGE = i18n.translate(
+  'xpack.searchBoost.projectDefaults.noDefault',
+  {
+    defaultMessage: 'No default boost profile found.',
+  }
+);
 
 export const CUSTOM_PROFILE_DESCRIPTION = i18n.translate(
   'xpack.searchBoost.projectDefaults.customProfile',

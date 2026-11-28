@@ -19,6 +19,8 @@ import {
   getRulesListLocation,
 } from '../links';
 import { ProfilesTab } from './profiles/profiles_tab';
+import { getProjectDefaults } from './project_defaults/project_default_data';
+import { ProjectDefaults } from './project_defaults/project_defaults';
 import { RulesTab } from './rules/rules_tab';
 import type { SearchBoostTab } from './search_boost_tabs';
 import { SearchBoostTabs } from './search_boost_tabs';
@@ -37,6 +39,13 @@ const TabContent = ({ tab, profiles, rules, canEdit }: TabContentProps) => {
 
   return (
     <>
+      <EuiSpacer size="l" />
+      <ProjectDefaults
+        canEdit={canEdit}
+        getProfileLinkProps={(name) => reactRouterNavigate(history, getProfilePath(name))}
+        {...getProjectDefaults(profiles, rules)}
+      />
+      <EuiSpacer size="l" />
       <SearchBoostTabs
         selectedTab={tab}
         onSelectTab={(selected) => {

@@ -19,7 +19,7 @@ const defaultProps: ProjectDefaultCardProps = {
   matches: [{ name: 'products' }, { name: 'users' }],
   canEdit: true,
   onEdit: jest.fn(),
-  onViewProfile: jest.fn(),
+  getProfileLinkProps: () => ({ href: '#', onClick: jest.fn() }),
 };
 
 describe('ProjectDefaultCard', () => {
@@ -89,14 +89,24 @@ describe('ProjectDefaultCard', () => {
     expect(screen.queryByTestId('searchBoostEditProjectDefault-indices')).not.toBeInTheDocument();
   });
 
-  it('shows a custom profile name, description, and view link', async () => {
+  it('hides Edit when onEdit is omitted', () => {
+    render(<ProjectDefaultCard {...defaultProps} onEdit={undefined} />);
+
+    expect(screen.queryByTestId('searchBoostEditProjectDefault-indices')).not.toBeInTheDocument();
+  });
+
+  it('shows a custom profile name, description, and a link to the profile', async () => {
     const user = userEvent.setup();
-    const onViewProfile = jest.fn();
+    const onClick = jest.fn();
+    const getProfileLinkProps = jest.fn((name: string) => ({
+      href: `/profiles/${name}`,
+      onClick,
+    }));
     render(
       <ProjectDefaultCard
         {...defaultProps}
         profile={{ name: 'catalog-fast', is_builtin: false }}
-        onViewProfile={onViewProfile}
+        getProfileLinkProps={getProfileLinkProps}
       />
     );
 
@@ -105,17 +115,20 @@ describe('ProjectDefaultCard', () => {
     );
     expect(screen.getByText('Using a selected custom boost profile.')).toBeInTheDocument();
 
-    await user.click(screen.getByTestId('searchBoostProjectDefaultProfileLink-indices'));
+    const link = screen.getByRole('link', { name: 'View boost profile "catalog-fast"' });
+    expect(link).toHaveAttribute('href', '/profiles/catalog-fast');
+    await user.click(link);
 
-    expect(onViewProfile).toHaveBeenCalledWith('catalog-fast');
+    expect(getProfileLinkProps).toHaveBeenCalledWith('catalog-fast');
+    expect(onClick).toHaveBeenCalledTimes(1);
   });
 
-  it('does not show the custom profile link when onViewProfile is omitted', () => {
+  it('does not show the custom profile link when getProfileLinkProps is omitted', () => {
     render(
       <ProjectDefaultCard
         {...defaultProps}
         profile={{ name: 'catalog-fast', is_builtin: false }}
-        onViewProfile={undefined}
+        getProfileLinkProps={undefined}
       />
     );
 

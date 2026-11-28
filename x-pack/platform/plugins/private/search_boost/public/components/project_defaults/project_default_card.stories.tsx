@@ -60,12 +60,18 @@ const meta: Meta<ProjectDefaultCardProps> = {
     type: 'indices',
     canEdit: true,
     onEdit: action('onEdit'),
-    onViewProfile: action('onViewProfile'),
+    getProfileLinkProps: (profileName) => ({
+      href: '#',
+      onClick: (event) => {
+        event.preventDefault();
+        action('onOpenProfile')(profileName);
+      },
+    }),
   },
   argTypes: {
     type: { control: 'radio', options: ['indices', 'data_streams'] },
     onEdit: { table: { disable: true } },
-    onViewProfile: { table: { disable: true } },
+    getProfileLinkProps: { table: { disable: true } },
   },
 };
 
@@ -88,13 +94,13 @@ export const NoMatches: Story = {
 };
 
 export const ProjectDefaultsSection: Story = {
-  render: ({ canEdit, onViewProfile }) => (
+  render: ({ canEdit, getProfileLinkProps }) => (
     <ProjectDefaults
       canEdit={canEdit}
       indices={CARD_DATA.indices}
       dataStreams={CARD_DATA.data_streams}
       onEdit={action('onEdit')}
-      onViewProfile={onViewProfile}
+      getProfileLinkProps={getProfileLinkProps}
     />
   ),
   argTypes: {
@@ -114,4 +120,16 @@ export const ProjectDefaultsSectionReadOnly: Story = {
   args: {
     canEdit: false,
   },
+};
+
+export const ProjectDefaultsSectionMissingDefault: Story = {
+  ...ProjectDefaultsSection,
+  render: ({ canEdit, getProfileLinkProps }) => (
+    <ProjectDefaults
+      canEdit={canEdit}
+      indices={CARD_DATA.indices}
+      onEdit={action('onEdit')}
+      getProfileLinkProps={getProfileLinkProps}
+    />
+  ),
 };

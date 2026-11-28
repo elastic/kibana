@@ -42,7 +42,7 @@ export const ProfilesTable = ({
   // Content List keeps the first render's cell renderers, so they read the latest getters.
   const latest = useLatest({ getProfileLinkProps, getProfileRulesLinkProps });
   const getProfile = useProfileItem();
-  const isCustomProfile = (item: ContentListItem) => getProfile(item)?.is_builtin === false;
+  const isCustomProfile = (item: ContentListItem) => getProfile(item)?.isManaged === false;
 
   return (
     <ContentListTable title={PROFILES_TABLE_CAPTION} data-test-subj="searchBoostProfilesTable">
@@ -52,7 +52,7 @@ export const ProfilesTable = ({
           <NameCell
             name={item.title}
             linkProps={latest.current.getProfileLinkProps(item.title)}
-            badge={getProfile(item)?.is_builtin ? MANAGED_PROFILE_BADGE_PROPS : undefined}
+            badge={getProfile(item)?.isManaged ? MANAGED_PROFILE_BADGE_PROPS : undefined}
             data-test-subj="searchBoostProfileLink"
           />
         )}

@@ -11,6 +11,7 @@ import { EuiBadge } from '@elastic/eui';
 import type { BoostProfileType, BoostRuleMatch } from '../../../common/types';
 import { formatTargetCount } from '../../translations';
 import { MatchesPopover } from '../matches_popover/matches_popover';
+import { getUsage } from '../usage';
 
 export interface MatchesBadgeProps {
   type: BoostProfileType;
@@ -28,7 +29,7 @@ export const MatchesBadge = ({
   'data-test-subj': dataTestSubj,
 }: MatchesBadgeProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const appliedCount = matches.filter(({ outrankedByRuleName }) => !outrankedByRuleName).length;
+  const { appliesTo: appliedCount } = getUsage(matches);
   const countLabel = formatTargetCount(type, appliedCount);
 
   if (matches.length === 0) {

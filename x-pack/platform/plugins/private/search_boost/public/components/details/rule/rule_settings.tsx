@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiBadge, EuiCode, EuiLink } from '@elastic/eui';
+import { isManagedProfile } from '../../../../common/profiles';
 import type { BoostProfile, BoostRuleListItem } from '../../../../common/types';
 import type { LinkProps } from '../../../types';
 import { DetailsSection } from '../details_section';
@@ -36,7 +37,7 @@ export const RuleSettings = ({ rule, profile, getProfileLinkProps }: RuleSetting
           value: (
             <>
               <EuiLink {...getProfileLinkProps(rule.boost_profile)}>{rule.boost_profile}</EuiLink>
-              {profile?.is_builtin && (
+              {profile && isManagedProfile(profile) && (
                 <>
                   {' '}
                   <EuiBadge>{MANAGED_PROFILE_BADGE}</EuiBadge>

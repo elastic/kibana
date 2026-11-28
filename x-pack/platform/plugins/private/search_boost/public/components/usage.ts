@@ -14,7 +14,7 @@ export interface BoostUsage {
   storageSizeInBytes?: number;
 }
 
-export const getUsage = (matches: BoostRuleMatch[]): BoostUsage => {
+export const getUsage = (matches: readonly BoostRuleMatch[]): BoostUsage => {
   const applied = matches.filter(({ outrankedByRuleName }) => !outrankedByRuleName);
   return {
     appliesTo: applied.length,
