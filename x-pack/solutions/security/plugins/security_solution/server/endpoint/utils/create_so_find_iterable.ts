@@ -109,9 +109,9 @@ export const createSoFindIterable = <TDocument = unknown>({
       return;
     }
 
-    // eslint-disable-next-line require-atomic-updates
+    // eslint-disable-next-line @kbn/compat/eslint-require-atomic-updates
     searchAfterValue = lastSearchHit.sort;
-    // eslint-disable-next-line require-atomic-updates
+    // eslint-disable-next-line @kbn/compat/eslint-require-atomic-updates
     pointInTime = Promise.resolve({ id: findResult.pit_id ?? '' });
     setValue(findResult);
 

@@ -111,7 +111,7 @@ export function useAbortableAsync<T>(
       };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    deps.concat(refreshId, clearValueOnNext)
+    [...deps, refreshId, clearValueOnNext]
   );
 
   const refresh = useCallback(() => {

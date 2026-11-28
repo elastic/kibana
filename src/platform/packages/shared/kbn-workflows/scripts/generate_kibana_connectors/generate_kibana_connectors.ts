@@ -27,13 +27,12 @@ import type { HttpMethod } from '../../types/latest';
 import {
   camelToSnake,
   type ContractMeta,
-  eslintFixGeneratedCode,
   formatDuration,
+  formatGeneratedCode,
   generateContractBlock,
   generateOutputSchemaString,
   generateParameterTypes,
   generateParamsSchemaString,
-  getEslintrcForGeneratedCode,
   getLicenseHeader,
   getRequestSchemaName,
   getResponseSchemaName,
@@ -50,8 +49,8 @@ export async function run() {
   validateIncludedOperations(contracts);
   await generateZodSchemas(contracts);
   saveKibanaConnectors(contracts);
-  eslintFixGeneratedCode({
-    paths: [
+  await formatGeneratedCode({
+    patterns: [
       KIBANA_CONTRACTS_OUTPUT_FILE_PATH,
       `${KIBANA_GENERATED_OUTPUT_FOLDER_PATH}/kibana*.gen.ts`,
     ],
@@ -94,11 +93,6 @@ function saveKibanaConnectors(contracts: ContractMeta[]) {
         'utf8'
       );
     }
-    fs.writeFileSync(
-      Path.resolve(KIBANA_GENERATED_OUTPUT_FOLDER_PATH, '.eslintrc.json'),
-      JSON.stringify(getEslintrcForGeneratedCode(), null, 2),
-      'utf8'
-    );
     console.log(
       `✅ ${contracts.length} Kibana connectors generated in ${formatDuration(
         startedAt,
@@ -137,7 +131,7 @@ function generateKibanaConnectorsIndexFile(contracts: ContractMeta[]) {
  * 
  * To regenerate: node scripts/generate_workflow_kibana_contracts.js
  */
-/* eslint-disable import/order */
+/* eslint-disable @kbn/compat/import-order */
 
 import type { InternalConnectorContract } from '../../../types/latest';
 

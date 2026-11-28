@@ -1,0 +1,84 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import * as a from 'lodash'; // eslint-disable-line @kbn/eslint/security_imports_restriction
+import * as b from 'lodash/fp'; // eslint-disable-line @kbn/eslint/security_imports_restriction
+
+import { set as c } from 'lodash'; // eslint-disable-line @kbn/eslint/security_imports_restriction
+import { setWith as d } from 'lodash'; // eslint-disable-line @kbn/eslint/security_imports_restriction
+import { template as e } from 'lodash'; // eslint-disable-line @kbn/eslint/security_imports_restriction
+
+// The following import statements can't be tested because they are not in our package.json
+// import 'lodash.set'; // eslint-disable-line @kbn/eslint/security_imports_restriction
+// import 'lodash.setWith'; // eslint-disable-line @kbn/eslint/security_imports_restriction
+// import 'lodash.template'; // eslint-disable-line @kbn/eslint/security_imports_restriction
+
+import 'lodash/set'; // eslint-disable-line @kbn/eslint/security_imports_restriction
+import 'lodash/setWith'; // eslint-disable-line @kbn/eslint/security_imports_restriction
+import 'lodash/template'; // eslint-disable-line @kbn/eslint/security_imports_restriction
+
+import { set as f } from 'lodash/fp'; // eslint-disable-line @kbn/eslint/security_imports_restriction
+import { setWith as g } from 'lodash/fp'; // eslint-disable-line @kbn/eslint/security_imports_restriction
+import { assoc as h } from 'lodash/fp'; // eslint-disable-line @kbn/eslint/security_imports_restriction
+import { assocPath as i } from 'lodash/fp'; // eslint-disable-line @kbn/eslint/security_imports_restriction
+import { template as j } from 'lodash/fp'; // eslint-disable-line @kbn/eslint/security_imports_restriction
+
+import 'lodash/fp/set'; // eslint-disable-line @kbn/eslint/security_imports_restriction
+import 'lodash/fp/setWith'; // eslint-disable-line @kbn/eslint/security_imports_restriction
+import 'lodash/fp/assoc'; // eslint-disable-line @kbn/eslint/security_imports_restriction
+import 'lodash/fp/assocPath'; // eslint-disable-line @kbn/eslint/security_imports_restriction
+import 'lodash/fp/template'; // eslint-disable-line @kbn/eslint/security_imports_restriction
+
+// The following require statements can't be tested because they are not in our package.json
+// require('lodash.set'); // eslint-disable-line @kbn/compat/eslint-no-restricted-modules
+// require('lodash.setWith'); // eslint-disable-line @kbn/compat/eslint-no-restricted-modules
+// require('lodash.template'); // eslint-disable-line @kbn/compat/eslint-no-restricted-modules
+
+require('lodash/set'); // eslint-disable-line @kbn/compat/eslint-no-restricted-modules
+require('lodash/setWith'); // eslint-disable-line @kbn/compat/eslint-no-restricted-modules
+require('lodash/template'); // eslint-disable-line @kbn/compat/eslint-no-restricted-modules
+
+require('lodash/fp/set'); // eslint-disable-line @kbn/compat/eslint-no-restricted-modules
+require('lodash/fp/setWith'); // eslint-disable-line @kbn/compat/eslint-no-restricted-modules
+require('lodash/fp/assoc'); // eslint-disable-line @kbn/compat/eslint-no-restricted-modules
+require('lodash/fp/assocPath'); // eslint-disable-line @kbn/compat/eslint-no-restricted-modules
+require('lodash/fp/template'); // eslint-disable-line @kbn/compat/eslint-no-restricted-modules
+
+// Adding some additional tests for Handlebars here, for more tests, see packages/kbn-eslint-plugin-imports/src/rules/no_direct_handlebars_import.test.ts
+import * as hb from 'handlebars'; // eslint-disable-line @kbn/imports/no_direct_handlebars_import
+import Handlebars from 'handlebars'; // eslint-disable-line @kbn/imports/no_direct_handlebars_import
+import { compile as hc } from 'handlebars'; // eslint-disable-line @kbn/imports/no_direct_handlebars_import
+import { precompile as hp } from 'handlebars'; // eslint-disable-line @kbn/imports/no_direct_handlebars_import
+import { template as ht } from 'handlebars'; // eslint-disable-line @kbn/imports/no_direct_handlebars_import
+import { SafeString as hs } from 'handlebars'; // eslint-disable-line @kbn/imports/no_direct_handlebars_import
+
+require('handlebars'); // eslint-disable-line @kbn/imports/no_direct_handlebars_import
+
+const lodash = {
+  set() {},
+  setWith() {},
+  assoc() {},
+  assocPath() {},
+  template() {},
+};
+lodash.set(); // eslint-disable-line no-restricted-properties
+lodash.setWith(); // eslint-disable-line no-restricted-properties
+lodash.assoc(); // eslint-disable-line no-restricted-properties
+lodash.assocPath(); // eslint-disable-line no-restricted-properties
+lodash.template(); // eslint-disable-line no-restricted-properties
+
+const _ = lodash;
+_.set(); // eslint-disable-line no-restricted-properties
+_.setWith(); // eslint-disable-line no-restricted-properties
+_.assoc(); // eslint-disable-line no-restricted-properties
+_.assocPath(); // eslint-disable-line no-restricted-properties
+_.template(); // eslint-disable-line no-restricted-properties
+
+// hack to ensure all imported variables are used
+module.exports = [a, b, c, d, e, f, g, h, i, j, hb, Handlebars, hc, hp, ht, hs];

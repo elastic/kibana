@@ -13,12 +13,14 @@ export const jestRules: DummyRuleMap = {
   'jest/no-focused-tests': 'error',
 };
 
-/** `@kbn/eslint-config`'s Jest rules. */
+/** Jest rules, ported from the former `@kbn/eslint-config`. */
 export const jestOverrides: OxlintOverride[] = [
   {
     files: ['**/*.{test,test.mocks,mock}.{js,mjs,ts,tsx}', '**/__mocks__/**/*.{js,mjs,ts,tsx}'],
+    env: { jest: true },
     rules: {
       'jest/no-identical-title': 'error',
+      '@kbn/compat/import-order': 'off',
     },
   },
 ];

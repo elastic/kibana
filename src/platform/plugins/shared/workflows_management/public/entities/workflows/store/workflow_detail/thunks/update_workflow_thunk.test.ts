@@ -21,7 +21,7 @@ import { setWorkflow, setYamlString } from '../slice';
 
 // Mock the loadWorkflowThunk
 jest.mock('./load_workflow_thunk');
-// eslint-disable-next-line import/order
+// eslint-disable-next-line @kbn/compat/import-order
 import { loadWorkflowThunk } from './load_workflow_thunk';
 const mockLoadWorkflowThunk = loadWorkflowThunk as jest.MockedFunction<typeof loadWorkflowThunk>;
 

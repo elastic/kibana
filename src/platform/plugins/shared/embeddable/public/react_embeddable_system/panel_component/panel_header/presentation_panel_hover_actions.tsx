@@ -281,7 +281,7 @@ export const PresentationPanelHoverActions = ({
   }, [api, quickActions]);
 
   const contextMenuClasses = classNames({
-    // eslint-disable-next-line @typescript-eslint/naming-convention
+    // eslint-disable-next-line @kbn/compat/typescript-naming-convention
     embPanel__optionsMenuPopover: true,
   });
 

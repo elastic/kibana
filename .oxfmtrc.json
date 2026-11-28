@@ -6,7 +6,7 @@
   "printWidth": 100,
   "sortPackageJson": false,
 
-  // gitignore syntax, rooted at the repo. Only the JS/TS files ESLint lints are formatted; the
+  // gitignore syntax, rooted at the repo. Only the JS/TS files oxlint lints are formatted; the
   // remaining entries mirror .eslintignore (minus what .gitignore already covers, which oxfmt
   // applies on its own) so vendored and generated code stays untouched.
   "ignorePatterns": [
@@ -29,7 +29,6 @@
     "/x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/libyara/wasm/dist/**",
 
     // package overrides
-    "/packages/kbn-eslint-config",
     "/packages/kbn-plugin-generator/template",
     "/packages/kbn-generate/templates",
     "/src/platform/packages/shared/kbn-expect/expect.js",

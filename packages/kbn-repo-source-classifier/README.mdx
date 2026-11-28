@@ -14,7 +14,7 @@ This package exposes a class which can be used to efficiently classify all of th
  - `common packages`: includes any existing package, plugin code in root `common/` directories, (and a few others in specific plugins), Eventually this will include `common-shared` packages
  - `tests or mocks`: code that is loaded by jest/storybook, and mocks/helpers intended for use by that code. These files usually live along side package code but will have a separate dependency tree and are pieces of code which should never end up in the product.
  - `static`: static files, currently any .json file or things loaded via `?raw` or `?asUrl` in browser code
- - `tooling`: scripts, config files for tools like eslint, webpack, etc. 
+ - `tooling`: scripts, config files for tools like oxlint, webpack, etc. 
  - `non-package`: code that lives outside of packages/plugins or doesn't fit into other more specific categories. Once the package project is complete this category should be limited to just `@kbn/pm`
 
 This is a map of types to the types they are allowed to import:
@@ -26,6 +26,6 @@ This is a map of types to the types they are allowed to import:
  - `tests or mocks`: anything
  - `tooling`: anything
 
-The `RepoSourceClassifier` class implements several caches to make these lookups as efficient as possible in ESLint when all imports across the entire repository are validated. This cache lasts for the lifetime of the class and to invalidate the cache the object should just be discarded and a new instance created.
+The `RepoSourceClassifier` class implements several caches to make these lookups as efficient as possible in lint rules when all imports across the entire repository are validated. This cache lasts for the lifetime of the class and to invalidate the cache the object should just be discarded and a new instance created.
 
 A CLI is provided for inspecting the results of the classifier, check out `node scripts/classify_source --help` for more information about usage.

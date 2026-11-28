@@ -29,7 +29,7 @@ jest.mock('@kbn/streams-schema', () => {
   };
 });
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @kbn/compat/typescript-no-var-requires
 const { Streams, isIlmLifecycle } = require('@kbn/streams-schema');
 const mockGetEffectiveLifecycle = getEffectiveLifecycle as jest.MockedFunction<
   typeof getEffectiveLifecycle

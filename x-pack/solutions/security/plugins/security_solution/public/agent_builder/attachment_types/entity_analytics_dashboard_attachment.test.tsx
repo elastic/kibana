@@ -68,6 +68,7 @@ jest.mock('@elastic/eui', () => {
         children
       )
   );
+  EuiFlexGroup.displayName = 'EuiFlexGroup';
 
   const EuiFlexItem = ({
     grow,

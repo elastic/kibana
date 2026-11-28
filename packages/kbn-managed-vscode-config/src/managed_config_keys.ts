@@ -25,7 +25,6 @@ export const MANAGED_CONFIG_KEYS: ManagedConfigKey[] = [
     value: {
       ['**/.chromium']: true,
       ['**/.es']: true,
-      ['**/.eslintcache']: true,
       ['**/.pnpm-store']: true,
       ['**/.yarn-local-mirror']: true,
       ['**/*.log']: true,
@@ -83,12 +82,7 @@ export const MANAGED_CONFIG_KEYS: ManagedConfigKey[] = [
 export const MANAGED_EXTENSIONS_KEYS: ManagedConfigKey[] = [
   {
     key: 'recommendations',
-    value: [
-      'oxc.oxc-vscode',
-      'dbaeumer.vscode-eslint',
-      'stylelint.vscode-stylelint',
-      'orta.vscode-jest',
-    ],
+    value: ['oxc.oxc-vscode', 'stylelint.vscode-stylelint', 'orta.vscode-jest'],
   },
 ];
 
