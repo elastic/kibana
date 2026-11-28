@@ -1487,6 +1487,55 @@ describe('WorkflowTaskManager', () => {
       expect(mockTaskManager.runSoon).toHaveBeenCalledTimes(2);
     });
 
+    it('should not throw when an idle task is claimed by Task Manager before runSoon', async () => {
+      const mockIdleTasks = [
+        {
+          id: 'task-1',
+          taskType: WORKFLOW_RESUME_TASK_TYPE,
+          params: { workflowRunId: workflowExecutionId, spaceId: 'default' },
+          state: {},
+          scope: [`workflow:execution:${workflowExecutionId}`],
+        },
+        {
+          id: 'task-2',
+          taskType: WORKFLOW_RESUME_TASK_TYPE,
+          params: { workflowRunId: workflowExecutionId, spaceId: 'default' },
+          state: {},
+          scope: [`workflow:execution:${workflowExecutionId}`],
+        },
+      ];
+
+      mockTaskManager.fetch.mockResolvedValue({ docs: mockIdleTasks } as any);
+      mockTaskManager.runSoon
+        .mockRejectedValueOnce(new TaskAlreadyRunningError('task-1 claimed'))
+        .mockResolvedValueOnce({ id: 'task-2' } as any);
+
+      await expect(
+        workflowTaskManager.forceRunIdleTasks(workflowExecutionId)
+      ).resolves.toBeUndefined();
+
+      expect(mockTaskManager.runSoon).toHaveBeenCalledTimes(2);
+    });
+
+    it('should rethrow runSoon errors other than TaskAlreadyRunningError', async () => {
+      const mockIdleTasks = [
+        {
+          id: 'task-1',
+          taskType: WORKFLOW_RESUME_TASK_TYPE,
+          params: { workflowRunId: workflowExecutionId, spaceId: 'default' },
+          state: {},
+          scope: [`workflow:execution:${workflowExecutionId}`],
+        },
+      ];
+
+      mockTaskManager.fetch.mockResolvedValue({ docs: mockIdleTasks } as any);
+      mockTaskManager.runSoon.mockRejectedValueOnce(new Error('task manager unavailable'));
+
+      await expect(workflowTaskManager.forceRunIdleTasks(workflowExecutionId)).rejects.toThrow(
+        'task manager unavailable'
+      );
+    });
+
     it('should generate new UUIDs for each rescheduled task', async () => {
       const mockIdleTasks = [
         { id: 'task-1', params: {}, state: {}, scope: [] },

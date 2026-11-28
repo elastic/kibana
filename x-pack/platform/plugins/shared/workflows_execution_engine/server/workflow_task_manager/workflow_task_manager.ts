@@ -637,7 +637,17 @@ export class WorkflowTaskManager {
 
     if (idleTasksToRun.length) {
       // TODO: To use bulkRunSoon once available
-      await Promise.all(idleTasksToRun.map((idleTask) => this.taskManager.runSoon(idleTask.id)));
+      await Promise.all(
+        idleTasksToRun.map(async (idleTask) => {
+          try {
+            await this.taskManager.runSoon(idleTask.id);
+          } catch (runSoonError) {
+            // Claimed between the fetch and `runSoon`: the task is already running, so its
+            // execution loop is awake and will observe `cancelRequested` without our help.
+            if (!(runSoonError instanceof TaskAlreadyRunningError)) throw runSoonError;
+          }
+        })
+      );
       return;
     }
 
