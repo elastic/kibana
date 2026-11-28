@@ -66,15 +66,20 @@ export interface InventoryViewApiService {
  * Factory function to create an Inventory Views API service helper
  * @param log - Scout logger instance
  * @param kbnClient - Kibana client for making API requests
+ * @param spaceId - Kibana space the views and the default view setting belong to (default space when omitted)
  * @returns InventoryViewApiService instance
  */
 export const getInventoryViewsApiService = ({
   kbnClient,
   log,
+  spaceId,
 }: {
   kbnClient: KbnClient;
   log: ScoutLogger;
+  spaceId?: string;
 }): InventoryViewApiService => {
+  const basePath = spaceId ? `/s/${spaceId}` : '';
+
   return {
     findAll: async () => {
       return await measurePerformanceAsync(
@@ -83,7 +88,7 @@ export const getInventoryViewsApiService = ({
         async (): Promise<SingleInventoryView[]> => {
           const response = await kbnClient.request<FindInventoryViewResponse>({
             method: 'GET',
-            path: '/api/infra/inventory_views',
+            path: `${basePath}/api/infra/inventory_views`,
             retries: 3,
           });
 
@@ -98,7 +103,7 @@ export const getInventoryViewsApiService = ({
         async (): Promise<InventoryView> => {
           const response = await kbnClient.request<InventoryViewResponse>({
             method: 'POST',
-            path: '/api/infra/inventory_views',
+            path: `${basePath}/api/infra/inventory_views`,
             retries: 3,
             body: { attributes },
           });
@@ -117,7 +122,7 @@ export const getInventoryViewsApiService = ({
           for (const viewId of ids) {
             await kbnClient.request({
               method: 'DELETE',
-              path: `/api/infra/inventory_views/${viewId}`,
+              path: `${basePath}/api/infra/inventory_views/${viewId}`,
               retries: 3,
               ignoreErrors: [404],
             });
@@ -135,7 +140,7 @@ export const getInventoryViewsApiService = ({
 
           const findAllResponse = await kbnClient.request<FindInventoryViewResponse>({
             method: 'GET',
-            path: '/api/infra/inventory_views',
+            path: `${basePath}/api/infra/inventory_views`,
             retries: 3,
           });
           const existingViews = findAllResponse.data.data;
@@ -151,7 +156,7 @@ export const getInventoryViewsApiService = ({
           for (const viewId of ids) {
             await kbnClient.request({
               method: 'DELETE',
-              path: `/api/infra/inventory_views/${viewId}`,
+              path: `${basePath}/api/infra/inventory_views/${viewId}`,
               retries: 3,
               ignoreErrors: [404],
             });
@@ -166,7 +171,7 @@ export const getInventoryViewsApiService = ({
         async (): Promise<InventoryView> => {
           const response = await kbnClient.request<InventoryViewResponse>({
             method: 'GET',
-            path: `/api/infra/inventory_views/${id}`,
+            path: `${basePath}/api/infra/inventory_views/${id}`,
             retries: 3,
           });
 
@@ -181,7 +186,7 @@ export const getInventoryViewsApiService = ({
         async (): Promise<void> => {
           await kbnClient.request({
             method: 'PATCH',
-            path: `/api/metrics/source/default`,
+            path: `${basePath}/api/metrics/source/default`,
             body: { inventoryDefaultView: id },
             retries: 3,
           });
