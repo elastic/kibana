@@ -175,55 +175,57 @@ export const IndexLifecycleSummary: FunctionComponent<Props> = ({ index, getUrlF
             min-width: 600px;
           `}
         >
-          {ilm.step_info && ilm.step === 'ERROR' && (
-            // there is an error
-            <>
-              <EuiPanel
-                color="danger"
-                hasBorder={true}
-                grow={false}
-                data-test-subj="policyErrorPanel"
-              >
-                <EuiText size="xs">
-                  <h3>
-                    <FormattedMessage
-                      defaultMessage="Lifecycle error"
-                      id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.lifecycleErrorTitle"
-                    />
-                  </h3>
-                  <EuiSpacer />
-                  <EuiCodeBlock language="json" isCopyable>
-                    {JSON.stringify(
-                      { failed_step: ilm.failed_step, step_info: ilm.step_info },
-                      null,
-                      2
-                    )}
-                  </EuiCodeBlock>
-                </EuiText>
-              </EuiPanel>
-              <EuiSpacer />
-            </>
-          )}
-          {ilm.step_info && ilm.step !== 'ERROR' && (
-            // ILM is waiting for the step to complete
-            <>
-              <EuiPanel hasBorder={true} grow={false} data-test-subj="policyStepPanel">
-                <EuiText size="xs">
-                  <h3>
-                    <FormattedMessage
-                      defaultMessage="Current step info"
-                      id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.stepInfoTitle"
-                    />
-                  </h3>
-                  <EuiSpacer />
-                  <EuiCodeBlock language="json" isCopyable>
-                    {JSON.stringify(ilm.step_info, null, 2)}
-                  </EuiCodeBlock>
-                </EuiText>
-              </EuiPanel>
-              <EuiSpacer />
-            </>
-          )}
+          {ilm.step_info &&
+            ilm.step === 'ERROR' && (
+              // there is an error
+              <>
+                <EuiPanel
+                  color="danger"
+                  hasBorder={true}
+                  grow={false}
+                  data-test-subj="policyErrorPanel"
+                >
+                  <EuiText size="xs">
+                    <h3>
+                      <FormattedMessage
+                        defaultMessage="Lifecycle error"
+                        id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.lifecycleErrorTitle"
+                      />
+                    </h3>
+                    <EuiSpacer />
+                    <EuiCodeBlock language="json" isCopyable>
+                      {JSON.stringify(
+                        { failed_step: ilm.failed_step, step_info: ilm.step_info },
+                        null,
+                        2
+                      )}
+                    </EuiCodeBlock>
+                  </EuiText>
+                </EuiPanel>
+                <EuiSpacer />
+              </>
+            )}
+          {ilm.step_info &&
+            ilm.step !== 'ERROR' && (
+              // ILM is waiting for the step to complete
+              <>
+                <EuiPanel hasBorder={true} grow={false} data-test-subj="policyStepPanel">
+                  <EuiText size="xs">
+                    <h3>
+                      <FormattedMessage
+                        defaultMessage="Current step info"
+                        id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.stepInfoTitle"
+                      />
+                    </h3>
+                    <EuiSpacer />
+                    <EuiCodeBlock language="json" isCopyable>
+                      {JSON.stringify(ilm.step_info, null, 2)}
+                    </EuiCodeBlock>
+                  </EuiText>
+                </EuiPanel>
+                <EuiSpacer />
+              </>
+            )}
           {ilm.phase_execution && (
             <EuiPanel hasBorder={true} grow={false} data-test-subj="phaseDefinitionPanel">
               <EuiText size="xs">

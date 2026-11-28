@@ -14,9 +14,8 @@ module.exports = {
     const originalConfig = await defaultConfig.webpackFinal(config);
 
     // Mock fleet plugin for PackageIcon component
-    originalConfig.resolve.alias['@kbn/fleet-plugin/public'] = require.resolve(
-      './__mocks__/package_icon'
-    );
+    originalConfig.resolve.alias['@kbn/fleet-plugin/public'] =
+      require.resolve('./__mocks__/package_icon');
     return originalConfig;
   },
 };

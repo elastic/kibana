@@ -71,10 +71,7 @@ export const DurationInput = memo(function DurationInputComponent({
   const durationUnitSelectStyle = css`
     min-width: 106px; // Preserve layout when disabled & dropdown arrow is not rendered
     box-shadow: none;
-    background: ${transparentize(
-      euiTheme.colors.primary,
-      0.1
-    )} !important; // Override focus states etc.
+    background: ${transparentize(euiTheme.colors.primary, 0.1)} !important; // Override focus states etc.
     color: ${euiTheme.colors.primary};
   `;
 

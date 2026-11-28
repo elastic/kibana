@@ -199,8 +199,10 @@ export interface VisitorHelper {
   options: AmbiguousHelperOptions;
 }
 
-export interface ResolvePartialOptions
-  extends Omit<Handlebars.ResolvePartialOptions, 'helpers' | 'partials' | 'decorators'> {
+export interface ResolvePartialOptions extends Omit<
+  Handlebars.ResolvePartialOptions,
+  'helpers' | 'partials' | 'decorators'
+> {
   // The upstream `helpers` property is too loose and allows all functions.
   helpers?: HelpersHash;
   // The upstream `partials` property is incorrectly typed and doesn't allow

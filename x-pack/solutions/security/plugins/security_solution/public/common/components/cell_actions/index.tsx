@@ -38,8 +38,10 @@ export interface SecurityCellActionsData {
   value: CellActionFieldValue;
 }
 
-export interface SecurityCellActionsProps
-  extends Omit<CellActionsProps, 'data' | 'metadata' | 'disabledActionTypes' | 'triggerId'> {
+export interface SecurityCellActionsProps extends Omit<
+  CellActionsProps,
+  'data' | 'metadata' | 'disabledActionTypes' | 'triggerId'
+> {
   sourcererScopeId?: SourcererScopeName;
   data: SecurityCellActionsData | SecurityCellActionsData[];
   triggerId: SecurityCellActionsTrigger;
@@ -49,8 +51,7 @@ export interface SecurityCellActionsProps
   extraActionsColor?: EuiButtonIconProps['color'];
 }
 
-export interface UseDataGridColumnsSecurityCellActionsProps
-  extends UseDataGridColumnsCellActionsProps {
+export interface UseDataGridColumnsSecurityCellActionsProps extends UseDataGridColumnsCellActionsProps {
   triggerId: SecurityCellActionsTrigger;
   disabledActionTypes?: SecurityCellActionType[];
   metadata?: SecurityCellActionMetadata;

@@ -768,7 +768,7 @@ export class EntityStoreDataClient {
     });
     const { hits } = response;
 
-    const total = typeof hits.total === 'number' ? hits.total : hits.total?.value ?? 0;
+    const total = typeof hits.total === 'number' ? hits.total : (hits.total?.value ?? 0);
 
     const records = hits.hits.map((hit) => {
       const { asset, ...source } = hit._source as EntityRecord;
@@ -982,8 +982,8 @@ export class EntityStoreDataClient {
       action === EntityEngineActions.CREATE
         ? AUDIT_TYPE.CREATION
         : EntityEngineActions.DELETE
-        ? AUDIT_TYPE.DELETION
-        : AUDIT_TYPE.CHANGE;
+          ? AUDIT_TYPE.DELETION
+          : AUDIT_TYPE.CHANGE;
 
     const category = AUDIT_CATEGORY.DATABASE;
 

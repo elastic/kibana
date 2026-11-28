@@ -10,12 +10,14 @@
 import type { SerializableRecord } from '@kbn/utility-types';
 import { PersistableState, PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
 
-export interface EnhancementRegistryDefinition<P extends SerializableRecord = SerializableRecord>
-  extends PersistableStateDefinition<P> {
+export interface EnhancementRegistryDefinition<
+  P extends SerializableRecord = SerializableRecord,
+> extends PersistableStateDefinition<P> {
   id: string;
 }
 
-export interface EnhancementRegistryItem<P extends SerializableRecord = SerializableRecord>
-  extends PersistableState<P> {
+export interface EnhancementRegistryItem<
+  P extends SerializableRecord = SerializableRecord,
+> extends PersistableState<P> {
   id: string;
 }

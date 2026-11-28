@@ -9,9 +9,10 @@
 
 import { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
 
-export class EuiProviderDevWarningPlugin
-  implements Plugin<EuiProviderDevWarningPluginSetup, EuiProviderDevWarningPluginStart>
-{
+export class EuiProviderDevWarningPlugin implements Plugin<
+  EuiProviderDevWarningPluginSetup,
+  EuiProviderDevWarningPluginStart
+> {
   public setup(core: CoreSetup) {
     core.application.register({
       id: 'euiProviderDevWarning',

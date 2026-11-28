@@ -56,9 +56,8 @@ export function createAddChangePointChartAction(
       if (!presentationContainerParent) throw new IncompatibleActionError();
 
       try {
-        const { resolveEmbeddableChangePointUserInput } = await import(
-          '../embeddables/change_point_chart/resolve_change_point_config_input'
-        );
+        const { resolveEmbeddableChangePointUserInput } =
+          await import('../embeddables/change_point_chart/resolve_change_point_config_input');
 
         const initialState = await resolveEmbeddableChangePointUserInput(
           coreStart,

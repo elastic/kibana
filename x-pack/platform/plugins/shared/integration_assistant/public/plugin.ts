@@ -24,9 +24,10 @@ import { parseExperimentalConfigValue } from '../common/experimental_features';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { type IntegrationAssistantConfigType } from '../server/config';
 
-export class IntegrationAssistantPlugin
-  implements Plugin<IntegrationAssistantPluginSetup, IntegrationAssistantPluginStart>
-{
+export class IntegrationAssistantPlugin implements Plugin<
+  IntegrationAssistantPluginSetup,
+  IntegrationAssistantPluginStart
+> {
   private telemetry = new Telemetry();
   private renderUpselling$ = new BehaviorSubject<RenderUpselling | undefined>(undefined);
   private config: IntegrationAssistantConfigType;

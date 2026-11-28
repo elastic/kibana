@@ -63,7 +63,7 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
     ? experimentalSelectedPatterns
     : oldSelectedPatterns;
   const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
-  const dataViewId = newDataViewPickerEnabled ? experimentalDataView?.id ?? '' : oldDataViewId;
+  const dataViewId = newDataViewPickerEnabled ? (experimentalDataView?.id ?? '') : oldDataViewId;
 
   const isEql = useRef(false);
 

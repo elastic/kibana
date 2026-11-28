@@ -99,9 +99,9 @@ export interface PrepareJobResults {
 
 type ReportTaskParamsType = Record<string, any>;
 
-export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
-  implements ReportingTask
-{
+export abstract class RunReportTask<
+  TaskParams extends ReportTaskParamsType,
+> implements ReportingTask {
   protected readonly logger: Logger;
   protected readonly queueTimeout: number;
 

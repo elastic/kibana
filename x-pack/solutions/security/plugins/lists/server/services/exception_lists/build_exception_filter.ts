@@ -135,7 +135,7 @@ export const buildExceptionItemFilterWithOsType = async (
 };
 
 export const buildExceptionItemFilter = async <
-  T extends ExceptionListItemSchema | CreateExceptionListItemSchema
+  T extends ExceptionListItemSchema | CreateExceptionListItemSchema,
 >(
   exceptionItem: T,
   listClient: ListClient
@@ -179,7 +179,7 @@ export const buildExceptionItemFilter = async <
 };
 
 export const createOrClauses = async <
-  T extends ExceptionListItemSchema | CreateExceptionListItemSchema
+  T extends ExceptionListItemSchema | CreateExceptionListItemSchema,
 >({
   exceptionsWithoutValueLists,
   exceptionsWithValueLists,
@@ -228,7 +228,7 @@ const isListTypeProcessable = (type: Type): boolean =>
   type === 'keyword' || type === 'ip' || type === 'ip_range';
 
 export const filterOutUnprocessableValueLists = async <
-  T extends ExceptionListItemSchema | CreateExceptionListItemSchema
+  T extends ExceptionListItemSchema | CreateExceptionListItemSchema,
 >(
   exceptionItems: T[],
   listClient: ListClient
@@ -280,7 +280,7 @@ export const filterOutUnprocessableValueLists = async <
 };
 
 export const removeExpiredExceptions = <
-  T extends ExceptionListItemSchema | CreateExceptionListItemSchema
+  T extends ExceptionListItemSchema | CreateExceptionListItemSchema,
 >(
   lists: T[],
   startedAt: Date
@@ -293,7 +293,7 @@ export const removeExpiredExceptions = <
   });
 
 export const buildExceptionFilter = async <
-  T extends ExceptionListItemSchema | CreateExceptionListItemSchema
+  T extends ExceptionListItemSchema | CreateExceptionListItemSchema,
 >({
   lists,
   excludeExceptions,

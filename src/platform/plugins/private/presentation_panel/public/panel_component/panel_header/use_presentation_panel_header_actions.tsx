@@ -24,7 +24,7 @@ import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../
 const disabledNotifications = ['ACTION_FILTERS_NOTIFICATION'];
 
 export const usePresentationPanelHeaderActions = <
-  ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi
+  ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
 >(
   showNotifications: boolean,
   showBadges: boolean,

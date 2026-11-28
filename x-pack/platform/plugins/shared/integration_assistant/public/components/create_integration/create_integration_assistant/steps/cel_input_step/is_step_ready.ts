@@ -9,9 +9,9 @@ import type { State } from '../../state';
 export const isCelInputStepReadyToComplete = ({ integrationSettings }: State) =>
   Boolean(
     integrationSettings?.name &&
-      integrationSettings?.dataStreamTitle &&
-      integrationSettings?.dataStreamDescription &&
-      integrationSettings?.dataStreamName &&
-      integrationSettings?.apiDefinition
+    integrationSettings?.dataStreamTitle &&
+    integrationSettings?.dataStreamDescription &&
+    integrationSettings?.dataStreamName &&
+    integrationSettings?.apiDefinition
   );
 // TODO add support for not uploading a spec file

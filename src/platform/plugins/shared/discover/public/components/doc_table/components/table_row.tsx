@@ -186,8 +186,8 @@ export const TableRow = ({
         // there/disabled when there are ignored values.
         const isFilterable = Boolean(
           mapping(column)?.filterable &&
-            typeof filter === 'function' &&
-            !row.raw._ignored?.includes(column)
+          typeof filter === 'function' &&
+          !row.raw._ignored?.includes(column)
         );
         rowCells.push(
           <TableCell

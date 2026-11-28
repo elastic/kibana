@@ -81,8 +81,8 @@ export class SpaceSelector extends Component<Props, {}> {
         this.props.selectedSpaceIds.includes('*')
           ? 'global'
           : this.props.selectedSpaceIds.length > 0
-          ? 'spaces'
-          : undefined
+            ? 'spaces'
+            : undefined
       )
     );
 

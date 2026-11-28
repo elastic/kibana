@@ -94,7 +94,7 @@ export const useAddBulkToTimelineAction = ({
   }, [newDataViewPickerEnabled, experimentalDataView, oldSourcererDataViewSpec.runtimeFieldMap]);
 
   const dataViewId = useMemo(
-    () => (newDataViewPickerEnabled ? experimentalDataView.id ?? '' : oldDataViewId),
+    () => (newDataViewPickerEnabled ? (experimentalDataView.id ?? '') : oldDataViewId),
     [experimentalDataView.id, newDataViewPickerEnabled, oldDataViewId]
   );
   const browserFields = useMemo(

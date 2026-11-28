@@ -54,7 +54,7 @@ import { isProperNode } from '../ast/helpers';
 export class VisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
   Data extends SharedData = SharedData,
-  Node extends VisitorAstNode = VisitorAstNode
+  Node extends VisitorAstNode = VisitorAstNode,
 > {
   constructor(
     /**
@@ -151,7 +151,7 @@ export class VisitorContext<
 
 export class QueryVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
-  Data extends SharedData = SharedData
+  Data extends SharedData = SharedData,
 > extends VisitorContext<Methods, Data, ESQLAstQueryNode> {
   public *commands(): Iterable<ESQLAstCommand> {
     yield* this.node.commands;
@@ -176,7 +176,7 @@ export class QueryVisitorContext<
 export class CommandVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
   Data extends SharedData = SharedData,
-  Node extends ESQLAstCommand = ESQLAstCommand
+  Node extends ESQLAstCommand = ESQLAstCommand,
 > extends VisitorContext<Methods, Data, Node> {
   public name(): string {
     return this.node.name.toUpperCase();
@@ -288,13 +288,13 @@ export class CommandVisitorContext<
 
 export class CommandOptionVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
-  Data extends SharedData = SharedData
+  Data extends SharedData = SharedData,
 > extends VisitorContext<Methods, Data, ESQLCommandOption> {}
 
 // FROM <sources> [ METADATA <columns> ]
 export class FromCommandVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
-  Data extends SharedData = SharedData
+  Data extends SharedData = SharedData,
 > extends CommandVisitorContext<Methods, Data, ESQLAstCommand> {
   /**
    * Visit the METADATA part of the FROM command.
@@ -336,7 +336,7 @@ export class FromCommandVisitorContext<
 // LIMIT <literal>
 export class LimitCommandVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
-  Data extends SharedData = SharedData
+  Data extends SharedData = SharedData,
 > extends CommandVisitorContext<Methods, Data> {
   /**
    * @returns The first numeric literal argument of the command.
@@ -372,151 +372,151 @@ export class LimitCommandVisitorContext<
 // EXPLAIN <query>
 export class ExplainCommandVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
-  Data extends SharedData = SharedData
+  Data extends SharedData = SharedData,
 > extends CommandVisitorContext<Methods, Data, ESQLAstCommand> {}
 
 // ROW <columns>
 export class RowCommandVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
-  Data extends SharedData = SharedData
+  Data extends SharedData = SharedData,
 > extends CommandVisitorContext<Methods, Data, ESQLAstCommand> {}
 
 // TS
 export class TimeseriesCommandVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
-  Data extends SharedData = SharedData
+  Data extends SharedData = SharedData,
 > extends CommandVisitorContext<Methods, Data, ESQLAstCommand> {}
 
 // SHOW <identifier>
 export class ShowCommandVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
-  Data extends SharedData = SharedData
+  Data extends SharedData = SharedData,
 > extends CommandVisitorContext<Methods, Data, ESQLAstCommand> {}
 
 // META <identifier>
 export class MetaCommandVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
-  Data extends SharedData = SharedData
+  Data extends SharedData = SharedData,
 > extends CommandVisitorContext<Methods, Data, ESQLAstCommand> {}
 
 // EVAL <columns>
 export class EvalCommandVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
-  Data extends SharedData = SharedData
+  Data extends SharedData = SharedData,
 > extends CommandVisitorContext<Methods, Data, ESQLAstCommand> {}
 
 // STATS <columns> [ BY <columns> ]
 export class StatsCommandVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
-  Data extends SharedData = SharedData
+  Data extends SharedData = SharedData,
 > extends CommandVisitorContext<Methods, Data, ESQLAstCommand> {}
 
 // INLINESTATS <columns> [ BY <columns> ]
 export class InlineStatsCommandVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
-  Data extends SharedData = SharedData
+  Data extends SharedData = SharedData,
 > extends CommandVisitorContext<Methods, Data, ESQLAstCommand> {}
 
 // LOOKUP <source> ON <column>
 export class LookupCommandVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
-  Data extends SharedData = SharedData
+  Data extends SharedData = SharedData,
 > extends CommandVisitorContext<Methods, Data, ESQLAstCommand> {}
 
 // KEEP <columns>
 export class KeepCommandVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
-  Data extends SharedData = SharedData
+  Data extends SharedData = SharedData,
 > extends CommandVisitorContext<Methods, Data, ESQLAstCommand> {}
 
 // SORT <columns>
 export class SortCommandVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
-  Data extends SharedData = SharedData
+  Data extends SharedData = SharedData,
 > extends CommandVisitorContext<Methods, Data, ESQLAstCommand> {}
 
 // WHERE <expression>
 export class WhereCommandVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
-  Data extends SharedData = SharedData
+  Data extends SharedData = SharedData,
 > extends CommandVisitorContext<Methods, Data, ESQLAstCommand> {}
 
 // DROP <columns>
 export class DropCommandVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
-  Data extends SharedData = SharedData
+  Data extends SharedData = SharedData,
 > extends CommandVisitorContext<Methods, Data, ESQLAstCommand> {}
 
 // RENAME <column> AS <column>
 export class RenameCommandVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
-  Data extends SharedData = SharedData
+  Data extends SharedData = SharedData,
 > extends CommandVisitorContext<Methods, Data, ESQLAstCommand> {}
 
 // DISSECT <column> <string> [ APPEND_SEPARATOR = <string> ]
 export class DissectCommandVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
-  Data extends SharedData = SharedData
+  Data extends SharedData = SharedData,
 > extends CommandVisitorContext<Methods, Data, ESQLAstCommand> {}
 
 // GROK <column> <string>
 export class GrokCommandVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
-  Data extends SharedData = SharedData
+  Data extends SharedData = SharedData,
 > extends CommandVisitorContext<Methods, Data, ESQLAstCommand> {}
 
 // ENRICH <column> [ ON <column> ] [ WITH <columns> ]
 export class EnrichCommandVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
-  Data extends SharedData = SharedData
+  Data extends SharedData = SharedData,
 > extends CommandVisitorContext<Methods, Data, ESQLAstCommand> {}
 
 // MV_EXPAND <column>
 export class MvExpandCommandVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
-  Data extends SharedData = SharedData
+  Data extends SharedData = SharedData,
 > extends CommandVisitorContext<Methods, Data, ESQLAstCommand> {}
 
 // <LOOKUP | LEFT | RIGHT> JOIN <target> ON <condition>
 export class JoinCommandVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
-  Data extends SharedData = SharedData
+  Data extends SharedData = SharedData,
 > extends CommandVisitorContext<Methods, Data, ESQLAstJoinCommand> {}
 
 // RERANK <query> ON field [, field ...] WITH <inference-id>
 export class RerankCommandVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
-  Data extends SharedData = SharedData
+  Data extends SharedData = SharedData,
 > extends CommandVisitorContext<Methods, Data, ESQLAstRerankCommand> {}
 
 // CHANGE_POINT <value> [ ON <key> ] [ AS <targetType>, <targetPvalue> ]
 export class ChangePointCommandVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
-  Data extends SharedData = SharedData
+  Data extends SharedData = SharedData,
 > extends CommandVisitorContext<Methods, Data, ESQLAstChangePointCommand> {}
 
 // FORK (COMMAND ... [| COMMAND ...]) [(COMMAND ... [| COMMAND ...])]
 export class ForkCommandVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
-  Data extends SharedData = SharedData
+  Data extends SharedData = SharedData,
 > extends CommandVisitorContext<Methods, Data, ESQLAstCommand> {}
 
 // COMPLETION
 export class CompletionCommandVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
-  Data extends SharedData = SharedData
+  Data extends SharedData = SharedData,
 > extends CommandVisitorContext<Methods, Data, ESQLAstCommand> {}
 
 // SAMPLE <probability> [SEED <seed>]
 export class SampleCommandVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
-  Data extends SharedData = SharedData
+  Data extends SharedData = SharedData,
 > extends CommandVisitorContext<Methods, Data, ESQLAstCommand> {}
 
 // RRF
 export class RrfCommandVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
-  Data extends SharedData = SharedData
+  Data extends SharedData = SharedData,
 > extends CommandVisitorContext<Methods, Data, ESQLAstCommand> {}
 
 // Expressions -----------------------------------------------------------------
@@ -524,22 +524,22 @@ export class RrfCommandVisitorContext<
 export class ExpressionVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
   Data extends SharedData = SharedData,
-  Node extends ESQLAstExpressionNode = ESQLAstExpressionNode
+  Node extends ESQLAstExpressionNode = ESQLAstExpressionNode,
 > extends VisitorContext<Methods, Data, Node> {}
 
 export class ColumnExpressionVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
-  Data extends SharedData = SharedData
+  Data extends SharedData = SharedData,
 > extends VisitorContext<Methods, Data, ESQLColumn> {}
 
 export class SourceExpressionVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
-  Data extends SharedData = SharedData
+  Data extends SharedData = SharedData,
 > extends VisitorContext<Methods, Data, ESQLSource> {}
 
 export class FunctionCallExpressionVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
-  Data extends SharedData = SharedData
+  Data extends SharedData = SharedData,
 > extends VisitorContext<Methods, Data, ESQLFunction> {
   /**
    * @returns Returns a printable uppercase function name or operator.
@@ -563,13 +563,13 @@ export class FunctionCallExpressionVisitorContext<
 export class LiteralExpressionVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
   Data extends SharedData = SharedData,
-  Node extends ESQLLiteral = ESQLLiteral
+  Node extends ESQLLiteral = ESQLLiteral,
 > extends ExpressionVisitorContext<Methods, Data, Node> {}
 
 export class ListLiteralExpressionVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
   Data extends SharedData = SharedData,
-  Node extends ESQLList = ESQLList
+  Node extends ESQLList = ESQLList,
 > extends ExpressionVisitorContext<Methods, Data, Node> {
   public *visitElements(
     input:
@@ -586,12 +586,12 @@ export class ListLiteralExpressionVisitorContext<
 
 export class TimeIntervalLiteralExpressionVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
-  Data extends SharedData = SharedData
+  Data extends SharedData = SharedData,
 > extends ExpressionVisitorContext<Methods, Data, ESQLTimeInterval> {}
 
 export class InlineCastExpressionVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
-  Data extends SharedData = SharedData
+  Data extends SharedData = SharedData,
 > extends ExpressionVisitorContext<Methods, Data, ESQLInlineCast> {
   public value(): ESQLAstExpression {
     this.ctx.assertMethodExists('visitExpression');
@@ -612,17 +612,17 @@ export class InlineCastExpressionVisitorContext<
 
 export class OrderExpressionVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
-  Data extends SharedData = SharedData
+  Data extends SharedData = SharedData,
 > extends VisitorContext<Methods, Data, ESQLOrderExpression> {}
 
 export class IdentifierExpressionVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
-  Data extends SharedData = SharedData
+  Data extends SharedData = SharedData,
 > extends VisitorContext<Methods, Data, ESQLIdentifier> {}
 
 export class MapExpressionVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
-  Data extends SharedData = SharedData
+  Data extends SharedData = SharedData,
 > extends VisitorContext<Methods, Data, ESQLMap> {
   public *visitEntries(
     input:
@@ -647,7 +647,7 @@ export class MapExpressionVisitorContext<
 
 export class MapEntryExpressionVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
-  Data extends SharedData = SharedData
+  Data extends SharedData = SharedData,
 > extends VisitorContext<Methods, Data, ESQLMapEntry> {
   public key(): ESQLStringLiteral {
     return this.node.key;

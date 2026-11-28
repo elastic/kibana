@@ -19,15 +19,12 @@ export interface KibanaUtilsPublicSetupDependencies {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface KibanaUtilsPublicStartDependencies {}
 
-export class KibanaUtilsPublicPlugin
-  implements
-    Plugin<
-      KibanaUtilsPublicSetup,
-      KibanaUtilsPublicStart,
-      KibanaUtilsPublicSetupDependencies,
-      KibanaUtilsPublicStartDependencies
-    >
-{
+export class KibanaUtilsPublicPlugin implements Plugin<
+  KibanaUtilsPublicSetup,
+  KibanaUtilsPublicStart,
+  KibanaUtilsPublicSetupDependencies,
+  KibanaUtilsPublicStartDependencies
+> {
   public setup(_core: CoreSetup): KibanaUtilsPublicSetup {
     return undefined;
   }

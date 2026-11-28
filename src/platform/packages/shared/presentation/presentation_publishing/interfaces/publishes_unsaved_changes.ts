@@ -18,7 +18,7 @@ export interface PublishesUnsavedChanges {
 export const apiPublishesUnsavedChanges = (api: unknown): api is PublishesUnsavedChanges => {
   return Boolean(
     api &&
-      (api as PublishesUnsavedChanges).hasUnsavedChanges$ &&
-      (api as PublishesUnsavedChanges).resetUnsavedChanges
+    (api as PublishesUnsavedChanges).hasUnsavedChanges$ &&
+    (api as PublishesUnsavedChanges).resetUnsavedChanges
   );
 };

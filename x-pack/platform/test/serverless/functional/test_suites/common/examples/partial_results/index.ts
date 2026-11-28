@@ -26,18 +26,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should trace mouse events', async () => {
       const events = await Promise.all(
-        (
-          await testSubjects.findAll('example-column-event')
-        ).map((wrapper) => wrapper.getVisibleText())
+        (await testSubjects.findAll('example-column-event')).map((wrapper) =>
+          wrapper.getVisibleText()
+        )
       );
       expect(events).to.eql(['mousedown', 'mouseup', 'click']);
     });
 
     it('should keep track of the events number', async () => {
       const counters = await Promise.all(
-        (
-          await testSubjects.findAll('example-column-count')
-        ).map((wrapper) => wrapper.getVisibleText())
+        (await testSubjects.findAll('example-column-count')).map((wrapper) =>
+          wrapper.getVisibleText()
+        )
       );
       expect(counters).to.eql(['3', '3', '3']);
     });

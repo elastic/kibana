@@ -30,9 +30,10 @@ export type ApmSourcesAccessPluginSetup = ReturnType<ApmSourcesAccessPlugin['set
  */
 export type ApmSourcesAccessPluginStart = ReturnType<ApmSourcesAccessPlugin['start']>;
 
-export class ApmSourcesAccessPlugin
-  implements Plugin<ApmSourcesAccessPluginSetup, ApmSourcesAccessPluginStart>
-{
+export class ApmSourcesAccessPlugin implements Plugin<
+  ApmSourcesAccessPluginSetup,
+  ApmSourcesAccessPluginStart
+> {
   public config: APMSourcesAccessConfig;
   public logger: Logger;
 

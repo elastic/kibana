@@ -110,10 +110,13 @@ export const PROFILE_VALUES: ThrottlingConfig[] = [
   },
 ];
 
-export const PROFILES_MAP = PROFILE_VALUES.reduce((acc, profile) => {
-  acc[profile.id] = profile;
-  return acc;
-}, {} as { [key: string]: ThrottlingConfig });
+export const PROFILES_MAP = PROFILE_VALUES.reduce(
+  (acc, profile) => {
+    acc[profile.id] = profile;
+    return acc;
+  },
+  {} as { [key: string]: ThrottlingConfig }
+);
 
 export const ALLOWED_SCHEDULES_IN_SECONDS = ['10s', '30s'];
 

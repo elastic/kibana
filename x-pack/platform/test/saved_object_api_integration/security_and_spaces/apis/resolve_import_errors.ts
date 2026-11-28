@@ -52,8 +52,8 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
     spaceId === DEFAULT_SPACE_ID
       ? CASES.SINGLE_NAMESPACE_DEFAULT_SPACE
       : spaceId === SPACE_1_ID
-      ? CASES.SINGLE_NAMESPACE_SPACE_1
-      : CASES.SINGLE_NAMESPACE_SPACE_2;
+        ? CASES.SINGLE_NAMESPACE_SPACE_1
+        : CASES.SINGLE_NAMESPACE_SPACE_2;
   const group1Importable = [
     { ...singleNamespaceObject, ...failConflict(!overwrite) },
     { ...CASES.NAMESPACE_AGNOSTIC, ...failConflict(!overwrite) },
@@ -198,8 +198,8 @@ export default function ({ getService }: FtrProviderContext) {
         overwrite
           ? ' with overwrite enabled'
           : createNewCopies
-          ? ' with createNewCopies enabled'
-          : ''
+            ? ' with createNewCopies enabled'
+            : ''
       }`;
       const { unauthorizedRead, unauthorizedWrite, authorized } = createTests(
         overwrite,

@@ -18,15 +18,12 @@ import type {
 import { setOnboardingSettings } from './onboarding';
 import { DEFAULT_PRODUCT_FEATURES } from '../common/constants';
 
-export class SecuritySolutionEssPlugin
-  implements
-    Plugin<
-      SecuritySolutionEssPluginSetup,
-      SecuritySolutionEssPluginStart,
-      SecuritySolutionEssPluginSetupDeps,
-      SecuritySolutionEssPluginStartDeps
-    >
-{
+export class SecuritySolutionEssPlugin implements Plugin<
+  SecuritySolutionEssPluginSetup,
+  SecuritySolutionEssPluginStart,
+  SecuritySolutionEssPluginSetupDeps,
+  SecuritySolutionEssPluginStartDeps
+> {
   public setup(
     _core: CoreSetup,
     setupDeps: SecuritySolutionEssPluginSetupDeps

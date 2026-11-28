@@ -22,15 +22,12 @@ import {
 } from './types';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common/constants';
 
-export class SearchInferenceEndpointsPlugin
-  implements
-    Plugin<
-      SearchInferenceEndpointsPluginSetup,
-      SearchInferenceEndpointsPluginStart,
-      SearchInferenceEndpointsPluginSetupDependencies,
-      SearchInferenceEndpointsPluginStartDependencies
-    >
-{
+export class SearchInferenceEndpointsPlugin implements Plugin<
+  SearchInferenceEndpointsPluginSetup,
+  SearchInferenceEndpointsPluginStart,
+  SearchInferenceEndpointsPluginSetupDependencies,
+  SearchInferenceEndpointsPluginStartDependencies
+> {
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {

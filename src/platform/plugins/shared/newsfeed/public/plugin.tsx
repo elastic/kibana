@@ -21,9 +21,10 @@ import { getApi, NewsfeedApi, NewsfeedApiEndpoint } from './lib/api';
 export type NewsfeedPublicPluginSetup = ReturnType<NewsfeedPublicPlugin['setup']>;
 export type NewsfeedPublicPluginStart = ReturnType<NewsfeedPublicPlugin['start']>;
 
-export class NewsfeedPublicPlugin
-  implements Plugin<NewsfeedPublicPluginSetup, NewsfeedPublicPluginStart>
-{
+export class NewsfeedPublicPlugin implements Plugin<
+  NewsfeedPublicPluginSetup,
+  NewsfeedPublicPluginStart
+> {
   private readonly isServerless: boolean;
   private readonly kibanaVersion: string;
   private readonly config: NewsfeedPluginBrowserConfig;

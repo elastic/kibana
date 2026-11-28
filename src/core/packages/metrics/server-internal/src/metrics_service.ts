@@ -40,9 +40,10 @@ export type InternalMetricsServiceSetup = MetricsServiceSetup;
 export type InternalMetricsServiceStart = MetricsServiceStart;
 
 /** @internal */
-export class MetricsService
-  implements CoreService<InternalMetricsServiceSetup, InternalMetricsServiceStart>
-{
+export class MetricsService implements CoreService<
+  InternalMetricsServiceSetup,
+  InternalMetricsServiceStart
+> {
   private readonly logger: Logger;
   private readonly opsMetricsLogger: Logger;
   private metricsCollector?: OpsMetricsCollector;

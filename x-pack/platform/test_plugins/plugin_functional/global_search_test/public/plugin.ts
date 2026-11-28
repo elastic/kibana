@@ -27,15 +27,12 @@ export interface GlobalSearchTestPluginStartDeps {
   globalSearch: GlobalSearchPluginStart;
 }
 
-export class GlobalSearchTestPlugin
-  implements
-    Plugin<
-      GlobalSearchTestPluginSetup,
-      GlobalSearchTestPluginStart,
-      GlobalSearchTestPluginSetupDeps,
-      GlobalSearchTestPluginStartDeps
-    >
-{
+export class GlobalSearchTestPlugin implements Plugin<
+  GlobalSearchTestPluginSetup,
+  GlobalSearchTestPluginStart,
+  GlobalSearchTestPluginSetupDeps,
+  GlobalSearchTestPluginStartDeps
+> {
   public setup(
     { application, getStartServices }: CoreSetup,
     { globalSearch }: GlobalSearchTestPluginSetupDeps

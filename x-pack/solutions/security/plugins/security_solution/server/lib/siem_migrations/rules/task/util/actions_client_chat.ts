@@ -50,7 +50,10 @@ interface CreateModelParams {
 }
 
 export class ActionsClientChat {
-  constructor(private readonly actionsClient: ActionsClient, private readonly logger: Logger) {}
+  constructor(
+    private readonly actionsClient: ActionsClient,
+    private readonly logger: Logger
+  ) {}
 
   public async createModel({
     migrationId,

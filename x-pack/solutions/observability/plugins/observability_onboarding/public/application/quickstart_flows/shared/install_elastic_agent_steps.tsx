@@ -332,8 +332,8 @@ function getStep(
       status === 'loading'
         ? loadingTitle
         : status === 'complete'
-        ? completedTitle
-        : incompleteTitle;
+          ? completedTitle
+          : incompleteTitle;
     return {
       title,
       status: status ?? ('incomplete' as const),

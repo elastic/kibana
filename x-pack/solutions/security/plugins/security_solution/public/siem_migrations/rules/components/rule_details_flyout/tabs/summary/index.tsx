@@ -48,7 +48,7 @@ export const SummaryTab: React.FC<SummaryTabProps> = React.memo(({ migrationRule
         const isCreatedByAssistant = createdBy === SIEM_MIGRATIONS_ASSISTANT_USER || !profile;
         const username = isCreatedByAssistant
           ? i18n.ASSISTANT_USERNAME
-          : profile.user.full_name ?? profile.user.username;
+          : (profile.user.full_name ?? profile.user.username);
         return {
           username,
           timelineAvatarAriaLabel: username,

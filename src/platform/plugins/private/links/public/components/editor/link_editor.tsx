@@ -118,7 +118,7 @@ export const LinkEditor = ({
               idSelected={selectedLinkType}
               onChange={(id) => {
                 if (currentLinkLabel === defaultLinkLabel) {
-                  setCurrentLinkLabel(link?.type === id ? link.label ?? '' : '');
+                  setCurrentLinkLabel(link?.type === id ? (link.label ?? '') : '');
                 }
                 setSelectedLinkType(id as LinkType);
               }}

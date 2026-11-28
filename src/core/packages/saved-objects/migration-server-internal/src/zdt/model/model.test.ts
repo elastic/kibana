@@ -120,7 +120,7 @@ describe('model', () => {
       ({
         ...baseState,
         controlState,
-      } as unknown as State);
+      }) as unknown as State;
 
     const createStubResponse = () =>
       Either.right({

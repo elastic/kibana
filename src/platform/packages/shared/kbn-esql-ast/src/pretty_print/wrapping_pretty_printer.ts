@@ -140,7 +140,7 @@ export class WrappingPrettyPrinter {
   }
 
   protected keyword(word: string) {
-    return this.opts.lowercaseKeywords ?? this.opts.lowercase
+    return (this.opts.lowercaseKeywords ?? this.opts.lowercase)
       ? word.toLowerCase()
       : word.toUpperCase();
   }

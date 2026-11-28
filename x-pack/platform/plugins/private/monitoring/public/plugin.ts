@@ -48,10 +48,12 @@ interface MonitoringSetupPluginDependencies {
   usageCollection: UsageCollectionSetup;
 }
 
-export class MonitoringPlugin
-  implements
-    Plugin<void, void, MonitoringSetupPluginDependencies, MonitoringStartPluginDependencies>
-{
+export class MonitoringPlugin implements Plugin<
+  void,
+  void,
+  MonitoringSetupPluginDependencies,
+  MonitoringStartPluginDependencies
+> {
   constructor(private initializerContext: PluginInitializerContext<MonitoringConfig>) {}
 
   public setup(

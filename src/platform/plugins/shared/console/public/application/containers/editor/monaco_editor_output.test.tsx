@@ -49,7 +49,7 @@ const createMockModel = (): monaco.editor.ITextModel =>
       getMockLines()
         .slice(startLineNumber - 1, endLineNumber)
         .join('\n'),
-  } as unknown as monaco.editor.ITextModel);
+  }) as unknown as monaco.editor.ITextModel;
 
 const mockEditor = {
   createDecorationsCollection: jest.fn(() => ({

@@ -41,9 +41,7 @@ export type BookSerializedState = SerializedTitles &
  * Book runtime state is a flattened version of all possible state keys.
  */
 export interface BookRuntimeState
-  extends BookAttributes,
-    Partial<BookByReferenceSerializedState>,
-    SerializedTitles {}
+  extends BookAttributes, Partial<BookByReferenceSerializedState>, SerializedTitles {}
 
 export type BookApi = DefaultEmbeddableApi<BookSerializedState> &
   HasEditCapabilities &

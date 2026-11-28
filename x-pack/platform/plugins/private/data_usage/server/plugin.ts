@@ -22,15 +22,12 @@ import { registerDataUsageRoutes } from './routes';
 import { PLUGIN_ID } from '../common';
 import { appContextService } from './services/app_context';
 
-export class DataUsagePlugin
-  implements
-    Plugin<
-      DataUsageServerSetup,
-      DataUsageServerStart,
-      DataUsageSetupDependencies,
-      DataUsageStartDependencies
-    >
-{
+export class DataUsagePlugin implements Plugin<
+  DataUsageServerSetup,
+  DataUsageServerStart,
+  DataUsageSetupDependencies,
+  DataUsageStartDependencies
+> {
   private readonly logger: LoggerFactory;
   private dataUsageContext: DataUsageContext;
 

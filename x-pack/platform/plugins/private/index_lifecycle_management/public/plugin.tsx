@@ -17,9 +17,12 @@ import { addAllExtensions } from './extend_index_management';
 import { ClientConfigType, SetupDependencies, StartDependencies } from './types';
 import { IlmLocatorDefinition } from './locator';
 
-export class IndexLifecycleManagementPlugin
-  implements Plugin<void, void, SetupDependencies, StartDependencies>
-{
+export class IndexLifecycleManagementPlugin implements Plugin<
+  void,
+  void,
+  SetupDependencies,
+  StartDependencies
+> {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   private breadcrumbService = new BreadcrumbService();

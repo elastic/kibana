@@ -230,7 +230,7 @@ describe('ProductFeaturesService', () => {
         ({
           route: { options: { tags } },
           url: { pathname: '', search: '' },
-        } as unknown as KibanaRequest);
+        }) as unknown as KibanaRequest;
 
       it('should check when productFeature tag when it matches and return not found when not enabled', async () => {
         const experimentalFeatures = {} as ExperimentalFeatures;
@@ -288,7 +288,7 @@ describe('ProductFeaturesService', () => {
           ({
             route: { options: { tags } },
             url: { pathname: '', search: '' },
-          } as unknown as KibanaRequest);
+          }) as unknown as KibanaRequest;
 
         it('should authorize when no tag matches', async () => {
           await lastRegisteredFn(
@@ -330,7 +330,7 @@ describe('ProductFeaturesService', () => {
           ({
             route: { options: { security: { authz: { requiredPrivileges } } } },
             url: { pathname: '', search: '' },
-          } as unknown as KibanaRequest);
+          }) as unknown as KibanaRequest;
 
         it('should authorize when no privilege matches', async () => {
           await lastRegisteredFn(getReq(['something', 'securitySolution']), res, toolkit);

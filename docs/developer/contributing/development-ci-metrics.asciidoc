@@ -93,14 +93,13 @@ jq -r .modules[].id {pluginDir}/target/public/stats.json | sort - > moduleids.tx
 +
 Produce a moduleids.txt file for both your branch and master and then pop them into Beyond Compare to get a very specific view of what's new.
 
-5. As a last resort you might want to try comparing the bundle source directly. It's usually best to do this using the production source so that you're inspecting the actual change in bytes that CI is seeing. After building the distributable version of your bundle run it through prettier and then dropping it into Beyond Compare along with the chunk from upstream:
+5. As a last resort you might want to try comparing the bundle source directly. It's usually best to do this using the production source so that you're inspecting the actual change in bytes that CI is seeing. After building the distributable version of your bundle, format a copy with oxfmt and compare it with the chunk from upstream. Use standard input because build output is excluded from repository-wide formatting:
 +
 [source,shell]
 -----------
 node scripts/build_kibana_platform_plugins --focus {pluginId} --dist
-npm install -g prettier
-prettier -w {pluginDir}/target/public/{pluginId}.plugin.js
-# repeat these steps for upstream and then compare the two {pluginId}.plugin.js files in Beyond Compare
+node scripts/oxfmt --stdin-filepath bundle.js < {pluginDir}/target/public/{pluginId}.plugin.js > {pluginDir}/target/public/{pluginId}.formatted.js
+# repeat these steps for upstream and then compare the two {pluginId}.formatted.js files in Beyond Compare
 -----------
 
 6. If all else fails reach out to Operations for help.

@@ -30,15 +30,12 @@ import { createIndexDocumentsContent } from './application/components/index_docu
 import { getErrorCode, getErrorMessage, isKibanaServerError } from './utils/get_error_message';
 import { navigationTree } from './navigation_tree';
 
-export class ServerlessSearchPlugin
-  implements
-    Plugin<
-      ServerlessSearchPluginSetup,
-      ServerlessSearchPluginStart,
-      ServerlessSearchPluginSetupDependencies,
-      ServerlessSearchPluginStartDependencies
-    >
-{
+export class ServerlessSearchPlugin implements Plugin<
+  ServerlessSearchPluginSetup,
+  ServerlessSearchPluginStart,
+  ServerlessSearchPluginSetupDependencies,
+  ServerlessSearchPluginStartDependencies
+> {
   public setup(
     core: CoreSetup<ServerlessSearchPluginStartDependencies, ServerlessSearchPluginStart>,
     setupDeps: ServerlessSearchPluginSetupDependencies

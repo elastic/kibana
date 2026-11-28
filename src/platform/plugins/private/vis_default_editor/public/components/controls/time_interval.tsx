@@ -115,8 +115,8 @@ function TimeIntervalParamEditor({
     selectedOptions = definedOption
       ? [definedOption]
       : value === autoInterval
-      ? []
-      : [{ label: value, key: 'custom' }];
+        ? []
+        : [{ label: value, key: 'custom' }];
   }
 
   const { isValid, error, interval } = validateInterval(agg, value, definedOption, timeBase);

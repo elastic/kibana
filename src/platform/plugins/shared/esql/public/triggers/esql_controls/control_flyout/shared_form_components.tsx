@@ -183,10 +183,10 @@ export function VariableName({
         defaultMessage: 'Variable name is required',
       })
     : variableExists
-    ? i18n.translate('esql.flyout.variableNameExists.error', {
-        defaultMessage: 'Variable name already exists',
-      })
-    : undefined;
+      ? i18n.translate('esql.flyout.variableNameExists.error', {
+          defaultMessage: 'Variable name already exists',
+        })
+      : undefined;
   return (
     <EuiFormRow
       label={i18n.translate('esql.flyout.variableName.label', {

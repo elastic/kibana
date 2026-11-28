@@ -25,18 +25,21 @@ export const ALERT_RULE_PARAMETERS_NODE_TYPE = `${ALERT_RULE_PARAMETERS}.nodeTyp
 const CUSTOM_METRIC_TYPE = 'custom';
 
 export const flatAlertRuleParams = (params: {}, pKey = ''): Record<string, unknown[]> => {
-  return Object.entries(params).reduce((acc, [key, field]) => {
-    const objectKey = pKey.length ? `${pKey}.${key}` : key;
-    if (typeof field === 'object' && field != null) {
-      if (Array.isArray(field) && field.length > 0) {
-        return Object.assign(acc, flatAlertRuleParams(field[0] as {}, objectKey));
-      } else {
-        return Object.assign(acc, flatAlertRuleParams(field as {}, objectKey));
+  return Object.entries(params).reduce(
+    (acc, [key, field]) => {
+      const objectKey = pKey.length ? `${pKey}.${key}` : key;
+      if (typeof field === 'object' && field != null) {
+        if (Array.isArray(field) && field.length > 0) {
+          return Object.assign(acc, flatAlertRuleParams(field[0] as {}, objectKey));
+        } else {
+          return Object.assign(acc, flatAlertRuleParams(field as {}, objectKey));
+        }
       }
-    }
-    acc[objectKey] = Array.isArray(field) ? field : [field];
-    return acc;
-  }, {} as Record<string, unknown[]>);
+      acc[objectKey] = Array.isArray(field) ? field : [field];
+      return acc;
+    },
+    {} as Record<string, unknown[]>
+  );
 };
 
 export const getInventoryViewInAppUrl = ({
@@ -144,10 +147,13 @@ export const getMetricsViewInAppUrl = ({
   }
 
   // creates an object of asset details supported assetType by their assetId field name
-  const assetTypeByAssetId = Object.values(SupportedAssetTypes).reduce((acc, curr) => {
-    acc[findInventoryModel(curr).fields.id] = curr;
-    return acc;
-  }, {} as Record<string, InventoryItemType>);
+  const assetTypeByAssetId = Object.values(SupportedAssetTypes).reduce(
+    (acc, curr) => {
+      acc[findInventoryModel(curr).fields.id] = curr;
+      return acc;
+    },
+    {} as Record<string, InventoryItemType>
+  );
 
   // detemines if the groupBy has a field that the asset details supports
   const supportedAssetId = groupBy.find((field) => !!assetTypeByAssetId[field]);

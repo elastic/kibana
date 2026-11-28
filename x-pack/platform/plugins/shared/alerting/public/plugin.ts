@@ -85,10 +85,12 @@ export interface AlertingUIConfig {
   maintenanceWindow: { enabled: boolean };
 }
 
-export class AlertingPublicPlugin
-  implements
-    Plugin<PluginSetupContract, PluginStartContract, AlertingPluginSetup, AlertingPluginStart>
-{
+export class AlertingPublicPlugin implements Plugin<
+  PluginSetupContract,
+  PluginStartContract,
+  AlertingPluginSetup,
+  AlertingPluginStart
+> {
   private alertNavigationRegistry?: AlertNavigationRegistry;
   private config: AlertingUIConfig;
   readonly maxAlertsPerRun: number;
@@ -128,7 +130,7 @@ export class AlertingPublicPlugin
           const [coreStart, pluginsStart] = (await core.getStartServices()) as [
             CoreStart,
             AlertingPluginStart,
-            unknown
+            unknown,
           ];
 
           return renderApp({

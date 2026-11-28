@@ -43,7 +43,7 @@ describe('Drag and drop reordering', () => {
   type MaximumThreeDroppablesProps = [
     Partial<DroppableProps>?,
     Partial<DroppableProps>?,
-    Partial<DroppableProps>?
+    Partial<DroppableProps>?,
   ];
 
   const renderDragAndDropGroup = (

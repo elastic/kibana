@@ -34,22 +34,16 @@ export type ExpandButtonClickCallback = (
 ) => void;
 
 export interface EntityNodeViewModel
-  extends Record<string, unknown>,
-    EntityNodeDataModel,
-    BaseNodeDataViewModel {
+  extends Record<string, unknown>, EntityNodeDataModel, BaseNodeDataViewModel {
   expandButtonClick?: ExpandButtonClickCallback;
   nodeClick?: NodeClickCallback;
 }
 
 export interface GroupNodeViewModel
-  extends Record<string, unknown>,
-    GroupNodeDataModel,
-    BaseNodeDataViewModel {}
+  extends Record<string, unknown>, GroupNodeDataModel, BaseNodeDataViewModel {}
 
 export interface LabelNodeViewModel
-  extends Record<string, unknown>,
-    LabelNodeDataModel,
-    BaseNodeDataViewModel {
+  extends Record<string, unknown>, LabelNodeDataModel, BaseNodeDataViewModel {
   expandButtonClick?: ExpandButtonClickCallback;
   nodeClick?: NodeClickCallback;
 }

@@ -125,3 +125,7 @@ execSync(`node scripts/eslint ${glob} --fix`, {
   cwd: root,
   stdio: 'inherit',
 });
+execSync(`node scripts/oxfmt '${glob}'`, {
+  cwd: root,
+  stdio: 'inherit',
+});

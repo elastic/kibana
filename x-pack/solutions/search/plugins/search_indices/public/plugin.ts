@@ -27,9 +27,10 @@ import {
 } from './routes';
 import { registerLocators } from './locators';
 
-export class SearchIndicesPlugin
-  implements Plugin<SearchIndicesPluginSetup, SearchIndicesPluginStart>
-{
+export class SearchIndicesPlugin implements Plugin<
+  SearchIndicesPluginSetup,
+  SearchIndicesPluginStart
+> {
   private pluginEnabled: boolean = false;
 
   public setup(

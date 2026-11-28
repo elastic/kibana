@@ -112,9 +112,9 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
           opacity: 0.25;
         `
       : css`
-          scroll-margin-top: ${dashboardContainerTopOffset +
-          globalNavTopOffset +
-          DASHBOARD_MARGIN_SIZE}px;
+          scroll-margin-top: ${
+            dashboardContainerTopOffset + globalNavTopOffset + DASHBOARD_MARGIN_SIZE
+          }px;
         `;
 
     const renderedEmbeddable = useMemo(() => {

@@ -85,7 +85,8 @@ export interface IndexPatternRef {
 }
 
 export interface IndexPattern {
-  getFormatterForField( // used extensively in lens
+  getFormatterForField(
+    // used extensively in lens
     sourceField: string
   ): unknown;
   id: string;

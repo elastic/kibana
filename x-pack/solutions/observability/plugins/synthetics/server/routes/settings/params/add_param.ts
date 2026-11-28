@@ -53,9 +53,10 @@ export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
         request.body as SyntheticsParamRequest[] | SyntheticsParamRequest
       );
 
-      const result = await savedObjectsClient.bulkCreate<Omit<SyntheticsParamSOAttributes, 'id'>>(
-        savedObjectsData
-      );
+      const result =
+        await savedObjectsClient.bulkCreate<Omit<SyntheticsParamSOAttributes, 'id'>>(
+          savedObjectsData
+        );
 
       const modifiedParamKeys = savedObjectsData.map((obj) => obj.attributes.key);
 

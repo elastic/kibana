@@ -139,9 +139,8 @@ describe('ActionsClientChatOpenAI', () => {
       it('returns the expected data', async () => {
         const actionsClientChatOpenAI = new ActionsClientChatOpenAI(defaultArgs);
 
-        const result: OpenAI.ChatCompletion = await actionsClientChatOpenAI.completionWithRetry(
-          defaultNonStreamingArgs
-        );
+        const result: OpenAI.ChatCompletion =
+          await actionsClientChatOpenAI.completionWithRetry(defaultNonStreamingArgs);
         expect(mockExecute).toHaveBeenCalledWith({
           actionId: connectorId,
           params: {
@@ -251,9 +250,8 @@ describe('ActionsClientChatOpenAI', () => {
           llmType: 'inference',
         });
 
-        const result: OpenAI.ChatCompletion = await actionsClientChatOpenAI.completionWithRetry(
-          defaultNonStreamingArgs
-        );
+        const result: OpenAI.ChatCompletion =
+          await actionsClientChatOpenAI.completionWithRetry(defaultNonStreamingArgs);
 
         expect(JSON.stringify(mockExecute.mock.calls[0][0])).toEqual(
           JSON.stringify({

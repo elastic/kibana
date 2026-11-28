@@ -23,4 +23,4 @@ export const getGaugeIconByType = (type: GaugeShape) =>
     [GaugeShapes.SEMI_CIRCLE]: IconChartGaugeSemiCircle,
     [GaugeShapes.ARC]: IconChartGaugeArc,
     [GaugeShapes.CIRCLE]: IconChartGaugeCircle,
-  }[type]);
+  })[type];

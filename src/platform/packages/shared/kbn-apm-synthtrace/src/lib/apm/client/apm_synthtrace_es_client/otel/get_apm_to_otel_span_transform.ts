@@ -18,10 +18,13 @@ function moveAttributes(
 ) {
   return Object.entries(obj)
     .filter(([key]) => key.startsWith(origin) && !ignoreList.some((item) => key.startsWith(item)))
-    .reduce((acc, [key, value]) => {
-      acc[`${destination}.${key}`] = value;
-      return acc;
-    }, {} as Record<string, any>);
+    .reduce(
+      (acc, [key, value]) => {
+        acc[`${destination}.${key}`] = value;
+        return acc;
+      },
+      {} as Record<string, any>
+    );
 }
 
 export function getOtelToApmSpanTransform() {

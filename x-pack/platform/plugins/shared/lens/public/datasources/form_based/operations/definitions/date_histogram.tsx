@@ -202,9 +202,9 @@ export const dateHistogramOperation: OperationDefinition<
 
     return Boolean(
       newField &&
-        newField.type === 'date' &&
-        newField.aggregatable &&
-        (!newField.aggregationRestrictions || newField.aggregationRestrictions.date_histogram)
+      newField.type === 'date' &&
+      newField.aggregatable &&
+      (!newField.aggregationRestrictions || newField.aggregationRestrictions.date_histogram)
     );
   },
   onFieldChange: (oldColumn, field) => {
@@ -257,8 +257,8 @@ export const dateHistogramOperation: OperationDefinition<
     const { usedField, timeZone, interval } = getTimeZoneAndInterval(column, indexPattern);
     const dropPartials = Boolean(
       column.params?.dropPartials &&
-        // set to false when detached from time picker
-        (indexPattern.timeFieldName === usedField?.name || !column.params?.ignoreTimeRange)
+      // set to false when detached from time picker
+      (indexPattern.timeFieldName === usedField?.name || !column.params?.ignoreTimeRange)
     );
 
     return buildExpressionFunction<AggFunctionsMapping['aggDateHistogram']>('aggDateHistogram', {

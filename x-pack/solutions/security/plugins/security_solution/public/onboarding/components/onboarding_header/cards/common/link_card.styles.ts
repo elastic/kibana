@@ -32,12 +32,14 @@ export const useCardStyles = () => {
       font-weight: ${euiTheme.font.weight.semiBold};
     }
 
-    ${isDarkMode
-      ? `
+    ${
+      isDarkMode
+        ? `
           background-color: ${euiTheme.colors.backgroundBasePlain};
           box-shadow: none;
           border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain};
         `
-      : ''}
+        : ''
+    }
   `;
 };

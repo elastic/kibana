@@ -69,30 +69,30 @@ export interface TelemetryServiceSetupParams {
 export type TelemetryEventTypeData<T extends TelemetryEventTypes> = T extends AlertsEventTypes
   ? AlertsGroupingTelemetryEventsMap[T]
   : T extends PreviewRuleEventTypes
-  ? PreviewRuleTelemetryEventsMap[T]
-  : T extends EntityEventTypes
-  ? EntityAnalyticsTelemetryEventsMap[T]
-  : T extends DataQualityEventTypes
-  ? DataQualityTelemetryEventsMap[T]
-  : T extends DocumentEventTypes
-  ? DocumentDetailsTelemetryEventsMap[T]
-  : T extends OnboardingHubEventTypes
-  ? OnboardingHubTelemetryEventsMap[T]
-  : T extends ManualRuleRunEventTypes
-  ? ManualRuleRunTelemetryEventsMap[T]
-  : T extends BulkFillRuleGapsEventTypes
-  ? BulkFillRuleGapsTelemetryEventsMap[T]
-  : T extends EventLogEventTypes
-  ? EventLogTelemetryEventsMap[T]
-  : T extends NotesEventTypes
-  ? NotesTelemetryEventsMap[T]
-  : T extends AppEventTypes
-  ? AppTelemetryEventsMap[T]
-  : T extends SiemMigrationsEventTypes
-  ? SiemMigrationsTelemetryEventsMap[T]
-  : T extends RuleUpgradeEventTypes
-  ? RuleUpgradeTelemetryEventsMap[T]
-  : never;
+    ? PreviewRuleTelemetryEventsMap[T]
+    : T extends EntityEventTypes
+      ? EntityAnalyticsTelemetryEventsMap[T]
+      : T extends DataQualityEventTypes
+        ? DataQualityTelemetryEventsMap[T]
+        : T extends DocumentEventTypes
+          ? DocumentDetailsTelemetryEventsMap[T]
+          : T extends OnboardingHubEventTypes
+            ? OnboardingHubTelemetryEventsMap[T]
+            : T extends ManualRuleRunEventTypes
+              ? ManualRuleRunTelemetryEventsMap[T]
+              : T extends BulkFillRuleGapsEventTypes
+                ? BulkFillRuleGapsTelemetryEventsMap[T]
+                : T extends EventLogEventTypes
+                  ? EventLogTelemetryEventsMap[T]
+                  : T extends NotesEventTypes
+                    ? NotesTelemetryEventsMap[T]
+                    : T extends AppEventTypes
+                      ? AppTelemetryEventsMap[T]
+                      : T extends SiemMigrationsEventTypes
+                        ? SiemMigrationsTelemetryEventsMap[T]
+                        : T extends RuleUpgradeEventTypes
+                          ? RuleUpgradeTelemetryEventsMap[T]
+                          : never;
 
 export type TelemetryEventTypes =
   | AlertsEventTypes

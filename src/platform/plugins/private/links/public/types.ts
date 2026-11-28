@@ -54,8 +54,7 @@ export type LinksSerializedState = SerializedTitles &
   (LinksByReferenceSerializedState | LinksByValueSerializedState);
 
 export interface LinksRuntimeState
-  extends Partial<LinksByReferenceSerializedState>,
-    SerializedTitles {
+  extends Partial<LinksByReferenceSerializedState>, SerializedTitles {
   links?: ResolvedLink[];
   layout?: LinksLayoutType;
   defaultTitle?: string;

@@ -222,24 +222,24 @@ export async function saveSavedWorkspace(
           services
         )
       : savedObject.id
-      ? await services.contentClient.update<GraphUpdateIn, GraphUpdateOut>({
-          contentTypeId: CONTENT_ID,
-          id: savedObject.id,
-          data: {
-            ...(extractedRefs.attributes as GraphSavedObjectAttributes),
-          },
-          options: {
-            references: extractedRefs.references,
-          },
-        })
-      : await services.contentClient.create<GraphCreateIn, GraphCreateOut>({
-          contentTypeId: CONTENT_ID,
-          data: attributes as GraphSavedObjectAttributes,
-          options: {
-            references: createOpt.references,
-            overwrite: true,
-          },
-        });
+        ? await services.contentClient.update<GraphUpdateIn, GraphUpdateOut>({
+            contentTypeId: CONTENT_ID,
+            id: savedObject.id,
+            data: {
+              ...(extractedRefs.attributes as GraphSavedObjectAttributes),
+            },
+            options: {
+              references: extractedRefs.references,
+            },
+          })
+        : await services.contentClient.create<GraphCreateIn, GraphCreateOut>({
+            contentTypeId: CONTENT_ID,
+            data: attributes as GraphSavedObjectAttributes,
+            options: {
+              references: createOpt.references,
+              overwrite: true,
+            },
+          });
 
     savedObject.id = resp.item.id;
     savedObject.isSaving = false;

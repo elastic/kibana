@@ -147,7 +147,7 @@ const KnowledgeBaseTourComp: React.FC<{
   ) : isKbSettingsPage ? (
     <VideoToast onClose={finishTour} />
   ) : (
-    children ?? null
+    (children ?? null)
   );
 };
 

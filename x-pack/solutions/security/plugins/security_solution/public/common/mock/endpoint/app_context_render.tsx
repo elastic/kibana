@@ -111,7 +111,7 @@ type HookRendererFunction<TResult, TProps> = (props: TProps) => TResult;
  */
 export type ReactQueryHookRenderer<
   TProps = unknown,
-  TResult extends UseBaseQueryResult = UseBaseQueryResult
+  TResult extends UseBaseQueryResult = UseBaseQueryResult,
 > = (
   hookFn: HookRendererFunction<TResult, TProps>,
   /**
@@ -324,7 +324,7 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
 
   const renderReactQueryHook: ReactQueryHookRenderer = async <
     TProps,
-    TResult extends UseBaseQueryResult = UseBaseQueryResult
+    TResult extends UseBaseQueryResult = UseBaseQueryResult,
   >(
     hookFn: HookRendererFunction<TResult, TProps>,
     /**

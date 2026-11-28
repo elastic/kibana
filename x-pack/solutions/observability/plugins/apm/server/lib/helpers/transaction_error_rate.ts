@@ -79,7 +79,7 @@ export function calculateFailedTransactionRate(
 ) {
   const successfulTransactions =
     'value' in outcomeResponse.successful
-      ? outcomeResponse.successful.value ?? 0
+      ? (outcomeResponse.successful.value ?? 0)
       : outcomeResponse.successful.doc_count;
 
   const successfulOrFailedTransactions =

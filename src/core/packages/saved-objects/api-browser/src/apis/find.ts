@@ -34,8 +34,10 @@ export type SavedObjectsFindOptions = Omit<
  * @public
  * @deprecated See https://github.com/elastic/kibana/issues/149098
  */
-export interface SavedObjectsFindResponse<T = unknown, A = unknown>
-  extends SavedObjectsBatchResponse<T> {
+export interface SavedObjectsFindResponse<
+  T = unknown,
+  A = unknown,
+> extends SavedObjectsBatchResponse<T> {
   /** aggregations from the search query */
   aggregations?: A;
   /** total number of results */

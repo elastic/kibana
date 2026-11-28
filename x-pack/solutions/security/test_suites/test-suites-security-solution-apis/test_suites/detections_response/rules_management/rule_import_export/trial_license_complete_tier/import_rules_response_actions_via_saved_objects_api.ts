@@ -53,9 +53,8 @@ export default ({ getService }: FtrProviderContext): void => {
     let superTestResponseActionsNoAuthz: TestAgent;
 
     before(async () => {
-      superTestResponseActionsNoAuthz = await utils.createSuperTestWithCustomRole(
-        RULE_ENABLE_ONLY_ROLE
-      );
+      superTestResponseActionsNoAuthz =
+        await utils.createSuperTestWithCustomRole(RULE_ENABLE_ONLY_ROLE);
     });
 
     after(async () => {

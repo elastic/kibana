@@ -101,9 +101,8 @@ export const getSingleMetricViewerEmbeddableFactory = (
           }),
         onEdit: async () => {
           try {
-            const { resolveEmbeddableSingleMetricViewerUserInput } = await import(
-              './single_metric_viewer_setup_flyout'
-            );
+            const { resolveEmbeddableSingleMetricViewerUserInput } =
+              await import('./single_metric_viewer_setup_flyout');
             const [coreStart, { data, share }, { mlApi }] = services;
             const result = await resolveEmbeddableSingleMetricViewerUserInput(
               coreStart,

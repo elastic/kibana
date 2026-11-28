@@ -69,11 +69,10 @@ const FilterControlsErrorView = memo(({ resetFilters }: { resetFilters: () => vo
   );
 });
 
-export interface UrlSyncedAlertsSearchBarProps
-  extends Omit<
-    AlertsSearchBarProps,
-    'query' | 'rangeFrom' | 'rangeTo' | 'filters' | 'onQuerySubmit'
-  > {
+export interface UrlSyncedAlertsSearchBarProps extends Omit<
+  AlertsSearchBarProps,
+  'query' | 'rangeFrom' | 'rangeTo' | 'filters' | 'onQuerySubmit'
+> {
   showFilterControls?: boolean;
   /**
    * Filters emitted by the filter controls. Owned by the parent page so that

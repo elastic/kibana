@@ -14,9 +14,12 @@ import { PluginSetup, PluginStart, SetupPlugins, StartPlugins, DataViewEditorPro
 import { getEditorOpener } from './open_editor';
 import { DataViewEditor } from './components/data_view_editor';
 
-export class DataViewEditorPlugin
-  implements Plugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins>
-{
+export class DataViewEditorPlugin implements Plugin<
+  PluginSetup,
+  PluginStart,
+  SetupPlugins,
+  StartPlugins
+> {
   public setup(core: CoreSetup<StartPlugins, PluginStart>, plugins: SetupPlugins): PluginSetup {
     return {};
   }

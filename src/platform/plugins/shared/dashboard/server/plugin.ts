@@ -49,9 +49,12 @@ interface StartDeps {
   share?: SharePluginStart;
 }
 
-export class DashboardPlugin
-  implements Plugin<DashboardPluginSetup, DashboardPluginStart, SetupDeps, StartDeps>
-{
+export class DashboardPlugin implements Plugin<
+  DashboardPluginSetup,
+  DashboardPluginStart,
+  SetupDeps,
+  StartDeps
+> {
   private contentClient?: ReturnType<ContentManagementServerSetup['register']>['contentClient'];
   private readonly logger: Logger;
 

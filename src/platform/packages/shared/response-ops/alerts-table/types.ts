@@ -114,8 +114,8 @@ export interface CasesService {
 type MergeProps<T, AP> = T extends (args: infer Props) => unknown
   ? (args: Props & AP) => ReactNode
   : T extends ComponentClass<infer Props>
-  ? ComponentClass<Props & AP>
-  : never;
+    ? ComponentClass<Props & AP>
+    : never;
 
 export interface AlertWithLegacyFormats {
   alert: Alert;
@@ -135,8 +135,9 @@ export interface AlertsTableSortCombinations {
   };
 }
 
-export interface AlertsTableProps<AC extends AdditionalContext = AdditionalContext>
-  extends PublicAlertsDataGridProps {
+export interface AlertsTableProps<
+  AC extends AdditionalContext = AdditionalContext,
+> extends PublicAlertsDataGridProps {
   /**
    * A unique identifier used to persist the table state in localStorage
    */
@@ -428,19 +429,18 @@ export interface CellActionsOptions {
   disabledCellActions?: string[];
 }
 
-export interface PublicAlertsDataGridProps
-  extends Omit<
-    EuiDataGridProps,
-    | 'renderCellPopover'
-    | 'renderCellValue'
-    | 'aria-labelledby'
-    | 'columnVisibility'
-    | 'rowCount'
-    | 'sorting'
-    | 'cellContext'
-    | 'pagination'
-    | 'columns'
-  > {
+export interface PublicAlertsDataGridProps extends Omit<
+  EuiDataGridProps,
+  | 'renderCellPopover'
+  | 'renderCellValue'
+  | 'aria-labelledby'
+  | 'columnVisibility'
+  | 'rowCount'
+  | 'sorting'
+  | 'cellContext'
+  | 'pagination'
+  | 'columns'
+> {
   ruleTypeIds: string[];
   minScore?: number;
   trackScores?: boolean;
@@ -481,8 +481,7 @@ export interface PublicAlertsDataGridProps
 }
 
 export interface AlertsDataGridProps<AC extends AdditionalContext = AdditionalContext>
-  extends PublicAlertsDataGridProps,
-    Pick<EuiDataGridProps, 'columnVisibility'> {
+  extends PublicAlertsDataGridProps, Pick<EuiDataGridProps, 'columnVisibility'> {
   renderContext: RenderContext<AC>;
   additionalToolbarControls?: ReactNode;
   pageSizeOptions?: number[];

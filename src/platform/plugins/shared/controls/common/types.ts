@@ -28,8 +28,9 @@ export interface DefaultControlState {
   width?: ControlWidth;
 }
 
-export interface SerializedControlState<ControlStateType extends object = object>
-  extends DefaultControlState {
+export interface SerializedControlState<
+  ControlStateType extends object = object,
+> extends DefaultControlState {
   type: string;
   explicitInput: ControlStateType;
 }

@@ -37,11 +37,11 @@ export class UnifiedSearchPageObject extends FtrService {
 
     const indexPatternSwitcher = await this.testSubjects.find('indexPattern-switcher', 500);
     const availableDataViews = await Promise.all(
-      (
-        await indexPatternSwitcher.findAllByCssSelector('.euiSelectableListItem')
-      ).map(async (item) => {
-        return await item.getAttribute('title');
-      })
+      (await indexPatternSwitcher.findAllByCssSelector('.euiSelectableListItem')).map(
+        async (item) => {
+          return await item.getAttribute('title');
+        }
+      )
     );
 
     await this.testSubjects.click(switchButtonSelector);

@@ -85,10 +85,13 @@ export async function getAggregatedDatasetPaginatedResults(options: {
   }
 
   return Object.entries(
-    results.reduce((acc, curr) => {
-      const dataset = extractIndexNameFromBackingIndex(curr.dataset);
-      acc[dataset] = (acc[dataset] ?? 0) + curr.count;
-      return acc;
-    }, {} as Record<string, number>)
+    results.reduce(
+      (acc, curr) => {
+        const dataset = extractIndexNameFromBackingIndex(curr.dataset);
+        acc[dataset] = (acc[dataset] ?? 0) + curr.count;
+        return acc;
+      },
+      {} as Record<string, number>
+    )
   ).map(([dataset, count]) => ({ dataset, count }));
 }

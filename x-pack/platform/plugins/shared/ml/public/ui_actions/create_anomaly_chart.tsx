@@ -60,9 +60,8 @@ export function createAddAnomalyChartsPanelAction(
 
       const [coreStart, pluginStart] = await getStartServices();
       try {
-        const { resolveEmbeddableAnomalyChartsUserInput } = await import(
-          '../embeddables/anomaly_charts/anomaly_charts_setup_flyout'
-        );
+        const { resolveEmbeddableAnomalyChartsUserInput } =
+          await import('../embeddables/anomaly_charts/anomaly_charts_setup_flyout');
         const initialState = await resolveEmbeddableAnomalyChartsUserInput(
           coreStart,
           pluginStart,

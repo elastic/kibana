@@ -17,8 +17,10 @@ import type { SnapshotMetricInput, SnapshotRequest } from '../../../../common/ht
 import { SnapshotCustomMetricInputRT } from '../../../../common/http_api';
 import type { InfraSourceConfiguration } from '../../../lib/sources';
 
-export interface InfraSnapshotRequestOptions
-  extends Omit<SnapshotRequest, 'sourceId' | 'filterQuery'> {
+export interface InfraSnapshotRequestOptions extends Omit<
+  SnapshotRequest,
+  'sourceId' | 'filterQuery'
+> {
   sourceConfiguration: InfraSourceConfiguration;
   filterQuery: JsonObject | undefined;
 }

@@ -152,7 +152,7 @@ export interface ResponseActionsClientUpdateCasesOptions {
 export type ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
   TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
   TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-  TMeta extends {} = {}
+  TMeta extends {} = {},
 > = ResponseActionsRequestBody &
   Pick<CommonResponseActionMethodOptions, 'ruleName' | 'ruleId' | 'hosts' | 'error'> &
   Pick<LogsEndpointAction<TParameters, TOutputContent, TMeta>, 'meta'> & {
@@ -162,7 +162,7 @@ export type ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
 
 export type ResponseActionsClientWriteActionResponseToEndpointIndexOptions<
   TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-  TMeta extends {} = {}
+  TMeta extends {} = {},
 > = {
   agentId: LogsEndpointActionResponse['agent']['id'];
   actionId: string;
@@ -181,7 +181,7 @@ export type ResponseActionsClientValidateRequestResponse =
 
 export interface FetchActionResponseEsDocsResponse<
   TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-  TMeta extends {} = {}
+  TMeta extends {} = {},
 > {
   [agentId: string]: LogsEndpointActionResponse<TOutputContent, TMeta>;
 }
@@ -189,7 +189,7 @@ export interface FetchActionResponseEsDocsResponse<
 export interface ResponseActionsClientPendingAction<
   TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
   TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-  TMeta extends {} = {}
+  TMeta extends {} = {},
 > {
   action: LogsEndpointAction<TParameters, TOutputContent, TMeta>;
   pendingAgentIds: string[];
@@ -314,7 +314,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   }
 
   protected getMethodOptions<
-    T extends CommonResponseActionMethodOptions = CommonResponseActionMethodOptions
+    T extends CommonResponseActionMethodOptions = CommonResponseActionMethodOptions,
   >(options: Partial<T> = {}): WithAllKeys<CommonResponseActionMethodOptions> {
     return {
       hosts: undefined,
@@ -348,7 +348,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   protected async fetchActionRequestEsDoc<
     TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
     TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-    TMeta extends {} = {}
+    TMeta extends {} = {},
   >(actionId: string): Promise<LogsEndpointAction<TParameters, TOutputContent, TMeta>> {
     const cacheKey = `fetchActionRequestEsDoc-${actionId}`;
     const cachedResponse =
@@ -378,7 +378,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
    */
   protected async fetchActionResponseEsDocs<
     TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-    TMeta extends {} = {}
+    TMeta extends {} = {},
   >(
     actionId: string,
     /** Specific Agent IDs to retrieve. default is to retrieve all */
@@ -453,7 +453,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   protected async writeActionRequestToEndpointIndex<
     TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
     TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-    TMeta extends {} = {}
+    TMeta extends {} = {},
   >(
     actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
       TParameters,
@@ -544,7 +544,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   protected buildActionResponseEsDoc<
     // Default type purposely set to empty object in order to ensure proper types are used when calling the method
     TOutputContent extends EndpointActionResponseDataOutput = Record<string, never>,
-    TMeta extends {} = {}
+    TMeta extends {} = {},
   >({
     actionId,
     error,
@@ -582,7 +582,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
    */
   protected async writeActionResponseToEndpointIndex<
     // Default type purposely set to empty object in order to ensure proper types are used when calling the method
-    TOutputContent extends EndpointActionResponseDataOutput = Record<string, never>
+    TOutputContent extends EndpointActionResponseDataOutput = Record<string, never>,
   >(
     options: ResponseActionsClientWriteActionResponseToEndpointIndexOptions<TOutputContent>
   ): Promise<LogsEndpointActionResponse<TOutputContent>> {
@@ -659,7 +659,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   protected fetchAllPendingActions<
     TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
     TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-    TMeta extends {} = {}
+    TMeta extends {} = {},
   >(): AsyncIterable<
     Array<ResponseActionsClientPendingAction<TParameters, TOutputContent, TMeta>>
   > {

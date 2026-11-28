@@ -53,8 +53,8 @@ const intervalOptions = PRESETS_IN_MINUTES.map((value) => ({
     value === 0
       ? onceTimeInterval()
       : value === 60
-      ? everyHourTimeInterval()
-      : everyNMinutesTimeInterval(value),
+        ? everyHourTimeInterval()
+        : everyNMinutesTimeInterval(value),
 }));
 
 export interface Props {

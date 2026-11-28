@@ -68,12 +68,9 @@ export const AddProcessorForm: FunctionComponent<Props> = ({
   closeFlyout,
   handleSubmit,
 }) => {
-  useEffect(
-    () => {
-      onOpen();
-    },
-    [] /* eslint-disable-line react-hooks/exhaustive-deps */
-  );
+  useEffect(() => {
+    onOpen();
+  }, [] /* eslint-disable-line react-hooks/exhaustive-deps */);
 
   const isFormDirty = useFormIsModified({ form });
 

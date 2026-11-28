@@ -170,7 +170,7 @@ export interface SupportedArguments {
  */
 export interface Command<
   TDefinition extends CommandDefinition = CommandDefinition,
-  TArgs extends SupportedArguments = any
+  TArgs extends SupportedArguments = any,
 > {
   /** The raw input entered by the user */
   input: string;
@@ -195,7 +195,7 @@ export interface CommandExecutionComponentProps<
   /** Internal store for the Command execution */
   TStore extends object = Record<string, unknown>,
   /** The metadata defined on the Command Definition */
-  TMeta = any
+  TMeta = any,
 > {
   command: Command<CommandDefinition<TMeta>, TArgs>;
 
@@ -241,7 +241,7 @@ export type CommandExecutionComponent<
   /** Internal store for the Command execution */
   TStore extends object = any,
   /** The metadata defined on the Command Definition */
-  TMeta = any
+  TMeta = any,
 > = ComponentType<CommandExecutionComponentProps<TArgs, TStore, TMeta>>;
 
 /**

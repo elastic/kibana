@@ -11,9 +11,12 @@ import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/publ
 import { PLUGIN_ID, PLUGIN_NAME, exampleFileKind, MyImageMetadata } from '../common';
 import { FilesExamplePluginsStart, FilesExamplePluginsSetup } from './types';
 
-export class FilesExamplePlugin
-  implements Plugin<unknown, unknown, FilesExamplePluginsSetup, FilesExamplePluginsStart>
-{
+export class FilesExamplePlugin implements Plugin<
+  unknown,
+  unknown,
+  FilesExamplePluginsSetup,
+  FilesExamplePluginsStart
+> {
   public setup(
     core: CoreSetup<FilesExamplePluginsStart>,
     { files, developerExamples }: FilesExamplePluginsSetup

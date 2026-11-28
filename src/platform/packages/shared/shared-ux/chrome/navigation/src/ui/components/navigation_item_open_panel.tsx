@@ -63,9 +63,9 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, activeNodes }: Props)
       size="s"
       fullWidth
       css={({ euiTheme }) => css`
-        background-color: ${isActive
-          ? transparentize(euiTheme.colors.lightShade, 0.5)
-          : 'transparent'};
+        background-color: ${
+          isActive ? transparentize(euiTheme.colors.lightShade, 0.5) : 'transparent'
+        };
         transform: none !important; /* don't translateY 1px */
         color: inherit;
         font-weight: inherit;
@@ -74,8 +74,9 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, activeNodes }: Props)
           justify-content: flex-start;
           position: relative;
         }
-        ${!withBadge
-          ? `
+        ${
+          !withBadge
+            ? `
     & .euiIcon {
       position: absolute;
       right: 0;
@@ -83,11 +84,12 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, activeNodes }: Props)
       transform: translateY(50%);
     }
   `
-          : `
+            : `
     & .euiBetaBadge {
       margin-left: -${euiTheme.size.m};
     }
-    `}
+    `
+        }
       `}
       data-test-subj={dataTestSubj}
     >

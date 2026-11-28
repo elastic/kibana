@@ -344,9 +344,8 @@ export class LensPlugin {
     const startServices = createStartServicesGetter(core.getStartServices);
 
     const getStartServicesForEmbeddable = async (): Promise<LensEmbeddableStartServices> => {
-      const { setUsageCollectionStart, initMemoizedErrorNotification } = await import(
-        './async_services'
-      );
+      const { setUsageCollectionStart, initMemoizedErrorNotification } =
+        await import('./async_services');
       const { core: coreStart, plugins } = startServices();
 
       const { visualizationMap, datasourceMap } = await this.initEditorFrameService();
@@ -739,9 +738,8 @@ export class LensPlugin {
       },
 
       stateHelperApi: async () => {
-        const { createFormulaPublicApi, createChartInfoApi, suggestionsApi } = await import(
-          './async_services'
-        );
+        const { createFormulaPublicApi, createChartInfoApi, suggestionsApi } =
+          await import('./async_services');
 
         const { visualizationMap, datasourceMap } = await this.initEditorFrameService();
         return {

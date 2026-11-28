@@ -324,9 +324,11 @@ export const AlertsDataGrid = typedMemo(
         }
 
         .alertsTableActiveRow {
-          background-color: ${colorMode === 'LIGHT'
-            ? tint(euiThemeVars.euiColorLightShade, 0.5)
-            : euiThemeVars.euiColorLightShade};
+          background-color: ${
+            colorMode === 'LIGHT'
+              ? tint(euiThemeVars.euiColorLightShade, 0.5)
+              : euiThemeVars.euiColorLightShade
+          };
         }
       `,
       [colorMode]

@@ -55,7 +55,10 @@ interface PkiHttp2Response {
 class PkiHttp2Client {
   private session: http2.ClientHttp2Session | undefined;
 
-  constructor(private readonly kibanaUrl: string, private readonly pfx: Buffer) {}
+  constructor(
+    private readonly kibanaUrl: string,
+    private readonly pfx: Buffer
+  ) {}
 
   async connect(): Promise<void> {
     const session = http2.connect(this.kibanaUrl, {

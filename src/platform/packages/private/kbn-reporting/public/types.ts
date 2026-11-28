@@ -53,5 +53,5 @@ export interface ReportParamsGetterOptions {
 
 export type ReportParamsGetter<
   O extends ReportParamsGetterOptions = ReportParamsGetterOptions,
-  T = unknown
+  T = unknown,
 > = (options: O) => T;

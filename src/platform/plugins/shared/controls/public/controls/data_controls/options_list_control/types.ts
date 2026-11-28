@@ -28,8 +28,10 @@ export type OptionsListControlApi = DataControlApi & {
   setSelectedOptions: (options: OptionsListSelection[] | undefined) => void;
 };
 
-export interface OptionsListComponentState
-  extends Omit<OptionsListControlState, keyof OptionsListDisplaySettings> {
+export interface OptionsListComponentState extends Omit<
+  OptionsListControlState,
+  keyof OptionsListDisplaySettings
+> {
   searchString: string;
   searchStringValid: boolean;
   requestSize: number;

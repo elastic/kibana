@@ -27,15 +27,12 @@ import {
 import { EventStreamService } from './event_stream';
 import { procedureNames } from '../common/rpc';
 
-export class ContentManagementPlugin
-  implements
-    Plugin<
-      ContentManagementServerSetup,
-      ContentManagementServerStart,
-      ContentManagementServerSetupDependencies,
-      ContentManagementServerStartDependencies
-    >
-{
+export class ContentManagementPlugin implements Plugin<
+  ContentManagementServerSetup,
+  ContentManagementServerStart,
+  ContentManagementServerSetupDependencies,
+  ContentManagementServerStartDependencies
+> {
   private readonly logger: Logger;
   private readonly core: Core;
   readonly #eventStream?: EventStreamService;

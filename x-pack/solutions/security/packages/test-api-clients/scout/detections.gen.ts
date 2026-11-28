@@ -139,11 +139,11 @@ export type ScoutResponseType = NonNullable<ApiClientOptions['responseType']>;
  */
 export type ScoutResponseBody<
   TResponseType extends ScoutResponseType,
-  TJsonBody = ApiClientResponse['body']
+  TJsonBody = ApiClientResponse['body'],
 > = TResponseType extends 'text' ? string : TResponseType extends 'buffer' ? Buffer : TJsonBody;
 
 export interface ScoutApiRequestOptions<
-  TResponseType extends ScoutResponseType = ScoutResponseType
+  TResponseType extends ScoutResponseType = ScoutResponseType,
 > {
   /** Extra headers merged on top of the defaults, e.g. an API key or a SAML cookie for auth */
   headers?: Record<string, string>;
@@ -615,10 +615,7 @@ finalize it.
   ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, GetRuleExecutionEventsResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
-    const path = `${basePath}${replaceParams(
-      '/internal/detection_engine/rules/{ruleId}/execution/events',
-      encodePathParams(props.params)
-    )}`;
+    const path = `${basePath}${replaceParams('/internal/detection_engine/rules/{ruleId}/execution/events', encodePathParams(props.params))}`;
 
     return apiClient.put<ScoutResponseBody<TResponseType, GetRuleExecutionEventsResponse>>(
       `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
@@ -640,10 +637,7 @@ finalize it.
   ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, GetRuleExecutionResultsResponse>>> {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
-    const path = `${basePath}${replaceParams(
-      '/internal/detection_engine/rules/{ruleId}/execution/results',
-      encodePathParams(props.params)
-    )}`;
+    const path = `${basePath}${replaceParams('/internal/detection_engine/rules/{ruleId}/execution/results', encodePathParams(props.params))}`;
 
     return apiClient.put<ScoutResponseBody<TResponseType, GetRuleExecutionResultsResponse>>(
       `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,

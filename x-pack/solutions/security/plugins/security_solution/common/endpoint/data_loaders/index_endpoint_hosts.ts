@@ -50,7 +50,8 @@ import {
 } from './utils';
 
 export interface IndexedHostsResponse
-  extends IndexedFleetAgentResponse,
+  extends
+    IndexedFleetAgentResponse,
     IndexedEndpointAndFleetActionsForHostResponse,
     IndexedFleetEndpointPolicyResponse {
   /**
@@ -301,7 +302,8 @@ const fetchKibanaVersion = async (kbnClient: KbnClient) => {
 };
 
 export interface DeleteIndexedEndpointHostsResponse
-  extends DeleteIndexedFleetAgentsResponse,
+  extends
+    DeleteIndexedFleetAgentsResponse,
     DeleteIndexedEndpointFleetActionsResponse,
     DeleteIndexedFleetEndpointPoliciesResponse {
   hosts: DeleteByQueryResponse | undefined;

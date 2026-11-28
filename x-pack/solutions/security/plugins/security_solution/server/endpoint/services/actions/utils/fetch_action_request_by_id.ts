@@ -25,7 +25,7 @@ import { catchAndWrapError } from '../../../utils';
 export const fetchActionRequestById = async <
   TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
   TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-  TMeta extends {} = {}
+  TMeta extends {} = {},
 >(
   esClient: ElasticsearchClient,
   actionId: string

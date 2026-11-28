@@ -34,7 +34,7 @@ const hasSubjectsArrayChanged = (
  *   When 'subjects' is expected to change, 'subjects' must be part of component react state.
  */
 export const useBatchedOptionalPublishingSubjects = <
-  SubjectsType extends [...AnyPublishingSubject[]]
+  SubjectsType extends [...AnyPublishingSubject[]],
 >(
   ...subjects: [...SubjectsType]
 ): UnwrapPublishingSubjectTuple<SubjectsType> => {
@@ -109,7 +109,7 @@ export const useBatchedOptionalPublishingSubjects = <
  * @param subjects Publishing subjects array.
  */
 export const useBatchedPublishingSubjects = <
-  SubjectsType extends [...Array<PublishingSubject<any>>]
+  SubjectsType extends [...Array<PublishingSubject<any>>],
 >(
   ...subjects: [...SubjectsType]
 ): UnwrapPublishingSubjectTuple<SubjectsType> => {

@@ -90,7 +90,7 @@ describe('deanonymizeMessage', () => {
 
     const [deanonymizedChunk, deanonymizedMessage] = result as [
       ChatCompletionChunkEvent,
-      ChatCompletionMessageEvent
+      ChatCompletionMessageEvent,
     ];
 
     expect(deanonymizedChunk.type).toBe(ChatCompletionEventType.ChatCompletionChunk);

@@ -34,10 +34,10 @@ export type ClonePanelActionApi = CanAccessViewMode &
 const isApiCompatible = (api: unknown | null): api is ClonePanelActionApi =>
   Boolean(
     apiHasUniqueId(api) &&
-      apiHasSerializableState(api) &&
-      apiCanAccessViewMode(api) &&
-      apiHasParentApi(api) &&
-      apiCanDuplicatePanels(api.parentApi)
+    apiHasSerializableState(api) &&
+    apiCanAccessViewMode(api) &&
+    apiHasParentApi(api) &&
+    apiCanDuplicatePanels(api.parentApi)
   );
 
 export class ClonePanelAction implements Action<EmbeddableApiContext> {

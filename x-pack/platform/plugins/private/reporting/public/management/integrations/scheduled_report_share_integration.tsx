@@ -45,9 +45,8 @@ export const createScheduledReportShareIntegration = ({
     id: 'scheduledReports',
     groupId: 'exportDerivatives',
     getShareIntegrationConfig: async (shareOpts: ShareContext) => {
-      const { ScheduledReportFlyoutShareWrapper } = await import(
-        '../components/scheduled_report_flyout_share_wrapper'
-      );
+      const { ScheduledReportFlyoutShareWrapper } =
+        await import('../components/scheduled_report_flyout_share_wrapper');
       const { sharingData } = shareOpts as unknown as { sharingData: ReportingSharingData };
 
       return {

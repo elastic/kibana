@@ -27,7 +27,9 @@ export const persistNotes = async (
       );
       return persistNote({
         request: frameworkRequest,
-        noteId: overrideOwner ? existingNoteIds?.find((nId) => nId === note.noteId) ?? null : null,
+        noteId: overrideOwner
+          ? (existingNoteIds?.find((nId) => nId === note.noteId) ?? null)
+          : null,
         note: newNote,
         overrideOwner,
       });

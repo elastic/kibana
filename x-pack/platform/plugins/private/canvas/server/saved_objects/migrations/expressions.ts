@@ -24,8 +24,8 @@ type ToSerializable<Type> = {
   [K in keyof Type]: Type[K] extends unknown[]
     ? ToSerializable<Type[K]>
     : Type[K] extends {}
-    ? ToSerializable<Type[K]>
-    : Serializable;
+      ? ToSerializable<Type[K]>
+      : Serializable;
 };
 
 type ExprAst = ToSerializable<Ast>;

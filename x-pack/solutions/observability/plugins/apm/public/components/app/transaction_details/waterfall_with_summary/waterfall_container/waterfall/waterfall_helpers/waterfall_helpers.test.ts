@@ -1192,7 +1192,7 @@ describe('waterfall_helpers', () => {
         },
         color: '',
         ...overrides,
-      } as IWaterfallItem);
+      }) as IWaterfallItem;
 
     describe('generateLegendsAndAssignColorsToWaterfall', () => {
       it('should generate legends for multiple services', () => {

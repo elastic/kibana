@@ -104,12 +104,12 @@ export class ComboBoxService extends FtrService {
     // Try to find alternate title casing
     const alternateTitle = (
       await Promise.all(
-        (
-          await this.find.allByCssSelector(`.euiFilterSelectItem`, this.WAIT_FOR_EXISTS_TIME)
-        ).map(async (e) => {
-          const title = (await e.getAttribute('title')) ?? '';
-          return { title, formattedTitle: title.toLowerCase().trim() };
-        })
+        (await this.find.allByCssSelector(`.euiFilterSelectItem`, this.WAIT_FOR_EXISTS_TIME)).map(
+          async (e) => {
+            const title = (await e.getAttribute('title')) ?? '';
+            return { title, formattedTitle: title.toLowerCase().trim() };
+          }
+        )
       )
     ).find(({ formattedTitle }) => {
       return formattedTitle === trimmedValue;

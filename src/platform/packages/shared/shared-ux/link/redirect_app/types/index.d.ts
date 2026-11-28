@@ -40,8 +40,10 @@ export type RedirectAppLinksProps = (
   DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement>;
 
 /** Props for the `RedirectAppLinksComponent`. */
-export interface RedirectAppLinksComponentProps
-  extends DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement> {
+export interface RedirectAppLinksComponentProps extends DetailedHTMLProps<
+  HTMLAttributes<HTMLDivElement>,
+  HTMLDivElement
+> {
   navigateToUrl: NavigateToUrl;
   currentAppId?: string | undefined;
 }

@@ -190,7 +190,7 @@ export const GridLayout = ({
         renderPanelContents,
         useCustomDragHandle,
         gridLayoutStateManager,
-      } as GridLayoutContextType),
+      }) as GridLayoutContextType,
     [renderPanelContents, useCustomDragHandle, gridLayoutStateManager]
   );
 

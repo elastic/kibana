@@ -20,7 +20,10 @@ export class BundleRemoteModule extends Module {
   public buildMeta?: any;
   public buildInfo?: any;
 
-  constructor(public readonly remote: BundleRemote, public readonly req: KbnImportReq) {
+  constructor(
+    public readonly remote: BundleRemote,
+    public readonly req: KbnImportReq
+  ) {
     super('kbn/bundleRemote', null);
   }
 

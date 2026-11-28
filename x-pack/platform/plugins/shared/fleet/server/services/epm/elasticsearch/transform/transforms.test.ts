@@ -196,7 +196,7 @@ _meta:
           id: 'endpoint',
           attributes: currentAttributes,
           references: [],
-        } as any)
+        }) as any
     );
     savedObjectsClient.update.mockImplementation(async (type, id, attributes) => {
       currentAttributes = { ...currentAttributes, ...(attributes as Partial<Installation>) };
@@ -1653,7 +1653,7 @@ _meta:
           id: 'my_upload',
           attributes: currentAttributes,
           references: [],
-        } as any)
+        }) as any
     );
     savedObjectsClient.update.mockImplementation(async (type, id, attributes) => {
       currentAttributes = { ...currentAttributes, ...(attributes as Partial<Installation>) };

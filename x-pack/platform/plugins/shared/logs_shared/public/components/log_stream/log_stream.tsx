@@ -216,7 +216,7 @@ Read more at https://github.com/elastic/kibana/blob/main/src/platform/plugins/sh
   );
 
   const columnConfigurations = useMemo(() => {
-    return resolvedLogView ? customColumns ?? resolvedLogView.columns : [];
+    return resolvedLogView ? (customColumns ?? resolvedLogView.columns) : [];
   }, [resolvedLogView, customColumns]);
 
   const streamItems = useMemo(

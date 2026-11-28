@@ -140,7 +140,7 @@ export function getMlClient(
   function switchDeploymentId<
     T extends
       | Parameters<MlClient['stopTrainedModelDeployment']>
-      | Parameters<MlClient['inferTrainedModel']>
+      | Parameters<MlClient['inferTrainedModel']>,
   >(p: T): T {
     const [params] = p;
     if (params.deployment_id !== undefined) {

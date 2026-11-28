@@ -19,7 +19,7 @@ import {
 } from './create_observable_from_http_response';
 
 export function httpResponseIntoObservable<
-  T extends InferenceTaskEvent = never
+  T extends InferenceTaskEvent = never,
 >(): OperatorFunction<StreamedHttpResponse, T> {
   return pipe(
     switchMap((response) => createObservableFromHttpResponse(response)),

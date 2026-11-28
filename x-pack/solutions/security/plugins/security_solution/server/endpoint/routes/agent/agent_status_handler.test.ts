@@ -167,8 +167,7 @@ describe('Agent Status API route handler', () => {
 
   it('should use a scoped SO client when spaces awareness feature is enabled', async () => {
     // @ts-expect-error write to readonly property
-    apiTestSetup.endpointAppContextMock.service.experimentalFeatures.endpointManagementSpaceAwarenessEnabled =
-      true;
+    apiTestSetup.endpointAppContextMock.service.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = true;
 
     ((await httpHandlerContextMock.securitySolution).getSpaceId as jest.Mock).mockReturnValue(
       'foo'

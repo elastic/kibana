@@ -110,7 +110,7 @@ describe('Processor: Foreach', () => {
 
     expect(processors[0][FOREACH_TYPE]).toEqual({
       field: 'test_foreach_processor',
-      // eslint-disable-next-line prettier/prettier
+      // prettier-ignore
       processor: { def_1: 'aaa\"bbb', def_2: 'aaa(bbb' },
     });
   });

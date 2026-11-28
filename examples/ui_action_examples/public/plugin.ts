@@ -20,10 +20,12 @@ export interface UiActionExamplesStartDependencies {
   uiActions: UiActionsStart;
 }
 
-export class UiActionExamplesPlugin
-  implements
-    Plugin<void, void, UiActionExamplesSetupDependencies, UiActionExamplesStartDependencies>
-{
+export class UiActionExamplesPlugin implements Plugin<
+  void,
+  void,
+  UiActionExamplesSetupDependencies,
+  UiActionExamplesStartDependencies
+> {
   public setup(
     core: CoreSetup<UiActionExamplesStartDependencies>,
     { uiActions }: UiActionExamplesSetupDependencies

@@ -50,9 +50,8 @@ export function createAddPatternAnalysisEmbeddableAction(
       if (!presentationContainerParent) throw new IncompatibleActionError();
 
       try {
-        const { resolveEmbeddablePatternAnalysisUserInput } = await import(
-          '../embeddables/pattern_analysis/resolve_pattern_analysis_config_input'
-        );
+        const { resolveEmbeddablePatternAnalysisUserInput } =
+          await import('../embeddables/pattern_analysis/resolve_pattern_analysis_config_input');
 
         const initialState: PatternAnalysisEmbeddableInitialState = {
           dataViewId: undefined,

@@ -113,7 +113,7 @@ describe('When invoking Trusted Apps Schema', () => {
         effectScope: { type: 'global' },
         entries: [createConditionEntry()],
         ...(data || {}),
-      } as NewTrustedApp);
+      }) as NewTrustedApp;
     const body = PostTrustedAppCreateRequestSchema.body;
 
     it('should not error on a valid message', () => {
@@ -398,7 +398,7 @@ describe('When invoking Trusted Apps Schema', () => {
         effectScope: { type: 'global' },
         entries: [createConditionEntry()],
         ...(data || {}),
-      } as NewTrustedApp);
+      }) as NewTrustedApp;
 
     const updateParams = <T>(data?: T): PutTrustedAppsRequestParams => ({
       id: 'validId',

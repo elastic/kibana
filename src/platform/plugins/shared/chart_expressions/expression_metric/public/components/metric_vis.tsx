@@ -59,8 +59,9 @@ const buildFilterEvent = (rowIdx: number, columnIdx: number, table: Datatable) =
 
 const getIcon =
   (type: string) =>
-  ({ width, height, color }: { width: number; height: number; color: string }) =>
-    <EuiIcon type={type} fill={color} css={{ width, height }} />;
+  ({ width, height, color }: { width: number; height: number; color: string }) => (
+    <EuiIcon type={type} fill={color} css={{ width, height }} />
+  );
 
 export interface MetricVisComponentProps {
   data: Datatable;
@@ -154,7 +155,7 @@ export const MetricVis = ({
     // has no backing data row, so resolving its maximum dimension would throw.
     const tileColor =
       config.metric.palette?.params && typeof value === 'number' && Number.isFinite(value)
-        ? getColor(
+        ? (getColor(
             value,
             config.metric.palette,
             {
@@ -164,8 +165,8 @@ export const MetricVis = ({
             },
             data,
             rowIdx
-          ) ?? defaultColor
-        : config.metric.color ?? defaultColor;
+          ) ?? defaultColor)
+        : (config.metric.color ?? defaultColor);
 
     const trendConfig: TrendConfig | undefined = config.metric.secondaryTrend.palette
       ? {

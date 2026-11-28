@@ -128,9 +128,8 @@ export const getLogRateAnalysisEmbeddableFactory = (
         isEditingEnabled: () => true,
         onEdit: async () => {
           try {
-            const { resolveEmbeddableLogRateAnalysisUserInput } = await import(
-              './resolve_log_rate_analysis_config_input'
-            );
+            const { resolveEmbeddableLogRateAnalysisUserInput } =
+              await import('./resolve_log_rate_analysis_config_input');
 
             const result = await resolveEmbeddableLogRateAnalysisUserInput(
               coreStart,

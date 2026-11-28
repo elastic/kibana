@@ -33,14 +33,14 @@ describe('shared', () => {
       const input1 = '';
       expect(to.xJsonString(input1)).toBe('{}');
 
-      // eslint-disable-next-line prettier/prettier
+      // prettier-ignore
       const input2 = '{"ISSUE": "aaa\"bbb","ISSUE2": "aaa\\(bbb","ISSUE3": """aaa\"bbb"""}';
       expect(to.xJsonString(input2)).toBe(
-        // eslint-disable-next-line prettier/prettier
+        // prettier-ignore
         '{"ISSUE": "aaa\"bbb","ISSUE2": "aaa\\(bbb","ISSUE3": """aaa\"bbb"""}'
       );
 
-      // eslint-disable-next-line prettier/prettier
+      // prettier-ignore
       const input3 = { ISSUE: "aaa\"bbb", ISSUE2: "aaa\\(bbb" };
       expect(to.xJsonString(input3)).toBe(JSON.stringify(input3, null, 2));
     });
@@ -89,7 +89,7 @@ describe('shared', () => {
       expect(validator(input1)).toBeUndefined();
 
       // Invalid JSON
-      // eslint-disable-next-line prettier/prettier
+      // prettier-ignore
       const input2 = '{"ISSUE": """"aaa\"bbb""';
       expect(validator(input2)).toMatchObject({ message, code });
     });

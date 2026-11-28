@@ -26,15 +26,12 @@ interface UiActionsEnhancedServerSetupDependencies {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface UiActionsEnhancedServerStartDependencies {}
 
-export class AdvancedUiActionsServerPlugin
-  implements
-    Plugin<
-      UiActionsEnhancedServerSetup,
-      UiActionsEnhancedServerStart,
-      UiActionsEnhancedServerSetupDependencies,
-      UiActionsEnhancedServerStartDependencies
-    >
-{
+export class AdvancedUiActionsServerPlugin implements Plugin<
+  UiActionsEnhancedServerSetup,
+  UiActionsEnhancedServerStart,
+  UiActionsEnhancedServerSetupDependencies,
+  UiActionsEnhancedServerStartDependencies
+> {
   protected readonly actionFactories: ActionFactoryRegistry = new Map();
 
   constructor() {}

@@ -18,15 +18,12 @@ import {
   ServerlessObservabilityPublicStartDependencies,
 } from './types';
 
-export class ServerlessObservabilityPlugin
-  implements
-    Plugin<
-      ServerlessObservabilityPublicSetup,
-      ServerlessObservabilityPublicStart,
-      ServerlessObservabilityPublicSetupDependencies,
-      ServerlessObservabilityPublicStartDependencies
-    >
-{
+export class ServerlessObservabilityPlugin implements Plugin<
+  ServerlessObservabilityPublicSetup,
+  ServerlessObservabilityPublicStart,
+  ServerlessObservabilityPublicSetupDependencies,
+  ServerlessObservabilityPublicStartDependencies
+> {
   public setup(
     _core: CoreSetup<
       ServerlessObservabilityPublicStartDependencies,

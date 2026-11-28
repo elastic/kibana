@@ -190,7 +190,7 @@ export const MetricItem = ({
                 {
                   title: truncateText(monitor.name),
                   subtitle: locationName,
-                  value: trendData !== 'loading' ? trendData?.median ?? 0 : 0,
+                  value: trendData !== 'loading' ? (trendData?.median ?? 0) : 0,
                   trendShape: MetricTrendShape.Area,
                   trend: trendData !== 'loading' && !!trendData?.data ? trendData.data : [],
                   extra:

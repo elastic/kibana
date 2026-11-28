@@ -135,7 +135,7 @@ export interface UnvalidatedToolCall {
  */
 export interface ToolCall<
   TName extends string = string,
-  TArguments extends Record<string, any> | undefined = Record<string, any> | undefined
+  TArguments extends Record<string, any> | undefined = Record<string, any> | undefined,
 > {
   /**
    * The id of the tool call, that must be re-used when providing the tool call response

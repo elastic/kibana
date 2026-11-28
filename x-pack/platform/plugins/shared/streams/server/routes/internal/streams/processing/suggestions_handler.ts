@@ -363,8 +363,10 @@ function getErrorMessageGroups(errors: string[]) {
   );
 }
 
-interface SuggestAndValidateGrokProcessorParams
-  extends Pick<OutputOptions, 'connectorId' | 'system' | 'previousMessages' | 'input'> {
+interface SuggestAndValidateGrokProcessorParams extends Pick<
+  OutputOptions,
+  'connectorId' | 'system' | 'previousMessages' | 'input'
+> {
   streamName: string;
   isWiredStream: boolean;
   inferenceClient: InferenceClient;

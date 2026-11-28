@@ -69,7 +69,7 @@ export type RootCauseAnalysisEvent =
     }>;
 
 export type RootCauseAnalysisToolRequest<
-  TToolName extends keyof typeof RCA_TOOLS = keyof typeof RCA_TOOLS
+  TToolName extends keyof typeof RCA_TOOLS = keyof typeof RCA_TOOLS,
 > = ToolCallsOf<{
   tools: Pick<typeof RCA_TOOLS, TToolName>;
 }>['toolCalls'][number];

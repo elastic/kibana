@@ -79,8 +79,8 @@ export async function getRuleExecutor(
     logger.debug(() => `Alerts bulk process finished with errors: ${JSON.stringify(errors)}`);
   }
 
-  const originalDocumentIds = createdAlerts.map(
-    (alert) => alertDocIdToDocumentIdMap.get(alert._id)!
+  const originalDocumentIds = createdAlerts.map((alert) =>
+    alertDocIdToDocumentIdMap.get(alert._id)!
   );
 
   return {

@@ -197,7 +197,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
             timeRange: {
               from: startDate ?? 'now-1d',
               to: endDate ?? 'now',
-              mode: mode ?? (startDate || endDate) ? 'absolute' : 'relative',
+              mode: (mode ?? (startDate || endDate)) ? 'absolute' : 'relative',
             },
             attributes: getLensAttributes(logsDataView, actionId),
           },

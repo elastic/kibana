@@ -554,9 +554,8 @@ describe('When using `getActionList()', () => {
       .mockReturnValue({
         findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
       });
-    (
-      actionRequests.hits.hits[0]._source as LogsEndpointAction
-    ).EndpointActions.expiration = `2021-04-30T16:08:47.449Z`;
+    (actionRequests.hits.hits[0]._source as LogsEndpointAction).EndpointActions.expiration =
+      `2021-04-30T16:08:47.449Z`;
     actionResponses.hits.hits.pop(); // remove the endpoint response
 
     await expect(
@@ -583,9 +582,8 @@ describe('When using `getActionList()', () => {
       .mockReturnValue({
         findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
       });
-    (
-      actionRequests.hits.hits[0]._source as LogsEndpointAction
-    ).EndpointActions.expiration = `2021-04-30T16:08:47.449Z`;
+    (actionRequests.hits.hits[0]._source as LogsEndpointAction).EndpointActions.expiration =
+      `2021-04-30T16:08:47.449Z`;
 
     await expect(
       await (
@@ -611,9 +609,8 @@ describe('When using `getActionList()', () => {
       .mockReturnValue({
         findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
       });
-    (
-      actionRequests.hits.hits[0]._source as LogsEndpointAction
-    ).EndpointActions.expiration = `2021-04-30T16:08:47.449Z`;
+    (actionRequests.hits.hits[0]._source as LogsEndpointAction).EndpointActions.expiration =
+      `2021-04-30T16:08:47.449Z`;
 
     await expect(
       await (
@@ -641,9 +638,8 @@ describe('When using `getActionList()', () => {
       .mockReturnValue({
         findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
       });
-    (
-      actionRequests.hits.hits[0]._source as LogsEndpointAction
-    ).EndpointActions.expiration = `2021-04-30T16:08:47.449Z`;
+    (actionRequests.hits.hits[0]._source as LogsEndpointAction).EndpointActions.expiration =
+      `2021-04-30T16:08:47.449Z`;
     actionResponses.hits.hits.pop(); // remove the endpoint response
 
     await expect(
@@ -672,9 +668,8 @@ describe('When using `getActionList()', () => {
       .mockReturnValue({
         findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
       });
-    (
-      actionRequests.hits.hits[0]._source as LogsEndpointAction
-    ).EndpointActions.expiration = `2021-04-30T16:08:47.449Z`;
+    (actionRequests.hits.hits[0]._source as LogsEndpointAction).EndpointActions.expiration =
+      `2021-04-30T16:08:47.449Z`;
     (actionResponses.hits.hits[0]._source as LogsEndpointActionResponse).error = Error(
       'Some error in action response'
     );

@@ -47,14 +47,13 @@ export interface CasesContextValue {
   dispatch: CasesContextValueDispatch;
 }
 
-export interface CasesContextProps
-  extends Pick<
-    CasesContextValue,
-    | 'owner'
-    | 'permissions'
-    | 'externalReferenceAttachmentTypeRegistry'
-    | 'persistableStateAttachmentTypeRegistry'
-  > {
+export interface CasesContextProps extends Pick<
+  CasesContextValue,
+  | 'owner'
+  | 'permissions'
+  | 'externalReferenceAttachmentTypeRegistry'
+  | 'persistableStateAttachmentTypeRegistry'
+> {
   basePath?: string;
   features?: CasesFeatures;
   releasePhase?: ReleasePhase;

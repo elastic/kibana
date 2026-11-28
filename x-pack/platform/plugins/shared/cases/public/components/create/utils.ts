@@ -115,4 +115,4 @@ export const createFormSerializer = (
 export const getOwnerDefaultValue = (availableOwners: string[]) =>
   availableOwners.includes(GENERAL_CASES_OWNER)
     ? GENERAL_CASES_OWNER
-    : availableOwners[0] ?? GENERAL_CASES_OWNER;
+    : (availableOwners[0] ?? GENERAL_CASES_OWNER);

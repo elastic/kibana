@@ -68,9 +68,10 @@ export interface ObservabilityOnboardingPluginStartDeps {
 export type ObservabilityOnboardingContextValue = CoreStart &
   ObservabilityOnboardingPluginStartDeps & { config: ConfigSchema };
 
-export class ObservabilityOnboardingPlugin
-  implements Plugin<ObservabilityOnboardingPluginSetup, ObservabilityOnboardingPluginStart>
-{
+export class ObservabilityOnboardingPlugin implements Plugin<
+  ObservabilityOnboardingPluginSetup,
+  ObservabilityOnboardingPluginStart
+> {
   private locators?: ObservabilityOnboardingPluginLocators;
 
   constructor(private readonly ctx: PluginInitializerContext) {}

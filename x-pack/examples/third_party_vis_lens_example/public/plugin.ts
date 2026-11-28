@@ -80,9 +80,12 @@ function getLensAttributes(defaultDataView: DataView): TypedLensByValueInput['at
   };
 }
 
-export class EmbeddedLensExamplePlugin
-  implements Plugin<void, void, SetupDependencies, StartDependencies>
-{
+export class EmbeddedLensExamplePlugin implements Plugin<
+  void,
+  void,
+  SetupDependencies,
+  StartDependencies
+> {
   public setup(
     core: CoreSetup<StartDependencies>,
     { developerExamples, lens, expressions }: SetupDependencies

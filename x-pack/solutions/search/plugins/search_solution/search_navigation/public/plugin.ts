@@ -25,9 +25,10 @@ import type {
 } from './types';
 import { classicNavigationFactory } from './classic_navigation';
 
-export class SearchNavigationPlugin
-  implements Plugin<SearchNavigationPluginSetup, SearchNavigationPluginStart>
-{
+export class SearchNavigationPlugin implements Plugin<
+  SearchNavigationPluginSetup,
+  SearchNavigationPluginStart
+> {
   private readonly logger: Logger;
   private currentChromeStyle: ChromeStyle | undefined = undefined;
   private baseClassicNavItemsFn: (() => ClassicNavItem[]) | undefined = undefined;

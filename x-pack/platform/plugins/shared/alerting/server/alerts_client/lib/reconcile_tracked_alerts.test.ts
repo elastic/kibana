@@ -124,7 +124,7 @@ const makeDoc = ({
     [ALERT_PENDING_RECOVERED_COUNT]: 0,
     [ALERT_MAINTENANCE_WINDOW_IDS]: ['mw-1'],
     ...extra,
-  } as unknown as Alert & RuleAlertData);
+  }) as unknown as Alert & RuleAlertData;
 
 const makeHit = (doc: Alert & RuleAlertData) => ({
   _index: '.internal.alerts-test.alerts-default-000001',

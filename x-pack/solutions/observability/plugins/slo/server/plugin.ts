@@ -51,10 +51,12 @@ import { LOCK_ID_RESOURCE_INSTALLER } from '../common/constants';
 
 const sloRuleTypes = [SLO_BURN_RATE_RULE_TYPE_ID];
 
-export class SLOPlugin
-  implements
-    Plugin<SLOServerSetup, SLOServerStart, SLOPluginSetupDependencies, SLOPluginStartDependencies>
-{
+export class SLOPlugin implements Plugin<
+  SLOServerSetup,
+  SLOServerStart,
+  SLOPluginSetupDependencies,
+  SLOPluginStartDependencies
+> {
   private readonly logger: Logger;
   private readonly config: SLOConfig;
   private readonly isServerless: boolean;

@@ -15,8 +15,7 @@ import { ContextMenuItemNavByRouter } from './context_menu_item_nav_by_router';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 
 export interface ContextMenuWithRouterSupportProps
-  extends CommonProps,
-    Pick<EuiPopoverProps, 'button' | 'anchorPosition' | 'panelPaddingSize'> {
+  extends CommonProps, Pick<EuiPopoverProps, 'button' | 'anchorPosition' | 'panelPaddingSize'> {
   items: ContextMenuItemNavByRouterProps[];
   /**
    * The max width for the popup menu. Default is `32ch`.

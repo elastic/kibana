@@ -20,18 +20,18 @@ export const hasInvalidButRequiredVar = (
     (registryVars && !packagePolicyVars) ||
     Boolean(
       registryVars &&
-        registryVars.find(
-          (registryVar) =>
-            registryVar.required &&
-            (!packagePolicyVars ||
-              !packagePolicyVars[registryVar.name] ||
-              validatePackagePolicyConfig(
-                packagePolicyVars[registryVar.name],
-                registryVar,
-                registryVar.name,
-                parse
-              )?.length)
-        )
+      registryVars.find(
+        (registryVar) =>
+          registryVar.required &&
+          (!packagePolicyVars ||
+            !packagePolicyVars[registryVar.name] ||
+            validatePackagePolicyConfig(
+              packagePolicyVars[registryVar.name],
+              registryVar,
+              registryVar.name,
+              parse
+            )?.length)
+      )
     )
   );
 };

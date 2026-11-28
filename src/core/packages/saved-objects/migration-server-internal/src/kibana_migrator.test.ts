@@ -49,16 +49,16 @@ const ZDT_SUCCESSFUL_MIGRATION_RESULT: MigrationResult[] = [
 
 jest.mock('./run_v2_migration', () => {
   return {
-    runV2Migration: jest.fn(
-      (): Promise<MigrationResult[]> => Promise.resolve(V2_SUCCESSFUL_MIGRATION_RESULT)
+    runV2Migration: jest.fn((): Promise<MigrationResult[]> =>
+      Promise.resolve(V2_SUCCESSFUL_MIGRATION_RESULT)
     ),
   };
 });
 
 jest.mock('./zdt', () => {
   return {
-    runZeroDowntimeMigration: jest.fn(
-      (): Promise<MigrationResult[]> => Promise.resolve(ZDT_SUCCESSFUL_MIGRATION_RESULT)
+    runZeroDowntimeMigration: jest.fn((): Promise<MigrationResult[]> =>
+      Promise.resolve(ZDT_SUCCESSFUL_MIGRATION_RESULT)
     ),
   };
 });

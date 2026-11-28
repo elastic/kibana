@@ -106,8 +106,8 @@ export const IndicesAndDataStreamsField: FunctionComponent<Props> = ({
     typeof config.indices === 'string'
       ? (config.indices as string).split(',')
       : Array.isArray(config.indices) && config.indices
-      ? config.indices
-      : []
+        ? config.indices
+        : []
   );
 
   const indicesSwitch = (

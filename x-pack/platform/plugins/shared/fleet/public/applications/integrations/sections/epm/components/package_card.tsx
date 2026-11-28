@@ -221,15 +221,17 @@ export function PackageCard({
 
             [class*='euiCard__description'] {
               flex-grow: 1;
-              ${descriptionLineClamp
-                ? shouldShowInstallationStatus({
-                    installStatus,
-                    showInstallationStatus,
-                    isActive: hasDataStreams,
-                  })
-                  ? getLineClampStyles(1) // Show only one line of description if installation status is shown
-                  : getLineClampStyles(descriptionLineClamp)
-                : ''}
+              ${
+                descriptionLineClamp
+                  ? shouldShowInstallationStatus({
+                      installStatus,
+                      showInstallationStatus,
+                      isActive: hasDataStreams,
+                    })
+                    ? getLineClampStyles(1) // Show only one line of description if installation status is shown
+                    : getLineClampStyles(descriptionLineClamp)
+                  : ''
+              }
             }
 
             [class*='euiCard__titleButton'] {

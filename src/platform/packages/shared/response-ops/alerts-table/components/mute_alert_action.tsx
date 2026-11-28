@@ -65,8 +65,8 @@ export const MuteAlertAction = typedMemo(
               defaultMessage: 'Loading muted state',
             })
           : isMuted
-          ? UNMUTE
-          : MUTE}
+            ? UNMUTE
+            : MUTE}
       </EuiContextMenuItem>
     );
   }

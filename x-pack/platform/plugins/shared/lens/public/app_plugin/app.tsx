@@ -479,7 +479,7 @@ export function App({
           lensServices={lensAppServices}
           originatingApp={
             isLinkedToOriginatingApp
-              ? incomingState?.originatingApp ?? initialContext?.originatingApp
+              ? (incomingState?.originatingApp ?? initialContext?.originatingApp)
               : undefined
           }
           isSaveable={isSaveable}

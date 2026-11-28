@@ -53,11 +53,11 @@ export const useSignalHelpers = (): {
     SourcererScopeName.detections
   );
   const dataViewId = newDataViewPickerEnabled
-    ? experimentalDefaultDataView?.id ?? null
+    ? (experimentalDefaultDataView?.id ?? null)
     : oldDataViewId;
 
   const defaultDataViewPattern = newDataViewPickerEnabled
-    ? experimentalDefaultDataView.getIndexPattern() ?? ''
+    ? (experimentalDefaultDataView.getIndexPattern() ?? '')
     : oldDefaultDataView.title;
 
   const signalIndexNeedsInit = useMemo(() => {

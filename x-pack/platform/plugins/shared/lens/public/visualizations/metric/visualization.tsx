@@ -102,7 +102,7 @@ const getMetricLayerConfiguration = (
 
   const isSecondaryMetricNumeric = Boolean(
     props.state.secondaryMetricAccessor &&
-      getAccessorType(datasource, props.state.secondaryMetricAccessor).isNumeric
+    getAccessorType(datasource, props.state.secondaryMetricAccessor).isNumeric
   );
 
   const getSecondaryAccessorDisplayConfig = (): Partial<AccessorConfig> => {
@@ -760,8 +760,8 @@ export const getMetricVisualization = ({
           palette: (hasDynamicColoring
             ? stops.map(({ color }) => color)
             : hasStaticColoring
-            ? [state.color]
-            : [getDefaultColor(state, isMetricNumeric)]
+              ? [state.color]
+              : [getDefaultColor(state, isMetricNumeric)]
           ).filter(nonNullable),
         },
       ],

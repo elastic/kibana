@@ -42,7 +42,7 @@ const getIndexPatternMock = (mockedFields: any = {}) =>
   ({
     sourceFilters: [{ value: 'time*' }, { value: 'nam*' }, { value: 'age*' }],
     ...mockedFields,
-  } as DataView);
+  }) as DataView;
 
 describe('SourceFiltersTable', () => {
   test('should render normally', () => {

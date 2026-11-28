@@ -86,7 +86,7 @@ export const getLayers = (
 
   return columns.map((col, layerIndex) => {
     return {
-      groupByRollup: (d: Datum) => (col.id ? d[col.id] ?? emptySliceLabel : col.name),
+      groupByRollup: (d: Datum) => (col.id ? (d[col.id] ?? emptySliceLabel) : col.name),
       showAccessor: (d: Datum) => true,
       nodeLabel: (d: unknown) => getNodeLabel(d, col, formatters, formatter.deserialize),
       fillLabel:

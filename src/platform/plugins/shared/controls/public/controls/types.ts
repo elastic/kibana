@@ -57,7 +57,7 @@ export type ControlApiInitialization<ControlApi extends DefaultControlApi = Defa
 
 export interface ControlFactory<
   State extends DefaultControlState = DefaultControlState,
-  ControlApi extends DefaultControlApi = DefaultControlApi
+  ControlApi extends DefaultControlApi = DefaultControlApi,
 > {
   type: string;
   order?: number;
@@ -78,7 +78,7 @@ export interface ControlFactory<
 
 export interface ControlPanelProps<
   ApiType extends DefaultControlApi = DefaultControlApi,
-  PropsType extends {} = { className: string }
+  PropsType extends {} = { className: string },
 > {
   uuid: string;
   Component: PanelCompatibleComponent<ApiType, PropsType>;

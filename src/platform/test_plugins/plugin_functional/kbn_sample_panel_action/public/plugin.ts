@@ -13,9 +13,10 @@ import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { createSamplePanelAction } from './sample_panel_action';
 import { createSamplePanelLink } from './sample_panel_link';
 
-export class SampelPanelActionTestPlugin
-  implements Plugin<SampelPanelActionTestPluginSetup, SampelPanelActionTestPluginStart>
-{
+export class SampelPanelActionTestPlugin implements Plugin<
+  SampelPanelActionTestPluginSetup,
+  SampelPanelActionTestPluginStart
+> {
   public setup(core: CoreSetup, { uiActions }: { uiActions: UiActionsSetup }) {
     const samplePanelAction = createSamplePanelAction(core.getStartServices);
     const samplePanelLink = createSamplePanelLink();

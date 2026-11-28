@@ -20,9 +20,12 @@ export interface ConnectorsPluginsStart {
   actions: ActionsPluginSetupContract;
 }
 
-export class StackConnectorsPlugin
-  implements Plugin<void, void, ConnectorsPluginsSetup, ConnectorsPluginsStart>
-{
+export class StackConnectorsPlugin implements Plugin<
+  void,
+  void,
+  ConnectorsPluginsSetup,
+  ConnectorsPluginsStart
+> {
   private readonly logger: Logger;
   private config: StackConnectorsConfigType;
   readonly experimentalFeatures: ExperimentalFeatures;

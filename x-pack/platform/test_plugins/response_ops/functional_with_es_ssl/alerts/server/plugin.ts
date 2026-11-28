@@ -109,9 +109,12 @@ export const failingAlertType: RuleType<never, never, never, never, never, 'defa
   },
 };
 
-export class AlertingFixturePlugin
-  implements Plugin<void, void, AlertingExampleDeps, AlertingExampleDeps>
-{
+export class AlertingFixturePlugin implements Plugin<
+  void,
+  void,
+  AlertingExampleDeps,
+  AlertingExampleDeps
+> {
   public setup(core: CoreSetup<AlertingExampleDeps>, { alerting, features }: AlertingExampleDeps) {
     alerting.registerType(noopAlertType);
     alerting.registerType(alwaysFiringAlertType);

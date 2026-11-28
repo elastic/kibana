@@ -139,11 +139,11 @@ export const isWiredStreamDefinition = (stream: {
 }): stream is WiredStreamDefinition =>
   Boolean(
     stream &&
-      typeof stream === 'object' &&
-      'ingest' in stream &&
-      typeof stream.ingest === 'object' &&
-      stream.ingest &&
-      'wired' in stream.ingest
+    typeof stream === 'object' &&
+    'ingest' in stream &&
+    typeof stream.ingest === 'object' &&
+    stream.ingest &&
+    'wired' in stream.ingest
   );
 
 export const isClassicStreamDefinition = (stream: {
@@ -151,9 +151,9 @@ export const isClassicStreamDefinition = (stream: {
 }): stream is ClassicStreamDefinition =>
   Boolean(
     stream &&
-      typeof stream === 'object' &&
-      'ingest' in stream &&
-      typeof stream.ingest === 'object' &&
-      stream.ingest &&
-      'classic' in stream.ingest
+    typeof stream === 'object' &&
+    'ingest' in stream &&
+    typeof stream.ingest === 'object' &&
+    stream.ingest &&
+    'classic' in stream.ingest
   );

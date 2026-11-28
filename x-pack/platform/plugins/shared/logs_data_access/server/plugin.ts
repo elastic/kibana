@@ -19,15 +19,12 @@ import { LogsDataAccessPluginStartDeps, LogsDataAccessPluginSetupDeps } from './
 export type LogsDataAccessPluginSetup = ReturnType<LogsDataAccessPlugin['setup']>;
 export type LogsDataAccessPluginStart = ReturnType<LogsDataAccessPlugin['start']>;
 
-export class LogsDataAccessPlugin
-  implements
-    Plugin<
-      LogsDataAccessPluginSetup,
-      LogsDataAccessPluginStart,
-      LogsDataAccessPluginSetupDeps,
-      LogsDataAccessPluginStartDeps
-    >
-{
+export class LogsDataAccessPlugin implements Plugin<
+  LogsDataAccessPluginSetup,
+  LogsDataAccessPluginStart,
+  LogsDataAccessPluginSetupDeps,
+  LogsDataAccessPluginStartDeps
+> {
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {

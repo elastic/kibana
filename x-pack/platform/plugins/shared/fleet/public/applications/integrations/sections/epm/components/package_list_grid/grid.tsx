@@ -120,7 +120,7 @@ export const GridColumn = ({
           }
         }}
         scrollElement={
-          scrollElementId ? document.getElementById(scrollElementId) ?? undefined : undefined
+          scrollElementId ? (document.getElementById(scrollElementId) ?? undefined) : undefined
         }
       >
         {() => (

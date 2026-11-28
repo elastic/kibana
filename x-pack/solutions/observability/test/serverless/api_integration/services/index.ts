@@ -15,12 +15,10 @@ export const services = {
 
 export type InheritedFtrProviderContext = GenericFtrProviderContext<typeof services, {}>;
 
-export type InheritedServices = InheritedFtrProviderContext extends GenericFtrProviderContext<
-  infer TServices,
-  {}
->
-  ? TServices
-  : {};
+export type InheritedServices =
+  InheritedFtrProviderContext extends GenericFtrProviderContext<infer TServices, {}>
+    ? TServices
+    : {};
 
 export type {
   SupertestWithRoleScopeType,

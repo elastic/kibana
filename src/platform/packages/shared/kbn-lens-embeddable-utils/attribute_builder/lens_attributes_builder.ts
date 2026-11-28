@@ -16,9 +16,9 @@ import type {
 import { DataViewCache } from './data_view_cache';
 import { getAdhocDataView } from './utils';
 
-export class LensAttributesBuilder<T extends Chart<LensVisualizationState>>
-  implements VisualizationAttributesBuilder
-{
+export class LensAttributesBuilder<
+  T extends Chart<LensVisualizationState>,
+> implements VisualizationAttributesBuilder {
   private dataViewCache: DataViewCache;
   constructor(private lens: { visualization: T }) {
     this.dataViewCache = DataViewCache.getInstance();

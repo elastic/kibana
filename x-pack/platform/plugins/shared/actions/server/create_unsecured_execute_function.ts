@@ -27,8 +27,10 @@ interface CreateBulkUnsecuredExecuteFunctionOptions {
   configurationUtilities: ActionsConfigurationUtilities;
 }
 
-export interface ExecuteOptions
-  extends Pick<ActionExecutorOptions, 'params' | 'source' | 'relatedSavedObjects'> {
+export interface ExecuteOptions extends Pick<
+  ActionExecutorOptions,
+  'params' | 'source' | 'relatedSavedObjects'
+> {
   id: string;
 }
 
@@ -37,8 +39,10 @@ export interface ExecutionResponse {
   items: ExecutionResponseItem[];
 }
 
-interface ActionTaskParams
-  extends Pick<ActionExecutorOptions, 'actionId' | 'params' | 'relatedSavedObjects'> {
+interface ActionTaskParams extends Pick<
+  ActionExecutorOptions,
+  'actionId' | 'params' | 'relatedSavedObjects'
+> {
   apiKey: string | null;
 }
 

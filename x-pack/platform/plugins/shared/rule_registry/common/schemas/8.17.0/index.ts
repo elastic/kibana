@@ -21,8 +21,10 @@ Then, update `../index.ts` to import from the new folder that has the latest sch
 new schemas to the union of all alert schemas, and re-export the new schemas as the `*Latest` schemas.
 */
 
-export interface SuppressionFields8170
-  extends Omit<SuppressionFields8130, typeof ALERT_SUPPRESSION_TERMS> {
+export interface SuppressionFields8170 extends Omit<
+  SuppressionFields8130,
+  typeof ALERT_SUPPRESSION_TERMS
+> {
   [ALERT_SUPPRESSION_TERMS]: Array<{
     field: string;
     value: SearchTypes | null;

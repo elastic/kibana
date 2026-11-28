@@ -424,8 +424,8 @@ export default function (providerContext: FtrProviderContext) {
             idx <= 2 // First 3 nodes are expected to be colored as danger (ORDER MATTERS, alerts are expected to be first)
               ? 'danger'
               : node.shape === 'label' && node.id.includes('outcome(failed)')
-              ? 'warning'
-              : 'primary',
+                ? 'warning'
+                : 'primary',
             `node color mismatched [node: ${node.id}] [actual: ${node.color}]`
           );
         });

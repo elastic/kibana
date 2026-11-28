@@ -90,10 +90,13 @@ export function managementRoutes({ router, routeGuard, getEnabledFeatures }: Rou
                   jobsSpaces(),
                 ]);
 
-                const dfaStatsMapped = dfaJobsStats.reduce((acc, cur) => {
-                  acc[cur.id] = cur;
-                  return acc;
-                }, {} as Record<string, estypes.MlDataframeAnalytics>);
+                const dfaStatsMapped = dfaJobsStats.reduce(
+                  (acc, cur) => {
+                    acc[cur.id] = cur;
+                    return acc;
+                  },
+                  {} as Record<string, estypes.MlDataframeAnalytics>
+                );
 
                 const dfaJobsWithSpaces: AnalyticsManagementItems[] = dfaJobs.map((j) => {
                   const id = j.id;
@@ -124,10 +127,13 @@ export function managementRoutes({ router, routeGuard, getEnabledFeatures }: Rou
 
                 const filteredModels = filterForEnabledFeatureModels(models, getEnabledFeatures());
 
-                const modelStatsMapped = modelsStats.reduce((acc, cur) => {
-                  acc[cur.model_id] = cur;
-                  return acc;
-                }, {} as Record<string, estypes.MlTrainedModelStats>);
+                const modelStatsMapped = modelsStats.reduce(
+                  (acc, cur) => {
+                    acc[cur.model_id] = cur;
+                    return acc;
+                  },
+                  {} as Record<string, estypes.MlTrainedModelStats>
+                );
 
                 const modelsWithSpaces: TrainedModelsManagementItems[] = filteredModels.map((m) => {
                   const id = m.model_id;

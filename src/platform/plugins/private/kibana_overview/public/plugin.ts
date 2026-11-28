@@ -27,15 +27,12 @@ import {
 import { PLUGIN_ID, PLUGIN_NAME, PLUGIN_PATH, PLUGIN_ICON } from '../common';
 import { init as initStatsReporter } from './lib/ui_metric';
 
-export class KibanaOverviewPlugin
-  implements
-    Plugin<
-      KibanaOverviewPluginSetup,
-      KibanaOverviewPluginStart,
-      AppPluginSetupDependencies,
-      AppPluginStartDependencies
-    >
-{
+export class KibanaOverviewPlugin implements Plugin<
+  KibanaOverviewPluginSetup,
+  KibanaOverviewPluginStart,
+  AppPluginSetupDependencies,
+  AppPluginStartDependencies
+> {
   public setup(
     core: CoreSetup<AppPluginStartDependencies>,
     { home, usageCollection }: AppPluginSetupDependencies

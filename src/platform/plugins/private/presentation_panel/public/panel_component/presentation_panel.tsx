@@ -24,7 +24,7 @@ const errorLoadingPanel = i18n.translate('presentationPanel.error.errorWhenLoadi
 
 export const PresentationPanel = <
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
-  PropsType extends {} = {}
+  PropsType extends {} = {},
 >(
   props: PresentationPanelProps<ApiType, PropsType> & {
     hidePanelChrome?: boolean;
@@ -100,7 +100,7 @@ export const PresentationPanel = <
         {PanelError ? (
           <PanelError error={new Error(value?.loadErrorReason ?? errorLoadingPanel)} />
         ) : (
-          value?.loadErrorReason ?? errorLoadingPanel
+          (value?.loadErrorReason ?? errorLoadingPanel)
         )}
       </EuiFlexGroup>
     );

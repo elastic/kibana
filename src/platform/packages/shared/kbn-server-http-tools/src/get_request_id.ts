@@ -19,6 +19,6 @@ export function getRequestId(
   return allowFromAnyIp ||
     // socket may be undefined in integration tests that connect via the http listener directly
     (remoteAddress && ipAllowlist.includes(remoteAddress))
-    ? (Array.isArray(opaqueId) ? opaqueId[0] : opaqueId) ?? uuidv4()
+    ? ((Array.isArray(opaqueId) ? opaqueId[0] : opaqueId) ?? uuidv4())
     : uuidv4();
 }

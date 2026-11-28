@@ -123,9 +123,9 @@ export const getRenderCellValueFn = ({
      */
     const useTopLevelObjectColumns = Boolean(
       useNewFieldsApi &&
-        !field &&
-        row?.raw.fields &&
-        !(row.raw.fields as Record<string, unknown[]>)[columnId]
+      !field &&
+      row?.raw.fields &&
+      !(row.raw.fields as Record<string, unknown[]>)[columnId]
     );
 
     if (isDetails) {

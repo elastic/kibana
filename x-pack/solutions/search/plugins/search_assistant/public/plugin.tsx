@@ -22,15 +22,12 @@ export interface PublicConfigType {
   };
 }
 
-export class SearchAssistantPlugin
-  implements
-    Plugin<
-      SearchAssistantPluginSetup,
-      SearchAssistantPluginStart,
-      {},
-      SearchAssistantPluginStartDependencies
-    >
-{
+export class SearchAssistantPlugin implements Plugin<
+  SearchAssistantPluginSetup,
+  SearchAssistantPluginStart,
+  {},
+  SearchAssistantPluginStartDependencies
+> {
   private readonly config: PublicConfigType;
 
   constructor(private readonly context: PluginInitializerContext) {

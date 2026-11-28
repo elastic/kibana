@@ -50,9 +50,8 @@ export function createAddLogRateAnalysisEmbeddableAction(
       if (!presentationContainerParent) throw new IncompatibleActionError();
 
       try {
-        const { resolveEmbeddableLogRateAnalysisUserInput } = await import(
-          '../embeddables/log_rate_analysis/resolve_log_rate_analysis_config_input'
-        );
+        const { resolveEmbeddableLogRateAnalysisUserInput } =
+          await import('../embeddables/log_rate_analysis/resolve_log_rate_analysis_config_input');
 
         const initialState: LogRateAnalysisEmbeddableInitialState = {
           dataViewId: undefined,

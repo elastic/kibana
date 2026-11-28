@@ -65,7 +65,7 @@ export interface InternalChromeStart extends ChromeStart {
     initNavigation<
       LinkId extends AppDeepLinkId = AppDeepLinkId,
       Id extends string = string,
-      ChildrenId extends string = Id
+      ChildrenId extends string = Id,
     >(
       id: SolutionId,
       navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>

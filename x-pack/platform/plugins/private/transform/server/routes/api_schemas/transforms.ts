@@ -94,7 +94,7 @@ export const syncSchema = schema.object({
 });
 
 function transformConfigPayloadValidator<
-  T extends { pivot?: PivotConfig; latest?: LatestFunctionConfig }
+  T extends { pivot?: PivotConfig; latest?: LatestFunctionConfig },
 >(value: T) {
   if (!value.pivot && !value.latest) {
     return 'pivot or latest is required for transform configuration';
@@ -142,8 +142,10 @@ export const putTransformsRequestSchema = schema.object(
 
 export type PutTransformsRequestSchema = TypeOf<typeof putTransformsRequestSchema>;
 
-export interface PutTransformsPivotRequestSchema
-  extends Omit<PutTransformsRequestSchema, 'latest'> {
+export interface PutTransformsPivotRequestSchema extends Omit<
+  PutTransformsRequestSchema,
+  'latest'
+> {
   pivot: {
     group_by: PivotGroupByDict;
     aggregations: PivotAggDict;

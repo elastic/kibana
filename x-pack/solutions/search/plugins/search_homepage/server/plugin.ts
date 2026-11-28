@@ -8,9 +8,12 @@ import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '
 
 import { SearchHomepagePluginSetup, SearchHomepagePluginStart } from './types';
 
-export class SearchHomepagePlugin
-  implements Plugin<SearchHomepagePluginSetup, SearchHomepagePluginStart, {}, {}>
-{
+export class SearchHomepagePlugin implements Plugin<
+  SearchHomepagePluginSetup,
+  SearchHomepagePluginStart,
+  {},
+  {}
+> {
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {

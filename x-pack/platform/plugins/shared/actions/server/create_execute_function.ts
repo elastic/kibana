@@ -33,8 +33,10 @@ interface CreateExecuteFunctionOptions {
   logger: Logger;
 }
 
-export interface ExecuteOptions
-  extends Pick<ActionExecutorOptions, 'params' | 'source' | 'relatedSavedObjects' | 'consumer'> {
+export interface ExecuteOptions extends Pick<
+  ActionExecutorOptions,
+  'params' | 'source' | 'relatedSavedObjects' | 'consumer'
+> {
   id: string;
   uuid?: string;
   spaceId: string;
@@ -45,8 +47,10 @@ export interface ExecuteOptions
   priority?: TaskPriority;
 }
 
-interface ActionTaskParams
-  extends Pick<ActionExecutorOptions, 'actionId' | 'params' | 'consumer' | 'relatedSavedObjects'> {
+interface ActionTaskParams extends Pick<
+  ActionExecutorOptions,
+  'actionId' | 'params' | 'consumer' | 'relatedSavedObjects'
+> {
   apiKey: string | null;
   executionId: string;
 }

@@ -129,7 +129,7 @@ export const buildQueryBarDescription = ({
   if (!isEmpty(query)) {
     items.push({
       title: (
-        <>{isLoadedFromSavedQuery ? i18n.SAVED_QUERY_LABEL : queryLabel ?? i18n.QUERY_LABEL}</>
+        <>{isLoadedFromSavedQuery ? i18n.SAVED_QUERY_LABEL : (queryLabel ?? i18n.QUERY_LABEL)}</>
       ),
       description: <Query>{query}</Query>,
     });

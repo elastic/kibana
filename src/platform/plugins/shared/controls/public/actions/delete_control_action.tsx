@@ -38,11 +38,11 @@ type DeleteControlActionApi = HasType &
 export const compatibilityCheck = (api: unknown | null): api is DeleteControlActionApi =>
   Boolean(
     apiHasType(api) &&
-      apiHasUniqueId(api) &&
-      apiHasParentApi(api) &&
-      apiCanAccessViewMode(api.parentApi) &&
-      apiIsOfType(api.parentApi, CONTROL_GROUP_TYPE) &&
-      apiIsPresentationContainer(api.parentApi)
+    apiHasUniqueId(api) &&
+    apiHasParentApi(api) &&
+    apiCanAccessViewMode(api.parentApi) &&
+    apiIsOfType(api.parentApi, CONTROL_GROUP_TYPE) &&
+    apiIsPresentationContainer(api.parentApi)
   );
 
 export class DeleteControlAction implements Action<EmbeddableApiContext> {

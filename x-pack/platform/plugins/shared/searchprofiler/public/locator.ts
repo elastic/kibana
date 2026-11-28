@@ -15,9 +15,7 @@ export interface SearchProfilerLocatorParams extends SerializableRecord {
   index: string;
 }
 
-export class SearchProfilerLocatorDefinition
-  implements LocatorDefinition<SearchProfilerLocatorParams>
-{
+export class SearchProfilerLocatorDefinition implements LocatorDefinition<SearchProfilerLocatorParams> {
   public readonly id = SEARCH_PROFILER_LOCATOR_ID;
 
   public readonly getLocation = async ({ loadFrom, index }: SearchProfilerLocatorParams) => {

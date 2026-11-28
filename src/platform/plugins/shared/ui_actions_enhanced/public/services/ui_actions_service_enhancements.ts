@@ -34,9 +34,7 @@ export interface UiActionsServiceEnhancementsParams {
   readonly getFeatureUsageStart: () => LicensingPluginStart['featureUsage'] | undefined;
 }
 
-export class UiActionsServiceEnhancements
-  implements PersistableStateDefinition<DynamicActionsState>
-{
+export class UiActionsServiceEnhancements implements PersistableStateDefinition<DynamicActionsState> {
   protected readonly actionFactories: ActionFactoryRegistry;
   protected readonly deps: Omit<UiActionsServiceEnhancementsParams, 'actionFactories'>;
 
@@ -52,7 +50,7 @@ export class UiActionsServiceEnhancements
   public readonly registerActionFactory = <
     Config extends BaseActionConfig = BaseActionConfig,
     ExecutionContext extends object = object,
-    FactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
+    FactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext,
   >(
     definition: ActionFactoryDefinition<Config, ExecutionContext, FactoryContext>
   ) => {
@@ -103,7 +101,7 @@ export class UiActionsServiceEnhancements
   public readonly registerDrilldown = <
     Config extends BaseActionConfig = BaseActionConfig,
     ExecutionContext extends object = object,
-    FactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
+    FactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext,
   >({
     id: factoryId,
     isBeta,

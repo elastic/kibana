@@ -62,13 +62,17 @@ const getCss = (
   showNativeBadge: ConnectorCheckableProps['showNativeBadge']
 ) => {
   return css`
-    ${showNativeBadge &&
-    `box-shadow: 8px 9px 0px -1px ${euiTheme.colors.lightestShade},
-      8px 9px 0px 0px ${euiTheme.colors.lightShade};`}
-    ${isDisabled &&
-    `background-color: ${euiTheme.colors.lightestShade};
+    ${
+      showNativeBadge &&
+      `box-shadow: 8px 9px 0px -1px ${euiTheme.colors.lightestShade},
+      8px 9px 0px 0px ${euiTheme.colors.lightShade};`
+    }
+    ${
+      isDisabled &&
+      `background-color: ${euiTheme.colors.lightestShade};
     color: ${euiTheme.colors.disabledText};
-    `}
+    `
+    }
   `;
 };
 

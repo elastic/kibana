@@ -169,14 +169,14 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
   const isLoadingIndexPattern = newDataViewPickerEnabled
     ? status !== 'ready'
     : oldIsLoadingIndexPattern;
-  const dataViewId = newDataViewPickerEnabled ? experimentalDataView.id ?? null : oldDataViewId;
+  const dataViewId = newDataViewPickerEnabled ? (experimentalDataView.id ?? null) : oldDataViewId;
   const selectedDataViewId = newDataViewPickerEnabled ? experimentalDataView.id : oldDataViewId;
   const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
 
   const runtimeMappings = useMemo(() => {
     return newDataViewPickerEnabled
-      ? (experimentalDataView.getRuntimeMappings() as RunTimeMappings) ?? {}
-      : (oldSourcererDataView?.runtimeFieldMap as RunTimeMappings) ?? {};
+      ? ((experimentalDataView.getRuntimeMappings() as RunTimeMappings) ?? {})
+      : ((oldSourcererDataView?.runtimeFieldMap as RunTimeMappings) ?? {});
   }, [newDataViewPickerEnabled, experimentalDataView, oldSourcererDataView]);
 
   const experimentalGetFieldSpec = useCallback(

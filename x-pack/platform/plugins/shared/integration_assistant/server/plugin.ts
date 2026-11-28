@@ -35,15 +35,12 @@ export type IntegrationAssistantRouteHandlerContext = CustomRequestHandlerContex
   };
 }>;
 
-export class IntegrationAssistantPlugin
-  implements
-    Plugin<
-      IntegrationAssistantPluginSetup,
-      IntegrationAssistantPluginStart,
-      IntegrationAssistantPluginSetupDependencies,
-      IntegrationAssistantPluginStartDependencies
-    >
-{
+export class IntegrationAssistantPlugin implements Plugin<
+  IntegrationAssistantPluginSetup,
+  IntegrationAssistantPluginStart,
+  IntegrationAssistantPluginSetupDependencies,
+  IntegrationAssistantPluginStartDependencies
+> {
   private readonly logger: Logger;
   private readonly config: IntegrationAssistantConfigType;
   private isAvailable: boolean;

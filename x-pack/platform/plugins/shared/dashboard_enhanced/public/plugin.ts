@@ -34,9 +34,12 @@ export interface SetupContract {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StartContract {}
 
-export class DashboardEnhancedPlugin
-  implements Plugin<SetupContract, StartContract, SetupDependencies, StartDependencies>
-{
+export class DashboardEnhancedPlugin implements Plugin<
+  SetupContract,
+  StartContract,
+  SetupDependencies,
+  StartDependencies
+> {
   public readonly drilldowns = new DashboardDrilldownsService();
 
   constructor(protected readonly context: PluginInitializerContext) {}

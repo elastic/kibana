@@ -103,7 +103,7 @@ function moonTaskInputFiles(projectDir: string, taskName: string, repoRoot: stri
   const inputs: string[] = moonYml.tasks?.[taskName]?.inputs ?? [];
   const patterns = inputs.flatMap((input) => {
     const group = input.match(/^@group\((\w+)\)$/);
-    return group ? moonYml.fileGroups?.[group[1]] ?? [] : [input];
+    return group ? (moonYml.fileGroups?.[group[1]] ?? []) : [input];
   });
 
   return patterns.flatMap((pattern: string) => {

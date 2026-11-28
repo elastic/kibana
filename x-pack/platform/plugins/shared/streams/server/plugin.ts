@@ -50,15 +50,12 @@ export const config: PluginConfigDescriptor<StreamsConfig> = {
   exposeToBrowser: exposeToBrowserConfig,
 };
 
-export class StreamsPlugin
-  implements
-    Plugin<
-      StreamsPluginSetup,
-      StreamsPluginStart,
-      StreamsPluginSetupDependencies,
-      StreamsPluginStartDependencies
-    >
-{
+export class StreamsPlugin implements Plugin<
+  StreamsPluginSetup,
+  StreamsPluginStart,
+  StreamsPluginSetupDependencies,
+  StreamsPluginStartDependencies
+> {
   public config: StreamsConfig;
   public logger: Logger;
   public server?: StreamsServer;

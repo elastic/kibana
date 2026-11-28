@@ -284,7 +284,7 @@ export const originTimestamp: (state: ResolverState) => number | undefined = com
 export const ariaFlowtoNodeID = createSelector(
   [visibleNodesAndEdgeLines, ariaFlowtoCandidateSelector] as [
     typeof visibleNodesAndEdgeLines,
-    typeof ariaFlowtoCandidateSelector
+    typeof ariaFlowtoCandidateSelector,
   ],
   function (
     visibleNodesAndEdgeLinesAtTime: (time: number) => VisibleEntites,
@@ -410,7 +410,7 @@ export const newIDsToRequest: (state: ResolverState) => (time: number) => Set<st
   createSelector(
     [nodeDataSelector, visibleNodesAndEdgeLines] as [
       typeof nodeDataSelector,
-      typeof visibleNodesAndEdgeLines
+      typeof visibleNodesAndEdgeLines,
     ],
     function (
       nodeData: Map<string, NodeData> | undefined,

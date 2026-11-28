@@ -55,8 +55,8 @@ type MergeToolOptions<TLeft extends ToolOptions, TRight extends ToolOptions> = O
         ? Assign<TLeft['tools'], TRight['tools']>
         : TLeft['tools']
       : TRight['tools'] extends Record<string, ToolDefinition>
-      ? TRight['tools']
-      : {};
+        ? TRight['tools']
+        : {};
   }
 >;
 
@@ -67,7 +67,7 @@ type ChatCompleteOptionsOfPromptOptions<TPromptOptions extends PromptOptions = P
 
 export type PromptResponseOf<
   TPrompt extends Prompt,
-  TStream extends boolean = false
+  TStream extends boolean = false,
 > = PromptCompositeResponse<Overwrite<PromptOptions<TPrompt>, { stream: TStream }>>;
 
 export type PromptAPIResponse<TPromptOptions extends PromptOptions = PromptOptions> =

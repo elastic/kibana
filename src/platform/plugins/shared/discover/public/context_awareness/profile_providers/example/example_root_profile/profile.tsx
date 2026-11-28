@@ -155,13 +155,12 @@ const getRenderAppWrapper: RootProfileProvider['profile']['getRenderAppWrapper']
   };
 
 const getDefaultAdHocDataViews: RootProfileProvider['profile']['getDefaultAdHocDataViews'] =
-  (prev) => () =>
-    [
-      ...prev(),
-      {
-        id: 'example-root-profile-ad-hoc-data-view',
-        name: 'Example profile data view',
-        title: 'my-example-*',
-        timeFieldName: '@timestamp',
-      },
-    ];
+  (prev) => () => [
+    ...prev(),
+    {
+      id: 'example-root-profile-ad-hoc-data-view',
+      name: 'Example profile data view',
+      title: 'my-example-*',
+      timeFieldName: '@timestamp',
+    },
+  ];

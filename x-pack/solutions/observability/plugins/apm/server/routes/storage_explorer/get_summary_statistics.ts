@@ -163,7 +163,7 @@ async function getMainSummaryStats({
 
   const { indices: allIndicesStats } = totalIndicesStats;
   const estimatedIncrementalSize = allIndicesStats
-    ? res.aggregations?.sample.indices.buckets.reduce((prev, curr) => {
+    ? (res.aggregations?.sample.indices.buckets.reduce((prev, curr) => {
         return (
           prev +
           getEstimatedSizeForDocumentsInIndex({
@@ -172,7 +172,7 @@ async function getMainSummaryStats({
             numberOfDocs: curr.number_of_metric_docs.value,
           })
         );
-      }, 0) ?? 0
+      }, 0) ?? 0)
     : 0;
 
   const durationAsDays = (end - start) / 1000 / 60 / 60 / 24;

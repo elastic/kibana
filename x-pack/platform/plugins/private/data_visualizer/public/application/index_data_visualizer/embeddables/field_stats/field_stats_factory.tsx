@@ -168,8 +168,8 @@ export const getFieldStatsChartEmbeddableFactory = (
         const dataView = isESQLQuery(state.query)
           ? await getESQLAdHocDataview(state.query.esql, deps.data.dataViews)
           : validDataViewId
-          ? await deps.data.dataViews.get(validDataViewId)
-          : undefined;
+            ? await deps.data.dataViews.get(validDataViewId)
+            : undefined;
         initialDataView = dataView;
       } catch (error) {
         // Only need to publish blocking error if viewtype is data view, and no data view found
@@ -265,9 +265,8 @@ export const getFieldStatsChartEmbeddableFactory = (
         isEditingEnabled: () => true,
         onEdit: async () => {
           try {
-            const { resolveEmbeddableFieldStatsUserInput } = await import(
-              './resolve_field_stats_embeddable_input'
-            );
+            const { resolveEmbeddableFieldStatsUserInput } =
+              await import('./resolve_field_stats_embeddable_input');
             const chartState = serializeFieldStatsChartState();
             const nextUpdate = await resolveEmbeddableFieldStatsUserInput(
               coreStart,

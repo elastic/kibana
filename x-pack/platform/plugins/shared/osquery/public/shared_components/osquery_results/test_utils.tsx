@@ -76,7 +76,7 @@ export const getMockedKibanaConfig = (permissionType: unknown) =>
         toasts: jest.fn(),
       },
     },
-  } as unknown as ReturnType<typeof useKibana>);
+  }) as unknown as ReturnType<typeof useKibana>;
 
 export const mockCasesContext: FC<PropsWithChildren<unknown>> = (props) => (
   <>{props?.children ?? null}</>

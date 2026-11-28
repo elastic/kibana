@@ -65,7 +65,8 @@ export const useCreateTimeline = ({
   } = useSecurityDefaultPatterns();
 
   const dataViewId = useMemo(
-    () => (newDataViewPickerEnabled ? experimentalSecurityDefaultDataViewId ?? '' : oldDataViewId),
+    () =>
+      newDataViewPickerEnabled ? (experimentalSecurityDefaultDataViewId ?? '') : oldDataViewId,
     [experimentalSecurityDefaultDataViewId, newDataViewPickerEnabled, oldDataViewId]
   );
   const selectedPatterns = useMemo(

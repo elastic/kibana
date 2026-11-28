@@ -177,13 +177,15 @@ export function WorkspacePanelWrapper({
             direction="row"
             css={css`
               margin-bottom: ${euiTheme.size.xs};
-              ${isFullscreen &&
-              `
+              ${
+                isFullscreen &&
+                `
                 background-color: ${euiTheme.colors.emptyShade};
                 justify-content: flex-end;
                 margin-bottom: 0;
                 padding: ${euiTheme.size.s} ${euiTheme.size.s} 0;
-              `}
+              `
+              }
             `}
             responsive={false}
           >
@@ -256,13 +258,15 @@ export function WorkspacePanelWrapper({
             height: 100%;
             position: absolute;
           }
-          ${isFullscreen &&
-          `
+          ${
+            isFullscreen &&
+            `
             margin-bottom: 0; 
             .lnsWorkspacePanelWrapper__content {
               padding: ${euiTheme.size.s}
             }
-          `}
+          `
+          }
         `}
         color="transparent"
       >

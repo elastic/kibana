@@ -41,15 +41,12 @@ import { telemetryEvents } from './telemetry/event_based_telemetry';
 import { UsageReportingService } from './common/services/usage_reporting_service';
 import { ai4SocMeteringService } from './ai4soc/services';
 
-export class SecuritySolutionServerlessPlugin
-  implements
-    Plugin<
-      SecuritySolutionServerlessPluginSetup,
-      SecuritySolutionServerlessPluginStart,
-      SecuritySolutionServerlessPluginSetupDeps,
-      SecuritySolutionServerlessPluginStartDeps
-    >
-{
+export class SecuritySolutionServerlessPlugin implements Plugin<
+  SecuritySolutionServerlessPluginSetup,
+  SecuritySolutionServerlessPluginStart,
+  SecuritySolutionServerlessPluginSetupDeps,
+  SecuritySolutionServerlessPluginStartDeps
+> {
   private kibanaVersion: string;
   private config: ServerlessSecurityConfig;
   private cloudSecurityUsageReportingTask: SecurityUsageReportingTask | undefined;

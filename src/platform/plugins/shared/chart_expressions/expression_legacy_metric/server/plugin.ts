@@ -22,15 +22,12 @@ interface StartDeps {
 export type ExpressionLegacyMetricPluginSetup = void;
 export type ExpressionLegacyMetricPluginStart = void;
 
-export class ExpressionLegacyMetricPlugin
-  implements
-    Plugin<
-      ExpressionLegacyMetricPluginSetup,
-      ExpressionLegacyMetricPluginStart,
-      SetupDeps,
-      StartDeps
-    >
-{
+export class ExpressionLegacyMetricPlugin implements Plugin<
+  ExpressionLegacyMetricPluginSetup,
+  ExpressionLegacyMetricPluginStart,
+  SetupDeps,
+  StartDeps
+> {
   public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionLegacyMetricPluginSetup {
     expressions.registerFunction(metricVisFunction);
   }

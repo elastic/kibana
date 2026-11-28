@@ -8,7 +8,10 @@
 /* eslint-disable max-classes-per-file */
 
 export class ResolveLogViewError extends Error {
-  constructor(message: string, public cause?: Error) {
+  constructor(
+    message: string,
+    public cause?: Error
+  ) {
     super(message);
     Object.setPrototypeOf(this, new.target.prototype);
     this.name = 'ResolveLogViewError';
@@ -16,7 +19,10 @@ export class ResolveLogViewError extends Error {
 }
 
 export class FetchLogViewError extends Error {
-  constructor(message: string, public cause?: Error) {
+  constructor(
+    message: string,
+    public cause?: Error
+  ) {
     super(message);
     Object.setPrototypeOf(this, new.target.prototype);
     this.name = 'FetchLogViewError';
@@ -24,7 +30,10 @@ export class FetchLogViewError extends Error {
 }
 
 export class FetchLogViewStatusError extends Error {
-  constructor(message: string, public cause?: Error) {
+  constructor(
+    message: string,
+    public cause?: Error
+  ) {
     super(message);
     Object.setPrototypeOf(this, new.target.prototype);
     this.name = 'FetchLogViewStatusError';
@@ -32,7 +41,10 @@ export class FetchLogViewStatusError extends Error {
 }
 
 export class PutLogViewError extends Error {
-  constructor(message: string, public cause?: Error) {
+  constructor(
+    message: string,
+    public cause?: Error
+  ) {
     super(message);
     Object.setPrototypeOf(this, new.target.prototype);
     this.name = 'PutLogViewError';

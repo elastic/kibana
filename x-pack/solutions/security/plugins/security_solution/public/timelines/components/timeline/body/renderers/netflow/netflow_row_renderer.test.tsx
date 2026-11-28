@@ -6,8 +6,6 @@
  */
 
 import React from 'react';
-// Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
-import 'jest-styled-components';
 import { render, screen } from '@testing-library/react';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { getMockNetflowData, TestProviders } from '../../../../../../common/mock';
@@ -27,14 +25,16 @@ jest.mock('../../../../../../common/lib/kibana');
 jest.mock('../../../../../../common/components/links/link_props');
 
 describe('netflowRowRenderer', () => {
-  test('renders correctly against snapshot', () => {
+  test('renders the source and destination endpoints', () => {
     const children = netflowRowRenderer.renderRow({
       data: getMockNetflowData(),
       scopeId: TimelineId.test,
     });
 
-    const { asFragment } = render(<TestProviders>{children}</TestProviders>);
-    expect(asFragment()).toMatchSnapshot();
+    render(<TestProviders>{children}</TestProviders>);
+
+    expect(screen.getByTestId('source-ip-badge')).toHaveTextContent('192.168.1.2:9987');
+    expect(screen.getByTestId('destination-ip-badge')).toHaveTextContent('10.1.2.3:80');
   });
 
   describe('#isInstance', () => {

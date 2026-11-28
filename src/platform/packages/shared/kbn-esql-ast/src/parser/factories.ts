@@ -98,7 +98,7 @@ export const createParserFieldsFromTerminalNode = (node: TerminalNode): AstNodeP
 
 export const createCommand = <
   Name extends string,
-  Cmd extends ESQLCommand<Name> = ESQLCommand<Name>
+  Cmd extends ESQLCommand<Name> = ESQLCommand<Name>,
 >(
   name: Name,
   ctx: ParserRuleContext,
@@ -615,10 +615,10 @@ export function createOption(name: string, ctx: ParserRuleContext): ESQLCommandO
     args: [],
     incomplete: Boolean(
       ctx.exception ||
-        ctx.children?.some((c) => {
-          // @ts-expect-error not exposed in type but exists see https://github.com/antlr/antlr4/blob/v4.11.1/runtime/JavaScript/src/antlr4/tree/ErrorNodeImpl.js#L19
-          return Boolean(c.isErrorNode);
-        })
+      ctx.children?.some((c) => {
+        // @ts-expect-error not exposed in type but exists see https://github.com/antlr/antlr4/blob/v4.11.1/runtime/JavaScript/src/antlr4/tree/ErrorNodeImpl.js#L19
+        return Boolean(c.isErrorNode);
+      })
     ),
   };
 }

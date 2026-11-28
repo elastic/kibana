@@ -52,7 +52,7 @@ export interface Prompt<TInput = any, TPromptVersions extends PromptVersion[] = 
 
 export interface PromptFactory<
   TInput = any,
-  TPromptVersions extends PromptVersion[] = PromptVersion[]
+  TPromptVersions extends PromptVersion[] = PromptVersion[],
 > {
   version<TNextPromptVersion extends PromptVersion>(
     version: TNextPromptVersion
@@ -60,10 +60,9 @@ export interface PromptFactory<
   get: () => Prompt<TInput, TPromptVersions>;
 }
 
-export type ToolOptionsOfPrompt<TPrompt extends Prompt> = TPrompt['versions'] extends Array<
-  infer TPromptVersion
->
-  ? TPromptVersion extends PromptVersion
-    ? Pick<TPromptVersion, 'tools' | 'toolChoice'>
-    : never
-  : never;
+export type ToolOptionsOfPrompt<TPrompt extends Prompt> =
+  TPrompt['versions'] extends Array<infer TPromptVersion>
+    ? TPromptVersion extends PromptVersion
+      ? Pick<TPromptVersion, 'tools' | 'toolChoice'>
+      : never
+    : never;

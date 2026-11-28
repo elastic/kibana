@@ -41,8 +41,7 @@ import { useMlJobService } from '../../application/services/job_service';
 
 const RESIZE_THROTTLE_TIME_MS = 500;
 
-export interface AnomalyChartsContainerProps
-  extends Partial<AnomalyChartsEmbeddableOverridableState> {
+export interface AnomalyChartsContainerProps extends Partial<AnomalyChartsEmbeddableOverridableState> {
   lastReloadRequestTime?: number;
   api: AnomalyChartsApi | AnomalyChartsAttachmentApi;
   id: string;

@@ -66,7 +66,7 @@ export function getConfigFromPalette(
                 type: 'colorCode',
                 colorCode: color,
               }),
-        } satisfies ColorMapping.ColorStep)
+        }) satisfies ColorMapping.ColorStep
     );
 
   return {

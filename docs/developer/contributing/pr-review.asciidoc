@@ -73,7 +73,7 @@ Reviewers are not simply evaluating the code itself, they are also evaluating th
 [discrete]
 === Consistency, style, readability
 
-Having a relatively consistent codebase is an important part of us building a sustainable project. With dozens of active contributors at any given time, we rely on automation to help ensure consistency - we enforce a comprehensive set of linting rules through CI. We're also rolling out prettier to make this even more automatic.
+Having a relatively consistent codebase is an important part of us building a sustainable project. With dozens of active contributors at any given time, we rely on automation to help ensure consistency: CI enforces linting rules and oxfmt formatting.
 
 For things that can't be easily automated, we maintain a link:{kib-repo}tree/{branch}/STYLEGUIDE.mdx[style guide] that authors should adhere to and reviewers should keep in mind when they review a pull request.
 

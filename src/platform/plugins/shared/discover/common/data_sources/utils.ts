@@ -39,8 +39,8 @@ export const createDataSource = ({
   return isOfAggregateQueryType(query)
     ? createEsqlDataSource()
     : dataView?.id
-    ? createDataViewDataSource({ dataViewId: dataView.id })
-    : undefined;
+      ? createDataViewDataSource({ dataViewId: dataView.id })
+      : undefined;
 };
 
 export const isDataSourceType = <T extends DataSourceType>(

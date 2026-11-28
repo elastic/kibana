@@ -99,8 +99,7 @@ export interface SearchSessionStatusResponse {
 /**
  * List of search session objects with on-the-fly calculated search session statuses
  */
-export interface SearchSessionsFindResponse
-  extends SavedObjectsFindResponse<SearchSessionSavedObjectAttributes> {
+export interface SearchSessionsFindResponse extends SavedObjectsFindResponse<SearchSessionSavedObjectAttributes> {
   /**
    * Map containing calculated statuses of search sessions from the find response
    */

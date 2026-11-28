@@ -24,10 +24,13 @@ const useAlertResponseActionsSupportMock = (): AlertResponseActionsSupport => {
       platform: 'linux',
       agentSupport: RESPONSE_ACTION_API_COMMANDS_NAMES.reduce<
         AlertResponseActionsSupport['details']['agentSupport']
-      >((acc, responseActionName) => {
-        acc[responseActionName] = true;
-        return acc;
-      }, {} as AlertResponseActionsSupport['details']['agentSupport']),
+      >(
+        (acc, responseActionName) => {
+          acc[responseActionName] = true;
+          return acc;
+        },
+        {} as AlertResponseActionsSupport['details']['agentSupport']
+      ),
     },
   };
 };

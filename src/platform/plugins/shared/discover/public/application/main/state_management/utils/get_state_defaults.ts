@@ -56,8 +56,8 @@ export function getStateDefaults({
   const dataSource = isEsqlQuery
     ? createEsqlDataSource()
     : dataView?.id
-    ? createDataViewDataSource({ dataViewId: dataView.id })
-    : undefined;
+      ? createDataViewDataSource({ dataViewId: dataView.id })
+      : undefined;
 
   const defaultState: DiscoverAppState = {
     query,

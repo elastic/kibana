@@ -97,7 +97,7 @@ export function ValueControlForm({
 
   const [valuesQuery, setValuesQuery] = useState<string>(
     variableType === ESQLVariableType.VALUES
-      ? initialState?.esqlQuery ?? INITIAL_EMPTY_STATE_QUERY
+      ? (initialState?.esqlQuery ?? INITIAL_EMPTY_STATE_QUERY)
       : ''
   );
   const [esqlQueryErrors, setEsqlQueryErrors] = useState<Error[] | undefined>();

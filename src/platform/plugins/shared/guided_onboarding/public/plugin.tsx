@@ -26,9 +26,10 @@ import type {
 import { GuidePanel } from './components';
 import { ApiService, apiService } from './services/api.service';
 
-export class GuidedOnboardingPlugin
-  implements Plugin<GuidedOnboardingPluginSetup, GuidedOnboardingPluginStart>
-{
+export class GuidedOnboardingPlugin implements Plugin<
+  GuidedOnboardingPluginSetup,
+  GuidedOnboardingPluginStart
+> {
   constructor() {}
   public setup(
     _core: CoreSetup,

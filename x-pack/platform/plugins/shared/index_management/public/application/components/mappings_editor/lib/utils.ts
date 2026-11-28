@@ -712,7 +712,7 @@ export function getStateWithCopyToFields(state: State): State {
       }
       field.source = source;
 
-      /* 
+      /*
         If no reference field is associated, 
         no further processing is needed, so we can skip to the next one.
       */

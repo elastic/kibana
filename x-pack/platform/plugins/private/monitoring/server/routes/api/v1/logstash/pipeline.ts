@@ -19,7 +19,7 @@ import { createValidationFunction } from '../../../../lib/create_route_validatio
 
 function getPipelineVersion(versions: PipelineVersion[], pipelineHash: string | null) {
   return pipelineHash
-    ? versions.find(({ hash }) => hash === pipelineHash) ?? versions[0]
+    ? (versions.find(({ hash }) => hash === pipelineHash) ?? versions[0])
     : versions[0];
 }
 

@@ -84,8 +84,8 @@ export const DefaultCellValue = ({
         observabilityFeatureIds.includes(producer)
           ? 'observability'
           : producer && (value === 'alerts' || value === 'stackAlerts' || value === 'discover')
-          ? producer
-          : value
+            ? producer
+            : value
       ) as AlertsTableSupportedConsumers;
       const consumerData = alertProducersData[consumer];
       if (!consumerData) {

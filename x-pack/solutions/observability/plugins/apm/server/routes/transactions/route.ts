@@ -38,8 +38,10 @@ import { getLatencyPeriods } from './get_latency_charts';
 import type { TransactionTraceSamplesResponse } from './trace_samples';
 import { getTraceSamples } from './trace_samples';
 
-export interface MergedServiceTransactionGroupsResponse
-  extends Omit<ServiceTransactionGroupsResponse, 'transactionGroups'> {
+export interface MergedServiceTransactionGroupsResponse extends Omit<
+  ServiceTransactionGroupsResponse,
+  'transactionGroups'
+> {
   transactionGroups: Array<{
     alertsCount: number;
     name: string;

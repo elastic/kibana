@@ -278,11 +278,14 @@ export function useFetchAgentsData() {
           }
 
           setAgentPoliciesIndexedByIds(
-            policies.reduce((acc, agentPolicy) => {
-              acc[agentPolicy.id] = agentPolicy;
+            policies.reduce(
+              (acc, agentPolicy) => {
+                acc[agentPolicy.id] = agentPolicy;
 
-              return acc;
-            }, {} as { [k: string]: AgentPolicy })
+                return acc;
+              },
+              {} as { [k: string]: AgentPolicy }
+            )
           );
 
           setAgentsStatus(agentStatusesToSummary(statusSummary));

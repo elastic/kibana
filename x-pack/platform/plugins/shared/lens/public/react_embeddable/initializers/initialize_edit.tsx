@@ -253,9 +253,9 @@ export function initializeEditApi(
       isEditingEnabled: () => {
         return Boolean(
           parentApi &&
-            apiHasAppContext(parentApi) &&
-            canEdit() &&
-            panelManagementApi.isEditingEnabled()
+          apiHasAppContext(parentApi) &&
+          canEdit() &&
+          panelManagementApi.isEditingEnabled()
         );
       },
       getEditHref: async () => {

@@ -76,7 +76,7 @@ export const GettingStarted = () => {
   const [classicGuide] = useState<boolean>(false);
   const useCase = query.useCase as GuideFilterValues;
   const [filter, setFilter] = useState<GuideFilterValues | GuideFilterValuesClassic>(
-    classicGuide ? useCase ?? 'all' : useCase ?? 'search'
+    classicGuide ? (useCase ?? 'all') : (useCase ?? 'search')
   );
   const guideCards = React.useMemo(
     () => getGuideCards(application, onboardingLocator),

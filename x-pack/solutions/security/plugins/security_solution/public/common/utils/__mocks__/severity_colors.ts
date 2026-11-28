@@ -10,9 +10,9 @@ import type { EuiThemeComputed } from '@elastic/eui';
 export const getMockEuiAmsterdamTheme = () =>
   ({
     themeName: 'EUI_THEME_AMSTERDAM',
-  } as EuiThemeComputed);
+  }) as EuiThemeComputed;
 
 export const getMockEuiBorealisTheme = () =>
   ({
     themeName: 'EUI_THEME_BOREALIS',
-  } as EuiThemeComputed);
+  }) as EuiThemeComputed;

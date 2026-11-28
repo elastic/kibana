@@ -36,8 +36,9 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
       width: 100%;
       height: 100%;
 
-      ${showBorder
-        ? css`
+      ${
+        showBorder
+          ? css`
             .embPanel {
               outline: var(--internalBorderStyle);
 
@@ -48,7 +49,7 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
               })},
             }
           `
-        : css`
+          : css`
             .embPanel {
               outline: 1px solid transparent; // necessary for outline-color transition
               z-index: ${euiTheme.levels.content}; // necessary for z-index transition
@@ -73,7 +74,8 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
                 })},
               }
             }
-          `}
+          `
+      }
 
       .embPanel__hoverActions {
         position: absolute;
@@ -83,7 +85,8 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
         visibility: hidden;
 
         // delay hiding hover actions to make grabbing the drag handle easier
-        transition: opacity ${euiTheme.animation.extraFast} ease-in,
+        transition:
+          opacity ${euiTheme.animation.extraFast} ease-in,
           z-index ${euiTheme.animation.extraFast} linear,
           visibility ${euiTheme.animation.extraFast} linear;
         transition-delay: ${euiTheme.animation.fast};
@@ -115,8 +118,9 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
 
       border-radius: ${euiTheme.border.radius.medium};
       border: var(--internalBorderStyle);
-      border-width: ${euiTheme.border.width
-        .thin}; /* Prevents the element from resizing when dragged by keeping the border width constant (overriding the default change from 1px to 2px) */
+      border-width: ${
+        euiTheme.border.width.thin
+      }; /* Prevents the element from resizing when dragged by keeping the border width constant (overriding the default change from 1px to 2px) */
       box-shadow: var(
         --hoverActionsSingleWrapperBoxShadowStyle
       ); /* Simulates a 2px border without affecting layout by using a box-shadow */
@@ -154,8 +158,9 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
         pointer-events: all; // re-enable pointer events for non-breakpoint children
         background-color: ${euiTheme.colors.backgroundBasePlain};
         border: var(--internalBorderStyle);
-        border-width: ${euiTheme.border.width
-          .thin}; /* Prevents the element from resizing when dragged by keeping the border width constant (overriding the default change from 1px to 2px) */
+        border-width: ${
+          euiTheme.border.width.thin
+        }; /* Prevents the element from resizing when dragged by keeping the border width constant (overriding the default change from 1px to 2px) */
         box-shadow: var(
           --hoverActionsBoxShadowStyle
         ); /* Simulates a 2px 3-side border without affecting layout by using a box-shadow */

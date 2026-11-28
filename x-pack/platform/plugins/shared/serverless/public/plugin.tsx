@@ -28,15 +28,12 @@ import {
   ServerlessPluginStartDependencies,
 } from './types';
 
-export class ServerlessPlugin
-  implements
-    Plugin<
-      ServerlessPluginSetup,
-      ServerlessPluginStart,
-      ServerlessPluginSetupDependencies,
-      ServerlessPluginStartDependencies
-    >
-{
+export class ServerlessPlugin implements Plugin<
+  ServerlessPluginSetup,
+  ServerlessPluginStart,
+  ServerlessPluginSetupDependencies,
+  ServerlessPluginStartDependencies
+> {
   private readonly config: ServerlessConfig;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {

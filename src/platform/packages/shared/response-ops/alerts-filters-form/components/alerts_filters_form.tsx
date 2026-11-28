@@ -118,7 +118,7 @@ export const AlertsFiltersForm = ({
     {
       filter: AlertsFilter;
     },
-    ...AlertsFiltersExpression
+    ...AlertsFiltersExpression,
   ];
   const lastFilterEmpty = useMemo(() => isLastFilterEmpty(value), [value]);
 

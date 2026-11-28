@@ -55,7 +55,11 @@ export interface SetupParams extends Omit<InstallParams, 'logger'> {
 export class RuleMigrationsDataService {
   private readonly adapters: Adapters;
 
-  constructor(private logger: Logger, private kibanaVersion: string, elserInferenceId?: string) {
+  constructor(
+    private logger: Logger,
+    private kibanaVersion: string,
+    elserInferenceId?: string
+  ) {
     this.adapters = {
       migrations: this.createIndexPatternAdapter({
         adapterId: 'migrations',

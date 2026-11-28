@@ -34,7 +34,7 @@ const getContext = (sourceFieldEnabled: boolean = true, canUseSyntheticSource: b
       enableMappingsSourceFieldSection: sourceFieldEnabled,
     },
     canUseSyntheticSource,
-  } as unknown as AppDependencies);
+  }) as unknown as AppDependencies;
 
 describe('Mappings editor: configuration form', () => {
   let testBed: TestBed<TestSubjects>;

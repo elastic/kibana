@@ -89,5 +89,5 @@ export type CustomMiddleware = (action: DragDropAction) => void;
 export type DragContextValue = [
   state: DragContextState,
   dispatch: React.Dispatch<DragDropAction>,
-  customMiddleware?: CustomMiddleware
+  customMiddleware?: CustomMiddleware,
 ];

@@ -69,7 +69,7 @@ export const NewIndex: React.FC = () => {
                   <NewIndexCard
                     disabled={Boolean(
                       type === INGESTION_METHOD_IDS.CRAWLER &&
-                        (errorConnectingMessage || !config.host)
+                      (errorConnectingMessage || !config.host)
                     )}
                     type={type}
                     onSelect={() => {

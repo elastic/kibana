@@ -82,32 +82,32 @@ export type PostAgentPolicyPostUpdateCallback = (agentPolicy: AgentPolicy) => Pr
 export type ExternalCallbackCreate = ['packagePolicyCreate', PostPackagePolicyCreateCallback];
 export type ExternalCallbackPostCreate = [
   'packagePolicyPostCreate',
-  PostPackagePolicyPostCreateCallback
+  PostPackagePolicyPostCreateCallback,
 ];
 
 export type ExternalCallbackDelete = ['packagePolicyDelete', PostPackagePolicyDeleteCallback];
 export type ExternalCallbackPostDelete = [
   'packagePolicyPostDelete',
-  PostPackagePolicyPostDeleteCallback
+  PostPackagePolicyPostDeleteCallback,
 ];
 
 export type ExternalCallbackUpdate = ['packagePolicyUpdate', PutPackagePolicyUpdateCallback];
 export type ExternalCallbackPostUpdate = [
   'packagePolicyPostUpdate',
-  PutPackagePolicyPostUpdateCallback
+  PutPackagePolicyPostUpdateCallback,
 ];
 
 export type ExternalCallbackAgentPolicyCreate = [
   'agentPolicyCreate',
-  PostAgentPolicyCreateCallback
+  PostAgentPolicyCreateCallback,
 ];
 export type ExternalCallbackAgentPolicyUpdate = [
   'agentPolicyUpdate',
-  PostAgentPolicyUpdateCallback
+  PostAgentPolicyUpdateCallback,
 ];
 export type ExternalCallbackAgentPolicyPostUpdate = [
   'agentPolicyPostUpdate',
-  PostAgentPolicyPostUpdateCallback
+  PostAgentPolicyPostUpdateCallback,
 ];
 
 /**

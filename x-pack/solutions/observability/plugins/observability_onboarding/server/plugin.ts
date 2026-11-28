@@ -28,15 +28,12 @@ import { EsLegacyConfigService } from './services/es_legacy_config_service';
 import { ObservabilityOnboardingConfig } from './config';
 import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../common/telemetry_events';
 
-export class ObservabilityOnboardingPlugin
-  implements
-    Plugin<
-      ObservabilityOnboardingPluginSetup,
-      ObservabilityOnboardingPluginStart,
-      ObservabilityOnboardingPluginSetupDependencies,
-      ObservabilityOnboardingPluginStartDependencies
-    >
-{
+export class ObservabilityOnboardingPlugin implements Plugin<
+  ObservabilityOnboardingPluginSetup,
+  ObservabilityOnboardingPluginStart,
+  ObservabilityOnboardingPluginSetupDependencies,
+  ObservabilityOnboardingPluginStartDependencies
+> {
   private readonly logger: Logger;
   esLegacyConfigService = new EsLegacyConfigService();
 

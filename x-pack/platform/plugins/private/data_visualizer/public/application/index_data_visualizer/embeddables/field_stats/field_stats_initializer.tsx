@@ -178,10 +178,12 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
             -webkit-mask-image: none;
             padding-left: inherit;
             margin-left: inherit;
-            ${!isScrollable &&
-            `
+            ${
+              !isScrollable &&
+              `
                 overflow-y: hidden;
-              `}
+              `
+            }
             > * {
               pointer-events: auto;
             }

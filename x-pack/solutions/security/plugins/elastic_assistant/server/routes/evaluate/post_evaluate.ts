@@ -428,9 +428,8 @@ export const postEvaluateRoute = (
                 prompt: chatPromptTemplate,
               });
 
-              const uiSettingsDateFormatTimezone = await ctx.core.uiSettings.client.get<string>(
-                DEFAULT_DATE_FORMAT_TZ
-              );
+              const uiSettingsDateFormatTimezone =
+                await ctx.core.uiSettings.client.get<string>(DEFAULT_DATE_FORMAT_TZ);
 
               return {
                 connectorId: connector.id,

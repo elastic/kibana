@@ -73,7 +73,7 @@ describe('convertToOtherParentPipelineAggColumns', () => {
       string,
       Parameters<typeof convertToOtherParentPipelineAggColumns>,
       () => void,
-      Partial<FormulaColumn> | [Partial<ParentPipelineAggColumn>, Partial<AggBasedColumn>] | null
+      Partial<FormulaColumn> | [Partial<ParentPipelineAggColumn>, Partial<AggBasedColumn>] | null,
     ]
   >([
     [
@@ -280,7 +280,7 @@ describe('convertToCumulativeSumAggColumn', () => {
       string,
       Parameters<typeof convertToCumulativeSumAggColumn>,
       () => void,
-      Partial<FormulaColumn> | [Partial<ParentPipelineAggColumn>, Partial<AggBasedColumn>] | null
+      Partial<FormulaColumn> | [Partial<ParentPipelineAggColumn>, Partial<AggBasedColumn>] | null,
     ]
   >([
     [

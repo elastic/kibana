@@ -16,9 +16,7 @@ import { ObsLogsExplorerLocatorDependencies } from './types';
 
 export type DataViewLocator = LocatorPublic<ObsLogsExplorerDataViewLocatorParams>;
 
-export class DataViewLocatorDefinition
-  implements LocatorDefinition<ObsLogsExplorerDataViewLocatorParams>
-{
+export class DataViewLocatorDefinition implements LocatorDefinition<ObsLogsExplorerDataViewLocatorParams> {
   public readonly id = OBS_LOGS_EXPLORER_DATA_VIEW_LOCATOR_ID;
 
   constructor(protected readonly deps: ObsLogsExplorerLocatorDependencies) {}

@@ -22,7 +22,7 @@ import { Builder } from '../builder';
 
 export interface VisitorOptions<
   Methods extends VisitorMethods = VisitorMethods,
-  Data extends SharedData = SharedData
+  Data extends SharedData = SharedData,
 > {
   visitors?: Methods;
   data?: Data;
@@ -30,7 +30,7 @@ export interface VisitorOptions<
 
 export class Visitor<
   Methods extends VisitorMethods = VisitorMethods,
-  Data extends SharedData = SharedData
+  Data extends SharedData = SharedData,
 > {
   /**
    * Finds the most specific node immediately after the given position. If the
@@ -196,7 +196,7 @@ export class Visitor<
 
   public on<
     K extends keyof VisitorMethods<Methods, Data>,
-    F extends VisitorMethods<Methods, Data>[K]
+    F extends VisitorMethods<Methods, Data>[K],
   >(visitor: K, fn: F): Visitor<Methods & { [KK in K]: F }, Data> {
     (this.ctx.methods as any)[visitor] = fn;
     return this as any;

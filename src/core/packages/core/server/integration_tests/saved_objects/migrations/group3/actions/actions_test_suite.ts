@@ -1009,9 +1009,7 @@ export const runActionTestSuite = ({
         indexName: 'reindex_target_5',
         mappings: {
           dynamic: 'strict',
-          properties: {
-            /** no title field */
-          },
+          properties: {/** no title field */},
         },
         esCapabilities,
       })();

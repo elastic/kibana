@@ -208,9 +208,7 @@ it.each([
           {
             path: '/api/internal-test',
             validate: false,
-            options: {
-              /* empty */
-            },
+            options: {/* empty */},
           },
           (_, __, res) => res.ok()
         );

@@ -24,25 +24,22 @@ export async function registerEmbeddables(
   const registerReactEmbeddableFactory = pluginsSetup.embeddable.registerReactEmbeddableFactory;
 
   registerReactEmbeddableFactory(APM_ALERTING_LATENCY_CHART_EMBEDDABLE, async () => {
-    const { getApmAlertingLatencyChartEmbeddableFactory } = await import(
-      './alerting/alerting_latency_chart/react_embeddable_factory'
-    );
+    const { getApmAlertingLatencyChartEmbeddableFactory } =
+      await import('./alerting/alerting_latency_chart/react_embeddable_factory');
 
     return getApmAlertingLatencyChartEmbeddableFactory({ ...deps, coreStart, pluginsStart });
   });
 
   registerReactEmbeddableFactory(APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE, async () => {
-    const { getApmAlertingThroughputChartEmbeddableFactory } = await import(
-      './alerting/alerting_throughput_chart/react_embeddable_factory'
-    );
+    const { getApmAlertingThroughputChartEmbeddableFactory } =
+      await import('./alerting/alerting_throughput_chart/react_embeddable_factory');
 
     return getApmAlertingThroughputChartEmbeddableFactory({ ...deps, coreStart, pluginsStart });
   });
 
   registerReactEmbeddableFactory(APM_ALERTING_FAILED_TRANSACTIONS_CHART_EMBEDDABLE, async () => {
-    const { getApmAlertingFailedTransactionsChartEmbeddableFactory } = await import(
-      './alerting/alerting_failed_transactions_chart/react_embeddable_factory'
-    );
+    const { getApmAlertingFailedTransactionsChartEmbeddableFactory } =
+      await import('./alerting/alerting_failed_transactions_chart/react_embeddable_factory');
 
     return getApmAlertingFailedTransactionsChartEmbeddableFactory({
       ...deps,
@@ -52,9 +49,8 @@ export async function registerEmbeddables(
   });
 
   registerReactEmbeddableFactory(APM_TRACE_WATERFALL_EMBEDDABLE, async () => {
-    const { getApmTraceWaterfallEmbeddableFactory } = await import(
-      './trace_waterfall/react_embeddable_factory'
-    );
+    const { getApmTraceWaterfallEmbeddableFactory } =
+      await import('./trace_waterfall/react_embeddable_factory');
 
     return getApmTraceWaterfallEmbeddableFactory({ ...deps, coreStart, pluginsStart });
   });

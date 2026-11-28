@@ -21,7 +21,7 @@ export const translateRuleState = Annotation.Root({
   resources: Annotation<RuleMigrationResources>(),
   integration: Annotation<RuleMigrationIntegration>({
     reducer: (current, value) => value ?? current,
-    default: () => ({} as RuleMigrationIntegration),
+    default: () => ({}) as RuleMigrationIntegration,
   }),
   includes_ecs_mapping: Annotation<boolean>({
     reducer: (current, value) => value ?? current,
@@ -37,11 +37,11 @@ export const translateRuleState = Annotation.Root({
   }),
   elastic_rule: Annotation<ElasticRulePartial>({
     reducer: (state, action) => ({ ...state, ...action }),
-    default: () => ({} as ElasticRulePartial),
+    default: () => ({}) as ElasticRulePartial,
   }),
   validation_errors: Annotation<TranslateRuleValidationErrors>({
     reducer: (current, value) => value ?? current,
-    default: () => ({ iterations: 0 } as TranslateRuleValidationErrors),
+    default: () => ({ iterations: 0 }) as TranslateRuleValidationErrors,
   }),
   translation_result: Annotation<RuleTranslationResult>({
     reducer: (current, value) => value ?? current,

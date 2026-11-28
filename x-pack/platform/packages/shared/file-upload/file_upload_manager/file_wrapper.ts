@@ -93,7 +93,10 @@ export class FileWrapper {
   public readonly fileStatus$ = this.analyzedFile$.asObservable();
   private fileSizeChecker: FileSizeChecker;
 
-  constructor(private file: File, private fileUpload: FileUploadStartApi) {
+  constructor(
+    private file: File,
+    private fileUpload: FileUploadStartApi
+  ) {
     this.fileSizeChecker = new FileSizeChecker(fileUpload, file);
     this.analyzedFile$.next({
       ...this.analyzedFile$.getValue(),

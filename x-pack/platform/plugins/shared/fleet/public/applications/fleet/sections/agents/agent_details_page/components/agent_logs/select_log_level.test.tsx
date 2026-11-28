@@ -37,7 +37,7 @@ const createAgent = (logLevel?: string) =>
         },
       },
     },
-  } as any);
+  }) as any;
 
 describe('SelectLogLevel', () => {
   beforeEach(() => {

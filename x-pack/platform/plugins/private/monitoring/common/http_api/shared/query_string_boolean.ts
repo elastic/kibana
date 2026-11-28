@@ -19,8 +19,8 @@ export const booleanFromStringRT = new rt.Type<boolean, string, unknown>(
         stringValue === 'true'
           ? rt.success(true)
           : stringValue === 'false'
-          ? rt.success(false)
-          : rt.failure(value, context)
+            ? rt.success(false)
+            : rt.failure(value, context)
       )
     ),
   String

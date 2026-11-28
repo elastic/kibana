@@ -101,7 +101,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   );
 
   const dataViewId = useMemo(
-    () => (newDataViewPickerEnabled ? experimentalDataView.id ?? '' : oldDataViewId),
+    () => (newDataViewPickerEnabled ? (experimentalDataView.id ?? '') : oldDataViewId),
     [experimentalDataView.id, newDataViewPickerEnabled, oldDataViewId]
   );
 

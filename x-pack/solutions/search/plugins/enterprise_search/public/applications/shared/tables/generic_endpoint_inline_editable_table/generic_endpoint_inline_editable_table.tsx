@@ -17,11 +17,10 @@ import { ItemWithAnID } from '../types';
 
 import { GenericEndpointInlineEditableTableLogic } from './generic_endpoint_inline_editable_table_logic';
 
-export interface GenericEndpointInlineEditableTableProps
-  extends Omit<
-    InlineEditableTableProps<ItemWithAnID>,
-    'onAdd' | 'onDelete' | 'onUpdate' | 'isLoading' | 'itemId'
-  > {
+export interface GenericEndpointInlineEditableTableProps extends Omit<
+  InlineEditableTableProps<ItemWithAnID>,
+  'onAdd' | 'onDelete' | 'onUpdate' | 'isLoading' | 'itemId'
+> {
   addRoute: string;
   instanceId: string;
   dataProperty: string;

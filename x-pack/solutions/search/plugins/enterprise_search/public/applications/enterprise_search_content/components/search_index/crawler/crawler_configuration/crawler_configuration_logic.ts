@@ -80,7 +80,7 @@ export const CrawlerConfigurationLogic = kea<
       (connector: Connector | null, localHtmlExtraction: boolean | null) =>
         localHtmlExtraction !== null
           ? localHtmlExtraction
-          : connector?.configuration.extract_full_html?.value ?? false,
+          : (connector?.configuration.extract_full_html?.value ?? false),
     ],
   }),
 });

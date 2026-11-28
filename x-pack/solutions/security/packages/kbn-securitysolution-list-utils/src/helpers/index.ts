@@ -741,8 +741,8 @@ export const getOperatorOptions = (
             isNotInListOperator,
           ]
       : supportMatches
-      ? ALL_OPERATORS
-      : ALL_OPERATORS_SANS_MATCHES;
+        ? ALL_OPERATORS
+        : ALL_OPERATORS_SANS_MATCHES;
   }
 };
 
@@ -823,7 +823,7 @@ export const getFormattedBuilderEntry = (
     };
   } else {
     const fieldToUse = allowCustomFieldOptions
-      ? foundField ?? { name: item.field, type: 'keyword' }
+      ? (foundField ?? { name: item.field, type: 'keyword' })
       : foundField;
 
     return {

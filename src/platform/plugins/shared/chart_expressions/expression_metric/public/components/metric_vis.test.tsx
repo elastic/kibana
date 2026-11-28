@@ -967,7 +967,7 @@ describe('MetricVisComponent', function () {
               metric: string;
               max?: string;
               breakdownBy?: string;
-            }
+            },
           ]
         > = [
           [

@@ -22,7 +22,7 @@ import type { ControlGroupApi } from '../../control_group/types';
 import { DataControlEditor } from './data_control_editor';
 
 export const openDataControlEditor = <
-  State extends DefaultDataControlState = DefaultDataControlState
+  State extends DefaultDataControlState = DefaultDataControlState,
 >({
   initialState,
   controlType,

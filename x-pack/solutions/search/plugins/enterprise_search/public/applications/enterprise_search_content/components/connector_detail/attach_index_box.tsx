@@ -95,11 +95,11 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
 
   const options: Array<EuiComboBoxOptionOption<string>> = isLoading
     ? []
-    : data?.indexNames.map((name) => {
+    : (data?.indexNames.map((name) => {
         return {
           label: name,
         };
-      }) ?? [];
+      }) ?? []);
 
   const hasMatchingOptions =
     data?.indexNames.some((name) =>

@@ -464,8 +464,8 @@ const connectNodes = (
     sourceNode.shape !== 'group' && targetNode.shape !== 'label'
       ? sourceNode.color
       : targetNode.shape !== 'group'
-      ? targetNode.color
-      : 'primary';
+        ? targetNode.color
+        : 'primary';
 
   return {
     id: `a(${sourceNodeId})-b(${targetNodeId})`,

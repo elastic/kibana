@@ -42,12 +42,10 @@ export class CiStatsPlugin {
       const { entryName } = this.options;
 
       const assets = Object.entries(compilation.assets)
-        .map(
-          ([name, source]: [string, any]): Asset => ({
-            name,
-            size: source.size(),
-          })
-        )
+        .map(([name, source]: [string, any]): Asset => ({
+          name,
+          size: source.size(),
+        }))
         .filter((asset) => {
           const filename = Path.basename(asset.name);
           if (filename.startsWith('.')) {

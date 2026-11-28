@@ -55,7 +55,7 @@ export const extractMigrationInfo = (soType: SavedObjectsType): SavedObjectTypeM
   const modelVersionMap =
     typeof soType.modelVersions === 'function'
       ? soType.modelVersions()
-      : soType.modelVersions ?? {};
+      : (soType.modelVersions ?? {});
   const modelVersionIds = Object.keys(modelVersionMap);
   const modelVersions = modelVersionIds.map<ModelVersionSummary>((version) => {
     const entry = modelVersionMap[version];

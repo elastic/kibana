@@ -52,10 +52,9 @@ function isSaveTimelineAction(action: Action): action is ReturnType<typeof saveT
   return action.type === saveTimeline.type;
 }
 
-export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State> =
-  // WARN: this is disabled because we need to support experimental data view picker here.
-  // once it is stable, remove the override
-  // eslint-disable-next-line complexity
+// The complexity override supports the experimental data view picker.
+// Remove it once the picker is stable.
+export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State> = // eslint-disable-next-line complexity
   (kibana: CoreStart) => (store) => (next) => async (action: Action) => {
     if (!isSaveTimelineAction(action)) {
       return next(action);

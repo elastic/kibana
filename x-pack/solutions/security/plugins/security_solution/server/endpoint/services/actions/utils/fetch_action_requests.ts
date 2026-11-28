@@ -158,12 +158,12 @@ const getActionTypeFilter = (actionType: string): QueryDslBoolQuery => {
         },
       }
     : actionType === 'automated'
-    ? {
-        filter: {
-          exists: {
-            field: 'data.alert_id',
+      ? {
+          filter: {
+            exists: {
+              field: 'data.alert_id',
+            },
           },
-        },
-      }
-    : {};
+        }
+      : {};
 };

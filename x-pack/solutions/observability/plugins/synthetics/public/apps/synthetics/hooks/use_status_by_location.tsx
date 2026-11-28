@@ -93,7 +93,7 @@ export function useStatusByLocation({
         const fullLoc = allLocations.find((l) => l.id === loc.id);
         if (fullLoc) {
           const ping = locationPings.find((p) => p.observer?.geo?.name === fullLoc?.label);
-          const status = ping ? (ping.summary?.down ?? 0 > 0 ? 'down' : 'up') : 'unknown';
+          const status = ping ? ((ping.summary?.down ?? 0 > 0) ? 'down' : 'up') : 'unknown';
           return {
             status,
             id: fullLoc?.id,

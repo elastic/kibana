@@ -39,8 +39,7 @@ import { DrilldownTableItem } from '../components/drilldown_table';
 const helloMessageStorageKey = `drilldowns:hidWelcomeMessage`;
 
 export interface DrilldownManagerStateDeps
-  extends DrilldownManagerDependencies,
-    PublicDrilldownManagerProps {}
+  extends DrilldownManagerDependencies, PublicDrilldownManagerProps {}
 
 /**
  * An instance of this class holds all the state necessary for Drilldown
@@ -104,8 +103,8 @@ export class DrilldownManagerState {
       error: !actionFactory
         ? invalidDrilldownType(event.action.factoryId) // this shouldn't happen for the end user, but useful during development
         : !actionFactory.isCompatibleLicense()
-        ? insufficientLicenseLevel
-        : undefined,
+          ? insufficientLicenseLevel
+          : undefined,
       triggers: event.triggers.map((trigger) => this.deps.getTrigger(trigger as string)),
       triggerIncompatible: !this.deps.triggers.find((t) => t === firstTrigger),
     };

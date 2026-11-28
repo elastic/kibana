@@ -70,8 +70,10 @@ export interface SubFeaturePrivilegeGroupConfig {
 /**
  * Configuration for a sub-feature privilege.
  */
-export interface SubFeaturePrivilegeConfig
-  extends Omit<FeatureKibanaPrivileges, 'excludeFromBasePrivileges' | 'composedOf' | 'replacedBy'> {
+export interface SubFeaturePrivilegeConfig extends Omit<
+  FeatureKibanaPrivileges,
+  'excludeFromBasePrivileges' | 'composedOf' | 'replacedBy'
+> {
   /**
    * Identifier for this privilege. Must be unique across all other privileges within a feature.
    */

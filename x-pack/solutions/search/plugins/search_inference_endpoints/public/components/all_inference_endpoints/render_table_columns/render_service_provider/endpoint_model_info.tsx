@@ -23,8 +23,8 @@ export const EndpointModelInfo: React.FC<EndpointModelInfoProps> = ({ endpointIn
     'model_id' in serviceSettings
       ? serviceSettings.model_id
       : 'model' in serviceSettings
-      ? serviceSettings.model
-      : undefined;
+        ? serviceSettings.model
+        : undefined;
 
   const isEligibleForMITBadge = modelId && ELASTIC_MODEL_DEFINITIONS[modelId]?.license === 'MIT';
 

@@ -416,7 +416,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
       resultField.onChange(
         isArray(newSelectedOptions)
           ? map(newSelectedOptions, 'label')
-          : newSelectedOptions[0]?.label ?? ''
+          : (newSelectedOptions[0]?.label ?? '')
       );
     },
     [resultField]

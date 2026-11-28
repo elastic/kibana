@@ -48,8 +48,7 @@ export interface PatternAnalysisEmbeddableState extends SerializedTitles, Serial
 }
 
 export interface PatternAnalysisEmbeddableInitialState
-  extends SerializedTitles,
-    SerializedTimeRange {
+  extends SerializedTitles, SerializedTimeRange {
   dataViewId?: string;
 }
 

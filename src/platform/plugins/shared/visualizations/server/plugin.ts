@@ -25,9 +25,10 @@ import { makeVisualizeEmbeddableFactory } from './embeddable/make_visualize_embe
 import { getVisualizationSavedObjectType, registerReadOnlyVisType } from './saved_objects';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 
-export class VisualizationsPlugin
-  implements Plugin<VisualizationsServerSetup, VisualizationsServerStart>
-{
+export class VisualizationsPlugin implements Plugin<
+  VisualizationsServerSetup,
+  VisualizationsServerStart
+> {
   private readonly logger: Logger;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {

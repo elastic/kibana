@@ -87,8 +87,9 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       services: mockedServices,
     };
 
-    jest.spyOn(ExistenceApi, 'useExistingFieldsReader').mockImplementation(
-      (): ExistingFieldsReader => ({
+    jest
+      .spyOn(ExistenceApi, 'useExistingFieldsReader')
+      .mockImplementation((): ExistingFieldsReader => ({
         hasFieldData: (dataViewId) => {
           return dataViewId === props.dataViewId;
         },
@@ -98,8 +99,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
             : ExistenceFetchStatus.unknown,
         isFieldsExistenceInfoUnavailable: (dataViewId) => dataViewId !== props.dataViewId,
         getNewFields: () => [],
-      })
-    );
+      }));
 
     const { result, rerender } = renderHook(useGroupedFields, {
       initialProps: props,
@@ -149,8 +149,9 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       services: mockedServices,
     };
 
-    jest.spyOn(ExistenceApi, 'useExistingFieldsReader').mockImplementation(
-      (): ExistingFieldsReader => ({
+    jest
+      .spyOn(ExistenceApi, 'useExistingFieldsReader')
+      .mockImplementation((): ExistingFieldsReader => ({
         hasFieldData: (dataViewId) => {
           return dataViewId === props.dataViewId;
         },
@@ -160,8 +161,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
             : ExistenceFetchStatus.unknown,
         isFieldsExistenceInfoUnavailable: (dataViewId) => dataViewId !== props.dataViewId,
         getNewFields: () => [],
-      })
-    );
+      }));
 
     const { result, rerender } = renderHook(useGroupedFields, {
       initialProps: props,
@@ -221,8 +221,9 @@ describe('UnifiedFieldList useGroupedFields()', () => {
 
     const newField = { name: 'test', type: 'keyword', searchable: true, aggregatable: true };
 
-    jest.spyOn(ExistenceApi, 'useExistingFieldsReader').mockImplementation(
-      (): ExistingFieldsReader => ({
+    jest
+      .spyOn(ExistenceApi, 'useExistingFieldsReader')
+      .mockImplementation((): ExistingFieldsReader => ({
         hasFieldData: (dataViewId) => {
           return dataViewId === props.dataViewId;
         },
@@ -232,8 +233,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
             : ExistenceFetchStatus.unknown,
         isFieldsExistenceInfoUnavailable: (dataViewId) => dataViewId !== props.dataViewId,
         getNewFields: () => [newField],
-      })
-    );
+      }));
 
     const { result, rerender } = renderHook(useGroupedFields, {
       initialProps: props,
@@ -558,8 +558,9 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       services: mockedServices,
     };
 
-    jest.spyOn(ExistenceApi, 'useExistingFieldsReader').mockImplementation(
-      (): ExistingFieldsReader => ({
+    jest
+      .spyOn(ExistenceApi, 'useExistingFieldsReader')
+      .mockImplementation((): ExistingFieldsReader => ({
         hasFieldData: (dataViewId, fieldName) => {
           return dataViewId === knownDataViewId && ['bytes', 'extension'].includes(fieldName);
         },
@@ -569,8 +570,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
             : ExistenceFetchStatus.unknown,
         isFieldsExistenceInfoUnavailable: (dataViewId) => dataViewId !== knownDataViewId,
         getNewFields: () => [],
-      })
-    );
+      }));
 
     const { result, rerender } = renderHook(useGroupedFields, {
       initialProps: props,

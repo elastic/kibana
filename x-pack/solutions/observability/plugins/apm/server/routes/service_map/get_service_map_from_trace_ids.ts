@@ -53,7 +53,7 @@ export async function getServiceMapFromTraceIds({
         ({
           from: { ...service.from, id: getLegacyNodeId(service.from) },
           to: { ...service.to, id: getLegacyNodeId(service.to) },
-        } as ExitSpanDestination)
+        }) as ExitSpanDestination
     ),
   };
 }

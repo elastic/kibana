@@ -129,7 +129,7 @@ export const getGroupingQuery = ({
       unitsCount: {
         value_count: {
           field: shouldFlattenMultiValueField
-            ? countByKeyForMultiValueFields ?? 'groupByField'
+            ? (countByKeyForMultiValueFields ?? 'groupByField')
             : 'groupByField',
         },
       },

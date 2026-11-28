@@ -190,8 +190,8 @@ export const SearchApplicationsList: React.FC<ListProps> = ({
           rightSideItems: isLoading
             ? []
             : !hasNoSearchApplications
-            ? [<CreateSearchApplicationButton disabled={isGated} />]
-            : [],
+              ? [<CreateSearchApplicationButton disabled={isGated} />]
+              : [],
         }}
         pageViewTelemetry="Search Applications"
         isLoading={isLoading && !isGated}

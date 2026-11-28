@@ -30,9 +30,8 @@ export async function getApmEventClient({
         const includeFrozen = await coreContext.uiSettings.client.get<boolean>(
           UI_SETTINGS.SEARCH_INCLUDE_FROZEN
         );
-        const excludedDataTiers = await coreContext.uiSettings.client.get<DataTier[]>(
-          searchExcludedDataTiers
-        );
+        const excludedDataTiers =
+          await coreContext.uiSettings.client.get<DataTier[]>(searchExcludedDataTiers);
 
         return { includeFrozen, excludedDataTiers };
       }),

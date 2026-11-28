@@ -231,7 +231,7 @@ class Package {
       // if the group is 'private-only', enforce it
       visibility = ['search', 'security', 'observability'].includes(group)
         ? 'private'
-        : this.manifest.visibility ?? 'shared';
+        : (this.manifest.visibility ?? 'shared');
     }
 
     return { group, visibility };

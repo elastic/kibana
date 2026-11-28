@@ -79,12 +79,12 @@ export const TimelineQueryTabEventsCountComponent: React.FC<{ timelineId: string
     isEmpty(kqlQueryTimeline?.expression ?? '') &&
     timelineType === 'template'
       ? ' '
-      : kqlQueryTimeline?.expression ?? '';
+      : (kqlQueryTimeline?.expression ?? '');
 
   const kqlQueryLanguage =
     isEmpty(dataProviders) && timelineType === 'template'
       ? 'kuery'
-      : kqlQueryTimeline?.kind ?? 'kuery';
+      : (kqlQueryTimeline?.kind ?? 'kuery');
 
   const dispatch = useDispatch();
   const {

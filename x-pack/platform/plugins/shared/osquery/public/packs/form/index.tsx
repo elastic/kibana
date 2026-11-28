@@ -73,7 +73,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
   const { data: { agentPoliciesById } = {} } = useAgentPolicies();
 
   const cancelButtonProps = useRouterNavigate(
-    `packs/${editMode ? packId ?? defaultValue?.id : ''}`
+    `packs/${editMode ? (packId ?? defaultValue?.id) : ''}`
   );
 
   const { mutateAsync: createAsync } = useCreatePack({

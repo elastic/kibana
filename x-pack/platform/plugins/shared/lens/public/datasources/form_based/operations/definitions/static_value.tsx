@@ -98,7 +98,7 @@ export const staticValueOperation: OperationDefinition<
     const label = isValid
       ? useDisplayLabel
         ? currentColumn.label
-        : params?.value ?? defaultLabel
+        : (params?.value ?? defaultLabel)
       : defaultLabel;
 
     return [

@@ -35,9 +35,10 @@ export type InternalRateLimiterSetup = void;
 export type InternalRateLimiterStart = void;
 
 /** @internal */
-export class HttpRateLimiterService
-  implements CoreService<InternalRateLimiterSetup, InternalRateLimiterStart>
-{
+export class HttpRateLimiterService implements CoreService<
+  InternalRateLimiterSetup,
+  InternalRateLimiterStart
+> {
   private overloaded$ = new BehaviorSubject(false);
   private ready$ = new Subject<boolean>();
   private stopped$ = new Subject<boolean>();

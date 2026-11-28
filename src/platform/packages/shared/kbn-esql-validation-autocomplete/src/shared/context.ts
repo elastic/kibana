@@ -68,8 +68,8 @@ export function isMarkerNode(node: ESQLAstItem | undefined): boolean {
 
   return Boolean(
     node &&
-      (isColumnItem(node) || isIdentifier(node) || isSourceItem(node)) &&
-      node.name.endsWith(EDITOR_MARKER)
+    (isColumnItem(node) || isIdentifier(node) || isSourceItem(node)) &&
+    node.name.endsWith(EDITOR_MARKER)
   );
 }
 

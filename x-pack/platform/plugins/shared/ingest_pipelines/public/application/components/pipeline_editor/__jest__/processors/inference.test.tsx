@@ -106,9 +106,9 @@ describe('Processor: Inference', () => {
 
       expect(processors[0][INFERENCE_TYPE]).toEqual({
         model_id: 'test_inference_processor',
-        // eslint-disable-next-line prettier/prettier
+        // prettier-ignore
         inference_config: { inf_conf_1: 'aaa\"bbb', inf_conf_2: 'aaa(bbb' },
-        // eslint-disable-next-line prettier/prettier
+        // prettier-ignore
         field_map: { field_map_1: 'aaa\"bbb', field_map_2: 'aaa(bbb' },
       });
     });
@@ -139,7 +139,7 @@ describe('Processor: Inference', () => {
       expect(processors[0][INFERENCE_TYPE]).toEqual({
         model_id: 'test_inference_processor',
         input_output: [
-          // eslint-disable-next-line prettier/prettier
+          // prettier-ignore
           { input_field: 'content', output_field: 'content_embedding', notes: 'aaa\"bbb' },
         ],
       });

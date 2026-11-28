@@ -267,6 +267,6 @@ export const getFormulaForAgg = ({
     visType,
     agg,
     dataView,
-    isMetricWithField(agg) ? getFieldNameFromField(agg.aggParams?.field) ?? '' : ''
+    isMetricWithField(agg) ? (getFieldNameFromField(agg.aggParams?.field) ?? '') : ''
   );
 };

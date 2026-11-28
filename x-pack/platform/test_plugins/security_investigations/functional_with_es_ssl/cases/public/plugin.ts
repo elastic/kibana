@@ -23,9 +23,12 @@ export interface CasesExamplePublicStartDeps {
   cases: CasesPublicStart;
 }
 
-export class CasesFixturePlugin
-  implements Plugin<Setup, Start, CasesExamplePublicSetupDeps, CasesExamplePublicStartDeps>
-{
+export class CasesFixturePlugin implements Plugin<
+  Setup,
+  Start,
+  CasesExamplePublicSetupDeps,
+  CasesExamplePublicStartDeps
+> {
   public setup(core: CoreSetup<CasesExamplePublicStartDeps>, plugins: CasesExamplePublicSetupDeps) {
     plugins.cases.attachmentFramework.registerExternalReference(
       getExternalReferenceAttachmentRegular()

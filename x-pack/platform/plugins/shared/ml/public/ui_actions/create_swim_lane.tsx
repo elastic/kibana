@@ -61,9 +61,8 @@ export function createAddSwimlanePanelAction(
       const [coreStart, pluginStart] = await getStartServices();
 
       try {
-        const { resolveAnomalySwimlaneUserInput } = await import(
-          '../embeddables/anomaly_swimlane/anomaly_swimlane_setup_flyout'
-        );
+        const { resolveAnomalySwimlaneUserInput } =
+          await import('../embeddables/anomaly_swimlane/anomaly_swimlane_setup_flyout');
 
         const initialState = await resolveAnomalySwimlaneUserInput(
           {

@@ -285,18 +285,18 @@ export const getEditorAutoCompleteSuggestion = (
       range.startColumn === 1
         ? suggestionsFromDefaultKeywords
         : // if last char is === '.' it means we are joining so we want to present just specific osquery table suggestions
-        isDot
-        ? osqueryColumns
-        : uniqBy(
-            [
-              ...suggestionsFromDefaultKeywords,
-              ...tableNameKeywords,
-              ...builtinConstantsKeywords,
-              ...builtinFunctionsKeywords,
-              ...dataTypesKeywords,
-              ...localKeywords,
-            ],
-            (word) => word.label.toLowerCase()
-          ),
+          isDot
+          ? osqueryColumns
+          : uniqBy(
+              [
+                ...suggestionsFromDefaultKeywords,
+                ...tableNameKeywords,
+                ...builtinConstantsKeywords,
+                ...builtinFunctionsKeywords,
+                ...dataTypesKeywords,
+                ...localKeywords,
+              ],
+              (word) => word.label.toLowerCase()
+            ),
   };
 };

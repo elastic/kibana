@@ -11,9 +11,8 @@ import { RegexWorkerService } from '../chat_complete/anonymization/regex_worker_
 
 export const createRegexWorkerServiceMock = () => {
   const mock = {
-    run: jest.fn(
-      ({ records }: AnonymizationRegexWorkerTaskPayload): Promise<AnonymizationState> =>
-        Promise.resolve({ records, anonymizations: [] })
+    run: jest.fn(({ records }: AnonymizationRegexWorkerTaskPayload): Promise<AnonymizationState> =>
+      Promise.resolve({ records, anonymizations: [] })
     ),
     stop: jest.fn().mockResolvedValue(undefined),
   };

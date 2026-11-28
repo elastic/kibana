@@ -121,8 +121,8 @@ export function asTrees(streams: ListStreamDetail[]): StreamTree[] {
         type: Streams.UnwiredStream.Definition.is(streamDetail.stream)
           ? 'classic'
           : isRootStreamDefinition(streamDetail.stream)
-          ? 'root'
-          : 'wired',
+            ? 'root'
+            : 'wired',
       };
       currentTree.push(newNode);
     }

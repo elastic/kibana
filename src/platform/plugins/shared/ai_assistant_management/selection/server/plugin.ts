@@ -35,15 +35,12 @@ import { observabilitySolutionSetting } from './src/settings/observability_setti
 import { securitySolutionSetting } from './src/settings/security_setting';
 import { AIAssistantType } from '../common/ai_assistant_type';
 
-export class AIAssistantManagementSelectionPlugin
-  implements
-    Plugin<
-      AIAssistantManagementSelectionPluginServerSetup,
-      AIAssistantManagementSelectionPluginServerStart,
-      AIAssistantManagementSelectionPluginServerDependenciesSetup,
-      AIAssistantManagementSelectionPluginServerDependenciesStart
-    >
-{
+export class AIAssistantManagementSelectionPlugin implements Plugin<
+  AIAssistantManagementSelectionPluginServerSetup,
+  AIAssistantManagementSelectionPluginServerStart,
+  AIAssistantManagementSelectionPluginServerDependenciesSetup,
+  AIAssistantManagementSelectionPluginServerDependenciesStart
+> {
   private readonly config: AIAssistantManagementSelectionConfig;
 
   constructor(initializerContext: PluginInitializerContext) {

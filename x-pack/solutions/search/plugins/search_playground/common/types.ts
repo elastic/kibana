@@ -8,9 +8,9 @@
 export type IndicesQuerySourceFields = Record<string, QuerySourceFields>;
 
 export enum MessageRole {
-  'user' = 'human',
-  'assistant' = 'assistant',
-  'system' = 'system',
+  user = 'human',
+  assistant = 'assistant',
+  system = 'system',
 }
 
 interface ModelField {

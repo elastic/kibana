@@ -90,7 +90,7 @@ function InputList({ config, list, onChange, setValidity }: InputListProps) {
         ({
           id: generateId(),
           ...getModelValue(item),
-        } as InputModel)
+        }) as InputModel
     )
   );
   const hasInvalidValues = models.some(config.hasInvalidValuesFn);
@@ -172,7 +172,7 @@ function InputList({ config, list, onChange, setValidity }: InputListProps) {
             ({
               id: generateId(),
               ...getModelValue(item),
-            } as InputModel)
+            }) as InputModel
         )
       );
     }

@@ -30,8 +30,7 @@ export interface OptionsListDisplaySettings {
 }
 
 export interface OptionsListControlState
-  extends DefaultDataControlState,
-    OptionsListDisplaySettings {
+  extends DefaultDataControlState, OptionsListDisplaySettings {
   searchTechnique?: OptionsListSearchTechnique;
   sort?: OptionsListSortingType;
   selectedOptions?: OptionsListSelection[];
@@ -90,11 +89,10 @@ export type OptionsListRequest = Omit<
 /**
  * The Options list request body is sent to the serverside Options List route and is used to create the ES query.
  */
-export interface OptionsListRequestBody
-  extends Pick<
-    OptionsListControlState,
-    'fieldName' | 'searchTechnique' | 'sort' | 'selectedOptions'
-  > {
+export interface OptionsListRequestBody extends Pick<
+  OptionsListControlState,
+  'fieldName' | 'searchTechnique' | 'sort' | 'selectedOptions'
+> {
   runtimeFieldMap?: Record<string, RuntimeFieldSpec>;
   allowExpensiveQueries: boolean;
   ignoreValidations?: boolean;

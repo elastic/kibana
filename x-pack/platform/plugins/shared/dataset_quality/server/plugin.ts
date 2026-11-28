@@ -18,15 +18,12 @@ import type {
   DatasetQualityPluginStartDependencies,
 } from './types';
 
-export class DatasetQualityServerPlugin
-  implements
-    Plugin<
-      DatasetQualityPluginSetup,
-      DatasetQualityPluginStart,
-      DatasetQualityPluginSetupDependencies,
-      DatasetQualityPluginStartDependencies
-    >
-{
+export class DatasetQualityServerPlugin implements Plugin<
+  DatasetQualityPluginSetup,
+  DatasetQualityPluginStart,
+  DatasetQualityPluginSetupDependencies,
+  DatasetQualityPluginStartDependencies
+> {
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {

@@ -85,9 +85,8 @@ describe('SamlSessionManager', () => {
 
     test(`'getSessionCookieForRole' should return the actual cookie value`, async () => {
       const samlSessionManager = new SamlSessionManager(samlSessionManagerOptions);
-      const cookie = await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(
-        roleViewer
-      );
+      const cookie =
+        await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(roleViewer);
       expect(cookie).toBe(cookieInstance.value);
     });
 
@@ -114,9 +113,8 @@ describe('SamlSessionManager', () => {
           testEmail
         )
       );
-      const cookieStr1 = await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(
-        roleViewer
-      );
+      const cookieStr1 =
+        await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(roleViewer);
       createLocalSAMLSessionMock.mockResolvedValueOnce(
         new Session(
           Cookie.parse(`sid=${getTestToken()}; Path=/; Expires=Wed, 01 Oct 2023 08:00:00 GMT`)!,
@@ -277,9 +275,8 @@ describe('SamlSessionManager', () => {
     test(`'getSessionCookieForRole' should return the actual cookie value`, async () => {
       const samlSessionManager = new SamlSessionManager(samlSMOptionsWithCloudHostName);
       createCloudSAMLSessionMock.mockResolvedValue(new Session(cloudCookieInstance, cloudEmail));
-      const cookie = await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(
-        roleViewer
-      );
+      const cookie =
+        await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(roleViewer);
       expect(cookie).toBe(cloudCookieInstance.value);
     });
 
@@ -306,9 +303,8 @@ describe('SamlSessionManager', () => {
           cloudEmail
         )
       );
-      const cookieStr1 = await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(
-        roleViewer
-      );
+      const cookieStr1 =
+        await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(roleViewer);
       createCloudSAMLSessionMock.mockResolvedValueOnce(
         new Session(
           Cookie.parse(`sid=${getTestToken()}; Path=/; Expires=Wed, 01 Oct 2023 08:00:00 GMT`)!,
@@ -439,9 +435,8 @@ describe('SamlSessionManager', () => {
 
       test(`uses the custom SAML provider for listed roles without reading cloud users`, async () => {
         const samlSessionManager = new SamlSessionManager(samlSMOptionsWithCustomRealm);
-        const cookie = await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(
-          customRole
-        );
+        const cookie =
+          await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(customRole);
 
         expect(cookie).toBe(customRealmCookieInstance.value);
         expect(createCustomRealmSAMLSessionMock).toHaveBeenCalledWith({
@@ -460,9 +455,8 @@ describe('SamlSessionManager', () => {
 
       test(`uses cloud users for roles that aren't listed`, async () => {
         const samlSessionManager = new SamlSessionManager(samlSMOptionsWithCustomRealm);
-        const cookie = await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(
-          roleViewer
-        );
+        const cookie =
+          await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(roleViewer);
 
         expect(cookie).toBe(cloudCookieInstance.value);
         expect(createCloudSAMLSessionMock).toHaveBeenCalledTimes(1);

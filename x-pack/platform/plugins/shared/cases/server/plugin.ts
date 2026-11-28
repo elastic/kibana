@@ -55,15 +55,12 @@ import {
   scheduleCasesAnalyticsSyncTasks,
 } from './cases_analytics';
 
-export class CasePlugin
-  implements
-    Plugin<
-      CasesServerSetup,
-      CasesServerStart,
-      CasesServerSetupDependencies,
-      CasesServerStartDependencies
-    >
-{
+export class CasePlugin implements Plugin<
+  CasesServerSetup,
+  CasesServerStart,
+  CasesServerSetupDependencies,
+  CasesServerStartDependencies
+> {
   private readonly caseConfig: ConfigType;
   private readonly logger: Logger;
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];

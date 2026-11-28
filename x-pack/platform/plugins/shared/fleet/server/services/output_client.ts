@@ -22,7 +22,10 @@ export interface OutputClientInterface {
 }
 
 export class OutputClient implements OutputClientInterface {
-  constructor(private soClient: SavedObjectsClientContract, private authz: FleetAuthz) {}
+  constructor(
+    private soClient: SavedObjectsClientContract,
+    private authz: FleetAuthz
+  ) {}
 
   async getDefaultDataOutputId() {
     if (!this.authz.fleet.readSettings && !this.authz.fleet.readAgentPolicies) {

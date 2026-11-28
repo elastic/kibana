@@ -28,8 +28,10 @@ type FormElementMap<FormValues extends {}> = {
   [formElementName in keyof FormValues]: FormElement<FormValues[formElementName], any>;
 };
 
-export interface CompositeFormElement<CompositeValue extends {}, InvalidReason>
-  extends FormElement<CompositeValue, InvalidReason | ChildFormValidationError> {
+export interface CompositeFormElement<CompositeValue extends {}, InvalidReason> extends FormElement<
+  CompositeValue,
+  InvalidReason | ChildFormValidationError
+> {
   childFormElements: FormElementMap<CompositeValue>;
 }
 

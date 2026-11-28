@@ -25,7 +25,7 @@ import { parseDuration } from '../lib';
 interface ScheduledExecutionOptions<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
-  ActionGroupIds extends string = DefaultActionGroupId
+  ActionGroupIds extends string = DefaultActionGroupId,
 > {
   actionGroup: ActionGroupIds;
   context: Context;
@@ -35,7 +35,7 @@ interface ScheduledExecutionOptions<
 export type PublicAlert<
   State extends AlertInstanceState = AlertInstanceState,
   Context extends AlertInstanceContext = AlertInstanceContext,
-  ActionGroupIds extends string = DefaultActionGroupId
+  ActionGroupIds extends string = DefaultActionGroupId,
 > = Pick<
   Alert<State, Context, ActionGroupIds, AADAlert>,
   | 'getContext'
@@ -52,7 +52,7 @@ export class Alert<
   State extends AlertInstanceState = AlertInstanceState,
   Context extends AlertInstanceContext = AlertInstanceContext,
   ActionGroupIds extends string = never,
-  AlertAsData extends AADAlert = AADAlert
+  AlertAsData extends AADAlert = AADAlert,
 > {
   private scheduledExecutionOptions?: ScheduledExecutionOptions<State, Context, ActionGroupIds>;
   private meta: MutableAlertInstanceMeta;

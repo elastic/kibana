@@ -25,7 +25,7 @@ export const getLLMClass = (llmType?: string) =>
   llmType === 'openai' || llmType === 'inference'
     ? ActionsClientChatOpenAI
     : llmType === 'bedrock'
-    ? ActionsClientBedrockChatModel
-    : llmType === 'gemini'
-    ? ActionsClientGeminiChatModel
-    : ActionsClientSimpleChatModel;
+      ? ActionsClientBedrockChatModel
+      : llmType === 'gemini'
+        ? ActionsClientGeminiChatModel
+        : ActionsClientSimpleChatModel;

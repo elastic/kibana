@@ -16,9 +16,10 @@ import type {
 import type { SearchIndicesPluginSetup, SearchIndicesPluginStart } from './types';
 import { defineRoutes } from './routes';
 
-export class SearchIndicesPlugin
-  implements Plugin<SearchIndicesPluginSetup, SearchIndicesPluginStart>
-{
+export class SearchIndicesPlugin implements Plugin<
+  SearchIndicesPluginSetup,
+  SearchIndicesPluginStart
+> {
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {

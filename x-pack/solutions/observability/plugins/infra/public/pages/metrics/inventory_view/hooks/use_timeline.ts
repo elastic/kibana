@@ -34,10 +34,10 @@ const getTimeLengthFromInterval = (interval: string | undefined) => {
       intervalInSeconds <= ONE_MINUTE * 15
         ? ONE_DAY
         : intervalInSeconds <= ONE_MINUTE * 35
-        ? ONE_DAY * 3
-        : intervalInSeconds <= ONE_HOUR * 2.5
-        ? ONE_WEEK
-        : ONE_MONTH;
+          ? ONE_DAY * 3
+          : intervalInSeconds <= ONE_HOUR * 2.5
+            ? ONE_WEEK
+            : ONE_MONTH;
     return { timeLength, intervalInSeconds };
   } else {
     return { timeLength: 0, intervalInSeconds: 0 };

@@ -43,13 +43,13 @@ export function toolChoiceToOpenAI(
   return typeof toolChoice === 'string'
     ? toolChoice
     : toolChoice
-    ? {
-        function: {
-          name: toolChoice.function,
-        },
-        type: 'function' as const,
-      }
-    : undefined;
+      ? {
+          function: {
+            name: toolChoice.function,
+          },
+          type: 'function' as const,
+        }
+      : undefined;
 }
 
 export function messagesToOpenAI({

@@ -519,8 +519,8 @@ async function getFunctionArgsSuggestions(
       command.name !== 'stats'
         ? -1
         : commandArgIndex < 0
-        ? Math.max(command.args.length - 1, 0)
-        : commandArgIndex;
+          ? Math.max(command.args.length - 1, 0)
+          : commandArgIndex;
 
     const finalCommandArg = command.args[finalCommandArgIndex];
 

@@ -168,7 +168,7 @@ export const OptionsListControl = ({
       >
         {hasSelections || existsSelected
           ? selectionDisplayNode
-          : displaySettings.placeholder ?? OptionsListStrings.control.getPlaceholder()}
+          : (displaySettings.placeholder ?? OptionsListStrings.control.getPlaceholder())}
       </EuiFilterButton>
     </>
   );

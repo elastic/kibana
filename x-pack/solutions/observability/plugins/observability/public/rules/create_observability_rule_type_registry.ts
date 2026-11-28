@@ -18,8 +18,9 @@ export type ObservabilityRuleTypeFormatter = (options: {
   formatters: { asDuration: AsDuration; asPercent: AsPercent };
 }) => { reason: string; link?: string; hasBasePath?: boolean };
 
-export interface ObservabilityRuleTypeModel<Params extends RuleTypeParams = RuleTypeParams>
-  extends RuleTypeModel<Params> {
+export interface ObservabilityRuleTypeModel<
+  Params extends RuleTypeParams = RuleTypeParams,
+> extends RuleTypeModel<Params> {
   format: ObservabilityRuleTypeFormatter;
   priority?: number;
 }

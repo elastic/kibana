@@ -78,7 +78,7 @@ const getRuleMock = (id = chance.guid()): CspBenchmarkRule =>
       tags: [chance.word(), chance.word()],
       version: chance.sentence(),
     },
-  } as CspBenchmarkRule);
+  }) as CspBenchmarkRule;
 
 const params = {
   paginations: {

@@ -196,8 +196,9 @@ export abstract class ActionRunner {
               appContextService
                 .getLogger()
                 .debug(
-                  `skipping batch as there is already an action document present with last agent ids, actionId: ${this
-                    .actionParams!.actionId!}`
+                  `skipping batch as there is already an action document present with last agent ids, actionId: ${
+                    this.actionParams!.actionId!
+                  }`
                 );
               return { actionId: this.actionParams.actionId! };
             }

@@ -214,6 +214,10 @@ async function run() {
     cwd: REPO_ROOT,
     stdio: 'inherit',
   });
+  execSync("node scripts/oxfmt 'x-pack/**/*/archives_metadata.ts'", {
+    cwd: REPO_ROOT,
+    stdio: 'inherit',
+  });
 }
 
 run()

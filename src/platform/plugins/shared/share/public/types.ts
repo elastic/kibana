@@ -59,7 +59,7 @@ export interface ShareMenuProviderLegacy {
 
 type ShareImplementationFactory<
   T extends Omit<ShareTypes, 'legacy'>,
-  C extends Record<string, unknown> = Record<string, unknown>
+  C extends Record<string, unknown> = Record<string, unknown>,
 > = T extends 'integration'
   ? {
       id: string;
@@ -114,7 +114,7 @@ export type EmbedShare = ShareImplementationFactory<
  * @description skeleton definition for implementing a share action integration
  */
 export type ShareIntegration<
-  IntegrationParameters extends Record<string, unknown> = Record<string, unknown>
+  IntegrationParameters extends Record<string, unknown> = Record<string, unknown>,
 > = ShareImplementationFactory<'integration', IntegrationParameters>;
 
 /**
@@ -129,50 +129,49 @@ export interface ShareLegacy {
 /**
  * @description Share integration implementation definition for performing exports within kibana
  */
-export interface ExportShare
-  extends ShareIntegration<
-    {
-      /**
-       * @deprecated only kept around for legacy reasons
-       */
-      name?: string;
-      icon?: EuiIconProps['type'];
-      sortOrder?: number;
-      /**
-       * @deprecated only kept around for legacy reasons
-       */
-      toolTipContent?: string;
-      label: string;
-      exportType: string;
-      /**
-       * allows disabling the export action, for instance the current app has no data to export
-       */
-      disabled?: boolean;
-      helpText?: ReactNode;
-      generateExportButtonLabel?: ReactNode;
-      generateAssetExport: (args: ExportGenerationOpts) => Promise<unknown>;
-      renderCopyURIButton?: boolean;
-      warnings?: Array<{ title: string; message: string }>;
-      requiresSavedState?: boolean;
-      supportedLayoutOptions?: Array<'print'>;
-      renderLayoutOptionSwitch?: boolean;
-    } & (
-      | {
-          generateAssetComponent?: never;
-          copyAssetURIConfig: {
-            headingText: string;
-            helpText?: string;
-            contentType: EuiCodeProps['language'];
-            generateAssetURIValue: (args: ExportGenerationOpts) => string | undefined;
-          };
-        }
-      | { generateAssetComponent: ReactNode; copyAssetURIConfig?: never }
-      | {
-          generateAssetComponent?: never;
-          copyAssetURIConfig?: never;
-        }
-    )
-  > {
+export interface ExportShare extends ShareIntegration<
+  {
+    /**
+     * @deprecated only kept around for legacy reasons
+     */
+    name?: string;
+    icon?: EuiIconProps['type'];
+    sortOrder?: number;
+    /**
+     * @deprecated only kept around for legacy reasons
+     */
+    toolTipContent?: string;
+    label: string;
+    exportType: string;
+    /**
+     * allows disabling the export action, for instance the current app has no data to export
+     */
+    disabled?: boolean;
+    helpText?: ReactNode;
+    generateExportButtonLabel?: ReactNode;
+    generateAssetExport: (args: ExportGenerationOpts) => Promise<unknown>;
+    renderCopyURIButton?: boolean;
+    warnings?: Array<{ title: string; message: string }>;
+    requiresSavedState?: boolean;
+    supportedLayoutOptions?: Array<'print'>;
+    renderLayoutOptionSwitch?: boolean;
+  } & (
+    | {
+        generateAssetComponent?: never;
+        copyAssetURIConfig: {
+          headingText: string;
+          helpText?: string;
+          contentType: EuiCodeProps['language'];
+          generateAssetURIValue: (args: ExportGenerationOpts) => string | undefined;
+        };
+      }
+    | { generateAssetComponent: ReactNode; copyAssetURIConfig?: never }
+    | {
+        generateAssetComponent?: never;
+        copyAssetURIConfig?: never;
+      }
+  )
+> {
   groupId: 'export';
 }
 
@@ -180,21 +179,20 @@ export interface ExportShare
  * @description Share integration implementation definition that build off exports within kibana,
  * reach out to the shared ux team before settling on using this interface
  */
-export interface ExportShareDerivatives
-  extends ShareIntegration<{
-    label: React.FC<{ openFlyout: () => void }>;
-    toolTipContent?: ReactNode;
-    flyoutContent: React.FC<{
-      closeFlyout: () => void;
-      flyoutRef: React.RefObject<HTMLDivElement>;
-    }>;
-    flyoutSizing?: Pick<EuiFlyoutProps, 'size' | 'maxWidth'>;
-    shouldRender: ({
-      availableExportItems,
-    }: {
-      availableExportItems: ExportShareConfig[];
-    }) => boolean;
-  }> {
+export interface ExportShareDerivatives extends ShareIntegration<{
+  label: React.FC<{ openFlyout: () => void }>;
+  toolTipContent?: ReactNode;
+  flyoutContent: React.FC<{
+    closeFlyout: () => void;
+    flyoutRef: React.RefObject<HTMLDivElement>;
+  }>;
+  flyoutSizing?: Pick<EuiFlyoutProps, 'size' | 'maxWidth'>;
+  shouldRender: ({
+    availableExportItems,
+  }: {
+    availableExportItems: ExportShareConfig[];
+  }) => boolean;
+}> {
   groupId: 'exportDerivatives';
 }
 
@@ -260,8 +258,9 @@ export interface SharingData {
 
 export type ShareIntegrationMapKey = `integration-${string}`;
 
-export interface RegisterShareIntegrationArgs<I extends ShareIntegration = ShareIntegration>
-  extends Pick<I, 'id' | 'groupId' | 'prerequisiteCheck'> {
+export interface RegisterShareIntegrationArgs<
+  I extends ShareIntegration = ShareIntegration,
+> extends Pick<I, 'id' | 'groupId' | 'prerequisiteCheck'> {
   getShareIntegrationConfig: I['config'];
 }
 
@@ -357,8 +356,10 @@ export interface ShareContext {
  * used to order the individual items in a flat list returned by all registered
  * menu providers.
  * */
-export interface ShareContextMenuPanelItem
-  extends Omit<EuiContextMenuPanelItemDescriptorEntry, 'name'> {
+export interface ShareContextMenuPanelItem extends Omit<
+  EuiContextMenuPanelItemDescriptorEntry,
+  'name'
+> {
   name: string; // EUI will accept a `ReactNode` for the `name` prop, but `ShareContentMenu` assumes a `string`.
   sortOrder?: number;
 }

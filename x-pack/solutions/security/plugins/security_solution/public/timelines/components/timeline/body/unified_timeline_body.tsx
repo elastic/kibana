@@ -17,8 +17,10 @@ import { UnifiedTimeline } from '../unified_components';
 import { defaultUdtHeaders } from './column_headers/default_headers';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
 
-export interface UnifiedTimelineBodyProps
-  extends Omit<ComponentProps<typeof UnifiedTimeline>, 'dataView'> {
+export interface UnifiedTimelineBodyProps extends Omit<
+  ComponentProps<typeof UnifiedTimeline>,
+  'dataView'
+> {
   header: ReactElement;
 }
 

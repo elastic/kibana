@@ -359,9 +359,8 @@ export class EndpointMetadataService {
     let unitedMetadataQueryResponse: SearchResponse<UnitedAgentMetadataPersistedData>;
 
     try {
-      unitedMetadataQueryResponse = await this.esClient.search<UnitedAgentMetadataPersistedData>(
-        unitedIndexQuery
-      );
+      unitedMetadataQueryResponse =
+        await this.esClient.search<UnitedAgentMetadataPersistedData>(unitedIndexQuery);
       // FYI: we don't need to run the ES search response through `this.ensureDataValidForSpace()` because
       // the query (`unitedIndexQuery`) above already included a filter with all of the valid policy ids
       // for the current space - thus data is already coped to the space

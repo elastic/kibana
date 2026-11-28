@@ -42,7 +42,7 @@ export interface SerializableAttributes {
 
 export type GenericVisualizationCrudTypes<
   ContentType extends string,
-  Attr extends SerializableAttributes
+  Attr extends SerializableAttributes,
 > = ContentManagementCrudTypes<
   ContentType,
   Attr,
@@ -53,7 +53,7 @@ export type GenericVisualizationCrudTypes<
 
 export interface VisualizationClient<
   ContentType extends string = string,
-  Attr extends SerializableAttributes = SerializableAttributes
+  Attr extends SerializableAttributes = SerializableAttributes,
 > {
   get: (id: string) => Promise<GenericVisualizationCrudTypes<ContentType, Attr>['GetOut']>;
   create: (

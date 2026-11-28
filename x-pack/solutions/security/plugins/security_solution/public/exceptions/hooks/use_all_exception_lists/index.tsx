@@ -17,7 +17,7 @@ export interface ExceptionListInfo extends ExceptionListSchema {
 export type UseAllExceptionListsReturn = [
   boolean,
   ExceptionListInfo[],
-  Record<string, ExceptionListInfo>
+  Record<string, ExceptionListInfo>,
 ];
 
 /**

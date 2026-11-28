@@ -112,14 +112,17 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ isCrawler }) => 
                           }
                         )
                     : hasMultipleConnectors
-                    ? i18n.translate('xpack.enterpriseSearch.connectorStats.multipleCrawlersText', {
-                        defaultMessage: '{count} web crawlers',
-                        values: { count: connectorCount },
-                      })
-                    : i18n.translate('xpack.enterpriseSearch.connectorStats.singleCrawlerText', {
-                        defaultMessage: '{count} web crawler',
-                        values: { count: connectorCount },
-                      })}
+                      ? i18n.translate(
+                          'xpack.enterpriseSearch.connectorStats.multipleCrawlersText',
+                          {
+                            defaultMessage: '{count} web crawlers',
+                            values: { count: connectorCount },
+                          }
+                        )
+                      : i18n.translate('xpack.enterpriseSearch.connectorStats.singleCrawlerText', {
+                          defaultMessage: '{count} web crawler',
+                          values: { count: connectorCount },
+                        })}
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>

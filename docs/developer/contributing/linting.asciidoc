@@ -1,10 +1,26 @@
 [[kibana-linting]]
-== Linting
+== Linting and formatting
 
 A note about linting: We use http://eslint.org[eslint] to check that the
 {kib-repo}blob/{branch}/STYLEGUIDE.mdx[styleguide] is being followed. It runs in a
 pre-commit hook and as a part of the tests, but most contributors
 integrate it with their code editors for real-time feedback.
+
+JavaScript and TypeScript formatting is handled separately by
+https://oxc.rs/docs/guide/usage/formatter[oxfmt], using `.oxfmtrc.json`.
+Run ESLint fixes before formatting so the formatter also handles those edits:
+
+[source,shell]
+----
+node scripts/eslint --fix path/to/file.ts
+node scripts/oxfmt path/to/file.ts
+----
+
+Use `node scripts/oxfmt --check path/to/file.ts` to report formatting differences
+without writing files. Without paths, oxfmt processes the repository's configured
+JavaScript and TypeScript files, excluding vendored and generated code.
+
+In CI, oxfmt runs after ESLint in the linting job, not in quick checks.
 
 Here are some hints for getting eslint setup in your favorite editor:
 
@@ -64,11 +80,7 @@ file by adding this line in your setting.
 }
 ----
 
-:warning: It is *not* recommended to use the
-https://prettier.io/[`Prettier` extension/IDE plugin] while
-maintaining the {kib} project. Formatting and styling roles are set in
-the multiple `.eslintrc.js` files across the project and some of them
-use the https://www.npmjs.com/package/prettier[NPM version of Prettier].
-Using the IDE extension might cause conflicts, applying the formatting
-to too many files that shouldn’t be prettier-ized and/or highlighting
-errors that are actually OK.
+Use the oxfmt editor extension for JavaScript and TypeScript formatting, and
+enable format on save. Keep the ESLint extension enabled for lint diagnostics
+and fixes; ESLint no longer formats code. Disable the Prettier extension for
+this workspace to avoid conflicting formatting.

@@ -13,7 +13,7 @@ import type { SerializableSavedSearch } from './types';
 
 export const fromSavedSearchAttributes = <
   Serialized extends boolean = false,
-  ReturnType = Serialized extends true ? SerializableSavedSearch : SavedSearch
+  ReturnType = Serialized extends true ? SerializableSavedSearch : SavedSearch,
 >(
   id: string | undefined,
   attributes: SavedSearchAttributes,
@@ -49,4 +49,4 @@ export const fromSavedSearchAttributes = <
     visContext: attributes.visContext,
     density: attributes.density,
     managed,
-  } as ReturnType);
+  }) as ReturnType;

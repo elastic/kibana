@@ -414,7 +414,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
         model:
           rest.model ??
           ('defaultModel' in this.config
-            ? this.config.defaultModel ?? DEFAULT_OPENAI_MODEL
+            ? (this.config.defaultModel ?? DEFAULT_OPENAI_MODEL)
             : DEFAULT_OPENAI_MODEL),
       };
 

@@ -293,10 +293,13 @@ export function generateLegendsAndAssignColorsToWaterfall(waterfallItems: IWater
   const colorBy =
     serviceLegends.length > 1 ? WaterfallLegendType.ServiceName : WaterfallLegendType.SpanType;
 
-  const serviceColorsMap = serviceLegends.reduce((colorMap, legend) => {
-    colorMap[legend.value] = legend.color;
-    return colorMap;
-  }, {} as Record<string, string>);
+  const serviceColorsMap = serviceLegends.reduce(
+    (colorMap, legend) => {
+      colorMap[legend.value] = legend.color;
+      return colorMap;
+    },
+    {} as Record<string, string>
+  );
 
   const legendsByValue = legends.reduce<Record<string, IWaterfallLegend>>((acc, curr) => {
     if (curr.type === colorBy) {

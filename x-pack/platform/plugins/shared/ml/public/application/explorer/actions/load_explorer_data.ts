@@ -181,7 +181,7 @@ const loadExplorerDataProvider = (
 
 export const useExplorerData = (): [
   Partial<ExplorerState> | undefined,
-  (d: LoadExplorerDataConfig) => void
+  (d: LoadExplorerDataConfig) => void,
 ] => {
   const timefilter = useTimefilter();
   const mlApi = useMlApi();

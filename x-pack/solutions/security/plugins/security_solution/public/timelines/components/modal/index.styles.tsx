@@ -29,8 +29,7 @@ export const usePaneStyles = () => {
     bottom: 0;
     // TODO EUI: add color with transparency
     background: ${transparentize(euiTheme.colors.ink, 0.5)};
-    z-index: ${(euiTheme.levels.flyout as number) +
-    1}; // this z-index needs to be between the eventFlyout (set at 1000) and the timelineFlyout (set at 1002)
+    z-index: ${(euiTheme.levels.flyout as number) + 1}; // this z-index needs to be between the eventFlyout (set at 1000) and the timelineFlyout (set at 1002)
 
     ${euiCanAnimate} {
       animation: ${euiAnimFadeIn} ${euiTheme.animation.fast} ease-in;

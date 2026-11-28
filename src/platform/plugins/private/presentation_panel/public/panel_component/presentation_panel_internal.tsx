@@ -26,7 +26,7 @@ import { usePanelErrorCss } from './use_panel_error_css';
 
 export const PresentationPanelInternal = <
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
-  ComponentPropsType extends {} = {}
+  ComponentPropsType extends {} = {},
 >({
   index,
   hideHeader,

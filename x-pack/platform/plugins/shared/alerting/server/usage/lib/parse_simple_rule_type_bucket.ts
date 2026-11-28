@@ -15,9 +15,12 @@ export function parseSimpleRuleTypeBucket(
   ruleTypeBuckets: AggregationsBuckets<AggregationsStringTermsBucketKeys>
 ) {
   const buckets = ruleTypeBuckets as AggregationsStringTermsBucketKeys[];
-  return (buckets ?? []).reduce((acc, bucket: AggregationsStringTermsBucketKeys) => {
-    const ruleType: string = replaceDotSymbols(bucket.key);
-    acc[ruleType] = bucket.doc_count ?? 0;
-    return acc;
-  }, {} as Record<string, number>);
+  return (buckets ?? []).reduce(
+    (acc, bucket: AggregationsStringTermsBucketKeys) => {
+      const ruleType: string = replaceDotSymbols(bucket.key);
+      acc[ruleType] = bucket.doc_count ?? 0;
+      return acc;
+    },
+    {} as Record<string, number>
+  );
 }

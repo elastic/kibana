@@ -95,8 +95,8 @@ export const ThresholdExpression = ({
           }
           isActive={Boolean(
             alertThresholdPopoverOpen ||
-              (errors.threshold0 && errors.threshold0.length) ||
-              (errors.threshold1 && errors.threshold1.length)
+            (errors.threshold0 && errors.threshold0.length) ||
+            (errors.threshold1 && errors.threshold1.length)
           )}
           onClick={() => {
             setAlertThresholdPopoverOpen(true);

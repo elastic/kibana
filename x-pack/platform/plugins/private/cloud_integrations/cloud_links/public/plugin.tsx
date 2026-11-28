@@ -29,9 +29,12 @@ interface CloudLinksDepsStart {
   guidedOnboarding?: GuidedOnboardingPluginStart;
 }
 
-export class CloudLinksPlugin
-  implements Plugin<void, void, CloudLinksDepsSetup, CloudLinksDepsStart>
-{
+export class CloudLinksPlugin implements Plugin<
+  void,
+  void,
+  CloudLinksDepsSetup,
+  CloudLinksDepsStart
+> {
   public offering: BuildFlavor;
 
   constructor(initializerContext: PluginInitializerContext) {

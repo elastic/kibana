@@ -126,7 +126,7 @@ export const getSerializedState = ({
   const savedObjectsTaggingApi = savedObjectsTaggingService?.getTaggingApi();
   const references = savedObjectsTaggingApi?.ui.updateTagsReferences
     ? savedObjectsTaggingApi?.ui.updateTagsReferences(searchSourceReferences ?? [], tags)
-    : searchSourceReferences ?? [];
+    : (searchSourceReferences ?? []);
 
   const allReferences = [
     ...references,

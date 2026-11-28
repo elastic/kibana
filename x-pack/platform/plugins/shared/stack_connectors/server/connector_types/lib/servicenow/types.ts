@@ -332,8 +332,7 @@ export interface AddEventApiHandlerArgs extends ExternalServiceApiHandlerArgs<Ex
   params: ExecutorSubActionAddEventParams;
 }
 
-export interface GetCommonFieldsHandlerArgsITOM
-  extends ExternalServiceApiHandlerArgs<ExternalServiceITOM> {
+export interface GetCommonFieldsHandlerArgsITOM extends ExternalServiceApiHandlerArgs<ExternalServiceITOM> {
   params: ExecutorSubActionGetChoicesParams;
 }
 

@@ -832,9 +832,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const SPACE_ID = `test-space-${uuidv4()}`;
       const SPACE_NAME = `test-space-name ${uuidv4()}`;
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
-      const spaceScopedPrivateLocation = await testPrivateLocationsService.addTestPrivateLocation(
-        SPACE_ID
-      );
+      const spaceScopedPrivateLocation =
+        await testPrivateLocationsService.addTestPrivateLocation(SPACE_ID);
       await supertestWithoutAuth
         .put(
           `/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
@@ -873,9 +872,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const SPACE_NAME = `test-space-name ${uuidv4()}`;
       const customNamespace = 'custom.namespace';
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
-      const spaceScopedPrivateLocation = await testPrivateLocationsService.addTestPrivateLocation(
-        SPACE_ID
-      );
+      const spaceScopedPrivateLocation =
+        await testPrivateLocationsService.addTestPrivateLocation(SPACE_ID);
       await supertestWithoutAuth
         .put(
           `/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
@@ -915,9 +913,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const SPACE_NAME = `test-space-name ${uuidv4()}`;
       const customNamespace = 'custom.namespace';
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
-      const spaceScopedPrivateLocation = await testPrivateLocationsService.addTestPrivateLocation(
-        SPACE_ID
-      );
+      const spaceScopedPrivateLocation =
+        await testPrivateLocationsService.addTestPrivateLocation(SPACE_ID);
       await supertestWithoutAuth
         .put(
           `/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
@@ -959,9 +956,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const SPACE_NAME = `test-space-name ${uuidv4()}`;
       const customNamespace = 'custom-namespace';
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
-      const spaceScopedPrivateLocation = await testPrivateLocationsService.addTestPrivateLocation(
-        SPACE_ID
-      );
+      const spaceScopedPrivateLocation =
+        await testPrivateLocationsService.addTestPrivateLocation(SPACE_ID);
       const { body } = await supertestWithoutAuth
         .put(
           `/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
@@ -1001,9 +997,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const SPACE_NAME = `test-space-name ${uuidv4()}`;
       const customNamespace = 'custom-namespace';
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
-      const spaceScopedPrivateLocation = await testPrivateLocationsService.addTestPrivateLocation(
-        SPACE_ID
-      );
+      const spaceScopedPrivateLocation =
+        await testPrivateLocationsService.addTestPrivateLocation(SPACE_ID);
       const { body } = await supertestWithoutAuth
         .put(
           `/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
@@ -1042,9 +1037,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const SPACE_ID = `test-space-${uuidv4()}`;
       const SPACE_NAME = `test-space-name ${uuidv4()}`;
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
-      const spaceScopedPrivateLocation = await testPrivateLocationsService.addTestPrivateLocation(
-        SPACE_ID
-      );
+      const spaceScopedPrivateLocation =
+        await testPrivateLocationsService.addTestPrivateLocation(SPACE_ID);
       await supertestWithoutAuth
         .put(
           `/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
@@ -1127,9 +1121,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const SPACE_ID = `test-space-${uuidv4()}`;
       const SPACE_NAME = `test-space-name ${uuidv4()}`;
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
-      const spaceScopedPrivateLocation = await testPrivateLocationsService.addTestPrivateLocation(
-        SPACE_ID
-      );
+      const spaceScopedPrivateLocation =
+        await testPrivateLocationsService.addTestPrivateLocation(SPACE_ID);
       await supertestWithoutAuth
         .put(
           `/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(

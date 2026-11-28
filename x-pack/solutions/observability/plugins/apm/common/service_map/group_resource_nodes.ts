@@ -92,29 +92,27 @@ function groupNodes({
   nodesMap: Map<string, ConnectionElement>;
   groupedConnections: ReturnType<typeof groupConnections>;
 }) {
-  return groupedConnections.map(
-    ({ id, targets }): GroupedNode => ({
-      data: {
-        id,
-        [SPAN_TYPE]: 'external',
-        label: i18n.translate('xpack.apm.serviceMap.resourceCountLabel', {
-          defaultMessage: '{count} resources',
-          values: { count: targets.length },
-        }),
-        groupedConnections: targets
-          .map((target) => {
-            const targetElement = nodesMap.get(target);
-            return targetElement
-              ? {
-                  ...targetElement.data,
-                  label: targetElement.data.label || targetElement.data.id,
-                }
-              : undefined;
-          })
-          .filter((target): target is GroupedConnection => !!target),
-      },
-    })
-  );
+  return groupedConnections.map(({ id, targets }): GroupedNode => ({
+    data: {
+      id,
+      [SPAN_TYPE]: 'external',
+      label: i18n.translate('xpack.apm.serviceMap.resourceCountLabel', {
+        defaultMessage: '{count} resources',
+        values: { count: targets.length },
+      }),
+      groupedConnections: targets
+        .map((target) => {
+          const targetElement = nodesMap.get(target);
+          return targetElement
+            ? {
+                ...targetElement.data,
+                label: targetElement.data.label || targetElement.data.id,
+              }
+            : undefined;
+        })
+        .filter((target): target is GroupedConnection => !!target),
+    },
+  }));
 }
 
 function groupEdges({
@@ -123,15 +121,13 @@ function groupEdges({
   groupedConnections: ReturnType<typeof groupConnections>;
 }) {
   return groupedConnections.flatMap(({ id, sources }) =>
-    sources.map(
-      (source): GroupedEdge => ({
-        data: {
-          id: `${source}~>${id}`,
-          source,
-          target: id,
-        },
-      })
-    )
+    sources.map((source): GroupedEdge => ({
+      data: {
+        id: `${source}~>${id}`,
+        source,
+        target: id,
+      },
+    }))
   );
 }
 

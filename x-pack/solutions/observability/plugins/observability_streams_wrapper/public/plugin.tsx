@@ -64,15 +64,12 @@ export const renderApp = ({
   };
 };
 
-export class ObservabilityStreamsWrapperPlugin
-  implements
-    Plugin<
-      ObservabilityStreamsWrapperPublicSetup,
-      ObservabilityStreamsWrapperPublicStart,
-      ObservabilityStreamsWrapperSetupDependencies,
-      ObservabilityStreamsWrapperStartDependencies
-    >
-{
+export class ObservabilityStreamsWrapperPlugin implements Plugin<
+  ObservabilityStreamsWrapperPublicSetup,
+  ObservabilityStreamsWrapperPublicStart,
+  ObservabilityStreamsWrapperSetupDependencies,
+  ObservabilityStreamsWrapperStartDependencies
+> {
   logger: Logger;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {

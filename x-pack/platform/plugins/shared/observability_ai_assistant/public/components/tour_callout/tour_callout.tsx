@@ -9,21 +9,20 @@ import React, { ReactElement, useEffect, useState } from 'react';
 import { EuiButtonEmpty, EuiText, EuiTourStep, EuiTourStepProps } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-export interface TourCalloutProps
-  extends Pick<
-    EuiTourStepProps,
-    | 'title'
-    | 'content'
-    | 'step'
-    | 'stepsTotal'
-    | 'anchorPosition'
-    | 'minWidth'
-    | 'maxWidth'
-    | 'footerAction'
-    | 'hasArrow'
-    | 'subtitle'
-    | 'maxWidth'
-  > {
+export interface TourCalloutProps extends Pick<
+  EuiTourStepProps,
+  | 'title'
+  | 'content'
+  | 'step'
+  | 'stepsTotal'
+  | 'anchorPosition'
+  | 'minWidth'
+  | 'maxWidth'
+  | 'footerAction'
+  | 'hasArrow'
+  | 'subtitle'
+  | 'maxWidth'
+> {
   children: ReactElement;
   isOpen?: boolean;
   footerButtonLabel: string;

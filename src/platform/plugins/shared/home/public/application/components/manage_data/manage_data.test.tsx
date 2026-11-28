@@ -52,7 +52,7 @@ const createApplicationStartMock = ({
         ['management', { status: managementAppStatus } as PublicAppInfo],
       ])
     ),
-  } as unknown as ApplicationStart);
+  }) as unknown as ApplicationStart;
 
 const applicationStartMock = createApplicationStartMock({
   isManagementEnabled: true,

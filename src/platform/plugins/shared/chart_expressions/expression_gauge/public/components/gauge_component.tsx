@@ -199,7 +199,9 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
       bands: number[],
       percentageMode?: boolean
     ) => {
-      const stops = percentageMode ? bands.map((v) => v * 100) : paletteConfig.params?.stops ?? [];
+      const stops = percentageMode
+        ? bands.map((v) => v * 100)
+        : (paletteConfig.params?.stops ?? []);
 
       return paletteService
         .get(paletteConfig?.name ?? 'custom')
@@ -341,7 +343,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
 
     const overridedColor = overrideColor(
       value,
-      args.percentageMode ? bands : args.palette?.params?.stops ?? [],
+      args.percentageMode ? bands : (args.palette?.params?.stops ?? []),
       args.percentageMode ? tickFormatter : undefined
     );
 
@@ -350,7 +352,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
     }
 
     return args.palette
-      ? getColor(value, args.palette, bands, args.percentageMode) ?? TRANSPARENT
+      ? (getColor(value, args.palette, bands, args.percentageMode) ?? TRANSPARENT)
       : TRANSPARENT;
   };
   const getColorConfig = (): BulletProps['colorBands'] => {

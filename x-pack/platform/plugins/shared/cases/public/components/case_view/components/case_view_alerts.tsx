@@ -79,7 +79,7 @@ export const CaseViewAlerts = ({
         ruleTypeIds={
           caseData.owner === SECURITY_SOLUTION_OWNER
             ? SECURITY_SOLUTION_RULE_TYPE_IDS
-            : alertData?.ruleTypeIds ?? []
+            : (alertData?.ruleTypeIds ?? [])
         }
         consumers={alertData?.featureIds}
         query={alertIdsQuery}

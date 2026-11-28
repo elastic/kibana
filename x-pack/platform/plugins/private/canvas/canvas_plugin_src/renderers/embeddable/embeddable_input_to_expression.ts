@@ -23,7 +23,7 @@ export const inputToExpressionTypeMap = {
 */
 export function embeddableInputToExpression<
   UseGenericEmbeddable extends boolean,
-  ConditionalReturnType = UseGenericEmbeddable extends true ? string : string | undefined
+  ConditionalReturnType = UseGenericEmbeddable extends true ? string : string | undefined,
 >(
   state: object,
   embeddableType: string,

@@ -98,21 +98,18 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
               : copyAllowlistedFields(filterList.prebuiltRulesAlerts, withSanitized);
           });
 
-          const sanitizedAlerts = processedAlerts.map(
-            (event: TelemetryEvent): TelemetryEvent =>
-              processK8sUsernames(clusterInfo?.cluster_uuid, event)
+          const sanitizedAlerts = processedAlerts.map((event: TelemetryEvent): TelemetryEvent =>
+            processK8sUsernames(clusterInfo?.cluster_uuid, event)
           );
 
-          const enrichedAlerts = sanitizedAlerts.map(
-            (event: TelemetryEvent): TelemetryEvent => ({
-              ...event,
-              licence_id: licenseInfo?.uid,
-              cluster_uuid: clusterInfo?.cluster_uuid,
-              cluster_name: clusterInfo?.cluster_name,
-              package_version: packageInfo?.version,
-              task_version: taskVersion,
-            })
-          );
+          const enrichedAlerts = sanitizedAlerts.map((event: TelemetryEvent): TelemetryEvent => ({
+            ...event,
+            licence_id: licenseInfo?.uid,
+            cluster_uuid: clusterInfo?.cluster_uuid,
+            cluster_name: clusterInfo?.cluster_name,
+            package_version: packageInfo?.version,
+            task_version: taskVersion,
+          }));
 
           log.debug('sending elastic prebuilt alerts', {
             length: enrichedAlerts.length,

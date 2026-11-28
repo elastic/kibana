@@ -62,8 +62,8 @@ const stateSelectorFactory =
     state$.pipe(map(selector), distinctUntilChanged(equalityFn));
 
 export enum LensVisServiceStatus {
-  'initial' = 'initial',
-  'completed' = 'completed',
+  initial = 'initial',
+  completed = 'completed',
 }
 
 interface LensVisServiceState {

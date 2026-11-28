@@ -312,9 +312,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
 
-      const spaceScopedPrivateLocation = await testPrivateLocations.addTestPrivateLocation(
-        SPACE_ID
-      );
+      const spaceScopedPrivateLocation =
+        await testPrivateLocations.addTestPrivateLocation(SPACE_ID);
       const newMonitor = {
         name,
         type: 'http',

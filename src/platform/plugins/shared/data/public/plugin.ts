@@ -49,15 +49,12 @@ import { getTableViewDescription } from './utils/table_inspector_view';
 import { NowProvider, NowProviderInternalContract } from './now_provider';
 import { getAggsFormats, DatatableUtilitiesService } from '../common';
 
-export class DataPublicPlugin
-  implements
-    Plugin<
-      DataPublicPluginSetup,
-      DataPublicPluginStart,
-      DataSetupDependencies,
-      DataStartDependencies
-    >
-{
+export class DataPublicPlugin implements Plugin<
+  DataPublicPluginSetup,
+  DataPublicPluginStart,
+  DataSetupDependencies,
+  DataStartDependencies
+> {
   private readonly searchService: SearchService;
   private readonly queryService: QueryService;
   private readonly storage: IStorageWrapper;

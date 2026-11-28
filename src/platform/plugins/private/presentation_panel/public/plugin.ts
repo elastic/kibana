@@ -35,15 +35,12 @@ export interface PresentationPanelStartDependencies {
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
 }
 
-export class PresentationPanelPlugin
-  implements
-    Plugin<
-      PresentationPanelSetup,
-      PresentationPanelStart,
-      PresentationPanelSetupDependencies,
-      PresentationPanelStartDependencies
-    >
-{
+export class PresentationPanelPlugin implements Plugin<
+  PresentationPanelSetup,
+  PresentationPanelStart,
+  PresentationPanelSetupDependencies,
+  PresentationPanelStartDependencies
+> {
   public setup(
     _coreSetup: CoreSetup<PresentationPanelSetupDependencies, PresentationPanelStart>,
     _setupPlugins: PresentationPanelSetupDependencies

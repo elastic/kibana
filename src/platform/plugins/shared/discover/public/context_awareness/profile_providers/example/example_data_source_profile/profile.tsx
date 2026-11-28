@@ -196,24 +196,22 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
 
       return [
         ...additionalControls,
-        ...['visBarVerticalStacked', 'heart', 'inspect'].map(
-          (iconType): RowControlColumn => ({
-            id: `exampleControl_${iconType}`,
-            render: (Control, rowProps) => {
-              return (
-                <Control
-                  data-test-subj={`exampleLogsControl_${iconType}`}
-                  label={`Example ${iconType}`}
-                  tooltipContent={`Example ${iconType}`}
-                  iconType={iconType}
-                  onClick={() => {
-                    alert(`Example "${iconType}" control clicked. Row index: ${rowProps.rowIndex}`);
-                  }}
-                />
-              );
-            },
-          })
-        ),
+        ...['visBarVerticalStacked', 'heart', 'inspect'].map((iconType): RowControlColumn => ({
+          id: `exampleControl_${iconType}`,
+          render: (Control, rowProps) => {
+            return (
+              <Control
+                data-test-subj={`exampleLogsControl_${iconType}`}
+                label={`Example ${iconType}`}
+                tooltipContent={`Example ${iconType}`}
+                iconType={iconType}
+                onClick={() => {
+                  alert(`Example "${iconType}" control clicked. Row index: ${rowProps.rowIndex}`);
+                }}
+              />
+            );
+          },
+        })),
       ];
     },
     getDefaultAppState: () => () => ({
@@ -233,27 +231,26 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
       ],
       rowHeight: 5,
     }),
-    getAdditionalCellActions: (prev) => () =>
-      [
-        ...prev(),
-        {
-          id: 'example-data-source-action',
-          getDisplayName: () => 'Example data source action',
-          getIconType: () => 'plus',
-          execute: () => {
-            alert('Example data source action executed');
-          },
+    getAdditionalCellActions: (prev) => () => [
+      ...prev(),
+      {
+        id: 'example-data-source-action',
+        getDisplayName: () => 'Example data source action',
+        getIconType: () => 'plus',
+        execute: () => {
+          alert('Example data source action executed');
         },
-        {
-          id: 'another-example-data-source-action',
-          getDisplayName: () => 'Another example data source action',
-          getIconType: () => 'minus',
-          execute: () => {
-            alert('Another example data source action executed');
-          },
-          isCompatible: ({ field }) => field.name !== 'message',
+      },
+      {
+        id: 'another-example-data-source-action',
+        getDisplayName: () => 'Another example data source action',
+        getIconType: () => 'minus',
+        execute: () => {
+          alert('Another example data source action executed');
         },
-      ],
+        isCompatible: ({ field }) => field.name !== 'message',
+      },
+    ],
     getPaginationConfig: (prev) => () => ({
       ...prev(),
       paginationMode: 'singlePage',

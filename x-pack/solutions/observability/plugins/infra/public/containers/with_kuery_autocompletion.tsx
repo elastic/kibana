@@ -75,14 +75,14 @@ class WithKueryAutocompletionComponent extends React.Component<
     });
 
     const suggestions = dataView
-      ? (await this.props.kibana.services.unifiedSearch.autocomplete.getQuerySuggestions({
+      ? ((await this.props.kibana.services.unifiedSearch.autocomplete.getQuerySuggestions({
           language,
           query: expression,
           selectionStart: cursorPosition,
           selectionEnd: cursorPosition,
           indexPatterns: [dataView],
           boolFilter: [],
-        })) ?? []
+        })) ?? [])
       : [];
 
     const transformedSuggestions = transformSuggestions

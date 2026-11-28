@@ -53,8 +53,8 @@ function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): Funct
     type: ['bucket', 'categorize'].includes(ESFunctionDefinition.name)
       ? 'grouping'
       : ESFunctionDefinition.type === 'eval'
-      ? 'scalar'
-      : ESFunctionDefinition.type,
+        ? 'scalar'
+        : ESFunctionDefinition.type,
     name: ESFunctionDefinition.name,
     operator: ESFunctionDefinition.operator,
     locationsAvailable,

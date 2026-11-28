@@ -45,12 +45,12 @@ export const CreateIntegrationAssistant = React.memo(() => {
     state.step === deployStepIndex
       ? stepNames.deploy
       : state.step === celReviewStepIndex
-      ? stepNames.cel_review
-      : state.step === celInputStepIndex
-      ? stepNames.cel_input
-      : state.step in stepNames
-      ? stepNames[state.step]
-      : 'Unknown Step';
+        ? stepNames.cel_review
+        : state.step === celInputStepIndex
+          ? stepNames.cel_input
+          : state.step in stepNames
+            ? stepNames[state.step]
+            : 'Unknown Step';
 
   const telemetry = useTelemetry();
   useEffect(() => {

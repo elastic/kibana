@@ -33,8 +33,7 @@ export interface LogRateAnalysisEmbeddableState extends SerializedTitles, Serial
 }
 
 export interface LogRateAnalysisEmbeddableInitialState
-  extends SerializedTitles,
-    SerializedTimeRange {
+  extends SerializedTitles, SerializedTimeRange {
   dataViewId?: string;
 }
 

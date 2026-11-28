@@ -30,7 +30,7 @@ import { ReindexService, reindexServiceFactory } from './reindex_service';
 const asApiResponse = <T>(body: T): TransportResult<T> =>
   ({
     body,
-  } as TransportResult<T>);
+  }) as TransportResult<T>;
 
 const { currentMajor, prevMajor } = getMockVersionInfo();
 

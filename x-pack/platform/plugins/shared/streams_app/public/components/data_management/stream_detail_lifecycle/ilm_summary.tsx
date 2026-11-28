@@ -142,12 +142,12 @@ function IlmPhase({
     phase.name === 'delete'
       ? undefined
       : phase.name === 'hot'
-      ? minAge
-        ? '0px 16px 16px 0px'
-        : '0px'
-      : minAge
-      ? '16px'
-      : '16px 0px 0px 16px';
+        ? minAge
+          ? '0px 16px 16px 0px'
+          : '0px'
+        : minAge
+          ? '16px'
+          : '16px 0px 0px 16px';
   const { ilmPhases } = useIlmPhasesColorAndDescription();
   const { euiTheme } = useEuiTheme();
 

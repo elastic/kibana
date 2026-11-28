@@ -59,9 +59,12 @@ export interface UiActionsEnhancedExamplesStart {
   managerWithEmbeddable: UiActionsEnhancedDynamicActionManager;
 }
 
-export class UiActionsEnhancedExamplesPlugin
-  implements Plugin<void, UiActionsEnhancedExamplesStart, SetupDependencies, StartDependencies>
-{
+export class UiActionsEnhancedExamplesPlugin implements Plugin<
+  void,
+  UiActionsEnhancedExamplesStart,
+  SetupDependencies,
+  StartDependencies
+> {
   public setup(
     core: CoreSetup<StartDependencies, UiActionsEnhancedExamplesStart>,
     { embeddable, uiActionsEnhanced: uiActions, developerExamples }: SetupDependencies

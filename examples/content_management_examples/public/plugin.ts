@@ -10,9 +10,12 @@
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { StartDeps, SetupDeps } from './types';
 
-export class ContentManagementExamplesPlugin
-  implements Plugin<unknown, unknown, SetupDeps, StartDeps>
-{
+export class ContentManagementExamplesPlugin implements Plugin<
+  unknown,
+  unknown,
+  SetupDeps,
+  StartDeps
+> {
   public setup(core: CoreSetup<StartDeps>, { contentManagement, developerExamples }: SetupDeps) {
     developerExamples.register({
       appId: `contentManagementExamples`,

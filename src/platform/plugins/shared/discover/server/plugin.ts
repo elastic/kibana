@@ -25,9 +25,12 @@ import type { ConfigSchema } from './config';
 import { appLocatorGetLocationCommon } from '../common/app_locator_get_location';
 import { TRACES_PRODUCT_FEATURE_ID } from '../common/constants';
 
-export class DiscoverServerPlugin
-  implements Plugin<object, DiscoverServerPluginStart, object, DiscoverServerPluginStartDeps>
-{
+export class DiscoverServerPlugin implements Plugin<
+  object,
+  DiscoverServerPluginStart,
+  object,
+  DiscoverServerPluginStartDeps
+> {
   private readonly config: ConfigSchema;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {

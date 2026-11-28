@@ -20,8 +20,8 @@ type OptionalPageState = object | undefined;
 export type MLPageState<PageType, PageState> = PageState extends OptionalPageState
   ? { page: PageType; pageState?: PageState }
   : PageState extends object
-  ? { page: PageType; pageState: PageState }
-  : { page: PageType };
+    ? { page: PageType; pageState: PageState }
+    : { page: PageType };
 
 export interface MlCommonGlobalState {
   time?: TimeRange;
@@ -185,7 +185,8 @@ export interface TimeSeriesExplorerAppState {
 }
 
 export interface TimeSeriesExplorerPageState
-  extends TimeSeriesExplorerParams,
+  extends
+    TimeSeriesExplorerParams,
     Pick<TimeSeriesExplorerAppState, 'query'>,
     Pick<TimeSeriesExplorerGlobalState, 'refreshInterval'> {
   jobIds?: JobId[];

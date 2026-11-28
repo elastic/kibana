@@ -79,8 +79,8 @@ export const DocViewerLegacyTable = ({
       const fieldType = isNestedFieldParent(field, dataView)
         ? 'nested'
         : fieldMapping
-        ? getFieldIconType(fieldMapping)
-        : undefined;
+          ? getFieldIconType(fieldMapping)
+          : undefined;
       const ignored = getIgnoredReason(fieldMapping ?? field, hit.raw._ignored);
       return {
         action: {

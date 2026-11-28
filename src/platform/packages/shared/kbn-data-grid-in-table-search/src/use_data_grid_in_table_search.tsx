@@ -16,8 +16,10 @@ import { wrapRenderCellValueWithInTableSearchSupport } from './wrap_render_cell_
 import { clearSearchTermRegExpCache } from './in_table_search_highlights_wrapper';
 import { getHighlightColors } from './get_highlight_colors';
 
-export interface UseDataGridInTableSearchProps
-  extends Pick<InTableSearchControlProps, 'rows' | 'visibleColumns'> {
+export interface UseDataGridInTableSearchProps extends Pick<
+  InTableSearchControlProps,
+  'rows' | 'visibleColumns'
+> {
   enableInTableSearch?: boolean;
   dataGridWrapper: HTMLElement | null;
   dataGridRef: React.RefObject<EuiDataGridRefProps | null>;

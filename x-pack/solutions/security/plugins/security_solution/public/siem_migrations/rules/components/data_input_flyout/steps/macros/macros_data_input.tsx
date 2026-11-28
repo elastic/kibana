@@ -24,8 +24,10 @@ interface MacrosDataInputSubStepsProps {
   missingMacros: string[];
   onMissingResourcesFetched: OnMissingResourcesFetched;
 }
-interface MacrosDataInputProps
-  extends Omit<MacrosDataInputSubStepsProps, 'migrationStats' | 'missingMacros'> {
+interface MacrosDataInputProps extends Omit<
+  MacrosDataInputSubStepsProps,
+  'migrationStats' | 'missingMacros'
+> {
   dataInputStep: DataInputStep;
   migrationStats?: RuleMigrationTaskStats;
   missingMacros?: string[];

@@ -15,15 +15,12 @@ import type {
   StartDependencies,
 } from './types';
 
-export class SearchConnectorsPlugin
-  implements
-    Plugin<
-      SearchConnectorsPluginSetup,
-      SearchConnectorsPluginStart,
-      SetupDependencies,
-      StartDependencies
-    >
-{
+export class SearchConnectorsPlugin implements Plugin<
+  SearchConnectorsPluginSetup,
+  SearchConnectorsPluginStart,
+  SetupDependencies,
+  StartDependencies
+> {
   private connectors: ConnectorServerSideDefinition[];
 
   constructor(initializerContext: PluginInitializerContext) {

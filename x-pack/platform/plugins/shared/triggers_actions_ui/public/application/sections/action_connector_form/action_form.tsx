@@ -319,7 +319,7 @@ export const ActionForm = ({
 
         const isSystemActionSelected = Boolean(
           actionTypesIndex[item.id].isSystemActionType &&
-            actions.find((action) => action.actionTypeId === item.id)
+          actions.find((action) => action.actionTypeId === item.id)
         );
 
         const isDisabled = !checkEnabledResult.isEnabled || isSystemActionSelected;

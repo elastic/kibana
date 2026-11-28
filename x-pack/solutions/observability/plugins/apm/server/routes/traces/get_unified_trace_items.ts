@@ -194,8 +194,8 @@ function resolveDuration(apmDuration?: number, otelDuration?: number[] | string)
   const duration = Array.isArray(otelDuration)
     ? otelDuration[0]
     : otelDuration
-    ? parseFloat(otelDuration)
-    : 0;
+      ? parseFloat(otelDuration)
+      : 0;
 
   return duration * 0.001;
 }

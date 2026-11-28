@@ -186,15 +186,12 @@ export interface VisualizationsStartDeps {
  *
  * @internal
  */
-export class VisualizationsPlugin
-  implements
-    Plugin<
-      VisualizationsSetup,
-      VisualizationsStart,
-      VisualizationsSetupDeps,
-      VisualizationsStartDeps
-    >
-{
+export class VisualizationsPlugin implements Plugin<
+  VisualizationsSetup,
+  VisualizationsStart,
+  VisualizationsSetupDeps,
+  VisualizationsStartDeps
+> {
   private readonly types: TypesService = new TypesService();
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private stopUrlTracking: (() => void) | undefined = undefined;

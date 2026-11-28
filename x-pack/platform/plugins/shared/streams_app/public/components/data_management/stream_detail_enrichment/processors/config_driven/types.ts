@@ -11,7 +11,7 @@ import { WithUIAttributes } from '../../types';
 
 export interface ConfigDrivenProcessorConfiguration<
   FormStateT,
-  ProcessorDefinitionT extends ProcessorDefinition
+  ProcessorDefinitionT extends ProcessorDefinition,
 > {
   type: ConfigDrivenProcessorType;
   inputDisplay: string;

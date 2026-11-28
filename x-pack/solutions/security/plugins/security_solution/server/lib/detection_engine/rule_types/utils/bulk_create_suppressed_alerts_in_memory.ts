@@ -187,7 +187,7 @@ export const bulkCreateSuppressedSequencesInMemory = async ({
 };
 
 export interface ExecuteBulkCreateAlertsParams<
-  T extends SuppressionFieldsLatest & BaseFieldsLatest
+  T extends SuppressionFieldsLatest & BaseFieldsLatest,
 > {
   sharedParams: SecuritySharedParams;
   services: SecurityRuleServices;
@@ -202,7 +202,7 @@ export interface ExecuteBulkCreateAlertsParams<
  * creates alerts in ES, both suppressed and unsuppressed
  */
 export const executeBulkCreateAlerts = async <
-  T extends SuppressionFieldsLatest & BaseFieldsLatest
+  T extends SuppressionFieldsLatest & BaseFieldsLatest,
 >({
   sharedParams,
   unsuppressibleWrappedDocs,
