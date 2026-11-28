@@ -314,60 +314,6 @@ module.exports = {
     },
 
     /**
-     * New Platform client-side
-     */
-    {
-      files: ['{src,x-pack}/plugins/*/public/**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'import/no-commonjs': 'error',
-      },
-    },
-    /**
-     * Allow default exports
-     */
-    {
-      files: [
-        '**/*.stories.tsx',
-        '**/*.test.js',
-        'src/platform/test/*/config.ts',
-        'src/platform/test/*/config_open.ts',
-        'src/platform/test/*/*.config.ts',
-        'src/platform/test/*/{tests,test_suites,apis,apps}/**/*',
-        'src/platform/test/server_integration/**/*.ts',
-        'x-pack/solutions/observability/plugins/apm/**/*.js',
-        'x-pack/platform/test/*/{tests,test_suites,apis,apps}/**/*',
-        'x-pack/platform/test/*api_integration*/**/*',
-        'x-pack/platform/test/*/*config.*ts',
-        'x-pack/solutions/*/test/**/{tests,test_suites,apis,apps,fixtures,index.ts}/**/*',
-        'x-pack/solutions/*/test/**/*config*.ts',
-        'x-pack/solutions/*/test/**/tests/**/*',
-        'x-pack/solutions/*/test/api_integration_deployment_agnostic/*configs/**/*',
-        'x-pack/solutions/*/test/alerting_api_integration/**/*',
-        'x-pack/solutions/*/test/serverless/*/configs/**/*',
-        'x-pack/solutions/security/packages/kbn-test-suites-xpack-security-endpoint/{apps,configs}/**/*',
-        'x-pack/platform/test/saved_object_api_integration/*/apis/**/*',
-        'x-pack/platform/test/ui_capabilities/*/tests/**/*',
-        'x-pack/platform/test/upgrade_assistant_integration/**/*',
-        '**/cypress.config.{js,ts}',
-        'x-pack/platform/test/serverless/shared/config*.ts',
-        'x-pack/platform/test/serverless/*/test_suites/**/*',
-        'x-pack/platform/test/serverless/functional/config*.ts',
-        'x-pack/platform/test/serverless/*/configs/**/*',
-        'x-pack/solutions/security/test_suites/test-suites-security-solution-apis/test_suites/**/*',
-        'x-pack/solutions/security/test_suites/test-suites-security-solution-apis/**/config*.ts',
-        '**/playwright.config.ts',
-        '**/playwright.v2.config.ts',
-        '**/*.playwright.config.ts',
-        '**/parallel.playwright.config.ts',
-      ],
-      rules: {
-        'import/no-default-export': 'off',
-        'import/no-named-as-default-member': 'off',
-        'import/no-named-as-default': 'off',
-      },
-    },
-
-    /**
      * Single package.json rules, it tells eslint to ignore the child package.json files
      * and look for dependencies declarations in the single and root level package.json
      */
@@ -392,7 +338,6 @@ module.exports = {
     {
       files: ['scripts/**/*.js', 'src/setup_node_env/**/*.js'],
       rules: {
-        'import/no-commonjs': 'off',
         'prefer-object-spread': 'off',
         'no-var': 'off',
         'prefer-const': 'off',
@@ -461,7 +406,6 @@ module.exports = {
       ],
       excludedFiles: ['**/integration_tests/**/*'],
       rules: {
-        'import/no-commonjs': 'off',
         'prefer-object-spread': 'off',
         'no-restricted-syntax': [
           'error',
@@ -740,9 +684,7 @@ module.exports = {
         'x-pack/platform/plugins/shared/automatic_import/common/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
-        'import/no-nodejs-modules': 'error',
         'no-duplicate-imports': 'off',
-        'import/no-duplicates': 'error',
         'no-restricted-imports': [
           'error',
           {
@@ -807,9 +749,7 @@ module.exports = {
         'x-pack/solutions/security/packages/kbn-test-suites-xpack-security-endpoint/**',
       ],
       rules: {
-        'import/no-nodejs-modules': 'error',
         'no-duplicate-imports': 'off',
-        'import/no-duplicates': ['error'],
         'no-restricted-imports': [
           'error',
           {
@@ -818,16 +758,6 @@ module.exports = {
             paths: RESTRICTED_IMPORTS,
           },
         ],
-      },
-    },
-    // Allow node.js imports for security solution test packages
-    {
-      files: [
-        'x-pack/solutions/security/packages/test-api-clients/**/*.{js,mjs,ts,tsx}',
-        'x-pack/solutions/security/packages/kbn-test-suites-xpack-security-endpoint/**/*.{js,mjs,ts,tsx}',
-      ],
-      rules: {
-        'import/no-nodejs-modules': 'off',
       },
     },
     {
@@ -1007,7 +937,6 @@ module.exports = {
         'require-atomic-updates': 'error',
         'symbol-description': 'error',
         'vars-on-top': 'error',
-        'import/no-duplicates': ['error'],
       },
       overrides: [
         {
@@ -1052,7 +981,6 @@ module.exports = {
         'x-pack/solutions/security/plugins/lists/common/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
-        'import/no-nodejs-modules': 'error',
         'no-restricted-imports': [
           'error',
           {
@@ -1393,9 +1321,7 @@ module.exports = {
     {
       files: ['src/platform/packages/shared/kbn-connector-specs/**/*.{js,mjs,ts,tsx}'],
       rules: {
-        'import/no-nodejs-modules': 'error',
         'no-duplicate-imports': 'off',
-        'import/no-duplicates': 'error',
         'no-restricted-imports': [
           'error',
           {
@@ -1418,18 +1344,6 @@ module.exports = {
       ],
       rules: {
         'no-restricted-imports': ['error', { paths: RESTRICTED_IMPORTS }],
-      },
-    },
-    {
-      files: ['src/platform/packages/shared/kbn-connector-specs/**/*.test.{ts,tsx}'],
-      rules: {
-        'import/no-nodejs-modules': 'off',
-      },
-    },
-    {
-      files: ['src/platform/packages/shared/kbn-connector-specs/src/specs/**/icon/*.{ts,tsx}'],
-      rules: {
-        'import/no-default-export': 'off',
       },
     },
     /**
@@ -1560,7 +1474,6 @@ module.exports = {
             'newlines-between': 'always-and-inside-groups',
           },
         ],
-        'import/newline-after-import': 'error',
         'react-hooks/exhaustive-deps': 'off',
         'react/jsx-boolean-value': ['error', 'never'],
         'sort-keys': 1, // warning
@@ -1597,7 +1510,6 @@ module.exports = {
             groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
           },
         ],
-        'import/extensions': ['error', 'never', { json: 'always', less: 'always', svg: 'always' }],
 
         // react
         'react/no-did-mount-set-state': 'error',
@@ -1676,24 +1588,6 @@ module.exports = {
             message: 'Import jQuery from @kbn/flot-charts instead of using the global.',
           },
         ],
-      },
-    },
-    {
-      files: [
-        'src/platform/packages/shared/kbn-flot-charts/index.js',
-        'src/platform/packages/shared/kbn-flot-charts/index.d.ts',
-      ],
-      rules: {
-        'import/no-default-export': 'off',
-      },
-    },
-    /**
-     * TSVB overrides
-     */
-    {
-      files: ['src/platform/plugins/shared/vis_types/timeseries/**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'import/no-default-export': 'error',
       },
     },
 
@@ -1820,7 +1714,6 @@ module.exports = {
             'newlines-between': 'always',
           },
         ],
-        'import/no-duplicates': ['error'],
         'sort-imports': [
           // This rule sorts imports of multiple members (destructured imports)
           'error',
@@ -1997,7 +1890,6 @@ module.exports = {
         'require-atomic-updates': 'error',
         'symbol-description': 'error',
         'vars-on-top': 'error',
-        'import/no-duplicates': ['error'],
         '@typescript-eslint/no-non-null-assertion': 'error',
         '@typescript-eslint/no-this-alias': 'error',
         '@typescript-eslint/no-explicit-any': 'error',
@@ -2044,7 +1936,6 @@ module.exports = {
             },
           },
         ],
-        'import/no-duplicates': ['error'],
         'sort-imports': [
           // This rule sorts imports of multiple members (destructured imports)
           'error',
@@ -2068,9 +1959,7 @@ module.exports = {
         'src/platform/packages/shared/kbn-workflows-ui/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
-        'import/no-nodejs-modules': 'error',
         'no-duplicate-imports': 'off',
-        'import/no-duplicates': ['error'],
       },
     },
     /**
@@ -2095,7 +1984,6 @@ module.exports = {
     {
       files: ['src/platform/packages/shared/kbn-workflows/scripts/**/*.{js,ts}'],
       rules: {
-        'import/no-nodejs-modules': 'off',
         'no-console': 'off',
         'no-process-exit': 'off',
       },
@@ -2121,8 +2009,17 @@ module.exports = {
       },
       rules: {
         'no-console': 'off',
-        '@kbn/imports/no_unresolvable_imports': 'off',
-        '@kbn/imports/uniform_imports': ['error', { preserveFileExtensions: true }],
+      },
+    },
+
+    {
+      // The OpenAPI generator writes these API client bundles with duplicate and unused imports and
+      // relies on these two fixes to clean them up. Both run here, in one ESLint fix pass, so the
+      // generator output stays the same on every machine. Oxlint turns both off for these files.
+      files: ['x-pack/solutions/security/packages/test-api-clients/{supertest,scout}/*.gen.ts'],
+      rules: {
+        '@kbn/imports/no_unused_imports': 'error',
+        'import/no-duplicates': 'error',
       },
     },
 
@@ -2141,28 +2038,10 @@ module.exports = {
       },
     },
     {
-      files: [
-        // TODO @kibana/operations
-        'scripts/create_observability_rules.js', // is importing "@kbn/observability-alerting-test-data" (observability/private)
-        'src/cli_setup/**', // is importing "@kbn/interactive-setup-plugin" (platform/private)
-        'src/dev/build/tasks/install_chromium.ts', // is importing "@kbn/screenshotting-plugin" (platform/private)*',
-
-        // For now, we keep the exception to let tests depend on anything.
-        // Ideally, we need to classify the solution specific ones to reduce CI times
-        'x-pack/platform/test/plugin_functional/plugins/resolver_test/**',
-      ],
-      rules: {
-        '@kbn/imports/no_group_crossing_manifests': 'warn',
-        '@kbn/imports/no_group_crossing_imports': 'warn',
-      },
-    },
-    {
       files: ['packages/kbn-dependency-usage/**/*.{ts,tsx}'],
       rules: {
         // disabling it since package is a CLI tool
         'no-console': 'off',
-        // disabling it since package is marked as module and it requires extension for files written
-        '@kbn/imports/uniform_imports': 'off',
       },
     },
     {

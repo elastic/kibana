@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
-  rules: {
-    'import/no-default-export': 'off',
-  },
-};
+// Oxlint imports plugins with native Node, which cannot load this TypeScript package; register the
+// same transpiler ESLint runs under (the root `.eslintrc.js` installs it).
+require('@kbn/swc-register').install();
+
+module.exports = require('.');

@@ -22,6 +22,7 @@ dependsOn:
   - '@kbn/repo-info'
   - '@kbn/repo-packages'
   - '@kbn/projects-solutions-groups'
+  - '@kbn/swc-register'
 tags:
   - shared-common
   - package
@@ -32,5 +33,7 @@ tags:
 fileGroups:
   src:
     - '**/*.ts'
+    - oxlint_plugin.js
+    - src/**/*.mjs
     - '!target/**/*'
 tasks: {}

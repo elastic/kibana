@@ -7,8 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
-  rules: {
-    'import/no-default-export': 'off',
-  },
-};
+import { execFileSync } from 'child_process';
+import { resolve } from 'path';
+
+it('replays every rule test case through Oxlint', () => {
+  execFileSync(process.execPath, [resolve(__dirname, '__fixtures__/run_oxlint_rule_tests.mjs')], {
+    cwd: resolve(__dirname, '../../../..'),
+    stdio: 'inherit',
+  });
+});

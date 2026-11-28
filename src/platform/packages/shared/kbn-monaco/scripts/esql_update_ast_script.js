@@ -93,9 +93,7 @@ function getUnquotedText(ctx: ParserRuleContext) {
           sourceType: 'module',
           ecmaVersion: 2018,
         },
-        rules: {
-          '@kbn/imports/no_unresolvable_imports': 'off',
-        },
+        rules: {},
       },
     });
 
