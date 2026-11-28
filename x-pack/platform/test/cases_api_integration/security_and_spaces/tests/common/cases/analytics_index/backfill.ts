@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
 import {
   CaseSeverity,
@@ -12,7 +13,9 @@ import {
   CustomFieldTypes,
 } from '@kbn/cases-plugin/common/types/domain';
 import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common/constants';
+import { CAI_ACTIVITY_SOURCE_INDEX } from '@kbn/cases-plugin/server/cases_analytics/activity_index/constants';
 import {
+  getBackfillTaskCount,
   runActivityBackfillTask,
   runAttachmentsBackfillTask,
   runCasesBackfillTask,
@@ -63,7 +66,18 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     after(async () => {
-      await deleteAllCaseItems(esClient);
+      // The backfills the plugin schedules at index creation run 60s later and would otherwise copy
+      // the next suite's fixtures, so let every backfill run before this suite hands over.
+      try {
+        await retry.try(async () => {
+          const backfillTaskCount = await getBackfillTaskCount(esClient);
+          if (backfillTaskCount > 0) {
+            throw new Error(`${backfillTaskCount} analytics backfill tasks have not run yet`);
+          }
+        });
+      } finally {
+        await deleteAllCaseItems(esClient);
+      }
     });
 
     it('should backfill the cases index', async () => {
@@ -101,7 +115,8 @@ export default ({ getService }: FtrProviderContext): void => {
         200
       );
 
-      await runCasesBackfillTask(supertest);
+      const backfillRunId = uuidv4();
+      await retry.try(() => runCasesBackfillTask(supertest, backfillRunId));
 
       await retry.tryForTime(300000, async () => {
         const caseAnalytics = await esClient.get({
@@ -190,7 +205,8 @@ export default ({ getService }: FtrProviderContext): void => {
         auth: authSpace1,
       });
 
-      await runAttachmentsBackfillTask(supertest, 'space1');
+      const backfillRunId = uuidv4();
+      await retry.try(() => runAttachmentsBackfillTask(supertest, backfillRunId, 'space1'));
 
       await retry.tryForTime(300000, async () => {
         const firstAttachmentAnalytics = await esClient.get({
@@ -224,7 +240,8 @@ export default ({ getService }: FtrProviderContext): void => {
         caseId: postedCase.id,
         params: { ...postCommentUserReq, owner: SECURITY_SOLUTION_OWNER },
       });
-      await runCommentsBackfillTask(supertest);
+      const backfillRunId = uuidv4();
+      await retry.try(() => runCommentsBackfillTask(supertest, backfillRunId));
 
       await retry.try(async () => {
         const commentAnalytics = await esClient.get({
@@ -291,9 +308,13 @@ export default ({ getService }: FtrProviderContext): void => {
         caseIDs: [caseToDelete.id],
       });
 
+      // Updating a case writes its user actions without a refresh, and the backfill only copies what is searchable.
+      await esClient.indices.refresh({ index: CAI_ACTIVITY_SOURCE_INDEX });
+      const backfillRunId = uuidv4();
+      await retry.try(() => runActivityBackfillTask(supertest, backfillRunId));
+
       let activityArray: any[] = [];
       await retry.try(async () => {
-        await runActivityBackfillTask(supertest);
         const activityAnalytics = await esClient.search({
           index: '.internal.cases-activity.securitysolution-default',
         });
