@@ -711,13 +711,19 @@ export class ActionExecutor {
             : {
                 errorType,
                 errorSource: result.errorSource === TaskErrorSource.USER ? 'user' : 'framework',
+                failureClass: result.failure?.class,
+                statusCode: result.failure?.statusCode,
+                // The public `errorName` for failures the framework names itself, else the
+                // name the handler threw.
+                errorName: result.failure?.errorName ?? result.errorName,
               }),
           durationMs: Date.now() - executionStartedAt,
         });
 
         event.event = event.event || {};
 
-        const { error, ...resultWithoutError } = result;
+        // `failure` is telemetry only and is dropped here with `error`, so it never reaches a caller.
+        const { error, failure: _failure, ...resultWithoutError } = result;
 
         function completeEventLogging() {
           eventLogger.stopTiming(event);

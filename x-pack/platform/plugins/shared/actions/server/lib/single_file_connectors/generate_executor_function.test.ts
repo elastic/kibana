@@ -8,6 +8,8 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { generateExecutorFunction } from './generate_executor_function';
+import { AllowlistDeniedError } from './connector_network_errors';
+import { RelayRequestError } from '../relay/relay_error';
 import { setConnectorActionErrorMeta, TEST_CONNECTOR_SUB_ACTION } from '@kbn/connector-specs';
 import type {
   ActionContext,
@@ -816,6 +818,7 @@ describe('generateExecutorFunction', () => {
         status: 'error',
         message: 'direct handler failure',
         actionId: connectorId,
+        failure: { class: 'handler', errorName: 'Error' },
       });
     });
 
@@ -1274,6 +1277,7 @@ describe('generateExecutorFunction', () => {
         status: 'error',
         message: 'handler failed',
         actionId: connectorId,
+        failure: { class: 'handler', errorName: 'Error' },
       });
     });
 
@@ -1294,6 +1298,7 @@ describe('generateExecutorFunction', () => {
         status: 'error',
         message: 'maxContentLength size of 1048576 exceeded',
         actionId: connectorId,
+        failure: { class: 'handler', errorName: 'Error' },
         errorMeta: { contentLengthBytes: 10 * 1024 * 1024 },
       });
     });
@@ -1330,6 +1335,7 @@ describe('generateExecutorFunction', () => {
         status: 'error',
         message: 'maxContentLength size of 1048576 exceeded',
         actionId: connectorId,
+        failure: { class: 'handler', errorName: 'Error' },
         errorMeta: { contentLengthBytes: 2048 },
       });
     });
@@ -1355,6 +1361,7 @@ describe('generateExecutorFunction', () => {
         status: 'error',
         message: 'maxContentLength size of 1048576 exceeded',
         actionId: connectorId,
+        failure: { class: 'handler', errorName: 'Error' },
         errorMeta: {
           contentLengthBytes: 20 * 1024 * 1024,
           estimatedOutputBytes: 28 * 1024 * 1024,
@@ -1396,6 +1403,7 @@ describe('generateExecutorFunction', () => {
           status: 'error',
           message: 'Request failed with status code 429',
           actionId: connectorId,
+          failure: { class: 'vendor_4xx', statusCode: 429, errorName: 'Error' },
           errorMeta: { statusCode: 429 },
           retry: inSeconds(30),
         });
@@ -1517,6 +1525,72 @@ describe('generateExecutorFunction', () => {
         });
       });
 
+      it('classifies a vendor 5xx so an outage is not read as a connector bug', async () => {
+        const result = await executeWithError(makeHttpError(503));
+
+        expect(result).toMatchObject({ status: 'error', failure: { class: 'vendor_5xx' } });
+      });
+
+      it('names a crash on the response, which is what a changed vendor looks like', async () => {
+        let thrown: unknown;
+        try {
+          const response = { data: undefined } as { data?: { items: string[] } };
+          // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+          response.data!.items.length;
+        } catch (err) {
+          thrown = err;
+        }
+
+        const result = await executeWithError(thrown);
+
+        expect(result).toMatchObject({
+          failure: { class: 'handler', errorName: 'TypeError' },
+        });
+      });
+
+      it('names a failure the connector raised deliberately', async () => {
+        const result = await executeWithError(new Error('no document id in the response'));
+
+        expect(result).toMatchObject({ failure: { class: 'handler', errorName: 'Error' } });
+      });
+
+      it('carries the vendor status alongside the class', async () => {
+        const result = await executeWithError(makeHttpError(429));
+
+        expect(result).toMatchObject({ failure: { class: 'vendor_4xx', statusCode: 429 } });
+      });
+
+      it('carries the status for a transport that is not axios', async () => {
+        const result = await executeWithError(
+          new RelayRequestError('/chat.postMessage', 503, 'upstream unavailable')
+        );
+
+        expect(result).toMatchObject({ failure: { class: 'vendor_5xx', statusCode: 503 } });
+      });
+
+      it('leaves the status out when the vendor never answered', async () => {
+        const result = await executeWithError(new Error('no document id in the response'));
+
+        expect(result.failure).not.toHaveProperty('statusCode');
+      });
+
+      it('classifies a transport failure as network', async () => {
+        const error = Object.assign(new Error('connect ECONNREFUSED'), {
+          request: {},
+          code: 'ECONNREFUSED',
+        });
+
+        const result = await executeWithError(error);
+
+        expect(result).toMatchObject({ status: 'error', failure: { class: 'network' } });
+      });
+
+      it('classifies an allowlist denial as denied, since the call never left Kibana', async () => {
+        const result = await executeWithError(new AllowlistDeniedError('target url is not added'));
+
+        expect(result).toMatchObject({ status: 'error', failure: { class: 'denied' } });
+      });
+
       it('adds neither to errors without a response status', async () => {
         const error = Object.assign(new Error('socket hang up'), {
           response: { headers: { 'retry-after': '30' } },
@@ -1528,6 +1602,7 @@ describe('generateExecutorFunction', () => {
           status: 'error',
           message: 'socket hang up',
           actionId: connectorId,
+          failure: { class: 'handler', errorName: 'Error' },
         });
       });
     });
@@ -1555,6 +1630,7 @@ describe('generateExecutorFunction', () => {
         status: 'error',
         message: 'string error',
         actionId: connectorId,
+        failure: { class: 'handler' },
       });
     });
 
@@ -1571,7 +1647,8 @@ describe('generateExecutorFunction', () => {
     it('returns status error with the allowedHosts message and no retry when ctx.client rejects with a policy error', async () => {
       const policyMessage =
         'target url "https://denied.example.com/api" is not added to the Kibana config xpack.actions.allowedHosts';
-      const policyError = new Error(policyMessage);
+      // What the axios allowlist interceptor throws for a denied host.
+      const policyError = new AllowlistDeniedError(policyMessage);
 
       const denyingClient = { get: jest.fn().mockRejectedValue(policyError) };
       mockGetAxiosInstanceWithAuth.mockResolvedValue(denyingClient as never);
@@ -1590,6 +1667,7 @@ describe('generateExecutorFunction', () => {
         status: 'error',
         message: policyMessage,
         actionId: connectorId,
+        failure: { class: 'denied', errorName: 'AllowlistDeniedError' },
       });
       expect(result).not.toHaveProperty('retry');
     });
@@ -1655,6 +1733,7 @@ describe('generateExecutorFunction', () => {
         status: 'error',
         message: 'connection failed',
         actionId: connectorId,
+        failure: { class: 'handler', errorName: 'Error' },
       });
     });
   });
