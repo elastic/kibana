@@ -6,6 +6,7 @@
  */
 
 import type SuperTest from 'supertest';
+import type { RetryService } from '@kbn/ftr-common-functional-services';
 
 import {
   getCAIActivityBackfillTaskId,
@@ -46,12 +47,27 @@ export const runCasesBackfillTask = async (supertest: SuperTest.Agent) => {
     .expect(200);
 };
 
-export const runCAISynchronizationTask = async (supertest: SuperTest.Agent) => {
-  await supertest
-    .post('/api/analytics_index/synchronization/run_soon')
-    .set('kbn-xsrf', 'xxx')
-    .send({ taskId: getSynchronizationTaskId('default', 'securitySolution') })
-    .expect(200);
+/**
+ * Triggers the synchronization task of the given space, retrying until Task Manager accepts the run.
+ */
+export const runCAISynchronizationTask = async (
+  supertest: SuperTest.Agent,
+  retry: RetryService,
+  spaceId: string = 'default'
+): Promise<void> => {
+  // The route answers 200 with `{ error }` when runSoon fails: the task is not scheduled yet,
+  // or is being claimed or already running and would not pick up data written before this call.
+  await retry.try(async () => {
+    const { body } = await supertest
+      .post('/api/analytics_index/synchronization/run_soon')
+      .set('kbn-xsrf', 'xxx')
+      .send({ taskId: getSynchronizationTaskId(spaceId, 'securitySolution') })
+      .expect(200);
+
+    if (body.error) {
+      throw new Error(`Failed to run the synchronization task: ${body.error}`);
+    }
+  });
 };
 
 export const runAttachmentsBackfillTask = async (supertest: SuperTest.Agent) => {
