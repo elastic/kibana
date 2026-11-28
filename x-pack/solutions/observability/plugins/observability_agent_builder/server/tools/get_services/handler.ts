@@ -150,8 +150,8 @@ export async function getToolHandler({
   const endMs = parseDatemath(end, { roundUp: true });
 
   const [logsIndices, metricsIndices] = await Promise.all([
-    getLogsIndices({ core, logger }),
-    getMetricsIndices({ core, plugins, logger }),
+    getLogsIndices({ core, request, logger }),
+    getMetricsIndices({ core, plugins, request, logger }),
   ]);
 
   const [apmResponse, logsAndMetricsServices] = await Promise.all([

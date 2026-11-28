@@ -7,7 +7,7 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import type { Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import {
   AGENT_NAME,
   AT_TIMESTAMP,
@@ -141,6 +141,7 @@ async function getCorrelations({
 export async function getToolHandler({
   core,
   plugins,
+  request,
   logger,
   esClient,
   start,
@@ -153,6 +154,7 @@ export async function getToolHandler({
 }: {
   core: ObservabilityAgentBuilderCoreSetup;
   plugins: ObservabilityAgentBuilderPluginSetupDependencies;
+  request: KibanaRequest;
   logger: Logger;
   esClient: IScopedClusterClient;
   start: string;
@@ -163,7 +165,7 @@ export async function getToolHandler({
   fieldCandidates?: string[];
   limit: number;
 }) {
-  const dataSources = await getObservabilityDataSources({ core, plugins, logger });
+  const dataSources = await getObservabilityDataSources({ core, plugins, request, logger });
   const indices = dataSources.apmIndexPatterns.transaction.split(',');
 
   const startTime = parseDatemath(start);

@@ -119,7 +119,7 @@ Notes:
     },
     handler: async (
       { start, end, kqlFilter, metric, percentileThreshold, fieldCandidates, limit },
-      { esClient }
+      { esClient, request }
     ) => {
       try {
         const [, pluginStart] = await core.getStartServices();
@@ -140,6 +140,7 @@ Notes:
         const result = await getToolHandler({
           core,
           plugins,
+          request,
           logger,
           esClient,
           start,
