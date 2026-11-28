@@ -22,7 +22,8 @@ export const addPanelFromLibrary: (...params: OnAddParams) => Promise<void> = as
   savedObject
 ) => {
   const discoverSessionAttributes = savedObject.attributes as DiscoverSessionAttributes;
-  const firstTabAttributes = discoverSessionAttributes.tabs[0].attributes;
+  const [firstTab] = discoverSessionAttributes.tabs;
+  const firstTabAttributes = firstTab.attributes;
   const mightHaveVariables =
     apiPublishesESQLVariables(container) &&
     firstTabAttributes.controlGroupJson &&
@@ -37,6 +38,7 @@ export const addPanelFromLibrary: (...params: OnAddParams) => Promise<void> = as
       panelType: SEARCH_EMBEDDABLE_TYPE,
       serializedState: {
         ref_id: savedObject.id,
+        selected_tab_id: firstTab.id,
         overrides: {},
       },
     },
