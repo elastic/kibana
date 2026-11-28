@@ -32,9 +32,10 @@ test.describe('MonitorAlerts', { tag: '@local-stateful-classic' }, () => {
   }) => {
     await test.step('go to monitor details', async () => {
       await browserAuth.loginAsAdmin();
-      await pageObjects.monitorDetails.navigateToOverviewPage({ dateRangeEnd, dateRangeStart });
-      await pageObjects.monitorDetails.navigateToMonitorDetails(monitorId);
-      await pageObjects.monitorDetails.waitForLoadingToFinish();
+      await pageObjects.monitorDetails.gotoMonitorDetails(monitorId, {
+        dateRangeStart,
+        dateRangeEnd,
+      });
     });
 
     await test.step('open anomaly detection flyout and verify no license error', async () => {
