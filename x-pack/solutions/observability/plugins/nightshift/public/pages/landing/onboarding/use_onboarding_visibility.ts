@@ -30,12 +30,12 @@ export interface OnboardingVisibility {
 }
 
 /**
- * Onboarding is normally done once the space has an automation; there is no state of its own.
- * Without automations (feature flag off) it falls back to "the space has an investigation".
+ * Onboarding has no state of its own: it is done once the space has an automation or an
+ * investigation. Without automations (feature flag off) only the investigation counts.
  *
  * An active session stays open after the first automation is created so the saved card and Done
- * button can appear; Done / "Skip this step" call `dismiss`. Return visits with an automation
- * still skip onboarding.
+ * button can appear (likewise when its trial investigation appears); Done / "Skip this step" call
+ * `dismiss`. Return visits with an automation or an investigation skip onboarding.
  */
 export const useOnboardingVisibility = ({
   isEnabled,
@@ -69,18 +69,25 @@ export const useOnboardingVisibility = ({
     refetchInterval: isEnabled && shouldPollTrial ? TRIAL_INVESTIGATION_REFETCH_INTERVAL_MS : false,
   });
   const { latestInvestigation } = investigations;
+  const hasInvestigation = latestInvestigation != null;
 
   const isLoading =
     isEnabled &&
     ((canUseAutomations && automations.isInitialLoading) || investigations.isInitialLoading);
 
-  // Latch once both lookups have settled on empty automations, so creating the first automation
-  // does not tear the page down before Done. Do not latch on a failed automations lookup, and do
-  // not latch while the trial investigation is still loading (avoids a first-investigation flash).
+  // Latch once both lookups have settled on an empty space (no automation, no investigation), so
+  // creating the trial investigation or the first automation does not tear the page down before
+  // Done. Do not latch on a failed automations lookup, and do not latch while the trial
+  // investigation is still loading (avoids a first-investigation flash).
   useEffect(() => {
     if (
       forceOnboarding ||
-      (!isDismissed && !isLoading && canUseAutomations && !hasAutomation && !automations.isError)
+      (!isDismissed &&
+        !isLoading &&
+        canUseAutomations &&
+        !hasAutomation &&
+        !hasInvestigation &&
+        !automations.isError)
     ) {
       setSessionOpen(true);
     }
@@ -90,15 +97,18 @@ export const useOnboardingVisibility = ({
     isLoading,
     canUseAutomations,
     hasAutomation,
+    hasInvestigation,
     automations.isError,
   ]);
   useEffect(() => {
     if (isDismissed) setSessionOpen(false);
   }, [isDismissed]);
 
-  const isDone = canUseAutomations
-    ? automations.isError || hasAutomation
-    : investigations.error != null || latestInvestigation != null;
+  const isDone =
+    automations.isError ||
+    hasAutomation ||
+    hasInvestigation ||
+    (!canUseAutomations && investigations.error != null);
 
   const dismiss = useCallback(() => setIsDismissed(true), [setIsDismissed]);
 
