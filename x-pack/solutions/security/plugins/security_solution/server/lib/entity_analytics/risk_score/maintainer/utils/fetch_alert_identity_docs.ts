@@ -11,6 +11,7 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import { isEntityTypeCreatableFromSingleDocument } from '@kbn/entity-store/server';
 import type { EntityType } from '../../../../../../common/entity_analytics/types';
+import { RISK_SCORING_REQUEST_TIMEOUT } from '../../constants';
 import type { ScopedLogger } from './with_log_context';
 
 /** Bounds each `terms`/`top_hits` request; chunks are sequential to limit in-flight responses. */
@@ -110,7 +111,7 @@ export const fetchAlertIdentityDocs = async ({
             },
           },
         },
-        { signal: abortSignal }
+        { signal: abortSignal, requestTimeout: RISK_SCORING_REQUEST_TIMEOUT }
       );
 
       const buckets =
