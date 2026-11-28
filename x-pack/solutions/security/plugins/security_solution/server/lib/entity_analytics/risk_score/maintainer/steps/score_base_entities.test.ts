@@ -24,7 +24,7 @@ const buildLogger = (): ScopedLogger =>
     info: jest.fn(),
     warn: jest.fn(),
     error: jest.fn(),
-  } as unknown as ScopedLogger);
+  }) as unknown as ScopedLogger;
 
 const collectPages = async <T>(generator: AsyncGenerator<T>): Promise<T[]> => {
   const pages: T[] = [];
@@ -431,7 +431,7 @@ describe('score_base_entities', () => {
             const [scoresArr] = Object.values(params as Record<string, unknown[]>);
             return { errors: [], docs_written: scoresArr.length, took: 1 };
           }),
-      } as unknown as RiskEngineDataWriter);
+      }) as unknown as RiskEngineDataWriter;
 
     const makeStoreEntity = (entityId: string) => ({
       entity: {
@@ -604,7 +604,7 @@ describe('score_base_entities', () => {
             const [scoresArr] = Object.values(params as Record<string, unknown[]>);
             return { errors: [], docs_written: scoresArr.length, took: 1 };
           }),
-      } as unknown as RiskEngineDataWriter);
+      }) as unknown as RiskEngineDataWriter;
 
     beforeEach(() => {
       crudClient = {
@@ -852,7 +852,7 @@ describe('score_base_entities', () => {
           const [scoresArr] = Object.values(params as Record<string, unknown[]>);
           return { errors: [], docs_written: scoresArr.length, took: 1 };
         }),
-      } as unknown as RiskEngineDataWriter);
+      }) as unknown as RiskEngineDataWriter;
 
     const zeroScoreParams = {
       entityType: EntityType.user,

@@ -90,7 +90,7 @@ const buildEntityQuery = (
     entityTypes.length > 0 ? { terms: { 'entity.EngineMetadata.Type': entityTypes } } : undefined;
   return entityTypeFilter && parsedQuery
     ? { bool: { must: [entityTypeFilter, parsedQuery] } }
-    : entityTypeFilter ?? parsedQuery;
+    : (entityTypeFilter ?? parsedQuery);
 };
 
 const normalizeEntityHit = (raw: Record<string, unknown>): Entity => {
@@ -148,7 +148,7 @@ export async function searchEntitiesV2(
   });
 
   const { hits } = response;
-  const total = typeof hits.total === 'number' ? hits.total : hits.total?.value ?? 0;
+  const total = typeof hits.total === 'number' ? hits.total : (hits.total?.value ?? 0);
   const records = hits.hits.map((hit) =>
     normalizeEntityHit((hit._source ?? {}) as Record<string, unknown>)
   );
@@ -210,7 +210,7 @@ export async function searchEntitiesV2Batch(options: {
     }
 
     const { hits } = response;
-    const total = typeof hits.total === 'number' ? hits.total : hits.total?.value ?? 0;
+    const total = typeof hits.total === 'number' ? hits.total : (hits.total?.value ?? 0);
     const records = hits.hits.map((hit) =>
       normalizeEntityHit((hit._source ?? {}) as Record<string, unknown>)
     );

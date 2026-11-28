@@ -594,9 +594,8 @@ export class AIAssistantService {
 
   /** @returns `false` when the install and its retry both failed. No license check. */
   public async ensureSpaceResources(spaceId: string): Promise<boolean> {
-    const { result: initialized, error } = await this.getSpaceResourcesInitializationPromise(
-      spaceId
-    );
+    const { result: initialized, error } =
+      await this.getSpaceResourcesInitializationPromise(spaceId);
 
     // If space level resources initialization failed, retry
     if (!initialized && error) {
@@ -870,16 +869,14 @@ export class AIAssistantService {
   ) {
     try {
       this.options.logger.debug(`Initializing spaceId level resources for AIAssistantService`);
-      const conversationsIndexName = await this.conversationsDataStream.getInstalledSpaceName(
-        spaceId
-      );
+      const conversationsIndexName =
+        await this.conversationsDataStream.getInstalledSpaceName(spaceId);
       if (!conversationsIndexName) {
         await this.conversationsDataStream.installSpace(spaceId);
       }
 
-      const knowledgeBaseIndexName = await this.knowledgeBaseDataStream.getInstalledSpaceName(
-        spaceId
-      );
+      const knowledgeBaseIndexName =
+        await this.knowledgeBaseDataStream.getInstalledSpaceName(spaceId);
       if (!knowledgeBaseIndexName) {
         await this.knowledgeBaseDataStream.installSpace(spaceId);
       }
@@ -896,9 +893,8 @@ export class AIAssistantService {
         await this.anonymizationFieldsDataStream.installSpace(spaceId);
         await this.createDefaultAnonymizationFields(spaceId);
       }
-      const alertSummaryIndexName = await this.alertSummaryDataStream.getInstalledSpaceName(
-        spaceId
-      );
+      const alertSummaryIndexName =
+        await this.alertSummaryDataStream.getInstalledSpaceName(spaceId);
       if (!alertSummaryIndexName) {
         await this.alertSummaryDataStream.installSpace(spaceId);
       }
@@ -925,9 +921,8 @@ export class AIAssistantService {
         await this.checkpointsDataStream.createIndex(spaceId);
       }
 
-      const checkpointWritesIndexName = await this.checkpointWritesDataStream.getInstalledIndexName(
-        spaceId
-      );
+      const checkpointWritesIndexName =
+        await this.checkpointWritesDataStream.getInstalledIndexName(spaceId);
       if (!checkpointWritesIndexName) {
         await this.checkpointWritesDataStream.createIndex(spaceId);
       }

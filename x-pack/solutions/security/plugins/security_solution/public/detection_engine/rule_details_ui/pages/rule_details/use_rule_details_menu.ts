@@ -226,8 +226,8 @@ export const useRuleDetailsMenu = ({
                 tooltipContent: !canManualRunRules
                   ? actionI18n.MANUAL_RULE_RUN_PERMISSIONS_TOOLTIP
                   : !rule.enabled
-                  ? actionI18n.MANUAL_RULE_RUN_TOOLTIP
-                  : undefined,
+                    ? actionI18n.MANUAL_RULE_RUN_TOOLTIP
+                    : undefined,
                 testId: 'rules-details-manual-rule-run',
                 run: async () => {
                   startTransaction({ name: SINGLE_RULE_ACTIONS.MANUAL_RULE_RUN });

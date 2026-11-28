@@ -62,7 +62,7 @@ describe('utils', () => {
     const docWithDatasourceStates = (datasourceStates: Record<string, unknown>): LensDocument =>
       ({
         state: { datasourceStates },
-      } as unknown as LensDocument);
+      }) as unknown as LensDocument;
 
     it('prefers textBased over formBased when both hold data', () => {
       expect(

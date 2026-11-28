@@ -56,7 +56,7 @@ describe('is_filter_applicable', () => {
           [key]: 'x',
         },
       },
-    } as unknown as Filter);
+    }) as unknown as Filter;
 
   const buildCombinedFilter = (params: Filter[]): Filter =>
     ({
@@ -67,7 +67,7 @@ describe('is_filter_applicable', () => {
         negate: false,
         disabled: false,
       },
-    } as unknown as Filter);
+    }) as unknown as Filter;
 
   it('treats filters as applicable when no dataViews are provided', () => {
     expect(isFilterApplicable(buildPhraseFilter('fieldA'), [])).toBe(true);

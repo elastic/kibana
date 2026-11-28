@@ -37,14 +37,14 @@ const MappingComponent: React.FC<MappingProps> = ({
             color: 'subdued',
           }
         : connectorType === ConnectorTypes.casesWebhook
-        ? {
-            desc: i18n.CASES_WEBHOOK_MAPPINGS,
-            color: 'subdued',
-          }
-        : {
-            desc: i18n.FIELD_MAPPING_DESC_ERR(actionTypeName),
-            color: 'danger',
-          },
+          ? {
+              desc: i18n.CASES_WEBHOOK_MAPPINGS,
+              color: 'subdued',
+            }
+          : {
+              desc: i18n.FIELD_MAPPING_DESC_ERR(actionTypeName),
+              color: 'danger',
+            },
     [mappings.length, isLoading, actionTypeName, connectorType]
   );
 

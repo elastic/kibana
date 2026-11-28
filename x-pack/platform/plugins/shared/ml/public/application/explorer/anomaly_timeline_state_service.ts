@@ -285,7 +285,7 @@ export class AnomalyTimelineStateService extends StateService {
           TimeBucketsInterval,
           TimeRangeBounds,
           Refresh,
-          SeverityThreshold[]
+          SeverityThreshold[],
         ]
       >
     )

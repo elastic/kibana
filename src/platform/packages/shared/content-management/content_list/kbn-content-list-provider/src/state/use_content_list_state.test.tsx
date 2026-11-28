@@ -15,12 +15,10 @@ import { useContentListState } from './use_content_list_state';
 import { CONTENT_LIST_ACTIONS } from './types';
 
 describe('useContentListState', () => {
-  const mockFindItems = jest.fn(
-    async (_params: FindItemsParams): Promise<FindItemsResult> => ({
-      items: [],
-      total: 0,
-    })
-  );
+  const mockFindItems = jest.fn(async (_params: FindItemsParams): Promise<FindItemsResult> => ({
+    items: [],
+    total: 0,
+  }));
 
   const createWrapper = () => {
     return ({ children }: { children: React.ReactNode }) => (

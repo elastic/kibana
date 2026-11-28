@@ -78,7 +78,7 @@ describe('parseJudgeVerdict', () => {
 
 describe('judgeLlmSmokeFailure', () => {
   const clientWith = (request: jest.Mock): Client =>
-    ({ transport: { request } } as unknown as Client);
+    ({ transport: { request } }) as unknown as Client;
 
   it('returns the verdict from the first reachable judge', async () => {
     const request = jest

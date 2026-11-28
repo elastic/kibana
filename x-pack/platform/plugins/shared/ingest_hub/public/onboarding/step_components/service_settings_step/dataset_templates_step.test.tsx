@@ -100,7 +100,7 @@ const makeOtel = (id: string, packageName = 'aws_cloudwatch_input_otel') =>
         varDefsByInput: { otelcol: { 'data_stream.dataset': { ...datasetVar, default: id } } },
       },
     },
-  } as unknown as AwsServiceMatrixEntry);
+  }) as unknown as AwsServiceMatrixEntry;
 
 const instance = (instanceId: string, isDuplicate = false): ServiceInstance => ({
   instanceId,

@@ -39,4 +39,4 @@ export const createRouteContextMock = ({
         },
       },
     }),
-  } as unknown as AlertZeroRequestHandlerContext);
+  }) as unknown as AlertZeroRequestHandlerContext;

@@ -18,7 +18,7 @@ export const isMandatoryChoiceGroup = (group: CatalogueChoiceGroup): boolean =>
   group.min_selected === 1;
 
 export const getDefaultChoice = (group: CatalogueChoiceGroup): string | undefined =>
-  isMandatoryChoiceGroup(group) ? group.default_field ?? group.fields[0] : group.default_field;
+  isMandatoryChoiceGroup(group) ? (group.default_field ?? group.fields[0]) : group.default_field;
 
 /**
  * The member present in the object is the selected one, even while it is still blank;

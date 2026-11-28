@@ -159,7 +159,7 @@ interface IAlertsService {
     LegacyState extends AlertInstanceState,
     LegacyContext extends AlertInstanceContext,
     ActionGroupIds extends string,
-    RecoveryActionGroupId extends string
+    RecoveryActionGroupId extends string,
   >(
     opts: CreateAlertsClientParams
   ): Promise<IAlertsClient<
@@ -193,6 +193,9 @@ export class AlertsService implements IAlertsService {
   private commonInitPromise: Promise<InitializationPromise>;
   private dataStreamAdapter: DataStreamAdapter;
   private totalFieldsLimit: number;
+  // Rules whose orphaned alert documents were already untracked by this Kibana process. Kept
+  // in memory on purpose: the cleanup is temporary and repeating it after a restart is harmless.
+  private readonly rulesWithoutOrphanedAlerts = new Set<string>();
 
   constructor(private readonly options: AlertsServiceParams) {
     this.initialized = false;
@@ -224,7 +227,7 @@ export class AlertsService implements IAlertsService {
     LegacyState extends AlertInstanceState,
     LegacyContext extends AlertInstanceContext,
     ActionGroupIds extends string,
-    RecoveryActionGroupId extends string
+    RecoveryActionGroupId extends string,
   >(
     opts: CreateAlertsClientParams
   ): Promise<IAlertsClient<
@@ -316,6 +319,7 @@ export class AlertsService implements IAlertsService {
       kibanaVersion: this.options.kibanaVersion,
       dataStreamAdapter: this.dataStreamAdapter,
       isServerless: this.isServerless,
+      rulesWithoutOrphanedAlerts: this.rulesWithoutOrphanedAlerts,
     });
   }
 

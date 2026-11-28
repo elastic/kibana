@@ -217,7 +217,7 @@ const getSiblingOrder = (id: string, result: LayoutIndex): string[] => {
     return result.outerOrder;
   }
   const container = result.panels.get(id)?.container;
-  const panels = container === undefined ? [] : result.containers.get(container) ?? [];
+  const panels = container === undefined ? [] : (result.containers.get(container) ?? []);
   return [...panels].sort(byReadingOrder).map((panel) => panel.id);
 };
 

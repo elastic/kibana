@@ -18,15 +18,12 @@ import type {
   WorkflowsExtensionsPublicPluginStartDeps,
 } from './types';
 
-export class WorkflowsExtensionsPublicPlugin
-  implements
-    Plugin<
-      WorkflowsExtensionsPublicPluginSetup,
-      WorkflowsExtensionsPublicPluginStart,
-      WorkflowsExtensionsPublicPluginSetupDeps,
-      WorkflowsExtensionsPublicPluginStartDeps
-    >
-{
+export class WorkflowsExtensionsPublicPlugin implements Plugin<
+  WorkflowsExtensionsPublicPluginSetup,
+  WorkflowsExtensionsPublicPluginStart,
+  WorkflowsExtensionsPublicPluginSetupDeps,
+  WorkflowsExtensionsPublicPluginStartDeps
+> {
   private readonly stepRegistry: PublicStepRegistry;
   private readonly triggerRegistry: PublicTriggerRegistry;
   private removeTestBridge?: () => void;

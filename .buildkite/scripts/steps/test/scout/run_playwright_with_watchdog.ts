@@ -120,6 +120,6 @@ child.on('error', (error) => {
 child.on('exit', (code, signal) => {
   clearInterval(watchdog);
   if (!killedByWatchdog) {
-    process.exitCode = signal ? 128 + (constants.signals[signal] ?? 0) : code ?? 1;
+    process.exitCode = signal ? 128 + (constants.signals[signal] ?? 0) : (code ?? 1);
   }
 });

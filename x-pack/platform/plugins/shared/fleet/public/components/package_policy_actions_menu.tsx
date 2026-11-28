@@ -109,7 +109,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
   const { data: agentlessPolicyData } = useGetOneAgentPolicy(agentlessPolicyId);
   const effectiveAgentPolicy = agentPolicy?.agentless
     ? agentPolicy
-    : agentlessPolicyData?.item ?? agentPolicy;
+    : (agentlessPolicyData?.item ?? agentPolicy);
 
   const supportBundleText = useMemo(() => {
     if (!isAgentlessPolicy) return '';
@@ -124,7 +124,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
       effectiveAgentPolicy?.agentless?.cluster_id
         ? `cluster_id=${effectiveAgentPolicy.agentless.cluster_id}`
         : null,
-      effectiveAgentPolicy?.id ?? packagePolicy.policy_ids[0]
+      (effectiveAgentPolicy?.id ?? packagePolicy.policy_ids[0])
         ? `policy_id=${effectiveAgentPolicy?.id ?? packagePolicy.policy_ids[0]}`
         : null,
       packagePolicy.package?.name ? `integration=${packagePolicy.package.name}` : null,
@@ -309,32 +309,32 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
           </EuiContextMenuItem>,
         ]
       : // The upgrade page of an agent-based policy edits it; a managed integration upgrades in place.
-      packagePolicy.hasUpgrade && (!onboardingDeploymentId || isAgentlessUpgrade)
-      ? [
-          <EuiContextMenuItem
-            data-test-subj="PackagePolicyActionsUpgradeItem"
-            disabled={
-              !canWriteIntegrationPolicies || (!isAgentlessUpgrade && !upgradePackagePolicyHref)
-            }
-            icon="refresh"
-            {...(isAgentlessUpgrade
-              ? {
-                  onClick: () => {
-                    setIsActionsMenuOpen(false);
-                    openAgentlessUpgradeModal();
-                  },
-                }
-              : { href: upgradePackagePolicyHref })}
-            key="packagePolicyUpgrade"
-          >
-            <FormattedMessage
-              id="xpack.fleet.policyDetails.packagePoliciesTable.upgradeActionTitle"
-              data-test-subj="UpgradeIntegrationPolicy"
-              defaultMessage="Upgrade integration policy"
-            />
-          </EuiContextMenuItem>,
-        ]
-      : []),
+        packagePolicy.hasUpgrade && (!onboardingDeploymentId || isAgentlessUpgrade)
+        ? [
+            <EuiContextMenuItem
+              data-test-subj="PackagePolicyActionsUpgradeItem"
+              disabled={
+                !canWriteIntegrationPolicies || (!isAgentlessUpgrade && !upgradePackagePolicyHref)
+              }
+              icon="refresh"
+              {...(isAgentlessUpgrade
+                ? {
+                    onClick: () => {
+                      setIsActionsMenuOpen(false);
+                      openAgentlessUpgradeModal();
+                    },
+                  }
+                : { href: upgradePackagePolicyHref })}
+              key="packagePolicyUpgrade"
+            >
+              <FormattedMessage
+                id="xpack.fleet.policyDetails.packagePoliciesTable.upgradeActionTitle"
+                data-test-subj="UpgradeIntegrationPolicy"
+                defaultMessage="Upgrade integration policy"
+              />
+            </EuiContextMenuItem>,
+          ]
+        : []),
     <EuiContextMenuItem
       disabled={
         !canWriteIntegrationPolicies ||

@@ -112,7 +112,12 @@ describe('DatastreamInitializer .rule-events (integration)', () => {
           status_count: { type: 'alias', path: 'alert.status_count' },
         },
       },
-      routing_tags: { type: 'keyword', ignore_above: 128 },
+      routing: {
+        properties: {
+          tags: { type: 'keyword', ignore_above: 128 },
+        },
+      },
+      reason: { type: 'keyword' },
     });
   };
 

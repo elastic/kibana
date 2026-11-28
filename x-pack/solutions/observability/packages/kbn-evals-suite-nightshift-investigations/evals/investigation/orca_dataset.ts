@@ -58,7 +58,8 @@ export interface OrcaRun {
 
 /**
  * Which release and slice to run, from `NIGHTSHIFT_ORCA_RELEASE` (`sampled50` by default, or
- * `public755`) and `NIGHTSHIFT_ORCA_SLICE` (`<index>/<count>`, for example `3/8`).
+ * `public755`) and `NIGHTSHIFT_ORCA_SLICE` (`<index>/<count>`, for example `3/8`). The Scout hook
+ * sets the slice for the CI shards `orcabench-<index>-of-<count>`.
  */
 export const resolveOrcaRun = (env: Record<string, string | undefined> = process.env): OrcaRun => {
   const releaseKey = env.NIGHTSHIFT_ORCA_RELEASE?.trim() || 'sampled50';
@@ -96,8 +97,8 @@ export const getOrcaDatasetHash = (
       left.metadata.case_id < right.metadata.case_id
         ? -1
         : left.metadata.case_id > right.metadata.case_id
-        ? 1
-        : 0
+          ? 1
+          : 0
     );
   const serialized = stringify(ordered);
   assert(serialized, 'Cannot serialize the ORCA dataset');
@@ -153,75 +154,34 @@ export const validateOrcaDataset = (
 };
 
 /**
- * Keeps one contiguous part of a validated release. The part gets its own dataset name, because
- * the eval client upserts the dataset it runs: under the release name it would drop the rest.
+ * One contiguous part of a release's examples, in `case_id` order. A slice runs against the
+ * release itself, so its scores land on the release's examples and the slices of one build merge
+ * into a single comparison row.
  */
-export const sliceOrcaDataset = (
-  dataset: EvaluationDataset<InvestigationExample>,
+export const selectOrcaSlice = (
+  examples: InvestigationExample[],
   { index, count }: OrcaSlice
-): EvaluationDataset<InvestigationExample> => {
-  const ordered = [...dataset.examples].sort((left, right) =>
+): InvestigationExample[] => {
+  const ordered = [...examples].sort((left, right) =>
     left.metadata.case_id < right.metadata.case_id
       ? -1
       : left.metadata.case_id > right.metadata.case_id
-      ? 1
-      : 0
+        ? 1
+        : 0
   );
   const start = Math.floor(((index - 1) * ordered.length) / count);
   const end = Math.floor((index * ordered.length) / count);
-  return {
-    ...dataset,
-    name: `${dataset.name}/slice-${index}-of-${count}`,
-    description: `Slice ${index} of ${count} of ${dataset.name}, in case_id order. ${dataset.description}`,
-    examples: ordered.slice(start, end),
-  };
+  return ordered.slice(start, end);
 };
 
-/**
- * Stores a slice under its own name and gives each example the id the server stored it under.
- * The server derives example ids from the dataset id, so the parent release's ids would match no
- * example of the slice dataset and its scores would show no history. The executor's own upsert of
- * the same examples is then a no-op.
- */
-export const storeOrcaSlice = async (
-  client: Pick<EvalsClient, 'getDatasetByName' | 'upsertDataset'>,
-  slice: EvaluationDataset<InvestigationExample>
-): Promise<EvaluationDataset<InvestigationExample>> => {
-  await client.upsertDataset({
-    name: slice.name,
-    description: slice.description,
-    tags: slice.tags,
-    maturity: slice.maturity,
-    examples: slice.examples.map(({ input, output, metadata }) => ({ input, output, metadata })),
-  });
-  const stored = await client.getDatasetByName(slice.name);
-  assert(stored, `ORCA slice dataset ${slice.name} is missing after it was stored`);
-  const idsByCase = new Map(
-    stored.examples.map(({ id, metadata }) => [metadata?.case_id, id] as const)
-  );
-  assert(
-    stored.examples.length === slice.examples.length &&
-      slice.examples.every(({ metadata }) => idsByCase.has(metadata.case_id)),
-    `ORCA slice dataset ${slice.name} does not hold exactly the slice's cases`
-  );
-  return {
-    ...slice,
-    examples: slice.examples.map((example) => ({
-      ...example,
-      id: idsByCase.get(example.metadata.case_id),
-    })),
-  };
-};
-
-/** Fetches a pinned Golden release, optionally one slice of it, without a file or synthetic fallback. */
+/** Fetches and validates a pinned Golden release, without a file or synthetic fallback. */
 export const loadOrcaDataset = async (
-  client: Pick<EvalsClient, 'getDatasetByName' | 'upsertDataset'>,
-  { release, slice }: OrcaRun = { release: ORCA_RELEASE }
+  client: Pick<EvalsClient, 'getDatasetByName'>,
+  release: OrcaRelease = ORCA_RELEASE
 ): Promise<EvaluationDataset<InvestigationExample>> => {
   const dataset = await client.getDatasetByName(release.name);
   assert(dataset, 'Pinned ORCA dataset is missing from Golden');
-  const validated = validateOrcaDataset(dataset, release);
-  return slice ? storeOrcaSlice(client, sliceOrcaDataset(validated, slice)) : validated;
+  return validateOrcaDataset(dataset, release);
 };
 
 const hasRows = (stdout: string): boolean => {
@@ -231,8 +191,8 @@ const hasRows = (stdout: string): boolean => {
     const rows = Array.isArray(data)
       ? data
       : data !== null && typeof data === 'object'
-      ? data.values
-      : undefined;
+        ? data.values
+        : undefined;
     return (
       Array.isArray(rows) &&
       rows.some(

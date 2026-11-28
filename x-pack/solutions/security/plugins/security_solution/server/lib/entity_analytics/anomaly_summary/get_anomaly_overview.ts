@@ -265,8 +265,8 @@ export const getEntityAnomalyOverview = async ({
           byFieldValue: record.byFieldValue,
         })
       : actual !== undefined
-      ? String(actual)
-      : null;
+        ? String(actual)
+        : null;
 
     return {
       recordId: anomaly._id ?? '',

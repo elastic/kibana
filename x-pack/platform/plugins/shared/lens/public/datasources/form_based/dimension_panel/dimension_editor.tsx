@@ -450,7 +450,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     }) => {
       const isActive = Boolean(
         incompleteOperation === operationType ||
-          (!incompleteOperation && selectedColumn && selectedColumn.operationType === operationType)
+        (!incompleteOperation && selectedColumn && selectedColumn.operationType === operationType)
       );
 
       const partialIcon = compatibleWithCurrentField &&
@@ -1179,10 +1179,10 @@ export function DimensionEditor(props: DimensionEditorProps) {
               dataTestSubj: 'indexPattern-time-shift-enable',
               inlineElement: Boolean(
                 selectedOperationDefinition.shiftable &&
-                  (currentIndexPattern.timeFieldName ||
-                    Object.values(state.layers[layerId].columns).some(
-                      (col) => col.operationType === 'date_histogram'
-                    ))
+                (currentIndexPattern.timeFieldName ||
+                  Object.values(state.layers[layerId].columns).some(
+                    (col) => col.operationType === 'date_histogram'
+                  ))
               ) ? (
                 <TimeShift
                   datatableUtilities={services.data.datatableUtilities}

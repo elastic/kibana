@@ -72,7 +72,7 @@ const makeDeps = (
           elasticsearch: {
             client: { asScoped: jest.fn().mockReturnValue({ asCurrentUser: {} }) },
           },
-        } as any),
+        }) as any,
       licensing: licensingMock.createStart(),
       logger: loggingSystemMock.createLogger(),
       getWorkflowsForOutputs: jest.fn(async (ids: string[]) =>
@@ -168,6 +168,7 @@ describe('WorkflowValidationService', () => {
       const request = {} as any;
 
       const result = await service.validateWorkflow(':::\nnot yaml', 'default', request, {
+        isManaged: false,
         includeVariableRules: false,
         includeEsqlRules: false,
       });
@@ -195,6 +196,7 @@ describe('WorkflowValidationService', () => {
       ].join('\n');
 
       const result = await service.validateWorkflow(yaml, 'default', request, {
+        isManaged: false,
         includeVariableRules: false,
         includeEsqlRules: false,
       });
@@ -223,6 +225,7 @@ describe('WorkflowValidationService', () => {
       ].join('\n');
 
       const result = await service.validateWorkflow(yaml, 'default', request, {
+        isManaged: false,
         includeVariableRules: true,
         includeEsqlRules: true,
       });
@@ -251,6 +254,7 @@ describe('WorkflowValidationService', () => {
       ].join('\n');
 
       const result = await service.validateWorkflow(yaml, 'default', request, {
+        isManaged: false,
         includeVariableRules: true,
         includeEsqlRules: true,
       });
@@ -301,6 +305,7 @@ describe('WorkflowValidationService', () => {
       const variableDiagnostics = async (reference: string) =>
         (
           await service.validateWorkflow(callerYaml(reference), 'default', {} as any, {
+            isManaged: false,
             includeVariableRules: true,
             includeEsqlRules: false,
           })
@@ -344,6 +349,7 @@ describe('WorkflowValidationService', () => {
       ].join('\n');
 
       const result = await service.validateWorkflow(yaml, 'default', {} as any, {
+        isManaged: false,
         includeVariableRules: true,
         includeEsqlRules: false,
       });
@@ -373,13 +379,13 @@ describe('WorkflowValidationService', () => {
         slackWorkflowYaml('{{ steps.notify.output.known }}'),
         'default',
         request,
-        { includeVariableRules: true, includeEsqlRules: true }
+        { includeVariableRules: true, includeEsqlRules: true, isManaged: false }
       );
       const fromConnectorOnly = await service.validateWorkflow(
         slackWorkflowYaml('{{ steps.notify.output.channel }}'),
         'default',
         request,
-        { includeVariableRules: true, includeEsqlRules: true }
+        { includeVariableRules: true, includeEsqlRules: true, isManaged: false }
       );
 
       expect(resolves.diagnostics.filter(({ source }) => source === 'variable')).toEqual([]);
@@ -399,13 +405,13 @@ describe('WorkflowValidationService', () => {
         slackWorkflowYaml('{{ steps.notify.output.channel }}'),
         'default',
         request,
-        { includeVariableRules: true, includeEsqlRules: true }
+        { includeVariableRules: true, includeEsqlRules: true, isManaged: false }
       );
       const missing = await service.validateWorkflow(
         slackWorkflowYaml('{{ steps.notify.output.missing }}'),
         'default',
         request,
-        { includeVariableRules: true, includeEsqlRules: true }
+        { includeVariableRules: true, includeEsqlRules: true, isManaged: false }
       );
 
       expect(resolves.diagnostics.filter(({ source }) => source === 'variable')).toEqual([]);
@@ -435,10 +441,12 @@ describe('WorkflowValidationService', () => {
       ].join('\n');
 
       const gate = await service.validateWorkflow(yaml, 'default', request, {
+        isManaged: false,
         includeVariableRules: false,
         includeEsqlRules: false,
       });
       const diagnostics = await service.validateWorkflow(yaml, 'default', request, {
+        isManaged: false,
         includeVariableRules: true,
         includeEsqlRules: true,
       });
@@ -468,6 +476,7 @@ describe('WorkflowValidationService', () => {
       ].join('\n');
 
       const result = await service.validateWorkflow(yaml, 'default', request, {
+        isManaged: false,
         includeVariableRules: false,
         includeEsqlRules: false,
       });
@@ -498,6 +507,7 @@ describe('WorkflowValidationService', () => {
       ].join('\n');
 
       const result = await service.validateWorkflow(yaml, 'default', request, {
+        isManaged: false,
         includeVariableRules: false,
         includeEsqlRules: false,
       });
@@ -531,6 +541,7 @@ describe('WorkflowValidationService', () => {
         const request = {} as any;
 
         const result = await service.validateWorkflow(pageWorkflowYaml, 'default', request, {
+          isManaged: false,
           includeVariableRules: false,
           includeEsqlRules: false,
         });
@@ -594,7 +605,7 @@ describe('WorkflowValidationService', () => {
         esqlWorkflowYaml('FROM logs-app | KEEP hostname'),
         'default',
         {} as any,
-        { includeVariableRules: true, includeEsqlRules: true }
+        { includeVariableRules: true, includeEsqlRules: true, isManaged: false }
       );
 
       expect(result.valid).toBe(false);
@@ -617,7 +628,7 @@ describe('WorkflowValidationService', () => {
         esqlWorkflowYaml('FROM logs-app | KEEP host.name'),
         'default',
         {} as any,
-        { includeVariableRules: true, includeEsqlRules: true }
+        { includeVariableRules: true, includeEsqlRules: true, isManaged: false }
       );
 
       expect(result.valid).toBe(true);
@@ -635,7 +646,7 @@ describe('WorkflowValidationService', () => {
         esqlWorkflowYaml('FROM logs-app | CHANGE_POINT host.name'),
         'default',
         {} as any,
-        { includeVariableRules: true, includeEsqlRules: true }
+        { includeVariableRules: true, includeEsqlRules: true, isManaged: false }
       );
 
       expect(result.diagnostics).toContainEqual(
@@ -654,7 +665,7 @@ describe('WorkflowValidationService', () => {
         esqlWorkflowYaml('FROM no-such-index | WHERE'),
         'default',
         {} as any,
-        { includeVariableRules: false, includeEsqlRules: false }
+        { includeVariableRules: false, includeEsqlRules: false, isManaged: false }
       );
 
       expect(result.valid).toBe(true);
@@ -674,6 +685,7 @@ describe('WorkflowValidationService', () => {
       ].join('\n');
 
       await service.validateWorkflow(yaml, 'default', {} as any, {
+        isManaged: false,
         includeVariableRules: true,
         includeEsqlRules: true,
       });
@@ -686,6 +698,7 @@ describe('WorkflowValidationService', () => {
       const queries = Array.from({ length: 50 }, (_, i) => `FROM logs-app | LIMIT ${i + 1}`);
 
       await service.validateWorkflow(esqlSteps(queries), 'default', {} as any, {
+        isManaged: false,
         includeVariableRules: true,
         includeEsqlRules: true,
       });
@@ -696,7 +709,7 @@ describe('WorkflowValidationService', () => {
     it('requests columns again for the next validation', async () => {
       const service = new WorkflowValidationService(makeDeps().deps);
       const yaml = esqlWorkflowYaml('FROM logs-app | LIMIT 1');
-      const options = { includeVariableRules: true, includeEsqlRules: true };
+      const options = { includeVariableRules: true, includeEsqlRules: true, isManaged: false };
 
       await service.validateWorkflow(yaml, 'default', {} as any, options);
       await service.validateWorkflow(yaml, 'default', {} as any, options);
@@ -722,7 +735,7 @@ describe('WorkflowValidationService', () => {
         esqlSteps(indices.map((index) => `FROM ${index} | LIMIT 1`)),
         'default',
         {} as any,
-        { includeVariableRules: true, includeEsqlRules: true }
+        { includeVariableRules: true, includeEsqlRules: true, isManaged: false }
       );
 
       expect(mockGetColumnsFor).toHaveBeenCalledTimes(indices.length);
@@ -738,6 +751,7 @@ describe('WorkflowValidationService', () => {
       );
 
       const result = await service.validateWorkflow(esqlSteps(queries), 'default', {} as any, {
+        isManaged: false,
         includeVariableRules: false,
         includeEsqlRules: true,
       });
@@ -770,6 +784,7 @@ describe('WorkflowValidationService', () => {
       const service = new WorkflowValidationService(makeDeps().deps);
 
       const result = await service.validateWorkflow(esqlSteps(queries), 'default', {} as any, {
+        isManaged: false,
         includeVariableRules: false,
         includeEsqlRules: true,
       });

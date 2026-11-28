@@ -55,6 +55,7 @@ export interface ArtifactEntryCardProps extends CommonArtifactEntryCardProps {
   hideDescription?: boolean;
   // A flag to hide comments section, false by default
   hideComments?: boolean;
+  dataUpdatedAt?: CardHeaderProps['dataUpdatedAt'];
 }
 
 export interface ArtifactEntryCardDecoratorProps extends CommonProps {
@@ -75,6 +76,7 @@ export const ArtifactEntryCard = memo<ArtifactEntryCardProps>(
     hideComments = false,
     Decorator,
     CriteriaComponent = CriteriaConditions,
+    dataUpdatedAt,
     'data-test-subj': dataTestSubj,
     ...commonProps
   }) => {
@@ -90,6 +92,7 @@ export const ArtifactEntryCard = memo<ArtifactEntryCardProps>(
             createdDate={artifact.created_at}
             updatedDate={artifact.updated_at}
             actions={actions}
+            dataUpdatedAt={dataUpdatedAt}
             data-test-subj={getTestId('header')}
           />
           <CardSubHeader

@@ -22,7 +22,7 @@ const handleGetSelectableOptions = ({ timelines }: { timelines: OpenTimelineResu
         key: `${t.title}-${index}`,
         title: t.title,
         checked: undefined,
-      } as EuiSelectableOption)
+      }) as EuiSelectableOption
   );
 
 /**

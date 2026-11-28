@@ -19,6 +19,9 @@ import {
   getSelectToggleButtonForName,
 } from './required_fields.test_helpers';
 
+/* EuiPopover runs tabbable's focusable() on every mount, which dominates jsdom render time for comboboxes */
+jest.mock('tabbable', () => ({ ...jest.requireActual('tabbable'), focusable: () => [] }));
+
 const ADD_REQUIRED_FIELD_BUTTON_TEST_ID = 'addRequiredFieldButton';
 const REQUIRED_FIELDS_GENERAL_WARNING_TEST_ID = 'requiredFieldsGeneralWarning';
 

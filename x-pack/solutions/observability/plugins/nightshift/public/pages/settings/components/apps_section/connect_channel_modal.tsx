@@ -23,13 +23,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
 import { KbnDangerCallout, type KbnCalloutProps } from '@kbn/ui-callout';
+import { parseSlackChannelInput } from '@kbn/nightshift-investigations-plugin/common';
 import {
   useAvailableChannels,
   useBindChannel,
   type BindFailure,
 } from '../../../../data/relay_apps/use_relay_app_bindings';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../../common/ebt_constants';
-import { parseSlackChannelInput } from '../../../../common/parse_slack_channel_input';
 
 const failureCopy = ({ reason, message }: BindFailure): string => {
   switch (reason) {

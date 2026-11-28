@@ -181,7 +181,7 @@ describe('use_output_form', () => {
         kafkaSslKeySecretInput: { value: sslKeySecret },
         kafkaAuthPasswordInput: { value: password },
         kafkaAuthPasswordSecretInput: { value: passwordSecret },
-      } as unknown as Parameters<typeof extractKafkaOutputSecrets>[0]);
+      }) as unknown as Parameters<typeof extractKafkaOutputSecrets>[0];
 
     it('returns null when there is no secret to send', () => {
       expect(extractKafkaOutputSecrets(givenInputs({}))).toBeNull();

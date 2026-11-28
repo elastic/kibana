@@ -29,7 +29,7 @@ export type NetworkTopCountriesColumns = [
   Columns<TopNetworkTablesEcsField['bytes_out']>,
   Columns<NetworkTopCountriesEdges>,
   Columns<NetworkTopCountriesEdges>,
-  Columns<NetworkTopCountriesEdges>
+  Columns<NetworkTopCountriesEdges>,
 ];
 
 export type NetworkTopCountriesColumnsNetworkDetails = [
@@ -37,7 +37,7 @@ export type NetworkTopCountriesColumnsNetworkDetails = [
   Columns<TopNetworkTablesEcsField['bytes_in']>,
   Columns<TopNetworkTablesEcsField['bytes_out']>,
   Columns<NetworkTopCountriesEdges>,
-  Columns<NetworkTopCountriesEdges>
+  Columns<NetworkTopCountriesEdges>,
 ];
 
 export const getNetworkTopCountriesColumns = (

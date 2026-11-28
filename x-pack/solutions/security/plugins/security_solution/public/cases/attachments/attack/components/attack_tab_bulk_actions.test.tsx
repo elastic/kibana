@@ -121,7 +121,7 @@ const buildAttack = (overrides: Partial<AttackDiscoveryAlert> = {}): AttackDisco
     tags: ['triage'],
     replacements: {},
     ...overrides,
-  } as unknown as AttackDiscoveryAlert);
+  }) as unknown as AttackDiscoveryAlert;
 
 const resolvedSelection: SelectedAttack[] = [
   { attackId: 'attack-1', title: 'Credential dumping on host-1', attack: buildAttack() },

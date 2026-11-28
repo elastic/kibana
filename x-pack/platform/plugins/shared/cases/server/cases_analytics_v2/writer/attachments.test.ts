@@ -61,7 +61,7 @@ const makeLegacyAttachmentSO = (
       updated_at: null,
       updated_by: null,
     } as unknown as AttachmentPersistedAttributes,
-  } as SavedObject<AttachmentPersistedAttributes>);
+  }) as SavedObject<AttachmentPersistedAttributes>;
 
 describe('CasesAttachmentsV2Writer', () => {
   afterEach(() => {

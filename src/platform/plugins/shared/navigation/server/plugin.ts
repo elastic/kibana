@@ -35,15 +35,12 @@ const navCustomizationSchema = z.object({
   hidden: z.array(z.string().max(100)),
 });
 
-export class NavigationServerPlugin
-  implements
-    Plugin<
-      NavigationServerSetup,
-      NavigationServerStart,
-      NavigationServerSetupDependencies,
-      NavigationServerStartDependencies
-    >
-{
+export class NavigationServerPlugin implements Plugin<
+  NavigationServerSetup,
+  NavigationServerStart,
+  NavigationServerSetupDependencies,
+  NavigationServerStartDependencies
+> {
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {

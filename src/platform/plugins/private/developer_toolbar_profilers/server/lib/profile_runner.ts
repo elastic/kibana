@@ -27,7 +27,10 @@ interface ActiveProfile {
 export class ProfileRunner {
   private active?: ActiveProfile;
 
-  constructor(private readonly type: ProfileType, private readonly commands: ProfilerCommands) {}
+  constructor(
+    private readonly type: ProfileType,
+    private readonly commands: ProfilerCommands
+  ) {}
 
   public isRunning(): boolean {
     return this.active !== undefined;

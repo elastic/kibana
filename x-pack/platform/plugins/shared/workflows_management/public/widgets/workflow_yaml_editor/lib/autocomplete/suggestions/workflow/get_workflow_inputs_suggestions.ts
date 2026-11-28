@@ -145,7 +145,7 @@ export async function getWorkflowInputsSuggestions(
 
   const searchPrefix =
     lineParseResult?.matchType === 'workflow-inputs' && lineParseResult
-      ? lineParseResult.fullKey ?? ''
+      ? (lineParseResult.fullKey ?? '')
       : extractInputKeyPrefix(lineUpToCursor);
   const lowerSearchPrefix = searchPrefix.toLowerCase();
   const required = schema.required ?? [];

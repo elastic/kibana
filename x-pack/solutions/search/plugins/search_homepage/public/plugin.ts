@@ -14,9 +14,12 @@ import type {
   SearchHomepageServicesContextDeps,
 } from './types';
 
-export class SearchHomepagePlugin
-  implements Plugin<void, void, {}, SearchHomepageAppPluginStartDependencies>
-{
+export class SearchHomepagePlugin implements Plugin<
+  void,
+  void,
+  {},
+  SearchHomepageAppPluginStartDependencies
+> {
   public setup(core: CoreSetup<SearchHomepageAppPluginStartDependencies>) {
     core.application.register({
       id: PLUGIN_ID,

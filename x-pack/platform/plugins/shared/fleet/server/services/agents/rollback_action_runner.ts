@@ -133,8 +133,8 @@ export async function rollbackBatch(
           `Cannot rollback agent in hosted agent policy ${agent.policy_id}`
         )
       : isAgentlessAgent(restrictions, agent)
-      ? new AgentlessAgentRestrictionError(`Cannot rollback managed agent ${agent.id}`)
-      : undefined;
+        ? new AgentlessAgentRestrictionError(`Cannot rollback managed agent ${agent.id}`)
+        : undefined;
     if (restrictionError) {
       if (!errorsByRollbackVersion[rollbackVersion]) {
         errorsByRollbackVersion[rollbackVersion] = {};

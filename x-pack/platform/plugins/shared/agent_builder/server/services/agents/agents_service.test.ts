@@ -61,6 +61,7 @@ const createStartDeps = ({
     savedObjects: savedObjectsServiceMock.createStartContract(),
     spaces: undefined,
     toolsService: createToolsServiceStartMock(),
+    getPrincipalKey: () => undefined,
   };
 };
 

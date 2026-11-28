@@ -126,13 +126,14 @@ export const focusVisibleTestHarness = {
   },
   reset: (): void => {
     mockIsFocusVisible = true;
-    jest
-      .spyOn(HTMLElement.prototype, 'matches')
-      .mockImplementation(function matches(this: HTMLElement, selectors: string): boolean {
-        return selectors === ':focus-visible'
-          ? mockIsFocusVisible
-          : nativeElementMatches.call(this, selectors);
-      });
+    jest.spyOn(HTMLElement.prototype, 'matches').mockImplementation(function matches(
+      this: HTMLElement,
+      selectors: string
+    ): boolean {
+      return selectors === ':focus-visible'
+        ? mockIsFocusVisible
+        : nativeElementMatches.call(this, selectors);
+    });
   },
 };
 

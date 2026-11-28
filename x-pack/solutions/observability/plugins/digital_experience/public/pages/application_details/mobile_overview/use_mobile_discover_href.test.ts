@@ -6,7 +6,10 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { mobilePanelDiscoverEsql } from '../../../../common/mobile/discover';
+import {
+  mobileCrashesDiscoverEsql,
+  mobilePanelDiscoverEsql,
+} from '../../../../common/mobile/discover';
 import { useDiscoverHref } from '../../../hooks/use_discover_href';
 import { useEnvironment } from '../../../hooks/use_environment';
 import { useQueryParam } from '../../../hooks/use_query_param';
@@ -34,7 +37,7 @@ const mockUrl = ({
       ({
         value: { osName, release }[key as 'osName' | 'release'],
         setValue: jest.fn(),
-      } as ReturnType<typeof useQueryParam>)
+      }) as ReturnType<typeof useQueryParam>
   );
 };
 
@@ -47,7 +50,7 @@ describe('useMobileDiscoverHref', () => {
   it("opens the page's events with every filter of its URL, over its time range", () => {
     mockUrl({ environment: 'production', osName: 'iOS', release: '2.0.0' });
 
-    const { result } = renderHook(() => useMobileDiscoverHref('shop-mobile'));
+    const { result } = renderHook(() => useMobileDiscoverHref('shop-mobile', 'overview'));
 
     expect(result.current).toBe('/app/discover');
     const [esql, timeRange] = jest.mocked(useDiscoverHref).mock.calls.at(-1) ?? [];
@@ -68,7 +71,7 @@ describe('useMobileDiscoverHref', () => {
   it('opens every event of the application without filters', () => {
     mockUrl();
 
-    renderHook(() => useMobileDiscoverHref('shop-mobile'));
+    renderHook(() => useMobileDiscoverHref('shop-mobile', 'overview'));
 
     const [esql] = jest.mocked(useDiscoverHref).mock.calls.at(-1) ?? [];
     expect(esql).toContain('`service.name` == "shop-mobile"');
@@ -78,7 +81,7 @@ describe('useMobileDiscoverHref', () => {
 
   it('follows a filter change, so it never opens the previous selection', () => {
     mockUrl({ osName: 'iOS' });
-    const { rerender } = renderHook(() => useMobileDiscoverHref('shop-mobile'));
+    const { rerender } = renderHook(() => useMobileDiscoverHref('shop-mobile', 'overview'));
 
     mockUrl({ osName: 'Android' });
     rerender();
@@ -87,10 +90,28 @@ describe('useMobileDiscoverHref', () => {
     expect(esql).toContain('`resource.attributes.os.name` == "Android"');
   });
 
+  it("opens the Crashes tab's crashes over its own range, still relative", () => {
+    mockUrl({ environment: 'production', release: '8.4.0' });
+
+    renderHook(() => useMobileDiscoverHref('ride-ios', 'crashes'));
+
+    const [esql, timeRange] = jest.mocked(useDiscoverHref).mock.calls.at(-1) ?? [];
+    expect(esql).toBe(
+      mobileCrashesDiscoverEsql(
+        { serviceName: 'ride-ios', release: '8.4.0' },
+        { environment: 'production' }
+      )
+    );
+    // Discover resolves "now" when the link opens, so it never shows an older window.
+    expect(timeRange).toEqual({ from: 'now-2h', to: 'now' });
+  });
+
   it('has no link without access to Discover', () => {
     mockUrl();
     jest.mocked(useDiscoverHref).mockReturnValue(undefined);
 
-    expect(renderHook(() => useMobileDiscoverHref('shop-mobile')).result.current).toBeUndefined();
+    expect(
+      renderHook(() => useMobileDiscoverHref('shop-mobile', 'overview')).result.current
+    ).toBeUndefined();
   });
 });

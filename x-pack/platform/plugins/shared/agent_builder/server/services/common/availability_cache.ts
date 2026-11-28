@@ -11,57 +11,139 @@ import type {
   AvailabilityConfig,
   AvailabilityResult,
 } from '@kbn/agent-builder-server';
+import type { PrincipalKeyResolver } from './principal_key';
 
 const DEFAULT_TTL = 5 * 60 * 1000; // 5 minutes default TTL
+// Bounded by resources x spaces. Going over a cap only costs recomputation.
+const MAX_SHARED_ENTRIES = 5000;
+// Bounded by resources x spaces x principals, where every API key is a principal of its own.
+const MAX_PRINCIPAL_ENTRIES = 10000;
+// A computation pending for longer is assumed stuck: later callers run the handler themselves
+// instead of waiting on it, so that a retry after a timeout is a new attempt.
+const PENDING_SHARE_WINDOW = 5 * 1000;
 
-export class AvailabilityCache {
-  private cache = new LRUCache<string, AvailabilityResult>({
-    max: 1000,
+interface PendingComputation {
+  result: Promise<AvailabilityResult>;
+  startedAt: number;
+}
+
+interface AvailabilityStore {
+  results: LRUCache<string, AvailabilityResult>;
+  /** Computations in progress, so that concurrent misses for a key share one handler call. */
+  pending: Map<string, PendingComputation>;
+}
+
+interface CacheLocation {
+  store: AvailabilityStore;
+  key: string;
+}
+
+const createStore = (max: number): AvailabilityStore => ({
+  results: new LRUCache<string, AvailabilityResult>({
+    max,
     ttl: DEFAULT_TTL,
     allowStale: false,
     ttlAutopurge: false,
-  });
+  }),
+  pending: new Map(),
+});
+
+export interface AvailabilityCacheOptions {
+  /**
+   * Resolves the principal part of the key for the `space-user` cache mode.
+   * Without it, or when it resolves no key, `space-user` results are not cached.
+   */
+  getPrincipalKey?: PrincipalKeyResolver;
+}
+
+export class AvailabilityCache {
+  /** Results for the `global` and `space` cache modes. */
+  private readonly sharedStore = createStore(MAX_SHARED_ENTRIES);
+  /** Results for the `space-user` cache mode, kept apart so that principals cannot evict shared results. */
+  private readonly principalStore = createStore(MAX_PRINCIPAL_ENTRIES);
+  private readonly getPrincipalKey?: PrincipalKeyResolver;
+
+  constructor({ getPrincipalKey }: AvailabilityCacheOptions = {}) {
+    this.getPrincipalKey = getPrincipalKey;
+  }
 
   async getOrCompute(
     resourceId: string,
     config: AvailabilityConfig,
     context: AvailabilityContext
   ): Promise<AvailabilityResult> {
-    const cacheKey = getCacheKey(resourceId, config, context);
-    const cachedValue = cacheKey ? this.cache.get(cacheKey) : undefined;
+    const location = this.getCacheLocation(resourceId, config, context);
+    if (!location) {
+      return config.handler(context);
+    }
+
+    const { store, key } = location;
+    const cachedValue = store.results.get(key);
     if (cachedValue !== undefined) {
       return cachedValue;
     }
-    const newValue = await config.handler(context);
-    if (cacheKey) {
-      this.cache.set(cacheKey, newValue, {
+
+    const pending = store.pending.get(key);
+    if (pending && Date.now() - pending.startedAt < PENDING_SHARE_WINDOW) {
+      return pending.result;
+    }
+
+    // The async wrapper turns a handler that throws synchronously into a rejected promise.
+    const result = (async () => config.handler(context))().then((value) => {
+      store.results.set(key, value, {
         ttl: config.cacheTtl ? config.cacheTtl * 1000 : DEFAULT_TTL,
       });
-    }
-    return newValue;
+      return value;
+    });
+    const computation: PendingComputation = { result, startedAt: Date.now() };
+    store.pending.set(key, computation);
+
+    // Released on failure too: an error is not cached, the next caller runs the handler again.
+    const release = () => {
+      if (store.pending.get(key) === computation) {
+        store.pending.delete(key);
+      }
+    };
+    result.then(release, release);
+
+    return result;
   }
 
   clear() {
-    this.cache.clear();
+    for (const store of [this.sharedStore, this.principalStore]) {
+      store.results.clear();
+      store.pending.clear();
+    }
   }
 
+  /** Whether a computed result is cached. A computation still in progress does not count. */
   has(resourceId: string, config: AvailabilityConfig, context: AvailabilityContext): boolean {
-    const cacheKey = getCacheKey(resourceId, config, context);
-    return cacheKey ? this.cache.has(cacheKey) : false;
+    const location = this.getCacheLocation(resourceId, config, context);
+    return location ? location.store.results.has(location.key) : false;
+  }
+
+  private getCacheLocation(
+    resourceId: string,
+    config: AvailabilityConfig,
+    context: AvailabilityContext
+  ): CacheLocation | undefined {
+    switch (config.cacheMode) {
+      case 'global':
+        return { store: this.sharedStore, key: resourceId };
+      case 'space':
+        return { store: this.sharedStore, key: `${resourceId}||${context.spaceId}` };
+      case 'space-user': {
+        const principalKey = this.getPrincipalKey?.(context.request);
+        if (!principalKey) {
+          return undefined;
+        }
+        return {
+          store: this.principalStore,
+          key: `${resourceId}||${context.spaceId}||${principalKey}`,
+        };
+      }
+      case 'none':
+        return undefined;
+    }
   }
 }
-
-const getCacheKey = (
-  resourceId: string,
-  config: AvailabilityConfig,
-  context: AvailabilityContext
-): string | undefined => {
-  switch (config.cacheMode) {
-    case 'global':
-      return `${resourceId}`;
-    case 'space':
-      return `${resourceId}||${context.spaceId}`;
-    case 'none':
-      return undefined;
-  }
-};

@@ -82,9 +82,8 @@ export const getSolutionViewSwitchCalloutComponent = async ({
     );
   };
 
-  const { SolutionViewSwitchCalloutInternal } = await import(
-    './solution_view_switch_callout_internal'
-  );
+  const { SolutionViewSwitchCalloutInternal } =
+    await import('./solution_view_switch_callout_internal');
 
   return (props: SolutionViewSwitchCalloutProps) => {
     const [shouldShow, setShouldShow] = useState<boolean>(() => !getIsDismissed());

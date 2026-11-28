@@ -40,52 +40,54 @@ const getDropTargetStyles = ({
     }
   }
 
-  ${isDraggingOver
-    ? css`
-        .drop-and-provider-timeline {
-          &:hover {
-            background-color: ${rgba(euiTheme.colors.success, 0.3)};
-          }
-        }
-        .drop-and-provider-timeline:hover {
-          background-color: ${rgba(euiTheme.colors.success, 0.3)};
-        }
-        > div.timeline-drop-area-empty {
-          color: ${euiTheme.colors.success};
-          background-color: ${rgba(euiTheme.colors.success, 0.2)};
-
-          & .timeline-drop-area-empty__text {
-            color: ${euiTheme.colors.success};
-          }
-        }
-        > div.timeline-drop-area {
-          background-color: ${rgba(euiTheme.colors.success, 0.2)};
-          .provider-item-filter-container div:first-child {
-            /* Override dragNdrop beautiful so we do not have our droppable moving around for no good reason */
-            transform: none !important;
-          }
+  ${
+    isDraggingOver
+      ? css`
           .drop-and-provider-timeline {
-            display: block !important;
-            + div {
-              display: none;
+            &:hover {
+              background-color: ${rgba(euiTheme.colors.success, 0.3)};
             }
           }
-
-          & .euiFormHelpText {
+          .drop-and-provider-timeline:hover {
+            background-color: ${rgba(euiTheme.colors.success, 0.3)};
+          }
+          > div.timeline-drop-area-empty {
             color: ${euiTheme.colors.success};
+            background-color: ${rgba(euiTheme.colors.success, 0.2)};
+
+            & .timeline-drop-area-empty__text {
+              color: ${euiTheme.colors.success};
+            }
           }
-        }
-        .flyout-overlay {
-          .euiPanel {
-            background-color: ${euiTheme.colors.lightShade};
+          > div.timeline-drop-area {
+            background-color: ${rgba(euiTheme.colors.success, 0.2)};
+            .provider-item-filter-container div:first-child {
+              /* Override dragNdrop beautiful so we do not have our droppable moving around for no good reason */
+              transform: none !important;
+            }
+            .drop-and-provider-timeline {
+              display: block !important;
+              + div {
+                display: none;
+              }
+            }
+
+            & .euiFormHelpText {
+              color: ${euiTheme.colors.success};
+            }
           }
-          + div {
-            /* Override dragNdrop beautiful so we do not have our droppable moving around for no good reason */
-            display: none !important;
+          .flyout-overlay {
+            .euiPanel {
+              background-color: ${euiTheme.colors.lightShade};
+            }
+            + div {
+              /* Override dragNdrop beautiful so we do not have our droppable moving around for no good reason */
+              display: none !important;
+            }
           }
-        }
-      `
-    : ''}
+        `
+      : ''
+  }
   > div.timeline-drop-area {
     .drop-and-provider-timeline {
       display: none;

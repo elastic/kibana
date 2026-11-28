@@ -49,7 +49,7 @@ export interface ConnectorDetail {
 export const resolveAllowedConnectorIds = (
   agentConfiguration?: { connector_ids?: string[] } | undefined
 ): string[] | undefined =>
-  agentConfiguration ? agentConfiguration.connector_ids ?? [] : undefined;
+  agentConfiguration ? (agentConfiguration.connector_ids ?? []) : undefined;
 
 /**
  * Returns connectors that have a ConnectorSpec and, when allowedIds is provided,

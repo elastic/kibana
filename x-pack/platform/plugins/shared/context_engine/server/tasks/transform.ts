@@ -119,7 +119,7 @@ export const parseReturned = (result: string | undefined | null): ParsedReturned
   }
 
   const columns = (esqlData.columns ?? []).map((column) =>
-    typeof column === 'string' ? column : column.name ?? ''
+    typeof column === 'string' ? column : (column.name ?? '')
   );
   return { columns, row_count: esqlData.values?.length ?? 0 };
 };

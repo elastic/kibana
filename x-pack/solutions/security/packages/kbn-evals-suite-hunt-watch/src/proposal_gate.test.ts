@@ -9,7 +9,7 @@ import type { ProposalWithMetadata } from '@kbn/proposals-common';
 import { describeSettlementProblems, expectedSettledStatus } from './proposal_gate';
 
 const proposal = (overrides: Partial<ProposalWithMetadata>): ProposalWithMetadata =>
-  ({ id: 'p1', status: 'pending', ...overrides } as ProposalWithMetadata);
+  ({ id: 'p1', status: 'pending', ...overrides }) as ProposalWithMetadata;
 
 describe('expectedSettledStatus', () => {
   it.each([

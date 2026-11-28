@@ -90,16 +90,16 @@ export const useSendSteer = () => {
   /** On a busy converse, attempt one steer with the same event id. */
   const steerAfterBusy = useCallback(
     ({
-        message,
-        eventId,
-        onUnsent,
-        steerable = true,
-      }: {
-        message: string;
-        eventId: string;
-        onUnsent?: (message: string) => void;
-        steerable?: boolean;
-      }) =>
+      message,
+      eventId,
+      onUnsent,
+      steerable = true,
+    }: {
+      message: string;
+      eventId: string;
+      onUnsent?: (message: string) => void;
+      steerable?: boolean;
+    }) =>
       (error: unknown): boolean => {
         if (!conversationId || !isConversationBusyRejection(error)) {
           return false;

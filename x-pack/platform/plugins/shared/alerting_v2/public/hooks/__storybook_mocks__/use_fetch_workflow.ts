@@ -28,4 +28,4 @@ export const useFetchWorkflow = (id: string | undefined) =>
     isLoading: false,
     isError: false,
     error: null,
-  } as UseQueryResult<WorkflowDetailDto, Error>);
+  }) as UseQueryResult<WorkflowDetailDto, Error>;

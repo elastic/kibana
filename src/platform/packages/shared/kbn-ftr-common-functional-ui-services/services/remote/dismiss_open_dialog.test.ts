@@ -18,7 +18,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { dismissOpenDialog, isBlockedByOpenDialogError } from './dismiss_open_dialog';
 
 const makeDriver = (accept: jest.Mock) =>
-  ({ switchTo: () => ({ alert: () => ({ accept }) }) } as unknown as WebDriver);
+  ({ switchTo: () => ({ alert: () => ({ accept }) }) }) as unknown as WebDriver;
 
 describe('dismissOpenDialog', () => {
   let log: ToolingLog;

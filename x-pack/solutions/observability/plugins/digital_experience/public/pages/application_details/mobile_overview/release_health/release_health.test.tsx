@@ -43,7 +43,17 @@ beforeEach(() => {
 
 const RELEASES: MobileReleasesResponse = {
   histogram: { interval: { value: 60, unit: 's' }, start: 0, end: 3_600_000 },
-  releases: [{ release: '1.0.0', isOther: false, sessions: 120, users: 30, errorRate: 0.1 }],
+  releases: [
+    {
+      release: '1.0.0',
+      isOther: false,
+      sessions: 120,
+      users: 30,
+      errorRate: 0.1,
+      coldStart: null,
+      coldStarts: 0,
+    },
+  ],
   series: [{ release: '1.0.0', isOther: false, points: [] }],
   markers: [],
 };

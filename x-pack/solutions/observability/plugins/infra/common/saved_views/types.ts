@@ -28,7 +28,7 @@ export interface SavedViewOperations<
   TView extends { id: TView['id'] },
   TId extends TView['id'] = TView['id'],
   TPayload = any,
-  TConfig = any
+  TConfig = any,
 > {
   createView: UseMutateAsyncFunction<TView, ServerError, TPayload>;
   deleteViewById: UseMutateFunction<null, ServerError, string, MutationContext<TView>>;
@@ -44,9 +44,9 @@ export interface SavedViewResult<
   },
   TId extends string = '',
   TPayload = any,
-  TConfig = any
-> extends SavedViewState<TView>,
-    SavedViewOperations<TView, TId, TPayload, TConfig> {}
+  TConfig = any,
+>
+  extends SavedViewState<TView>, SavedViewOperations<TView, TId, TPayload, TConfig> {}
 
 export interface UpdateViewParams<TRequestPayload> {
   id: string;

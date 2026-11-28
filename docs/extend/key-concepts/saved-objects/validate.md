@@ -239,7 +239,7 @@ Use this when the feature and its plugin are only enabled in dedicated dev or QA
 
 Use this when the plugin is always enabled (including in Serverless production), but the SO type should only be registered when a feature flag or configuration option is turned on.
 
-The `no_conditional_saved_object_type_registration` ESLint rule normally forbids conditional registration to avoid migration ON/OFF conflicts. For WIP types, suppress it with an inline comment and a TODO to remove it at graduation:
+The `no_conditional_saved_object_type_registration` lint rule normally forbids conditional registration to avoid migration ON/OFF conflicts. For WIP types, suppress it with an inline comment and a TODO to remove it at graduation:
 
 ```typescript
 if (config.featureFlags.myFeatureEnabled) {
@@ -250,4 +250,4 @@ if (config.featureFlags.myFeatureEnabled) {
 
 Because the type is only registered when the flag is on, it is never registered in environments where the flag is off — so the CI SO check never sees it, and no `wip_types.json` entry or `migrations.allowWipTypes` config is needed.
 
-**Graduation**: remove the conditional and the ESLint suppression. The type becomes unconditionally registered and is subject to full SO type constraints from that point forward.
+**Graduation**: remove the conditional and the lint suppression. The type becomes unconditionally registered and is subject to full SO type constraints from that point forward.

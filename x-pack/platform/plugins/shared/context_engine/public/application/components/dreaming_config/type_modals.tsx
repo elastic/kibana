@@ -286,11 +286,11 @@ const attributeError = (key: string): string | undefined =>
         values: { key },
       })
     : RESERVED_ENTITY_ATTRIBUTE_KEYS.includes(key)
-    ? i18n.translate('xpack.contextEngine.dreamingConfig.entityModal.attributeReserved', {
-        defaultMessage: '"{key}" is kept for dreaming’s own use.',
-        values: { key },
-      })
-    : undefined;
+      ? i18n.translate('xpack.contextEngine.dreamingConfig.entityModal.attributeReserved', {
+          defaultMessage: '"{key}" is kept for dreaming’s own use.',
+          values: { key },
+        })
+      : undefined;
 
 interface EntityTypeModalProps {
   initial?: DreamingEntityType;

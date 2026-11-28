@@ -85,7 +85,7 @@ describe('executeWorkflowTool', () => {
           prompt: { type: 'confirmation', ...definition },
         })),
       },
-    } as any);
+    }) as any;
 
   beforeEach(() => {
     executeWorkflowMock.mockReset();
@@ -123,7 +123,7 @@ describe('executeWorkflowTool', () => {
           actions: { api: { get: (a: string) => `api:${a}` } },
           checkPrivilegesWithRequest: () => ({ atSpace }),
         },
-      } as any);
+      }) as any;
     const getAvailabilityWith = (
       isWorkflowsAvailable: boolean,
       securityGetter: Parameters<typeof executeWorkflowTool>[0]['getSecurity']
@@ -134,6 +134,12 @@ describe('executeWorkflowTool', () => {
       }).availability!.handler({ request: {} as any, uiSettings: {} as any, spaceId: 'default' });
     const getAvailability = (isWorkflowsAvailable: boolean, atSpace: jest.Mock) =>
       getAvailabilityWith(isWorkflowsAvailable, securityWith(atSpace));
+
+    it('caches the result per space and principal', () => {
+      const tool = executeWorkflowTool({ workflowsManagement, getSecurity });
+
+      expect(tool.availability?.cacheMode).toBe('space-user');
+    });
 
     it('is available when Workflows is available and the caller can execute workflows', async () => {
       const atSpace = jest.fn().mockResolvedValue({ hasAllRequested: true });
@@ -180,7 +186,7 @@ describe('executeWorkflowTool', () => {
             actions: { api: { get: (a: string) => `api:${a}` } },
             checkPrivilegesWithRequest: () => ({ atSpace }),
           },
-        } as any);
+        }) as any;
       const tool = executeWorkflowTool({ workflowsManagement, getSecurity: denyingSecurity });
 
       const result = await invokeHandler(
@@ -417,7 +423,7 @@ steps:
             actions: { api: { get: (a: string) => `api:${a}` } },
             checkPrivilegesWithRequest: () => ({ atSpace }),
           },
-        } as any);
+        }) as any;
       const tool = executeWorkflowTool({
         workflowsManagement: { management: { getWorkflow } } as any,
         getSecurity: executeOnlySecurity,
@@ -539,7 +545,7 @@ steps:
               actions: { api: { get: (a: string) => `api:${a}` } },
               checkPrivilegesWithRequest: () => ({ atSpace }),
             },
-          } as any),
+          }) as any,
       });
 
       const result = (await tool.handler(

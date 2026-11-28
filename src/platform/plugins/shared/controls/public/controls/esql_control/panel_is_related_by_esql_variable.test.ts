@@ -16,7 +16,7 @@ import { panelIsRelatedByEsqlVariable } from './panel_is_related_by_esql_variabl
 const esqlVariable = (key: string): ESQLControlVariable =>
   ({
     key,
-  } as ESQLControlVariable);
+  }) as ESQLControlVariable;
 
 const getSiblingApi = (esql: string) => ({
   esql$: new BehaviorSubject<AggregateQuery[]>([{ esql }]),

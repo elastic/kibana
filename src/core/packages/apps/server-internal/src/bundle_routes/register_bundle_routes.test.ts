@@ -42,6 +42,7 @@ const createUiPlugins = (...ids: string[]): UiPlugins => ({
       publicTargetDir: `/plugins/${id}/public-target-dir`,
       publicAssetsDir: `/plugins/${id}/public-assets-dir`,
       version: '8.0.0',
+      requiredPlugins: [],
       requiredBundles: [],
     });
     return map;
@@ -56,6 +57,7 @@ const createExternalPluginsUiPlugins = (...ids: string[]): UiPlugins => ({
       publicTargetDir: Path.join(fromRoot('plugins'), id, 'target'),
       publicAssetsDir: Path.join(fromRoot('plugins'), id, 'assets'),
       version: '8.0.0',
+      requiredPlugins: [],
       requiredBundles: [],
     });
     return map;

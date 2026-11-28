@@ -31,11 +31,11 @@ export interface HasEditCapabilities extends HasTypeDisplayName {
 export const hasEditCapabilities = (root: unknown): root is HasEditCapabilities => {
   return Boolean(
     root &&
-      (root as HasEditCapabilities).onEdit &&
-      typeof (root as HasEditCapabilities).onEdit === 'function' &&
-      (root as HasEditCapabilities).getTypeDisplayName &&
-      typeof (root as HasEditCapabilities).getTypeDisplayName === 'function' &&
-      (root as HasEditCapabilities).isEditingEnabled &&
-      typeof (root as HasEditCapabilities).isEditingEnabled === 'function'
+    (root as HasEditCapabilities).onEdit &&
+    typeof (root as HasEditCapabilities).onEdit === 'function' &&
+    (root as HasEditCapabilities).getTypeDisplayName &&
+    typeof (root as HasEditCapabilities).getTypeDisplayName === 'function' &&
+    (root as HasEditCapabilities).isEditingEnabled &&
+    typeof (root as HasEditCapabilities).isEditingEnabled === 'function'
   );
 };

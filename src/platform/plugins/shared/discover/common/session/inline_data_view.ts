@@ -39,7 +39,7 @@ export const getDataViewSpecKey = (dataView: DataViewSpec): string => {
   const fieldFilters = spec.type === AS_CODE_DATA_VIEW_SPEC_TYPE ? spec.field_filters : undefined;
   const fieldSettings = Object.fromEntries(
     Object.entries(
-      spec.type === AS_CODE_DATA_VIEW_SPEC_TYPE ? spec.field_settings ?? {} : {}
+      spec.type === AS_CODE_DATA_VIEW_SPEC_TYPE ? (spec.field_settings ?? {}) : {}
     ).filter(([, field]) => Object.values(field).some((value) => value !== undefined))
   );
 

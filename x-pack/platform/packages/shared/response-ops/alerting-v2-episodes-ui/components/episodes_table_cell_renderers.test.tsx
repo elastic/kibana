@@ -255,7 +255,7 @@ describe('EpisodeTagsCell', () => {
 
 describe('EpisodeRuleTagsCell', () => {
   const makeRuleWithTags = (tags?: string[]): Rule =>
-    ({ metadata: { name: 'rule name', ...(tags ? { tags } : {}) } } as unknown as Rule);
+    ({ metadata: { name: 'rule name', ...(tags ? { tags } : {}) } }) as unknown as Rule;
 
   const ruleTagsCellProps = { ...baseCellProps, columnId: 'rule_tags' };
 
@@ -352,7 +352,7 @@ describe('EpisodeRuleCell', () => {
       metadata: { name },
       query: { base: `FROM ${name}` },
       ...(grouping ? { grouping } : {}),
-    } as unknown as Rule);
+    }) as unknown as Rule;
 
   const getRuleDetailsHref = (ruleId: string) => `/app/alerting/rules/${ruleId}`;
 

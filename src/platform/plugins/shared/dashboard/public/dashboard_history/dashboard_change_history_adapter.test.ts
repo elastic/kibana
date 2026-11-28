@@ -25,8 +25,8 @@ jest.mock('../dashboard_client', () => ({
 }));
 
 const getHttp = () =>
-  ({ get: jest.fn(), post: jest.fn() } as unknown as jest.Mocked<Pick<HttpSetup, 'get' | 'post'>> &
-    HttpSetup);
+  ({ get: jest.fn(), post: jest.fn() }) as unknown as jest.Mocked<Pick<HttpSetup, 'get' | 'post'>> &
+    HttpSetup;
 
 const getTestDashboardApi = () =>
   getDashboardApi({

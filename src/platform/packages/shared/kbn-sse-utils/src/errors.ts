@@ -18,9 +18,13 @@ export enum ServerSentEventErrorCode {
 
 export class ServerSentEventError<
   TCode extends string,
-  TMeta extends Record<string, any> | undefined
+  TMeta extends Record<string, any> | undefined,
 > extends Error {
-  constructor(public code: TCode, message: string, public meta: TMeta) {
+  constructor(
+    public code: TCode,
+    message: string,
+    public meta: TMeta
+  ) {
     super(message);
   }
 

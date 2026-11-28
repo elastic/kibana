@@ -73,7 +73,7 @@ export const generateWorkflow = async ({
             }\n\nThese ES|QL sources do not exist on this cluster yet and were kept as written:\n${unknownSources.join(
               '\n'
             )}`
-          : lastAgentStep?.text ?? '';
+          : (lastAgentStep?.text ?? '');
 
       return { workflow: out.validation.parsedWorkflow, yaml: out.yaml, response };
     }

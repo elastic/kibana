@@ -153,15 +153,12 @@ const SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER = 'significantEvents';
 const SLACK_CONNECTOR_RECONCILE_INTERVAL_MS = 60_000;
 const RULE_CREATION_APP = 'nightshift';
 
-export class SignificantEventsPlugin
-  implements
-    Plugin<
-      void,
-      SignificantEventsServerStart,
-      SignificantEventsPluginSetupDependencies,
-      SignificantEventsPluginStartDependencies
-    >
-{
+export class SignificantEventsPlugin implements Plugin<
+  void,
+  SignificantEventsServerStart,
+  SignificantEventsPluginSetupDependencies,
+  SignificantEventsPluginStartDependencies
+> {
   public logger: Logger;
   public server?: SignificantEventsServer;
   private isDev: boolean;
@@ -204,6 +201,10 @@ export class SignificantEventsPlugin
     core.savedObjects.registerType(runQuotaLedgerSavedObjectType);
 
     const { server: eventsServer } = this;
+    plugins.nightshiftInvestigations?.registerSlackChannelBindingChecker((request, channelId) =>
+      new SlackAppService(eventsServer).isChannelBound(request, channelId)
+    );
+
     const slackCountsByRun = new WeakMap<
       AbortSignal,
       Promise<Partial<Awaited<ReturnType<typeof getSlackSnapshotCounts>>>>

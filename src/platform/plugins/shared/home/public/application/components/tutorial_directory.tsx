@@ -11,6 +11,7 @@ import _ from 'lodash';
 import React from 'react';
 import { EuiFlexItem, EuiFlexGrid } from '@elastic/eui';
 import { AppHeader, type AppHeaderTab } from '@kbn/app-header';
+import type { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import type { InjectedIntl } from '@kbn/i18n-react';
 import { injectI18n } from '@kbn/i18n-react';
@@ -25,6 +26,7 @@ import type { TutorialType } from '../../services/tutorials/types';
 import {
   getTutorialDirectoryAppHeaderBack,
   getTutorialDirectoryFirstCrumb,
+  getHashQuery,
 } from './tutorial_directory_return_crumb';
 
 const SAMPLE_DATA_TAB_ID = 'sampleData';
@@ -54,6 +56,7 @@ interface TutorialCard extends Pick<TutorialType, 'id' | 'category' | 'name'> {
 interface TutorialDirectoryUiState {
   selectedTabId: TutorialDirectoryUiProps['openTab'];
   tutorialCards: TutorialCard[];
+  appTitles: ReadonlyMap<string, string>;
 }
 
 class TutorialDirectoryUi extends React.Component<
@@ -61,6 +64,7 @@ class TutorialDirectoryUi extends React.Component<
   TutorialDirectoryUiState
 > {
   private _isMounted: boolean;
+  private appsSubscription?: Subscription;
   tabs: Array<{ id: string; name: string; content: JSX.Element }>;
 
   constructor(props: TutorialDirectoryUiProps) {
@@ -95,16 +99,24 @@ class TutorialDirectoryUi extends React.Component<
     this.state = {
       selectedTabId: openTab,
       tutorialCards: [],
+      appTitles: new Map(),
     };
   }
 
   componentWillUnmount() {
     this._isMounted = false;
+    this.appsSubscription?.unsubscribe();
   }
 
   async componentDidMount() {
     this._isMounted = true;
     this.setBreadcrumbs();
+    // Registered app titles name the page the back link returns to.
+    this.appsSubscription = getServices().application.applications$.subscribe((apps) => {
+      const appTitles = new Map<string, string>();
+      apps.forEach(({ id, title }) => appTitles.set(id, title));
+      this.setState({ appTitles });
+    });
     const tutorialConfigs: TutorialType[] = await getTutorials();
     if (!this._isMounted) {
       return;
@@ -171,7 +183,7 @@ class TutorialDirectoryUi extends React.Component<
       const tabExists = this.tabs.some((tab) => tab.id === newTab);
       if (!tabExists) {
         // If the tab does not exist, redirect to the default tab
-        getServices().history.push(`#/tutorial_directory/${SAMPLE_DATA_TAB_ID}`);
+        this.pushTab(SAMPLE_DATA_TAB_ID);
       } else if (newTab !== this.state.selectedTabId) {
         this.setState({
           selectedTabId: newTab,
@@ -179,20 +191,26 @@ class TutorialDirectoryUi extends React.Component<
       }
     }
 
-    if (prevState.selectedTabId !== this.state.selectedTabId) {
+    if (
+      prevState.selectedTabId !== this.state.selectedTabId ||
+      prevState.appTitles !== this.state.appTitles
+    ) {
       this.setBreadcrumbs();
     }
   }
 
+  getAppTitle = (appId: string) => this.state.appTitles.get(appId);
+
   setBreadcrumbs = () => {
     const tab = this.getSelectedTab();
-    const { application, history } = getServices();
+    const { application, history, chrome } = getServices();
     const hash =
       history.location.hash || (typeof window !== 'undefined' ? window.location.hash : '');
     const firstCrumb = getTutorialDirectoryFirstCrumb({
       hash,
       addBasePath: this.props.addBasePath,
       getUrlForApp: application.getUrlForApp,
+      getAppTitle: this.getAppTitle,
     });
     const breadcrumbs = [firstCrumb];
 
@@ -203,19 +221,25 @@ class TutorialDirectoryUi extends React.Component<
       });
     }
 
-    getServices().chrome.setBreadcrumbs(breadcrumbs, {
+    chrome.setBreadcrumbs(breadcrumbs, {
       project: {
         value: breadcrumbs,
       },
     });
+    chrome.docTitle.change(tab?.name ? [tab.name, addDataTitle] : [addDataTitle]);
   };
 
   onSelectedTabChanged = (id: string) => {
     this.setState({
       selectedTabId: id,
     });
-    // Update URL to reflect the selected tab
-    getServices().history.push(`#/tutorial_directory/${id}`);
+    this.pushTab(id);
+  };
+
+  // Updates the URL to reflect the tab, keeping the query so the return params survive tab changes.
+  pushTab = (id: string) => {
+    const { history } = getServices();
+    history.push(`#/tutorial_directory/${id}${getHashQuery(history.location.hash)}`);
   };
 
   getTabs = (): AppHeaderTab[] => {
@@ -286,6 +310,7 @@ class TutorialDirectoryUi extends React.Component<
       hash,
       addBasePath: this.props.addBasePath,
       getUrlForApp: application.getUrlForApp,
+      getAppTitle: this.getAppTitle,
     });
 
     return (

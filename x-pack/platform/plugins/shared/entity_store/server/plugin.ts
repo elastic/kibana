@@ -61,15 +61,12 @@ import { serviceEntityDefinition } from '../common/domain/definitions/service';
 import { genericEntityDefinition } from '../common/domain/definitions/generic';
 import { EXTRACTION_MODE } from '../common/domain/definitions/entity_schema';
 
-export class EntityStorePlugin
-  implements
-    Plugin<
-      EntityStoreSetupContract,
-      EntityStoreStartContract,
-      EntityStoreSetupPlugins,
-      EntityStoreStartPlugins
-    >
-{
+export class EntityStorePlugin implements Plugin<
+  EntityStoreSetupContract,
+  EntityStoreStartContract,
+  EntityStoreSetupPlugins,
+  EntityStoreStartPlugins
+> {
   private readonly logger: Logger;
   private readonly isServerless: boolean;
   private readonly stop$ = new Subject<void>();

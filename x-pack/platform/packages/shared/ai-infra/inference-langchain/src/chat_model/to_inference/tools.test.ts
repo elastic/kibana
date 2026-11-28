@@ -142,8 +142,8 @@ describe('toolDefinitionToInference preserves $defs', () => {
       name: string;
       kittens?: Pet[];
     }
-    const petSchema = z.lazy(
-      (): z.ZodType<Pet> => z.object({ name: z.string(), kittens: z.array(petSchema).optional() })
+    const petSchema = z.lazy((): z.ZodType<Pet> =>
+      z.object({ name: z.string(), kittens: z.array(petSchema).optional() })
     );
 
     const converted = z.toJSONSchema(z.object({ pet: petSchema }), { io: 'input' });

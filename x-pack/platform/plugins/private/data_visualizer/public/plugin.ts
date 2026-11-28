@@ -31,15 +31,12 @@ export type DataVisualizerCoreSetup = CoreSetup<
   DataVisualizerPluginStart
 >;
 
-export class DataVisualizerPlugin
-  implements
-    Plugin<
-      DataVisualizerPluginSetup,
-      DataVisualizerPluginStart,
-      DataVisualizerSetupDependencies,
-      DataVisualizerStartDependencies
-    >
-{
+export class DataVisualizerPlugin implements Plugin<
+  DataVisualizerPluginSetup,
+  DataVisualizerPluginStart,
+  DataVisualizerSetupDependencies,
+  DataVisualizerStartDependencies
+> {
   private resultsLinks = {
     fileBeat: {
       enabled: true,
@@ -83,15 +80,11 @@ export class DataVisualizerPlugin
       getMaxBytesFormatted,
       FieldStatsUnavailableMessage: dynamic(
         async () =>
-          import(
-            './application/index_data_visualizer/embeddables/grid_embeddable/embeddable_error_msg'
-          )
+          import('./application/index_data_visualizer/embeddables/grid_embeddable/embeddable_error_msg')
       ),
       FieldStatisticsTable: dynamic(
         async () =>
-          import(
-            './application/index_data_visualizer/embeddables/grid_embeddable/field_stats_wrapper'
-          )
+          import('./application/index_data_visualizer/embeddables/grid_embeddable/field_stats_wrapper')
       ),
     };
   }

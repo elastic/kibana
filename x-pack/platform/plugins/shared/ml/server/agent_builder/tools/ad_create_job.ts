@@ -214,7 +214,7 @@ export const createAdCreateJobTool = (
           const cardinalitySearchQuery: estypes.QueryDslQueryContainer | undefined =
             datafeedQuery && durationRangeFilter
               ? { bool: { must: [datafeedQuery, durationRangeFilter] } }
-              : datafeedQuery ?? durationRangeFilter;
+              : (datafeedQuery ?? durationRangeFilter);
 
           if (indices && indices.length > 0) {
             if (overallCardinalityFields.size > 0 && !resolvedOverallCardinality) {
@@ -413,8 +413,8 @@ export const createAdCreateJobTool = (
             blocking.length > 0
               ? VALIDATION_STATUS.ERROR
               : hydratedMessages.some((m) => m.status === VALIDATION_STATUS.WARNING)
-              ? VALIDATION_STATUS.WARNING
-              : VALIDATION_STATUS.SUCCESS;
+                ? VALIDATION_STATUS.WARNING
+                : VALIDATION_STATUS.SUCCESS;
 
           return {
             results: [
@@ -615,8 +615,8 @@ const collectInfluencerCardinalityFields = (
   const influencerList = Array.isArray(influencers)
     ? influencers
     : influencers === undefined
-    ? []
-    : [influencers];
+      ? []
+      : [influencers];
   const fields = new Set<string>();
   for (const influencer of influencerList) {
     if (isCardinalityField(influencer)) {

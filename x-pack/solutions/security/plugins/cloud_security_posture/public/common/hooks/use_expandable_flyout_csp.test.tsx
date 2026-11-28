@@ -13,7 +13,7 @@ import { SecuritySolutionContext } from '../../application/security_solution_con
 import { useExpandableFlyoutCsp } from './use_expandable_flyout_csp';
 
 const buildRecord = (source: Record<string, unknown>) =>
-  ({ raw: { _source: source } } as unknown as DataTableRecord);
+  ({ raw: { _source: source } }) as unknown as DataTableRecord;
 
 const buildFlyoutHandle = () => {
   let resolveClose = () => {};

@@ -55,8 +55,7 @@ export interface EntityMaintainerLifecycle {
 }
 
 export interface EntityMaintainerRegistration
-  extends EntityMaintainerTaskEntry,
-    EntityMaintainerLifecycle {}
+  extends EntityMaintainerTaskEntry, EntityMaintainerLifecycle {}
 
 export interface EntityMaintainerRegistryValue {
   task: EntityMaintainerTaskEntry;

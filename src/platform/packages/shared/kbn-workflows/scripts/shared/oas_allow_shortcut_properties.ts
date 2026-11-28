@@ -50,7 +50,7 @@ export const allowShortcutProperties = (
     const schema = schemas[schemaName];
     const propertySchema =
       schema && !('$ref' in schema)
-        ? SHORTCUT_SCHEMA_OVERRIDES[schemaName] ?? findPropertySchema(schema, propertyName)
+        ? (SHORTCUT_SCHEMA_OVERRIDES[schemaName] ?? findPropertySchema(schema, propertyName))
         : undefined;
     if (schema && propertySchema) {
       schemas[schemaName] = { anyOf: [schema, propertySchema] };

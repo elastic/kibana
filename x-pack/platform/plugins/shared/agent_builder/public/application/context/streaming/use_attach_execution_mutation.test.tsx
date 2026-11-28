@@ -68,7 +68,7 @@ const resumeStarted = createExecutionStartedEvent({
 });
 
 const chunk = (text: string): ChatEvent =>
-  ({ type: ChatEventType.messageChunk, data: { message_id: 'm', text_chunk: text } } as ChatEvent);
+  ({ type: ChatEventType.messageChunk, data: { message_id: 'm', text_chunk: text } }) as ChatEvent;
 
 const messageOf = (events: TimelineDisplayEvent[]): string | undefined =>
   events.find(

@@ -42,7 +42,7 @@ const createLog = (): jest.Mocked<ToolingLog> =>
     warning: jest.fn(),
     info: jest.fn(),
     debug: jest.fn(),
-  } as unknown as jest.Mocked<ToolingLog>);
+  }) as unknown as jest.Mocked<ToolingLog>;
 
 const ROLLOUT_STATUS_PACKAGE_POLICY_ID = 'rollout-status-package-policy-id';
 const ROLLOUT_STATUS_AGENT_POLICY_ID = 'rollout-status-agent-policy-id';
@@ -68,7 +68,7 @@ const createIndexed = (): IndexedFleetEndpointPolicyResponse =>
         revision: 1,
       },
     ],
-  } as IndexedFleetEndpointPolicyResponse);
+  }) as IndexedFleetEndpointPolicyResponse;
 
 const createItem = ({
   revision,
@@ -154,7 +154,7 @@ const createSearchClient = ({
     }),
     create: jest.fn().mockResolvedValue({}),
     deleteByQuery: jest.fn().mockResolvedValue({}),
-  } as unknown as Client);
+  }) as unknown as Client;
 
 const expectSeedRejectsWithCleanup = async (item: unknown, expectedError: string) => {
   const indexed = createIndexed();

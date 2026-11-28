@@ -35,9 +35,9 @@ export const investigationProcessOutputSchema = lazySchema(() =>
 export type InvestigationProcessOutput = z.infer<typeof investigationProcessOutputSchema>;
 
 const grade = (description: string) =>
-  ({ type: 'number', description: `Integer 0-3: ${description}` } as const);
+  ({ type: 'number', description: `Integer 0-3: ${description}` }) as const;
 const sentence = (description: string) =>
-  ({ type: 'string', description: `One sentence explaining ${description}.` } as const);
+  ({ type: 'string', description: `One sentence explaining ${description}.` }) as const;
 
 export const investigationProcessPrompt = createPrompt({
   name: 'nightshift_investigation_process',

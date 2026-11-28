@@ -18,9 +18,15 @@ const mockGetTransforms = jest.fn();
 beforeEach(() => {
   mockGetTransforms.mockReset();
   mockGetTransforms.mockImplementation((type: string) =>
-    type === 'markdown' || type === 'lens-dashboard-app' || type === 'vega'
-      ? { schema: z.object({ content: z.string() }).strict() }
-      : undefined
+    type === 'vega'
+      ? {
+          schema: z
+            .object({ spec: z.object({ format: z.literal('hjson'), value: z.string().min(1) }) })
+            .strict(),
+        }
+      : type === 'markdown' || type === 'lens-dashboard-app'
+        ? { schema: z.object({ content: z.string() }).strict() }
+        : undefined
   );
 });
 
@@ -103,8 +109,13 @@ describe('createDashboardAppStateValidator', () => {
       ]);
     });
 
-    it('does not validate vega panels', () => {
-      expect(validatePanel({ spec: '{}' }, 'vega')).toEqual([]);
+    it('validates vega panels with the vega schema', () => {
+      expect(validatePanel({ spec: { format: 'hjson', value: '{mark: bar}' } }, 'vega')).toEqual(
+        []
+      );
+      expect(validatePanel({ spec: '{mark: bar}' }, 'vega')).toEqual([
+        expect.stringMatching(/^config\.spec: /),
+      ]);
     });
 
     it('validates lens panels with the dashboard application lens schema', () => {
@@ -128,6 +139,26 @@ describe('createDashboardAppStateValidator', () => {
           panels: [],
         } as DashboardAttachmentData)
       ).toEqual([{ path: ['title'], message: expect.any(String) }]);
+    });
+
+    it('accepts the dashboard options the tool writes', () => {
+      expect(
+        createValidator().validateDashboardFields({
+          title: 'Dashboard',
+          panels: [],
+          options: { hide_panel_borders: true, sync_cursor: true },
+        })
+      ).toEqual([]);
+    });
+
+    it('reports an unknown options key, such as a typo, at its path', () => {
+      expect(
+        createValidator().validateDashboardFields({
+          title: 'Dashboard',
+          panels: [],
+          options: { hide_borders: true },
+        } as DashboardAttachmentData)
+      ).toEqual([{ path: ['options', 'hide_borders'], message: 'Unrecognized key' }]);
     });
   });
 });

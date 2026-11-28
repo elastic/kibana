@@ -54,15 +54,12 @@ interface WorkflowsManagementPublicConfig {
   pages: { enabled: boolean };
 }
 
-export class WorkflowsPlugin
-  implements
-    Plugin<
-      WorkflowsPublicPluginSetup,
-      WorkflowsPublicPluginStart,
-      WorkflowsPublicPluginSetupDependencies,
-      WorkflowsPublicPluginStartDependencies
-    >
-{
+export class WorkflowsPlugin implements Plugin<
+  WorkflowsPublicPluginSetup,
+  WorkflowsPublicPluginStart,
+  WorkflowsPublicPluginSetupDependencies,
+  WorkflowsPublicPluginStartDependencies
+> {
   private logger: Logger;
   private appUpdater$: Subject<AppUpdater>;
   private telemetryService: TelemetryService;

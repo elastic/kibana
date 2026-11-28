@@ -58,7 +58,7 @@ describe('AgentPolicyCustomFields', () => {
           ...createPackagePolicyMock(),
           inputs: [
             { type: 'supported' } as PackagePolicyInput,
-            ...unsupportedInputTypes.map((type) => ({ type } as PackagePolicyInput)),
+            ...unsupportedInputTypes.map((type) => ({ type }) as PackagePolicyInput),
           ],
         },
       ],

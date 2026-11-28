@@ -37,7 +37,7 @@ const caps = (
         ? { manageEscalations: overrides.manageEscalations }
         : {}),
     },
-  } as unknown as Capabilities);
+  }) as unknown as Capabilities;
 
 describe('getAlertZeroInvestigationsCapabilities', () => {
   it('returns all false when no capabilities are set', () => {

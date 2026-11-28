@@ -718,9 +718,9 @@ interface EnhancedPackagePolicy extends NewPackagePolicy {
 }
 ```
 
-#### ESLint Rules to Enforce Type Safety
+#### Lint Rules to Enforce Type Safety
 
-Add these rules to your ESLint configuration:
+Add these rules to the plugin's oxlint overrides in `.oxlint/team_overrides.mts`:
 
 ```json
 {

@@ -24,7 +24,7 @@ const createSetupMock = (): ActionsPluginSetupContract =>
     getAxiosInstanceWithAuth: jest.fn(),
     getCredential: jest.fn(),
     getClientLeasePool: jest.fn(),
-  } as unknown as ActionsPluginSetupContract);
+  }) as unknown as ActionsPluginSetupContract;
 
 describe('materializeDeclarativeConnectorSpec', () => {
   const connector = parseDeclarativeConnectorSpec(loadFixture('abuseipdb-1.1.0.yaml'));

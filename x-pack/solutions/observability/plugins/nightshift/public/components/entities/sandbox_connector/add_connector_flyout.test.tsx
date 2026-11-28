@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { AddConnectorFlyout } from './add_connector_flyout';
 import {
   actionType,
@@ -165,6 +165,26 @@ describe('AddConnectorFlyout', () => {
       })
     );
     expect(screen.getByTestId('nightshiftAddConnectorFlyout')).toBeInTheDocument();
+  });
+
+  it('opens the type of a created connector instead of confirming with a toast', async () => {
+    const { getAddConnectorFlyout, agents, toasts } = setup();
+    await waitFor(() => expect(screen.getByTestId('.http-create')).toBeEnabled());
+    expect(screen.getByTestId('.http-toggle')).toHaveAttribute('aria-expanded', 'false');
+
+    fireEvent.click(screen.getByTestId('.http-create'));
+
+    expect(await screen.findByTestId('addConnectorFlyoutStub')).toBeInTheDocument();
+    const calls = getAddConnectorFlyout.mock.calls as unknown as Array<
+      [{ onConnectorCreated: (connector: { id: string; name: string }) => void }]
+    >;
+    act(() => calls[calls.length - 1][0].onConnectorCreated({ id: 'h3', name: 'h3' }));
+    await waitFor(() => expect(agents.addConnectorToAgent).toHaveBeenCalled());
+
+    await waitFor(() =>
+      expect(screen.getByTestId('.http-toggle')).toHaveAttribute('aria-expanded', 'true')
+    );
+    expect(toasts.addSuccess).not.toHaveBeenCalled();
   });
 
   it('locks Create connector without permission to create connectors', async () => {
