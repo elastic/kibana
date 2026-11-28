@@ -161,3 +161,11 @@ export const dataSetToFormValues = (data: DataSetWithName): CreateDatasetFormVal
   },
   mappings: mappingsToEditorValue(data.mappings),
 });
+
+export const CLONED_DATASET_NAME_SUFFIX = '-copy';
+
+/** Maps a saved dataset to form initial state for creating a copy of it under a new name. */
+export const cloneDataSetToFormValues = (data: DataSetWithName): CreateDatasetFormValues => ({
+  ...dataSetToFormValues(data),
+  name: `${data.name}${CLONED_DATASET_NAME_SUFFIX}`,
+});

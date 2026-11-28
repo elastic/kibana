@@ -13,7 +13,7 @@ import { useHistory } from 'react-router-dom';
 import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
 
 import type { DataSetWithName, DataSource } from '../common';
-import { CREATE_DATASET_PATH, getEditDatasetPath } from './app_paths';
+import { CREATE_DATASET_PATH, getCloneDatasetPath, getEditDatasetPath } from './app_paths';
 import { DatasetRowActions } from './dataset_row_actions';
 import { getDataSourceTypeVerbose } from './get_data_source_type_label';
 import { getDatasetEsqlQuery } from './get_dataset_esql_query';
@@ -109,6 +109,7 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
                     : undefined
                 }
                 onEdit={() => history.push(getEditDatasetPath(item.name))}
+                onClone={() => history.push(getCloneDatasetPath(item.name))}
                 onDelete={() => onDelete(item)}
               />
             ),

@@ -26,9 +26,19 @@ jest.mock('./data_sources_tab_content', () => ({
 }));
 
 jest.mock('./create_dataset_wizard', () => ({
-  CreateDatasetWizardPage: ({ initialDataSet }: { initialDataSet?: { name: string } }) => (
+  CreateDatasetWizardPage: ({
+    initialDataSet,
+    cloneFromDataSet,
+  }: {
+    initialDataSet?: { name: string };
+    cloneFromDataSet?: { name: string };
+  }) => (
     <div data-test-subj="createDatasetWizard">
-      {initialDataSet ? `edit:${initialDataSet.name}` : 'create'}
+      {initialDataSet
+        ? `edit:${initialDataSet.name}`
+        : cloneFromDataSet
+        ? `clone:${cloneFromDataSet.name}`
+        : 'create'}
     </div>
   ),
 }));
@@ -198,6 +208,58 @@ describe('Main', () => {
         <MockAppHeaderProvider>
           <KibanaContextProvider services={services}>
             <MemoryRouter initialEntries={['/datasets/edit/logs-dataset']}>
+              <Main />
+            </MemoryRouter>
+          </KibanaContextProvider>
+        </MockAppHeaderProvider>
+      </EuiProvider>
+    );
+
+    expect(await findByTestId('datasetsTabContent')).toBeInTheDocument();
+    expect(queryByTestId('createDatasetWizard')).toBeNull();
+  });
+
+  it('opens the wizard with the matching dataset on the clone route', async () => {
+    const services = createServicesMock({
+      dataSources: [{ name: 'source-1', type: 's3', description: '', settings: {} }],
+      dataSets: [
+        {
+          name: 'logs-dataset',
+          data_source: 'source-1',
+          resource: 'bucket/*',
+          description: '',
+        },
+      ],
+    });
+
+    const { findByTestId, queryByTestId } = render(
+      <EuiProvider>
+        <MockAppHeaderProvider>
+          <KibanaContextProvider services={services}>
+            <MemoryRouter initialEntries={['/datasets/clone/logs-dataset']}>
+              <Main />
+            </MemoryRouter>
+          </KibanaContextProvider>
+        </MockAppHeaderProvider>
+      </EuiProvider>
+    );
+
+    expect(await findByTestId('createDatasetWizard')).toHaveTextContent('clone:logs-dataset');
+    expect(queryByTestId('appHeaderTabs')).toBeNull();
+    expect(queryByTestId('appHeaderTitle')).toBeNull();
+  });
+
+  it('redirects to the datasets tab when the clone route dataset is missing', async () => {
+    const services = createServicesMock({
+      dataSources: [{ name: 'source-1', type: 's3', description: '', settings: {} }],
+      dataSets: [],
+    });
+
+    const { findByTestId, queryByTestId } = render(
+      <EuiProvider>
+        <MockAppHeaderProvider>
+          <KibanaContextProvider services={services}>
+            <MemoryRouter initialEntries={['/datasets/clone/logs-dataset']}>
               <Main />
             </MemoryRouter>
           </KibanaContextProvider>

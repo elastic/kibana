@@ -23,6 +23,7 @@ export interface DatasetRowActionsProps {
   disabled?: boolean;
   onOpenInDiscover?: () => void;
   onEdit: () => void;
+  onClone: () => void;
   onDelete: () => void;
 }
 
@@ -30,6 +31,7 @@ export const DatasetRowActions: FunctionComponent<DatasetRowActionsProps> = ({
   disabled = false,
   onOpenInDiscover,
   onEdit,
+  onClone,
   onDelete,
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -82,6 +84,17 @@ export const DatasetRowActions: FunctionComponent<DatasetRowActionsProps> = ({
               data-test-subj="dataSetsSetsEditButton"
             >
               {translations.editAction}
+            </EuiContextMenuItem>,
+            <EuiContextMenuItem
+              key="clone"
+              icon="copy"
+              onClick={() => {
+                closeMenu();
+                onClone();
+              }}
+              data-test-subj="dataSetsSetsCloneButton"
+            >
+              {translations.cloneAction}
             </EuiContextMenuItem>,
             <EuiContextMenuItem
               key="delete"

@@ -7,6 +7,7 @@
 
 import type { DataSetWithName } from '../../common/dataset_types';
 import {
+  cloneDataSetToFormValues,
   dataSetFromListItem,
   dataSetToFormValues,
   emptyDatasetFormValues,
@@ -131,5 +132,20 @@ describe('dataset_form_initial_values', () => {
     expect(result.settings.schema_resolution).toBe('union_by_name');
     expect(result.settings.partition_path).toBe('/year={year}/');
     expect(result.settings.file_exclusions).toEqual(['**/tmp/**']);
+  });
+
+  it('copies a dataset to form values with "-copy" appended to the name', () => {
+    const data: DataSetWithName = {
+      name: 'logs',
+      data_source: 'source',
+      resource: 'r',
+      description: 'desc',
+      settings: { format: 'csv', delimiter: ';', target_split_size: '64mb' },
+    };
+
+    expect(cloneDataSetToFormValues(data)).toEqual({
+      ...dataSetToFormValues(data),
+      name: 'logs-copy',
+    });
   });
 });
